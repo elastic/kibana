@@ -21,7 +21,7 @@
 
       rect.scheduled-event-marker {
         stroke-width: 1px;
-        stroke: $euiColorMediumShade;
+        stroke: $euiColorDarkShade;
         fill: $euiColorLightShade;
         pointer-events: none;
       }
@@ -43,41 +43,41 @@
   }
 
   .axis .tick line {
-    stroke: rgba(0, 0, 0, .05);
+    stroke: $euiColorLightShade;
     stroke-width: 1px;
   }
 
   .values-line {
     fill: none;
-    stroke: #32A7C2;
+    stroke: $euiColorPrimary;
     stroke-width: 2;
   }
 
   .values-dots circle,
   .values-dots-circle {
-    fill: #32A7C2;
+    fill: $euiColorPrimary;
     stroke-width: 0;
   }
 
   .values-dots circle.values-dots-circle-blur {
-    fill: #AAA;
+    fill: $euiColorMediumShade;
   }
 
   .metric-value {
     opacity: 1;
     fill: transparent;
-    stroke: #32A7C2;
+    stroke: $euiColorPrimary;
     stroke-width: 0;
   }
 
   .anomaly-marker {
     stroke-width: 1px;
-    stroke: #AAAAAA;
+    stroke: $euiColorMediumShade;
   }
 
   .anomaly-marker:hover {
     stroke-width: 6px;
-    stroke: #32A7C2;
+    stroke: $euiColorPrimary;
   }
 
   .anomaly-marker.critical {
@@ -97,7 +97,7 @@
   }
 
   .anomaly-marker.low {
-    fill: #D2E9F7;
+    fill: $mlColorLowWarning;
   }
 
   .metric-value:hover,

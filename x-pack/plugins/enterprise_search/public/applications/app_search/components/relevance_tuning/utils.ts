@@ -7,10 +7,9 @@
 
 import { cloneDeep, omit } from 'lodash';
 
-import { NUMBER } from '../../../shared/constants/field_types';
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
 
-import { RawBoost, Boost, SearchSettings, BoostType } from './types';
+import { RawBoost, Boost, SearchSettings, BoostType, ValueBoost } from './types';
 
 // If the user hasn't entered a filter, then we can skip filtering the array entirely
 export const filterIfTerm = (array: string[], filterTerm: string): string[] => {
@@ -26,9 +25,9 @@ export const removeBoostStateProps = (searchSettings: SearchSettings) => {
   return updatedSettings;
 };
 
-export const parseBoostCenter = (fieldType: SchemaTypes, value: string | number) => {
+export const parseBoostCenter = (fieldType: SchemaType, value: string | number) => {
   // Leave non-numeric fields alone
-  if (fieldType === NUMBER) {
+  if (fieldType === SchemaType.Number) {
     const floatValue = parseFloat(value as string);
     return isNaN(floatValue) ? value : floatValue;
   }
@@ -61,3 +60,41 @@ export const normalizeBoostValues = (boosts: Record<string, RawBoost[]>): Record
       [fieldName]: boostList.map(normalizeBoostValue),
     };
   }, {});
+
+// Our model allows for empty values to be added to boosts. However, the server will not accept
+// empty strings in values. To avoid that, we filter out empty values before sending them to the server.
+
+// I.e., the server will not accept any of the following, so we need to filter them out
+// value: undefined
+// value: []
+// value: ['']
+// value: ['foo', '']
+export const removeEmptyValueBoosts = (
+  boosts: Record<string, Boost[]>
+): Record<string, Boost[]> => {
+  // before:
+  //   { foo: { values: ['a', '', '   '] } }
+  //   { foo: { values: [''] } }
+  // after:
+  //   { foo: { values: ['a'] } }
+  const filterEmptyValueBoosts = (fieldBoosts: Boost[]) => {
+    return fieldBoosts.filter((boost: Boost) => {
+      if (boost.type !== BoostType.Value) return true;
+
+      const valueBoost = boost as ValueBoost;
+      const filteredValues = valueBoost.value.filter((value) => value.trim() !== '');
+
+      if (filteredValues.length) {
+        boost.value = filteredValues;
+        return true;
+      } else {
+        return false;
+      }
+    });
+  };
+
+  return Object.entries(boosts).reduce((acc, [fieldName, fieldBoosts]) => {
+    const updatedBoosts = filterEmptyValueBoosts(fieldBoosts);
+    return updatedBoosts.length ? { ...acc, [fieldName]: updatedBoosts } : acc;
+  }, {});
+};

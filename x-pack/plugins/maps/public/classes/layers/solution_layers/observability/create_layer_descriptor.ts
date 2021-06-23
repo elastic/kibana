@@ -18,6 +18,7 @@ import {
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
+  emsWorldLayerId,
   FIELD_ORIGIN,
   GRID_RESOLUTION,
   RENDER_AS,
@@ -182,7 +183,7 @@ export function createLayerDescriptor({
         },
       ],
       sourceDescriptor: EMSFileSource.createDescriptor({
-        id: 'world_countries',
+        id: emsWorldLayerId,
         tooltipProperties: ['name', 'iso2'],
       }),
       style: VectorStyle.createDescriptor({

@@ -12,7 +12,7 @@ import dateMath, { Unit } from '@elastic/datemath';
 import { parseEsInterval } from '../../../utils';
 
 const unitsDesc = dateMath.unitsDesc;
-const largeMax = unitsDesc.indexOf('M');
+const largeMax = unitsDesc.indexOf('w');
 
 export interface EsInterval {
   expression: string;
@@ -28,12 +28,18 @@ export interface EsInterval {
  * @param  {moment.duration} duration
  * @return {object}
  */
-export function convertDurationToNormalizedEsInterval(duration: moment.Duration): EsInterval {
+export function convertDurationToNormalizedEsInterval(
+  duration: moment.Duration,
+  targetUnit?: Unit
+): EsInterval {
   for (let i = 0; i < unitsDesc.length; i++) {
     const unit = unitsDesc[i];
     const val = duration.as(unit);
     // find a unit that rounds neatly
     if (val >= 1 && Math.floor(val) === val) {
+      if (val === 1 && targetUnit && unit !== targetUnit) {
+        continue;
+      }
       // if the unit is "large", like years, but
       // isn't set to 1 ES will puke. So keep going until
       // we get out of the "large" units

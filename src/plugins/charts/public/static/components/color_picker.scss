@@ -4,6 +4,18 @@ $visColorPickerWidth: $euiSizeL * 8; // 8 columns
   width: $visColorPickerWidth;
 }
 
+.visColorPicker__colorBtn {
+  position: relative;
+
+  input[type='radio'] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+}
+
 .visColorPicker__valueDot {
   cursor: pointer;
 

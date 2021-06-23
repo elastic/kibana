@@ -10,10 +10,14 @@ import { format as formatUrl } from 'url';
 import fs from 'fs';
 import { Client } from '@elastic/elasticsearch';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function ElasticsearchProvider({ getService }: FtrProviderContext) {
+/*
+ registers Kibana-specific @elastic/elasticsearch client instance.
+ */
+export function ElasticsearchProvider({ getService }: FtrProviderContext): KibanaClient {
   const config = getService('config');
 
   if (process.env.TEST_CLOUD) {

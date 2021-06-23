@@ -15,7 +15,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
   describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');
 
-    this.tags('ciGroup7');
     const log = getService('log');
 
     if (!isRegistryEnabled()) {
@@ -32,7 +31,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     loadTestFile(require.resolve('./metadata'));
     loadTestFile(require.resolve('./metadata_v1'));
     loadTestFile(require.resolve('./policy'));
-    loadTestFile(require.resolve('./artifacts'));
     loadTestFile(require.resolve('./package'));
   });
 }

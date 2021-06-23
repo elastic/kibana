@@ -7,7 +7,7 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { catchError, finalize, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
@@ -25,7 +25,6 @@ export const runTaskFnFactory: RunTaskFnFactory<
 > = function executeJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');
-  const logger = parentLogger.clone([PNG_JOB_TYPE, 'execute']);
 
   return async function runTask(jobId, job, cancellationToken) {
     const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
@@ -33,9 +32,9 @@ export const runTaskFnFactory: RunTaskFnFactory<
     let apmGeneratePng: { end: () => void } | null | undefined;
 
     const generatePngObservable = await generatePngObservableFactory(reporting);
-    const jobLogger = logger.clone([jobId]);
+    const jobLogger = parentLogger.clone([PNG_JOB_TYPE, 'execute', jobId]);
     const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, logger)),
+      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
       map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
       map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
       mergeMap((conditionalHeaders) => {
@@ -52,20 +51,17 @@ export const runTaskFnFactory: RunTaskFnFactory<
           job.layout
         );
       }),
-      map(({ base64, warnings }) => {
-        if (apmGeneratePng) apmGeneratePng.end();
-
-        return {
-          content_type: 'image/png',
-          content: base64,
-          size: (base64 && base64.length) || 0,
-          warnings,
-        };
-      }),
+      map(({ base64, warnings }) => ({
+        content_type: 'image/png',
+        content: base64,
+        size: (base64 && base64.length) || 0,
+        warnings,
+      })),
       catchError((err) => {
         jobLogger.error(err);
         return Rx.throwError(err);
-      })
+      }),
+      finalize(() => apmGeneratePng?.end())
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);

@@ -6,6 +6,7 @@
  */
 
 import { TransformState, TRANSFORM_STATE } from '../constants';
+import { isPopulatedObject } from '../shared_imports';
 import { TransformId } from './transform';
 
 export interface TransformStats {
@@ -33,6 +34,8 @@ export interface TransformStats {
     attributes: Record<string, any>;
   };
   stats: {
+    delete_time_in_ms: number;
+    documents_deleted: number;
     documents_indexed: number;
     documents_processed: number;
     index_failures: number;
@@ -53,11 +56,10 @@ export interface TransformStats {
   state: TransformState;
 }
 
-export function isTransformStats(arg: any): arg is TransformStats {
-  return (
-    typeof arg === 'object' &&
-    arg !== null &&
-    {}.hasOwnProperty.call(arg, 'state') &&
-    Object.values(TRANSFORM_STATE).includes(arg.state)
-  );
+function isTransformState(arg: unknown): arg is TransformState {
+  return typeof arg === 'string' && Object.values(TRANSFORM_STATE).includes(arg as TransformState);
+}
+
+export function isTransformStats(arg: unknown): arg is TransformStats {
+  return isPopulatedObject(arg, ['state']) && isTransformState(arg.state);
 }

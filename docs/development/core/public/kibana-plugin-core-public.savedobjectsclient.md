@@ -24,7 +24,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [bulkGet](./kibana-plugin-core-public.savedobjectsclient.bulkget.md) |  | <code>(objects?: Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;</code> | Returns an array of objects by id |
 |  [create](./kibana-plugin-core-public.savedobjectsclient.create.md) |  | <code>&lt;T = unknown&gt;(type: string, attributes: T, options?: SavedObjectsCreateOptions) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Persists an object |
 |  [delete](./kibana-plugin-core-public.savedobjectsclient.delete.md) |  | <code>(type: string, id: string, options?: SavedObjectsDeleteOptions &#124; undefined) =&gt; ReturnType&lt;SavedObjectsApi['delete']&gt;</code> | Deletes an object |
-|  [find](./kibana-plugin-core-public.savedobjectsclient.find.md) |  | <code>&lt;T = unknown&gt;(options: SavedObjectsFindOptions) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T&gt;&gt;</code> | Search for objects |
+|  [find](./kibana-plugin-core-public.savedobjectsclient.find.md) |  | <code>&lt;T = unknown, A = unknown&gt;(options: SavedObjectsFindOptions) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T, unknown&gt;&gt;</code> | Search for objects |
 |  [get](./kibana-plugin-core-public.savedobjectsclient.get.md) |  | <code>&lt;T = unknown&gt;(type: string, id: string) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Fetches a single object |
 
 ## Methods
@@ -32,5 +32,5 @@ The constructor for this class is marked as internal. Third-party code should no
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [bulkUpdate(objects)](./kibana-plugin-core-public.savedobjectsclient.bulkupdate.md) |  | Update multiple documents at once |
-|  [update(type, id, attributes, { version, migrationVersion, references })](./kibana-plugin-core-public.savedobjectsclient.update.md) |  | Updates an object |
+|  [update(type, id, attributes, { version, references, upsert })](./kibana-plugin-core-public.savedobjectsclient.update.md) |  | Updates an object |
 

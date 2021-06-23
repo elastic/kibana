@@ -156,7 +156,17 @@ describe('TagsClient', () => {
       await tagsClient.getAll();
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags`);
+      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags`, {
+        asSystemRequest: undefined,
+      });
+    });
+    it('allows `asSystemRequest` option to be set', async () => {
+      await tagsClient.getAll({ asSystemRequest: true });
+
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags`, {
+        asSystemRequest: true,
+      });
     });
     it('returns the tag objects from the response', async () => {
       const tags = await tagsClient.getAll();

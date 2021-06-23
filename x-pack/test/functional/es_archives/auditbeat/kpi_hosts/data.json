@@ -1,0 +1,194 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "auditbeat-7.0.0-alpha1-2018.11.27",
+    "type": "doc",
+    "id": "Rs93UmcBTFzn_XoLWT6M",
+    "source": {
+      "@timestamp": "2018-11-27T00:00:11.544Z",
+      "process": {
+        "pid": "31964",
+        "exe": "/usr/sbin/sshd"
+      },
+      "source": {
+        "ip": "128.199.87.213"
+      },
+      "network": {
+        "direction": "incoming"
+      },
+      "beat": {
+        "name": "demo-stack-nginx-01",
+        "hostname": "demo-stack-nginx-01",
+        "version": "7.0.0-alpha1"
+      },
+      "host": {
+        "name": "demo-stack-nginx-01"
+      },
+      "auditd": {
+        "session": "unset",
+        "data": {
+          "hostname": "128.199.87.213",
+          "terminal": "ssh",
+          "op": "PAM:bad_ident"
+        },
+        "summary": {
+          "object": {
+            "primary": "ssh",
+            "secondary": "128.199.87.213",
+            "type": "user-session"
+          },
+          "how": "/usr/sbin/sshd",
+          "actor": {
+            "primary": "unset",
+            "secondary": "root"
+          }
+        },
+        "sequence": 192383,
+        "result": "fail"
+      },
+      "event": {
+        "category": "user-login",
+        "type": "user_err",
+        "action": "error",
+        "module": "auditd"
+      },
+      "user": {
+        "name_map": {
+          "uid": "root"
+        },
+        "auid": "unset",
+        "uid": "0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "auditbeat-7.0.0-alpha1-2018.11.27",
+    "type": "doc",
+    "id": "6Nr4UmcBTFzn_XoL4l6d",
+    "source": {
+      "@timestamp": "2018-11-27T02:21:40.914Z",
+      "host": {
+        "name": "demo-stack-haproxy-01"
+      },
+      "user": {
+        "auid": "unset",
+        "uid": "0",
+        "name_map": {
+          "uid": "root"
+        }
+      },
+      "process": {
+        "pid": "20001",
+        "exe": "/usr/sbin/sshd"
+      },
+      "source": {
+        "ip": "82.62.233.163"
+      },
+      "network": {
+        "direction": "incoming"
+      },
+      "auditd": {
+        "sequence": 142431,
+        "result": "fail",
+        "session": "unset",
+        "data": {
+          "acct": "(unknown user)",
+          "op": "login",
+          "terminal": "sshd"
+        },
+        "summary": {
+          "actor": {
+            "primary": "unset",
+            "secondary": "(unknown user)"
+          },
+          "object": {
+            "primary": "sshd",
+            "secondary": "82.62.233.163",
+            "type": "user-session"
+          },
+          "how": "/usr/sbin/sshd"
+        }
+      },
+      "event": {
+        "category": "user-login",
+        "type": "user_login",
+        "action": "logged-in",
+        "module": "auditd"
+      },
+      "beat": {
+        "name": "demo-stack-haproxy-01",
+        "hostname": "demo-stack-haproxy-01",
+        "version": "7.0.0-alpha1"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "auditbeat-7.0.0-alpha1-2018.11.27",
+    "type": "doc",
+    "id": "sdwQU2cBTFzn_XoLA1gL",
+    "source": {
+      "@timestamp": "2018-11-27T02:46:56.545Z",
+      "process": {
+        "pid": "26473",
+        "exe": "/usr/sbin/sshd"
+      },
+      "source": {
+        "ip": "35.243.183.165"
+      },
+      "network": {
+        "direction": "incoming"
+      },
+      "beat": {
+        "name": "demo-stack-apache-01",
+        "hostname": "demo-stack-apache-01",
+        "version": "7.0.0-alpha1"
+      },
+      "host": {
+        "name": "demo-stack-apache-01"
+      },
+      "auditd": {
+        "session": "unset",
+        "data": {
+          "op": "login",
+          "acct": "(unknown user)",
+          "terminal": "sshd"
+        },
+        "summary": {
+          "actor": {
+            "primary": "unset",
+            "secondary": "(unknown user)"
+          },
+          "object": {
+            "primary": "sshd",
+            "secondary": "35.243.183.165",
+            "type": "user-session"
+          },
+          "how": "/usr/sbin/sshd"
+        },
+        "sequence": 184472,
+        "result": "fail"
+      },
+      "event": {
+        "type": "user_login",
+        "action": "logged-in",
+        "module": "auditd",
+        "category": "user-login"
+      },
+      "user": {
+        "name_map": {
+          "uid": "root"
+        },
+        "uid": "0",
+        "auid": "unset"
+      }
+    }
+  }
+}

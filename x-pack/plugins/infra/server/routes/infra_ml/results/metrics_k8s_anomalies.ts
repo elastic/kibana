@@ -38,6 +38,7 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           sort: sortParam,
           pagination: paginationParam,
           metric,
+          query,
         },
       } = request.body;
 
@@ -51,16 +52,17 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           paginationCursors,
           hasMoreEntries,
           timing,
-        } = await getMetricK8sAnomalies(
-          requestContext.infra,
+        } = await getMetricK8sAnomalies({
+          context: requestContext.infra,
           sourceId,
           anomalyThreshold,
           startTime,
           endTime,
           metric,
+          query,
           sort,
-          pagination
-        );
+          pagination,
+        });
 
         return response.ok({
           body: getMetricsK8sAnomaliesSuccessReponsePayloadRT.encode({

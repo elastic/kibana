@@ -28,10 +28,11 @@ function* printPlugins(plugins: Plugins, includes: string[]) {
       yield `|{kib-repo}blob/{branch}/${path}[${plugin.id}]`;
     }
 
-    if (!plugin.relativeReadmePath || plugin.readmeSnippet) {
-      yield plugin.readmeSnippet ? `|${plugin.readmeSnippet}` : '|WARNING: Missing README.';
-      yield '';
-    }
+    yield plugin.relativeReadmePath === undefined
+      ? '|WARNING: Missing README.'
+      : `|${plugin.readmeSnippet}`;
+
+    yield '';
   }
 }
 

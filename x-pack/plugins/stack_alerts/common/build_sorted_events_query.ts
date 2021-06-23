@@ -4,18 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { estypes } from '@elastic/elasticsearch';
+import type { ESSearchRequest } from '../../../../src/core/types/elasticsearch';
 
-import { ESSearchBody, ESSearchRequest } from '../../../typings/elasticsearch';
-import { SortOrder } from '../../../typings/elasticsearch/aggregations';
-
-type BuildSortedEventsQueryOpts = Pick<ESSearchBody, 'aggs' | 'track_total_hits'> &
-  Pick<Required<ESSearchRequest>, 'index' | 'size'>;
+interface BuildSortedEventsQueryOpts {
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
+  track_total_hits: boolean | number;
+  index: estypes.Indices;
+  size: number;
+}
 
 export interface BuildSortedEventsQuery extends BuildSortedEventsQueryOpts {
   filter: unknown;
   from: string;
   to: string;
-  sortOrder?: SortOrder | undefined;
+  sortOrder?: 'asc' | 'desc';
   searchAfterSortId: string | number | undefined;
   timeField: string;
 }
@@ -53,10 +56,10 @@ export const buildSortedEventsQuery = ({
   const filterWithTime = [filter, { bool: { filter: rangeFilter } }];
 
   const searchQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index,
     size,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: track_total_hits ?? false,
     body: {
       docvalue_fields: docFields,

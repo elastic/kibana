@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { RuntimeMappings } from '../../../../../../../common/types/fields';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
+import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
 import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
@@ -16,6 +18,7 @@ import {
   DataFrameAnalyticsId,
   DataFrameAnalysisConfigType,
 } from '../../../../../../../common/types/data_frame_analytics';
+import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -50,6 +53,7 @@ export interface State {
     alpha: undefined | number;
     computeFeatureInfluence: string;
     createIndexPattern: boolean;
+    classAssignmentObjective: undefined | string;
     dependentVariable: DependentVariable;
     description: string;
     destinationIndex: EsIndexName;
@@ -92,6 +96,9 @@ export interface State {
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     resultsField: undefined | string;
+    runtimeMappings: undefined | RuntimeMappings;
+    runtimeMappingsUpdated: boolean;
+    previousRuntimeMapping: undefined | RuntimeMappings;
     softTreeDepthLimit: undefined | number;
     softTreeDepthTolerance: undefined | number;
     sourceIndex: EsIndexName;
@@ -126,6 +133,7 @@ export const getInitialState = (): State => ({
     alpha: undefined,
     computeFeatureInfluence: 'true',
     createIndexPattern: true,
+    classAssignmentObjective: undefined,
     dependentVariable: '',
     description: '',
     destinationIndex: '',
@@ -168,6 +176,9 @@ export const getInitialState = (): State => ({
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     resultsField: undefined,
+    runtimeMappings: undefined,
+    runtimeMappingsUpdated: false,
+    previousRuntimeMapping: undefined,
     softTreeDepthLimit: undefined,
     softTreeDepthTolerance: undefined,
     sourceIndex: '',
@@ -209,6 +220,9 @@ export const getJobConfigFromFormState = (
         ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
       query: formState.jobConfigQuery,
+      ...(isRuntimeMappings(formState.runtimeMappings)
+        ? { runtime_mappings: formState.runtimeMappings }
+        : {}),
     },
     dest: {
       index: formState.destinationIndex,
@@ -278,18 +292,22 @@ export const getJobConfigFromFormState = (
     };
   }
 
-  if (
-    formState.jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-    jobConfig?.analysis?.classification !== undefined &&
-    formState.numTopClasses !== undefined
-  ) {
-    // @ts-ignore
-    jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+  if (jobConfig?.analysis !== undefined && isClassificationAnalysis(jobConfig?.analysis)) {
+    if (formState.numTopClasses !== undefined) {
+      jobConfig.analysis.classification.num_top_classes = formState.numTopClasses;
+    }
+    if (formState.classAssignmentObjective !== undefined) {
+      jobConfig.analysis.classification.class_assignment_objective =
+        formState.classAssignmentObjective;
+    }
   }
 
   if (formState.jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
     const analysis = Object.assign(
       {},
+      formState.computeFeatureInfluence !== undefined && {
+        compute_feature_influence: formState.computeFeatureInfluence,
+      },
       formState.method && { method: formState.method },
       formState.nNeighbors && {
         n_neighbors: formState.nNeighbors,
@@ -298,7 +316,7 @@ export const getJobConfigFromFormState = (
       formState.featureInfluenceThreshold && {
         feature_influence_threshold: formState.featureInfluenceThreshold,
       },
-      formState.standardizationEnabled && {
+      formState.standardizationEnabled !== undefined && {
         standardization_enabled: formState.standardizationEnabled,
       }
     );
@@ -333,6 +351,7 @@ export function getFormStateFromJobConfig(
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
+    runtimeMappings: analyticsJobConfig.source.runtime_mappings,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
     maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields?.includes ?? [],

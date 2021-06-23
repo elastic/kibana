@@ -211,9 +211,7 @@ describe('TelemetryService', () => {
       originalFetch = window.fetch;
     });
 
-    // @ts-ignore
     beforeEach(() => (window.fetch = mockFetch = jest.fn()));
-    // @ts-ignore
     afterAll(() => (window.fetch = originalFetch));
 
     it('reports opt-in status to telemetry url', async () => {
@@ -256,6 +254,26 @@ describe('TelemetryService', () => {
       const result = await telemetryService['reportOptInStatus'](mockPayload);
       expect(result).toBeUndefined();
       expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('canSendTelemetry', () => {
+    it('does not send telemetry if screenshotMode is true', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: true,
+        config: { optIn: true },
+      });
+
+      expect(telemetryService.canSendTelemetry()).toBe(false);
+    });
+
+    it('does send telemetry if screenshotMode is false and we are opted in', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: false,
+        config: { optIn: true },
+      });
+
+      expect(telemetryService.canSendTelemetry()).toBe(true);
     });
   });
 });

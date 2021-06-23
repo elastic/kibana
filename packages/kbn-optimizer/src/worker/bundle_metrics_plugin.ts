@@ -10,7 +10,7 @@ import Path from 'path';
 
 import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
-import { CiStatsMetrics } from '@kbn/dev-utils';
+import { CiStatsMetric } from '@kbn/dev-utils';
 
 import { Bundle } from '../common';
 
@@ -68,7 +68,7 @@ export class BundleMetricsPlugin {
         throw new Error(`moduleCount wasn't populated by PopulateBundleCachePlugin`);
       }
 
-      const bundleMetrics: CiStatsMetrics = [
+      const bundleMetrics: CiStatsMetric[] = [
         {
           group: `@kbn/optimizer bundle module count`,
           id: bundle.id,

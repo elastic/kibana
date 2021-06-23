@@ -13,15 +13,16 @@ import { UiSettingsParams } from 'kibana/server';
 
 import { MAX_BUCKETS_SETTING } from '../common/constants';
 
-export const uiSettings: Record<string, UiSettingsParams> = {
+export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [MAX_BUCKETS_SETTING]: {
     name: i18n.translate('visTypeTimeseries.advancedSettings.maxBucketsTitle', {
-      defaultMessage: 'Maximum buckets',
+      defaultMessage: 'TSVB buckets limit',
     }),
     value: 2000,
     description: i18n.translate('visTypeTimeseries.advancedSettings.maxBucketsText', {
-      defaultMessage: 'The maximum number of buckets a single datasource can return',
+      defaultMessage:
+        'Affects the TSVB histogram density. Must be set higher than "histogram:maxBars".',
     }),
     schema: schema.number(),
   },
-};
+});

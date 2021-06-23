@@ -19,7 +19,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
   hasArrow={true}
   id="sampleDataLinksecommerce"
   isOpen={false}
-  ownFocus={false}
+  ownFocus={true}
   panelPaddingSize="none"
 >
   <EuiContextMenu

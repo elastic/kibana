@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { RequestParams } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { buildExceptionFilter } from '../../../common/detection_engine/build_exceptions_filter';
-import { ExceptionListItemSchema } from '../../../../lists/common';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
-import { SearchResponse } from '../types';
 
 export { Anomaly };
-export type AnomalyResults = SearchResponse<Anomaly>;
+export type AnomalyResults = estypes.SearchResponse<Anomaly>;
 type MlAnomalySearch = <T>(
-  searchParams: RequestParams.Search,
+  searchParams: estypes.SearchRequest,
   jobIds: string[]
-) => Promise<SearchResponse<T>>;
+) => Promise<estypes.SearchResponse<T>>;
 
 export interface AnomaliesSearchParams {
   jobIds: string[];
@@ -67,7 +66,7 @@ export const getAnomalies = async (
             include_unmapped: true,
           },
         ],
-        sort: [{ record_score: { order: 'desc' } }],
+        sort: [{ record_score: { order: 'desc' as const } }],
       },
     },
     params.jobIds

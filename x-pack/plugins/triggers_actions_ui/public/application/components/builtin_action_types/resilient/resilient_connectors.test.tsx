@@ -111,6 +111,26 @@ describe('ResilientActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
   });
 
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      actionTypeId: '.resilient',
+      isPreconfigured: false,
+      config: {},
+      secrets: {},
+      isMissingSecrets: true,
+    } as ResilientActionConnector;
+    const wrapper = mountWithIntl(
+      <ResilientConnectorFields
+        action={actionConnector}
+        errors={{ apiUrl: [], apiKeyId: [], apiKeySecret: [], orgId: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+  });
+
   test('should display a message on edit to re-enter credentials', () => {
     const actionConnector = {
       secrets: {

@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
-  "language": "kuery",
-  "license": "Elastic License",
+  "language": "eql",
+  "license": "Elastic License v2",
   "name": "Adding Hidden File Attribute via Attrib",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:attrib.exe and process.args:+h",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"attrib.exe\" and process.args : \"+h\"\n",
   "risk_score": 21,
   "rule_id": "4630d948-40d4-4cef-ac69-4002e29bc3db",
   "severity": "low",
@@ -55,6 +56,7 @@
       "technique": []
     }
   ],
-  "type": "query",
-  "version": 6
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 9
 }

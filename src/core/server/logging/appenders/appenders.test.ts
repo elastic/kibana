@@ -21,33 +21,33 @@ beforeEach(() => {
 
 test('`configSchema` creates correct schema.', () => {
   const appendersSchema = Appenders.configSchema;
-  const validConfig1 = { kind: 'file', layout: { kind: 'mock' }, path: 'path' };
+  const validConfig1 = { type: 'file', layout: { type: 'mock' }, fileName: 'path' };
   expect(appendersSchema.validate(validConfig1)).toEqual({
-    kind: 'file',
-    layout: { kind: 'mock' },
-    path: 'path',
+    type: 'file',
+    layout: { type: 'mock' },
+    fileName: 'path',
   });
 
-  const validConfig2 = { kind: 'console', layout: { kind: 'mock' } };
+  const validConfig2 = { type: 'console', layout: { type: 'mock' } };
   expect(appendersSchema.validate(validConfig2)).toEqual({
-    kind: 'console',
-    layout: { kind: 'mock' },
+    type: 'console',
+    layout: { type: 'mock' },
   });
 
   const wrongConfig1 = {
-    kind: 'console',
-    layout: { kind: 'mock' },
-    path: 'path',
+    type: 'console',
+    layout: { type: 'mock' },
+    fileName: 'path',
   };
   expect(() => appendersSchema.validate(wrongConfig1)).toThrow();
 
-  const wrongConfig2 = { kind: 'file', layout: { kind: 'mock' } };
+  const wrongConfig2 = { type: 'file', layout: { type: 'mock' } };
   expect(() => appendersSchema.validate(wrongConfig2)).toThrow();
 
   const wrongConfig3 = {
-    kind: 'console',
-    layout: { kind: 'mock' },
-    path: 'path',
+    type: 'console',
+    layout: { type: 'mock' },
+    fileName: 'path',
   };
   expect(() => appendersSchema.validate(wrongConfig3)).toThrow();
 });
@@ -56,31 +56,31 @@ test('`create()` creates correct appender.', () => {
   mockCreateLayout.mockReturnValue({ format: () => '' });
 
   const consoleAppender = Appenders.create({
-    kind: 'console',
-    layout: { highlight: true, kind: 'pattern', pattern: '' },
+    type: 'console',
+    layout: { highlight: true, type: 'pattern', pattern: '' },
   });
   expect(consoleAppender).toBeInstanceOf(ConsoleAppender);
 
   const fileAppender = Appenders.create({
-    kind: 'file',
-    layout: { highlight: true, kind: 'pattern', pattern: '' },
-    path: 'path',
+    type: 'file',
+    layout: { highlight: true, type: 'pattern', pattern: '' },
+    fileName: 'path',
   });
   expect(fileAppender).toBeInstanceOf(FileAppender);
 
   const legacyAppender = Appenders.create({
-    kind: 'legacy-appender',
+    type: 'legacy-appender',
     legacyLoggingConfig: { verbose: true },
   });
 
   expect(legacyAppender).toBeInstanceOf(LegacyAppender);
 
   const rollingFileAppender = Appenders.create({
-    kind: 'rolling-file',
-    path: 'path',
-    layout: { highlight: true, kind: 'pattern', pattern: '' },
-    strategy: { kind: 'numeric', max: 5, pattern: '%i' },
-    policy: { kind: 'size-limit', size: ByteSizeValue.parse('15b') },
+    type: 'rolling-file',
+    fileName: 'path',
+    layout: { highlight: true, type: 'pattern', pattern: '' },
+    strategy: { type: 'numeric', max: 5, pattern: '%i' },
+    policy: { type: 'size-limit', size: ByteSizeValue.parse('15b') },
   });
   expect(rollingFileAppender).toBeInstanceOf(RollingFileAppender);
 });

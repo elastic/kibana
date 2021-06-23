@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { processFilters, useSwimlaneInputResolver } from './swimlane_input_resolver';
+import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
@@ -55,6 +55,11 @@ describe('useSwimlaneInputResolver', () => {
               points: [],
             })
           ),
+          getSwimlaneBucketInterval: jest.fn(() => {
+            return {
+              asSeconds: jest.fn(() => 900),
+            };
+          }),
         },
         anomalyDetectorService: {
           getJobs$: jest.fn((jobId: string[]) => {
@@ -155,148 +160,5 @@ describe('useSwimlaneInputResolver', () => {
     });
 
     expect(result.current[6]?.message).toBe('Invalid job');
-  });
-});
-
-describe('processFilters', () => {
-  test('should format embeddable input to es query', () => {
-    expect(
-      processFilters(
-        [
-          {
-            meta: {
-              index: 'c01fcbd0-8936-11ea-a70f-9f68bc175114',
-              type: 'phrases',
-              key: 'instance',
-              value: 'i-20d061fa',
-              params: ['i-20d061fa'],
-              alias: null,
-              negate: false,
-              disabled: false,
-            },
-            query: {
-              bool: {
-                should: [
-                  {
-                    match_phrase: {
-                      instance: 'i-20d061fa',
-                    },
-                  },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-            $state: {
-              // @ts-ignore
-              store: 'appState',
-            },
-          },
-          {
-            meta: {
-              index: 'c01fcbd0-8936-11ea-a70f-9f68bc175114',
-              alias: null,
-              negate: true,
-              disabled: false,
-              type: 'phrase',
-              key: 'instance',
-              params: {
-                query: 'i-16fd8d2a',
-              },
-            },
-            query: {
-              match_phrase: {
-                instance: 'i-16fd8d2a',
-              },
-            },
-
-            $state: {
-              // @ts-ignore
-              store: 'appState',
-            },
-          },
-          {
-            meta: {
-              index: 'c01fcbd0-8936-11ea-a70f-9f68bc175114',
-              alias: null,
-              negate: false,
-              disabled: false,
-              type: 'exists',
-              key: 'instance',
-              value: 'exists',
-            },
-            exists: {
-              field: 'instance',
-            },
-            $state: {
-              // @ts-ignore
-              store: 'appState',
-            },
-          },
-          {
-            meta: {
-              index: 'c01fcbd0-8936-11ea-a70f-9f68bc175114',
-              alias: null,
-              negate: false,
-              disabled: true,
-              type: 'exists',
-              key: 'instance',
-              value: 'exists',
-            },
-            exists: {
-              field: 'region',
-            },
-            $state: {
-              // @ts-ignore
-              store: 'appState',
-            },
-          },
-        ],
-        {
-          language: 'kuery',
-          query: 'instance : "i-088147ac"',
-        }
-      )
-    ).toEqual({
-      bool: {
-        must: [
-          {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                {
-                  match_phrase: {
-                    instance: 'i-088147ac',
-                  },
-                },
-              ],
-            },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  match_phrase: {
-                    instance: 'i-20d061fa',
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          {
-            exists: {
-              field: 'instance',
-            },
-          },
-        ],
-        must_not: [
-          {
-            match_phrase: {
-              instance: 'i-16fd8d2a',
-            },
-          },
-        ],
-      },
-    });
   });
 });

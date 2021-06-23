@@ -8,6 +8,7 @@
 
 export {
   TimeIntervalTriggeringPolicy,
-  TimeIntervalTriggeringPolicyConfig,
   timeIntervalTriggeringPolicyConfigSchema,
 } from './time_interval_policy';
+
+export type { TimeIntervalTriggeringPolicyConfig } from './time_interval_policy';

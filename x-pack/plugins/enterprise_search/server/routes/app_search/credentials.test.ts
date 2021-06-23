@@ -34,11 +34,16 @@ describe('credentials routes', () => {
 
     describe('validates', () => {
       it('correctly', () => {
-        const request = { query: { 'page[current]': 1 } };
+        const request = {
+          query: {
+            'page[current]': 1,
+            'page[size]': 10,
+          },
+        };
         mockRouter.shouldValidate(request);
       });
 
-      it('missing page[current]', () => {
+      it('missing page query params', () => {
         const request = { query: {} };
         mockRouter.shouldThrow(request);
       });

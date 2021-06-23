@@ -47,6 +47,9 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     server: true,
     extraPublicDirs: true,
     requiredBundles: true,
+    serviceFolders: true,
+    owner: true,
+    description: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -186,6 +189,8 @@ export async function parseManifest(
     ui: includesUiPlugin,
     server: includesServerPlugin,
     extraPublicDirs: manifest.extraPublicDirs,
+    owner: manifest.owner,
+    description: manifest.description,
   };
 }
 

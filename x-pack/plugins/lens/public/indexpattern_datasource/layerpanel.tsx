@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { DatasourceLayerPanelProps } from '../types';
 import { IndexPatternPrivateState } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
@@ -20,13 +21,19 @@ export interface IndexPatternLayerPanelProps
 export function LayerPanel({ state, layerId, onChangeIndexPattern }: IndexPatternLayerPanelProps) {
   const layer = state.layers[layerId];
 
+  const indexPattern = state.indexPatterns[layer.indexPatternId];
+
+  const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingIndexPattern', {
+    defaultMessage: 'Index pattern not found',
+  });
+
   return (
     <I18nProvider>
       <ChangeIndexPattern
         data-test-subj="indexPattern-switcher"
         trigger={{
-          label: state.indexPatterns[layer.indexPatternId].title,
-          title: state.indexPatterns[layer.indexPatternId].title,
+          label: indexPattern?.title || notFoundTitleLabel,
+          title: indexPattern?.title || notFoundTitleLabel,
           'data-test-subj': 'lns_layerIndexPatternLabel',
           size: 's',
           fontWeight: 'normal',

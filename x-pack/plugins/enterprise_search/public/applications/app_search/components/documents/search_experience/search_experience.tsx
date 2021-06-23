@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet;
 import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet

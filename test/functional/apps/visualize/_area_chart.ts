@@ -34,6 +34,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     );
 
   describe('area charts', function indexPatternCreation() {
+    let isNewChartsLibraryEnabled = false;
+    before(async () => {
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
+      await PageObjects.visualize.initTests(isNewChartsLibraryEnabled);
+    });
     const initAreaChart = async () => {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
@@ -97,12 +102,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const xAxisLabels = await PageObjects.visChart.getExpectedValue(
         ['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00'],
         [
-          '2015-09-20 00:00',
+          '2015-09-19 12:00',
           '2015-09-20 12:00',
-          '2015-09-21 00:00',
           '2015-09-21 12:00',
-          '2015-09-22 00:00',
           '2015-09-22 12:00',
+          '2015-09-23 12:00',
         ]
       );
       const yAxisLabels = await PageObjects.visChart.getExpectedValue(
@@ -450,7 +454,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const errorMessage = await fieldErrorMessage.getVisibleText();
         expect(errorMessage).to.be(
-          'The index pattern test_index* does not contain any of the following compatible field types: date'
+          'The index pattern test_index* does not contain any of the following compatible field types: date or date_range'
         );
       });
     });
@@ -506,7 +510,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should show error when calendar interval invalid', async () => {
-          await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
+          await PageObjects.visEditor.setInterval('2w', { type: 'custom' });
           const intervalErrorMessage = await find.byCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );

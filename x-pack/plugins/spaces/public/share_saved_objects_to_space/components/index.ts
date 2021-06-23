@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ContextWrapper } from './context_wrapper';
-export { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
+export { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
+export { getLegacyUrlConflict } from './legacy_url_conflict';

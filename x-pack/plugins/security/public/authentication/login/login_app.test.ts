@@ -7,10 +7,10 @@
 
 jest.mock('./login_page');
 
-import { AppMount } from 'src/core/public';
-import { loginApp } from './login_app';
+import type { AppMount } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { loginApp } from './login_app';
 
 describe('loginApp', () => {
   it('properly registers application', () => {

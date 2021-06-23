@@ -44,6 +44,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -162,7 +163,7 @@ Array [
               <label
                 className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected"
                 disabled={false}
-                htmlFor="generated-id-true"
+                htmlFor="generated-id"
                 onClick={[Function]}
                 style={
                   Object {
@@ -179,8 +180,9 @@ Array [
                     <input
                       checked={true}
                       className="euiScreenReaderOnly"
+                      data-test-subj="generated-id-true"
                       disabled={false}
-                      id="generated-id-true"
+                      id="generated-id"
                       name="value"
                       onChange={[Function]}
                       type="radio"
@@ -192,7 +194,7 @@ Array [
               <label
                 className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
                 disabled={false}
-                htmlFor="generated-id-false"
+                htmlFor="generated-id"
                 onClick={[Function]}
                 style={
                   Object {
@@ -209,8 +211,9 @@ Array [
                     <input
                       checked={false}
                       className="euiScreenReaderOnly"
+                      data-test-subj="generated-id-false"
                       disabled={false}
-                      id="generated-id-false"
+                      id="generated-id"
                       name="value"
                       onChange={[Function]}
                       type="radio"
@@ -248,6 +251,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -329,6 +333,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -474,6 +479,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -555,6 +561,7 @@ Array [
           <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
           />
@@ -700,6 +707,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />
@@ -902,6 +910,7 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
               />

@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
-import { UiSettingsType, StringValidation } from '../../../../../../core/public';
+import { UiSettingsType } from '../../../../../../core/public';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../../../core/public/mocks';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -74,12 +74,6 @@ const settings: Record<string, FieldSetting> = {
     defVal: null,
     isCustom: false,
     isOverridden: false,
-    validation: {
-      maxSize: {
-        length: 1000,
-        description: 'Description for 1 kB',
-      },
-    },
     ...defaults,
   },
   json: {
@@ -154,10 +148,6 @@ const settings: Record<string, FieldSetting> = {
     displayName: 'String test validation setting',
     description: 'Description for String test validation setting',
     type: 'string',
-    validation: {
-      regex: new RegExp('^foo'),
-      message: 'must start with "foo"',
-    },
     value: undefined,
     defVal: 'foo-default',
     isCustom: false,
@@ -188,10 +178,6 @@ const userValues = {
   string: 'foo',
   stringWithValidation: 'fooUserValue',
   color: '#FACF0C',
-};
-
-const invalidUserValues = {
-  stringWithValidation: 'invalidUserValue',
 };
 
 const handleChange = jest.fn();
@@ -475,24 +461,6 @@ describe('Field', () => {
         // @ts-ignore
         const userValue = userValues[type];
         const fieldUserValue = type === 'array' ? userValue.join(', ') : userValue;
-
-        if (setting.validation) {
-          // @ts-ignore
-          const invalidUserValue = invalidUserValues[type];
-          it('should display an error when validation fails', async () => {
-            await (component.instance() as Field).onFieldChange(invalidUserValue);
-            const expectedUnsavedChanges = {
-              value: invalidUserValue,
-              error: (setting.validation as StringValidation).message,
-              isInvalid: true,
-            };
-            expect(handleChange).toBeCalledWith(setting.name, expectedUnsavedChanges);
-            wrapper.setProps({ unsavedChanges: expectedUnsavedChanges });
-            const updated = wrapper.update();
-            const errorMessage = updated.find('.euiFormErrorText').text();
-            expect(errorMessage).toEqual(expectedUnsavedChanges.error);
-          });
-        }
 
         it('should be able to change value', async () => {
           await (component.instance() as Field).onFieldChange(fieldUserValue);

@@ -19,6 +19,7 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
+  GeometryValue,
   RectAnnotation,
   RectAnnotationDatum,
 } from '@elastic/charts';
@@ -29,7 +30,7 @@ import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_reac
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
-import { useSourceContext } from '../../../../../containers/source';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useTimeline } from '../../hooks/use_timeline';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
@@ -141,7 +142,8 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const onClickPoint: ElementClickListener = useCallback(
     ([[geometryValue]]) => {
       if (!Array.isArray(geometryValue)) {
-        const { x: timestamp } = geometryValue;
+        // casting to GeometryValue as we are using cartesian charts
+        const { x: timestamp } = geometryValue as GeometryValue;
         jumpToTime(timestamp);
         stopAutoReload();
       }

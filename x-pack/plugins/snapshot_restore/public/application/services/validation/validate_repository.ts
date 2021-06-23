@@ -31,7 +31,7 @@ export interface RepositorySettingsValidation {
   [key: string]: string[];
 }
 
-export const INVALID_NAME_CHARS = ['"', '*', '\\', '<', '|', ',', '>', '/', '?'];
+export const INVALID_NAME_CHARS = ['"', '*', '\\', '<', '|', ',', '>', '/', '?', '#'];
 
 const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;

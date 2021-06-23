@@ -15,6 +15,8 @@ import {
 
 import { matchAllQuery } from '../../common';
 
+import { isIndexPattern } from '../../../../common/types/index_pattern';
+
 export type SavedSearchQuery = object;
 
 type IndexPatternId = string;
@@ -77,10 +79,6 @@ export function loadCurrentIndexPattern(
 export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedSearchId) {
   currentSavedSearch = savedSearches.get(savedSearchId);
   return currentSavedSearch;
-}
-
-function isIndexPattern(arg: any): arg is IndexPattern {
-  return arg !== undefined;
 }
 
 export interface SearchItems {

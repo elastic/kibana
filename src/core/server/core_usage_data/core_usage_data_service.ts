@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, Observable } from 'rxjs';
+import { takeUntil, first } from 'rxjs/operators';
+import { get } from 'lodash';
+import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
 import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
@@ -16,11 +18,12 @@ import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import {
+import type {
   CoreServicesUsageData,
   CoreUsageData,
   CoreUsageDataStart,
   CoreUsageDataSetup,
+  ConfigUsageData,
 } from './types';
 import { isConfigured } from './is_configured';
 import { ElasticsearchServiceStart } from '../elasticsearch';
@@ -30,15 +33,19 @@ import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
 
+export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
+
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
   metrics: MetricsServiceSetup;
   savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
+  changedDeprecatedConfigPath$: Observable<ChangedDeprecatedPaths>;
 }
 
 export interface StartDeps {
   savedObjects: SavedObjectsServiceStart;
   elasticsearch: ElasticsearchServiceStart;
+  exposedConfigsToUsage: ExposedConfigsToUsage;
 }
 
 /**
@@ -83,6 +90,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
   private opsMetrics?: OpsMetrics;
   private kibanaConfig?: KibanaConfigType;
   private coreUsageStatsClient?: CoreUsageStatsClient;
+  private deprecatedConfigPaths: ChangedDeprecatedPaths = { set: [], unset: [] };
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
@@ -118,10 +126,12 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             const stats = body[0];
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
-              docsCount: stats['docs.count'],
-              docsDeleted: stats['docs.deleted'],
-              storeSizeBytes: stats['store.size'],
-              primaryStoreSizeBytes: stats['pri.store.size'],
+              docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
+              docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
+              storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
+              primaryStoreSizeBytes: stats['pri.store.size']
+                ? parseInt(stats['pri.store.size'], 10)
+                : 0,
             };
           });
       })
@@ -221,12 +231,22 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             keystoreConfigured: isConfigured.record(http.ssl.keystore),
             truststoreConfigured: isConfigured.record(http.ssl.truststore),
           },
+          securityResponseHeaders: {
+            // ES does not index `null` and it cannot be searched, so we coalesce these to string values instead
+            strictTransportSecurity: http.securityResponseHeaders.strictTransportSecurity ?? 'NULL',
+            xContentTypeOptions: http.securityResponseHeaders.xContentTypeOptions ?? 'NULL',
+            referrerPolicy: http.securityResponseHeaders.referrerPolicy ?? 'NULL',
+            permissionsPolicyConfigured: isConfigured.string(
+              http.securityResponseHeaders.permissionsPolicy ?? undefined
+            ),
+            disableEmbedding: http.securityResponseHeaders.disableEmbedding,
+          },
         },
 
         logging: {
           appendersTypesUsed: Array.from(
             Array.from(this.loggingConfig?.appenders.values() ?? [])
-              .reduce((acc, a) => acc.add(a.kind), new Set<string>())
+              .reduce((acc, a) => acc.add(a.type), new Set<string>())
               .values()
           ),
           loggersConfiguredCount: this.loggingConfig?.loggers.length ?? 0,
@@ -235,8 +255,10 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         savedObjects: {
           customIndex: isCustomIndex(this.kibanaConfig!.index),
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
-          maxImportExportSizeBytes: this.soConfig.maxImportExportSize.getValueInBytes(),
+          maxImportExportSize: this.soConfig.maxImportExportSize,
         },
+
+        deprecatedKeys: this.deprecatedConfigPaths,
       },
       environment: {
         memory: {
@@ -252,7 +274,111 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     };
   }
 
-  setup({ http, metrics, savedObjectsStartPromise }: SetupDeps) {
+  private getMarkedAsSafe(
+    exposedConfigsToUsage: ExposedConfigsToUsage,
+    usedPath: string,
+    pluginId?: string
+  ): { explicitlyMarked: boolean; isSafe: boolean } {
+    if (pluginId) {
+      const exposeDetails = exposedConfigsToUsage.get(pluginId) || {};
+      const exposeKeyDetails = Object.keys(exposeDetails).find((exposeKey) => {
+        const fullPath = `${pluginId}.${exposeKey}`;
+        return hasConfigPathIntersection(usedPath, fullPath);
+      });
+
+      if (exposeKeyDetails) {
+        const explicitlyMarkedAsSafe = exposeDetails[exposeKeyDetails];
+
+        if (typeof explicitlyMarkedAsSafe === 'boolean') {
+          return {
+            explicitlyMarked: true,
+            isSafe: explicitlyMarkedAsSafe,
+          };
+        }
+      }
+    }
+
+    return { explicitlyMarked: false, isSafe: false };
+  }
+
+  private async getNonDefaultKibanaConfigs(
+    exposedConfigsToUsage: ExposedConfigsToUsage
+  ): Promise<ConfigUsageData> {
+    const config = await this.configService.getConfig$().pipe(first()).toPromise();
+    const nonDefaultConfigs = config.toRaw();
+    const usedPaths = await this.configService.getUsedPaths();
+    const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];
+
+    return usedPaths.reduce((acc, usedPath) => {
+      const rawConfigValue = get(nonDefaultConfigs, usedPath);
+      const pluginId = exposedConfigsKeys.find(
+        (exposedConfigsKey) =>
+          usedPath === exposedConfigsKey || usedPath.startsWith(`${exposedConfigsKey}.`)
+      );
+
+      const { explicitlyMarked, isSafe } = this.getMarkedAsSafe(
+        exposedConfigsToUsage,
+        usedPath,
+        pluginId
+      );
+
+      // explicitly marked as safe
+      if (explicitlyMarked && isSafe) {
+        // report array of objects as redacted even if explicitly marked as safe.
+        // TS typings prevent explicitly marking arrays of objects as safe
+        // this makes sure to report redacted even if TS was bypassed.
+        if (
+          Array.isArray(rawConfigValue) &&
+          rawConfigValue.some((item) => typeof item === 'object')
+        ) {
+          acc[usedPath] = '[redacted]';
+        } else {
+          acc[usedPath] = rawConfigValue;
+        }
+      }
+
+      // explicitly marked as unsafe
+      if (explicitlyMarked && !isSafe) {
+        acc[usedPath] = '[redacted]';
+      }
+
+      /**
+       * not all types of values may contain sensitive values.
+       * Report boolean and number configs if not explicitly marked as unsafe.
+       */
+      if (!explicitlyMarked) {
+        switch (typeof rawConfigValue) {
+          case 'number':
+          case 'boolean':
+            acc[usedPath] = rawConfigValue;
+            break;
+          case 'undefined':
+            acc[usedPath] = 'undefined';
+            break;
+          case 'object': {
+            // non-array object types are already handled
+            if (Array.isArray(rawConfigValue)) {
+              if (
+                rawConfigValue.every(
+                  (item) => typeof item === 'number' || typeof item === 'boolean'
+                )
+              ) {
+                acc[usedPath] = rawConfigValue;
+                break;
+              }
+            }
+          }
+          default: {
+            acc[usedPath] = '[redacted]';
+          }
+        }
+      }
+
+      return acc;
+    }, {} as Record<string, any | any[]>);
+  }
+
+  setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }: SetupDeps) {
     metrics
       .getOpsMetrics$()
       .pipe(takeUntil(this.stop$))
@@ -293,6 +419,10 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         this.kibanaConfig = config;
       });
 
+    changedDeprecatedConfigPath$
+      .pipe(takeUntil(this.stop$))
+      .subscribe((deprecatedConfigPaths) => (this.deprecatedConfigPaths = deprecatedConfigPaths));
+
     const internalRepositoryPromise = savedObjectsStartPromise.then((savedObjects) =>
       savedObjects.createInternalRepository([CORE_USAGE_STATS_TYPE])
     );
@@ -312,10 +442,13 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     return { registerType, getClient } as CoreUsageDataSetup;
   }
 
-  start({ savedObjects, elasticsearch }: StartDeps) {
+  start({ savedObjects, elasticsearch, exposedConfigsToUsage }: StartDeps) {
     return {
-      getCoreUsageData: () => {
-        return this.getCoreUsageData(savedObjects, elasticsearch);
+      getCoreUsageData: async () => {
+        return await this.getCoreUsageData(savedObjects, elasticsearch);
+      },
+      getConfigsUsageData: async () => {
+        return await this.getNonDefaultKibanaConfigs(exposedConfigsToUsage);
       },
     };
   }

@@ -20,19 +20,6 @@ describe('collector', () => {
       );
     });
 
-    it('should fail if init is not a function', () => {
-      expect(
-        () =>
-          new Collector(logger, {
-            type: 'my_test_collector',
-            // @ts-expect-error
-            init: 1,
-          })
-      ).toThrowError(
-        'If init property is passed, Collector must be instantiated with a options.init as a function property'
-      );
-    });
-
     it('should fail if fetch is not defined', () => {
       expect(
         () =>
@@ -163,6 +150,45 @@ describe('collector', () => {
             items: { name: { type: 'keyword' }, value: { type: 'long' } },
           },
           otherProp: { type: 'long' },
+        },
+      });
+      expect(collector).toBeDefined();
+    });
+
+    test('TS allows _meta.descriptions in schema', () => {
+      const collector = new Collector(logger, {
+        type: 'my_test_collector_with_description',
+        isReady: () => false,
+        fetch: () => ({ testPass: 100 }),
+        schema: {
+          testPass: { type: 'long' },
+          _meta: { description: 'Count of testPass as number' },
+        },
+      });
+      expect(collector).toBeDefined();
+    });
+
+    test('schema allows _meta as a data field', () => {
+      const collector = new Collector(logger, {
+        type: 'my_test_collector_with_meta_field',
+        isReady: () => false,
+        fetch: () => ({ testPass: 100, _meta: 'metaData' }),
+        schema: {
+          testPass: { type: 'long' },
+          _meta: { type: 'keyword' },
+        },
+      });
+      expect(collector).toBeDefined();
+    });
+
+    test('schema allows _meta as a data field that has a description', () => {
+      const collector = new Collector(logger, {
+        type: 'my_test_collector_with_meta_field',
+        isReady: () => false,
+        fetch: () => ({ testPass: 100, _meta: 'metaData' }),
+        schema: {
+          testPass: { type: 'long' },
+          _meta: { type: 'keyword', _meta: { description: '_meta data as a keyword' } },
         },
       });
       expect(collector).toBeDefined();

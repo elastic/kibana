@@ -76,7 +76,7 @@ export interface Props {
   /**
    * Sets auto refresh interval
    */
-  setRefreshInterval: (interval?: number) => void;
+  setRefreshInterval: (interval: number) => void;
   /**
    * Is autoplay enabled?
    */
@@ -86,13 +86,9 @@ export interface Props {
    */
   autoplayInterval: number;
   /**
-   * Enables autoplay
-   */
-  enableAutoplay: (autoplay: boolean) => void;
-  /**
    * Sets autoplay interval
    */
-  setAutoplayInterval: (interval?: number) => void;
+  setAutoplayInterval: (interval: number) => void;
 }
 
 export const ViewMenu: FunctionComponent<Props> = ({
@@ -110,10 +106,9 @@ export const ViewMenu: FunctionComponent<Props> = ({
   setRefreshInterval,
   autoplayEnabled,
   autoplayInterval,
-  enableAutoplay,
   setAutoplayInterval,
 }) => {
-  const setRefresh = (val: number | undefined) => setRefreshInterval(val);
+  const setRefresh = (val: number) => setRefreshInterval(val);
 
   const disableInterval = () => {
     setRefresh(0);
@@ -197,16 +192,6 @@ export const ViewMenu: FunctionComponent<Props> = ({
         },
       },
       {
-        name: autoplayEnabled
-          ? strings.getAutoplayOffMenuItemLabel()
-          : strings.getAutoplayOnMenuItemLabel(),
-        icon: autoplayEnabled ? 'stop' : 'play',
-        onClick: () => {
-          enableAutoplay(!autoplayEnabled);
-          closePopover();
-        },
-      },
-      {
         name: strings.getAutoplaySettingsMenuItemLabel(),
         icon: 'empty',
         panel: {
@@ -269,6 +254,5 @@ ViewMenu.propTypes = {
   setRefreshInterval: PropTypes.func.isRequired,
   autoplayEnabled: PropTypes.bool.isRequired,
   autoplayInterval: PropTypes.number.isRequired,
-  enableAutoplay: PropTypes.func.isRequired,
   setAutoplayInterval: PropTypes.func.isRequired,
 };

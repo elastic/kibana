@@ -14,7 +14,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
-  AGGS_TERMS_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -25,9 +24,11 @@ import {
   DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
+  MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_MULTIFIELDS,
 } from '../common';
 
-export const uiSettings: Record<string, UiSettingsParams> = {
+export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [DEFAULT_COLUMNS_SETTING]: {
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
@@ -39,6 +40,17 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
   },
+  [MAX_DOC_FIELDS_DISPLAYED]: {
+    name: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedTitle', {
+      defaultMessage: 'Maximum document fields displayed',
+    }),
+    value: 200,
+    description: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedText', {
+      defaultMessage: 'Maximum number of fields rendered in the document column',
+    }),
+    category: ['discover'],
+    schema: schema.number(),
+  },
   [SAMPLE_SIZE_SETTING]: {
     name: i18n.translate('discover.advancedSettings.sampleSizeTitle', {
       defaultMessage: 'Number of rows',
@@ -46,20 +58,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
       defaultMessage: 'The number of rows to show in the table',
-    }),
-    category: ['discover'],
-    schema: schema.number(),
-  },
-  [AGGS_TERMS_SIZE_SETTING]: {
-    name: i18n.translate('discover.advancedSettings.aggsTermsSizeTitle', {
-      defaultMessage: 'Number of terms',
-    }),
-    value: 20,
-    type: 'number',
-    description: i18n.translate('discover.advancedSettings.aggsTermsSizeText', {
-      defaultMessage:
-        'Determines how many terms will be visualized when clicking the "visualize" ' +
-        'button, in the field drop downs, in the discover sidebar.',
     }),
     category: ['discover'],
     schema: schema.number(),
@@ -158,13 +156,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
   },
   [DOC_TABLE_LEGACY]: {
     name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use legacy table',
+      defaultMessage: 'Use classic table',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
-        'view. Enable this option if you prefer to fall back to the legacy table.',
+        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
+        'Turn on this option to use the classic table. Turn off to use the new table. ',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -189,10 +187,37 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     },
   },
   [SEARCH_FIELDS_FROM_SOURCE]: {
-    name: 'Read fields from _source',
-    description: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
+    name: i18n.translate('discover.advancedSettings.discover.readFieldsFromSource', {
+      defaultMessage: 'Read fields from _source',
+    }),
+    description: i18n.translate(
+      'discover.advancedSettings.discover.readFieldsFromSourceDescription',
+      {
+        defaultMessage: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
+      }
+    ),
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
   },
-};
+  [SHOW_MULTIFIELDS]: {
+    name: i18n.translate('discover.advancedSettings.discover.showMultifields', {
+      defaultMessage: 'Show multi-fields',
+    }),
+    description: i18n.translate('discover.advancedSettings.discover.showMultifieldsDescription', {
+      defaultMessage: `Controls whether {multiFields} display in the expanded document view. In most cases, multi-fields are the same as the original field. This option is only available when \`searchFieldsFromSource\` is off.`,
+      values: {
+        multiFields:
+          `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html"
+            target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.discover.multiFieldsLinkText', {
+            defaultMessage: 'multi-fields',
+          }) +
+          '</a>',
+      },
+    }),
+    value: false,
+    category: ['discover'],
+    schema: schema.boolean(),
+  },
+});

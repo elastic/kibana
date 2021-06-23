@@ -6,7 +6,9 @@
  */
 
 import { isString } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../../../src/core/server';
+
+import type { Capabilities as UICapabilities } from 'src/core/server';
+
 import { uiCapabilitiesRegex } from '../../../../features/server';
 
 export class UIActions {

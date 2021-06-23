@@ -10,24 +10,28 @@ import { startBasic } from '../../../lib/start_basic';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
-export function registerStartBasicRoute({ router, plugins: { licensing } }: RouteDependencies) {
+export function registerStartBasicRoute({
+  router,
+  lib: { handleEsError },
+  plugins: { licensing },
+}: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/start_basic'),
       validate: { query: schema.object({ acknowledge: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { client } = ctx.core.elasticsearch;
       try {
         return res.ok({
           body: await startBasic({
             acknowledge: Boolean(req.query.acknowledge),
-            callAsCurrentUser,
+            client,
             licensing,
           }),
         });
-      } catch (e) {
-        return res.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response: res });
       }
     }
   );

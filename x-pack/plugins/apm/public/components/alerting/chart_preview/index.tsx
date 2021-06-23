@@ -6,7 +6,7 @@
  */
 
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   BarSeries,
   Chart,
@@ -74,7 +74,7 @@ export function ChartPreview({
         <Settings tooltip="none" />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
-          domainType={AnnotationDomainTypes.YDomain}
+          domainType={AnnotationDomainType.YDomain}
           id="chart_preview_line_annotation"
           markerPosition="left"
           style={style}

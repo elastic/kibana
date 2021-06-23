@@ -13,4 +13,5 @@ export default createTestConfig('security_and_spaces', {
   license: 'trial',
   ssl: true,
   enableActionsProxy: true,
+  publicBaseUrl: true,
 });

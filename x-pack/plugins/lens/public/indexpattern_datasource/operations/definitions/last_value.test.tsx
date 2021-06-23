@@ -29,6 +29,11 @@ const defaultProps = {
     ...createMockedIndexPattern(),
     hasRestrictions: false,
   } as IndexPattern,
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('last_value', () => {
@@ -74,7 +79,8 @@ describe('last_value', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -337,6 +343,60 @@ describe('last_value', () => {
     );
     expect(disabledStatus).toEqual(
       'This function requires the presence of a date field in your index'
+    );
+  });
+
+  it('should pick the previous format configuration if set', () => {
+    const indexPattern = createMockedIndexPattern();
+    expect(
+      lastValueOperation.buildColumn({
+        indexPattern,
+        layer: {
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            },
+          },
+          columnOrder: [],
+          indexPatternId: '',
+        },
+
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        previousColumn: {
+          label: 'Count',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count',
+          params: {
+            format: {
+              id: 'number',
+              params: {
+                decimals: 2,
+              },
+            },
+          },
+        },
+      }).params
+    ).toEqual(
+      expect.objectContaining({
+        format: {
+          id: 'number',
+          params: {
+            decimals: 2,
+          },
+        },
+      })
     );
   });
 

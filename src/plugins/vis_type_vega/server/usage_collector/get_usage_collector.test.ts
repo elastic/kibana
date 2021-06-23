@@ -20,7 +20,7 @@ const mockedSavedObjects = [
         visState: JSON.stringify({
           type: 'vega',
           params: {
-            spec: '{"$schema": "https://vega.github.io/schema/vega-lite/v4.json" }',
+            spec: '{"$schema": "https://vega.github.io/schema/vega-lite/v5.json" }',
           },
         }),
       },

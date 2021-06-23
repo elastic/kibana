@@ -359,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body.itemsDeleted).to.eql([componentTemplateName]);
         expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
-        expect(body.errors[0].error.msg).to.contain('index_template_missing_exception');
+        expect(body.errors[0].error.msg).to.contain('resource_not_found_exception');
       });
     });
 

@@ -9,7 +9,6 @@ import React from 'react';
 
 import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyValue } from '../../../common/components/empty_value';
-import { ExternalLinkIcon } from '../../../common/components/external_link_icon';
 import { PortOrServiceNameLink } from '../../../common/components/links';
 
 export const CLIENT_PORT_FIELD_NAME = 'client.port';
@@ -40,7 +39,6 @@ export const Port = React.memo<{
     value={value}
   >
     <PortOrServiceNameLink portOrServiceName={value || getEmptyValue()} />
-    <ExternalLinkIcon />
   </DefaultDraggable>
 ));
 

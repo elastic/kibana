@@ -56,7 +56,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(['terms', 'cardinality', 'last_value']);
+      ).toEqual(['terms', 'unique_count', 'last_value']);
     });
 
     it('should return only bucketed operations on strings when passed proper filterOperations function', () => {
@@ -87,11 +87,11 @@ describe('getOperationTypesForField', () => {
         'range',
         'terms',
         'median',
-        'avg',
+        'average',
         'sum',
         'min',
         'max',
-        'cardinality',
+        'unique_count',
         'percentile',
         'last_value',
       ]);
@@ -109,7 +109,16 @@ describe('getOperationTypesForField', () => {
           },
           (op) => !op.isBucketed
         )
-      ).toEqual(['median', 'avg', 'sum', 'min', 'max', 'cardinality', 'percentile', 'last_value']);
+      ).toEqual([
+        'median',
+        'average',
+        'sum',
+        'min',
+        'max',
+        'unique_count',
+        'percentile',
+        'last_value',
+      ]);
     });
 
     it('should return operations on dates', () => {
@@ -286,7 +295,7 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "bytes",
-                "operationType": "avg",
+                "operationType": "average",
                 "type": "field",
               },
               Object {
@@ -303,11 +312,27 @@ describe('getOperationTypesForField', () => {
                 "type": "fullReference",
               },
               Object {
-                "operationType": "derivative",
+                "operationType": "differences",
                 "type": "fullReference",
               },
               Object {
                 "operationType": "moving_average",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_sum",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_min",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_max",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "overall_average",
                 "type": "fullReference",
               },
               Object {
@@ -322,17 +347,17 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "timestamp",
-                "operationType": "cardinality",
+                "operationType": "unique_count",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
-                "operationType": "cardinality",
+                "operationType": "unique_count",
                 "type": "field",
               },
               Object {
                 "field": "source",
-                "operationType": "cardinality",
+                "operationType": "unique_count",
                 "type": "field",
               },
               Object {
@@ -344,6 +369,14 @@ describe('getOperationTypesForField', () => {
                 "field": "bytes",
                 "operationType": "last_value",
                 "type": "field",
+              },
+              Object {
+                "operationType": "math",
+                "type": "managedReference",
+              },
+              Object {
+                "operationType": "formula",
+                "type": "managedReference",
               },
             ],
           },

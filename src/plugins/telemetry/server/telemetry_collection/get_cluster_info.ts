@@ -8,22 +8,6 @@
 
 import { ElasticsearchClient } from 'src/core/server';
 
-// This can be removed when the ES client improves the types
-export interface ESClusterInfo {
-  cluster_uuid: string;
-  cluster_name: string;
-  version: {
-    number: string;
-    build_flavor?: string;
-    build_type?: string;
-    build_hash?: string;
-    build_date?: string;
-    build_snapshot?: boolean;
-    lucene_version?: string;
-    minimum_wire_compatibility_version?: string;
-    minimum_index_compatibility_version?: string;
-  };
-}
 /**
  * Get the cluster info from the connected cluster.
  *
@@ -32,6 +16,6 @@ export interface ESClusterInfo {
  * @param {function} esClient The asInternalUser handler (exposed for testing)
  */
 export async function getClusterInfo(esClient: ElasticsearchClient) {
-  const { body } = await esClient.info<ESClusterInfo>();
+  const { body } = await esClient.info();
   return body;
 }

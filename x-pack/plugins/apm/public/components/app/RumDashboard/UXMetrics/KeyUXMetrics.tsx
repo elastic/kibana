@@ -36,7 +36,7 @@ export function formatToSec(
   }
   return (valueInMs / 1000).toFixed(2) + ' s';
 }
-const STAT_STYLE = { width: '240px' };
+const STAT_STYLE = { width: '200px' };
 
 interface Props {
   data?: UXMetrics | null;
@@ -71,7 +71,7 @@ export function KeyUXMetrics({ data, loading }: Props) {
 
   // Note: FCP value is in ms unit
   return (
-    <EuiFlexGroup wrap>
+    <EuiFlexGroup wrap responsive={false}>
       <EuiFlexItem grow={false} style={STAT_STYLE}>
         <EuiStat
           titleSize="s"

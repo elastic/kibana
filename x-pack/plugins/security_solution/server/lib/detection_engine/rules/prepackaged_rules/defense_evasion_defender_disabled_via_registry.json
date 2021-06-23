@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies modifications to the Windows Defender registry settings to disable the service or set the service to be started manually.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Windows Defender Disabled via Registry Modification",
+  "note": "## Triage and analysis\n\nDetections should be investigated to identify if the hosts and users are authorized to use this tool. As this rule detects post-exploitation process activity, investigations into this should be prioritized",
+  "query": "registry where event.type in (\"creation\", \"change\") and\n  ((registry.path:\"HKLM\\\\SOFTWARE\\\\Policies\\\\Microsoft\\\\Windows Defender\\\\DisableAntiSpyware\" and\n     registry.data.strings:\"1\") or\n  (registry.path:\"HKLM\\\\System\\\\ControlSet*\\\\Services\\\\WinDefend\\\\Start\" and\n     registry.data.strings in (\"3\", \"4\")))\n",
+  "references": [
+    "https://thedfirreport.com/2020/12/13/defender-control/"
+  ],
+  "risk_score": 21,
+  "rule_id": "2ffa1f1e-b6db-47fa-994b-1512743847eb",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.006",
+              "name": "Indicator Blocking",
+              "reference": "https://attack.mitre.org/techniques/T1562/006/"
+            },
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

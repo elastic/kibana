@@ -79,16 +79,12 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                     responsive={false}
                   >
                     <EuiFlexItem grow={false}>
-                      <SourceIcon
-                        serviceType={serviceType}
-                        name={name}
-                        className="source-card-configured__icon"
-                      />
+                      <SourceIcon serviceType={serviceType} name={name} size="l" />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText size="s">
                         <h4>
-                          {name}&nbsp;
+                          {name}
                           {!connected &&
                             !accountContextOnly &&
                             isOrganization &&

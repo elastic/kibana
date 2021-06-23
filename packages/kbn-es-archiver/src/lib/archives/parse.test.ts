@@ -9,7 +9,12 @@
 import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
-import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
+import {
+  createConcatStream,
+  createListStream,
+  createPromiseFromStreams,
+  kibanaPackageJson,
+} from '@kbn/utils';
 
 import { createParseArchiveStreams } from './parse';
 
@@ -54,6 +59,17 @@ describe('esArchiver createParseArchiveStreams', () => {
         expect(output).toEqual([{ a: 1 }, 1]);
       });
 
+      it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            Buffer.from('{"$KIBANA'),
+            Buffer.from('_PACKAGE_VERSION": "enabled"}'),
+          ]),
+          ...createParseArchiveStreams({ gzip: false }),
+        ]);
+        return expect(output).toEqual({ [kibanaPackageJson.version]: 'enabled' });
+      });
+
       it('provides each JSON object as soon as it is parsed', async () => {
         let onReceived: (resolved: any) => void;
         const receivedPromise = new Promise((resolve) => (onReceived = resolve));
@@ -74,11 +90,13 @@ describe('esArchiver createParseArchiveStreams', () => {
           createConcatStream([]),
         ] as [Readable, ...Writable[]]);
 
-        input.write(Buffer.from('{"a": 1}\n\n{"a":'));
+        // before emitting a result, the buffer waits until it at least receives toReplace.length bytes
+        // so we need a long second object to ensure that the first gets emitted.
+        input.write(Buffer.from('{"a": 1}\n\n{"propertyNameLongerThanToReplace":'));
         expect(await receivedPromise).toEqual({ a: 1 });
         input.write(Buffer.from('2}'));
         input.end();
-        expect(await finalPromise).toEqual([{ a: 1 }, { a: 2 }]);
+        expect(await finalPromise).toEqual([{ a: 1 }, { propertyNameLongerThanToReplace: 2 }]);
       });
     });
 
@@ -135,6 +153,18 @@ describe('esArchiver createParseArchiveStreams', () => {
         ] as [Readable, ...Writable[]]);
 
         expect(output).toEqual([{ a: 1 }, { a: 2 }]);
+      });
+
+      it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            Buffer.from('{"$KIBANA_PACKAGE'),
+            Buffer.from('_VERSION": "enabled"}'),
+          ]),
+          createGzip(),
+          ...createParseArchiveStreams({ gzip: true }),
+        ]);
+        return expect(output).toEqual({ [kibanaPackageJson.version]: 'enabled' });
       });
     });
 

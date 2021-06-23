@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
 
 import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
+
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -24,8 +24,6 @@ jest.mock('@elastic/eui', () => {
     EuiScreenReaderOnly: () => <></>,
   };
 });
-
-const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
 describe('DraggableLegendItem', () => {
   describe('rendering a regular (non "All others") legend item', () => {
@@ -41,11 +39,9 @@ describe('DraggableLegendItem', () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <DraggableLegendItem legendItem={legendItem} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <DraggableLegendItem legendItem={legendItem} />
+        </TestProviders>
       );
     });
 
@@ -79,11 +75,9 @@ describe('DraggableLegendItem', () => {
 
     beforeEach(() => {
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <DraggableLegendItem legendItem={allOthersLegendItem} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <DraggableLegendItem legendItem={allOthersLegendItem} />
+        </TestProviders>
       );
     });
 
@@ -118,11 +112,9 @@ describe('DraggableLegendItem', () => {
     };
 
     const wrapper = mount(
-      <ThemeProvider theme={theme}>
-        <TestProviders>
-          <DraggableLegendItem legendItem={noColorLegendItem} />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <DraggableLegendItem legendItem={noColorLegendItem} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="legend-color"]').exists()).toBe(false);

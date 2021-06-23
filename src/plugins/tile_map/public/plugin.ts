@@ -15,7 +15,9 @@ import {
 } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { MapsEmsPluginSetup } from '../../maps_ems/public';
+import { IServiceSettings } from '../../maps_ems/public';
 import { DataPublicPluginStart } from '../../data/public';
 import {
   setCoreService,
@@ -31,10 +33,6 @@ import { createTileMapFn } from './tile_map_fn';
 import { createTileMapTypeDefinition } from './tile_map_type';
 import { getTileMapRenderer } from './tile_map_renderer';
 
-export interface TileMapConfigType {
-  tilemap: any;
-}
-
 /** @private */
 export interface TileMapVisualizationDependencies {
   uiSettings: IUiSettingsClient;
@@ -49,6 +47,7 @@ export interface TileMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+  mapsEms: MapsEmsPluginSetup;
 }
 
 /** @internal */
@@ -58,9 +57,8 @@ export interface TileMapPluginStartDependencies {
   share: SharePluginStart;
 }
 
-export interface TileMapPluginSetup {
-  config: any;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TileMapPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TileMapPluginStart {}
 
@@ -74,15 +72,15 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
 
   public setup(
     core: CoreSetup,
-    { expressions, visualizations, mapsLegacy }: TileMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy, mapsEms }: TileMapPluginSetupDependencies
   ) {
-    const { getZoomPrecision, getPrecision, getServiceSettings } = mapsLegacy;
+    const { getZoomPrecision, getPrecision } = mapsLegacy;
     const visualizationDependencies: Readonly<TileMapVisualizationDependencies> = {
       getZoomPrecision,
       getPrecision,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
       uiSettings: core.uiSettings,
-      getServiceSettings,
+      getServiceSettings: mapsEms.getServiceSettings,
     };
 
     expressions.registerFunction(createTileMapFn);
@@ -90,10 +88,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
 
     visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
 
-    const config = this.initializerContext.config.get<TileMapConfigType>();
-    return {
-      config,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: TileMapPluginStartDependencies) {

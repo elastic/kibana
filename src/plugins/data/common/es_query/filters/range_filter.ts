@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
@@ -63,7 +63,7 @@ export type RangeFilter = Filter &
     script?: {
       script: {
         params: any;
-        lang: string;
+        lang: estypes.ScriptLanguage;
         source: any;
       };
     };
@@ -138,7 +138,10 @@ export const buildRangeFilter = (
 };
 
 export const getRangeScript = (field: IFieldType, params: RangeFilterParams) => {
-  const knownParams = pickBy(params, (val, key: any) => key in operators);
+  const knownParams = mapValues(
+    pickBy(params, (val, key: any) => key in operators),
+    (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)
+  );
   let script = map(
     knownParams,
     (val: any, key: string) => '(' + field.script + ')' + get(operators, key) + key

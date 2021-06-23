@@ -25,9 +25,9 @@ export class DataMappingPopover extends Component<Props, State> {
   };
 
   _togglePopover = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
+    this.setState((prevState) => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
   };
 
   _closePopover = () => {

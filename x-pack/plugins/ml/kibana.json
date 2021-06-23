@@ -10,25 +10,25 @@
     "data",
     "cloud",
     "features",
-    "fileUpload",
+    "dataVisualizer",
     "licensing",
     "share",
     "embeddable",
     "uiActions",
     "kibanaLegacy",
-    "indexPatternManagement",
     "discover",
     "triggersActionsUi"
   ],
   "optionalPlugins": [
-    "alerts",
+    "alerting",
     "home",
     "security",
     "spaces",
     "management",
     "licenseManagement",
     "maps",
-    "lens"
+    "lens",
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
@@ -39,8 +39,8 @@
     "dashboard",
     "savedObjects",
     "home",
-    "spaces",
-    "maps"
+    "maps",
+    "usageCollection"
   ],
   "extraPublicDirs": [
     "common"

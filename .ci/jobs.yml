@@ -33,6 +33,7 @@ JOB:
   - x-pack-ciGroup11
   - x-pack-ciGroup12
   - x-pack-ciGroup13
+  - x-pack-ciGroupDocker
   - x-pack-accessibility
   - x-pack-visualRegression
 

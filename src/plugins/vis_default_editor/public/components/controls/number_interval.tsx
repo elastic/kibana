@@ -73,11 +73,12 @@ function NumberIntervalParamEditor({
   setValidity,
   setValue,
 }: AggParamEditorProps<string | undefined>) {
-  const isAutoChecked = isAutoInterval(value);
+  const field = agg.getField();
+  const fieldSupportsAuto = !field || field.type === 'number';
+  const isAutoChecked = fieldSupportsAuto && isAutoInterval(value);
   const base: number = get(editorConfig, 'interval.base') as number;
   const min = base || 0;
-  const isValid =
-    value !== '' && value !== undefined && (isAutoInterval(value) || Number(value) >= min);
+  const isValid = value !== '' && value !== undefined && (isAutoChecked || Number(value) >= min);
 
   useEffect(() => {
     setValidity(isValid);
@@ -112,6 +113,7 @@ function NumberIntervalParamEditor({
             onChange={onAutoSwitchChange}
             checked={isAutoChecked}
             compressed
+            disabled={!fieldSupportsAuto}
             data-test-subj={`visEditorIntervalSwitch${agg.id}`}
           />
         </EuiFlexItem>

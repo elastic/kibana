@@ -7,7 +7,7 @@
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   Axis,
   Chart,
   LineAnnotation,
@@ -248,7 +248,7 @@ export const WatchVisualization = () => {
                 <LineAnnotation
                   key={specId}
                   id={specId}
-                  domainType={AnnotationDomainTypes.YDomain}
+                  domainType={AnnotationDomainType.YDomain}
                   dataValues={[{ dataValue: watch.threshold[i], details: specId }]}
                 />
               );

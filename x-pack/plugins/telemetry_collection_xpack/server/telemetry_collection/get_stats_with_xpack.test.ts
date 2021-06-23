@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
+import { SavedObjectsClient } from '../../../../../src/core/server';
+import { usageCollectionPluginMock } from '../../../../../src/plugins/usage_collection/server/mocks';
 
 const kibana = {
   kibana: {
@@ -49,10 +52,16 @@ const getContext = () => ({
   logger: coreMock.createPluginInitializerContext().logger.get('test'),
 });
 
-const mockUsageCollection = (kibanaUsage: Record<string, unknown> = kibana) => ({
-  bulkFetch: () => kibanaUsage,
-  toObject: (data: any) => data,
-});
+const mockUsageCollection = (kibanaUsage: Record<string, unknown> = kibana) => {
+  const usageCollectionMock = usageCollectionPluginMock.createSetupContract();
+  usageCollectionMock.bulkFetch.mockImplementation(async () =>
+    Object.entries(kibanaUsage).map(([type, result]) => ({ type, result }))
+  );
+  usageCollectionMock.toObject.mockImplementation((data) =>
+    Object.fromEntries((data || []).map(({ type, result }) => [type, result]))
+  );
+  return usageCollectionMock;
+};
 
 /**
  * Instantiate the esClient mock with the common requests
@@ -61,28 +70,28 @@ function mockEsClient() {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // mock for license should return a basic license
   esClient.license.get.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: { license: { type: 'basic' } } }
   );
   // mock for xpack usage should return an empty object
   esClient.xpack.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: {} }
   );
   // mock for nodes usage should resolve for this test
   esClient.nodes.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: { cluster_name: 'test cluster', nodes: nodesUsage } }
   );
   // mock for info should resolve for this test
   esClient.info.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     {
       body: {
         cluster_uuid: 'test',
         cluster_name: 'test',
-        version: { number: '8.0.0' },
-      },
+        version: { number: '8.0.0' } as estypes.ElasticsearchVersionInfo,
+      } as estypes.InfoResponse,
     }
   );
 
@@ -90,6 +99,9 @@ function mockEsClient() {
 }
 
 describe('Telemetry Collection: Get Aggregated Stats', () => {
+  const soClient = new SavedObjectsClient(
+    coreMock.createStart().savedObjects.createInternalRepository()
+  );
   test('OSS-like telemetry (no license nor X-Pack telemetry)', async () => {
     const esClient = mockEsClient();
     // mock for xpack.usage should throw a 404 for this test
@@ -105,7 +117,9 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       {
         esClient,
         usageCollection,
-      } as any,
+        soClient,
+        kibanaRequest: undefined,
+      },
       context
     );
     stats.forEach((entry) => {
@@ -125,7 +139,9 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       {
         esClient,
         usageCollection,
-      } as any,
+        soClient,
+        kibanaRequest: undefined,
+      },
       context
     );
     stats.forEach((entry) => {
@@ -139,9 +155,9 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     const esClient = mockEsClient();
     const usageCollection = mockUsageCollection({
       ...kibana,
-      monitoringTelemetry: [
-        { collectionSource: 'monitoring', timestamp: new Date().toISOString() },
-      ],
+      monitoringTelemetry: {
+        stats: [{ collectionSource: 'monitoring', timestamp: new Date().toISOString() }],
+      },
     });
     const context = getContext();
 
@@ -150,7 +166,9 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       {
         esClient,
         usageCollection,
-      } as any,
+        soClient,
+        kibanaRequest: undefined,
+      },
       context
     );
     stats.forEach((entry, index) => {

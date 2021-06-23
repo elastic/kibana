@@ -5,107 +5,155 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
-import React from 'react';
-import { Query } from 'react-apollo';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+import deepEqual from 'fast-deep-equal';
+import { noop } from 'lodash/fp';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
-import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { getDefaultFetchPolicy } from '../../../../common/containers/helpers';
-import { QueryTemplate, QueryTemplateProps } from '../../../../common/containers/query_template';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { inputsModel } from '../../../../common/store';
+import { useKibana } from '../../../../common/lib/kibana';
+import {
+  HostItem,
+  HostsQueries,
+  HostDetailsRequestOptions,
+  HostDetailsStrategyResponse,
+} from '../../../../../common/search_strategy/security_solution/hosts';
 
-import { HostOverviewQuery } from './host_overview.gql_query';
-import { GetHostOverviewQuery, HostItem } from '../../../../graphql/types';
+import * as i18n from './translations';
+import {
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../../src/plugins/data/common';
+import { getInspectResponse } from '../../../../helpers';
+import { InspectResponse } from '../../../../types';
 
-const ID = 'hostOverviewQuery';
+export const ID = 'hostsDetailsQuery';
 
-export interface HostOverviewArgs {
+export interface HostDetailsArgs {
   id: string;
-  inspect: inputsModel.InspectQuery;
-  hostOverview: HostItem;
-  loading: boolean;
+  inspect: InspectResponse;
+  hostDetails: HostItem;
   refetch: inputsModel.Refetch;
   startDate: string;
   endDate: string;
 }
 
-export interface HostOverviewReduxProps {
-  isInspected: boolean;
-}
-
-export interface OwnProps extends QueryTemplateProps {
-  children: (args: HostOverviewArgs) => React.ReactNode;
-  hostName: string;
-  startDate: string;
+interface UseHostDetails {
   endDate: string;
+  hostName: string;
+  id?: string;
+  indexNames: string[];
+  skip?: boolean;
+  startDate: string;
 }
 
-type HostsOverViewProps = OwnProps & HostOverviewReduxProps;
+export const useHostDetails = ({
+  endDate,
+  hostName,
+  indexNames,
+  id = ID,
+  skip = false,
+  startDate,
+}: UseHostDetails): [boolean, HostDetailsArgs] => {
+  const { data } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
+  const [loading, setLoading] = useState(false);
+  const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions | null>(
+    null
+  );
+  const { addError, addWarning } = useAppToasts();
 
-class HostOverviewByNameComponentQuery extends QueryTemplate<
-  HostsOverViewProps,
-  GetHostOverviewQuery.Query,
-  GetHostOverviewQuery.Variables
-> {
-  public render() {
-    const {
-      id = ID,
-      indexNames,
-      isInspected,
-      children,
-      hostName,
-      skip,
-      sourceId,
-      startDate,
-      endDate,
-    } = this.props;
-    return (
-      <Query<GetHostOverviewQuery.Query, GetHostOverviewQuery.Variables>
-        query={HostOverviewQuery}
-        fetchPolicy={getDefaultFetchPolicy()}
-        notifyOnNetworkStatusChange
-        skip={skip}
-        variables={{
-          sourceId,
-          hostName,
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-          defaultIndex: indexNames,
-          inspect: isInspected,
-        }}
-      >
-        {({ data, loading, refetch }) => {
-          const hostOverview = getOr([], 'source.HostOverview', data);
-          return children({
-            id,
-            inspect: getOr(null, 'source.HostOverview.inspect', data),
-            refetch,
-            loading,
-            hostOverview,
-            startDate,
-            endDate,
+  const [hostDetailsResponse, setHostDetailsResponse] = useState<HostDetailsArgs>({
+    endDate,
+    hostDetails: {},
+    id,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    refetch: refetch.current,
+    startDate,
+  });
+
+  const hostDetailsSearch = useCallback(
+    (request: HostDetailsRequestOptions | null) => {
+      if (request == null || skip) {
+        return;
+      }
+
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        searchSubscription$.current = data.search
+          .search<HostDetailsRequestOptions, HostDetailsStrategyResponse>(request, {
+            strategy: 'securitySolutionSearchStrategy',
+            abortSignal: abortCtrl.current.signal,
+          })
+          .subscribe({
+            next: (response) => {
+              if (isCompleteResponse(response)) {
+                setLoading(false);
+                setHostDetailsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  hostDetails: response.hostDetails,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  refetch: refetch.current,
+                }));
+                searchSubscription$.current.unsubscribe();
+              } else if (isErrorResponse(response)) {
+                setLoading(false);
+                addWarning(i18n.ERROR_HOST_OVERVIEW);
+                searchSubscription$.current.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              setLoading(false);
+              addError(msg, {
+                title: i18n.FAIL_HOST_OVERVIEW,
+              });
+              searchSubscription$.current.unsubscribe();
+            },
           });
-        }}
-      </Query>
-    );
-  }
-}
+      };
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+    },
+    [data.search, addError, addWarning, skip]
+  );
 
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
+  useEffect(() => {
+    setHostDetailsRequest((prevRequest) => {
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: HostsQueries.details,
+        hostName,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+      };
+      if (!deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [endDate, hostName, indexNames, startDate]);
+
+  useEffect(() => {
+    hostDetailsSearch(hostDetailsRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
     };
-  };
-  return mapStateToProps;
-};
+  }, [hostDetailsRequest, hostDetailsSearch]);
 
-export const HostOverviewByNameQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps)
-)(HostOverviewByNameComponentQuery);
+  return [loading, hostDetailsResponse];
+};

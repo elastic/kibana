@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getChunks, MiddleTruncatedText } from './middle_truncated_text';
-import { render, within, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { within, fireEvent, waitFor } from '@testing-library/react';
+import { getChunks, MiddleTruncatedText } from './middle_truncated_text';
+import { render } from '../../../../../lib/helper/rtl_helpers';
 
 const longString =
   'this-is-a-really-really-really-really-really-really-really-really-long-string.madeup.extension';
@@ -28,7 +29,14 @@ describe('Component', () => {
   const url = 'http://www.elastic.co';
   it('renders truncated text and aria label', () => {
     const { getByText, getByLabelText } = render(
-      <MiddleTruncatedText text={longString} ariaLabel={longString} url={url} />
+      <MiddleTruncatedText
+        index={1}
+        text={longString}
+        ariaLabel={longString}
+        url={url}
+        onClick={jest.fn()}
+        highestIndex={10}
+      />
     );
 
     expect(getByText(first)).toBeInTheDocument();
@@ -39,7 +47,13 @@ describe('Component', () => {
 
   it('renders screen reader only text', () => {
     const { getByTestId } = render(
-      <MiddleTruncatedText text={longString} ariaLabel={longString} url={url} />
+      <MiddleTruncatedText
+        index={1}
+        text={longString}
+        ariaLabel={longString}
+        url={url}
+        highestIndex={10}
+      />
     );
 
     const { getByText } = within(getByTestId('middleTruncatedTextSROnly'));
@@ -49,7 +63,13 @@ describe('Component', () => {
 
   it('renders external link', () => {
     const { getByText } = render(
-      <MiddleTruncatedText text={longString} ariaLabel={longString} url={url} />
+      <MiddleTruncatedText
+        index={1}
+        text={longString}
+        ariaLabel={longString}
+        url={url}
+        highestIndex={10}
+      />
     );
     const link = getByText('Open resource in new tab').closest('a');
 
@@ -61,13 +81,15 @@ describe('Component', () => {
     const handleClick = jest.fn();
     const { getByTestId } = render(
       <MiddleTruncatedText
+        index={1}
         text={longString}
         ariaLabel={longString}
         url={url}
         onClick={handleClick}
+        highestIndex={10}
       />
     );
-    const button = getByTestId('middleTruncatedTextButton');
+    const button = getByTestId('middleTruncatedTextButton1');
     fireEvent.click(button);
 
     await waitFor(() => {

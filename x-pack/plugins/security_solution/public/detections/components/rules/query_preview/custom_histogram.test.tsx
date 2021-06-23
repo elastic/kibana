@@ -6,9 +6,7 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -35,19 +33,17 @@ describe('PreviewCustomQueryHistogram', () => {
 
   test('it renders loader when isLoading is true', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <TestProviders>
-          <PreviewCustomQueryHistogram
-            to="2020-07-08T08:20:18.966Z"
-            from="2020-07-07T08:20:18.966Z"
-            data={[]}
-            totalCount={0}
-            inspect={{ dsl: [], response: [] }}
-            refetch={jest.fn()}
-            isLoading
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewCustomQueryHistogram
+          to="2020-07-08T08:20:18.966Z"
+          from="2020-07-07T08:20:18.966Z"
+          data={[]}
+          totalCount={0}
+          inspect={{ dsl: [], response: [] }}
+          refetch={jest.fn()}
+          isLoading
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeTruthy();
@@ -58,23 +54,21 @@ describe('PreviewCustomQueryHistogram', () => {
 
   test('it configures data and subtitle', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <TestProviders>
-          <PreviewCustomQueryHistogram
-            to="2020-07-08T08:20:18.966Z"
-            from="2020-07-07T08:20:18.966Z"
-            data={[
-              { x: 1602247050000, y: 2314, g: 'All others' },
-              { x: 1602247162500, y: 3471, g: 'All others' },
-              { x: 1602247275000, y: 3369, g: 'All others' },
-            ]}
-            totalCount={9154}
-            inspect={{ dsl: [], response: [] }}
-            refetch={jest.fn()}
-            isLoading={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewCustomQueryHistogram
+          to="2020-07-08T08:20:18.966Z"
+          from="2020-07-07T08:20:18.966Z"
+          data={[
+            { x: 1602247050000, y: 2314, g: 'All others' },
+            { x: 1602247162500, y: 3471, g: 'All others' },
+            { x: 1602247275000, y: 3369, g: 'All others' },
+          ]}
+          totalCount={9154}
+          inspect={{ dsl: [], response: [] }}
+          refetch={jest.fn()}
+          isLoading={false}
+        />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="queryPreviewLoading"]').exists()).toBeFalsy();
@@ -111,19 +105,17 @@ describe('PreviewCustomQueryHistogram', () => {
     const mockRefetch = jest.fn();
 
     mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <TestProviders>
-          <PreviewCustomQueryHistogram
-            to="2020-07-08T08:20:18.966Z"
-            from="2020-07-07T08:20:18.966Z"
-            data={[]}
-            totalCount={0}
-            inspect={{ dsl: ['some dsl'], response: ['query response'] }}
-            refetch={mockRefetch}
-            isLoading={false}
-          />
-        </TestProviders>
-      </ThemeProvider>
+      <TestProviders>
+        <PreviewCustomQueryHistogram
+          to="2020-07-08T08:20:18.966Z"
+          from="2020-07-07T08:20:18.966Z"
+          data={[]}
+          totalCount={0}
+          inspect={{ dsl: ['some dsl'], response: ['query response'] }}
+          refetch={mockRefetch}
+          isLoading={false}
+        />
+      </TestProviders>
     );
 
     expect(mockSetQuery).toHaveBeenCalledWith({

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 
 import { AddGroupModal } from './add_group_modal';
 
@@ -36,7 +36,6 @@ describe('AddGroupModal', () => {
     const wrapper = shallow(<AddGroupModal />);
 
     expect(wrapper.find(EuiModal)).toHaveLength(1);
-    expect(wrapper.find(EuiOverlayMask)).toHaveLength(1);
   });
 
   it('updates the input value', () => {

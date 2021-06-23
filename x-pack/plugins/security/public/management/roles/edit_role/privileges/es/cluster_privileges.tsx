@@ -6,9 +6,11 @@
  */
 
 import { EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { Component } from 'react';
 import _ from 'lodash';
-import { Role, isRoleReadOnly } from '../../../../../../common/model';
+import React, { Component } from 'react';
+
+import type { Role } from '../../../../../../common/model';
+import { isRoleReadOnly } from '../../../../../../common/model';
 
 interface Props {
   role: Role;

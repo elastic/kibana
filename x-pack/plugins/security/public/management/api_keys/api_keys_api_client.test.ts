@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { APIKeysAPIClient } from './api_keys_api_client';
+import { httpServiceMock } from 'src/core/public/mocks';
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { APIKeysAPIClient } from './api_keys_api_client';
 
 describe('APIKeysAPIClient', () => {
   it('checkPrivileges() queries correct endpoint', async () => {
@@ -82,6 +82,22 @@ describe('APIKeysAPIClient', () => {
     expect(httpMock.post).toHaveBeenCalledTimes(1);
     expect(httpMock.post).toHaveBeenCalledWith('/internal/security/api_key/invalidate', {
       body: JSON.stringify({ apiKeys: mockAPIKeys, isAdmin: true }),
+    });
+  });
+
+  it('createApiKey() queries correct endpoint', async () => {
+    const httpMock = httpServiceMock.createStartContract();
+
+    const mockResponse = Symbol('mockResponse');
+    httpMock.post.mockResolvedValue(mockResponse);
+
+    const apiClient = new APIKeysAPIClient(httpMock);
+    const mockAPIKeys = { name: 'name', expiration: '7d' };
+
+    await expect(apiClient.createApiKey(mockAPIKeys)).resolves.toBe(mockResponse);
+    expect(httpMock.post).toHaveBeenCalledTimes(1);
+    expect(httpMock.post).toHaveBeenCalledWith('/internal/security/api_key', {
+      body: JSON.stringify(mockAPIKeys),
     });
   });
 });

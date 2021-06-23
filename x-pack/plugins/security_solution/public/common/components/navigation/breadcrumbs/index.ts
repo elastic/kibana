@@ -15,7 +15,7 @@ import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/p
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
-import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/pages';
+import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import {
   RouteSpyState,
@@ -146,10 +146,7 @@ export const getBreadcrumbsForRoute = (
   }
   if (isTimelinesRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'timeline', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
+    const urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
 
     return [
       siemRootBreadcrumb,

@@ -66,17 +66,13 @@ describe('kql syntax errors', () => {
   it('should throw an error for unescaped quotes in a quoted string', () => {
     expect(() => {
       fromKueryExpression('foo:"ba "r"');
-    }).toThrow(
-      'Expected AND, OR, end of input, whitespace but "r" found.\n' + 'foo:"ba "r"\n' + '---------^'
-    );
+    }).toThrow('Expected AND, OR, end of input but "r" found.\n' + 'foo:"ba "r"\n' + '---------^');
   });
 
   it('should throw an error for unescaped special characters in literals', () => {
     expect(() => {
       fromKueryExpression('foo:ba:r');
-    }).toThrow(
-      'Expected AND, OR, end of input, whitespace but ":" found.\n' + 'foo:ba:r\n' + '------^'
-    );
+    }).toThrow('Expected AND, OR, end of input but ":" found.\n' + 'foo:ba:r\n' + '------^');
   });
 
   it('should throw an error for range queries missing a value', () => {

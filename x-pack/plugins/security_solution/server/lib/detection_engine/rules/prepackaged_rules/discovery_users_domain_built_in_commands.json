@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the execution of macOS built-in commands related to account or group enumeration.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Enumeration of Users or Groups via Built-in Commands",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  not process.parent.executable : (\"/Applications/NoMAD.app/Contents/MacOS/NoMAD\", \n    \"/Applications/ZoomPresence.app/Contents/MacOS/ZoomPresence\",\n     \"/Applications/Sourcetree.app/Contents/MacOS/Sourcetree\",\n     \"/Library/Application Support/JAMF/Jamf.app/Contents/MacOS/JamfDaemon.app/Contents/MacOS/JamfDaemon\",\n     \"/usr/local/jamf/bin/jamf\"\n    ) and \n  process.name : (\"ldapsearch\", \"dsmemberutil\") or\n  (process.name : \"dscl\" and \n     process.args : (\"read\", \"-read\", \"list\", \"-list\", \"ls\", \"search\", \"-search\") and \n     process.args : (\"/Active Directory/*\", \"/Users*\", \"/Groups*\"))\n",
+  "risk_score": 21,
+  "rule_id": "6e9b351e-a531-4bdc-b73e-7034d6eed7ff",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1069",
+          "name": "Permission Groups Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1069/"
+        },
+        {
+          "id": "T1087",
+          "name": "Account Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1087/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 2
+}

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { APMRequestHandlerContext } from '../../routes/typings';
+import { APMRouteHandlerResources } from '../../routes/typings';
 
-export function getApmIndexPatternTitle(context: APMRequestHandlerContext) {
-  return context.config['apm_oss.indexPattern'];
+export function getApmIndexPatternTitle(
+  config: APMRouteHandlerResources['config']
+) {
+  return config['apm_oss.indexPattern'];
 }

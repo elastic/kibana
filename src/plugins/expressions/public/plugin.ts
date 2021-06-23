@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
   ExpressionsService,
-  ExpressionsServiceSetup,
-  ExecutionContext,
-  ExpressionsServiceStart,
-} from '../common';
-import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
+  setRenderersRegistry,
+  setNotifications,
+  setExpressionsService,
+} from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
 import { ExpressionLoader, IExpressionLoader, loader } from './loader';
 import { render, ExpressionRenderHandler } from './render';
@@ -42,14 +43,8 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
   private configureExecutor(core: CoreSetup) {
     const { executor } = this.expressions;
 
-    const getSavedObject: ExecutionContext['getSavedObject'] = async (type, id) => {
-      const [start] = await core.getStartServices();
-      return start.savedObjects.client.get(type, id);
-    };
-
     executor.extendContext({
       environment: 'client',
-      getSavedObject,
     });
   }
 
@@ -62,7 +57,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     setRenderersRegistry(renderers);
     setExpressionsService(expressions);
 
-    const setup = expressions.setup();
+    const setup = expressions.setup(pick(core, 'getStartServices'));
 
     return Object.freeze(setup);
   }

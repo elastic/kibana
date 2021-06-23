@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams, FindResult } from '../../../../../alerts/server';
+import { AlertTypeParams, FindResult } from '../../../../../alerting/server';
 import { NOTIFICATIONS_ID } from '../../../../common/constants';
 import { FindNotificationParams } from './types';
 

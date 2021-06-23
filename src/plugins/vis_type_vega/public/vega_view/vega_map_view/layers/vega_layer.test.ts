@@ -36,6 +36,7 @@ describe('vega_map_view/tms_raster_layer', () => {
       vegaView: ({
         initialize: jest.fn(),
       } as unknown) as View,
+      vegaControls: 'element',
       updateVegaView: jest.fn(),
     };
   });

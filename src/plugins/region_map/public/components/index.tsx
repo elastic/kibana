@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { IServiceSettings } from 'src/plugins/maps_legacy/public';
+import { IServiceSettings } from 'src/plugins/maps_ems/public';
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
 import { RegionMapVisParams } from '../region_map_types';
 

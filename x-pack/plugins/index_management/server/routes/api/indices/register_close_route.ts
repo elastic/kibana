@@ -14,10 +14,10 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerCloseRoute({ router, license, lib }: RouteDependencies) {
+export function registerCloseRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/close'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const payload = req.body as typeof bodySchema.type;
       const { indices = [] } = payload;
 
@@ -38,8 +38,8 @@ export function registerCloseRoute({ router, license, lib }: RouteDependencies) 
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

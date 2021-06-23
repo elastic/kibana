@@ -10,7 +10,9 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import type {
+import { DatatableColumn } from 'src/plugins/expressions/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
@@ -18,11 +20,27 @@ import type {
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
+import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
+import { CustomPaletteParams } from '../shared_components/coloring/types';
+import { getStopsForFixedMode } from '../shared_components';
+import { getDefaultSummaryLabel } from './summary';
 
 export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  isTransposed?: boolean;
+  // These flags are necessary to transpose columns and map them back later
+  // They are set automatically and are not user-editable
+  transposable?: boolean;
+  originalColumnId?: string;
+  originalName?: string;
+  bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
+  alignment?: 'left' | 'right' | 'center';
+  palette?: PaletteOutput<CustomPaletteParams>;
+  colorMode?: 'none' | 'cell' | 'text';
+  summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
+  summaryLabel?: string;
 }
 
 export interface SortingState {
@@ -36,16 +54,26 @@ export interface DatatableVisualizationState {
   sorting?: SortingState;
 }
 
-export const datatableVisualization: Visualization<DatatableVisualizationState> = {
+const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
+  defaultMessage: 'Table',
+});
+
+export const getDatatableVisualization = ({
+  paletteService,
+}: {
+  paletteService: PaletteRegistry;
+}): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
   visualizationTypes: [
     {
       id: 'lnsDatatable',
       icon: LensIconChartDatatable,
-      label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
+      label: visualizationLabel,
+      groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
+        defaultMessage: 'Tabular and single value',
       }),
+      sortPriority: 1,
     },
   ],
 
@@ -67,9 +95,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   getDescription() {
     return {
       icon: LensIconChartDatatable,
-      label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
-      }),
+      label: visualizationLabel,
     };
   },
 
@@ -104,6 +130,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         oldColumnSettings[column.columnId] = column;
       });
     }
+    const lastTransposedColumnIndex = table.columns.findIndex((c) =>
+      !oldColumnSettings[c.columnId] ? false : !oldColumnSettings[c.columnId]?.isTransposed
+    );
+    const usesTransposing = state?.columns.some((c) => c.isTransposed);
+
     const title =
       table.changeType === 'unchanged'
         ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
@@ -134,8 +165,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         state: {
           ...(state || {}),
           layerId: table.layerId,
-          columns: table.columns.map((col) => ({
+          columns: table.columns.map((col, columnIndex) => ({
             ...(oldColumnSettings[col.columnId] || {}),
+            isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
             columnId: col.columnId,
           })),
         },
@@ -162,21 +194,55 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     return {
       groups: [
         {
-          groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.breakdown', {
-            defaultMessage: 'Break down by',
+          groupId: 'rows',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
+            defaultMessage: 'Rows',
+          }),
+          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
+            defaultMessage:
+              'Split table rows by field. This is recommended for high cardinality breakdowns.',
           }),
           layerId: state.layerId,
           accessors: sortedColumns
-            .filter((c) => datasource!.getOperationForColumnId(c)?.isBucketed)
+            .filter(
+              (c) =>
+                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                !state.columns.find((col) => col.columnId === c)?.isTransposed
+            )
             .map((accessor) => ({
               columnId: accessor,
               triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
             })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
-          dataTestSubj: 'lnsDatatable_column',
+          dataTestSubj: 'lnsDatatable_rows',
           enableDimensionEditor: true,
+          hideGrouping: true,
+          nestingOrder: 1,
+        },
+        {
+          groupId: 'columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
+            defaultMessage: 'Columns',
+          }),
+          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
+            defaultMessage:
+              "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
+          }),
+          layerId: state.layerId,
+          accessors: sortedColumns
+            .filter(
+              (c) =>
+                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                state.columns.find((col) => col.columnId === c)?.isTransposed
+            )
+            .map((accessor) => ({ columnId: accessor })),
+          supportsMoreColumns: true,
+          filterOperations: (op) => op.isBucketed,
+          dataTestSubj: 'lnsDatatable_columns',
+          enableDimensionEditor: true,
+          hideGrouping: true,
+          nestingOrder: 0,
         },
         {
           groupId: 'metrics',
@@ -186,10 +252,26 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           layerId: state.layerId,
           accessors: sortedColumns
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
-            .map((accessor) => ({
-              columnId: accessor,
-              triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
-            })),
+            .map((accessor) => {
+              const columnConfig = columnMap[accessor];
+              const hasColoring = Boolean(
+                columnConfig.colorMode !== 'none' && columnConfig.palette?.params?.stops
+              );
+              return {
+                columnId: accessor,
+                triggerIcon: columnConfig.hidden
+                  ? 'invisible'
+                  : hasColoring
+                  ? 'colorBy'
+                  : undefined,
+                palette: hasColoring
+                  ? getStopsForFixedMode(
+                      columnConfig.palette?.params?.stops || [],
+                      columnConfig.palette?.params?.colorStops
+                    )
+                  : undefined,
+              };
+            }),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           required: true,
@@ -200,13 +282,26 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  setDimension({ prevState, columnId }) {
-    if (prevState.columns.some((column) => column.columnId === columnId)) {
-      return prevState;
+  setDimension({ prevState, columnId, groupId, previousColumn }) {
+    if (
+      prevState.columns.some(
+        (column) =>
+          column.columnId === columnId || (previousColumn && column.columnId === previousColumn)
+      )
+    ) {
+      return {
+        ...prevState,
+        columns: prevState.columns.map((column) => {
+          if (column.columnId === columnId || column.columnId === previousColumn) {
+            return { ...column, columnId, isTransposed: groupId === 'columns' };
+          }
+          return column;
+        }),
+      };
     }
     return {
       ...prevState,
-      columns: [...prevState.columns, { columnId }],
+      columns: [...prevState.columns, { columnId, isTransposed: groupId === 'columns' }],
     };
   },
   removeDimension({ prevState, columnId }) {
@@ -219,7 +314,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <TableDimensionEditor {...props} />
+        <TableDimensionEditor {...props} paletteService={paletteService} />
       </I18nProvider>,
       domElement
     );
@@ -254,20 +349,47 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
           arguments: {
             title: [title || ''],
             description: [description || ''],
-            columns: columns.map((column) => ({
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'lens_datatable_column',
-                  arguments: {
-                    columnId: [column.columnId],
-                    hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
-                    width: typeof column.width === 'undefined' ? [] : [column.width],
+            columns: columns.map((column) => {
+              const paletteParams = {
+                ...column.palette?.params,
+                // rewrite colors and stops as two distinct arguments
+                colors: (column.palette?.params?.stops || []).map(({ color }) => color),
+                stops:
+                  column.palette?.params?.name === 'custom'
+                    ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                    : [],
+                reverse: false, // managed at UI level
+              };
+
+              const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+
+              return {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: 'lens_datatable_column',
+                    arguments: {
+                      columnId: [column.columnId],
+                      hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
+                      width: typeof column.width === 'undefined' ? [] : [column.width],
+                      isTransposed:
+                        typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
+                      transposable: [
+                        !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
+                      ],
+                      alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
+                      colorMode: [column.colorMode ?? 'none'],
+                      palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
+                      summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
+                      summaryLabel: hasNoSummaryRow
+                        ? []
+                        : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
+                    },
                   },
-                },
-              ],
-            })),
+                ],
+              };
+            }),
             sortingColumnId: [state.sorting?.columnId || ''],
             sortingDirection: [state.sorting?.direction || 'none'],
           },
@@ -276,7 +398,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     return undefined;
   },
 
@@ -323,7 +445,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         return state;
     }
   },
-};
+});
 
 function getDataSourceAndSortedColumns(
   state: DatatableVisualizationState,

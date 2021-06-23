@@ -67,7 +67,7 @@ export const getShortTimeStamp = (timeStamp: moment.Moment, relative = false) =>
     moment.locale(prevLocale);
     return shortTimestamp;
   } else {
-    if (moment().diff(timeStamp, 'd') > 1) {
+    if (moment().diff(timeStamp, 'd') >= 1) {
       return timeStamp.format('ll LTS');
     }
     return timeStamp.format('LTS');

@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export {
+export { NotificationsService } from './notifications_service';
+export type {
   ErrorToastOptions,
   ToastOptions,
   Toast,
@@ -17,8 +17,4 @@ export {
   ToastsSetup,
   ToastsStart,
 } from './toasts';
-export {
-  NotificationsService,
-  NotificationsSetup,
-  NotificationsStart,
-} from './notifications_service';
+export type { NotificationsSetup, NotificationsStart } from './notifications_service';

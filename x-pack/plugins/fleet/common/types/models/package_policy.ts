@@ -14,12 +14,14 @@ export interface PackagePolicyPackage {
 export interface PackagePolicyConfigRecordEntry {
   type?: string;
   value?: any;
+  frozen?: boolean;
 }
 
 export type PackagePolicyConfigRecord = Record<string, PackagePolicyConfigRecordEntry>;
 
 export interface NewPackagePolicyInputStream {
   enabled: boolean;
+  keep_enabled?: boolean;
   data_stream: {
     dataset: string;
     type: string;
@@ -35,7 +37,9 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 
 export interface NewPackagePolicyInput {
   type: string;
+  policy_template?: string;
   enabled: boolean;
+  keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
@@ -55,6 +59,7 @@ export interface NewPackagePolicy {
   output_id: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
+  vars?: PackagePolicyConfigRecord;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

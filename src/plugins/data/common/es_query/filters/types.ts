@@ -35,6 +35,7 @@ export enum FILTERS {
   MISSING = 'missing',
   QUERY_STRING = 'query_string',
   RANGE = 'range',
+  RANGE_FROM_VALUE = 'range_from_value',
   GEO_BOUNDING_BOX = 'geo_bounding_box',
   GEO_POLYGON = 'geo_polygon',
   SPATIAL_FILTER = 'spatial_filter',

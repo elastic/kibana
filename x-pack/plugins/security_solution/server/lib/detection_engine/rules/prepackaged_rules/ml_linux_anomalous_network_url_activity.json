@@ -9,7 +9,7 @@
   ],
   "from": "now-45m",
   "interval": "15m",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "machine_learning_job_id": "linux_anomalous_network_url_activity_ecs",
   "name": "Unusual Linux Web Activity",
   "references": [
@@ -26,5 +26,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 3
+  "version": 4
 }

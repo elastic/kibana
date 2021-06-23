@@ -7,10 +7,11 @@
 
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
-import { reject, isUndefined } from 'lodash';
+import { reject, isUndefined, isNumber } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
-import { EsContext } from '.';
+import util from 'util';
+import { estypes } from '@elastic/elasticsearch';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 import { esKuery } from '../../../../../src/plugins/data/server';
@@ -25,10 +26,12 @@ export interface Doc {
   body: IEvent;
 }
 
+type Wait = () => Promise<boolean>;
+
 export interface ConstructorOpts {
   logger: Logger;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  context: EsContext;
+  wait: Wait;
 }
 
 export interface QueryEventsBySavedObjectResult {
@@ -38,18 +41,21 @@ export interface QueryEventsBySavedObjectResult {
   data: IValidatedEvent[];
 }
 
-export class ClusterClientAdapter {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AliasAny = any;
+
+export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
   private readonly logger: Logger;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  private readonly docBuffer$: Subject<Doc>;
-  private readonly context: EsContext;
+  private readonly docBuffer$: Subject<TDoc>;
+  private readonly wait: Wait;
   private readonly docsBufferedFlushed: Promise<void>;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
-    this.context = opts.context;
-    this.docBuffer$ = new Subject<Doc>();
+    this.wait = opts.wait;
+    this.docBuffer$ = new Subject<TDoc>();
 
     // buffer event log docs for time / buffer length, ignore empty
     // buffers, then index the buffered docs; kick things off with a
@@ -74,17 +80,20 @@ export class ClusterClientAdapter {
     await this.docsBufferedFlushed;
   }
 
-  public indexDocument(doc: Doc): void {
+  public indexDocument(doc: TDoc): void {
     this.docBuffer$.next(doc);
   }
 
-  async indexDocuments(docs: Doc[]): Promise<void> {
+  async indexDocuments(docs: TDoc[]): Promise<void> {
     // If es initialization failed, don't try to index.
     // Also, don't log here, we log the failure case in plugin startup
     // instead, otherwise we'd be spamming the log (if done here)
-    if (!(await this.context.waitTillReady())) {
+    if (!(await this.wait())) {
+      this.logger.debug(`Initialization failed, not indexing ${docs.length} documents`);
       return;
     }
+
+    this.logger.debug(`Indexing ${docs.length} documents`);
 
     const bulkBody: Array<Record<string, unknown>> = [];
 
@@ -97,7 +106,13 @@ export class ClusterClientAdapter {
 
     try {
       const esClient = await this.elasticsearchClientPromise;
-      await esClient.bulk({ body: bulkBody });
+      const response = await esClient.bulk({ body: bulkBody });
+
+      if (response.body.errors) {
+        const error = new Error('Error writing some bulk events');
+        error.stack += '\n' + util.inspect(response.body.items, { depth: null });
+        this.logger.error(error);
+      }
     } catch (err) {
       this.logger.error(
         `error writing bulk events: "${err.message}"; docs: ${JSON.stringify(bulkBody)}`
@@ -135,14 +150,13 @@ export class ClusterClientAdapter {
   }
 
   public async doesIndexTemplateExist(name: string): Promise<boolean> {
-    let result;
     try {
       const esClient = await this.elasticsearchClientPromise;
-      result = (await esClient.indices.existsTemplate({ name })).body;
+      const { body } = await esClient.indices.existsTemplate({ name });
+      return body as boolean;
     } catch (err) {
       throw new Error(`error checking existance of index template: ${err.message}`);
     }
-    return result as boolean;
   }
 
   public async createIndexTemplate(name: string, template: Record<string, unknown>): Promise<void> {
@@ -156,26 +170,24 @@ export class ClusterClientAdapter {
       // instances at the same time.
       const existsNow = await this.doesIndexTemplateExist(name);
       if (!existsNow) {
-        throw new Error(`error creating index template: ${err.message}`);
+        const error = new Error(`error creating index template: ${err.message}`);
+        Object.assign(error, { wrapped: err });
+        throw error;
       }
     }
   }
 
   public async doesAliasExist(name: string): Promise<boolean> {
-    let result;
     try {
       const esClient = await this.elasticsearchClientPromise;
-      result = (await esClient.indices.existsAlias({ name })).body;
+      const { body } = await esClient.indices.existsAlias({ name });
+      return body as boolean;
     } catch (err) {
       throw new Error(`error checking existance of initial index: ${err.message}`);
     }
-    return result as boolean;
   }
 
-  public async createIndex(
-    name: string,
-    body: string | Record<string, unknown> = {}
-  ): Promise<void> {
+  public async createIndex(name: string, body: Record<string, unknown> = {}): Promise<void> {
     try {
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.create({
@@ -228,64 +240,67 @@ export class ClusterClientAdapter {
       });
       throw err;
     }
-    const body = {
-      size: perPage,
-      from: (page - 1) * perPage,
-      sort: { [sort_field]: { order: sort_order } },
-      query: {
-        bool: {
-          filter: dslFilterQuery,
-          must: reject(
-            [
-              {
-                nested: {
-                  path: 'kibana.saved_objects',
-                  query: {
-                    bool: {
-                      must: [
-                        {
-                          term: {
-                            'kibana.saved_objects.rel': {
-                              value: SAVED_OBJECT_REL_PRIMARY,
-                            },
-                          },
-                        },
-                        {
-                          term: {
-                            'kibana.saved_objects.type': {
-                              value: type,
-                            },
-                          },
-                        },
-                        {
-                          terms: {
-                            // default maximum of 65,536 terms, configurable by index.max_terms_count
-                            'kibana.saved_objects.id': ids,
-                          },
-                        },
-                        namespaceQuery,
-                      ],
+    const musts: estypes.QueryDslQueryContainer[] = [
+      {
+        nested: {
+          path: 'kibana.saved_objects',
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'kibana.saved_objects.rel': {
+                      value: SAVED_OBJECT_REL_PRIMARY,
                     },
                   },
                 },
-              },
-              start && {
-                range: {
-                  '@timestamp': {
-                    gte: start,
+                {
+                  term: {
+                    'kibana.saved_objects.type': {
+                      value: type,
+                    },
                   },
                 },
-              },
-              end && {
-                range: {
-                  '@timestamp': {
-                    lte: end,
+                {
+                  terms: {
+                    // default maximum of 65,536 terms, configurable by index.max_terms_count
+                    'kibana.saved_objects.id': ids,
                   },
                 },
-              },
-            ],
-            isUndefined
-          ),
+                namespaceQuery,
+              ],
+            },
+          },
+        },
+      },
+    ];
+    if (start) {
+      musts.push({
+        range: {
+          '@timestamp': {
+            gte: start,
+          },
+        },
+      });
+    }
+    if (end) {
+      musts.push({
+        range: {
+          '@timestamp': {
+            lte: end,
+          },
+        },
+      });
+    }
+
+    const body: estypes.SearchRequest['body'] = {
+      size: perPage,
+      from: (page - 1) * perPage,
+      sort: [{ [sort_field]: { order: sort_order } }],
+      query: {
+        bool: {
+          filter: dslFilterQuery,
+          must: reject(musts, isUndefined),
         },
       },
     };
@@ -295,7 +310,7 @@ export class ClusterClientAdapter {
         body: {
           hits: { hits, total },
         },
-      } = await esClient.search({
+      } = await esClient.search<IValidatedEvent>({
         index,
         track_total_hits: true,
         body,
@@ -303,8 +318,8 @@ export class ClusterClientAdapter {
       return {
         page,
         per_page: perPage,
-        total: total.value,
-        data: hits.map((hit: { _source: unknown }) => hit._source) as IValidatedEvent[],
+        total: isNumber(total) ? total : total.value,
+        data: hits.map((hit) => hit._source),
       };
     } catch (err) {
       throw new Error(

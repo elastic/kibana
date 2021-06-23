@@ -9,19 +9,22 @@
     "licensing",
     "triggersActionsUi",
     "embeddable",
-    "infra"
+    "infra",
+    "observability",
+    "ruleRegistry"
   ],
   "optionalPlugins": [
+    "spaces",
     "cloud",
     "usageCollection",
     "taskManager",
     "actions",
-    "alerts",
-    "observability",
+    "alerting",
     "security",
     "ml",
     "home",
-    "maps"
+    "maps",
+    "fleet"
   ],
   "server": true,
   "ui": true,
@@ -33,11 +36,11 @@
     "public/style/variables"
   ],
   "requiredBundles": [
+    "home",
     "kibanaReact",
     "kibanaUtils",
-    "observability",
-    "home",
     "maps",
-    "ml"
+    "ml",
+    "observability"
   ]
 }

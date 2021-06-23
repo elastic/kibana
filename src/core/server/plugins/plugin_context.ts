@@ -133,7 +133,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
-      auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
+      auth: {
+        get: deps.http.auth.get,
+        isAuthenticated: deps.http.auth.isAuthenticated,
+      },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
@@ -162,6 +165,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: deps.uiSettings.register,
     },
     getStartServices: () => plugin.startDependencies,
+    deprecations: deps.deprecations.getRegistry(plugin.name),
   };
 }
 

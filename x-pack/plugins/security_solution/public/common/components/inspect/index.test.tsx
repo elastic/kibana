@@ -11,7 +11,6 @@ import React from 'react';
 import {
   TestProviders,
   mockGlobalState,
-  apolloClientObservable,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
@@ -35,25 +34,13 @@ describe('Inspect Button', () => {
     state: state.inputs,
   };
 
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   describe('Render', () => {
     beforeEach(() => {
       const myState = cloneDeep(state);
       myState.inputs = upsertQuery(newQuery);
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
     test('Eui Empty Button', () => {
       const wrapper = mount(
@@ -157,13 +144,7 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(
-        myState,
-        SUB_PLUGINS_REDUCER,
-        apolloClientObservable,
-        kibanaObservable,
-        storage
-      );
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(

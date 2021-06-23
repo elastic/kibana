@@ -8,16 +8,16 @@
 
 import { IContextContainer } from './context';
 
-export type ContextContainerMock = jest.Mocked<IContextContainer<any>>;
+export type ContextContainerMock = jest.Mocked<IContextContainer>;
 
-const createContextMock = (mockContext = {}) => {
+const createContextMock = (mockContext: any = {}) => {
   const contextMock: ContextContainerMock = {
-    // @ts-expect-error tsc cannot infer ContextName and uses never
+    // @ts-expect-error since ContextContainerMock cannot infer ContextName and fallsback to never
     registerContext: jest.fn(),
     createHandler: jest.fn(),
   };
   contextMock.createHandler.mockImplementation((pluginId, handler) => (...args) =>
-    handler(mockContext, ...args)
+    Promise.resolve(handler(mockContext, ...args))
   );
   return contextMock;
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJSON as pkg } from '@kbn/dev-utils';
+import { kibanaPackageJson as pkg } from '@kbn/dev-utils';
 
 import { getVersionInfo } from '../version_info';
 

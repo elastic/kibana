@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { Calendar, CalendarEvent } from '../../../../../plugins/ml/server/models/calendar';
+import { estypes } from '@elastic/elasticsearch';
+import { Calendar } from '../../../../../plugins/ml/server/models/calendar';
+
+type ScheduledEvent = estypes.MlCalendarEvent;
 
 export const assertAllEventsExistInCalendar = (
-  eventsToCheck: CalendarEvent[],
+  eventsToCheck: ScheduledEvent[],
   calendar: Calendar
 ): boolean => {
-  const updatedCalendarEvents = calendar.events as CalendarEvent[];
+  const updatedCalendarEvents = calendar.events;
   let allEventsAreUpdated = true;
   for (const eventToCheck of eventsToCheck) {
     // if at least one of the events that we need to check is not in the updated events

@@ -62,6 +62,8 @@ export interface HttpResponseOptions {
   body?: HttpResponsePayload;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
+  /** Bypass the default error formatting */
+  bypassErrorFormat?: boolean;
 }
 
 /**
@@ -79,6 +81,8 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
   body?: T;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
+  /** Bypass the default error formatting */
+  bypassErrorFormat?: boolean;
   statusCode: number;
 }
 
@@ -176,15 +180,6 @@ const errorResponseFactory = {
    */
   conflict: (options: ErrorHttpResponseOptions = {}) =>
     new KibanaResponse(409, options.body || 'Conflict', options),
-
-  // Server error
-  /**
-   * The server encountered an unexpected condition that prevented it from fulfilling the request.
-   * Status code: `500`.
-   * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
-   */
-  internalError: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(500, options.body || 'Internal Error', options),
 
   /**
    * Creates an error response with defined status code and payload.
@@ -312,7 +307,7 @@ export const kibanaResponseFactory = {
       );
     }
     const { statusCode: code, body, ...rest } = options;
-    return new KibanaResponse(code, body, rest);
+    return new KibanaResponse(code, body, { ...rest });
   },
 };
 

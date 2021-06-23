@@ -19,6 +19,7 @@ export const validateLogEntryDatasetsRequestPayloadRT = rt.type({
     timestampField: rt.string,
     startTime: rt.number,
     endTime: rt.number,
+    runtimeMappings: rt.UnknownRecord,
   }),
 });
 

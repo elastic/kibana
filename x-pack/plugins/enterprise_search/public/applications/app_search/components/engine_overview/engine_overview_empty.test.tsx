@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import '../../__mocks__/engine_logic.mock';
+
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -12,6 +14,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
 import { docLinks } from '../../../shared/doc_links';
+import { getPageTitle, getPageHeaderActions } from '../../../test_helpers';
 
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 
@@ -25,11 +28,13 @@ describe('EmptyEngineOverview', () => {
   });
 
   it('renders', () => {
-    expect(wrapper.find('h1').text()).toEqual('Engine setup');
+    expect(getPageTitle(wrapper)).toEqual('Engine setup');
   });
 
   it('renders a documentation link', () => {
-    expect(wrapper.find(EuiButton).prop('href')).toEqual(`${docLinks.appSearchBase}/index.html`);
+    expect(getPageHeaderActions(wrapper).find(EuiButton).prop('href')).toEqual(
+      `${docLinks.appSearchBase}/index.html`
+    );
   });
 
   it('renders document creation components', () => {

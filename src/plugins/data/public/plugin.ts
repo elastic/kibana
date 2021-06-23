@@ -16,7 +16,6 @@ import {
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  DataPublicPluginEnhancements,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -115,13 +114,13 @@ export class DataPublicPlugin
     );
 
     return {
-      autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
+      autocomplete: this.autocomplete.setup(core, {
+        timefilter: queryService.timefilter,
+        usageCollection,
+      }),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
-      __enhance: (enhancements: DataPublicPluginEnhancements) => {
-        searchService.__enhance(enhancements.search);
-      },
     };
   }
 
@@ -195,10 +194,7 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
-      trackUiMetric: this.usageCollection?.reportUiCounter.bind(
-        this.usageCollection,
-        'data_plugin'
-      ),
+      usageCollection: this.usageCollection,
     });
 
     return {

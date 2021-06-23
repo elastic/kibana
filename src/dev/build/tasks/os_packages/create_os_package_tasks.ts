@@ -49,6 +49,7 @@ export const CreateRpmPackage: Task = {
   },
 };
 
+const dockerBuildDate = new Date().toISOString();
 export const CreateDockerCentOS: Task = {
   description: 'Creating Docker CentOS image',
 
@@ -57,11 +58,13 @@ export const CreateDockerCentOS: Task = {
       architecture: 'x64',
       context: false,
       image: true,
+      dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
       context: false,
       image: true,
+      dockerBuildDate,
     });
   },
 };
@@ -76,6 +79,7 @@ export const CreateDockerUBI: Task = {
         context: false,
         ubi: true,
         image: true,
+        dockerBuildDate,
       });
     }
   },
@@ -88,6 +92,7 @@ export const CreateDockerContexts: Task = {
     await runDockerGenerator(config, log, build, {
       context: true,
       image: false,
+      dockerBuildDate,
     });
 
     if (!build.isOss()) {
@@ -95,11 +100,13 @@ export const CreateDockerContexts: Task = {
         ubi: true,
         context: true,
         image: false,
+        dockerBuildDate,
       });
       await runDockerGenerator(config, log, build, {
         ironbank: true,
         context: true,
         image: false,
+        dockerBuildDate,
       });
     }
   },

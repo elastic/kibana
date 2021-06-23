@@ -47,13 +47,13 @@ interface Range {
   display: string;
 }
 
-interface UpdateReduxTime extends OnTimeChangeProps {
+export interface UpdateReduxTime extends OnTimeChangeProps {
   id: InputsModelId;
   kql?: inputsModel.GlobalKqlQuery | undefined;
   timelineId?: string;
 }
 
-interface ReturnUpdateReduxTime {
+export interface ReturnUpdateReduxTime {
   kqlHaveBeenUpdated: boolean;
 }
 

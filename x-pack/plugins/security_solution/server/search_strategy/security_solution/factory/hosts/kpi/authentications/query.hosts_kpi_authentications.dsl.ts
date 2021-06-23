@@ -54,7 +54,7 @@ export const buildHostsKpiAuthenticationsQuery = ({
         authentication_success_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {
@@ -76,7 +76,7 @@ export const buildHostsKpiAuthenticationsQuery = ({
         authentication_failure_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {

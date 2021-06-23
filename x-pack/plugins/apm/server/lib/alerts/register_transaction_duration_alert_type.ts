@@ -6,29 +6,31 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
+import {
+  getEnvironmentLabel,
+  getEnvironmentEsField,
+} from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDurationFormatter } from '../../../common/utils/formatters';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-
-interface RegisterAlertParams {
-  alerts: AlertingPlugin['setup'];
-  config$: Observable<APMConfig>;
-}
+import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -47,10 +49,17 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
-  alerts,
+  alerting,
+  ruleDataClient,
   config$,
-}: RegisterAlertParams) {
-  alerts.registerType({
+  logger,
+}: RegisterRuleDependencies) {
+  const createLifecycleRuleType = createLifecycleRuleTypeFactory({
+    ruleDataClient,
+    logger,
+  });
+
+  const type = createLifecycleRuleType({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -77,12 +86,11 @@ export function registerTransactionDurationAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
-      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
-        size: 0,
         body: {
+          size: 0,
           query: {
             bool: {
               filter: [
@@ -93,15 +101,21 @@ export function registerTransactionDurationAlertType({
                     },
                   },
                 },
-                { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                {
+                  term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
+                },
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
-                { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
-                ...getEnvironmentUiFilterES(alertParams.environment),
-              ],
+                {
+                  term: {
+                    [TRANSACTION_TYPE]: alertParams.transactionType,
+                  },
+                },
+                ...environmentQuery(alertParams.environment),
+              ] as QueryDslQueryContainer[],
             },
           },
           aggs: {
-            agg:
+            latency:
               alertParams.aggregationType === 'avg'
                 ? { avg: { field: TRANSACTION_DURATION } }
                 : {
@@ -112,26 +126,23 @@ export function registerTransactionDurationAlertType({
                       ],
                     },
                   },
-            environments: {
-              terms: {
-                field: SERVICE_ENVIRONMENT,
-                size: maxServiceEnvironments,
-              },
-            },
           },
         },
       };
 
-      const response = await alertingEsClient(services, searchParams);
+      const response = await alertingEsClient({
+        scopedClusterClient: services.scopedClusterClient,
+        params: searchParams,
+      });
 
       if (!response.aggregations) {
-        return;
+        return {};
       }
 
-      const { agg, environments } = response.aggregations;
+      const { latency } = response.aggregations;
 
       const transactionDuration =
-        'values' in agg ? Object.values(agg.values)[0] : agg?.value;
+        'values' in latency ? Object.values(latency.values)[0] : latency?.value;
 
       const threshold = alertParams.threshold * 1000;
 
@@ -141,22 +152,33 @@ export function registerTransactionDurationAlertType({
           transactionDuration
         ).formatted;
 
-        environments.buckets.map((bucket) => {
-          const environment = bucket.key;
-          const alertInstance = services.alertInstanceFactory(
-            `${AlertType.TransactionDuration}_${environment}`
-          );
-
-          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+        services
+          .alertWithLifecycle({
+            id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
+              alertParams.environment
+            )}`,
+            fields: {
+              [SERVICE_NAME]: alertParams.serviceName,
+              ...getEnvironmentEsField(alertParams.environment),
+              [TRANSACTION_TYPE]: alertParams.transactionType,
+              [PROCESSOR_EVENT]: ProcessorEvent.transaction,
+              [ALERT_EVALUATION_VALUE]: transactionDuration,
+              [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold * 1000,
+            },
+          })
+          .scheduleActions(alertTypeConfig.defaultActionGroupId, {
             transactionType: alertParams.transactionType,
             serviceName: alertParams.serviceName,
-            environment,
+            environment: getEnvironmentLabel(alertParams.environment),
             threshold,
             triggerValue: transactionDurationFormatted,
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
           });
-        });
       }
+
+      return {};
     },
   });
+
+  alerting.registerType(type);
 }

@@ -87,7 +87,6 @@ export class ReportInfoButton extends Component<Props, State> {
 
     const attempts = info.attempts ? info.attempts.toString() : NA;
     const maxAttempts = info.max_attempts ? info.max_attempts.toString() : NA;
-    const priority = info.priority ? info.priority.toString() : NA;
     const timeout = info.timeout ? info.timeout.toString() : NA;
     const warnings = info.output && info.output.warnings ? info.output.warnings.join(',') : null;
 
@@ -152,10 +151,6 @@ export class ReportInfoButton extends Component<Props, State> {
       {
         title: 'Max Attempts',
         description: maxAttempts,
-      },
-      {
-        title: 'Priority',
-        description: priority,
       },
       {
         title: 'Timeout',

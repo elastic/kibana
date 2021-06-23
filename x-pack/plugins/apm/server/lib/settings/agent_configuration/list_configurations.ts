@@ -17,7 +17,11 @@ export async function listConfigurations({ setup }: { setup: Setup }) {
     size: 200,
   };
 
-  const resp = await internalClient.search<AgentConfiguration>(params);
+  const resp = await internalClient.search<AgentConfiguration>(
+    'list_agent_configuration',
+    params
+  );
+
   return resp.hits.hits
     .map(convertConfigSettingsToString)
     .map((hit) => hit._source);

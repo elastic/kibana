@@ -49,7 +49,7 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
           aggs={aggCount id="1" enabled=true schema="metric"}
         `;
@@ -63,7 +63,7 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
           timeFields='relatedContent.article:published_time'
           aggs={aggCount id="1" enabled=true schema="metric"}
@@ -78,7 +78,7 @@ export default function ({
           to: '2015-09-22T00:00:00Z',
         };
         const expression = `
-          kibana_context timeRange='${JSON.stringify(timeRange)}'
+          kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
           timeFields='relatedContent.article:published_time'
           timeFields='@timestamp'

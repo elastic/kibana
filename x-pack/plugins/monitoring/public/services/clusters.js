@@ -38,14 +38,18 @@ export function monitoringClustersProvider($injector) {
 
     async function getClusters() {
       try {
-        const response = await $http.post(url, {
-          ccs,
-          timeRange: {
-            min: min.toISOString(),
-            max: max.toISOString(),
+        const response = await $http.post(
+          url,
+          {
+            ccs,
+            timeRange: {
+              min: min.toISOString(),
+              max: max.toISOString(),
+            },
+            codePaths,
           },
-          codePaths,
-        });
+          { headers: { 'kbn-system-request': 'true' } }
+        );
         return formatClusters(response.data);
       } catch (err) {
         const Private = $injector.get('Private');

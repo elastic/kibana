@@ -11,27 +11,15 @@ import { coreMock } from '../../../core/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '../../index_pattern_field_editor/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
   IndexPatternManagementPlugin,
 } from './plugin';
+import { IndexPatternManagmentContext } from './types';
 
-const createSetupContract = (): IndexPatternManagementSetup => ({
-  creation: {
-    addCreationConfig: jest.fn(),
-  } as any,
-  list: {
-    addListConfig: jest.fn(),
-  } as any,
-  fieldFormatEditors: {
-    getAll: jest.fn(),
-    getById: jest.fn(),
-  } as any,
-  environment: {
-    update: jest.fn(),
-  },
-});
+const createSetupContract = (): IndexPatternManagementSetup => {};
 
 const createStartContract = (): IndexPatternManagementStart => ({
   creation: {
@@ -42,10 +30,6 @@ const createStartContract = (): IndexPatternManagementStart => ({
     getIndexPatternTags: jest.fn(),
     getFieldInfo: jest.fn(),
     areScriptedFieldsEnabled: jest.fn(),
-  } as any,
-  fieldFormatEditors: {
-    getAll: jest.fn(),
-    getById: jest.fn(),
   } as any,
 });
 
@@ -59,6 +43,7 @@ const createInstance = async () => {
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
+      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     });
 
   return {
@@ -69,36 +54,36 @@ const createInstance = async () => {
 };
 
 const docLinks = {
+  ELASTIC_WEBSITE_URL: 'htts://jestTest.elastic.co',
+  DOC_LINK_VERSION: 'jest',
   links: {
     indexPatterns: {},
     scriptedFields: {},
-  },
+    runtimeFields: {},
+  } as any,
 };
 
-const createIndexPatternManagmentContext = () => {
-  const {
-    chrome,
-    application,
-    savedObjects,
-    uiSettings,
-    notifications,
-    overlays,
-  } = coreMock.createStart();
+const createIndexPatternManagmentContext = (): {
+  [key in keyof IndexPatternManagmentContext]: any;
+} => {
+  const { chrome, application, uiSettings, notifications, overlays } = coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
+  const indexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
 
   return {
     chrome,
     application,
-    savedObjects,
     uiSettings,
     notifications,
     overlays,
     http,
     docLinks,
     data,
+    indexPatternFieldEditor,
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
+    fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
   };
 };
 

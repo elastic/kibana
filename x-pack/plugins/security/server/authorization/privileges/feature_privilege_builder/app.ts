@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FeatureKibanaPrivileges } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeAppBuilder extends BaseFeaturePrivilegeBuilder {

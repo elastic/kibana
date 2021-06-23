@@ -28,6 +28,7 @@ export interface Gauge extends ColorSchemaParams {
   gaugeType: GaugeType;
   labels: Labels;
   percentageMode: boolean;
+  percentageFormatPattern?: string;
   outline?: boolean;
   scale: {
     show: boolean;
@@ -118,6 +119,8 @@ export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
           '!moving_avg',
           '!cumulative_sum',
           '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

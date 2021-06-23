@@ -10,10 +10,10 @@ import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
+import { EuiIconProps } from '@elastic/eui';
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
@@ -68,8 +68,12 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
-  // Track UI Metrics
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+
+  placeholder?: string;
+  isClearable?: boolean;
+  iconType?: EuiIconProps['type'];
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -95,8 +99,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
-  public filterBarRef: Element | null = null;
-  public filterBarWrapperRef: Element | null = null;
 
   public static getDerivedStateFromProps(nextProps: SearchBarProps, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
@@ -207,19 +209,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
-  public setFilterBarHeight = () => {
-    requestAnimationFrame(() => {
-      const height =
-        this.filterBarRef && this.state.isFiltersVisible ? this.filterBarRef.clientHeight : 0;
-      if (this.filterBarWrapperRef) {
-        this.filterBarWrapperRef.setAttribute('style', `height: ${height}px`);
-      }
-    });
-  };
-
-  // member-ordering rules conflict with use-before-declaration rules
-  public ro = new ResizeObserver(this.setFilterBarHeight);
-
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
 
@@ -323,9 +312,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             },
           });
         }
-        if (this.props.trackUiMetric) {
-          this.props.trackUiMetric(METRIC_TYPE.CLICK, `${this.services.appName}:query_submitted`);
-        }
+        this.services.usageCollection?.reportUiCounter(
+          this.services.appName,
+          METRIC_TYPE.CLICK,
+          'query_submitted'
+        );
       }
     );
   };
@@ -344,20 +335,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.props.onSavedQueryUpdated(savedQuery);
     }
   };
-
-  public componentDidMount() {
-    if (this.filterBarRef) {
-      this.setFilterBarHeight();
-      this.ro.observe(this.filterBarRef);
-    }
-  }
-
-  public componentDidUpdate() {
-    if (this.filterBarRef) {
-      this.setFilterBarHeight();
-      this.ro.unobserve(this.filterBarRef);
-    }
-  }
 
   public render() {
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
@@ -399,6 +376,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           }
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          placeholder={this.props.placeholder}
+          isClearable={this.props.isClearable}
+          iconType={this.props.iconType}
+          nonKqlMode={this.props.nonKqlMode}
+          nonKqlModeHelpText={this.props.nonKqlModeHelpText}
         />
       );
     }
@@ -410,27 +392,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
       filterBar = (
-        <div
-          id="GlobalFilterGroup"
-          ref={(node) => {
-            this.filterBarWrapperRef = node;
-          }}
-          className={filterGroupClasses}
-        >
-          <div
-            ref={(node) => {
-              this.filterBarRef = node;
-            }}
-          >
-            <FilterBar
-              className="globalFilterGroup__filterBar"
-              filters={this.props.filters!}
-              onFiltersUpdated={this.props.onFiltersUpdated}
-              indexPatterns={this.props.indexPatterns!}
-              appName={this.services.appName}
-              trackUiMetric={this.props.trackUiMetric}
-            />
-          </div>
+        <div id="GlobalFilterGroup" className={filterGroupClasses}>
+          <FilterBar
+            className="globalFilterGroup__filterBar"
+            filters={this.props.filters!}
+            onFiltersUpdated={this.props.onFiltersUpdated}
+            indexPatterns={this.props.indexPatterns!}
+            appName={this.services.appName}
+          />
         </div>
       );
     }

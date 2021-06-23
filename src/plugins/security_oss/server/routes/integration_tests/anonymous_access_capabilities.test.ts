@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
-import { setupServer } from '../../../../../core/server/test_utils';
-import { AnonymousAccessService } from '../../plugin';
+
+import type { UnwrapPromise } from '@kbn/utility-types';
+import { setupServer } from 'src/core/server/test_utils';
+
+import type { AnonymousAccessService } from '../../plugin';
 import { setupAnonymousAccessCapabilitiesRoute } from '../anonymous_access_capabilities';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;

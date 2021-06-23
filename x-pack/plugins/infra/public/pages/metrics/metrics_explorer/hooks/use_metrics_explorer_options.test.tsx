@@ -68,7 +68,6 @@ describe('useMetricExplorerOptions', () => {
     expect(result.current.currentTimerange).toEqual(DEFAULT_TIMERANGE);
     expect(result.current.isAutoReloading).toEqual(false);
     expect(STORE.MetricsExplorerOptions).toEqual(JSON.stringify(DEFAULT_OPTIONS));
-    expect(STORE.MetricsExplorerTimeRange).toEqual(JSON.stringify(DEFAULT_TIMERANGE));
   });
 
   it('should change the store when options update', () => {
@@ -96,7 +95,6 @@ describe('useMetricExplorerOptions', () => {
     });
     rerender();
     expect(result.current.currentTimerange).toEqual(newTimeRange);
-    expect(STORE.MetricsExplorerTimeRange).toEqual(JSON.stringify(newTimeRange));
   });
 
   it('should load from store when available', () => {

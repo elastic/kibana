@@ -46,8 +46,8 @@ describe('preview_scripted_field route', () => {
 
     expect(mockClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "_source": undefined,
         "body": Object {
+          "_source": undefined,
           "query": Object {
             "match_all": Object {},
           },
@@ -59,10 +59,10 @@ describe('preview_scripted_field route', () => {
               },
             },
           },
+          "size": 10,
+          "timeout": "30s",
         },
         "index": "kibana_sample_data_logs",
-        "size": 10,
-        "timeout": "30s",
       }
     `);
 
@@ -102,12 +102,12 @@ describe('preview_scripted_field route', () => {
 
     expect(mockClient.search.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "_source": Array [
-          "a",
-          "b",
-          "c",
-        ],
         "body": Object {
+          "_source": Array [
+            "a",
+            "b",
+            "c",
+          ],
           "query": Object {
             "bool": Object {
               "some": "query",
@@ -121,10 +121,10 @@ describe('preview_scripted_field route', () => {
               },
             },
           },
+          "size": 10,
+          "timeout": "30s",
         },
         "index": "kibana_sample_data_logs",
-        "size": 10,
-        "timeout": "30s",
       }
     `);
   });

@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
-  MappingsDefinition,
+  Mappings,
 } from '../../../../../observability/server';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
@@ -31,15 +31,16 @@ export async function createApmAgentConfigurationIndex({
   });
 }
 
-const mappings: MappingsDefinition = {
+const mappings: Mappings = {
   dynamic: 'strict',
   dynamic_templates: [
     {
       // force string to keyword (instead of default of text + keyword)
+      // @ts-expect-error @elastic/elasticsearch expects here mapping: MappingPropertyBase
       strings: {
         match_mapping_type: 'string',
         mapping: {
-          type: 'keyword',
+          type: 'keyword' as const,
           ignore_above: 1024,
         },
       },

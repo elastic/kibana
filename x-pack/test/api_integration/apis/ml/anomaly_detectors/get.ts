@@ -52,13 +52,14 @@ export default ({ getService }: FtrProviderContext) => {
     ];
 
     for (const jobConfig of mockJobConfigs) {
+      // @ts-expect-error not full interface
       await ml.api.createAnomalyDetectionJob(jobConfig);
     }
   }
 
   describe('GET anomaly_detectors', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await createJobs();

@@ -40,7 +40,7 @@ export const LogRetentionCallout: React.FC<Props> = ({ type }) => {
   const hasLogRetention = logRetention !== null;
 
   useEffect(() => {
-    if (!hasLogRetention) fetchLogRetention();
+    if (!hasLogRetention && canManageLogSettings) fetchLogRetention();
   }, []);
 
   const logRetentionSettings = logRetention?.[type];
@@ -72,24 +72,22 @@ export const LogRetentionCallout: React.FC<Props> = ({ type }) => {
           )
         }
       >
-        {canManageLogSettings && (
-          <p>
-            <FormattedMessage
-              id="xpack.enterpriseSearch.appSearch.logRetention.callout.description.manageSettingsDetail"
-              defaultMessage="To manage analytics & logging, {visitSettingsLink}."
-              values={{
-                visitSettingsLink: (
-                  <EuiLinkTo to={SETTINGS_PATH}>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.appSearch.logRetention.callout.description.manageSettingsLinkText',
-                      { defaultMessage: 'visit your settings' }
-                    )}
-                  </EuiLinkTo>
-                ),
-              }}
-            />
-          </p>
-        )}
+        <p>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.logRetention.callout.description.manageSettingsDetail"
+            defaultMessage="To manage analytics & logging, {visitSettingsLink}."
+            values={{
+              visitSettingsLink: (
+                <EuiLinkTo to={SETTINGS_PATH}>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.logRetention.callout.description.manageSettingsLinkText',
+                    { defaultMessage: 'visit your settings' }
+                  )}
+                </EuiLinkTo>
+              ),
+            }}
+          />
+        </p>
       </EuiCallOut>
       <EuiSpacer />
     </>

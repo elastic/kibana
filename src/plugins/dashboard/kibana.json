@@ -11,10 +11,12 @@
     "share",
     "uiActions",
     "urlForwarding",
-    "presentationUtil"
+    "presentationUtil",
+    "visualizations"
   ],
   "optionalPlugins": [
     "home",
+    "spacesOss",
     "savedObjectsTaggingOss",
     "usageCollection"],
   "server": true,
@@ -22,6 +24,7 @@
   "requiredBundles": [
     "home",
     "kibanaReact",
-    "kibanaUtils"
+    "kibanaUtils",
+    "presentationUtil"
   ]
 }

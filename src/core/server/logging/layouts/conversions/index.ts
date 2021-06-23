@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { Conversion } from './type';
+export type { Conversion } from './type';
 
 export { LoggerConversion } from './logger';
 export { LevelConversion } from './level';

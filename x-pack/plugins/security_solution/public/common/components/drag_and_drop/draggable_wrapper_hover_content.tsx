@@ -12,14 +12,12 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
+
 import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 
-import { stopPropagationAndPreventDefault } from '../accessibility/helpers';
-import { TooltipWithKeyboardShortcut } from '../accessibility/tooltip_with_keyboard_shortcut';
 import { getAllFieldsByName } from '../../containers/source';
-import { useAddToTimeline } from '../../hooks/use_add_to_timeline';
 import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../lib/clipboard/clipboard';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { useKibana } from '../../lib/kibana';
@@ -28,11 +26,14 @@ import { StatefulTopN } from '../top_n';
 
 import { allowTopN } from './helpers';
 import * as i18n from './translations';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
+import { timelineSelectors } from '../../../timelines/store/timeline';
+import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
+import { TooltipWithKeyboardShortcut } from '../accessibility';
 
 export const AdditionalContent = styled.div`
   padding: 2px;
@@ -102,21 +103,25 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
   toggleTopN,
   value,
 }) => {
-  const { startDragToTimeline } = useAddToTimeline({ draggableId, fieldName: field });
   const kibana = useKibana();
+  const { timelines } = kibana.services;
+  const { startDragToTimeline } = timelines.getUseAddToTimeline()({
+    draggableId,
+    fieldName: field,
+  });
   const filterManagerBackup = useMemo(() => kibana.services.data.query.filterManager, [
     kibana.services.data.query.filterManager,
   ]);
-  const { getTimelineFilterManager } = useManageTimeline();
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { filterManager: activeFilterMananager } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? '')
+  );
   const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
   const filterManager = useMemo(
-    () =>
-      timelineId === TimelineId.active
-        ? getTimelineFilterManager(TimelineId.active)
-        : filterManagerBackup,
-    [timelineId, getTimelineFilterManager, filterManagerBackup]
+    () => (timelineId === TimelineId.active ? activeFilterMananager : filterManagerBackup),
+    [timelineId, activeFilterMananager, filterManagerBackup]
   );
 
   //  Regarding data from useManageTimeline:
@@ -134,7 +139,7 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
         )
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
-  const { browserFields, indexPattern, selectedPatterns } = useSourcererScope(activeScope);
+  const { browserFields, indexPattern } = useSourcererScope(activeScope);
   const handleStartDragToTimeline = useCallback(() => {
     startDragToTimeline();
     if (closePopOver != null) {
@@ -365,7 +370,6 @@ const DraggableWrapperHoverContentComponent: React.FC<Props> = ({
                   browserFields={browserFields}
                   field={field}
                   indexPattern={indexPattern}
-                  indexNames={selectedPatterns}
                   onFilterAdded={onFilterAdded}
                   timelineId={timelineId ?? undefined}
                   toggleTopN={toggleTopN}

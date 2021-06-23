@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const enableCorrelations = 'apm:enableCorrelations';
 export const enableServiceOverview = 'apm:enableServiceOverview';

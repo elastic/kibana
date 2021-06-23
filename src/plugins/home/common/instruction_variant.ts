@@ -23,6 +23,7 @@ export const INSTRUCTION_VARIANT = {
   JAVA: 'java',
   DOTNET: 'dotnet',
   LINUX: 'linux',
+  PHP: 'php',
 };
 
 const DISPLAY_MAP = {
@@ -42,6 +43,7 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.JAVA]: 'Java',
   [INSTRUCTION_VARIANT.DOTNET]: '.NET',
   [INSTRUCTION_VARIANT.LINUX]: 'Linux',
+  [INSTRUCTION_VARIANT.PHP]: 'PHP',
 };
 
 /**

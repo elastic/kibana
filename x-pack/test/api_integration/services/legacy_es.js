@@ -10,7 +10,6 @@ import { format as formatUrl } from 'url';
 import * as legacyElasticsearch from 'elasticsearch';
 
 import { elasticsearchJsPlugin as indexManagementEsClientPlugin } from '../../../plugins/index_management/server/client/elasticsearch';
-import { elasticsearchJsPlugin as snapshotRestoreEsClientPlugin } from '../../../plugins/snapshot_restore/server/client/elasticsearch_sr';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DEFAULT_API_VERSION } from '../../../../src/core/server/elasticsearch/elasticsearch_config';
 
@@ -21,6 +20,6 @@ export function LegacyEsProvider({ getService }) {
     apiVersion: DEFAULT_API_VERSION,
     host: formatUrl(config.get('servers.elasticsearch')),
     requestTimeout: config.get('timeouts.esRequestTimeout'),
-    plugins: [indexManagementEsClientPlugin, snapshotRestoreEsClientPlugin],
+    plugins: [indexManagementEsClientPlugin],
   });
 }

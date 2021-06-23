@@ -12,38 +12,50 @@ import { EuiCode } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
-  fieldValidators,
+  useFormData,
+  SelectField,
   ToggleField,
   UseField,
   Field,
 } from '../../../../../../shared_imports';
+import { hasTemplateSnippet } from '../../../utils';
 
 import { FieldsConfig, to, from } from './shared';
 
 import { FieldNameField } from './common_fields/field_name_field';
 
-const { emptyField } = fieldValidators;
-
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
+  // This is a required field, but we exclude validation because we accept empty values as ''
   value: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
       defaultMessage: 'Value',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText', {
-      defaultMessage: 'Value for the field.',
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText"
+        defaultMessage="Value for the field. A blank value will set {emptyString}."
+        values={{
+          emptyString: <EuiCode>{'""'}</EuiCode>,
+        }}
+      />
+    ),
+  },
+  mediaType: {
+    type: FIELD_TYPES.SELECT,
+    defaultValue: 'application/json',
+    serializer: from.undefinedIfValue('application/json'),
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.mediaTypeFieldLabel', {
+      defaultMessage: 'Media Type',
     }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueRequiredError', {
-            defaultMessage: 'A value is required.',
-          })
-        ),
-      },
-    ],
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.mediaTypeHelpText"
+        defaultMessage="Media type for encoding value."
+      />
+    ),
   },
   /* Optional fields config */
   override: {
@@ -93,6 +105,8 @@ const fieldsConfig: FieldsConfig = {
  * Disambiguate name from the Set data structure
  */
 export const SetProcessor: FunctionComponent = () => {
+  const [{ fields }] = useFormData({ watch: 'fields.value' });
+
   return (
     <>
       <FieldNameField
@@ -101,14 +115,56 @@ export const SetProcessor: FunctionComponent = () => {
         })}
       />
 
-      <UseField config={fieldsConfig.value} component={Field} path="fields.value" />
+      <UseField
+        config={fieldsConfig.value}
+        component={Field}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'valueFieldInput',
+          },
+        }}
+        path="fields.value"
+      />
 
-      <UseField config={fieldsConfig.override} component={ToggleField} path="fields.override" />
+      {hasTemplateSnippet(fields?.value) && (
+        <UseField
+          componentProps={{
+            euiFieldProps: {
+              'data-test-subj': 'mediaTypeSelectorField',
+              options: [
+                {
+                  value: 'application/json',
+                  text: 'application/json',
+                },
+                {
+                  value: 'text/plain',
+                  text: 'text/plain',
+                },
+                {
+                  value: 'application/x-www-form-urlencoded',
+                  text: 'application/x-www-form-urlencoded',
+                },
+              ],
+            },
+          }}
+          config={fieldsConfig.mediaType}
+          component={SelectField}
+          path="fields.media_type"
+        />
+      )}
+
+      <UseField
+        config={fieldsConfig.override}
+        component={ToggleField}
+        path="fields.override"
+        data-test-subj="overrideField"
+      />
 
       <UseField
         config={fieldsConfig.ignore_empty_value}
         component={ToggleField}
         path="fields.ignore_empty_value"
+        data-test-subj="ignoreEmptyField"
       />
     </>
   );

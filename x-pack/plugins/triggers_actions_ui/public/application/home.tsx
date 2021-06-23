@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { lazy, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -21,16 +21,20 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToAlerts } from './constants';
+import { Section, routeToConnectors, routeToRules } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
 
-import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
-import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+
+const ActionsConnectorsList = lazy(
+  () => import('./sections/actions_connectors_list/components/actions_connectors_list')
+);
+const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
 
 export interface MatchParams {
   section: Section;
@@ -56,9 +60,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }> = [];
 
   tabs.push({
-    id: 'alerts',
+    id: 'rules',
     name: (
-      <FormattedMessage id="xpack.triggersActionsUI.home.alertsTabTitle" defaultMessage="Alerts" />
+      <FormattedMessage id="xpack.triggersActionsUI.home.rulesTabTitle" defaultMessage="Rules" />
     ),
   });
 
@@ -86,26 +90,26 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
+      <EuiPageContent color="transparent">
         <EuiTitle size="m">
           <EuiFlexGroup>
             <EuiFlexItem>
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Alerts and Actions"
+                  defaultMessage="Rules and Connectors"
                 />
               </h1>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/managing-alerts-and-actions.html`}
+                href={docLinks.links.alerting.guide}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.home.alertsAndActionsDocsLinkText"
+                  id="xpack.triggersActionsUI.home.docsLinkText"
                   defaultMessage="Documentation"
                 />
               </EuiButtonEmpty>
@@ -117,7 +121,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           <p>
             <FormattedMessage
               id="xpack.triggersActionsUI.home.sectionDescription"
-              defaultMessage="Detect conditions using alerts, and take actions using connectors."
+              defaultMessage="Detect conditions using rules, and take actions using connectors."
             />
           </p>
         </EuiText>
@@ -137,32 +141,24 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
         <EuiSpacer size="s" />
 
-        <Switch>
-          {canShowActions && (
-            <Route
-              exact
-              path={routeToConnectors}
-              component={() => (
-                <HealthContextProvider>
-                  <HealthCheck waitForCheck={true}>
-                    <ActionsConnectorsList />
-                  </HealthCheck>
-                </HealthContextProvider>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <Switch>
+              {canShowActions && (
+                <Route
+                  exact
+                  path={routeToConnectors}
+                  component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
+                />
               )}
-            />
-          )}
-          <Route
-            exact
-            path={routeToAlerts}
-            component={() => (
-              <HealthContextProvider>
-                <HealthCheck inFlyout={true} waitForCheck={true}>
-                  <AlertsList />
-                </HealthCheck>
-              </HealthContextProvider>
-            )}
-          />
-        </Switch>
+              <Route
+                exact
+                path={routeToRules}
+                component={suspendedComponentWithProps(AlertsList, 'xl')}
+              />
+            </Switch>
+          </HealthCheck>
+        </HealthContextProvider>
       </EuiPageContent>
     </EuiPageBody>
   );

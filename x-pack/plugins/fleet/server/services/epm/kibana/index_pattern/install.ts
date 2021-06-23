@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
-import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
+import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import type { FieldSpec } from 'src/plugins/data/common';
+
+import { loadFieldsFromYaml } from '../../fields/field';
+import type { Fields, Field } from '../../fields/field';
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
-import { ArchivePackage, Installation, InstallSource, ValueOf } from '../../../../../common/types';
-import { RegistryPackage, DataType } from '../../../../types';
+import type {
+  ArchivePackage,
+  Installation,
+  InstallSource,
+  ValueOf,
+} from '../../../../../common/types';
+import { appContextService } from '../../../../services';
+import type { RegistryPackage, DataType } from '../../../../types';
 import { getInstallation, getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
 
 interface FieldFormatMap {
@@ -52,29 +60,29 @@ const typeMap: TypeMap = {
   constant_keyword: 'string',
 };
 
-export interface IndexPatternField {
-  name: string;
-  type?: string;
-  count: number;
-  scripted: boolean;
-  indexed: boolean;
-  analyzed: boolean;
-  searchable: boolean;
-  aggregatable: boolean;
-  doc_values: boolean;
-  enabled?: boolean;
-  script?: string;
-  lang?: string;
-  readFromDocValues: boolean;
-}
+const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 
 export const indexPatternTypes = Object.values(dataTypes);
-export async function installIndexPatterns(
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName?: string,
-  pkgVersion?: string,
-  installSource?: InstallSource
-) {
+export async function installIndexPatterns({
+  savedObjectsClient,
+  pkgName,
+  pkgVersion,
+  installSource,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  pkgName?: string;
+  pkgVersion?: string;
+  installSource?: InstallSource;
+}) {
+  const logger = appContextService.getLogger();
+
+  logger.debug(
+    `kicking off installation of index patterns for ${
+      pkgName && pkgVersion ? `${pkgName}-${pkgVersion}` : 'no specific package'
+    }`
+  );
+
   // get all user installed packages
   const installedPackagesRes = await getPackageSavedObjects(savedObjectsClient);
   const installedPackagesSavedObjects = installedPackagesRes.saved_objects.filter(
@@ -108,6 +116,7 @@ export async function installIndexPatterns(
       });
     }
   }
+
   // get each package's registry info
   const packagesToFetchPromise = packagesToFetch.map((pkg) =>
     getPackageFromSource({
@@ -118,27 +127,33 @@ export async function installIndexPatterns(
     })
   );
   const packages = await Promise.all(packagesToFetchPromise);
+
   // for each index pattern type, create an index pattern
-  indexPatternTypes.forEach(async (indexPatternType) => {
-    // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
-    if (!pkgName && installedPackagesSavedObjects.length === 0) {
-      try {
-        await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, `${indexPatternType}-*`);
-      } catch (err) {
-        // index pattern was probably deleted by the user already
+  return Promise.all(
+    indexPatternTypes.map(async (indexPatternType) => {
+      // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
+      if (!pkgName && installedPackagesSavedObjects.length === 0) {
+        try {
+          logger.debug(`deleting index pattern ${indexPatternType}-*`);
+          await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, `${indexPatternType}-*`);
+        } catch (err) {
+          // index pattern was probably deleted by the user already
+        }
+        return;
       }
-      return;
-    }
-    const packagesWithInfo = packages.map((pkg) => pkg.packageInfo);
-    // get all data stream fields from all installed packages
-    const fields = await getAllDataStreamFieldsByType(packagesWithInfo, indexPatternType);
-    const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
-    // create or overwrite the index pattern
-    await savedObjectsClient.create(INDEX_PATTERN_SAVED_OBJECT_TYPE, kibanaIndexPattern, {
-      id: `${indexPatternType}-*`,
-      overwrite: true,
-    });
-  });
+      const packagesWithInfo = packages.map((pkg) => pkg.packageInfo);
+      // get all data stream fields from all installed packages
+      const fields = await getAllDataStreamFieldsByType(packagesWithInfo, indexPatternType);
+      const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
+
+      // create or overwrite the index pattern
+      await savedObjectsClient.create(INDEX_PATTERN_SAVED_OBJECT_TYPE, kibanaIndexPattern, {
+        id: `${indexPatternType}-*`,
+        overwrite: true,
+      });
+      logger.debug(`created index pattern ${kibanaIndexPattern.title}`);
+    })
+  );
 }
 
 // loops through all given packages and returns an array
@@ -182,7 +197,7 @@ export const createIndexPattern = (indexPatternType: string, fields: Fields) => 
 // and also returns the fieldFormatMap
 export const createIndexPatternFields = (
   fields: Fields
-): { indexPatternFields: IndexPatternField[]; fieldFormatMap: FieldFormatMap } => {
+): { indexPatternFields: FieldSpec[]; fieldFormatMap: FieldFormatMap } => {
   const flattenedFields = flattenFields(fields);
   const fieldFormatMap = createFieldFormatMap(flattenedFields);
   const transformedFields = flattenedFields.map(transformField);
@@ -191,8 +206,8 @@ export const createIndexPatternFields = (
 };
 
 // merges fields that are duplicates with the existing taking precedence
-export const dedupeFields = (fields: IndexPatternField[]) => {
-  const uniqueObj = fields.reduce<{ [name: string]: IndexPatternField }>((acc, field) => {
+export const dedupeFields = (fields: FieldSpec[]) => {
+  const uniqueObj = fields.reduce<{ [name: string]: FieldSpec }>((acc, field) => {
     // if field doesn't exist yet
     if (!acc[field.name]) {
       acc[field.name] = field;
@@ -244,34 +259,20 @@ const getField = (fields: Fields, pathNames: string[]): Field | undefined => {
   return undefined;
 };
 
-export const transformField = (field: Field, i: number, fields: Fields): IndexPatternField => {
-  const newField: IndexPatternField = {
+export const transformField = (field: Field, i: number, fields: Fields): FieldSpec => {
+  const newField: FieldSpec = {
     name: field.name,
+    type: field.type && typeMap[field.type] ? typeMap[field.type] : 'string',
     count: field.count ?? 0,
     scripted: false,
     indexed: field.index ?? true,
-    analyzed: field.analyzed ?? false,
     searchable: field.searchable ?? true,
     aggregatable: field.aggregatable ?? true,
-    doc_values: field.doc_values ?? true,
     readFromDocValues: field.doc_values ?? true,
   };
 
-  // if type exists, check if it exists in the map
-  if (field.type) {
-    // if no type match type is not set (undefined)
-    if (typeMap[field.type]) {
-      newField.type = typeMap[field.type];
-    }
-    // if type isn't set, default to string
-  } else {
-    newField.type = 'string';
-  }
-
   if (newField.type === 'binary') {
     newField.aggregatable = false;
-    newField.analyzed = false;
-    newField.doc_values = field.doc_values ?? false;
     newField.readFromDocValues = field.doc_values ?? false;
     newField.indexed = false;
     newField.searchable = false;
@@ -279,11 +280,8 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
 
   if (field.type === 'object' && field.hasOwnProperty('enabled')) {
     const enabled = field.enabled ?? true;
-    newField.enabled = enabled;
     if (!enabled) {
       newField.aggregatable = false;
-      newField.analyzed = false;
-      newField.doc_values = false;
       newField.readFromDocValues = false;
       newField.indexed = false;
       newField.searchable = false;
@@ -298,7 +296,6 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     newField.scripted = true;
     newField.script = field.script;
     newField.lang = 'painless';
-    newField.doc_values = false;
     newField.readFromDocValues = false;
   }
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
-
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 import { mockOverviewValues } from './__mocks__';
+
 import { OverviewLogic } from './overview_logic';
 
 describe('OverviewLogic', () => {

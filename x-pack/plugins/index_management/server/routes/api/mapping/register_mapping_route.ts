@@ -21,10 +21,10 @@ function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string)
   };
 }
 
-export function registerMappingRoute({ router, license, lib }: RouteDependencies) {
+export function registerMappingRoute({ router, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/mapping/{indexName}'), validate: { params: paramsSchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { indexName } = req.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none',
@@ -46,8 +46,8 @@ export function registerMappingRoute({ router, license, lib }: RouteDependencies
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

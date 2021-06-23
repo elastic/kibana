@@ -152,16 +152,21 @@ interface EsError {
   reason: string;
   line?: number;
   col?: number;
+  script?: string;
 }
 
 /**
  * Returns an error message based on the root cause
  */
-function extractErrorMessage({ type, reason, line, col }: EsError): string {
+function extractErrorMessage({ type, reason, script, line, col }: EsError): string {
   let message = `[${type}] ${reason}`;
 
   if (line !== undefined && col !== undefined) {
     message += `, with line=${line} & col=${col}`;
+  }
+
+  if (script !== undefined) {
+    message += ` '${script}'`;
   }
 
   return message;

@@ -5,34 +5,32 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
-import { IUiSettingsClient } from 'kibana/public';
+import React, { FC, Fragment, useState, useEffect } from 'react';
 
 import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
-import { getIndexPatternsContract } from '../../util/index_utils';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
 
-// @ts-ignore
-import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
-
-export interface FileDataVisualizerPageProps {
-  kibanaConfig: IUiSettingsClient;
-}
-
-export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({ kibanaConfig }) => {
+export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
-  const indexPatterns = getIndexPatternsContract();
   const {
-    services: { docLinks },
+    services: { docLinks, dataVisualizer },
   } = useMlKibana();
-  const helpLink = docLinks.links.ml.guide;
+  const [FileDataVisualizer, setFileDataVisualizer] = useState<FC<{}> | null>(null);
+
+  useEffect(() => {
+    if (dataVisualizer !== undefined) {
+      const { getFileDataVisualizerComponent } = dataVisualizer;
+      getFileDataVisualizerComponent().then(setFileDataVisualizer);
+    }
+  }, []);
+
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
-      <HelpMenu docLink={helpLink} />
+      {FileDataVisualizer}
+      <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>
   );
 };

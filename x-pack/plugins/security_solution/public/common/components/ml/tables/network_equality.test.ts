@@ -8,7 +8,7 @@
 import { networkEquality } from './network_equality';
 import { AnomaliesNetworkTableProps } from '../types';
 import { NetworkType } from '../../../../network/store/model';
-import { FlowTarget } from '../../../../graphql/types';
+import { FlowTarget } from '../../../../../common/search_strategy';
 
 describe('network_equality', () => {
   test('it returns true if start and end date are equal', () => {

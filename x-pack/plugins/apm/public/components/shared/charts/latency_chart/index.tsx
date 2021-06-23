@@ -9,10 +9,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { RULE_ID } from '@kbn/rule-data-utils/target/technical_field_names';
+import { AlertType } from '../../../../../common/alert_types';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useTheme } from '../../../../hooks/use_theme';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
@@ -21,6 +25,7 @@ import {
 } from '../../../shared/charts/transaction_charts/helper';
 import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
 import * as urlHelpers from '../../../shared/Links/url_helpers';
+import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
 interface Props {
   height?: number;
@@ -32,10 +37,16 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: LatencyAggregationType.p99, text: '99th percentile' },
 ];
 
+function filterNil<T>(value: T | null | undefined): value is T {
+  return value != null;
+}
+
 export function LatencyChart({ height }: Props) {
   const history = useHistory();
+  const theme = useTheme();
+  const comparisonChartTheme = getComparisonChartTheme(theme);
   const { urlParams } = useUrlParams();
-  const { latencyAggregationType } = urlParams;
+  const { latencyAggregationType, comparisonEnabled } = urlParams;
   const license = useLicenseContext();
 
   const {
@@ -43,9 +54,21 @@ export function LatencyChart({ height }: Props) {
     latencyChartsStatus,
   } = useTransactionLatencyChartsFetcher();
 
-  const { latencyTimeseries, anomalyTimeseries, mlJobId } = latencyChartsData;
+  const {
+    currentPeriod,
+    previousPeriod,
+    anomalyTimeseries,
+    mlJobId,
+  } = latencyChartsData;
 
-  const latencyMaxY = getMaxY(latencyTimeseries);
+  const { alerts } = useApmServiceContext();
+
+  const timeseries = [
+    currentPeriod,
+    comparisonEnabled ? previousPeriod : undefined,
+  ].filter(filterNil);
+
+  const latencyMaxY = getMaxY(timeseries);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
 
   return (
@@ -99,9 +122,15 @@ export function LatencyChart({ height }: Props) {
           height={height}
           fetchStatus={latencyChartsStatus}
           id="latencyChart"
-          timeseries={latencyTimeseries}
+          customTheme={comparisonChartTheme}
+          timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
           anomalyTimeseries={anomalyTimeseries}
+          alerts={alerts.filter(
+            (alert) =>
+              alert[RULE_ID]?.[0] === AlertType.TransactionDuration ||
+              alert[RULE_ID]?.[0] === AlertType.TransactionDurationAnomaly
+          )}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

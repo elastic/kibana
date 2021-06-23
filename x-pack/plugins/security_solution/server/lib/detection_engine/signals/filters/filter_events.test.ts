@@ -14,7 +14,7 @@ import { FieldSet } from './types';
 
 describe('filterEvents', () => {
   let listClient = listMock.getListClient();
-  let events = [sampleDocWithSortId('123', '1.1.1.1')];
+  let events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,7 +27,7 @@ describe('filterEvents', () => {
         }))
       )
     );
-    events = [sampleDocWithSortId('123', '1.1.1.1')];
+    events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
   });
 
   afterEach(() => {
@@ -35,7 +35,7 @@ describe('filterEvents', () => {
   });
 
   test('it filters out the event if it is "included"', () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1')];
+    events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
     const fieldAndSetTuples: FieldSet[] = [
       {
         field: 'source.ip',
@@ -51,7 +51,7 @@ describe('filterEvents', () => {
   });
 
   test('it does not filter out the event if it is "excluded"', () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1')];
+    events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
     const fieldAndSetTuples: FieldSet[] = [
       {
         field: 'source.ip',
@@ -67,7 +67,7 @@ describe('filterEvents', () => {
   });
 
   test('it does NOT filter out the event if the field is not found', () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1')];
+    events = [sampleDocWithSortId('123', undefined, '1.1.1.1')];
     const fieldAndSetTuples: FieldSet[] = [
       {
         field: 'madeup.nonexistent', // field does not exist
@@ -83,7 +83,10 @@ describe('filterEvents', () => {
   });
 
   test('it does NOT filter out the event if it is in both an inclusion and exclusion list', () => {
-    events = [sampleDocWithSortId('123', '1.1.1.1'), sampleDocWithSortId('123', '2.2.2.2')];
+    events = [
+      sampleDocWithSortId('123', undefined, '1.1.1.1'),
+      sampleDocWithSortId('123', undefined, '2.2.2.2'),
+    ];
     const fieldAndSetTuples: FieldSet[] = [
       {
         field: 'source.ip',

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
+// @ts-expect-error
 import { Pager } from './pager';
 
 export function createPagerFactory() {

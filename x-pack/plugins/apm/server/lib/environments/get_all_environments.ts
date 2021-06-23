@@ -14,6 +14,10 @@ import {
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
+/**
+ * This is used for getting *all* environments, and does not filter by range.
+ * It's used in places where we get the list of all possible environments.
+ */
 export async function getAllEnvironments({
   serviceName,
   setup,
@@ -25,6 +29,10 @@ export async function getAllEnvironments({
   searchAggregatedTransactions: boolean;
   includeMissing?: boolean;
 }) {
+  const operationName = serviceName
+    ? 'get_all_environments_for_service'
+    : 'get_all_environments_for_all_services';
+
   const { apmEventClient, config } = setup;
   const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
@@ -66,7 +74,7 @@ export async function getAllEnvironments({
     },
   };
 
-  const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search(operationName, params);
 
   const environments =
     resp.aggregations?.environments.buckets.map(

@@ -8,16 +8,15 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import type { PersistedState } from '../../visualizations/public';
+import type { ExpressionRenderDefinition } from '../../expressions/public';
 
-import { XyVisType } from '../common';
-import { VisComponentType } from './vis_component';
-import { RenderValue, visName } from './xy_vis_fn';
+import type { XyVisType } from '../common';
+import type { VisComponentType } from './vis_component';
+import { RenderValue, visName } from './expression_functions/xy_vis_fn';
 
 // @ts-ignore
 const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));

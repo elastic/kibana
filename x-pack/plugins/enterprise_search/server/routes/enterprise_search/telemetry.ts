@@ -20,7 +20,7 @@ const productToTelemetryMap = {
   workplace_search: WS_TELEMETRY_NAME,
 };
 
-export function registerTelemetryRoute({ router, getSavedObjectsService, log }: RouteDependencies) {
+export function registerTelemetryRoute({ router, getSavedObjectsService }: RouteDependencies) {
   router.put(
     {
       path: '/api/enterprise_search/stats',
@@ -43,23 +43,16 @@ export function registerTelemetryRoute({ router, getSavedObjectsService, log }: 
     async (ctx, request, response) => {
       const { product, action, metric } = request.body;
 
-      try {
-        if (!getSavedObjectsService) throw new Error('Could not find Saved Objects service');
+      if (!getSavedObjectsService) throw new Error('Could not find Saved Objects service');
 
-        return response.ok({
-          body: await incrementUICounter({
-            id: productToTelemetryMap[product],
-            savedObjects: getSavedObjectsService(),
-            uiAction: `ui_${action}`,
-            metric,
-          }),
-        });
-      } catch (e) {
-        log.error(
-          `Enterprise Search UI telemetry error: ${e instanceof Error ? e.stack : e.toString()}`
-        );
-        return response.internalError({ body: 'Enterprise Search UI telemetry failed' });
-      }
+      return response.ok({
+        body: await incrementUICounter({
+          id: productToTelemetryMap[product],
+          savedObjects: getSavedObjectsService(),
+          uiAction: `ui_${action}`,
+          metric,
+        }),
+      });
     }
   );
 }

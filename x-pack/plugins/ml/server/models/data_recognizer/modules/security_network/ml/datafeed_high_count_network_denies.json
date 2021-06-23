@@ -1,0 +1,44 @@
+{
+  "job_id": "high_count_network_denies",
+  "indices": [
+    "logs-*",
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "network"
+          }
+        }
+      ],
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "event.outcome": {
+                    "query": "deny",
+                    "operator": "OR"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "event.type": {
+                    "query": "denied",
+                    "operator": "OR"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

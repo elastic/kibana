@@ -52,7 +52,7 @@ describe('xy_visualization', () => {
       };
     }
 
-    it('should show mixed xy chart when multilple series types', () => {
+    it('should show mixed xy chart when multiple series types', () => {
       const desc = xyVisualization.getDescription(mixedState('bar', 'line'));
 
       expect(desc.label).toEqual('Mixed XY');
@@ -62,7 +62,7 @@ describe('xy_visualization', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
       expect(desc.icon).toEqual(LensIconChartBar);
-      expect(desc.label).toEqual('Bar');
+      expect(desc.label).toEqual('Bar vertical');
     });
 
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
@@ -70,23 +70,23 @@ describe('xy_visualization', () => {
         mixedState('bar_horizontal', 'bar_horizontal_stacked')
       );
 
-      expect(desc.label).toEqual('Mixed H. bar');
+      expect(desc.label).toEqual('Mixed bar horizontal');
     });
 
     it('should show bar chart when bar only', () => {
       const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
 
-      expect(desc.label).toEqual('H. Bar');
+      expect(desc.label).toEqual('Bar horizontal');
     });
 
     it('should show the chart description if not mixed', () => {
       expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area');
       expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line');
       expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
-        'Stacked area'
+        'Area stacked'
       );
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
-        'H. Stacked bar'
+        'Bar horizontal stacked'
       );
     });
   });
@@ -332,7 +332,7 @@ describe('xy_visualization', () => {
       expect(options.map((o) => o.groupId)).toEqual(['x', 'y', 'breakdown']);
     });
 
-    it('should return the correct labels for the 3 dimensios', () => {
+    it('should return the correct labels for the 3 dimensions', () => {
       const options = xyVisualization.getConfiguration({
         state: exampleState(),
         frame,
@@ -345,7 +345,7 @@ describe('xy_visualization', () => {
       ]);
     });
 
-    it('should return the correct labels for the 3 dimensios for a horizontal chart', () => {
+    it('should return the correct labels for the 3 dimensions for a horizontal chart', () => {
       const initialState = exampleState();
       const state = {
         ...initialState,
@@ -481,12 +481,12 @@ describe('xy_visualization', () => {
 
       it('should query palette to fill in colors for other dimensions', () => {
         const palette = paletteServiceMock.get('default');
-        (palette.getColor as jest.Mock).mockClear();
+        (palette.getCategoricalColor as jest.Mock).mockClear();
         const accessorConfig = callConfigAndFindYConfig({}, 'c');
         expect(accessorConfig.triggerIcon).toEqual('color');
         // black is the color returned from the palette mock
         expect(accessorConfig.color).toEqual('black');
-        expect(palette.getColor).toHaveBeenCalledWith(
+        expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
             {
               name: 'c',
@@ -505,9 +505,9 @@ describe('xy_visualization', () => {
           label: 'Overwritten label',
         });
         const palette = paletteServiceMock.get('default');
-        (palette.getColor as jest.Mock).mockClear();
+        (palette.getCategoricalColor as jest.Mock).mockClear();
         callConfigAndFindYConfig({}, 'c');
-        expect(palette.getColor).toHaveBeenCalledWith(
+        expect(palette.getCategoricalColor).toHaveBeenCalledWith(
           [
             expect.objectContaining({
               name: 'Overwritten label',
@@ -526,7 +526,7 @@ describe('xy_visualization', () => {
           },
           'c'
         );
-        expect(palette.getColor).toHaveBeenCalled();
+        expect(palette.getCategoricalColor).toHaveBeenCalled();
       });
 
       it('should not show any indicator as long as there is no data', () => {
@@ -551,7 +551,7 @@ describe('xy_visualization', () => {
       it('should show current palette for break down by dimension', () => {
         const palette = paletteServiceMock.get('mock');
         const customColors = ['yellow', 'green'];
-        (palette.getColors as jest.Mock).mockReturnValue(customColors);
+        (palette.getCategoricalColors as jest.Mock).mockReturnValue(customColors);
         const breakdownConfig = callConfigForBreakdownConfigs({
           palette: { type: 'palette', name: 'mock', params: {} },
           splitAccessor: 'd',
@@ -570,9 +570,9 @@ describe('xy_visualization', () => {
         paletteGetter.mockReturnValue({
           id: 'default',
           title: '',
-          getColors: jest.fn(),
+          getCategoricalColors: jest.fn(),
           toExpression: jest.fn(),
-          getColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
+          getCategoricalColor: jest.fn().mockReturnValueOnce('blue').mockReturnValueOnce('green'),
         });
 
         const yConfigs = callConfigForYConfigs({});
@@ -587,139 +587,138 @@ describe('xy_visualization', () => {
   });
 
   describe('#getErrorMessages', () => {
+    let mockDatasource: ReturnType<typeof createMockDatasource>;
+    let frame: ReturnType<typeof createMockFramePublicAPI>;
+
+    beforeEach(() => {
+      frame = createMockFramePublicAPI();
+      mockDatasource = createMockDatasource('testDatasource');
+
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        label: 'MyOperation',
+      } as Operation);
+
+      frame.datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+      };
+    });
+
     it("should not return an error when there's only one dimension (X or Y)", () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+          ],
+        })
       ).not.toBeDefined();
     });
     it("should not return an error when there's only one dimension on multiple layers (same axis everywhere)", () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+          ],
+        })
       ).not.toBeDefined();
     });
     it('should not return an error when mixing different valid configurations in multiple layers', () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: ['a'],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: ['a'],
-                splitAccessor: 'a',
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['a'],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['a'],
+              splitAccessor: 'a',
+            },
+          ],
+        })
       ).not.toBeDefined();
     });
     it("should not return an error when there's only one splitAccessor dimension configured", () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+          ],
+        })
       ).not.toBeDefined();
 
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+          ],
+        })
       ).not.toBeDefined();
     });
     it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: [],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: ['a'],
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['a'],
+            },
+          ],
+        })
       ).toEqual([
         {
           shortMessage: 'Missing Vertical axis.',
@@ -729,34 +728,31 @@ describe('xy_visualization', () => {
     });
     it('should return an error with batched messages for the same error with multiple layers', () => {
       expect(
-        xyVisualization.getErrorMessages(
-          {
-            ...exampleState(),
-            layers: [
-              {
-                layerId: 'first',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: ['a'],
-              },
-              {
-                layerId: 'second',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-              {
-                layerId: 'third',
-                seriesType: 'area',
-                xAccessor: undefined,
-                accessors: [],
-                splitAccessor: 'a',
-              },
-            ],
-          },
-          createMockFramePublicAPI()
-        )
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['a'],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+            {
+              layerId: 'third',
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: [],
+              splitAccessor: 'a',
+            },
+          ],
+        })
       ).toEqual([
         {
           shortMessage: 'Missing Vertical axis.',
@@ -766,6 +762,39 @@ describe('xy_visualization', () => {
     });
     it("should return an error when some layers are complete but other layers aren't", () => {
       expect(
+        xyVisualization.getErrorMessages({
+          ...exampleState(),
+          layers: [
+            {
+              layerId: 'first',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: [],
+            },
+            {
+              layerId: 'second',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['a'],
+            },
+            {
+              layerId: 'third',
+              seriesType: 'area',
+              xAccessor: 'a',
+              accessors: ['a'],
+            },
+          ],
+        })
+      ).toEqual([
+        {
+          shortMessage: 'Missing Vertical axis.',
+          longMessage: 'Layer 1 requires a field for the Vertical axis.',
+        },
+      ]);
+    });
+
+    it('should return an error when accessor type is of the wrong type', () => {
+      expect(
         xyVisualization.getErrorMessages(
           {
             ...exampleState(),
@@ -773,29 +802,73 @@ describe('xy_visualization', () => {
               {
                 layerId: 'first',
                 seriesType: 'area',
+                splitAccessor: 'd',
                 xAccessor: 'a',
-                accessors: [],
+                accessors: ['b'], // just use a single accessor to avoid too much noise
+              },
+            ],
+          },
+          frame.datasourceLayers
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Wrong data type for Vertical axis.',
+          longMessage:
+            'The dimension MyOperation provided for the Vertical axis has the wrong data type. Expected number but have string',
+        },
+      ]);
+    });
+
+    it('should return an error if two incompatible xAccessors (multiple layers) are used', () => {
+      // current incompatibility is only for date and numeric histograms as xAccessors
+      const datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+        second: createMockDatasource('testDatasource').publicAPIMock,
+      };
+      datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
+        id === 'a'
+          ? (({
+              dataType: 'date',
+              scale: 'interval',
+            } as unknown) as Operation)
+          : null
+      );
+      datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
+        id === 'e'
+          ? (({
+              dataType: 'number',
+              scale: 'interval',
+            } as unknown) as Operation)
+          : null
+      );
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b'],
               },
               {
                 layerId: 'second',
                 seriesType: 'area',
-                xAccessor: 'a',
-                accessors: ['a'],
-              },
-              {
-                layerId: 'third',
-                seriesType: 'area',
-                xAccessor: 'a',
-                accessors: ['a'],
+                splitAccessor: 'd',
+                xAccessor: 'e',
+                accessors: ['b'],
               },
             ],
           },
-          createMockFramePublicAPI()
+          datasourceLayers
         )
       ).toEqual([
         {
-          shortMessage: 'Missing Vertical axis.',
-          longMessage: 'Layer 1 requires a field for the Vertical axis.',
+          shortMessage: 'Wrong data type for Horizontal axis.',
+          longMessage:
+            'Data type mismatch for the Horizontal axis. Cannot mix date and number interval types.',
         },
       ]);
     });
@@ -856,12 +929,17 @@ describe('xy_visualization', () => {
       );
       expect(warningMessages).toHaveLength(1);
       expect(warningMessages && warningMessages[0]).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <strong>
-            Label B
-          </strong>
-           contains array values. Your visualization may not render as expected.
-        </React.Fragment>
+        <FormattedMessage
+          defaultMessage="{label} contains array values. Your visualization may not render as expected."
+          id="xpack.lens.xyVisualization.arrayValues"
+          values={
+            Object {
+              "label": <strong>
+                Label B
+              </strong>,
+            }
+          }
+        />
       `);
     });
   });

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
 import { GetListItemByValueOptions } from '../items';
 import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE } from '../../../common/constants.mock';
 
 export const getListItemByValueOptionsMocks = (): GetListItemByValueOptions => ({
-  callCluster: getCallClusterMock(),
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   type: TYPE,

@@ -16,6 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
+  // @ts-expect-error not full interface
   const JOB_CONFIG: Job = {
     job_id: `fq_multi_1_ae`,
     description:
@@ -35,8 +36,9 @@ export default ({ getService }: FtrProviderContext) => {
     model_plot_config: { enabled: true },
   };
 
+  // @ts-expect-error not full interface
   const DATAFEED_CONFIG: Datafeed = {
-    datafeed_id: 'datafeed-fq_multi_1_se',
+    datafeed_id: 'datafeed-fq_multi_1_ae',
     indices: ['ft_farequote'],
     job_id: 'fq_multi_1_ae',
     query: { bool: { must: [{ match_all: {} }] } },
@@ -48,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GetAnomaliesTableData', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createMockJobs();
     });

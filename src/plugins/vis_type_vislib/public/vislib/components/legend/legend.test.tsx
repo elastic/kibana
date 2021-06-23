@@ -246,8 +246,8 @@ describe('VisLegend Component', () => {
       first.simulate('click');
 
       const popover = wrapper.find('.visColorPicker').first();
-      const firstColor = popover.find('.visColorPicker__valueDot').first();
-      firstColor.simulate('click');
+      const firstColor = popover.find('.visColorPicker__colorBtn input').first();
+      firstColor.simulate('change');
 
       const colors = mockState.get('vis.colors');
 

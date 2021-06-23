@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
@@ -29,9 +29,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${auditLogPlugin}`,
         '--xpack.security.audit.enabled=true',
-        '--xpack.security.audit.appender.kind=file',
-        `--xpack.security.audit.appender.path=${auditLogPath}`,
-        '--xpack.security.audit.appender.layout.kind=json',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
       ],
     },
   };

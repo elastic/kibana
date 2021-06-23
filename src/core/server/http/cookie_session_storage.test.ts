@@ -124,7 +124,9 @@ const cookieOptions = {
   path,
 };
 
-describe('Cookie based SessionStorage', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/89318
+// https://github.com/elastic/kibana/issues/89319
+describe.skip('Cookie based SessionStorage', () => {
   describe('#set()', () => {
     it('Should write to session storage & set cookies', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);

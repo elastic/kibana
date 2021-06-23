@@ -71,7 +71,6 @@ export class SimpleSavedObject<T = unknown> {
   public save(): Promise<SimpleSavedObject<T>> {
     if (this.id) {
       return this.client.update(this.type, this.id, this.attributes, {
-        migrationVersion: this.migrationVersion,
         references: this.references,
       });
     } else {

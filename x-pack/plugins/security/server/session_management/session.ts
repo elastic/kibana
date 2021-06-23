@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import type { Crypto } from '@elastic/node-crypto';
+import nodeCrypto from '@elastic/node-crypto';
+import { createHash, randomBytes } from 'crypto';
 import { promisify } from 'util';
-import { randomBytes, createHash } from 'crypto';
-import nodeCrypto, { Crypto } from '@elastic/node-crypto';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { KibanaRequest, Logger } from '../../../../../src/core/server';
+import type { KibanaRequest, Logger } from 'src/core/server';
+
 import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';
-import type { SessionIndex, SessionIndexValue } from './session_index';
 import type { SessionCookie } from './session_cookie';
+import type { SessionIndex, SessionIndexValue } from './session_index';
 
 /**
  * The shape of the value that represents user's session information.
@@ -77,6 +80,18 @@ export interface SessionValueContentToEncrypt {
 }
 
 /**
+ * Filter provided for the `Session.invalidate` method that determines which session values should
+ * be invalidated. It can have three possible types:
+ *   - `all` means that all existing active and inactive sessions should be invalidated.
+ *   - `current` means that session associated with the current request should be invalidated.
+ *   - `query` means that only sessions that match specified query should be invalidated.
+ */
+export type InvalidateSessionsFilter =
+  | { match: 'all' }
+  | { match: 'current' }
+  | { match: 'query'; query: { provider: { type: string; name?: string }; username?: string } };
+
+/**
  * The SIDs and AAD must be unpredictable to prevent guessing attacks, where an attacker is able to
  * guess or predict the ID of a valid session through statistical analysis techniques. That's why we
  * generate SIDs and AAD using a secure PRNG and current OWASP guidance suggests a minimum of 16
@@ -130,7 +145,7 @@ export class Session {
       (sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now)
     ) {
       sessionLogger.debug('Session has expired and will be invalidated.');
-      await this.clear(request);
+      await this.invalidate(request, { match: 'current' });
       return null;
     }
 
@@ -152,7 +167,7 @@ export class Session {
       sessionLogger.warn(
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
-      await this.clear(request);
+      await this.invalidate(request, { match: 'current' });
       return null;
     }
 
@@ -191,7 +206,7 @@ export class Session {
       ...publicSessionValue,
       ...sessionExpirationInfo,
       sid,
-      usernameHash: username && createHash('sha3-256').update(username).digest('hex'),
+      usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(JSON.stringify({ username, state }), aad),
     });
 
@@ -227,7 +242,7 @@ export class Session {
       ...sessionValue.metadata.index,
       ...publicSessionInfo,
       ...sessionExpirationInfo,
-      usernameHash: username && createHash('sha3-256').update(username).digest('hex'),
+      usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(
         JSON.stringify({ username, state }),
         sessionCookieValue.aad
@@ -355,24 +370,53 @@ export class Session {
   }
 
   /**
-   * Clears session value for the specified request.
-   * @param request Request instance to clear session value for.
+   * Invalidates sessions that match the specified filter.
+   * @param request Request instance initiated invalidation.
+   * @param filter Filter that narrows down the list of the sessions that should be invalidated.
    */
-  async clear(request: KibanaRequest) {
+  async invalidate(request: KibanaRequest, filter: InvalidateSessionsFilter) {
+    // We don't require request to have the associated session, but nevertheless we still want to
+    // log the SID if session is available.
     const sessionCookieValue = await this.options.sessionCookie.get(request);
-    if (!sessionCookieValue) {
-      return;
+    const sessionLogger = this.getLoggerForSID(sessionCookieValue?.sid);
+
+    // We clear session cookie only when the current session should be invalidated since it's the
+    // only case when this action is explicitly and unequivocally requested. This behavior doesn't
+    // introduce any risk since even if the current session has been affected the session cookie
+    // will be automatically invalidated as soon as client attempts to re-use it due to missing
+    // underlying session index value.
+    let invalidateIndexValueFilter;
+    if (filter.match === 'current') {
+      if (!sessionCookieValue) {
+        return;
+      }
+
+      sessionLogger.debug('Invalidating current session.');
+      await this.options.sessionCookie.clear(request);
+      invalidateIndexValueFilter = { match: 'sid' as 'sid', sid: sessionCookieValue.sid };
+    } else if (filter.match === 'all') {
+      sessionLogger.debug('Invalidating all sessions.');
+      invalidateIndexValueFilter = filter;
+    } else {
+      sessionLogger.debug(
+        `Invalidating sessions that match query: ${JSON.stringify(
+          filter.query.username ? { ...filter.query, username: '[REDACTED]' } : filter.query
+        )}.`
+      );
+      invalidateIndexValueFilter = filter.query.username
+        ? {
+            ...filter,
+            query: {
+              provider: filter.query.provider,
+              usernameHash: Session.getUsernameHash(filter.query.username),
+            },
+          }
+        : filter;
     }
 
-    const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
-    sessionLogger.debug('Invalidating session.');
-
-    await Promise.all([
-      this.options.sessionCookie.clear(request),
-      this.options.sessionIndex.clear(sessionCookieValue.sid),
-    ]);
-
-    sessionLogger.debug('Successfully invalidated session.');
+    const invalidatedCount = await this.options.sessionIndex.invalidate(invalidateIndexValueFilter);
+    sessionLogger.debug(`Successfully invalidated ${invalidatedCount} session(s).`);
+    return invalidatedCount;
   }
 
   private calculateExpiry(
@@ -411,9 +455,19 @@ export class Session {
 
   /**
    * Creates logger scoped to a specified session ID.
-   * @param sid Session ID to create logger for.
+   * @param [sid] Session ID to create logger for.
    */
-  private getLoggerForSID(sid: string) {
-    return this.options.logger.get(sid?.slice(-10));
+  private getLoggerForSID(sid?: string) {
+    return this.options.logger.get(sid?.slice(-10) ?? 'no_session');
+  }
+
+  /**
+   * Generates a sha3-256 hash for the specified `username`. The hash is intended to be stored in
+   * the session index to allow querying user specific sessions and don't expose the original
+   * `username` at the same time.
+   * @param username Username string to generate hash for.
+   */
+  private static getUsernameHash(username: string) {
+    return createHash('sha3-256').update(username).digest('hex');
   }
 }

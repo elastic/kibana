@@ -22,7 +22,7 @@ interface SourceOptionItemProps {
 export const SourceOptionItem: React.FC<SourceOptionItemProps> = ({ source }) => (
   <EuiFlexGroup gutterSize="xs" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false}>
-      <SourceIcon wrapped {...source} />
+      <SourceIcon {...source} size="l" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <TruncatedContent tooltipType="title" content={source.name} length={MAX_LENGTH} />

@@ -18,9 +18,13 @@ describe('fetch saga effect factory', () => {
   let fetchEffect;
 
   it('works with success workflow', () => {
-    const indexStatusResult = { indexExists: true, docCount: 2712532 };
+    const indexStatusResult = {
+      indexExists: true,
+      docCount: 2712532,
+      indices: 'heartbeat-*,synthetics-*',
+    };
     const fetchStatus = async (): Promise<StatesIndexStatus> => {
-      return { indexExists: true, docCount: 2712532 };
+      return { indexExists: true, docCount: 2712532, indices: 'heartbeat-*,synthetics-*' };
     };
     fetchEffect = fetchEffectFactory(
       fetchStatus,

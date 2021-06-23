@@ -6,17 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, Component } from 'react';
+import React, { Component, ReactElement } from 'react';
 
-import {
-  EuiGlobalToastList,
-  EuiGlobalToastListToast,
-  EuiPageContent,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiGlobalToastList, EuiGlobalToastListToast, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { DocLinksStart } from 'src/core/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
@@ -57,10 +52,11 @@ export class CreateIndexPatternWizard extends Component<
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
 
     const type = new URLSearchParams(props.location.search).get('type') || undefined;
+    const indexPattern = new URLSearchParams(props.location.search).get('name') || '';
 
     this.state = {
       step: 1,
-      indexPattern: '',
+      indexPattern,
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
@@ -226,9 +222,9 @@ export class CreateIndexPatternWizard extends Component<
       const initialQuery = new URLSearchParams(location.search).get('id') || undefined;
 
       return (
-        <EuiPageContent>
+        <>
           {header}
-          <EuiHorizontalRule />
+          <EuiSpacer size={'l'} />
           <StepIndexPattern
             allIndices={allIndices}
             initialQuery={indexPattern || initialQuery}
@@ -238,15 +234,15 @@ export class CreateIndexPatternWizard extends Component<
               this.state.indexPatternCreationType.getShowSystemIndices() && this.state.step === 1
             }
           />
-        </EuiPageContent>
+        </>
       );
     }
 
     if (step === 2) {
       return (
-        <EuiPageContent>
+        <>
           {header}
-          <EuiHorizontalRule />
+          <EuiSpacer size={'l'} />
           <StepTimeField
             indexPattern={indexPattern}
             goToPreviousStep={this.goToIndexPatternStep}
@@ -254,7 +250,7 @@ export class CreateIndexPatternWizard extends Component<
             indexPatternCreationType={this.state.indexPatternCreationType}
             selectedTimeField={this.state.selectedTimeField}
           />
-        </EuiPageContent>
+        </>
       );
     }
 

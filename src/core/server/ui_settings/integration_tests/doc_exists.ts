@@ -9,43 +9,42 @@
 import { getServices, chance } from './lib';
 
 export const docExistsSuite = (savedObjectsIndex: string) => () => {
-  async function setup(options: any = {}) {
+  async function setup(options: { initialSettings?: Record<string, any> } = {}) {
     const { initialSettings } = options;
 
-    const { kbnServer, uiSettings, callCluster } = getServices();
+    const { uiSettings, esClient, supertest } = getServices();
 
     // delete the kibana index to ensure we start fresh
-    await callCluster('deleteByQuery', {
+    await esClient.deleteByQuery({
       index: savedObjectsIndex,
+      conflicts: 'proceed',
       body: {
-        conflicts: 'proceed',
         query: { match_all: {} },
       },
+      refresh: true,
+      wait_for_completion: true,
     });
 
     if (initialSettings) {
       await uiSettings.setMany(initialSettings);
     }
 
-    return { kbnServer, uiSettings };
+    return { uiSettings, supertest };
   }
 
   describe('get route', () => {
     it('returns a 200 and includes userValues', async () => {
       const defaultIndex = chance.word({ length: 10 });
-      const { kbnServer } = await setup({
+
+      const { supertest } = await setup({
         initialSettings: {
           defaultIndex,
         },
       });
 
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'GET',
-        url: '/api/kibana/settings',
-      });
+      const { body } = await supertest('get', '/api/kibana/settings').expect(200);
 
-      expect(statusCode).toBe(200);
-      expect(result).toMatchObject({
+      expect(body).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),
@@ -64,20 +63,17 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
   describe('set route', () => {
     it('returns a 200 and all values including update', async () => {
-      const { kbnServer } = await setup();
+      const { supertest } = await setup();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'POST',
-        url: '/api/kibana/settings/defaultIndex',
-        payload: {
+
+      const { body } = await supertest('post', '/api/kibana/settings/defaultIndex')
+        .send({
           value: defaultIndex,
-        },
-      });
+        })
+        .expect(200);
 
-      expect(statusCode).toBe(200);
-
-      expect(result).toMatchObject({
+      expect(body).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),
@@ -94,18 +90,15 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
     });
 
     it('returns a 400 if trying to set overridden value', async () => {
-      const { kbnServer } = await setup();
+      const { supertest } = await setup();
 
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'POST',
-        url: '/api/kibana/settings/foo',
-        payload: {
+      const { body } = await supertest('delete', '/api/kibana/settings/foo')
+        .send({
           value: 'baz',
-        },
-      });
+        })
+        .expect(400);
 
-      expect(statusCode).toBe(400);
-      expect(result).toEqual({
+      expect(body).toEqual({
         error: 'Bad Request',
         message: 'Unable to update "foo" because it is overridden',
         statusCode: 400,
@@ -115,22 +108,18 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
   describe('setMany route', () => {
     it('returns a 200 and all values including updates', async () => {
-      const { kbnServer } = await setup();
+      const { supertest } = await setup();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'POST',
-        url: '/api/kibana/settings',
-        payload: {
+      const { body } = await supertest('post', '/api/kibana/settings')
+        .send({
           changes: {
             defaultIndex,
           },
-        },
-      });
+        })
+        .expect(200);
 
-      expect(statusCode).toBe(200);
-
-      expect(result).toMatchObject({
+      expect(body).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),
@@ -147,20 +136,17 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
     });
 
     it('returns a 400 if trying to set overridden value', async () => {
-      const { kbnServer } = await setup();
+      const { supertest } = await setup();
 
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'POST',
-        url: '/api/kibana/settings',
-        payload: {
+      const { body } = await supertest('post', '/api/kibana/settings')
+        .send({
           changes: {
             foo: 'baz',
           },
-        },
-      });
+        })
+        .expect(400);
 
-      expect(statusCode).toBe(400);
-      expect(result).toEqual({
+      expect(body).toEqual({
         error: 'Bad Request',
         message: 'Unable to update "foo" because it is overridden',
         statusCode: 400,
@@ -172,19 +158,15 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
     it('returns a 200 and deletes the setting', async () => {
       const defaultIndex = chance.word({ length: 10 });
 
-      const { kbnServer, uiSettings } = await setup({
+      const { uiSettings, supertest } = await setup({
         initialSettings: { defaultIndex },
       });
 
       expect(await uiSettings.get('defaultIndex')).toBe(defaultIndex);
 
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'DELETE',
-        url: '/api/kibana/settings/defaultIndex',
-      });
+      const { body } = await supertest('delete', '/api/kibana/settings/defaultIndex').expect(200);
 
-      expect(statusCode).toBe(200);
-      expect(result).toMatchObject({
+      expect(body).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),
@@ -197,15 +179,11 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       });
     });
     it('returns a 400 if deleting overridden value', async () => {
-      const { kbnServer } = await setup();
+      const { supertest } = await setup();
 
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'DELETE',
-        url: '/api/kibana/settings/foo',
-      });
+      const { body } = await supertest('delete', '/api/kibana/settings/foo').expect(400);
 
-      expect(statusCode).toBe(400);
-      expect(result).toEqual({
+      expect(body).toEqual({
         error: 'Bad Request',
         message: 'Unable to update "foo" because it is overridden',
         statusCode: 400,

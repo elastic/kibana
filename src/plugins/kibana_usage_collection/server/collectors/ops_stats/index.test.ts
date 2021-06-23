@@ -11,7 +11,7 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/usage_collection.mock';
+} from '../../../../usage_collection/server/mocks';
 
 import { registerOpsStatsCollector } from './';
 import { OpsMetrics } from '../../../../../core/server';

@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: This needs to be removed and properly typed
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { flow, get } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
@@ -117,28 +120,9 @@ const migrateSearchSortToNestedArray: SavedObjectMigrationFn<any, any> = (doc) =
   };
 };
 
-const migrateExistingSavedSearch: SavedObjectMigrationFn<any, any> = (doc) => {
-  if (!doc.attributes) {
-    return doc;
-  }
-  const pre712 = doc.attributes.pre712;
-  // pre712 already has a value
-  if (pre712 !== undefined) {
-    return doc;
-  }
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      pre712: true,
-    },
-  };
-};
-
 export const searchMigrations = {
   '6.7.2': flow(migrateMatchAllQuery),
   '7.0.0': flow(setNewReferences),
   '7.4.0': flow(migrateSearchSortToNestedArray),
   '7.9.3': flow(migrateMatchAllQuery),
-  '7.12.0': flow(migrateExistingSavedSearch),
 };

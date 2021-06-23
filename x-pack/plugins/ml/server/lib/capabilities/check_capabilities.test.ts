@@ -51,7 +51,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(28);
+      expect(count).toBe(30);
     });
   });
 
@@ -82,6 +82,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canGetAnnotations).toBe(true);
       expect(capabilities.canCreateAnnotation).toBe(true);
       expect(capabilities.canDeleteAnnotation).toBe(true);
+      expect(capabilities.canUseMlAlerts).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -102,6 +103,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteDataFrameAnalytics).toBe(false);
       expect(capabilities.canCreateDataFrameAnalytics).toBe(false);
       expect(capabilities.canStartStopDataFrameAnalytics).toBe(false);
+      expect(capabilities.canCreateMlAlerts).toBe(false);
     });
 
     test('full capabilities', async () => {

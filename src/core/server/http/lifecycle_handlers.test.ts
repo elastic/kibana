@@ -241,12 +241,15 @@ describe('customHeaders pre-response handler', () => {
     expect(toolkit.next).toHaveBeenCalledWith({ headers: { 'kbn-name': 'my-server-name' } });
   });
 
-  it('adds the custom headers defined in the configuration', () => {
+  it('adds the security headers and custom headers defined in the configuration', () => {
     const config = createConfig({
       name: 'my-server-name',
-      customResponseHeaders: {
+      securityResponseHeaders: {
         headerA: 'value-A',
-        headerB: 'value-B',
+        headerB: 'value-B', // will be overridden by the custom response header below
+      },
+      customResponseHeaders: {
+        headerB: 'x',
       },
     });
     const handler = createCustomHeadersPreResponseHandler(config as HttpConfig);
@@ -258,7 +261,7 @@ describe('customHeaders pre-response handler', () => {
       headers: {
         'kbn-name': 'my-server-name',
         headerA: 'value-A',
-        headerB: 'value-B',
+        headerB: 'x',
       },
     });
   });

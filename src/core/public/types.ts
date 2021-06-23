@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-export {
+export type {
   UiSettingsParams,
   PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
-  ImageValidation,
-  StringValidationRegex,
 } from '../../core/types';
 
 /**

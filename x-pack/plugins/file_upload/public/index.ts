@@ -11,7 +11,9 @@ export function plugin() {
   return new FileUploadPlugin();
 }
 
-export * from '../common';
+export * from './importer/types';
 
-export { StartContract } from './plugin';
-export { FileUploadComponentProps } from './get_file_upload_component';
+export { Props as IndexNameFormProps } from './components/geojson_upload_form/index_name_form';
+
+export { FileUploadPluginStart } from './plugin';
+export { FileUploadComponentProps, FileUploadGeoResults } from './lazy_load_bundle';

@@ -24,8 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('authentications', () => {
-    before(() => esArchiver.load('auditbeat/hosts'));
-    after(() => esArchiver.unload('auditbeat/hosts'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts'));
 
     it('Make sure that we get Authentication data', async () => {
       const { body: authentications } = await supertest
@@ -44,9 +44,10 @@ export default function ({ getService }: FtrProviderContext) {
             fakePossibleCount: 3,
             querySize: 1,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -72,9 +73,10 @@ export default function ({ getService }: FtrProviderContext) {
             fakePossibleCount: 5,
             querySize: 2,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 

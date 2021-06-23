@@ -14,9 +14,9 @@ Object {
   },
   "count": 1,
   "esTypes": Array [
-    "text",
+    "keyword",
   ],
-  "lang": "lang",
+  "lang": "java",
   "name": "name",
   "readFromDocValues": false,
   "script": "script",
@@ -49,7 +49,7 @@ Object {
   "count": 1,
   "customLabel": undefined,
   "esTypes": Array [
-    "text",
+    "keyword",
   ],
   "format": Object {
     "id": "number",
@@ -58,7 +58,7 @@ Object {
     },
   },
   "isMapped": undefined,
-  "lang": "lang",
+  "lang": "java",
   "name": "name",
   "readFromDocValues": false,
   "runtimeField": Object {

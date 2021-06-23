@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SavedObjectsClientContract } from 'src/core/server';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { ManifestClient } from './manifest_client';
+import { EndpointArtifactClientInterface } from './artifact_client';
+
+export const getManifestClientMock = (
+  savedObjectsClient?: SavedObjectsClientContract
+): ManifestClient => {
+  if (savedObjectsClient !== undefined) {
+    return new ManifestClient(savedObjectsClient, 'v1');
+  }
+  return new ManifestClient(savedObjectsClientMock.create(), 'v1');
+};
+
+export const createEndpointArtifactClientMock = (): jest.Mocked<EndpointArtifactClientInterface> => {
+  return {
+    createArtifact: jest.fn(),
+    getArtifact: jest.fn(),
+    deleteArtifact: jest.fn(),
+  };
+};

@@ -14,6 +14,7 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [
+      require.resolve('./apps/status_page'),
       require.resolve('./apps/bundles'),
       require.resolve('./apps/console'),
       require.resolve('./apps/context'),
@@ -23,7 +24,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
-      require.resolve('./apps/status_page'),
       require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
     ],
@@ -36,13 +36,20 @@ export default async function ({ readConfigFile }) {
       ...commonConfig.get('esTestCluster'),
       serverArgs: ['xpack.security.enabled=false'],
     },
+
     kbnTestServer: {
       ...commonConfig.get('kbnTestServer'),
       serverArgs: [
         ...commonConfig.get('kbnTestServer.serverArgs'),
-        '--oss',
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
+        '--xpack.maps.showMapVisualizationTypes=true',
+
+        // to be re-enabled once kibana/issues/102552 is completed
+        '--xpack.security.enabled=false',
+        '--monitoring.enabled=false',
+        '--xpack.reporting.enabled=false',
+        '--enterpriseSearch.enabled=false',
       ],
     },
 
@@ -94,6 +101,9 @@ export default async function ({ readConfigFile }) {
       home: {
         pathname: '/app/home',
         hash: '/',
+      },
+      observabilityCases: {
+        pathname: '/app/observability/cases',
       },
     },
     junit: {
@@ -169,6 +179,21 @@ export default async function ({ readConfigFile }) {
               {
                 names: ['kibana_sample*'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        kibana_sample_read: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['kibana_sample*'],
+                privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
             ],

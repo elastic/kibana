@@ -61,6 +61,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
       SavedObjectFinder={() => null}
+      showCreateNewMenu
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
@@ -112,6 +113,7 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
       SavedObjectFinder={(props) => <DummySavedObjectFinder {...props} />}
+      showCreateNewMenu
     />
   ) as ReactWrapper<any, {}, AddPanelFlyout>;
 

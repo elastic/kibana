@@ -85,6 +85,7 @@ export function mountWithIntl<T>(
     childContextTypes,
     ...props
   }: {
+    attachTo?: HTMLElement;
     context?: any;
     childContextTypes?: ValidationMap<any>;
   } = {}

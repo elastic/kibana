@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -66,10 +65,31 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
   const { jobs, hasLegacyJobs } = data;
 
   return (
-    <EuiPanel>
+    <>
+      <EuiText color="subdued">
+        <FormattedMessage
+          id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
+          defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
+          values={{
+            mlJobsLink: (
+              <MLManageJobsLink>
+                {i18n.translate(
+                  'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
+                  {
+                    defaultMessage: 'Machine Learning',
+                  }
+                )}
+              </MLManageJobsLink>
+            ),
+          }}
+        />
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiTitle>
+          <EuiTitle size="s">
             <h2>
               {i18n.translate(
                 'xpack.apm.settings.anomalyDetection.jobList.environments',
@@ -91,26 +111,9 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText"
-          defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
-          values={{
-            mlJobsLink: (
-              <MLManageJobsLink>
-                {i18n.translate(
-                  'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
-                  {
-                    defaultMessage: 'Machine Learning',
-                  }
-                )}
-              </MLManageJobsLink>
-            ),
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="l" />
+
+      <EuiSpacer size="m" />
+
       <ManagedTable
         noItemsMessage={getNoItemsMessage({ status })}
         columns={columns}
@@ -119,7 +122,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
       <EuiSpacer size="l" />
 
       {hasLegacyJobs && <LegacyJobsCallout />}
-    </EuiPanel>
+    </>
   );
 }
 

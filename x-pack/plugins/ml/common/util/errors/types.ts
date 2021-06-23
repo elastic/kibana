@@ -12,6 +12,7 @@ export interface EsErrorRootCause {
   type: string;
   reason: string;
   caused_by?: EsErrorRootCause;
+  script?: string;
 }
 
 export interface EsErrorBody {

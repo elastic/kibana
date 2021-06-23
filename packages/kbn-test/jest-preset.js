@@ -68,7 +68,7 @@ module.exports = {
   ],
 
   // The test environment that will be used for testing
-  testEnvironment: 'jest-environment-jsdom-thirteen',
+  testEnvironment: 'jest-environment-jsdom',
 
   // The glob patterns Jest uses to detect test files
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
@@ -94,7 +94,7 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|d3-interpolate|d3-color))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
   ],
 
@@ -107,4 +107,7 @@ module.exports = {
     '!**/*.d.ts',
     '!**/index.{js,ts}',
   ],
+
+  // A custom resolver to preserve symlinks by default
+  resolver: '<rootDir>/packages/kbn-test/target/jest/setup/preserve_symlinks_resolver.js',
 };

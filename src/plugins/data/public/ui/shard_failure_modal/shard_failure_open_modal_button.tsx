@@ -9,8 +9,8 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
+import type { estypes } from '@elastic/elasticsearch';
 
-import { SearchResponse } from 'elasticsearch';
 import { getOverlays } from '../../services';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
@@ -19,7 +19,7 @@ import { ShardFailureRequest } from './shard_failure_types';
 // @internal
 export interface ShardFailureOpenModalButtonProps {
   request: ShardFailureRequest;
-  response: SearchResponse<any>;
+  response: estypes.SearchResponse<any>;
   title: string;
 }
 

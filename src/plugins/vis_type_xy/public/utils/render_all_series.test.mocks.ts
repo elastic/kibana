@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { VisConfig } from '../types';
+import { AxisMode, VisConfig } from '../types';
 
 export const getVisConfig = (): VisConfig => {
   return {
@@ -98,7 +98,7 @@ export const getVisConfig = (): VisConfig => {
           },
         },
         groupId: 'ValueAxis-1',
-        title: 'Percentiles of products.base_price',
+        title: 'Avg of products.base_price',
         ticks: {
           show: true,
           rotation: 0,
@@ -109,7 +109,141 @@ export const getVisConfig = (): VisConfig => {
           show: false,
         },
         scale: {
-          mode: 'normal',
+          mode: AxisMode.Normal,
+          type: 'linear',
+        },
+        domain: {},
+        integersOnly: false,
+      },
+    ],
+    legend: {
+      show: true,
+      position: 'right',
+    },
+    rotation: 0,
+    thresholdLine: {
+      color: '#E7664C',
+      show: false,
+      value: 10,
+      width: 1,
+      groupId: 'ValueAxis-1',
+    },
+  };
+};
+
+export const getVisConfigMutipleYaxis = (): VisConfig => {
+  return {
+    markSizeRatio: 5.3999999999999995,
+    fittingFunction: 'linear',
+    detailedTooltip: true,
+    isTimeChart: true,
+    showCurrentTime: false,
+    showValueLabel: false,
+    enableHistogramMode: true,
+    tooltip: {
+      type: 'vertical',
+    },
+    aspects: {
+      x: {
+        accessor: 'col-0-2',
+        column: 0,
+        title: 'order_date per minute',
+        format: {
+          id: 'date',
+          params: {
+            pattern: 'HH:mm',
+          },
+        },
+        aggType: 'date_histogram',
+        aggId: '2',
+        params: {
+          date: true,
+          intervalESUnit: 'm',
+          intervalESValue: 1,
+          interval: 60000,
+          format: 'HH:mm',
+        },
+      },
+      y: [
+        {
+          accessor: 'col-1-3',
+          column: 1,
+          title: 'Average products.base_price',
+          format: {
+            id: 'number',
+          },
+          aggType: 'avg',
+          aggId: '3',
+          params: {},
+        },
+        {
+          accessor: 'col-1-2',
+          column: 1,
+          title: 'Average products.taxful_price',
+          format: {
+            id: 'number',
+          },
+          aggType: 'avg',
+          aggId: '33',
+          params: {},
+        },
+      ],
+    },
+    xAxis: {
+      id: 'CategoryAxis-1',
+      position: 'bottom',
+      show: true,
+      style: {
+        axisTitle: {
+          visible: true,
+        },
+        tickLabel: {
+          visible: true,
+          rotation: 0,
+        },
+      },
+      groupId: 'CategoryAxis-1',
+      title: 'order_date per minute',
+      ticks: {
+        show: true,
+        showOverlappingLabels: false,
+        showDuplicates: false,
+      },
+      grid: {
+        show: false,
+      },
+      scale: {
+        type: 'time',
+      },
+      integersOnly: false,
+    },
+    yAxes: [
+      {
+        id: 'ValueAxis-1',
+        position: 'left',
+        show: true,
+        style: {
+          axisTitle: {
+            visible: true,
+          },
+          tickLabel: {
+            visible: true,
+            rotation: 0,
+          },
+        },
+        groupId: 'ValueAxis-1',
+        title: 'Avg of products.base_price',
+        ticks: {
+          show: true,
+          rotation: 0,
+          showOverlappingLabels: true,
+          showDuplicates: true,
+        },
+        grid: {
+          show: false,
+        },
+        scale: {
+          mode: AxisMode.Normal,
           type: 'linear',
         },
         domain: {},
@@ -298,7 +432,7 @@ export const getVisConfigPercentiles = (): VisConfig => {
           show: false,
         },
         scale: {
-          mode: 'normal',
+          mode: AxisMode.Normal,
           type: 'linear',
         },
         domain: {},

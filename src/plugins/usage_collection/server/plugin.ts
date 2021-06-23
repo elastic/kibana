@@ -6,39 +6,133 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   PluginInitializerContext,
   Logger,
   CoreSetup,
   CoreStart,
   ISavedObjectsRepository,
   Plugin,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
 } from 'src/core/server';
-import { ConfigType } from './config';
-import { CollectorSet, CollectorSetPublic } from './collector';
+import type { ConfigType } from './config';
+import { CollectorSet } from './collector';
+import type { Collector, CollectorOptions, UsageCollectorOptions } from './collector';
 import { setupRoutes } from './routes';
 
-export type UsageCollectionSetup = CollectorSetPublic;
-export class UsageCollectionPlugin implements Plugin<CollectorSet> {
+import { UsageCountersService } from './usage_counters';
+import type { UsageCounter } from './usage_counters';
+
+/** Server's setup APIs exposed by the UsageCollection Service **/
+export interface UsageCollectionSetup {
+  /**
+   * Creates and registers a usage counter to collect daily aggregated plugin counter events
+   */
+  createUsageCounter: (type: string) => UsageCounter;
+  /**
+   * Returns a usage counter by type
+   */
+  getUsageCounterByType: (type: string) => UsageCounter | undefined;
+  /**
+   * Creates a usage collector to collect plugin telemetry data.
+   * registerCollector must be called to connect the created collector with the service.
+   */
+  makeUsageCollector: <
+    TFetchReturn,
+    WithKibanaRequest extends boolean = false,
+    ExtraOptions extends object = {}
+  >(
+    options: UsageCollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  ) => Collector<TFetchReturn, ExtraOptions>;
+  /**
+   * Register a usage collector or a stats collector.
+   * Used to connect the created collector to telemetry.
+   */
+  registerCollector: <TFetchReturn, ExtraOptions extends object>(
+    collector: Collector<TFetchReturn, ExtraOptions>
+  ) => void;
+  /**
+   * Returns a usage collector by type
+   */
+  getCollectorByType: <TFetchReturn, ExtraOptions extends object>(
+    type: string
+  ) => Collector<TFetchReturn, ExtraOptions> | undefined;
+  /**
+   * Returns if all the collectors are ready to fetch their reported usage.
+   * @internal: telemetry use
+   */
+  areAllCollectorsReady: () => Promise<boolean>;
+  /**
+   * Fetches the collection from all the registered collectors
+   * @internal: telemetry use
+   */
+  bulkFetch: <TFetchReturn, ExtraOptions extends object>(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
+    collectors?: Map<string, Collector<TFetchReturn, ExtraOptions>>
+  ) => Promise<Array<{ type: string; result: unknown }>>;
+  /**
+   * Converts an array of fetched stats results into key/object
+   * @internal: telemetry use
+   */
+  toObject: <Result extends Record<string, unknown>, T = unknown>(
+    statsData?: Array<{ type: string; result: T }>
+  ) => Result;
+  /**
+   * Rename fields to use API conventions
+   * @internal: monitoring use
+   */
+  toApiFieldNames: (
+    apiData: Record<string, unknown> | unknown[]
+  ) => Record<string, unknown> | unknown[];
+  /**
+   * Creates a stats collector to collect plugin telemetry data.
+   * registerCollector must be called to connect the created collector with the service.
+   * @internal: telemetry and monitoring use
+   */
+  makeStatsCollector: <
+    TFetchReturn,
+    WithKibanaRequest extends boolean,
+    ExtraOptions extends object = {}
+  >(
+    options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  ) => Collector<TFetchReturn, ExtraOptions>;
+}
+
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
+  private usageCountersService?: UsageCountersService;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup): UsageCollectionSetup {
     const config = this.initializerContext.config.get<ConfigType>();
 
     const collectorSet = new CollectorSet({
-      logger: this.logger.get('collector-set'),
+      logger: this.logger.get('usage-collection', 'collector-set'),
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
-    const globalConfig = this.initializerContext.config.legacy.get();
+    this.usageCountersService = new UsageCountersService({
+      logger: this.logger.get('usage-collection', 'usage-counters-service'),
+      retryCount: config.usageCounters.retryCount,
+      bufferDurationMs: config.usageCounters.bufferDuration.asMilliseconds(),
+    });
 
+    const { createUsageCounter, getUsageCounterByType } = this.usageCountersService.setup(core);
+
+    const uiCountersUsageCounter = createUsageCounter('uiCounter');
+    const globalConfig = this.initializerContext.config.legacy.get();
     const router = core.http.createRouter();
     setupRoutes({
       router,
+      uiCountersUsageCounter,
       getSavedObjects: () => this.savedObjects,
       collectorSet,
       config: {
@@ -52,15 +146,38 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
       overallStatus$: core.status.overall$,
     });
 
-    return collectorSet;
+    return {
+      areAllCollectorsReady: collectorSet.areAllCollectorsReady,
+      bulkFetch: collectorSet.bulkFetch,
+      getCollectorByType: collectorSet.getCollectorByType,
+      makeStatsCollector: collectorSet.makeStatsCollector,
+      makeUsageCollector: collectorSet.makeUsageCollector,
+      registerCollector: collectorSet.registerCollector,
+      toApiFieldNames: collectorSet.toApiFieldNames,
+      toObject: collectorSet.toObject,
+      createUsageCounter,
+      getUsageCounterByType,
+    };
   }
 
   public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
+    const config = this.initializerContext.config.get<ConfigType>();
+    if (!this.usageCountersService) {
+      throw new Error('plugin setup must be called first.');
+    }
+
     this.savedObjects = savedObjects.createInternalRepository();
+    if (config.usageCounters.enabled) {
+      this.usageCountersService.start({ savedObjects });
+    } else {
+      // call stop() to complete observers.
+      this.usageCountersService.stop();
+    }
   }
 
   public stop() {
     this.logger.debug('Stopping plugin');
+    this.usageCountersService?.stop();
   }
 }

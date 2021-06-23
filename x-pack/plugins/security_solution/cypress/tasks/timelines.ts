@@ -20,12 +20,10 @@ export const exportTimeline = (timelineId: string) => {
 };
 
 export const openTimeline = (id: string) => {
-  // This temporary wait here is to reduce flakeyness until we integrate cypress-pipe. Then please let us use cypress pipe.
-  // Ref: https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
-  // Ref: https://github.com/NicholasBoll/cypress-pipe#readme
-  cy.get(TIMELINE(id)).should('be.visible').wait(1500).click();
+  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+  cy.get(TIMELINE(id)).should('be.visible').pipe(click);
 };
 
-export const waitForTimelinesPanelToBeLoaded = () => {
-  cy.get(TIMELINES_TABLE).should('exist');
+export const waitForTimelinesPanelToBeLoaded = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+  return cy.get(TIMELINES_TABLE).should('exist');
 };

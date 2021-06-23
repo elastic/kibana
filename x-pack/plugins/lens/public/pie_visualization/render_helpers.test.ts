@@ -66,7 +66,16 @@ describe('render helpers', () => {
       };
       expect(
         getFilterContext(
-          [{ groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 }],
+          [
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+          ],
           ['a'],
           table
         )
@@ -98,7 +107,16 @@ describe('render helpers', () => {
       };
       expect(
         getFilterContext(
-          [{ groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 }],
+          [
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+          ],
           ['a', 'b'],
           table
         )
@@ -131,8 +149,22 @@ describe('render helpers', () => {
       expect(
         getFilterContext(
           [
-            { groupByRollup: 'Test', value: 100, depth: 1, path: [], sortIndex: 1 },
-            { groupByRollup: 'Two', value: 5, depth: 1, path: [], sortIndex: 1 },
+            {
+              groupByRollup: 'Test',
+              value: 100,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
+            {
+              groupByRollup: 'Two',
+              value: 5,
+              depth: 1,
+              path: [],
+              sortIndex: 1,
+              smAccessorValue: '',
+            },
           ],
           ['a', 'b'],
           table

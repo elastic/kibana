@@ -7,7 +7,7 @@
 
 import { ThreadPoolRejectionsAlertBase } from './thread_pool_rejections_alert_base';
 import { ALERT_THREAD_POOL_WRITE_REJECTIONS, ALERT_DETAILS } from '../../common/constants';
-import { Alert } from '../../../alerts/common';
+import { Alert } from '../../../alerting/common';
 
 export class ThreadPoolWriteRejectionsAlert extends ThreadPoolRejectionsAlertBase {
   private static TYPE = ALERT_THREAD_POOL_WRITE_REJECTIONS;

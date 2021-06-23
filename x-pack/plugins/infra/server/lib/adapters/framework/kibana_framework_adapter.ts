@@ -6,8 +6,15 @@
  */
 
 import {
+  IndicesExistsAlias,
+  IndicesGet,
+  MlGetBuckets,
+} from '@elastic/elasticsearch/api/requestParams';
+import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import { estypes } from '@elastic/elasticsearch';
+import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import {
   InfraRouteConfig,
-  InfraTSVBResponse,
   InfraServerPluginSetupDeps,
   CallWithRequestParams,
   InfraDatabaseSearchResponse,
@@ -26,15 +33,23 @@ import {
 import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
+import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_type_timeseries/server';
+import { InfraServerPluginStartDeps } from './adapter_types';
 
 export class KibanaFramework {
   public router: IRouter<InfraPluginRequestHandlerContext>;
   public plugins: InfraServerPluginSetupDeps;
+  private core: CoreSetup<InfraServerPluginStartDeps>;
 
-  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginSetupDeps) {
+  constructor(
+    core: CoreSetup<InfraServerPluginStartDeps>,
+    config: InfraConfig,
+    plugins: InfraServerPluginSetupDeps
+  ) {
     this.router = core.http.createRouter();
     this.plugins = plugins;
+    this.core = core;
   }
 
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
@@ -134,16 +149,85 @@ export class KibanaFramework {
         }
       : {};
 
-    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, {
-      ...params,
-      ...frozenIndicesParams,
-    });
+    let apiResult;
+    switch (endpoint) {
+      case 'search':
+        apiResult = elasticsearch.client.asCurrentUser.search({
+          ...params,
+          ...frozenIndicesParams,
+        });
+        break;
+      case 'msearch':
+        apiResult = elasticsearch.client.asCurrentUser.msearch({
+          ...params,
+          ...frozenIndicesParams,
+        } as estypes.MsearchRequest);
+        break;
+      case 'fieldCaps':
+        apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
+          ...params,
+          ...frozenIndicesParams,
+        });
+        break;
+      case 'indices.existsAlias':
+        apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({
+          ...params,
+          ...frozenIndicesParams,
+        } as IndicesExistsAlias);
+        break;
+      case 'indices.getAlias':
+        apiResult = elasticsearch.client.asCurrentUser.indices.getAlias({
+          ...params,
+          ...frozenIndicesParams,
+        });
+        break;
+      case 'indices.get':
+        apiResult = elasticsearch.client.asCurrentUser.indices.get({
+          ...params,
+          ...frozenIndicesParams,
+        } as IndicesGet);
+        break;
+      case 'transport.request':
+        apiResult = elasticsearch.client.asCurrentUser.transport.request({
+          ...params,
+          ...frozenIndicesParams,
+        } as TransportRequestParams);
+        break;
+      case 'ml.getBuckets':
+        apiResult = elasticsearch.client.asCurrentUser.ml.getBuckets({
+          ...params,
+          ...frozenIndicesParams,
+        } as MlGetBuckets<any>);
+        break;
+    }
+    return apiResult ? (await apiResult).body : undefined;
   }
 
-  public getIndexPatternsService(
+  public async getIndexPatternsServiceWithRequestContext(
     requestContext: InfraPluginRequestHandlerContext
-  ): IndexPatternsFetcher {
-    return new IndexPatternsFetcher(requestContext.core.elasticsearch.client.asCurrentUser, true);
+  ) {
+    return await this.createIndexPatternsService(
+      requestContext.core.savedObjects.client,
+      requestContext.core.elasticsearch.client.asCurrentUser
+    );
+  }
+
+  public async getIndexPatternsService(
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
+  ) {
+    return await this.createIndexPatternsService(savedObjectsClient, elasticsearchClient);
+  }
+
+  private async createIndexPatternsService(
+    savedObjectsClient: SavedObjectsClientContract,
+    elasticsearchClient: ElasticsearchClient
+  ) {
+    const [, startPlugins] = await this.core.getStartServices();
+    return startPlugins.data.indexPatterns.indexPatternsServiceFactory(
+      savedObjectsClient,
+      elasticsearchClient
+    );
   }
 
   public getSpaceId(request: KibanaRequest): string {
@@ -166,7 +250,7 @@ export class KibanaFramework {
     model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: any[]
-  ): Promise<InfraTSVBResponse> {
+  ): Promise<TimeseriesVisData> {
     const { getVisData } = this.plugins.visTypeTimeseries;
     if (typeof getVisData !== 'function') {
       throw new Error('TSVB is not available');

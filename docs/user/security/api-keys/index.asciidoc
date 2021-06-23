@@ -4,7 +4,7 @@
 
 
 API keys enable you to create secondary credentials so that you can send
-requests on behalf of the user. Secondary credentials have
+requests on behalf of a user. Secondary credentials have
 the same or lower access rights.
 
 For example, if you extract data from an {es} cluster on a daily
@@ -14,8 +14,7 @@ and then put the API credentials into a cron job.
 Or, you might create API keys to automate ingestion of new data from
 remote sources, without a live user interaction.
 
-You can create API keys from the {kib} Console. To view and invalidate 
-API keys, open the main menu, then click *Stack Management > API Keys*.
+To manage API keys, open the main menu, then click *Stack Management > API Keys*.
 
 [role="screenshot"]
 image:user/security/api-keys/images/api-keys.png["API Keys UI"]
@@ -46,37 +45,15 @@ cluster privileges to use API keys in {kib}. To manage roles, open the main menu
 [float]
 [[create-api-key]]
 === Create an API key
-You can {ref}/security-api-create-api-key.html[create an API key] from
-the {kib} Console. This example shows how to create an API key
-to authenticate to a <<api, Kibana API>>.
 
-[source,js]
-POST /_security/api_key
-{
-  "name": "kibana_api_key"
-}
+To create an API key, open the main menu, then click *Stack Management > API Keys > Create API key*.
 
-This creates an API key with the
-name `kibana_api_key`. API key
-names must be globally unique.
-An expiration date is optional and follows
-{ref}/common-options.html#time-units[{es} time unit format].
-When an expiration is not provided, the API key does not expire.
+[role="screenshot"]
+image:user/security/api-keys/images/create-api-key.png["Create API Key UI"]
 
-The response should look something like this:
+Once created, you can copy the API key (Base64 encoded) and use it to send requests to {es} on your behalf. For example:
 
-[source,js]
-{
-  "id" : "XFcbCnIBnbwqt2o79G4q",
-  "name" : "kibana_api_key",
-  "api_key" : "FD6P5UA4QCWlZZQhYF3YGw"
-}
-
-Now, you can use the API key to request {kib} roles. You'll need to send a request with a 
-`Authorization` header with a value having the prefix `ApiKey` followed by the credentials, 
-where credentials is the base64 encoding of `id` and `api_key` joined by a colon. For example:
-
-[source,js]
+[source,bash]
 curl --location --request GET 'http://localhost:5601/api/security/role' \
 --header 'Content-Type: application/json;charset=UTF-8' \
 --header 'kbn-xsrf: true' \
@@ -84,20 +61,16 @@ curl --location --request GET 'http://localhost:5601/api/security/role' \
 
 [float]
 [[view-api-keys]]
-=== View and invalidate API keys
-The *API Keys* feature in Kibana lists your API keys, including the name, date created,
-and expiration date. If an API key expires, its status changes from `Active` to `Expired`.
+=== View and delete API keys
+
+The *API Keys* feature in Kibana lists your API keys, including the name, date created, and status. If an API key expires, its status changes from `Active` to `Expired`.
 
 If you have `manage_security` or `manage_api_key` permissions,
 you can view the API keys of all users, and see which API key was
 created by which user in which realm.
 If you have only the `manage_own_api_key` permission, you see only a list of your own keys.
 
-You can invalidate API keys individually or in bulk.
-Invalidated keys are deleted in batch after seven days.
-
-[role="screenshot"]
-image:user/security/api-keys/images/api-key-invalidate.png["API Keys invalidate"]
+You can delete API keys individually or in bulk.
 
 You cannot modify an API key. If you need additional privileges,
 you must create a new key with the desired configuration and invalidate the old key.

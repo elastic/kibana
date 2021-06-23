@@ -6,9 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 import { Annotation } from '../../../../plugins/observability/common/annotations';
-import { ESSearchHit } from '../../../../typings/elasticsearch';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
@@ -153,6 +152,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           track_total_hits: true,
         });
 
+        // @ts-expect-error doesn't handle number
         expect(search.body.hits.total.value).to.be(1);
 
         expect(search.body.hits.hits[0]._source).to.eql(response.body._source);
@@ -236,16 +236,15 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           },
         });
 
-        const initialSearch = await es.search({
+        const initialSearch = await es.search<Annotation>({
           index: DEFAULT_INDEX_NAME,
           track_total_hits: true,
         });
 
+        // @ts-expect-error doesn't handler number
         expect(initialSearch.body.hits.total.value).to.be(2);
 
-        const [id1, id2] = initialSearch.body.hits.hits.map(
-          (hit: ESSearchHit<Annotation>) => hit._id
-        );
+        const [id1, id2] = initialSearch.body.hits.hits.map((hit) => hit._id);
 
         expect(
           (
@@ -261,6 +260,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           track_total_hits: true,
         });
 
+        // @ts-expect-error doesn't handler number
         expect(searchAfterFirstDelete.body.hits.total.value).to.be(1);
 
         expect(searchAfterFirstDelete.body.hits.hits[0]._id).to.be(id2);
@@ -279,6 +279,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
           track_total_hits: true,
         });
 
+        // @ts-expect-error doesn't handle number
         expect(searchAfterSecondDelete.body.hits.total.value).to.be(0);
       });
     });

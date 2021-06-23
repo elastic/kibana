@@ -30,6 +30,7 @@ import { TRANSFORM_STATE } from '../../../../../../common/constants';
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 const STATE_COLOR = {
   aborting: 'warning',
   failed: 'danger',
@@ -37,6 +38,7 @@ const STATE_COLOR = {
   started: 'primary',
   stopped: 'hollow',
   stopping: 'hollow',
+  waiting: 'hollow',
 } as const;
 
 export const getTaskStateBadge = (
@@ -65,9 +67,13 @@ export const getTaskStateBadge = (
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
+  transformNodes: number,
   transformSelection: TransformListRow[]
 ) => {
-  const { actions, modals } = useActions({ forceDisable: transformSelection.length > 0 });
+  const { actions, modals } = useActions({
+    forceDisable: transformSelection.length > 0,
+    transformNodes,
+  });
 
   function toggleDetails(item: TransformListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -198,13 +204,15 @@ export const useColumns = (
             {!isBatchTransform && (
               <Fragment>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
-                  {/* If not stopped or failed show the animated progress bar */}
+                  {/* If not stopped, failed or waiting show the animated progress bar */}
                   {item.stats.state !== TRANSFORM_STATE.STOPPED &&
+                    item.stats.state !== TRANSFORM_STATE.WAITING &&
                     item.stats.state !== TRANSFORM_STATE.FAILED && (
                       <EuiProgress color="primary" size="m" />
                     )}
-                  {/* If stopped or failed show an empty (0%) progress bar */}
+                  {/* If stopped, failed or waiting show an empty (0%) progress bar */}
                   {(item.stats.state === TRANSFORM_STATE.STOPPED ||
+                    item.stats.state === TRANSFORM_STATE.WAITING ||
                     item.stats.state === TRANSFORM_STATE.FAILED) && (
                     <EuiProgress value={0} max={100} color="primary" size="m" />
                   )}

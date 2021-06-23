@@ -9,10 +9,12 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
+import { CursorIcon } from '../../../icons';
+
 import {
   ENGINE_ANALYTICS_TOP_QUERIES_PATH,
   ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH,
@@ -20,6 +22,7 @@ import {
   ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH,
   ENGINE_ANALYTICS_RECENT_QUERIES_PATH,
 } from '../../../routes';
+import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
 import { AnalyticsLayout } from '../analytics_layout';
@@ -36,6 +39,8 @@ import {
   RECENT_QUERIES,
 } from '../constants';
 import { AnalyticsLogic, AnalyticsCards, AnalyticsChart, convertToChartData } from '../index';
+
+import './analytics.scss';
 
 export const Analytics: React.FC = () => {
   const {
@@ -55,45 +60,53 @@ export const Analytics: React.FC = () => {
 
   return (
     <AnalyticsLayout isAnalyticsView title={ANALYTICS_TITLE}>
-      <AnalyticsCards
-        stats={[
-          {
-            stat: totalQueries,
-            text: TOTAL_QUERIES,
-            dataTestSubj: 'TotalQueriesCard',
-          },
-          {
-            stat: totalQueriesNoResults,
-            text: TOTAL_QUERIES_NO_RESULTS,
-            dataTestSubj: 'TotalQueriesNoResultsCard',
-          },
-          {
-            stat: totalClicks,
-            text: TOTAL_CLICKS,
-            dataTestSubj: 'TotalClicksCard',
-          },
-        ]}
-      />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={1}>
+          <AnalyticsCards
+            stats={[
+              {
+                stat: totalQueries,
+                text: TOTAL_QUERIES,
+                dataTestSubj: 'TotalQueriesCard',
+              },
+              {
+                stat: totalQueriesNoResults,
+                text: TOTAL_QUERIES_NO_RESULTS,
+                dataTestSubj: 'TotalQueriesNoResultsCard',
+              },
+              {
+                stat: totalClicks,
+                text: TOTAL_CLICKS,
+                dataTestSubj: 'TotalClicksCard',
+              },
+            ]}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>
+          <EuiPanel hasBorder>
+            <AnalyticsChart
+              lines={[
+                {
+                  id: TOTAL_QUERIES,
+                  data: convertToChartData({ startDate, data: queriesPerDay }),
+                },
+                {
+                  id: TOTAL_QUERIES_NO_RESULTS,
+                  data: convertToChartData({ startDate, data: queriesNoResultsPerDay }),
+                  isDashed: true,
+                },
+                {
+                  id: TOTAL_CLICKS,
+                  data: convertToChartData({ startDate, data: clicksPerDay }),
+                  isDashed: true,
+                },
+              ]}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
 
-      <AnalyticsChart
-        lines={[
-          {
-            id: TOTAL_QUERIES,
-            data: convertToChartData({ startDate, data: queriesPerDay }),
-          },
-          {
-            id: TOTAL_QUERIES_NO_RESULTS,
-            data: convertToChartData({ startDate, data: queriesNoResultsPerDay }),
-            isDashed: true,
-          },
-          {
-            id: TOTAL_CLICKS,
-            data: convertToChartData({ startDate, data: clicksPerDay }),
-            isDashed: true,
-          },
-        ]}
-      />
       <EuiSpacer />
 
       <AnalyticsSection
@@ -108,18 +121,32 @@ export const Analytics: React.FC = () => {
               'Gain insight into the most frequent queries, and which queries returned no results.',
           }
         )}
+        iconType="search"
       >
-        <EuiTitle size="s">
-          <h3>{TOP_QUERIES}</h3>
-        </EuiTitle>
-        <AnalyticsTable items={topQueries.slice(0, 10)} hasClicks />
-        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_PATH)} />
-        <EuiSpacer />
-        <EuiTitle size="s">
-          <h3>{TOP_QUERIES_NO_RESULTS}</h3>
-        </EuiTitle>
-        <AnalyticsTable items={topQueriesNoResults.slice(0, 10)} />
-        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH)} />
+        <EuiFlexGroup className="analyticsOverviewTables">
+          <EuiFlexItem>
+            <DataPanel
+              title={<h3>{TOP_QUERIES}</h3>}
+              filled
+              action={<ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_PATH)} />}
+            >
+              <AnalyticsTable items={topQueries.slice(0, 10)} hasClicks isSmall />
+            </DataPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <DataPanel
+              title={<h3>{TOP_QUERIES_NO_RESULTS}</h3>}
+              filled
+              action={
+                <ViewAllButton
+                  to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_NO_RESULTS_PATH)}
+                />
+              }
+            >
+              <AnalyticsTable items={topQueriesNoResults.slice(0, 10)} isSmall />
+            </DataPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </AnalyticsSection>
       <EuiSpacer size="xl" />
 
@@ -134,39 +161,58 @@ export const Analytics: React.FC = () => {
             defaultMessage: 'Discover which queries generated the most and least amount of clicks.',
           }
         )}
+        iconType={CursorIcon}
       >
-        <EuiTitle size="s">
-          <h3>{TOP_QUERIES_WITH_CLICKS}</h3>
-        </EuiTitle>
-        <AnalyticsTable items={topQueriesWithClicks.slice(0, 10)} hasClicks />
-        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH)} />
-        <EuiSpacer />
-        <EuiTitle size="s">
-          <h3>{TOP_QUERIES_NO_CLICKS}</h3>
-        </EuiTitle>
-        <AnalyticsTable items={topQueriesNoClicks.slice(0, 10)} />
-        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH)} />
+        <EuiFlexGroup className="analyticsOverviewTables">
+          <EuiFlexItem>
+            <DataPanel
+              title={<h3>{TOP_QUERIES_WITH_CLICKS}</h3>}
+              filled
+              action={
+                <ViewAllButton
+                  to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_WITH_CLICKS_PATH)}
+                />
+              }
+            >
+              <AnalyticsTable items={topQueriesWithClicks.slice(0, 10)} hasClicks isSmall />
+            </DataPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <DataPanel
+              title={<h3>{TOP_QUERIES_NO_CLICKS}</h3>}
+              filled
+              action={
+                <ViewAllButton
+                  to={generateEnginePath(ENGINE_ANALYTICS_TOP_QUERIES_NO_CLICKS_PATH)}
+                />
+              }
+            >
+              <AnalyticsTable items={topQueriesNoClicks.slice(0, 10)} isSmall />
+            </DataPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </AnalyticsSection>
       <EuiSpacer size="xl" />
 
-      <AnalyticsSection
-        title={RECENT_QUERIES}
+      <DataPanel
+        hasBorder
+        title={<h2>{RECENT_QUERIES}</h2>}
         subtitle={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.analytics.recentQueriesDescription',
           { defaultMessage: 'A view into queries happening right now.' }
         )}
+        action={<ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_RECENT_QUERIES_PATH)} />}
       >
         <RecentQueriesTable items={recentQueries.slice(0, 10)} />
-        <ViewAllButton to={generateEnginePath(ENGINE_ANALYTICS_RECENT_QUERIES_PATH)} />
-      </AnalyticsSection>
+      </DataPanel>
     </AnalyticsLayout>
   );
 };
 
 export const ViewAllButton: React.FC<{ to: string }> = ({ to }) => (
-  <EuiButtonTo to={to} size="s" fullWidth>
+  <EuiButtonEmptyTo to={to} size="s" iconType="eye">
     {i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.viewAllButtonLabel', {
       defaultMessage: 'View all',
     })}
-  </EuiButtonTo>
+  </EuiButtonEmptyTo>
 );

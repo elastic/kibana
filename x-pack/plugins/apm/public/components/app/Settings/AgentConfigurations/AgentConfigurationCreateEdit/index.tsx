@@ -109,7 +109,15 @@ export function AgentConfigurationCreateEdit({
 
   return (
     <>
-      <EuiTitle>
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.agentConfig.newConfig.description', {
+          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+        })}
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiTitle size="s">
         <h2>
           {isEditMode
             ? i18n.translate('xpack.apm.agentConfig.editConfigTitle', {
@@ -120,14 +128,6 @@ export function AgentConfigurationCreateEdit({
               })}
         </h2>
       </EuiTitle>
-
-      <EuiText size="s">
-        {i18n.translate('xpack.apm.agentConfig.newConfig.description', {
-          defaultMessage: `This allows you to fine-tune your agent configuration directly in
-        Kibana. Best of all, changes are automatically propagated to your APM
-        agents so there’s no need to redeploy.`,
-        })}
-      </EuiText>
 
       <EuiSpacer size="m" />
 

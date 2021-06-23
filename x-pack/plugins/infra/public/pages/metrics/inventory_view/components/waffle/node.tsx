@@ -11,6 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'lodash';
+import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
@@ -62,70 +63,78 @@ export class Node extends React.PureComponent<Props, State> {
 
     const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
 
+    const button = (
+      <EuiToolTip
+        delay="regular"
+        position="right"
+        content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
+      >
+        <NodeContainer
+          data-test-subj="nodeContainer"
+          style={{ width: squareSize || 0, height: squareSize || 0 }}
+          onClick={this.togglePopover}
+        >
+          <SquareOuter color={color} style={nodeBorder}>
+            <SquareInner color={color}>
+              {valueMode ? (
+                <ValueInner aria-label={nodeAriaLabel}>
+                  <Label color={color}>{node.name}</Label>
+                  <Value color={color}>{value}</Value>
+                </ValueInner>
+              ) : (
+                ellipsisMode && (
+                  <ValueInner aria-label={nodeAriaLabel}>
+                    <Label color={color}>...</Label>
+                  </ValueInner>
+                )
+              )}
+            </SquareInner>
+          </SquareOuter>
+        </NodeContainer>
+      </EuiToolTip>
+    );
+
     return (
       <>
-        <NodeContextMenu
-          node={node}
-          nodeType={nodeType}
-          isPopoverOpen={isPopoverOpen}
+        <EuiPopover
+          button={button}
+          isOpen={isPopoverOpen}
           closePopover={this.closePopover}
-          options={options}
-          currentTime={currentTime}
-          popoverPosition="downCenter"
-          openNewOverlay={this.toggleNewOverlay}
+          anchorPosition="downCenter"
         >
-          <ConditionalToolTip
-            currentTime={currentTime}
-            formatter={formatter}
-            hidden={isPopoverOpen}
+          <NodeContextMenu
             node={node}
+            nodeType={nodeType}
+            options={options}
+            currentTime={currentTime}
+          />
+        </EuiPopover>
+
+        {this.state.isOverlayOpen && (
+          <NodeContextPopover
+            openAlertFlyout={this.openAlertFlyout}
+            node={node}
+            nodeType={nodeType}
+            isOpen={this.state.isOverlayOpen}
+            options={options}
+            currentTime={currentTime}
+            onClose={this.toggleNewOverlay}
+          />
+        )}
+
+        {isAlertFlyoutVisible && (
+          <AlertFlyout
+            filter={
+              options.fields
+                ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
+                : ''
+            }
             options={options}
             nodeType={nodeType}
-          >
-            <NodeContainer
-              data-test-subj="nodeContainer"
-              style={{ width: squareSize || 0, height: squareSize || 0 }}
-              onClick={this.togglePopover}
-            >
-              <SquareOuter color={color} style={nodeBorder}>
-                <SquareInner color={color}>
-                  {valueMode ? (
-                    <ValueInner aria-label={nodeAriaLabel}>
-                      <Label color={color}>{node.name}</Label>
-                      <Value color={color}>{value}</Value>
-                    </ValueInner>
-                  ) : (
-                    ellipsisMode && (
-                      <ValueInner aria-label={nodeAriaLabel}>
-                        <Label color={color}>...</Label>
-                      </ValueInner>
-                    )
-                  )}
-                </SquareInner>
-              </SquareOuter>
-            </NodeContainer>
-          </ConditionalToolTip>
-        </NodeContextMenu>
-        <NodeContextPopover
-          openAlertFlyout={this.openAlertFlyout}
-          node={node}
-          nodeType={nodeType}
-          isOpen={this.state.isOverlayOpen}
-          options={options}
-          currentTime={currentTime}
-          onClose={this.toggleNewOverlay}
-        />
-        <AlertFlyout
-          filter={
-            options.fields
-              ? `${findInventoryFields(nodeType, options.fields).id}: "${node.id}"`
-              : ''
-          }
-          options={options}
-          nodeType={nodeType}
-          setVisible={this.setAlertFlyoutVisible}
-          visible={isAlertFlyoutVisible}
-        />
+            setVisible={this.setAlertFlyoutVisible}
+            visible={isAlertFlyoutVisible}
+          />
+        )}
       </>
     );
   }

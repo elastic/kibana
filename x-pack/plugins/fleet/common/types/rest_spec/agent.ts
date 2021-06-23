@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  Agent,
-  AgentAction,
-  NewAgentAction,
-  NewAgentEvent,
-  AgentEvent,
-  AgentStatus,
-  AgentType,
-} from '../models';
+import type { Agent, AgentAction, NewAgentAction } from '../models';
 
 export interface GetAgentsRequest {
   query: {
@@ -43,52 +35,6 @@ export interface GetOneAgentResponse {
   item: Agent;
 }
 
-export interface PostAgentCheckinRequest {
-  params: {
-    agentId: string;
-  };
-  body: {
-    status?: 'online' | 'error' | 'degraded';
-    local_metadata?: Record<string, any>;
-    events?: NewAgentEvent[];
-  };
-}
-
-export interface PostAgentCheckinResponse {
-  action: string;
-
-  actions: AgentAction[];
-}
-
-export interface PostAgentEnrollRequest {
-  body: {
-    type: AgentType;
-    metadata: {
-      local: Record<string, any>;
-      user_provided: Record<string, any>;
-    };
-  };
-}
-
-export interface PostAgentEnrollResponse {
-  action: string;
-
-  item: Agent & { status: AgentStatus };
-}
-
-export interface PostAgentAcksRequest {
-  body: {
-    events: AgentEvent[];
-  };
-  params: {
-    agentId: string;
-  };
-}
-
-export interface PostAgentAcksResponse {
-  action: string;
-}
-
 export interface PostNewAgentActionRequest {
   body: {
     action: NewAgentAction;
@@ -108,6 +54,7 @@ export interface PostAgentUnenrollRequest {
   };
   body: {
     force?: boolean;
+    revoke?: boolean;
   };
 }
 
@@ -118,11 +65,17 @@ export interface PostBulkAgentUnenrollRequest {
   body: {
     agents: string[] | string;
     force?: boolean;
+    revoke?: boolean;
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostBulkAgentUnenrollResponse {}
+export type PostBulkAgentUnenrollResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
 
 export interface PostAgentUpgradeRequest {
   params: {
@@ -141,8 +94,14 @@ export interface PostBulkAgentUpgradeRequest {
     version: string;
   };
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostBulkAgentUpgradeResponse {}
+
+export type PostBulkAgentUpgradeResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
@@ -164,30 +123,13 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
-export interface PostBulkAgentReassignResponse {
-  [key: string]: {
+export type PostBulkAgentReassignResponse = Record<
+  Agent['id'],
+  {
     success: boolean;
-    error?: Error;
-  };
-}
-
-export interface GetOneAgentEventsRequest {
-  params: {
-    agentId: string;
-  };
-  query: {
-    page: number;
-    perPage: number;
-    kuery?: string;
-  };
-}
-
-export interface GetOneAgentEventsResponse {
-  list: AgentEvent[];
-  total: number;
-  page: number;
-  perPage: number;
-}
+    error?: string;
+  }
+>;
 
 export interface DeleteAgentRequest {
   params: {

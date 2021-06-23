@@ -15,10 +15,12 @@ import { mergeProjection } from '../../projections/util/merge_projection';
 import { getServiceNodesProjection } from '../../projections/service_nodes';
 
 export async function getServiceNodeMetadata({
+  kuery,
   serviceName,
   serviceNodeName,
   setup,
 }: {
+  kuery?: string;
   serviceName: string;
   serviceNodeName: string;
   setup: Setup & SetupTimeRange;
@@ -27,6 +29,7 @@ export async function getServiceNodeMetadata({
 
   const query = mergeProjection(
     getServiceNodesProjection({
+      kuery,
       setup,
       serviceName,
       serviceNodeName,
@@ -52,7 +55,10 @@ export async function getServiceNodeMetadata({
     }
   );
 
-  const response = await apmEventClient.search(query);
+  const response = await apmEventClient.search(
+    'get_service_node_metadata',
+    query
+  );
 
   return {
     host: response.aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,

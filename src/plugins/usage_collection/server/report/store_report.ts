@@ -10,18 +10,21 @@ import { ISavedObjectsRepository } from 'src/core/server';
 import moment from 'moment';
 import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
+import { storeApplicationUsage } from './store_application_usage';
+import { UsageCounter } from '../usage_counters';
+import { serializeUiCounterName } from '../../common/ui_counters';
 
 export async function storeReport(
   internalRepository: ISavedObjectsRepository,
+  uiCountersUsageCounter: UsageCounter,
   report: ReportSchemaType
 ) {
   const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
-  const appUsage = report.application_usage ? Object.values(report.application_usage) : [];
+  const appUsages = report.application_usage ? Object.values(report.application_usage) : [];
 
   const momentTimestamp = moment();
   const timestamp = momentTimestamp.toDate();
-  const date = momentTimestamp.format('DDMMYYYY');
 
   return Promise.allSettled([
     // User Agent
@@ -54,31 +57,16 @@ export async function storeReport(
       })
       .value(),
     // UI Counters
-    ...uiCounters.map(async ([key, metric]) => {
+    ...uiCounters.map(async ([, metric]) => {
       const { appName, eventName, total, type } = metric;
-      const savedObjectId = `${appName}:${date}:${type}:${eventName}`;
-      return [
-        await internalRepository.incrementCounter('ui-counter', savedObjectId, [
-          { fieldName: 'count', incrementBy: total },
-        ]),
-      ];
+      const counterName = serializeUiCounterName({ appName, eventName });
+      uiCountersUsageCounter.incrementCounter({
+        counterName,
+        counterType: type,
+        incrementBy: total,
+      });
     }),
     // Application Usage
-    ...[
-      (async () => {
-        if (!appUsage.length) return [];
-        const { saved_objects: savedObjects } = await internalRepository.bulkCreate(
-          appUsage.map((metric) => ({
-            type: 'application_usage_transactional',
-            attributes: {
-              ...metric,
-              timestamp,
-            },
-          }))
-        );
-
-        return savedObjects;
-      })(),
-    ],
+    storeApplicationUsage(internalRepository, appUsages, timestamp),
   ]);
 }

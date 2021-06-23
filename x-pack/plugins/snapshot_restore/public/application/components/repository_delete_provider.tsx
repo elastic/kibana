@@ -7,7 +7,7 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { Repository } from '../../../common/types';
 import { useServices, useToastNotifications } from '../app_context';
@@ -109,79 +109,77 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
     const isSingle = repositoryNames.length === 1;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            isSingle ? (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleTitle"
-                defaultMessage="Remove repository '{name}'?"
-                values={{ name: repositoryNames[0] }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleTitle"
-                defaultMessage="Remove {count} repositories?"
-                values={{ count: repositoryNames.length }}
-              />
-            )
-          }
-          onCancel={closeModal}
-          onConfirm={deleteRepository}
-          cancelButtonText={
+      <EuiConfirmModal
+        title={
+          isSingle ? (
             <FormattedMessage
-              id="xpack.snapshotRestore.deleteRepository.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
+              id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleTitle"
+              defaultMessage="Remove repository '{name}'?"
+              values={{ name: repositoryNames[0] }}
             />
-          }
-          confirmButtonText={
-            isSingle ? (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteRepository.confirmModal.confirmSingleButtonLabel"
-                defaultMessage="Remove repository"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deleteRepository.confirmModal.confirmMultipleButtonLabel"
-                defaultMessage="Remove repositories"
-              />
-            )
-          }
-          buttonColor="danger"
-          data-test-subj="deleteRepositoryConfirmation"
-        >
-          {isSingle ? (
+          ) : (
+            <FormattedMessage
+              id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleTitle"
+              defaultMessage="Remove {count} repositories?"
+              values={{ count: repositoryNames.length }}
+            />
+          )
+        }
+        onCancel={closeModal}
+        onConfirm={deleteRepository}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.deleteRepository.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          isSingle ? (
+            <FormattedMessage
+              id="xpack.snapshotRestore.deleteRepository.confirmModal.confirmSingleButtonLabel"
+              defaultMessage="Remove repository"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.snapshotRestore.deleteRepository.confirmModal.confirmMultipleButtonLabel"
+              defaultMessage="Remove repositories"
+            />
+          )
+        }
+        buttonColor="danger"
+        data-test-subj="deleteRepositoryConfirmation"
+      >
+        {isSingle ? (
+          <p>
+            <FormattedMessage
+              id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleDescription"
+              defaultMessage="The snapshots in this repository will still exist, but Elasticsearch won’t have access to them.
+                  Adjust policies that use this repository to prevent scheduled snapshots from failing."
+            />
+          </p>
+        ) : (
+          <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleDescription"
-                defaultMessage="The snapshots in this repository will still exist, but Elasticsearch won’t have access to them.
-                  Adjust policies that use this repository to prevent scheduled snapshots from failing."
+                id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleListDescription"
+                defaultMessage="You are about to remove these repositories:"
               />
             </p>
-          ) : (
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleListDescription"
-                  defaultMessage="You are about to remove these repositories:"
-                />
-              </p>
-              <ul>
-                {repositoryNames.map((name) => (
-                  <li key={name}>{name}</li>
-                ))}
-              </ul>
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleDescription"
-                  defaultMessage="The snapshots in these repositories will still exist, but Elasticsearch won't have access to them.
+            <ul>
+              {repositoryNames.map((name) => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleDescription"
+                defaultMessage="The snapshots in these repositories will still exist, but Elasticsearch won't have access to them.
                     Adjust policies that use these repositories to prevent scheduled snapshots from failing."
-                />
-              </p>
-            </Fragment>
-          )}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+              />
+            </p>
+          </Fragment>
+        )}
+      </EuiConfirmModal>
     );
   };
 

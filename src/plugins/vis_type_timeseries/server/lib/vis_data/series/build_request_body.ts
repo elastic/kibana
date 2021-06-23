@@ -18,7 +18,7 @@ import { processors } from '../request_processors/series/index';
  *   panel: {Object} - a panel object,
  *   series: {Object} - an series object,
  *   esQueryConfig: {Object} - es query config object,
- *   indexPatternObject: {Object} - an index pattern object,
+ *   seriesIndex: {Object} - an index pattern object,
  *   capabilities: {Object} - a search capabilities object
  * ]
  * @returns {Object} doc - processed body

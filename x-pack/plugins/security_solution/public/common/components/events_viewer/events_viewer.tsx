@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
+import { useDispatch } from 'react-redux';
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useKibana } from '../../lib/kibana';
-import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
+import { KqlMode } from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
@@ -37,12 +37,21 @@ import {
   Query,
 } from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
-import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
+import {
+  ColumnHeaderOptions,
+  ControlColumnProps,
+  RowRenderer,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
+import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
+import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -122,6 +131,8 @@ interface Props {
   kqlMode: KqlMode;
   query: Query;
   onRuleChange?: () => void;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   start: string;
   sort: Sort[];
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
@@ -146,28 +157,28 @@ const EventsViewerComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   kqlMode,
-  query,
   onRuleChange,
+  query,
+  renderCellValue,
+  rowRenderers,
   start,
   sort,
   utilityBar,
   graphEventId,
 }) => {
-  const { globalFullScreen } = useGlobalFullScreen();
+  const dispatch = useDispatch();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
 
-  const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
-
   useEffect(() => {
-    setIsTimelineLoading({ id, isLoading: isQueryLoading });
-  }, [id, isQueryLoading, setIsTimelineLoading]);
+    dispatch(timelineActions.updateIsLoading({ id, isLoading: isQueryLoading }));
+  }, [dispatch, id, isQueryLoading]);
 
-  const { queryFields, title, unit } = useMemo(() => getManageTimelineById(id), [
-    getManageTimelineById,
-    id,
-  ]);
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);
+  const { queryFields, title } = useDeepEqualSelector((state) => getManageTimeline(state, id));
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
@@ -176,11 +187,11 @@ const EventsViewerComponent: React.FC<Props> = ({
       <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
         <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ExitFullScreen />
+          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
         </EuiFlexItem>
       </TitleFlexGroup>
     ),
-    [justTitle]
+    [globalFullScreen, justTitle, setGlobalFullScreen]
   );
 
   const combinedQueries = combineQueries({
@@ -268,6 +279,9 @@ const EventsViewerComponent: React.FC<Props> = ({
     setIsQueryLoading(loading);
   }, [loading]);
 
+  const leadingControlColumns: ControlColumnProps[] = [defaultControlColumn];
+  const trailingControlColumns: ControlColumnProps[] = [];
+
   return (
     <StyledEuiPanel
       data-test-subj="events-viewer-panel"
@@ -310,12 +324,16 @@ const EventsViewerComponent: React.FC<Props> = ({
                     isEventViewer={true}
                     onRuleChange={onRuleChange}
                     refetch={refetch}
+                    renderCellValue={renderCellValue}
+                    rowRenderers={rowRenderers}
                     sort={sort}
                     tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,
                     })}
+                    leadingControlColumns={leadingControlColumns}
+                    trailingControlColumns={trailingControlColumns}
                   />
                   <Footer
                     activePage={pageInfo.activePage}
@@ -343,6 +361,7 @@ const EventsViewerComponent: React.FC<Props> = ({
 
 export const EventsViewer = React.memo(
   EventsViewerComponent,
+  // eslint-disable-next-line complexity
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
     prevProps.columns === nextProps.columns &&
@@ -359,6 +378,8 @@ export const EventsViewer = React.memo(
     prevProps.itemsPerPageOptions === nextProps.itemsPerPageOptions &&
     prevProps.kqlMode === nextProps.kqlMode &&
     deepEqual(prevProps.query, nextProps.query) &&
+    prevProps.renderCellValue === nextProps.renderCellValue &&
+    prevProps.rowRenderers === nextProps.rowRenderers &&
     prevProps.start === nextProps.start &&
     deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.utilityBar === nextProps.utilityBar &&

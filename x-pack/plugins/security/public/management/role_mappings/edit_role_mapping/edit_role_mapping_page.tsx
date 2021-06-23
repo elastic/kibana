@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
+  EuiLink,
   EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiLink,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart, ScopedHistory, DocLinksStart } from 'src/core/public';
-import { RoleMapping } from '../../../../common/model';
-import { RuleEditorPanel } from './rule_editor_panel';
+import type { DocLinksStart, NotificationsStart, ScopedHistory } from 'src/core/public';
+
+import type { RoleMapping } from '../../../../common/model';
+import type { RolesAPIClient } from '../../roles';
 import {
+  DeleteProvider,
   NoCompatibleRealms,
   PermissionDenied,
-  DeleteProvider,
   SectionLoading,
 } from '../components';
-import { RolesAPIClient } from '../../roles';
-import { validateRoleMappingForSave } from './services/role_mapping_validation';
+import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { MappingInfoPanel } from './mapping_info_panel';
-import { RoleMappingsAPIClient } from '../role_mappings_api_client';
+import { RuleEditorPanel } from './rule_editor_panel';
+import { validateRoleMappingForSave } from './services/role_mapping_validation';
 
 interface State {
   loadState: 'loading' | 'permissionDenied' | 'ready' | 'saveInProgress';

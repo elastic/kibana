@@ -34,14 +34,15 @@ import {
   editRuleAction,
   exportRulesAction,
 } from './actions';
-import { Action } from './reducer';
+import { RulesTableAction } from '../../../../containers/detection_engine/rules/rules_table';
 import { LocalizedDateTooltip } from '../../../../../common/components/localized_date_tooltip';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { getToolTipContent, canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import { TagsDisplay } from './tag_display';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 
 export const getActions = (
-  dispatch: React.Dispatch<Action>,
+  dispatch: React.Dispatch<RulesTableAction>,
   dispatchToaster: Dispatch<ActionToaster>,
   history: H.History,
   reFetchRules: () => Promise<void>,
@@ -67,6 +68,7 @@ export const getActions = (
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
   },
   {
+    'data-test-subj': 'duplicateRuleAction',
     description: i18n.DUPLICATE_RULE,
     icon: 'copy',
     name: !actionsPrivileges ? (
@@ -78,9 +80,15 @@ export const getActions = (
     ),
     enabled: (rowItem: Rule) => canEditRuleWithActions(rowItem, actionsPrivileges),
     onClick: async (rowItem: Rule) => {
-      await duplicateRulesAction([rowItem], [rowItem.id], dispatch, dispatchToaster);
-      await reFetchRules();
-      await refetchPrePackagedRulesStatus();
+      const createdRules = await duplicateRulesAction(
+        [rowItem],
+        [rowItem.id],
+        dispatch,
+        dispatchToaster
+      );
+      if (createdRules?.length) {
+        editRuleAction(createdRules[0], history);
+      }
     },
   },
   {
@@ -88,7 +96,7 @@ export const getActions = (
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
-    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch),
+    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch, dispatchToaster),
     enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
@@ -112,12 +120,12 @@ export type RulesColumns = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType
 export type RulesStatusesColumns = EuiBasicTableColumn<RuleStatusRowItemType>;
 type FormatUrl = (path: string) => string;
 interface GetColumns {
-  dispatch: React.Dispatch<Action>;
+  dispatch: React.Dispatch<RulesTableAction>;
   dispatchToaster: Dispatch<ActionToaster>;
   formatUrl: FormatUrl;
   history: H.History;
   hasMlPermissions: boolean;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loadingRuleIds: string[];
   reFetchRules: () => Promise<void>;
   refetchPrePackagedRulesStatus: () => Promise<void>;
@@ -134,7 +142,7 @@ export const getColumns = ({
   formatUrl,
   history,
   hasMlPermissions,
-  hasNoPermissions,
+  hasPermissions,
   loadingRuleIds,
   reFetchRules,
   refetchPrePackagedRulesStatus,
@@ -200,7 +208,7 @@ export const getColumns = ({
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );
@@ -267,7 +275,7 @@ export const getColumns = ({
             enabled={item.enabled}
             isDisabled={
               !canEditRuleWithActions(item, hasReadActionsPrivileges) ||
-              hasNoPermissions ||
+              !hasPermissions ||
               (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
             }
             isLoading={loadingRuleIds.includes(item.id)}
@@ -292,7 +300,7 @@ export const getColumns = ({
     } as EuiTableActionsColumnType<Rule>,
   ];
 
-  return hasNoPermissions ? cols : [...cols, ...actions];
+  return hasPermissions ? [...cols, ...actions] : cols;
 };
 
 export const getMonitoringColumns = (
@@ -313,7 +321,11 @@ export const getMonitoringColumns = (
             }}
             href={formatUrl(getRuleDetailsUrl(item.id))}
           >
-            {value}
+            {/* Temporary fix if on upgrade a rule has a status of 'partial failure' we want to display that text as 'warning' */}
+            {/* On the next subsequent rule run, that 'partial failure' status will be re-written as a 'warning' status */}
+            {/* and this code will no longer be necessary */}
+            {/* TODO: remove this code in 8.0.0 */}
+            {value === 'partial failure' ? 'warning' : value}
           </LinkAnchor>
         );
       },
@@ -357,20 +369,6 @@ export const getMonitoringColumns = (
       truncateText: true,
       width: '14%',
     },
-    // hiding this field until after 7.11 release
-    // {
-    //   field: 'current_status.last_look_back_date',
-    //   name: i18n.COLUMN_LAST_LOOKBACK_DATE,
-    //   render: (value: RuleStatus['current_status']['last_look_back_date']) => {
-    //     return value == null ? (
-    //       getEmptyTagValue()
-    //     ) : (
-    //       <FormattedDate value={value} fieldName={'last look back date'} />
-    //     );
-    //   },
-    //   truncateText: true,
-    //   width: '16%',
-    // },
     {
       field: 'current_status.status_date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,
@@ -393,7 +391,7 @@ export const getMonitoringColumns = (
         return (
           <>
             <EuiHealth color={getStatusColor(value ?? null)}>
-              {value ?? getEmptyTagValue()}
+              {getRuleStatusText(value) ?? getEmptyTagValue()}
             </EuiHealth>
           </>
         );

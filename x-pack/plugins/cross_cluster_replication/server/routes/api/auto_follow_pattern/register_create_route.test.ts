@@ -8,10 +8,8 @@
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError } from '../../../shared_imports';
-import { formatEsError } from '../../../lib/format_es_error';
-import { License } from '../../../services';
-import { mockRouteContext } from '../test_lib';
+import { handleEsError } from '../../../shared_imports';
+import { mockRouteContext, mockLicense } from '../test_lib';
 import { registerCreateRoute } from './register_create_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -24,12 +22,9 @@ describe('[CCR API] Create auto-follow pattern', () => {
 
     registerCreateRoute({
       router,
-      license: {
-        guardApiRoute: (route: any) => route,
-      } as License,
+      license: mockLicense,
       lib: {
-        isEsError,
-        formatEsError,
+        handleEsError,
       },
     });
 
@@ -38,8 +33,10 @@ describe('[CCR API] Create auto-follow pattern', () => {
 
   it('should throw a 409 conflict error if id already exists', async () => {
     const routeContextMock = mockRouteContext({
-      // Fail the uniqueness check.
-      callAsCurrentUser: jest.fn().mockResolvedValueOnce(true),
+      ccr: {
+        // Fail the uniqueness check.
+        getAutoFollowPattern: jest.fn().mockResolvedValueOnce(true),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({
@@ -55,11 +52,11 @@ describe('[CCR API] Create auto-follow pattern', () => {
 
   it('should return 200 status when the id does not exist', async () => {
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest
-        .fn()
+      ccr: {
         // Pass the uniqueness check.
-        .mockRejectedValueOnce({ statusCode: 404 })
-        .mockResolvedValueOnce(true),
+        getAutoFollowPattern: jest.fn().mockRejectedValueOnce({ statusCode: 404 }),
+        putAutoFollowPattern: jest.fn().mockResolvedValueOnce(true),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest({

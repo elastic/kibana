@@ -58,7 +58,7 @@ export function CustomLinkMenuSection({
     [transaction]
   );
 
-  const { data: customLinks = [], status, refetch } = useFetcher(
+  const { data, status, refetch } = useFetcher(
     (callApmApi) =>
       callApmApi({
         isCachable: false,
@@ -67,6 +67,8 @@ export function CustomLinkMenuSection({
       }),
     [filters]
   );
+
+  const customLinks = data?.customLinks ?? [];
 
   return (
     <>

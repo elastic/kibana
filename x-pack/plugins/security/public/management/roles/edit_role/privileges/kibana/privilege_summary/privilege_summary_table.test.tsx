@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import React from 'react';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
-import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
+
 import { mountWithIntl } from '@kbn/test/jest';
-import { PrivilegeSummaryTable } from './privilege_summary_table';
-import { RoleKibanaPrivilege } from '../../../../../../../common/model';
+import { coreMock } from 'src/core/public/mocks';
+
+import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
+import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
+import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
+import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
+import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
+import type { PrivilegeSummaryTableProps } from './privilege_summary_table';
+import { PrivilegeSummaryTable } from './privilege_summary_table';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
   name: 'some-role',
@@ -40,6 +47,9 @@ const spaces = [
     disabledFeatures: [],
   },
 ];
+const spacesManager = spacesManagerMock.create();
+const { getStartServices } = coreMock.createSetup();
+const spacesApiUi = getUiApi({ spacesManager, getStartServices });
 
 const maybeExpectSubFeaturePrivileges = (expect: boolean, subFeaturesPrivileges: unknown) => {
   return expect ? { subFeaturesPrivileges } : {};
@@ -83,12 +93,23 @@ const expectNoPrivileges = (displayedPrivileges: any, expectSubFeatures: boolean
   });
 };
 
+const setup = async (props: PrivilegeSummaryTableProps) => {
+  const wrapper = mountWithIntl(<PrivilegeSummaryTable {...props} />);
+
+  // lazy-load SpaceAvatar
+  await act(async () => {
+    wrapper.update();
+  });
+
+  return wrapper;
+};
+
 describe('PrivilegeSummaryTable', () => {
   [true, false].forEach((allowSubFeaturePrivileges) => {
     describe(`when sub feature privileges are ${
       allowSubFeaturePrivileges ? 'allowed' : 'disallowed'
     }`, () => {
-      it('ignores unknown base privileges', () => {
+      it('ignores unknown base privileges', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -101,21 +122,20 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
         expectNoPrivileges(displayedPrivileges, allowSubFeaturePrivileges);
       });
 
-      it('ignores unknown feature privileges', () => {
+      it('ignores unknown feature privileges', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -130,21 +150,20 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
         expectNoPrivileges(displayedPrivileges, allowSubFeaturePrivileges);
       });
 
-      it('ignores unknown features', () => {
+      it('ignores unknown features', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -159,21 +178,20 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
         expectNoPrivileges(displayedPrivileges, allowSubFeaturePrivileges);
       });
 
-      it('renders effective privileges for the global base privilege', () => {
+      it('renders effective privileges for the global base privilege', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -186,14 +204,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
@@ -234,7 +251,7 @@ describe('PrivilegeSummaryTable', () => {
         });
       });
 
-      it('renders effective privileges for a global feature privilege', () => {
+      it('renders effective privileges for a global feature privilege', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -249,14 +266,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
@@ -297,7 +313,7 @@ describe('PrivilegeSummaryTable', () => {
         });
       });
 
-      it('renders effective privileges for the space base privilege', () => {
+      it('renders effective privileges for the space base privilege', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -310,14 +326,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
@@ -358,7 +373,7 @@ describe('PrivilegeSummaryTable', () => {
         });
       });
 
-      it('renders effective privileges for a space feature privilege', () => {
+      it('renders effective privileges for a space feature privilege', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -373,14 +388,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
@@ -421,7 +435,7 @@ describe('PrivilegeSummaryTable', () => {
         });
       });
 
-      it('renders effective privileges for global base + space base privileges', () => {
+      it('renders effective privileges for global base + space base privileges', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -439,14 +453,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
@@ -512,7 +525,7 @@ describe('PrivilegeSummaryTable', () => {
         });
       });
 
-      it('renders effective privileges for global base + space feature privileges', () => {
+      it('renders effective privileges for global base + space feature privileges', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -532,14 +545,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
@@ -605,7 +617,7 @@ describe('PrivilegeSummaryTable', () => {
         });
       });
 
-      it('renders effective privileges for global feature + space base privileges', () => {
+      it('renders effective privileges for global feature + space base privileges', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -625,14 +637,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
@@ -698,7 +709,7 @@ describe('PrivilegeSummaryTable', () => {
         });
       });
 
-      it('renders effective privileges for global feature + space feature privileges', () => {
+      it('renders effective privileges for global feature + space feature privileges', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -720,14 +731,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 
@@ -793,7 +803,7 @@ describe('PrivilegeSummaryTable', () => {
         });
       });
 
-      it('renders effective privileges for a complex setup', () => {
+      it('renders effective privileges for a complex setup', async () => {
         const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures, {
           allowSubFeaturePrivileges,
         });
@@ -821,14 +831,13 @@ describe('PrivilegeSummaryTable', () => {
           },
         ]);
 
-        const wrapper = mountWithIntl(
-          <PrivilegeSummaryTable
-            spaces={spaces}
-            kibanaPrivileges={kibanaPrivileges}
-            role={role}
-            canCustomizeSubFeaturePrivileges={allowSubFeaturePrivileges}
-          />
-        );
+        const wrapper = await setup({
+          spaces,
+          kibanaPrivileges,
+          role,
+          canCustomizeSubFeaturePrivileges: allowSubFeaturePrivileges,
+          spacesApiUi,
+        });
 
         const displayedPrivileges = getDisplayedFeaturePrivileges(wrapper, role);
 

@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RuleGroup } from './rule_group';
-import { Rule } from './rule';
+
 import { ExceptAllRule } from './except_all_rule';
+import type { Rule } from './rule';
+import { RuleGroup } from './rule_group';
 
 /**
  * Represents a group of rules in which none can evaluate to true (all must evaluate to false).

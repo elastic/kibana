@@ -15,14 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('value suggestions', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('dashboard/drilldowns');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/dashboard/drilldowns');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
-      await esArchiver.unload('dashboard/drilldowns');
+      await esArchiver.unload('x-pack/test/functional/es_archives/dashboard/drilldowns');
     });
 
     it('show up', async () => {

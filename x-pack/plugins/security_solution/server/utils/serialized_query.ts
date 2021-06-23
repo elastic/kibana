@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { UserInputError } from 'apollo-server-errors';
 import { isEmpty, isPlainObject, isString } from 'lodash/fp';
 
-import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
+import { JsonObject } from '@kbn/common-utils';
 
 export const parseFilterQuery = (filterQuery: string): JsonObject => {
   try {
@@ -25,9 +24,8 @@ export const parseFilterQuery = (filterQuery: string): JsonObject => {
     }
     return {};
   } catch (err) {
-    throw new UserInputError(`Failed to parse query: ${err}`, {
-      query: filterQuery,
-      originalError: err,
-    });
+    throw new Error(
+      `Failed to parse query: ${JSON.stringify(err)}, query: ${JSON.stringify(filterQuery)}`
+    );
   }
 };

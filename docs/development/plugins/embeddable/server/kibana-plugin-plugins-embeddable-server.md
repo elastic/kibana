@@ -18,3 +18,9 @@
 |  --- | --- |
 |  [plugin](./kibana-plugin-plugins-embeddable-server.plugin.md) |  |
 
+## Type Aliases
+
+|  Type Alias | Description |
+|  --- | --- |
+|  [EmbeddableStart](./kibana-plugin-plugins-embeddable-server.embeddablestart.md) |  |
+

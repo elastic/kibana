@@ -6,11 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import React, { FunctionComponent, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
-import { PhasesExceptDelete } from '../../../../../../common/types';
+import { PhaseExceptDelete } from '../../../../../../common/types';
 
 import {
   calculateRelativeFromAbsoluteMilliseconds,
@@ -18,7 +19,7 @@ import {
   AbsoluteTimings,
 } from '../../lib';
 
-import { InfinityIcon } from '../infinity_icon';
+import { InfinityIcon, LearnMoreLink } from '..';
 
 import { TimelinePhaseText } from './components';
 
@@ -47,7 +48,7 @@ const SCORE_BUFFER_AMOUNT = 50;
 
 const i18nTexts = {
   title: i18n.translate('xpack.indexLifecycleMgmt.timeline.title', {
-    defaultMessage: 'Policy Summary',
+    defaultMessage: 'Policy summary',
   }),
   description: i18n.translate('xpack.indexLifecycleMgmt.timeline.description', {
     defaultMessage: 'This policy moves data through the following phases.',
@@ -55,18 +56,14 @@ const i18nTexts = {
   hotPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.hotPhaseSectionTitle', {
     defaultMessage: 'Hot phase',
   }),
-  rolloverTooltip: i18n.translate(
-    'xpack.indexLifecycleMgmt.timeline.hotPhaseRolloverToolTipContent',
-    {
-      defaultMessage:
-        'How long it takes to reach the rollover criteria in the hot phase can vary. Data moves to the next phase when the time since rollover reaches the minimum age.',
-    }
-  ),
   warmPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.warmPhaseSectionTitle', {
     defaultMessage: 'Warm phase',
   }),
   coldPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.coldPhaseSectionTitle', {
     defaultMessage: 'Cold phase',
+  }),
+  frozenPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.frozenPhaseSectionTitle', {
+    defaultMessage: 'Frozen phase',
   }),
   deleteIcon: {
     toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.deleteIconToolTipContent', {
@@ -90,12 +87,17 @@ const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
     inputs.phases.cold != null
       ? msTimeToOverallPercent(inputs.phases.cold, inputs.total) + SCORE_BUFFER_AMOUNT
       : 0;
+  const frozenScore =
+    inputs.phases.frozen != null
+      ? msTimeToOverallPercent(inputs.phases.frozen, inputs.total) + SCORE_BUFFER_AMOUNT
+      : 0;
 
-  const totalScore = hotScore + warmScore + coldScore;
+  const totalScore = hotScore + warmScore + coldScore + frozenScore;
   return {
     hot: `${toPercent(hotScore, totalScore)}%`,
     warm: `${toPercent(warmScore, totalScore)}%`,
     cold: `${toPercent(coldScore, totalScore)}%`,
+    frozen: `${toPercent(frozenScore, totalScore)}%`,
   };
 };
 
@@ -108,6 +110,7 @@ interface Props {
   isUsingRollover: boolean;
   warmPhaseMinAge?: string;
   coldPhaseMinAge?: string;
+  frozenPhaseMinAge?: string;
   deletePhaseMinAge?: string;
 }
 
@@ -121,6 +124,9 @@ export const Timeline: FunctionComponent<Props> = memo(
       hot: { min_age: phasesMinAge.hotPhaseMinAge },
       warm: phasesMinAge.warmPhaseMinAge ? { min_age: phasesMinAge.warmPhaseMinAge } : undefined,
       cold: phasesMinAge.coldPhaseMinAge ? { min_age: phasesMinAge.coldPhaseMinAge } : undefined,
+      frozen: phasesMinAge.frozenPhaseMinAge
+        ? { min_age: phasesMinAge.frozenPhaseMinAge }
+        : undefined,
       delete: phasesMinAge.deletePhaseMinAge
         ? { min_age: phasesMinAge.deletePhaseMinAge }
         : undefined,
@@ -130,7 +136,7 @@ export const Timeline: FunctionComponent<Props> = memo(
 
     const widths = calculateWidths(phaseAgeInMilliseconds);
 
-    const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
+    const getDurationInPhaseContent = (phase: PhaseExceptDelete): string | React.ReactNode =>
       phaseAgeInMilliseconds.phases[phase] === Infinity ? (
         <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
       ) : null;
@@ -143,6 +149,16 @@ export const Timeline: FunctionComponent<Props> = memo(
           </EuiTitle>
           <EuiText size="s" color="subdued">
             {i18nTexts.description}
+            &nbsp;
+            <LearnMoreLink
+              docPath="ilm-index-lifecycle.html#ilm-phase-transitions"
+              text={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
+                  defaultMessage="Learn about timing"
+                />
+              }
+            />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -153,6 +169,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                 el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
                 el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
                 el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
+                el.style.setProperty('--ilm-timeline-frozen-phase-width', widths.frozen ?? null);
               }
             }}
           >
@@ -161,7 +178,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                 <div className="ilmTimeline__phasesContainer">
                   {/* These are the actual color bars for the timeline */}
                   <div
-                    data-test-subj="ilmTimelineHotPhase"
+                    data-test-subj="ilmTimelinePhase-hot"
                     className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
                   >
                     <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
@@ -172,7 +189,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                   </div>
                   {exists(phaseAgeInMilliseconds.phases.warm) && (
                     <div
-                      data-test-subj="ilmTimelineWarmPhase"
+                      data-test-subj="ilmTimelinePhase-warm"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
                     >
                       <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
@@ -184,7 +201,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                   )}
                   {exists(phaseAgeInMilliseconds.phases.cold) && (
                     <div
-                      data-test-subj="ilmTimelineColdPhase"
+                      data-test-subj="ilmTimelinePhase-cold"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
                     >
                       <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
@@ -194,12 +211,24 @@ export const Timeline: FunctionComponent<Props> = memo(
                       />
                     </div>
                   )}
+                  {exists(phaseAgeInMilliseconds.phases.frozen) && (
+                    <div
+                      data-test-subj="ilmTimelinePhase-frozen"
+                      className="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
+                    >
+                      <div className="ilmTimeline__colorBar ilmTimeline__frozenPhase__colorBar" />
+                      <TimelinePhaseText
+                        phaseName={i18nTexts.frozenPhase}
+                        durationInPhase={getDurationInPhaseContent('frozen')}
+                      />
+                    </div>
+                  )}
                 </div>
               </EuiFlexItem>
               {hasDeletePhase && (
                 <EuiFlexItem grow={false}>
                   <div
-                    data-test-subj="ilmTimelineDeletePhase"
+                    data-test-subj="ilmTimelinePhase-delete"
                     className="ilmTimeline__deleteIconContainer"
                   >
                     <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />

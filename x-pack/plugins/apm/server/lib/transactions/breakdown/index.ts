@@ -18,23 +18,31 @@ import {
   TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 
 export async function getTransactionBreakdown({
+  environment,
+  kuery,
   setup,
   serviceName,
   transactionName,
   transactionType,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionName?: string;
   transactionType: string;
 }) {
-  const { esFilter, apmEventClient, start, end, config } = setup;
+  const { apmEventClient, start, end, config } = setup;
 
   const subAggs = {
     sum_all_self_times: {
@@ -80,8 +88,18 @@ export async function getTransactionBreakdown({
   const filters = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { range: rangeFilter(start, end) },
-    ...esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
+    {
+      bool: {
+        should: [
+          { exists: { field: SPAN_SELF_TIME_SUM } },
+          { exists: { field: TRANSACTION_BREAKDOWN_COUNT } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
   ];
 
   if (transactionName) {
@@ -113,7 +131,7 @@ export async function getTransactionBreakdown({
     },
   };
 
-  const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search('get_transaction_breakdown', params);
 
   const formatBucket = (
     aggs:

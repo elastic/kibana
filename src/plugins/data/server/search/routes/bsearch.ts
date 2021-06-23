@@ -11,7 +11,7 @@ import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  ISearchOptions,
+  ISearchOptionsSerializable,
 } from '../../../common/search';
 import { ISearchStart } from '../types';
 
@@ -20,7 +20,7 @@ export function registerBsearchRoute(
   getScoped: ISearchStart['asScoped']
 ): void {
   bfetch.addBatchProcessingRoute<
-    { request: IKibanaSearchRequest; options?: ISearchOptions },
+    { request: IKibanaSearchRequest; options?: ISearchOptionsSerializable },
     IKibanaSearchResponse
   >('/internal/bsearch', (request) => {
     return {

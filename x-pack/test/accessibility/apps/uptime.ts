@@ -17,11 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const uptimeService = getService('uptime');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/90555
-  describe.skip('uptime', () => {
+  describe('uptime', () => {
     before(async () => {
-      await esArchiver.load('uptime/blank');
+      await esArchiver.load('x-pack/test/functional/es_archives/uptime/blank');
       await makeChecks(es, A11Y_TEST_MONITOR_ID, 150, 1, 1000, {
         tls: {
           certificate_not_valid_after: moment().add(30, 'days').toISOString(),
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('uptime/blank');
+      await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
     });
 
     it('overview page', async () => {
@@ -60,7 +60,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('overview alert popover controls', async () => {
       await uptimeService.overview.openAlertsPopover();
+      await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
+    });
+
+    it('overview alert popover controls nested content', async () => {
       await uptimeService.overview.navigateToNestedPopover();
       await a11y.testAppSnapshot();
     });

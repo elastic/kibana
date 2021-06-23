@@ -34,38 +34,32 @@ export const initNodeDetailsRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const { nodeId, cloudId, nodeType, metrics, timerange, sourceId } = pipe(
-          NodeDetailsRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-        const source = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
+      const { nodeId, cloudId, nodeType, metrics, timerange, sourceId } = pipe(
+        NodeDetailsRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
+      const source = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
 
-        UsageCollector.countNode(nodeType);
+      UsageCollector.countNode(nodeType);
 
-        const options: InfraMetricsRequestOptions = {
-          nodeIds: {
-            nodeId,
-            cloudId,
-          },
-          nodeType,
-          sourceConfiguration: source.configuration,
-          metrics,
-          timerange,
-        };
-        return response.ok({
-          body: NodeDetailsMetricDataResponseRT.encode({
-            metrics: await libs.metrics.getMetrics(requestContext, options, request),
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      const options: InfraMetricsRequestOptions = {
+        nodeIds: {
+          nodeId,
+          cloudId,
+        },
+        nodeType,
+        sourceConfiguration: source.configuration,
+        metrics,
+        timerange,
+      };
+      return response.ok({
+        body: NodeDetailsMetricDataResponseRT.encode({
+          metrics: await libs.metrics.getMetrics(requestContext, options, request),
+        }),
+      });
     }
   );
 };

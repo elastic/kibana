@@ -34,8 +34,7 @@ export default function ({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  // Failing: See https://github.com/elastic/kibana/issues/64473
-  describe.skip('indices', () => {
+  describe('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
@@ -178,7 +177,8 @@ export default function ({ getService }) {
       });
     });
 
-    describe('list', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/64473
+    describe.skip('list', function () {
       this.tags(['skipCloud']);
 
       it('should list all the indices with the expected properties and data enrichers', async function () {
@@ -209,7 +209,8 @@ export default function ({ getService }) {
     });
 
     describe('reload', function () {
-      describe('(not on Cloud)', function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/90565
+      describe.skip('(not on Cloud)', function () {
         this.tags(['skipCloud']);
 
         it('should list all the indices with the expected properties and data enrichers', async function () {

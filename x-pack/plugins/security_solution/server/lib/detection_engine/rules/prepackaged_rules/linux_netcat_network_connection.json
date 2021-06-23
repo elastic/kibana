@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Netcat Network Activity",
   "query": "sequence by process.entity_id\n  [process where (process.name == \"nc\" or process.name == \"ncat\" or process.name == \"netcat\" or\n                  process.name == \"netcat.openbsd\" or process.name == \"netcat.traditional\") and\n     event.type == \"start\"]\n  [network where (process.name == \"nc\" or process.name == \"ncat\" or process.name == \"netcat\" or\n                  process.name == \"netcat.openbsd\" or process.name == \"netcat.traditional\")]\n",
   "references": [
@@ -30,5 +30,5 @@
     "Threat Detection"
   ],
   "type": "eql",
-  "version": 5
+  "version": 6
 }

@@ -6,7 +6,15 @@
  */
 
 import React, { memo } from 'react';
-import { EuiCard, EuiIcon, EuiTextColor, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiIcon,
+  EuiTextColor,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -42,8 +50,10 @@ export const LockedPolicyCard = memo(() => {
             </strong>
           </h3>
         }
-        description={
-          <EuiFlexGroup className="lockedCardDescription" direction="column" gutterSize="none">
+        description={false}
+      >
+        <EuiFlexGroup className="lockedCardDescription" direction="column" gutterSize="none">
+          <EuiText>
             <EuiFlexItem>
               <h4>
                 <EuiTextColor color="subdued">
@@ -59,7 +69,7 @@ export const LockedPolicyCard = memo(() => {
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policy.details.lockedCard"
                   defaultMessage="To turn on Ransomware protection, you must upgrade your license to Platinum, start a
-            free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
+              free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
                   values={{
                     cloudDeploymentLink: (
                       <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
@@ -73,9 +83,9 @@ export const LockedPolicyCard = memo(() => {
                 />
               </p>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
+          </EuiText>
+        </EuiFlexGroup>
+      </EuiCard>
     </LockedPolicyDiv>
   );
 });

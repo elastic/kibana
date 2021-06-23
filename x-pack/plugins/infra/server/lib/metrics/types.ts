@@ -26,27 +26,13 @@ export const PercentilesKeyedTypeRT = rt.type({
   values: rt.array(rt.type({ key: rt.string, value: NumberOrNullRT })),
 });
 
-export const TopHitsTypeRT = rt.type({
-  hits: rt.type({
-    total: rt.type({
-      value: rt.number,
-      relation: rt.string,
-    }),
-    hits: rt.array(
-      rt.intersection([
-        rt.type({
-          _index: rt.string,
-          _id: rt.string,
-          _score: NumberOrNullRT,
-          _source: rt.object,
-        }),
-        rt.partial({
-          sort: rt.array(rt.union([rt.string, rt.number])),
-          max_score: NumberOrNullRT,
-        }),
-      ])
-    ),
-  }),
+export const TopMetricsTypeRT = rt.type({
+  top: rt.array(
+    rt.type({
+      sort: rt.union([rt.array(rt.number), rt.array(rt.string)]),
+      metrics: rt.record(rt.string, rt.union([rt.number, rt.string, rt.null])),
+    })
+  ),
 });
 
 export const MetricValueTypeRT = rt.union([
@@ -54,7 +40,7 @@ export const MetricValueTypeRT = rt.union([
   NormalizedMetricValueRT,
   PercentilesTypeRT,
   PercentilesKeyedTypeRT,
-  TopHitsTypeRT,
+  TopMetricsTypeRT,
 ]);
 export type MetricValueType = rt.TypeOf<typeof MetricValueTypeRT>;
 

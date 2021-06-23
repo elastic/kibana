@@ -15,6 +15,13 @@ export const DESTINATION = i18n.translate('xpack.securitySolution.timeline.desti
   defaultMessage: 'Destination',
 });
 
+export const FROM_ITS_ORIGINAL_PATH = i18n.translate(
+  'xpack.securitySolution.timeline.file.fromOriginalPathDescription',
+  {
+    defaultMessage: 'from its original path',
+  }
+);
+
 export const PROTOCOL = i18n.translate('xpack.securitySolution.timeline.protocol', {
   defaultMessage: 'Protocol',
 });

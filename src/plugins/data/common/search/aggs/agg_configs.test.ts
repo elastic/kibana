@@ -14,6 +14,7 @@ import { mockAggTypesRegistry } from './test_helpers';
 import type { IndexPatternField } from '../../index_patterns';
 import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
 import { stubIndexPattern, stubIndexPatternWithFields } from '../../../common/stubs';
+import { IEsSearchResponse } from '..';
 
 describe('AggConfigs', () => {
   let indexPattern: IndexPattern;
@@ -230,7 +231,7 @@ describe('AggConfigs', () => {
   describe('#toDsl', () => {
     beforeEach(() => {
       indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (name as unknown) as IndexPatternField;
+      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
     });
 
     it('uses the sorted aggs', () => {
@@ -332,6 +333,109 @@ describe('AggConfigs', () => {
       });
     });
 
+    it('inserts a time split filters agg if there are multiple time shifts', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'terms',
+          schema: 'segment',
+          params: { field: 'clientip', size: 10 },
+        },
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+        {
+          enabled: true,
+          type: 'sum',
+          schema: 'metric',
+          params: { field: 'bytes', timeShift: '1d' },
+        },
+      ];
+      indexPattern.fields.push({
+        name: 'timestamp',
+        type: 'date',
+        esTypes: ['date'],
+        aggregatable: true,
+        filterable: true,
+        searchable: true,
+      } as IndexPatternField);
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      ac.timeFields = ['timestamp'];
+      ac.timeRange = {
+        from: '2021-05-05T00:00:00.000Z',
+        to: '2021-05-10T00:00:00.000Z',
+      };
+      const dsl = ac.toDsl();
+
+      const terms = ac.byName('terms')[0];
+      const avg = ac.byName('avg')[0];
+      const sum = ac.byName('sum')[0];
+
+      expect(dsl[terms.id].aggs.time_offset_split.filters.filters).toMatchInlineSnapshot(`
+        Object {
+          "0": Object {
+            "range": Object {
+              "timestamp": Object {
+                "gte": "2021-05-05T00:00:00.000Z",
+                "lte": "2021-05-10T00:00:00.000Z",
+              },
+            },
+          },
+          "86400000": Object {
+            "range": Object {
+              "timestamp": Object {
+                "gte": "2021-05-04T00:00:00.000Z",
+                "lte": "2021-05-09T00:00:00.000Z",
+              },
+            },
+          },
+        }
+      `);
+      expect(dsl[terms.id].aggs.time_offset_split.aggs).toHaveProperty(avg.id);
+      expect(dsl[terms.id].aggs.time_offset_split.aggs).toHaveProperty(sum.id);
+    });
+
+    it('does not insert a time split if there is a single time shift', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'terms',
+          schema: 'segment',
+          params: { field: 'clientip', size: 10 },
+        },
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {
+            field: 'bytes',
+            timeShift: '1d',
+          },
+        },
+        {
+          enabled: true,
+          type: 'sum',
+          schema: 'metric',
+          params: { field: 'bytes', timeShift: '1d' },
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      ac.timeFields = ['timestamp'];
+      ac.timeRange = {
+        from: '2021-05-05T00:00:00.000Z',
+        to: '2021-05-10T00:00:00.000Z',
+      };
+      const dsl = ac.toDsl();
+
+      const terms = ac.byName('terms')[0];
+      const avg = ac.byName('avg')[0];
+      const sum = ac.byName('sum')[0];
+
+      expect(dsl[terms.id].aggs).not.toHaveProperty('time_offset_split');
+      expect(dsl[terms.id].aggs).toHaveProperty(avg.id);
+      expect(dsl[terms.id].aggs).toHaveProperty(sum.id);
+    });
+
     it('writes multiple metric aggregations at every level if the vis is hierarchical', () => {
       const configStates = [
         { enabled: true, type: 'terms', schema: 'segment', params: { field: 'bytes', orderBy: 1 } },
@@ -342,8 +446,8 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const topLevelDsl = ac.toDsl(true);
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const topLevelDsl = ac.toDsl();
       const buckets = ac.bySchemaName('buckets');
       const metrics = ac.bySchemaName('metrics');
 
@@ -412,8 +516,8 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const topLevelDsl = ac.toDsl(true)['2'];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const topLevelDsl = ac.toDsl()['2'];
 
       expect(Object.keys(topLevelDsl.aggs)).toContain('1');
       expect(Object.keys(topLevelDsl.aggs)).toContain('1-bucket');
@@ -424,6 +528,248 @@ describe('AggConfigs', () => {
         'buckets_path',
         '1-bucket>_count'
       );
+    });
+  });
+
+  describe('#postFlightTransform', () => {
+    it('merges together splitted responses for multiple shifts', () => {
+      indexPattern = stubIndexPattern as IndexPattern;
+      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      const configStates = [
+        {
+          enabled: true,
+          type: 'terms',
+          schema: 'segment',
+          params: { field: 'clientip', size: 10 },
+        },
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: { field: '@timestamp', interval: '1d' },
+        },
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {
+            field: 'bytes',
+            timeShift: '1d',
+          },
+        },
+        {
+          enabled: true,
+          type: 'sum',
+          schema: 'metric',
+          params: { field: 'bytes' },
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      ac.timeFields = ['@timestamp'];
+      ac.timeRange = {
+        from: '2021-05-05T00:00:00.000Z',
+        to: '2021-05-10T00:00:00.000Z',
+      };
+      // 1 terms bucket (A), with 2 date buckets (7th and 8th of May)
+      // the bucket keys of the shifted time range will be shifted forward
+      const response = {
+        rawResponse: {
+          aggregations: {
+            '1': {
+              buckets: [
+                {
+                  key: 'A',
+                  time_offset_split: {
+                    buckets: {
+                      '0': {
+                        2: {
+                          buckets: [
+                            {
+                              // 2021-05-07
+                              key: 1620345600000,
+                              3: {
+                                value: 1.1,
+                              },
+                              4: {
+                                value: 2.2,
+                              },
+                            },
+                            {
+                              // 2021-05-08
+                              key: 1620432000000,
+                              doc_count: 26,
+                              3: {
+                                value: 3.3,
+                              },
+                              4: {
+                                value: 4.4,
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      '86400000': {
+                        2: {
+                          buckets: [
+                            {
+                              // 2021-05-07
+                              key: 1620345600000,
+                              doc_count: 13,
+                              3: {
+                                value: 5.5,
+                              },
+                              4: {
+                                value: 6.6,
+                              },
+                            },
+                            {
+                              // 2021-05-08
+                              key: 1620432000000,
+                              3: {
+                                value: 7.7,
+                              },
+                              4: {
+                                value: 8.8,
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+      const mergedResponse = ac.postFlightTransform(
+        (response as unknown) as IEsSearchResponse<any>
+      );
+      expect(mergedResponse.rawResponse).toEqual({
+        aggregations: {
+          '1': {
+            buckets: [
+              {
+                '2': {
+                  buckets: [
+                    {
+                      '4': {
+                        value: 2.2,
+                      },
+                      // 2021-05-07
+                      key: 1620345600000,
+                    },
+                    {
+                      '3': {
+                        value: 5.5,
+                      },
+                      '4': {
+                        value: 4.4,
+                      },
+                      doc_count: 26,
+                      doc_count_86400000: 13,
+                      // 2021-05-08
+                      key: 1620432000000,
+                    },
+                    {
+                      '3': {
+                        value: 7.7,
+                      },
+                      // 2021-05-09
+                      key: 1620518400000,
+                    },
+                  ],
+                },
+                key: 'A',
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('shifts date histogram keys and renames doc_count properties for single shift', () => {
+      indexPattern = stubIndexPattern as IndexPattern;
+      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+      const configStates = [
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: { field: '@timestamp', interval: '1d' },
+        },
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {
+            field: 'bytes',
+            timeShift: '1d',
+          },
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      ac.timeFields = ['@timestamp'];
+      ac.timeRange = {
+        from: '2021-05-05T00:00:00.000Z',
+        to: '2021-05-10T00:00:00.000Z',
+      };
+      const response = {
+        rawResponse: {
+          aggregations: {
+            '1': {
+              buckets: [
+                {
+                  // 2021-05-07
+                  key: 1620345600000,
+                  doc_count: 26,
+                  2: {
+                    value: 1.1,
+                  },
+                },
+                {
+                  // 2021-05-08
+                  key: 1620432000000,
+                  doc_count: 27,
+                  2: {
+                    value: 2.2,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+      const mergedResponse = ac.postFlightTransform(
+        (response as unknown) as IEsSearchResponse<any>
+      );
+      expect(mergedResponse.rawResponse).toEqual({
+        aggregations: {
+          '1': {
+            buckets: [
+              {
+                '2': {
+                  value: 1.1,
+                },
+                doc_count_86400000: 26,
+                // 2021-05-08
+                key: 1620432000000,
+              },
+              {
+                '2': {
+                  value: 2.2,
+                },
+                doc_count_86400000: 27,
+                // 2021-05-09
+                key: 1620518400000,
+              },
+            ],
+          },
+        },
+      });
     });
   });
 });

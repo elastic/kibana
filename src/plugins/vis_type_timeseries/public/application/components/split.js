@@ -63,8 +63,9 @@ export class Split extends Component {
 
   render() {
     const { model, panel, uiRestrictions, seriesQuantity } = this.props;
-    const indexPattern =
-      (model.override_index_pattern && model.series_index_pattern) || panel.index_pattern;
+    const indexPattern = model.override_index_pattern
+      ? model.series_index_pattern
+      : panel.index_pattern;
     const splitMode = get(this.props, 'model.split_mode', SPLIT_MODES.EVERYTHING);
     const Component = this.getComponent(splitMode, uiRestrictions);
 

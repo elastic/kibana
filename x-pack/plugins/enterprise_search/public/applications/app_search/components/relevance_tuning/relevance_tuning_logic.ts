@@ -8,9 +8,13 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
-import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  setSuccessMessage,
+  flashAPIErrors,
+  clearFlashMessages,
+} from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/types';
+import { Schema, SchemaConflicts } from '../../../shared/schema/types';
 
 import { EngineLogic } from '../engine';
 import { Result } from '../result/types';
@@ -20,19 +24,21 @@ import {
   RESET_CONFIRMATION_MESSAGE,
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
+  BOOST_TYPE_TO_EMPTY_BOOST,
 } from './constants';
-import { BaseBoost, Boost, BoostType, SearchSettings } from './types';
+import { Boost, BoostFunction, BoostOperation, BoostType, SearchSettings } from './types';
 import {
   filterIfTerm,
   parseBoostCenter,
   removeBoostStateProps,
   normalizeBoostValues,
+  removeEmptyValueBoosts,
 } from './utils';
 
 interface RelevanceTuningProps {
   searchSettings: SearchSettings;
   schema: Schema;
-  schemaConflicts: SchemaConflicts;
+  schemaConflicts?: SchemaConflicts;
 }
 
 interface RelevanceTuningActions {
@@ -44,7 +50,6 @@ interface RelevanceTuningActions {
   setResultsLoading(resultsLoading: boolean): boolean;
   clearSearchResults(): void;
   resetSearchSettingsState(): void;
-  dismissSchemaConflictCallout(): void;
   initializeRelevanceTuning(): void;
   getSearchResults(): void;
   setSearchSettingsResponse(searchSettings: SearchSettings): { searchSettings: SearchSettings };
@@ -64,29 +69,22 @@ interface RelevanceTuningActions {
   updateBoostValue(
     name: string,
     boostIndex: number,
-    valueIndex: number,
-    value: string
-  ): { name: string; boostIndex: number; valueIndex: number; value: string };
+    updatedValues: string[]
+  ): { name: string; boostIndex: number; updatedValues: string[] };
   updateBoostCenter(
     name: string,
     boostIndex: number,
     value: string | number
   ): { name: string; boostIndex: number; value: string | number };
-  addBoostValue(name: string, boostIndex: number): { name: string; boostIndex: number };
-  removeBoostValue(
-    name: string,
-    boostIndex: number,
-    valueIndex: number
-  ): { name: string; boostIndex: number; valueIndex: number };
   updateBoostSelectOption(
     name: string,
     boostIndex: number,
-    optionType: keyof BaseBoost,
-    value: string
+    optionType: keyof Pick<Boost, 'operation' | 'function'>,
+    value: BoostOperation | BoostFunction
   ): {
     name: string;
     boostIndex: number;
-    optionType: keyof BaseBoost;
+    optionType: keyof Pick<Boost, 'operation' | 'function'>;
     value: string;
   };
   updateSearchValue(query: string): string;
@@ -100,7 +98,6 @@ interface RelevanceTuningValues {
   filteredSchemaFields: string[];
   filteredSchemaFieldsWithConflicts: string[];
   schemaConflicts: SchemaConflicts;
-  showSchemaConflictCallout: boolean;
   engineHasSchemaFields: boolean;
   filterInputValue: string;
   query: string;
@@ -123,7 +120,6 @@ export const RelevanceTuningLogic = kea<
     setResultsLoading: (resultsLoading) => resultsLoading,
     clearSearchResults: true,
     resetSearchSettingsState: true,
-    dismissSchemaConflictCallout: true,
     initializeRelevanceTuning: true,
     getSearchResults: true,
     setSearchSettingsResponse: (searchSettings) => ({
@@ -138,15 +134,8 @@ export const RelevanceTuningLogic = kea<
     addBoost: (name, type) => ({ name, type }),
     deleteBoost: (name, index) => ({ name, index }),
     updateBoostFactor: (name, index, factor) => ({ name, index, factor }),
-    updateBoostValue: (name, boostIndex, valueIndex, value) => ({
-      name,
-      boostIndex,
-      valueIndex,
-      value,
-    }),
+    updateBoostValue: (name, boostIndex, updatedValues) => ({ name, boostIndex, updatedValues }),
     updateBoostCenter: (name, boostIndex, value) => ({ name, boostIndex, value }),
-    addBoostValue: (name, boostIndex) => ({ name, boostIndex }),
-    removeBoostValue: (name, boostIndex, valueIndex) => ({ name, boostIndex, valueIndex }),
     updateBoostSelectOption: (name, boostIndex, optionType, value) => ({
       name,
       boostIndex,
@@ -176,13 +165,7 @@ export const RelevanceTuningLogic = kea<
     schemaConflicts: [
       {},
       {
-        onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts,
-      },
-    ],
-    showSchemaConflictCallout: [
-      true,
-      {
-        dismissSchemaConflictCallout: () => false,
+        onInitializeRelevanceTuning: (_, { schemaConflicts }) => schemaConflicts || {},
       },
     ],
     filterInputValue: [
@@ -281,18 +264,21 @@ export const RelevanceTuningLogic = kea<
 
       actions.setResultsLoading(true);
 
+      const filteredBoosts = removeEmptyValueBoosts(boosts);
+
       try {
         const response = await http.post(url, {
           query: {
             query,
           },
           body: JSON.stringify({
-            boosts: isEmpty(boosts) ? undefined : boosts,
+            boosts: isEmpty(filteredBoosts) ? undefined : filteredBoosts,
             search_fields: isEmpty(searchFields) ? undefined : searchFields,
           }),
         });
 
         actions.setSearchResults(response.results);
+        clearFlashMessages();
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -323,6 +309,12 @@ export const RelevanceTuningLogic = kea<
       } catch (e) {
         flashAPIErrors(e);
         actions.onSearchSettingsError();
+      } finally {
+        const { invalidBoosts, unsearchedUnconfirmedFields } = EngineLogic.values.engine;
+        if (invalidBoosts || unsearchedUnconfirmedFields) {
+          // Re-fetch engine data so that any navigation flags are updated dynamically
+          EngineLogic.actions.initializeEngine();
+        }
       }
     },
     resetSearchSettings: async () => {
@@ -372,7 +364,7 @@ export const RelevanceTuningLogic = kea<
     addBoost: ({ name, type }) => {
       const { searchSettings } = values;
       const { boosts } = searchSettings;
-      const emptyBoost = { type, factor: 1, newBoost: true };
+      const emptyBoost = BOOST_TYPE_TO_EMPTY_BOOST[type];
       let boostArray;
 
       if (Array.isArray(boosts[name])) {
@@ -424,16 +416,11 @@ export const RelevanceTuningLogic = kea<
         },
       });
     },
-    updateBoostValue: ({ name, boostIndex, valueIndex, value }) => {
+    updateBoostValue: ({ name, boostIndex, updatedValues }) => {
       const { searchSettings } = values;
       const { boosts } = searchSettings;
       const updatedBoosts: Boost[] = cloneDeep(boosts[name]);
-      const existingValue = updatedBoosts[boostIndex].value;
-      if (existingValue === undefined) {
-        updatedBoosts[boostIndex].value = [value];
-      } else {
-        existingValue[valueIndex] = value;
-      }
+      updatedBoosts[boostIndex].value = updatedValues;
 
       actions.setSearchSettings({
         ...searchSettings,
@@ -458,46 +445,15 @@ export const RelevanceTuningLogic = kea<
         },
       });
     },
-    addBoostValue: ({ name, boostIndex }) => {
-      const { searchSettings } = values;
-      const { boosts } = searchSettings;
-      const updatedBoosts = cloneDeep(boosts[name]);
-      const updatedBoost = updatedBoosts[boostIndex];
-      if (updatedBoost) {
-        updatedBoost.value = Array.isArray(updatedBoost.value) ? updatedBoost.value : [''];
-        updatedBoost.value.push('');
-      }
-
-      actions.setSearchSettings({
-        ...searchSettings,
-        boosts: {
-          ...boosts,
-          [name]: updatedBoosts,
-        },
-      });
-    },
-    removeBoostValue: ({ name, boostIndex, valueIndex }) => {
-      const { searchSettings } = values;
-      const { boosts } = searchSettings;
-      const updatedBoosts = cloneDeep(boosts[name]);
-      const boostValue = updatedBoosts[boostIndex].value;
-
-      if (boostValue === undefined) return;
-
-      boostValue.splice(valueIndex, 1);
-      actions.setSearchSettings({
-        ...searchSettings,
-        boosts: {
-          ...boosts,
-          [name]: updatedBoosts,
-        },
-      });
-    },
     updateBoostSelectOption: ({ name, boostIndex, optionType, value }) => {
       const { searchSettings } = values;
       const { boosts } = searchSettings;
       const updatedBoosts = cloneDeep(boosts[name]);
-      updatedBoosts[boostIndex][optionType] = value;
+      if (optionType === 'operation') {
+        updatedBoosts[boostIndex][optionType] = value as BoostOperation;
+      } else {
+        updatedBoosts[boostIndex][optionType] = value as BoostFunction;
+      }
 
       actions.setSearchSettings({
         ...searchSettings,

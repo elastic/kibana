@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import {
+  normalizeMachineLearningJobIds,
+  normalizeThresholdObject,
+} from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { Alert } from '../../../../../alerts/common';
+import { SanitizedAlert } from '../../../../../alerting/common';
 import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
@@ -47,6 +51,7 @@ export const createRules = async ({
   threat,
   threatFilters,
   threatIndex,
+  threatIndicatorPath,
   threatLanguage,
   concurrentSearches,
   itemsPerSearch,
@@ -61,7 +66,7 @@ export const createRules = async ({
   version,
   exceptionsList,
   actions,
-}: CreateRulesOptions): Promise<Alert<RuleTypeParams>> => {
+}: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
   return alertsClient.create<RuleTypeParams>({
     data: {
       name,
@@ -87,7 +92,9 @@ export const createRules = async ({
         timelineId,
         timelineTitle,
         meta,
-        machineLearningJobId,
+        machineLearningJobId: machineLearningJobId
+          ? normalizeMachineLearningJobIds(machineLearningJobId)
+          : undefined,
         filters,
         maxSignals,
         riskScore,
@@ -96,12 +103,13 @@ export const createRules = async ({
         severity,
         severityMapping,
         threat,
-        threshold,
+        threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
         /**
          * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
          */
         threatFilters: threatFilters as PartialFilter[] | undefined,
         threatIndex,
+        threatIndicatorPath,
         threatQuery,
         concurrentSearches,
         itemsPerSearch,

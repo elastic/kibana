@@ -6,6 +6,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isRuntimeField } from './utils/runtime_field_utils';
+
+export const analyzeFileQuerySchema = schema.object({
+  charset: schema.maybe(schema.string()),
+  column_names: schema.maybe(schema.string()),
+  delimiter: schema.maybe(schema.string()),
+  explain: schema.maybe(schema.string()),
+  format: schema.maybe(schema.string()),
+  grok_pattern: schema.maybe(schema.string()),
+  has_header_row: schema.maybe(schema.string()),
+  line_merge_size_limit: schema.maybe(schema.string()),
+  lines_to_sample: schema.maybe(schema.string()),
+  quote: schema.maybe(schema.string()),
+  should_trim_fields: schema.maybe(schema.string()),
+  timeout: schema.maybe(schema.string()),
+  timestamp_field: schema.maybe(schema.string()),
+  timestamp_format: schema.maybe(schema.string()),
+});
 
 export const importFileQuerySchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -23,3 +41,15 @@ export const importFileBodySchema = schema.object({
     pipeline: schema.maybe(schema.any()),
   }),
 });
+
+export const runtimeMappingsSchema = schema.object(
+  {},
+  {
+    unknowns: 'allow',
+    validate: (v: object) => {
+      if (Object.values(v).some((o) => !isRuntimeField(o))) {
+        return 'Invalid runtime field';
+      }
+    },
+  }
+);

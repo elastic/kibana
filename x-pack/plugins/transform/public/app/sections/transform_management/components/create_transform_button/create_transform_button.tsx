@@ -18,15 +18,20 @@ import {
 
 interface CreateTransformButtonProps {
   onClick: MouseEventHandler<HTMLButtonElement>;
+  transformNodes: number;
 }
 
-export const CreateTransformButton: FC<CreateTransformButtonProps> = ({ onClick }) => {
+export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
+  onClick,
+  transformNodes,
+}) => {
   const { capabilities } = useContext(AuthorizationContext);
 
   const disabled =
     !capabilities.canCreateTransform ||
     !capabilities.canPreviewTransform ||
-    !capabilities.canStartStopTransform;
+    !capabilities.canStartStopTransform ||
+    transformNodes === 0;
 
   const createTransformButton = (
     <EuiButton
@@ -45,7 +50,12 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({ onClick 
 
   if (disabled) {
     return (
-      <EuiToolTip position="top" content={createCapabilityFailureMessage('canCreateTransform')}>
+      <EuiToolTip
+        position="top"
+        content={createCapabilityFailureMessage(
+          transformNodes > 0 ? 'canCreateTransform' : 'noTransformNodes'
+        )}
+      >
         {createTransformButton}
       </EuiToolTip>
     );

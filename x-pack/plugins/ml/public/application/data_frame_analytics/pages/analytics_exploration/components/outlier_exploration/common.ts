@@ -20,8 +20,8 @@ export const getFeatureCount = (resultsField: string, tableItems: DataGridItem[]
 
   const fullItem = tableItems[0];
 
-  if (Array.isArray(fullItem[`${resultsField}.${FEATURE_INFLUENCE}.feature_name`])) {
-    return fullItem[`${resultsField}.${FEATURE_INFLUENCE}.feature_name`].length;
+  if (Array.isArray(fullItem[`${resultsField}.${FEATURE_INFLUENCE}`])) {
+    return fullItem[`${resultsField}.${FEATURE_INFLUENCE}`].length;
   }
 
   return 0;

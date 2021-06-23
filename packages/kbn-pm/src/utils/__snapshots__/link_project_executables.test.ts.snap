@@ -11,6 +11,7 @@ Object {
   "mkdirp": Array [],
   "readFile": Array [],
   "rmdirp": Array [],
+  "tryRealpath": Array [],
   "unlink": Array [],
   "writeFile": Array [],
 }
@@ -27,6 +28,7 @@ Object {
   "mkdirp": Array [],
   "readFile": Array [],
   "rmdirp": Array [],
+  "tryRealpath": Array [],
   "unlink": Array [],
   "writeFile": Array [],
 }

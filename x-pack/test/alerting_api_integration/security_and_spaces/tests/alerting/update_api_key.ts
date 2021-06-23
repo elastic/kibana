@@ -36,18 +36,18 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
       describe(scenario.id, () => {
         it('should handle update alert api key request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'MY action',
-              actionTypeId: 'test.noop',
+              connector_type_id: 'test.noop',
               config: {},
               secrets: {},
             })
             .expect(200);
 
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -61,7 +61,7 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
           switch (scenario.id) {
@@ -93,11 +93,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              expect(updatedAlert.api_key_owner).to.eql(user.username);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -113,16 +113,16 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
         it('should handle update alert api key request appropriately when consumer is the same as producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
           switch (scenario.id) {
@@ -147,11 +147,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              expect(updatedAlert.api_key_owner).to.eql(user.username);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -167,16 +167,16 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
         it('should handle update alert api key request appropriately when consumer is not the producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.unrestricted-noop',
+                rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
           switch (scenario.id) {
@@ -212,11 +212,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              expect(updatedAlert.api_key_owner).to.eql(user.username);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -232,16 +232,16 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
         it('should handle update alert api key request appropriately when consumer is "alerts"', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
           switch (scenario.id) {
@@ -277,11 +277,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              expect(updatedAlert.api_key_owner).to.eql(user.username);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -297,11 +297,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
         it('should still be able to update API key when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await retry.try(async () => {
             await supertest
@@ -341,11 +341,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.apiKeyOwner).to.eql(user.username);
+              expect(updatedAlert.api_key_owner).to.eql(user.username);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -361,11 +361,11 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
 
         it(`shouldn't update alert api key from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix('other')}/api/alerts/alert`)
+            .post(`${getUrlPrefix('other')}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert', 'alerts');
+          objectRemover.add('other', createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
 

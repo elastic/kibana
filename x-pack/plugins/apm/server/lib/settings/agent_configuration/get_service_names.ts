@@ -50,7 +50,10 @@ export async function getServiceNames({
     },
   };
 
-  const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search(
+    'get_service_names_for_agent_config',
+    params
+  );
   const serviceNames =
     resp.aggregations?.services.buckets
       .map((bucket) => bucket.key as string)

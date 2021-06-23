@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import type { IRouter } from 'src/core/server';
+import { get } from 'lodash';
+
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 
 type RequestHandler = (...params: any[]) => any;
 
@@ -48,7 +51,7 @@ export interface RequestMock {
   [key: string]: any;
 }
 
-export class RouterMock {
+export class RouterMock implements IRouter {
   /**
    * Cache to keep a reference to all the request handler defined on the router for each HTTP method and path
    */
@@ -60,15 +63,13 @@ export class RouterMock {
     patch: {},
   };
 
-  private _callAsCurrentUserCallCount = 0;
-  private _callAsCurrentUserResponses: any[] = [];
-  private contextMock = {};
+  public contextMock = {
+    core: { elasticsearch: { client: elasticsearchServiceMock.createScopedClusterClient() } },
+  };
 
-  constructor(pathToESclient = 'core.elasticsearch.dataClient') {
-    set(this.contextMock, pathToESclient, {
-      callAsCurrentUser: this.callAsCurrentUser.bind(this),
-    });
-  }
+  getRoutes = jest.fn();
+  handleLegacyErrors = jest.fn();
+  routerPath = '';
 
   get({ path }: { path: string }, handler: RequestHandler) {
     this.cacheHandlers.get[path] = handler;
@@ -90,17 +91,8 @@ export class RouterMock {
     this.cacheHandlers.patch[path] = handler;
   }
 
-  private callAsCurrentUser() {
-    const index = this._callAsCurrentUserCallCount;
-    this._callAsCurrentUserCallCount += 1;
-    const response = this._callAsCurrentUserResponses[index];
-
-    return typeof response === 'function' ? Promise.resolve(response()) : Promise.resolve(response);
-  }
-
-  public set callAsCurrentUserResponses(responses: any[]) {
-    this._callAsCurrentUserCallCount = 0;
-    this._callAsCurrentUserResponses = responses;
+  getMockApiFn(path: string): jest.Mock {
+    return get(this.contextMock.core.elasticsearch.client.asCurrentUser, path);
   }
 
   runRequest({ method, path, ...mockRequest }: RequestMock) {

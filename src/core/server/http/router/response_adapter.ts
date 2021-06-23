@@ -14,6 +14,8 @@ import typeDetect from 'type-detect';
 import Boom from '@hapi/boom';
 import * as stream from 'stream';
 
+import { isResponseError as isElasticsearchResponseError } from '../../elasticsearch/client/errors';
+
 import {
   HttpResponsePayload,
   KibanaResponse,
@@ -28,6 +30,7 @@ function setHeaders(response: HapiResponseObject, headers: Record<string, string
       response.header(header, value as any);
     }
   });
+  applyEtag(response, headers);
   return response;
 }
 
@@ -39,6 +42,7 @@ const statusHelpers = {
 
 export class HapiResponseAdapter {
   constructor(private readonly responseToolkit: HapiResponseToolkit) {}
+
   public toBadRequest(message: string) {
     const error = Boom.badRequest();
     error.output.payload.message = message;
@@ -68,6 +72,9 @@ export class HapiResponseAdapter {
   }
 
   private toHapiResponse(kibanaResponse: KibanaResponse) {
+    if (kibanaResponse.options.bypassErrorFormat) {
+      return this.toSuccess(kibanaResponse);
+    }
     if (statusHelpers.isError(kibanaResponse.status)) {
       return this.toError(kibanaResponse);
     }
@@ -115,6 +122,7 @@ export class HapiResponseAdapter {
         .response(kibanaResponse.payload)
         .code(kibanaResponse.status);
       setHeaders(response, kibanaResponse.options.headers);
+
       return response;
     }
 
@@ -144,9 +152,21 @@ function getErrorMessage(payload?: ResponseError): string {
     throw new Error('expected error message to be provided');
   }
   if (typeof payload === 'string') return payload;
+  // for ES response errors include nested error reason message. it doesn't contain sensitive data.
+  if (isElasticsearchResponseError(payload)) {
+    return `[${payload.message}]: ${payload.meta.body?.error?.reason}`;
+  }
+
   return getErrorMessage(payload.message);
 }
 
 function getErrorAttributes(payload?: ResponseError): ResponseErrorAttributes | undefined {
   return typeof payload === 'object' && 'attributes' in payload ? payload.attributes : undefined;
+}
+
+function applyEtag(response: HapiResponseObject, headers: Record<string, string | string[]>) {
+  const etagHeader = Object.keys(headers).find((header) => header.toLowerCase() === 'etag');
+  if (etagHeader) {
+    response.etag(headers[etagHeader] as string);
+  }
 }

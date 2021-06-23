@@ -33,6 +33,30 @@ import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
+
+jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ params }) => {
@@ -77,6 +101,11 @@ const defaultOptions = {
       { name: sourceField, type: 'number', displayName: sourceField },
     ]),
   },
+  operationDefinitionMap: {},
+  isFullscreen: false,
+  toggleFullscreen: jest.fn(),
+  setIsCloseable: jest.fn(),
+  layerId: '1',
 };
 
 describe('ranges', () => {
@@ -147,7 +176,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
@@ -194,7 +224,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
       expect(esAggsFn).toEqual(
@@ -215,7 +246,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
       expect(esAggsFn).toEqual(
@@ -236,7 +268,8 @@ describe('ranges', () => {
         'col1',
         {} as IndexPattern,
         layer,
-        uiSettingsMock
+        uiSettingsMock,
+        []
       );
 
       expect((esAggsFn as { arguments: unknown }).arguments).toEqual(

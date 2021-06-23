@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-
+import type { estypes } from '@elastic/elasticsearch';
 import { HostAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts/authentications';
 import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
 
@@ -33,7 +33,10 @@ export const buildQuery = ({
   defaultIndex,
   docValueFields,
 }: HostAuthenticationsRequestOptions) => {
-  const esFields = reduceFields(authenticationsFields, { ...hostFieldsMap, ...sourceFieldsMap });
+  const esFields = reduceFields(authenticationsFields, {
+    ...hostFieldsMap,
+    ...sourceFieldsMap,
+  }) as string[];
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -69,7 +72,10 @@ export const buildQuery = ({
           terms: {
             size: querySize,
             field: 'user.name',
-            order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
+            order: [
+              { 'successes.doc_count': 'desc' as const },
+              { 'failures.doc_count': 'desc' as const },
+            ] as estypes.AggregationsTermsAggregationOrder,
           },
           aggs: {
             failures: {
@@ -83,7 +89,7 @@ export const buildQuery = ({
                   top_hits: {
                     size: 1,
                     _source: esFields,
-                    sort: [{ '@timestamp': { order: 'desc' } }],
+                    sort: [{ '@timestamp': { order: 'desc' as const } }],
                   },
                 },
               },
@@ -99,7 +105,7 @@ export const buildQuery = ({
                   top_hits: {
                     size: 1,
                     _source: esFields,
-                    sort: [{ '@timestamp': { order: 'desc' } }],
+                    sort: [{ '@timestamp': { order: 'desc' as const } }],
                   },
                 },
               },

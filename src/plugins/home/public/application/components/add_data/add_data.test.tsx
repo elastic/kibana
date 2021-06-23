@@ -9,6 +9,7 @@
 import React from 'react';
 import { AddData } from './add_data';
 import { shallowWithIntl } from '@kbn/test/jest';
+import { FeatureCatalogueEntry, FeatureCatalogueCategory } from '../../../services';
 
 jest.mock('../app_navigation_handler', () => {
   return {
@@ -28,9 +29,9 @@ beforeEach(() => {
 
 const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
-const mockFeatures = [
+const mockFeatures: FeatureCatalogueEntry[] = [
   {
-    category: 'data',
+    category: FeatureCatalogueCategory.DATA,
     description: 'Ingest data from popular apps and services.',
     showOnHomePage: true,
     icon: 'indexOpen',
@@ -40,7 +41,7 @@ const mockFeatures = [
     title: 'Ingest data',
   },
   {
-    category: 'admin',
+    category: FeatureCatalogueCategory.ADMIN,
     description: 'Add and manage your fleet of Elastic Agents and integrations.',
     showOnHomePage: true,
     icon: 'indexManagementApp',
@@ -50,7 +51,7 @@ const mockFeatures = [
     title: 'Add Elastic Agent',
   },
   {
-    category: 'data',
+    category: FeatureCatalogueCategory.DATA,
     description: 'Import your own CSV, NDJSON, or log file',
     showOnHomePage: true,
     icon: 'document',

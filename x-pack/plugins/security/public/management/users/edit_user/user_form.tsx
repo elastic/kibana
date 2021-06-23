@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,25 +18,31 @@ import {
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
+import { throttle } from 'lodash';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { throttle } from 'lodash';
+
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { User, Role, isRoleDeprecated } from '../../../../common/model';
-import { NAME_REGEX, MAX_NAME_LENGTH } from '../../../../common/constants';
-import { useForm, ValidationErrors } from '../../../components/use_form';
+import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
+import type { Role, User } from '../../../../common/model';
+import { isRoleDeprecated } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
-import { RolesAPIClient } from '../../roles';
+import type { ValidationErrors } from '../../../components/use_form';
+import { useForm } from '../../../components/use_form';
 import { RoleComboBox } from '../../role_combo_box';
-import { UserAPIClient } from '..';
+import { RolesAPIClient } from '../../roles';
+import { UserAPIClient } from '../user_api_client';
 
 export const THROTTLE_USERS_WAIT = 10000;
 
 export interface UserFormValues {
   username?: string;
-  full_name: string;
-  email: string;
+  full_name?: string;
+  email?: string;
   password?: string;
   confirm_password?: string;
   roles: readonly string[];
@@ -257,6 +262,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         >
           <EuiFieldText
             name="username"
+            data-test-subj={'userFormUserNameInput'}
             icon="user"
             value={form.values.username}
             isLoading={form.isValidating}
@@ -278,6 +284,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             >
               <EuiFieldText
                 name="full_name"
+                data-test-subj={'userFormFullNameInput'}
                 value={form.values.full_name}
                 isInvalid={form.touched.full_name && !!form.errors.full_name}
                 onChange={eventHandlers.onChange}
@@ -293,6 +300,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             >
               <EuiFieldText
                 name="email"
+                data-test-subj={'userFormEmailInput'}
                 value={form.values.email}
                 isInvalid={form.touched.email && !!form.errors.email}
                 onChange={eventHandlers.onChange}
@@ -332,6 +340,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           >
             <EuiFieldPassword
               name="password"
+              data-test-subj={'passwordInput'}
               type="dual"
               value={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
@@ -349,6 +358,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           >
             <EuiFieldPassword
               name="confirm_password"
+              data-test-subj={'passwordConfirmationInput'}
               type="dual"
               value={form.values.confirm_password}
               isInvalid={form.touched.confirm_password && !!form.errors.confirm_password}

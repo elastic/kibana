@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
 
@@ -25,7 +25,6 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
-  EuiOverlayMask,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -101,7 +100,7 @@ export interface FieldEditorState {
   isReady: boolean;
   isCreating: boolean;
   isDeprecatedLang: boolean;
-  scriptingLangs: string[];
+  scriptingLangs: estypes.ScriptLanguage[];
   fieldTypes: string[];
   fieldTypeFormats: FieldTypeFormat[];
   existingFieldNames: string[];
@@ -132,8 +131,8 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   public readonly context!: IndexPatternManagmentContextValue;
 
-  supportedLangs: string[] = [];
-  deprecatedLangs: string[] = [];
+  supportedLangs: estypes.ScriptLanguage[] = [];
+  deprecatedLangs: estypes.ScriptLanguage[] = [];
   constructor(props: FieldEdiorProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
@@ -190,6 +189,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.setState({
       isReady: true,
       isCreating: !indexPattern.fields.getByName(spec.name),
+      // @ts-expect-error '' is not a valid ScriptLanguage
       isDeprecatedLang: this.deprecatedLangs.includes(spec.lang || ''),
       errors: [],
       scriptingLangs,
@@ -225,7 +225,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     });
   };
 
-  onLangChange = (lang: string) => {
+  onLangChange = (lang: estypes.ScriptLanguage) => {
     const { spec } = this.state;
     const fieldTypes = get(FIELD_TYPES_BY_LANG, lang, DEFAULT_FIELD_TYPES);
     spec.lang = lang;
@@ -374,7 +374,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           })}
           data-test-subj="editorFieldLang"
           onChange={(e) => {
-            this.onLangChange(e.target.value);
+            this.onLangChange(e.target.value as estypes.ScriptLanguage);
           }}
         />
       </EuiFormRow>
@@ -488,7 +488,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderFormat() {
     const { spec, fieldTypeFormats, fieldFormatId, fieldFormatParams, format } = this.state;
-    const { indexPatternManagementStart } = this.context.services;
+    const { fieldFormatEditors } = this.context.services;
     const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
 
     const label = defaultFormat ? (
@@ -532,7 +532,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams || {}}
-            fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}
+            fieldFormatEditors={fieldFormatEditors}
             onChange={this.onFormatParamsChange}
             onError={this.onFormatParamsError}
           />
@@ -643,42 +643,40 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec } = this.state;
 
     return this.state.showDeleteModal ? (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
-            defaultMessage: "Delete field '{fieldName}'",
-            values: { fieldName: spec.name },
-          })}
-          onCancel={this.hideDeleteModal}
-          onConfirm={() => {
-            this.hideDeleteModal();
-            this.deleteField();
-          }}
-          cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
-            defaultMessage: 'Delete',
-          })}
-          buttonColor="danger"
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        >
-          <p>
-            <FormattedMessage
-              id="indexPatternManagement.deleteFieldLabel"
-              defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
-              values={{
-                separator: (
-                  <span>
-                    <br />
-                    <br />
-                  </span>
-                ),
-              }}
-            />
-          </p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={i18n.translate('indexPatternManagement.deleteFieldHeader', {
+          defaultMessage: "Delete field '{fieldName}'",
+          values: { fieldName: spec.name },
+        })}
+        onCancel={this.hideDeleteModal}
+        onConfirm={() => {
+          this.hideDeleteModal();
+          this.deleteField();
+        }}
+        cancelButtonText={i18n.translate('indexPatternManagement.deleteField.cancelButton', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('indexPatternManagement.deleteField.deleteButton', {
+          defaultMessage: 'Delete',
+        })}
+        buttonColor="danger"
+        defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+      >
+        <p>
+          <FormattedMessage
+            id="indexPatternManagement.deleteFieldLabel"
+            defaultMessage="You can't recover a deleted field.{separator}Are you sure you want to do this?"
+            values={{
+              separator: (
+                <span>
+                  <br />
+                  <br />
+                </span>
+              ),
+            }}
+          />
+        </p>
+      </EuiConfirmModal>
     ) : null;
   };
 

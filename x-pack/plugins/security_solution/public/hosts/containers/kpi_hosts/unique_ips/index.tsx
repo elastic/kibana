@@ -8,7 +8,10 @@
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { Subscription } from 'rxjs';
 
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -20,7 +23,6 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -49,10 +51,13 @@ export const useHostsKpiUniqueIps = ({
   skip = false,
   startDate,
 }: UseHostsKpiUniqueIps): [boolean, HostsKpiUniqueIpsArgs] => {
-  const { data, notifications } = useKibana().services;
+  const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
+  const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
+  const { getTransformChangesIfTheyExist } = useTransforms();
+
   const [
     hostsKpiUniqueIpsRequest,
     setHostsKpiUniqueIpsRequest,
@@ -73,6 +78,7 @@ export const useHostsKpiUniqueIps = ({
       refetch: refetch.current,
     }
   );
+  const { addError, addWarning } = useAppToasts();
 
   const hostsKpiUniqueIpsSearch = useCallback(
     (request: HostsKpiUniqueIpsRequestOptions | null) => {
@@ -80,12 +86,10 @@ export const useHostsKpiUniqueIps = ({
         return;
       }
 
-      let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
         setLoading(true);
-
-        const searchSubscription$ = data.search
+        searchSubscription$.current = data.search
           .search<HostsKpiUniqueIpsRequestOptions, HostsKpiUniqueIpsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
@@ -93,71 +97,72 @@ export const useHostsKpiUniqueIps = ({
           .subscribe({
             next: (response) => {
               if (!response.isPartial && !response.isRunning) {
-                if (!didCancel) {
-                  setLoading(false);
-                  setHostsKpiUniqueIpsResponse((prevResponse) => ({
-                    ...prevResponse,
-                    uniqueSourceIps: response.uniqueSourceIps,
-                    uniqueSourceIpsHistogram: response.uniqueSourceIpsHistogram,
-                    uniqueDestinationIps: response.uniqueDestinationIps,
-                    uniqueDestinationIpsHistogram: response.uniqueDestinationIpsHistogram,
-                    inspect: getInspectResponse(response, prevResponse.inspect),
-                    refetch: refetch.current,
-                  }));
-                }
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                setHostsKpiUniqueIpsResponse((prevResponse) => ({
+                  ...prevResponse,
+                  uniqueSourceIps: response.uniqueSourceIps,
+                  uniqueSourceIpsHistogram: response.uniqueSourceIpsHistogram,
+                  uniqueDestinationIps: response.uniqueDestinationIps,
+                  uniqueDestinationIpsHistogram: response.uniqueDestinationIpsHistogram,
+                  inspect: getInspectResponse(response, prevResponse.inspect),
+                  refetch: refetch.current,
+                }));
+                searchSubscription$.current.unsubscribe();
               } else if (response.isPartial && !response.isRunning) {
-                if (!didCancel) {
-                  setLoading(false);
-                }
-                // TODO: Make response error status clearer
-                notifications.toasts.addWarning(i18n.ERROR_HOSTS_KPI_UNIQUE_IPS);
-                searchSubscription$.unsubscribe();
+                setLoading(false);
+                addWarning(i18n.ERROR_HOSTS_KPI_UNIQUE_IPS);
+                searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
-              if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
-                  title: i18n.FAIL_HOSTS_KPI_UNIQUE_IPS,
-                  text: msg.message,
-                });
-              }
+              setLoading(false);
+              addError(msg, {
+                title: i18n.FAIL_HOSTS_KPI_UNIQUE_IPS,
+              });
+              searchSubscription$.current.unsubscribe();
             },
           });
       };
+      searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       asyncSearch();
       refetch.current = asyncSearch;
-      return () => {
-        didCancel = true;
-        abortCtrl.current.abort();
-      };
     },
-    [data.search, notifications.toasts, skip]
+    [data.search, addError, addWarning, skip]
   );
 
   useEffect(() => {
+    const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+      indices: indexNames,
+      filterQuery,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+    });
     setHostsKpiUniqueIpsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate, getTransformChangesIfTheyExist]);
 
   useEffect(() => {
     hostsKpiUniqueIpsSearch(hostsKpiUniqueIpsRequest);
+    return () => {
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    };
   }, [hostsKpiUniqueIpsRequest, hostsKpiUniqueIpsSearch]);
 
   return [loading, hostsKpiUniqueIpsResponse];

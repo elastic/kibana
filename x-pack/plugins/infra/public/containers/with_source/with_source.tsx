@@ -9,17 +9,19 @@ import React, { useContext } from 'react';
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
-  InfraSavedSourceConfiguration,
-  InfraSourceConfiguration,
-} from '../../../common/http_api/source_api';
+  MetricsSourceConfigurationProperties,
+  PartialMetricsSourceConfigurationProperties,
+} from '../../../common/metrics_sources';
 import { RendererFunction } from '../../utils/typed_react';
-import { Source } from '../source';
+import { Source } from '../metrics_source';
 
 interface WithSourceProps {
   children: RendererFunction<{
-    configuration?: InfraSourceConfiguration;
-    create: (sourceProperties: InfraSavedSourceConfiguration) => Promise<any> | undefined;
-    createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
+    configuration?: MetricsSourceConfigurationProperties;
+    create: (
+      sourceProperties: PartialMetricsSourceConfigurationProperties
+    ) => Promise<any> | undefined;
+    createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
     exists?: boolean;
     hasFailed: boolean;
     isLoading: boolean;
@@ -29,7 +31,9 @@ interface WithSourceProps {
     metricAlias?: string;
     metricIndicesExist?: boolean;
     sourceId: string;
-    update: (sourceProperties: InfraSavedSourceConfiguration) => Promise<any> | undefined;
+    update: (
+      sourceProperties: PartialMetricsSourceConfigurationProperties
+    ) => Promise<any> | undefined;
     version?: string;
   }>;
 }
@@ -42,7 +46,6 @@ export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children 
     sourceExists,
     sourceId,
     metricIndicesExist,
-    logIndicesExist,
     isLoading,
     loadSource,
     hasFailedLoadingSource,
@@ -60,7 +63,6 @@ export const WithSource: React.FunctionComponent<WithSourceProps> = ({ children 
     isLoading,
     lastFailureMessage: loadSourceFailureMessage,
     load: loadSource,
-    logIndicesExist,
     metricIndicesExist,
     sourceId,
     update: updateSourceConfiguration,

@@ -18,7 +18,7 @@ const I18N_RC = '.i18nrc.json';
 
 export async function getTranslationPaths({ cwd, nested }: { cwd: string; nested: boolean }) {
   const glob = nested ? `*/${I18N_RC}` : I18N_RC;
-  const entries = await globby(glob, { cwd });
+  const entries = await globby(glob, { cwd, dot: true });
   const translationPaths: string[] = [];
 
   for (const entry of entries) {

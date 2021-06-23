@@ -229,10 +229,10 @@ function EditorUI({ initialTextValue }: EditorProps) {
               getDocumentation={() => {
                 return getDocumentation(editorInstanceRef.current!, docLinkVersion);
               }}
-              autoIndent={(event: any) => {
+              autoIndent={(event) => {
                 autoIndent(editorInstanceRef.current!, event);
               }}
-              addNotification={({ title }) => notifications.toasts.add({ title })}
+              notifications={notifications}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

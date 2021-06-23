@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -26,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'url_create',
         'store_search_session',
+        'generate_report',
       ];
       const trialPrivileges = await supertest
         .get('/api/security/privileges')

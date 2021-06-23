@@ -12,6 +12,20 @@ export const timelionSheetSavedObjectType: SavedObjectsType = {
   name: 'timelion-sheet',
   hidden: false,
   namespaceType: 'single',
+  management: {
+    icon: 'visTimelion',
+    defaultSearchField: 'title',
+    importableAndExportable: true,
+    getTitle(obj) {
+      return obj.attributes.title;
+    },
+    getInAppUrl(obj) {
+      return {
+        path: `/app/timelion#/${encodeURIComponent(obj.id)}`,
+        uiCapabilitiesPath: 'timelion.show',
+      };
+    },
+  },
   mappings: {
     properties: {
       description: { type: 'text' },

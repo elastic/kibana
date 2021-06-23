@@ -7,7 +7,6 @@
  */
 
 import { PackageInfo } from 'kibana/server';
-import { ISearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector } from './collectors';
 import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } from './aggs';
 import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
@@ -15,11 +14,7 @@ import { IndexPatternsContract } from '../../common/index_patterns/index_pattern
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { ISessionsClient, ISessionService } from './session';
 
-export { ISearchStartSearchSource };
-
-export interface SearchEnhancements {
-  searchInterceptor: ISearchInterceptor;
-}
+export { ISearchStartSearchSource, SearchUsageCollector };
 
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
@@ -38,10 +33,6 @@ export interface ISearchSetup {
    * {@link ISessionsClient}
    */
   sessionsClient: ISessionsClient;
-  /**
-   * @internal
-   */
-  __enhance: (enhancements: SearchEnhancements) => void;
 }
 
 /**

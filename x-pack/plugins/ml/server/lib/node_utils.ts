@@ -17,7 +17,7 @@ export async function getMlNodeCount(client: IScopedClusterClient): Promise<MlNo
   if (typeof body.nodes === 'object') {
     Object.keys(body.nodes).forEach((k) => {
       if (body.nodes[k].attributes !== undefined) {
-        const maxOpenJobs = body.nodes[k].attributes['ml.max_open_jobs'];
+        const maxOpenJobs = +body.nodes[k].attributes['ml.max_open_jobs'];
         if (maxOpenJobs !== null && maxOpenJobs > 0) {
           count++;
         }

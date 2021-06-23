@@ -6,8 +6,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-
-import { HostsSortField } from '../../graphql/types';
+import { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
 
 import { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/hosts');

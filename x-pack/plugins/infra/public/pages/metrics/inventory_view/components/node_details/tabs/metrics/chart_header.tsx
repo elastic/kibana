@@ -12,6 +12,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { colorTransformer } from '../../../../../../../../common/color_palette';
 import { MetricsExplorerOptionsMetric } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
+import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   title: string;
@@ -21,11 +22,11 @@ interface Props {
 export const ChartHeader = ({ title, metrics }: Props) => {
   return (
     <EuiFlexGroup gutterSize={'s'} responsive={false}>
-      <EuiFlexItem grow={1}>
+      <HeaderItem grow={1}>
         <EuiText size={'s'}>
-          <h4>{title}</h4>
+          <H4>{title}</H4>
         </EuiText>
-      </EuiFlexItem>
+      </HeaderItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
           {metrics.map((chartMetric) => (
@@ -50,3 +51,13 @@ export const ChartHeader = ({ title, metrics }: Props) => {
     </EuiFlexGroup>
   );
 };
+
+const HeaderItem = euiStyled(EuiFlexItem).attrs({ grow: 1 })`
+  overflow: hidden;
+`;
+
+const H4 = euiStyled('h4')`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;

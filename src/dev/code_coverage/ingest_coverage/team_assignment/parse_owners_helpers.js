@@ -15,7 +15,6 @@ import { pluckIndex } from '../transforms';
 const coverageDelimRe = /^#CC#\s/;
 
 export const empties = (x) => x !== '';
-export const comments = (x) => !/^#\s{1,3}/.test(x);
 const dropDelim = (x) => () => x.replace(coverageDelimRe, '');
 
 export const dropCCDelim = (x) =>

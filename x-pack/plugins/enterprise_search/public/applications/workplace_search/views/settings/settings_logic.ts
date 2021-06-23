@@ -17,6 +17,7 @@ import {
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
+import { AppLogic } from '../../app_logic';
 import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
 import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
 import { Connector } from '../../types';
@@ -150,6 +151,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         const response = await http.put(route, { body });
         actions.setUpdatedName(response);
         setSuccessMessage(ORG_UPDATED_MESSAGE);
+        AppLogic.actions.setOrgName(name);
       } catch (e) {
         flashAPIErrors(e);
       }

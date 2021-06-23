@@ -20,6 +20,16 @@ export interface ListNodesRouteResponse {
   isUsingDeprecatedDataRoleConfig: boolean;
 }
 
+export interface NodesDetails {
+  nodeId: string;
+  stats: {
+    name: string;
+    host: string;
+  };
+}
+
+export type NodesDetailsResponse = NodesDetails[];
+
 export interface ListSnapshotReposResponse {
   /**
    * An array of repository names

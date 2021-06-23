@@ -25,8 +25,12 @@ import { previewMetricAnomalyAlert } from '../../lib/alerting/metric_anomaly/pre
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { assertHasInfraMlPlugins } from '../../utils/request_context';
 
-export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) => {
-  const { callWithRequest } = framework;
+export const initAlertPreviewRoute = ({
+  framework,
+  sources,
+  getLogQueryFields,
+  configuration,
+}: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -46,14 +50,14 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
         alertNotifyWhen,
       } = request.body;
 
-      const callCluster = (endpoint: string, opts: Record<string, any>) => {
-        return callWithRequest(requestContext, endpoint, opts);
-      };
+      const esClient = requestContext.core.elasticsearch.client.asCurrentUser;
 
       const source = await sources.getSourceConfiguration(
         requestContext.core.savedObjects.client,
         sourceId || 'default'
       );
+
+      const compositeSize = configuration.inventory.compositeSize;
 
       try {
         switch (alertType) {
@@ -64,7 +68,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               filterQuery,
             } = request.body as MetricThresholdAlertPreviewRequestParams;
             const previewResult = await previewMetricThresholdAlert({
-              callCluster,
+              esClient,
               params: { criteria, filterQuery, groupBy },
               lookback,
               config: source.configuration,
@@ -80,16 +84,23 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
             });
           }
           case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID: {
+            const logQueryFields = await getLogQueryFields(
+              sourceId || 'default',
+              requestContext.core.savedObjects.client,
+              requestContext.core.elasticsearch.client.asCurrentUser
+            );
             const {
               nodeType,
               criteria,
               filterQuery,
             } = request.body as InventoryAlertPreviewRequestParams;
             const previewResult = await previewInventoryMetricThresholdAlert({
-              callCluster,
+              esClient,
               params: { criteria, filterQuery, nodeType },
               lookback,
               source,
+              logQueryFields,
+              compositeSize,
               alertInterval,
               alertThrottle,
               alertNotifyWhen,

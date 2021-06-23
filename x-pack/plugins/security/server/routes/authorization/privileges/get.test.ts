@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from '../../../../../../../src/core/server';
-import { LicenseCheck } from '../../../../../licensing/server';
-import { RawKibanaPrivileges } from '../../../../common/model';
-import { defineGetPrivilegesRoutes } from './get';
-import type { SecurityRequestHandlerContext } from '../../../types';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../../../src/core/server/mocks';
+import type { LicenseCheck } from '../../../../../licensing/server';
+import type { RawKibanaPrivileges } from '../../../../common/model';
+import type { SecurityRequestHandlerContext } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineGetPrivilegesRoutes } from './get';
 
 const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   return {

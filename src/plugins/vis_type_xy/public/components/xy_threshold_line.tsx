@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 
-import { AnnotationDomainTypes, LineAnnotation } from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 
 import { ThresholdLineConfig } from '../types';
 
@@ -32,7 +32,7 @@ export const XYThresholdLine: FC<XYThresholdLineProps> = ({
     <LineAnnotation
       id="__threshold_line__"
       groupId={groupId}
-      domainType={AnnotationDomainTypes.YDomain}
+      domainType={AnnotationDomainType.YDomain}
       dataValues={[{ dataValue }]}
       style={{
         line: {

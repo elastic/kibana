@@ -29,6 +29,24 @@ include::kibana-platform-plugin-api.asciidoc[leveloffset=+1]
 
 include::core/index.asciidoc[leveloffset=+1]
 
+include::core/application_service.asciidoc[leveloffset=+1]
+
+include::core/configuration-service.asciidoc[leveloffset=+1]
+
+include::core/elasticsearch-service.asciidoc[leveloffset=+1]
+
+include::core/http-service.asciidoc[leveloffset=+1]
+
+include::core/logging-service.asciidoc[leveloffset=+1]
+
+include::core/logging-configuration-migration.asciidoc[leveloffset=+1]
+
+include::core/saved-objects-service.asciidoc[leveloffset=+1]
+
+include::core/uisettings-service.asciidoc[leveloffset=+1]
+
+include::core/patterns-scoped-services.asciidoc[leveloffset=+1]
+
 include::security/index.asciidoc[leveloffset=+1]
 
 include::add-data-tutorials.asciidoc[leveloffset=+1]

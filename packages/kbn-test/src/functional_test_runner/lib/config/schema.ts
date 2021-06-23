@@ -9,12 +9,13 @@
 import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
+import type { CustomHelpers } from 'joi';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-const INSPECTING =
-  process.execArgv.includes('--inspect') || process.execArgv.includes('--inspect-brk');
+// it will search both --inspect and --inspect-brk
+const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
 const urlPartsSchema = () =>
   Joi.object()
@@ -54,15 +55,17 @@ const dockerServerSchema = () =>
       image: requiredWhenEnabled(Joi.string()),
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
-      waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
+      waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
       waitFor: Joi.func().optional(),
       args: Joi.array().items(Joi.string()).optional(),
     })
     .default();
 
 const defaultRelativeToConfigPath = (path: string) => {
-  const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
-  makeDefault.description = `<config.js directory>/${path}`;
+  const makeDefault = (parent: any, helpers: CustomHelpers) => {
+    helpers.schema.description(`<config.js directory>/${path}`);
+    return resolve(dirname(helpers.prefs.context!.path), path);
+  };
   return makeDefault;
 };
 
@@ -172,7 +175,7 @@ export const schema = Joi.object()
         license: Joi.string().default('basic'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
-        serverEnvVars: Joi.object(),
+        esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
       })
@@ -184,6 +187,19 @@ export const schema = Joi.object()
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
         installDir: Joi.string(),
+        /** Options for how FTR should execute and interact with Kibana */
+        runOptions: Joi.object()
+          .keys({
+            /**
+             * Log message to wait for before initiating tests, defaults to waiting for Kibana status to be `available`.
+             * Note that this log message must not be filtered out by the current logging config, for example by the
+             * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
+             */
+            wait: Joi.object()
+              .regex()
+              .default(/Kibana is now available/),
+          })
+          .default(),
       })
       .default(),
 
@@ -206,10 +222,10 @@ export const schema = Joi.object()
     // definition of apps that work with `common.navigateToApp()`
     apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
 
-    // settings for the esArchiver module
-    esArchiver: Joi.object()
+    // settings for the saved objects svc
+    kbnArchiver: Joi.object()
       .keys({
-        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
       })
       .default(),
 

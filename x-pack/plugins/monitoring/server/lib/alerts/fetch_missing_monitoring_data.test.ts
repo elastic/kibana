@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchMissingMonitoringData } from './fetch_missing_monitoring_data';
 
 function getResponse(
@@ -38,7 +40,8 @@ function getResponse(
 }
 
 describe('fetchMissingMonitoringData', () => {
-  let callCluster = jest.fn();
+  const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+
   const index = '.monitoring-*';
   const startMs = 100;
   const size = 10;
@@ -51,8 +54,10 @@ describe('fetchMissingMonitoringData', () => {
         clusterName: 'clusterName1',
       },
     ];
-    callCluster = jest.fn().mockImplementation((...args) => {
-      return {
+
+    esClient.search.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
             buckets: clusters.map((cluster) => ({
@@ -80,16 +85,9 @@ describe('fetchMissingMonitoringData', () => {
             })),
           },
         },
-      };
-    });
-    const result = await fetchMissingMonitoringData(
-      callCluster,
-      clusters,
-      index,
-      size,
-      now,
-      startMs
+      })
     );
+    const result = await fetchMissingMonitoringData(esClient, clusters, index, size, now, startMs);
     expect(result).toEqual([
       {
         nodeId: 'nodeUuid1',
@@ -116,8 +114,9 @@ describe('fetchMissingMonitoringData', () => {
         clusterName: 'clusterName1',
       },
     ];
-    callCluster = jest.fn().mockImplementation((...args) => {
-      return {
+    esClient.search.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
             buckets: clusters.map((cluster) => ({
@@ -136,16 +135,9 @@ describe('fetchMissingMonitoringData', () => {
             })),
           },
         },
-      };
-    });
-    const result = await fetchMissingMonitoringData(
-      callCluster,
-      clusters,
-      index,
-      size,
-      now,
-      startMs
+      })
     );
+    const result = await fetchMissingMonitoringData(esClient, clusters, index, size, now, startMs);
     expect(result).toEqual([
       {
         nodeId: 'nodeUuid1',

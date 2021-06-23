@@ -41,7 +41,7 @@ export const buildHostsKpiHostsQuery = ({
         hosts_histogram: {
           auto_date_histogram: {
             field: '@timestamp',
-            buckets: '6',
+            buckets: 6,
           },
           aggs: {
             count: {

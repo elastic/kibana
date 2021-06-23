@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -13,7 +13,11 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -26,7 +30,9 @@ export type ThroughputChartsResponse = PromiseReturnType<
   typeof searchThroughput
 >;
 
-async function searchThroughput({
+function searchThroughput({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
@@ -34,6 +40,8 @@ async function searchThroughput({
   searchAggregatedTransactions,
   intervalString,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -45,12 +53,13 @@ async function searchThroughput({
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    { term: { [TRANSACTION_TYPE]: transactionType } },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
-    { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...setup.esFilter,
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
   if (transactionName) {
@@ -86,16 +95,20 @@ async function searchThroughput({
     },
   };
 
-  return apmEventClient.search(params);
+  return apmEventClient.search('get_transaction_throughput_series', params);
 }
 
 export async function getThroughputCharts({
+  environment,
+  kuery,
   serviceName,
   transactionType,
   transactionName,
   setup,
   searchAggregatedTransactions,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionType: string;
   transactionName: string | undefined;
@@ -105,6 +118,8 @@ export async function getThroughputCharts({
   const { bucketSize, intervalString } = getBucketSize(setup);
 
   const response = await searchThroughput({
+    environment,
+    kuery,
     serviceName,
     transactionType,
     transactionName,

@@ -65,7 +65,9 @@ export function getIdentifierDeclarationFromSource(node: ts.Node, source: ts.Sou
   }
 
   const identifierName = node.getText();
-  const identifierDefinition: ts.Node = (source as any).locals.get(identifierName);
+  const identifierDefinition: ts.Node =
+    (source as any).locals.get(identifierName) ||
+    (source as any).symbol.exports.get(identifierName);
   if (!identifierDefinition) {
     throw new Error(`Unable to find identifier in source ${identifierName}`);
   }

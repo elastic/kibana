@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { LocalUIFilterName } from '../../../common/ui_filter';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
+import { TimeRangeComparisonType } from '../../components/shared/time_comparison/get_time_range_comparison';
 
 export type IUrlParams = {
   detailTab?: string;
@@ -15,6 +17,8 @@ export type IUrlParams = {
   environment?: string;
   rangeFrom?: string;
   rangeTo?: string;
+  exactStart?: string;
+  exactEnd?: string;
   refreshInterval?: number;
   refreshPaused?: boolean;
   sortDirection?: string;
@@ -29,7 +33,7 @@ export type IUrlParams = {
   pageSize?: number;
   searchTerm?: string;
   percentile?: number;
-  latencyAggregationType?: string;
+  latencyAggregationType?: LatencyAggregationType;
   comparisonEnabled?: boolean;
-  comparisonType?: string;
-} & Partial<Record<LocalUIFilterName, string>>;
+  comparisonType?: TimeRangeComparisonType;
+} & Partial<Record<UxLocalUIFilterName, string>>;

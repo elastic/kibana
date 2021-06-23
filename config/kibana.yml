@@ -23,7 +23,7 @@
 #server.publicBaseUrl: ""
 
 # The maximum payload size in bytes for incoming server requests.
-#server.maxPayloadBytes: 1048576
+#server.maxPayload: 1048576
 
 # The Kibana server's name.  This is used for display purposes.
 #server.name: "your-hostname"

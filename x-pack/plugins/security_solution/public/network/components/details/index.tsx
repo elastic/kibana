@@ -144,11 +144,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
             <InspectButton queryId={id} title={i18n.INSPECT_TITLE} inspectIndex={0} />
           )}
           {descriptionLists.map((descriptionList, index) => (
-            <OverviewDescriptionList
-              descriptionList={descriptionList}
-              isInDetailsSidePanel={isInDetailsSidePanel}
-              key={index}
-            />
+            <OverviewDescriptionList descriptionList={descriptionList} key={index} />
           ))}
 
           {loading && (

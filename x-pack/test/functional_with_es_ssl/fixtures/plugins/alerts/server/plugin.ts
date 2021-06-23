@@ -9,12 +9,12 @@ import { Plugin, CoreSetup } from 'kibana/server';
 import {
   PluginSetupContract as AlertingSetup,
   AlertType,
-} from '../../../../../../plugins/alerts/server';
+} from '../../../../../../plugins/alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   features: FeaturesPluginSetup;
 }
 
@@ -82,10 +82,10 @@ export const failingAlertType: AlertType<never, never, never, never, 'default' |
 };
 
 export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
-    alerts.registerType(noopAlertType);
-    alerts.registerType(alwaysFiringAlertType);
-    alerts.registerType(failingAlertType);
+  public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
+    alerting.registerType(noopAlertType);
+    alerting.registerType(alwaysFiringAlertType);
+    alerting.registerType(failingAlertType);
     features.registerKibanaFeature({
       id: 'alerting_fixture',
       name: 'alerting_fixture',
@@ -95,7 +95,9 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
       privileges: {
         all: {
           alerting: {
-            all: ['test.always-firing', 'test.noop', 'test.failing'],
+            rule: {
+              all: ['test.always-firing', 'test.noop', 'test.failing'],
+            },
           },
           savedObject: {
             all: [],
@@ -105,7 +107,9 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
         },
         read: {
           alerting: {
-            all: ['test.always-firing', 'test.noop', 'test.failing'],
+            rule: {
+              all: ['test.always-firing', 'test.noop', 'test.failing'],
+            },
           },
           savedObject: {
             all: [],

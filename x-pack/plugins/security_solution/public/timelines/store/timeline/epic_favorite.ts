@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
 import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { from, Observable, empty } from 'rxjs';
 import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
-import { persistTimelineFavoriteMutation } from '../../containers/favorite/persist.gql_query';
-import { PersistTimelineFavoriteMutation, ResponseFavoriteTimeline } from '../../../graphql/types';
 import { addError } from '../../../common/store/app/actions';
 import {
   endTimelineSaving,
@@ -24,16 +20,15 @@ import {
   showCallOutUnauthorizedMsg,
 } from './actions';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import { refetchQueries } from './refetch_queries';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { inputsModel } from '../../../common/store/inputs';
-import { TimelineType } from '../../../../common/types/timeline';
+import { ResponseFavoriteTimeline, TimelineType } from '../../../../common/types/timeline';
+import { persistFavorite } from '../../containers/api';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
 export const epicPersistTimelineFavorite = (
-  apolloClient: ApolloClient<NormalizedCacheObject>,
   action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,
@@ -42,19 +37,11 @@ export const epicPersistTimelineFavorite = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
-    apolloClient.mutate<
-      PersistTimelineFavoriteMutation.Mutation,
-      PersistTimelineFavoriteMutation.Variables
-    >({
-      mutation: persistTimelineFavoriteMutation,
-      fetchPolicy: 'no-cache',
-      variables: {
-        timelineId: myEpicTimelineId.getTimelineId(),
-        templateTimelineId: timeline[action.payload.id].templateTimelineId,
-        templateTimelineVersion: timeline[action.payload.id].templateTimelineVersion,
-        timelineType: timeline[action.payload.id].timelineType ?? TimelineType.default,
-      },
-      refetchQueries,
+    persistFavorite({
+      timelineId: myEpicTimelineId.getTimelineId(),
+      templateTimelineId: timeline[action.payload.id].templateTimelineId,
+      templateTimelineVersion: timeline[action.payload.id].templateTimelineVersion,
+      timelineType: timeline[action.payload.id].timelineType ?? TimelineType.default,
     })
   ).pipe(
     withLatestFrom(timeline$, allTimelineQuery$),

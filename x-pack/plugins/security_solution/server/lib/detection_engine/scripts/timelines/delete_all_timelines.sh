@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./timelines/delete_all_timelines.sh
+# Example: sh ./timelines/delete_all_timelines.sh
 curl -s -k \
   -H "Content-Type: application/json" \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \

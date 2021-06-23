@@ -62,8 +62,8 @@ exports[`dev/i18n/extractors/html throws on i18n filter usage in complex angular
 Array [
   Array [
     [Error: Couldn't parse angular i18n expression:
-Unexpected token, expected ";" (1:6):
- mode [37m[41ma[49m[39ms ('metricVis.colorModes.' + mode],
+Missing semicolon (1:5):
+ mode[37m[41m [49m[39mas ('metricVis.colorModes.' + mode],
   ],
 ]
 `;

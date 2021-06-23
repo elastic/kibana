@@ -1,0 +1,782 @@
+{
+  "id": "securitySolution",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.Plugin",
+        "type": "Class",
+        "tags": [],
+        "label": "Plugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.Plugin",
+            "text": "Plugin"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "public",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-public.PluginSetup",
+            "text": "PluginSetup"
+          },
+          ", ",
+          "PluginStart",
+          ", ",
+          "SetupPlugins",
+          ", ",
+          "StartPlugins",
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+          "lineNumber": 75
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+              "lineNumber": 79
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initializerContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<object>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                  "lineNumber": 79
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<",
+              "StartPlugins",
+              ", ",
+              "PluginStart",
+              ">, plugins: ",
+              "SetupPlugins",
+              ") => ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.PluginSetup",
+                "text": "PluginSetup"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+              "lineNumber": 103
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<",
+                  "StartPlugins",
+                  ", ",
+                  "PluginStart",
+                  ">"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                  "lineNumber": 103
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "SetupPlugins"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                  "lineNumber": 103
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: ",
+              "StartPlugins",
+              ") => {}"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+              "lineNumber": 344
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                  "lineNumber": 344
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "StartPlugins"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                  "lineNumber": 344
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => {}"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+              "lineNumber": 389
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "securitySolution",
+      "id": "def-public.PluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "PluginSetup",
+      "description": [],
+      "source": {
+        "path": "x-pack/plugins/security_solution/public/types.ts",
+        "lineNumber": 69
+      },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginSetup.resolver",
+          "type": "Function",
+          "tags": [],
+          "label": "resolver",
+          "description": [],
+          "signature": [
+            "() => Promise<",
+            "ResolverPluginSetup",
+            ">"
+          ],
+          "source": {
+            "path": "x-pack/plugins/security_solution/public/types.ts",
+            "lineNumber": 70
+          },
+          "deprecated": false,
+          "returnComment": [],
+          "children": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-server.AppClient",
+        "type": "Class",
+        "tags": [],
+        "label": "AppClient",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/client/client.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.AppClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/client/client.ts",
+              "lineNumber": 13
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.AppClient.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                  "lineNumber": 13
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.AppClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; enableExperimental: string[]; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; packagerTaskInterval: string; validateArtifactDownloads: boolean; }>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/client/client.ts",
+                  "lineNumber": 13
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.AppClient.getSignalsIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "getSignalsIndex",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/client/client.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-server.Plugin",
+        "type": "Class",
+        "tags": [],
+        "label": "Plugin",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
+          " implements ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.Plugin",
+            "text": "Plugin"
+          },
+          "<",
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.PluginSetup",
+            "text": "PluginSetup"
+          },
+          ", ",
+          {
+            "pluginId": "securitySolution",
+            "scope": "server",
+            "docId": "kibSecuritySolutionPluginApi",
+            "section": "def-server.PluginStart",
+            "text": "PluginStart"
+          },
+          ", ",
+          "SetupPlugins",
+          ", ",
+          "StartPlugins",
+          ">"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/plugin.ts",
+          "lineNumber": 143
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.Plugin.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/plugin.ts",
+              "lineNumber": 159
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.Plugin.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<unknown>"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                  "lineNumber": 159
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.Plugin.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<",
+              "StartPlugins",
+              ", ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.PluginStart",
+                "text": "PluginStart"
+              },
+              ">, plugins: ",
+              "SetupPlugins",
+              ") => {}"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/plugin.ts",
+              "lineNumber": 171
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.Plugin.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CoreSetup",
+                    "text": "CoreSetup"
+                  },
+                  "<",
+                  "StartPlugins",
+                  ", ",
+                  {
+                    "pluginId": "securitySolution",
+                    "scope": "server",
+                    "docId": "kibSecuritySolutionPluginApi",
+                    "section": "def-server.PluginStart",
+                    "text": "PluginStart"
+                  },
+                  ">"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                  "lineNumber": 171
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.Plugin.setup.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "SetupPlugins"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                  "lineNumber": 171
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.Plugin.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: ",
+              "StartPlugins",
+              ") => {}"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/plugin.ts",
+              "lineNumber": 471
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.Plugin.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                  "lineNumber": 471
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.Plugin.start.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "StartPlugins"
+                ],
+                "source": {
+                  "path": "x-pack/plugins/security_solution/server/plugin.ts",
+                  "lineNumber": 471
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.Plugin.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/plugin.ts",
+              "lineNumber": 546
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-server.AppRequestContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppRequestContext",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/types.ts",
+          "lineNumber": 17
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.AppRequestContext.getAppClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "securitySolution",
+                "scope": "server",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-server.AppClient",
+                "text": "AppClient"
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/security_solution/server/types.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-server.ConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "ConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly enableExperimental: string[]; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; readonly packagerTaskInterval: string; readonly validateArtifactDownloads: boolean; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/security_solution/server/config.ts",
+          "lineNumber": 75
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "securitySolution",
+      "id": "def-server.PluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "PluginSetup",
+      "description": [],
+      "source": {
+        "path": "x-pack/plugins/security_solution/server/plugin.ts",
+        "lineNumber": 127
+      },
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "securitySolution",
+      "id": "def-server.PluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "PluginStart",
+      "description": [],
+      "source": {
+        "path": "x-pack/plugins/security_solution/server/plugin.ts",
+        "lineNumber": 130
+      },
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

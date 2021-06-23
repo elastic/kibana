@@ -7,7 +7,7 @@
 
 import util from 'util';
 import { isEqual, isEqualWith } from 'lodash';
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { RawKibanaPrivileges } from '../../../../plugins/security/common/model';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -29,8 +29,16 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'url_create',
               'store_search_session',
+              'generate_report',
             ],
-            visualize: ['all', 'read', 'minimal_all', 'minimal_read', 'url_create'],
+            visualize: [
+              'all',
+              'read',
+              'minimal_all',
+              'minimal_read',
+              'url_create',
+              'generate_report',
+            ],
             dashboard: [
               'all',
               'read',
@@ -38,6 +46,8 @@ export default function ({ getService }: FtrProviderContext) {
               'minimal_read',
               'url_create',
               'store_search_session',
+              'generate_report',
+              'download_csv_report',
             ],
             dev_tools: ['all', 'read'],
             advancedSettings: ['all', 'read'],
@@ -47,13 +57,14 @@ export default function ({ getService }: FtrProviderContext) {
             timelion: ['all', 'read'],
             graph: ['all', 'read'],
             maps: ['all', 'read'],
-            canvas: ['all', 'read'],
+            canvas: ['all', 'read', 'minimal_all', 'minimal_read', 'generate_report'],
             infrastructure: ['all', 'read'],
             logs: ['all', 'read'],
+            observabilityCases: ['all', 'read'],
             uptime: ['all', 'read'],
             apm: ['all', 'read'],
             ml: ['all', 'read'],
-            siem: ['all', 'read'],
+            siem: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_all', 'cases_read'],
             fleet: ['all', 'read'],
             stackAlerts: ['all', 'read'],
             actions: ['all', 'read'],

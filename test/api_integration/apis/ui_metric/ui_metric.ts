@@ -8,7 +8,7 @@
 
 import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { UserAgentMetric } from '@kbn/analytics/target/types/metrics/user_agent';
+import { UserAgentMetric } from '@kbn/analytics/target_types/metrics/user_agent';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -102,12 +102,12 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           hits: { hits },
         },
-      } = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      } = await es.search<any>({ index: '.kibana', q: 'type:ui-metric' });
 
       const countTypeEvent = hits.find(
         (hit: { _id: string }) => hit._id === `ui-metric:myApp:${uniqueEventName}`
       );
-      expect(countTypeEvent._source['ui-metric'].count).to.eql(3);
+      expect(countTypeEvent?._source['ui-metric'].count).to.eql(3);
     });
   });
 }

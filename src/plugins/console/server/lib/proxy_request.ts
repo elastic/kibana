@@ -46,9 +46,9 @@ export const proxyRequest = ({
   const client = uri.protocol === 'https:' ? https : http;
   let resolved = false;
 
-  let resolve: any;
-  let reject: any;
-  const reqPromise = new Promise<http.ServerResponse>((res, rej) => {
+  let resolve: (res: http.IncomingMessage) => void;
+  let reject: (res: unknown) => void;
+  const reqPromise = new Promise<http.IncomingMessage>((res, rej) => {
     resolve = res;
     reject = rej;
   });

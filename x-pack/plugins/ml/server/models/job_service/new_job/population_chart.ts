@@ -7,7 +7,12 @@
 
 import { get } from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
-import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import {
+  AggFieldNamePair,
+  EVENT_RATE_FIELD_ID,
+  RuntimeMappings,
+} from '../../../../common/types/fields';
+import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 const OVER_FIELD_EXAMPLES_COUNT = 40;
@@ -39,7 +44,9 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
     intervalMs: number,
     query: object,
     aggFieldNamePairs: AggFieldNamePair[],
-    splitFieldName: string | null
+    splitFieldName: string | null,
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ) {
     const json: object = getPopulationSearchJsonFromConfig(
       indexPatternTitle,
@@ -49,7 +56,9 @@ export function newJobPopulationChartProvider({ asCurrentUser }: IScopedClusterC
       intervalMs,
       query,
       aggFieldNamePairs,
-      splitFieldName
+      splitFieldName,
+      runtimeMappings,
+      indicesOptions
     );
 
     const { body } = await asCurrentUser.search(json);
@@ -131,7 +140,9 @@ function getPopulationSearchJsonFromConfig(
   intervalMs: number,
   query: any,
   aggFieldNamePairs: AggFieldNamePair[],
-  splitFieldName: string | null
+  splitFieldName: string | null,
+  runtimeMappings: RuntimeMappings | undefined,
+  indicesOptions: IndicesOptions | undefined
 ): object {
   const json = {
     index: indexPatternTitle,
@@ -153,7 +164,9 @@ function getPopulationSearchJsonFromConfig(
           aggs: {},
         },
       },
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
+    ...(indicesOptions ?? {}),
   };
 
   if (query.bool === undefined) {
@@ -237,5 +250,6 @@ function getPopulationSearchJsonFromConfig(
   } else {
     json.body.aggs.times.aggs = aggs;
   }
+
   return json;
 }

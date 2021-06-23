@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { isHexColor } from './utils';
 
 const configSchema = schema.object({
-  placement: schema.oneOf([schema.literal('disabled'), schema.literal('header')], {
+  placement: schema.oneOf([schema.literal('disabled'), schema.literal('top')], {
     defaultValue: 'disabled',
   }),
   textContent: schema.string({ defaultValue: '' }),
@@ -30,13 +31,31 @@ const configSchema = schema.object({
     },
     defaultValue: '#FFF9E8',
   }),
+  disableSpaceBanners: schema.boolean({ defaultValue: false }),
 });
 
 export type BannersConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<BannersConfigType> = {
   schema: configSchema,
-  exposeToBrowser: {
-    placement: true,
-  },
+  exposeToBrowser: {},
+  deprecations: () => [
+    (rootConfig, fromPath, addDeprecation) => {
+      const pluginConfig = get(rootConfig, fromPath);
+      if (pluginConfig?.placement === 'header') {
+        addDeprecation({
+          message: 'The `header` value for xpack.banners.placement has been replaced by `top`',
+          correctiveActions: {
+            manualSteps: [
+              `Remove "xpack.banners.placement: header" from your kibana configs.`,
+              `Add "xpack.banners.placement: to" to your kibana configs instead.`,
+            ],
+          },
+        });
+        return {
+          set: [{ path: `${fromPath}.placement`, value: 'top' }],
+        };
+      }
+    },
+  ],
 };

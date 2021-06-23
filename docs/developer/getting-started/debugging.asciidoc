@@ -96,7 +96,7 @@ cd ../kibana
 ----
 
 . Change the elasticsearch credentials in your `kibana.yml` configuration file to match those needed by elasticsearch and the APM server (see the apm-integration-testing repo's https://github.com/elastic/apm-integration-testing#logging-in[README] for users provided to test different scenarios).
-. Make sure that the APM agent is active and points to the local APM server by adding the following configuration settings to to a config file under `config/apm.dev.js`:
+. Make sure that the APM agent is active and points to the local APM server by adding the following configuration settings to a config file under `config/apm.dev.js`:
 +
 Example `config/apm.dev.js` file:
 +

@@ -23,12 +23,14 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     id: 'TEST_VIS',
     clearLayer: jest.fn((state, _layerId) => state),
+    removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
     visualizationTypes: [
       {
         icon: 'empty',
         id: 'TEST_VIS',
         label: 'TEST',
+        groupLabel: 'TEST_VISGroup',
       },
     ],
     getVisualizationTypeId: jest.fn((_state) => 'empty'),
@@ -54,7 +56,8 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
 
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    getErrorMessages: jest.fn((_state, _frame) => undefined),
+    getErrorMessages: jest.fn((_state) => undefined),
+    renderDimensionEditor: jest.fn(),
   };
 }
 
@@ -88,13 +91,14 @@ export function createMockDatasource(id: string): DatasourceMock {
     uniqueLabels: jest.fn((_state) => ({})),
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),
-    getDropTypes: jest.fn(),
+    getDropProps: jest.fn(),
     onDrop: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
     getErrorMessages: jest.fn((_state) => undefined),
+    checkIntegrity: jest.fn((_state) => []),
   };
 }
 
@@ -102,10 +106,9 @@ export type FrameMock = jest.Mocked<FramePublicAPI>;
 
 export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
   return {
-    getColors: jest.fn((_) => ['#ff0000', '#00ff00']),
+    getCategoricalColors: jest.fn((_) => ['#ff0000', '#00ff00']),
     title: 'Mock Palette',
     id: 'default',
-    renderEditor: jest.fn(),
     toExpression: jest.fn(() => ({
       type: 'expression',
       chain: [
@@ -116,7 +119,7 @@ export function createMockPaletteDefinition(): jest.Mocked<PaletteDefinition> {
         },
       ],
     })),
-    getColor: jest.fn().mockReturnValue('#ff0000'),
+    getCategoricalColor: jest.fn().mockReturnValue('#ff0000'),
   };
 }
 

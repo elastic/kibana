@@ -10,11 +10,6 @@
   .source-card-configured {
     padding: 8px;
 
-    &__icon {
-      width: 2em;
-      height: 2em;
-    }
-
     &__not-connected-tooltip {
       position: relative;
       top: 3px;
@@ -23,15 +18,8 @@
   }
 }
 
-.privateSourcesLayout {
-  $sideBarWidth: $euiSize * 30;
-
-  left: $sideBarWidth;
-  width: calc(100% - #{$sideBarWidth});
-
-  &__sideBar {
-    padding: 32px 40px 40px;
-    width: $sideBarWidth;
-    margin-left: -$sideBarWidth;
+.sourcesSubNav {
+  li {
+    display: block;
   }
 }

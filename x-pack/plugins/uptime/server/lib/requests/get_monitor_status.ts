@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { JsonObject } from 'src/plugins/kibana_utils/public';
+import { JsonObject } from '@kbn/common-utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
 
@@ -68,7 +70,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
             },
             // append user filters, if defined
             ...(filters?.bool ? [filters] : []),
-          ],
+          ] as QueryDslQueryContainer[],
         },
       },
       size: 0,
@@ -81,7 +83,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
              * to tell Elasticsearch where it should start on subsequent queries.
              */
             ...(afterKey ? { after: afterKey } : {}),
-            sources: [
+            sources: asMutableArray([
               {
                 monitorId: {
                   terms: {
@@ -104,7 +106,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
                   },
                 },
               },
-            ],
+            ] as const),
           },
           aggs: {
             fields: {

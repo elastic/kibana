@@ -25,6 +25,7 @@ describe('get buckets', () => {
     });
 
     await getBuckets({
+      environment: 'prod',
       serviceName: 'myServiceName',
       bucketSize: 10,
       setup: {
@@ -42,14 +43,7 @@ describe('get buckets', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFilters: {
-          environment: 'prod',
-        },
-        esFilter: [
-          {
-            term: { 'service.environment': 'prod' },
-          },
-        ],
+        uiFilters: {},
         indices: {
           /* eslint-disable @typescript-eslint/naming-convention */
           'apm_oss.sourcemapIndices': 'apm-*',
@@ -71,7 +65,7 @@ describe('get buckets', () => {
   });
 
   it('should limit query results to error documents', () => {
-    const query = clientSpy.mock.calls[0][0];
+    const query = clientSpy.mock.calls[0][1];
     expect(query.apm.events).toEqual([ProcessorEvent.error]);
   });
 });

@@ -16,3 +16,14 @@ export const RECENT_API_EVENTS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.apiLogs.recent',
   { defaultMessage: 'Recent API events' }
 );
+
+export const POLLING_DURATION = 5000;
+
+export const POLLING_ERROR_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.apiLogs.pollingErrorMessage',
+  { defaultMessage: 'Could not refresh API log data' }
+);
+export const POLLING_ERROR_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.apiLogs.pollingErrorDescription',
+  { defaultMessage: 'Please check your connection or manually reload the page.' }
+);

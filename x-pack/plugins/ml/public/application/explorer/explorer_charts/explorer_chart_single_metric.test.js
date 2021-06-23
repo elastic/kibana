@@ -7,18 +7,6 @@
 
 import { chartData as mockChartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
-
-// Mock TimeBuckets and mlFieldFormatService, they don't play well
-// with the jest based test setup yet.
-jest.mock('../../util/time_buckets', () => ({
-  getTimeBucketsFromCache: jest.fn(() => {
-    return {
-      setBounds: jest.fn(),
-      setInterval: jest.fn(),
-      getScaledDateFormat: jest.fn(),
-    };
-  }),
-}));
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
     getFieldFormat: jest.fn(),
@@ -30,6 +18,11 @@ import React from 'react';
 
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { chartLimits } from '../../util/chart_utils';
+import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
+
+const utilityProps = {
+  timeBuckets: timeBucketsMock,
+};
 
 describe('ExplorerChart', () => {
   const mlSelectSeverityServiceMock = {
@@ -56,6 +49,7 @@ describe('ExplorerChart', () => {
         mlSelectSeverityService={mlSelectSeverityServiceMock}
         tooltipService={mockTooltipService}
         severity={0}
+        {...utilityProps}
       />
     );
 
@@ -82,6 +76,7 @@ describe('ExplorerChart', () => {
         mlSelectSeverityService={mlSelectSeverityServiceMock}
         tooltipService={mockTooltipService}
         severity={0}
+        {...utilityProps}
       />
     );
 
@@ -115,6 +110,7 @@ describe('ExplorerChart', () => {
           mlSelectSeverityService={mlSelectSeverityServiceMock}
           tooltipService={mockTooltipService}
           severity={0}
+          {...utilityProps}
         />
       </div>
     );

@@ -14,7 +14,7 @@ export function applyCurrentSettings(
   editor: CoreEditor | CustomAceEditor,
   settings: DevToolsSettings
 ) {
-  if ((editor as any).setStyles) {
+  if ((editor as { setStyles?: Function }).setStyles) {
     (editor as CoreEditor).setStyles({
       wrapLines: settings.wrapMode,
       fontSize: settings.fontSize + 'px',

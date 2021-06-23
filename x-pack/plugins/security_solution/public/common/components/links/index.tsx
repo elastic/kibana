@@ -20,7 +20,7 @@ import React, { useMemo, useCallback } from 'react';
 import { isNil } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { IP_REPUTATION_LINKS_SETTING, APP_ID } from '../../../../common/constants';
+import { IP_REPUTATION_LINKS_SETTING, APP_ID, CASES_APP_ID } from '../../../../common/constants';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
@@ -39,7 +39,6 @@ import {
 } from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
-import { ExternalLinkIcon } from '../external_link_icon';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
@@ -53,6 +52,13 @@ export const LinkButton: React.FC<
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
+
+export const PortContainer = styled.div`
+  & svg {
+    position: relative;
+    top: -1px;
+  }
+`;
 
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{
@@ -112,11 +118,12 @@ export const ExternalLink = React.memo<{
     const inAllowlist = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
     return url && inAllowlist && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
-        <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
-          {children}
-          <ExternalLinkIcon data-test-subj="externalLinkIcon" />
+        <>
+          <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
+            {children}
+          </EuiLink>
           {!isNil(idx) && idx < lastIndexToShow && <Comma data-test-subj="externalLinkComma" />}
-        </EuiLink>
+        </>
       </EuiToolTip>
     ) : null;
   }
@@ -164,24 +171,25 @@ export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
+  subCaseId?: string;
   title?: string;
-}> = ({ children, detailName, title }) => {
+}> = ({ children, detailName, subCaseId, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCaseDetails = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCaseDetailsUrl({ id: detailName, search }),
+      return navigateToApp(CASES_APP_ID, {
+        path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
     },
-    [detailName, navigateToApp, search]
+    [detailName, navigateToApp, search, subCaseId]
   );
 
   return (
     <LinkAnchor
       onClick={goToCaseDetails}
-      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }))}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
@@ -196,9 +204,9 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCreateCase = useCallback(
-    (ev) => {
+    async (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+      return navigateToApp(CASES_APP_ID, {
         path: getCreateCaseUrl(search),
       });
     },
@@ -228,15 +236,17 @@ export const PortOrServiceNameLink = React.memo<{
   children?: React.ReactNode;
   portOrServiceName: number | string;
 }>(({ children, portOrServiceName }) => (
-  <EuiLink
-    data-test-subj="port-or-service-name-link"
-    href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
-      String(portOrServiceName)
-    )}`}
-    target="_blank"
-  >
-    {children ? children : portOrServiceName}
-  </EuiLink>
+  <PortContainer>
+    <EuiLink
+      data-test-subj="port-or-service-name-link"
+      href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
+        String(portOrServiceName)
+      )}`}
+      target="_blank"
+    >
+      {children ? children : portOrServiceName}
+    </EuiLink>
+  </PortContainer>
 ));
 
 PortOrServiceNameLink.displayName = 'PortOrServiceNameLink';

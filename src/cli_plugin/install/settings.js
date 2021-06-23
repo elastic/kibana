@@ -7,10 +7,8 @@
  */
 
 import { resolve } from 'path';
-
 import expiry from 'expiry-js';
-
-import { fromRoot } from '../../core/server/utils';
+import { fromRoot } from '@kbn/utils';
 
 function generateUrls({ version, plugin }) {
   return [

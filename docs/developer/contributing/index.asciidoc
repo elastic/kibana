@@ -1,7 +1,7 @@
 [[contributing]]
 == Contributing
 
-Whether you want to fix a bug, implement a feature, or add some other improvements or apis, the following sections will 
+Whether you want to fix a bug, implement a feature, add an improvement, or add APIs, the following sections will 
 guide you on the process. After committing your code, check out the link:https://www.elastic.co/community/contributor[Elastic Contributor Program] where you can earn points and rewards for your contributions.
 
 Read <<development-getting-started>> to get your environment up and running, then read <<development-best-practices>>.
@@ -53,24 +53,27 @@ To use a single paragraph of text, enter a `Release note:` or `## Release note` 
 
 When you create the Release Notes text, use the following best practices:
 
-* Use present tense. 
+* Use active voice. 
 * Use sentence case.
-* When you create a feature PR, start with `Adds`.
-* When you create an enhancement PR, start with `Improves`. 
-* When you create a bug fix PR, start with `Fixes`.
-* When you create a deprecation PR, start with `Deprecates`.
+* When you create a PR that adds a feature, start with `Adds`.
+* When you create a PR that improves an existing feature, start with `Improves`. 
+* When you create a PR that fixes existing functionality, start with `Fixes`.
+* When you create a PR that deprecates functionality, start with `Deprecates`.
 
 [discrete]
 ==== Add your labels
 
+To make sure that your PR is included in the Release Notes, add the right label.
+
 [arabic]
 . Label the PR with the targeted version (ex: `v7.3.0`).
 . Label the PR with the appropriate GitHub labels:
-  * For a new feature or functionality, use `release_note:enhancement`.
-  * For an external-facing fix, use `release_note:fix`. We do not include docs, build, and test fixes in the Release Notes, or unreleased issues that are only on `master`.
-  * For a deprecated feature, use `release_note:deprecation`.
-  * For a breaking change, use `release_note:breaking`.
-  * To **NOT** include your changes in the Release Notes, use `release_note:skip`.
+  * `release_note:feature` — New user-facing features, significant enhancements to features, and significant bug fixes (in rare cases).
+  * `release_note:enhancement` — Minor UI changes and enhancements.
+  * `release_note:fix` — Fixes for bugs that existed in the previous release. 
+  * `release_note:deprecation` — Deprecates functionality that existed in previous releases.
+  * `release_note:breaking` — Breaking changes that weren't present in previous releases.
+  * `release_note:skip` — Changes that should not appear in the Release Notes. For example, docs, build, and test fixes, or unreleased issues that are only in `master`.
 
 
 include::development-github.asciidoc[leveloffset=+1]

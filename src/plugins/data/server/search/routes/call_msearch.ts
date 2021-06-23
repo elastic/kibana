@@ -8,8 +8,8 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SearchResponse } from 'elasticsearch';
-import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
+import type { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
 import { getKbnServerError } from '../../../../kibana_utils/server';
@@ -66,6 +66,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     try {
       const promise = esClient.asCurrentUser.msearch(
         {
+          // @ts-expect-error @elastic/elasticsearch client types don't support plain string bodies
           body: convertRequestBody(params.body, timeout),
         },
         {
@@ -78,8 +79,8 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
         body: {
           ...response,
           body: {
-            responses: response.body.responses?.map((r: SearchResponse<unknown>) =>
-              shimHitsTotal(r)
+            responses: response.body.responses?.map((r) =>
+              shimHitsTotal(r as estypes.SearchResponse<unknown>)
             ),
           },
         },

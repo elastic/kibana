@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsAggregationResponsePart } from '../../../../../../typings/elasticsearch/aggregations';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -13,9 +13,8 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { AlertParams } from '../../../routes/alerts/chart_preview';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
@@ -37,14 +36,14 @@ export async function getTransactionDurationChartPreview({
   const query = {
     bool: {
       filter: [
-        { range: rangeFilter(start, end) },
         { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
         ...(serviceName ? [{ term: { [SERVICE_NAME]: serviceName } }] : []),
         ...(transactionType
           ? [{ term: { [TRANSACTION_TYPE]: transactionType } }]
           : []),
-        ...getEnvironmentUiFilterES(environment),
-      ],
+        ...rangeQuery(start, end),
+        ...environmentQuery(environment),
+      ] as QueryDslQueryContainer[],
     },
   };
 
@@ -73,7 +72,10 @@ export async function getTransactionDurationChartPreview({
     apm: { events: [ProcessorEvent.transaction] },
     body: { size: 0, query, aggs },
   };
-  const resp = await apmEventClient.search(params);
+  const resp = await apmEventClient.search(
+    'get_transaction_duration_chart_preview',
+    params
+  );
 
   if (!resp.aggregations) {
     return [];
@@ -84,7 +86,7 @@ export async function getTransactionDurationChartPreview({
     const x = bucket.key;
     const y =
       aggregationType === 'avg'
-        ? (bucket.agg as MetricsAggregationResponsePart).value
+        ? (bucket.agg as { value: number | null }).value
         : (bucket.agg as { values: Record<string, number | null> }).values[
             percentilesKey
           ];

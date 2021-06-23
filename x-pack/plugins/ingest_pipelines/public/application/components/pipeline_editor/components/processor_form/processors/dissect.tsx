@@ -22,7 +22,7 @@ import {
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { EDITOR_PX_HEIGHT } from './shared';
+import { EDITOR_PX_HEIGHT, from, to, isJSONStringValidator } from './shared';
 
 const { emptyField } = fieldValidators;
 
@@ -34,6 +34,8 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
       label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldLabel', {
         defaultMessage: 'Pattern',
       }),
+      deserializer: to.escapeBackslashes,
+      serializer: from.unescapeBackslashes,
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.dissectForm.patternFieldHelpText"
@@ -67,11 +69,15 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
             )
           ),
         },
+        {
+          validator: isJSONStringValidator,
+        },
       ],
     },
     /* Optional field config */
     append_separator: {
       type: FIELD_TYPES.TEXT,
+      serializer: from.emptyStringToUndefined,
       label: i18n.translate(
         'xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorparaotrFieldLabel',
         {
@@ -82,7 +88,7 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.dissectForm.appendSeparatorHelpText"
           defaultMessage="If you specify a key modifier, this character separates the fields when appending results. Defaults to {value}."
-          values={{ value: <EuiCode inline>{'""'}</EuiCode> }}
+          values={{ value: <EuiCode>{'""'}</EuiCode> }}
         />
       ),
     },

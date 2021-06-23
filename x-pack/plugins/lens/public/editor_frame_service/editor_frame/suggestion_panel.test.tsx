@@ -291,4 +291,24 @@ describe('suggestion_panel', () => {
     expect(wrapper.find(EuiIcon)).toHaveLength(1);
     expect(wrapper.find(EuiIcon).prop('type')).toEqual(LensIconChartDatatable);
   });
+
+  it('should return no suggestion if visualization has missing index-patterns', () => {
+    // create a layer that is referencing an indexPatterns not retrieved by the datasource
+    const missingIndexPatternsState = {
+      layers: { indexPatternId: 'a' },
+      indexPatterns: {},
+    };
+    mockDatasource.checkIntegrity.mockReturnValue(['a']);
+    const newProps = {
+      ...defaultProps,
+      datasourceStates: {
+        mock: {
+          ...defaultProps.datasourceStates.mock,
+          state: missingIndexPatternsState,
+        },
+      },
+    };
+    const wrapper = mount(<SuggestionPanel {...newProps} />);
+    expect(wrapper.html()).toEqual(null);
+  });
 });

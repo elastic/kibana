@@ -28,12 +28,6 @@ const isSnapshotNameNotLowerCase = (str: string): boolean => {
 };
 
 export interface ValidatePolicyHelperData {
-  managedRepository?: {
-    name: string;
-    policy: string;
-  };
-  isEditing?: boolean;
-  policyName?: string;
   /**
    * Whether to block on the indices configured for this snapshot.
    *
@@ -58,13 +52,7 @@ export const validatePolicy = (
   const i18n = textService.i18n;
 
   const { name, snapshotName, schedule, repository, config, retention } = policy;
-  const {
-    managedRepository,
-    isEditing,
-    policyName,
-    validateIndicesCount,
-    repositoryDoesNotExist,
-  } = validationHelperData;
+  const { validateIndicesCount, repositoryDoesNotExist } = validationHelperData;
 
   const validation: PolicyValidation = {
     isValid: true,
@@ -156,22 +144,6 @@ export const validatePolicy = (
     validation.errors.minCount.push(
       i18n.translate('xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage', {
         defaultMessage: 'Minimum count cannot be greater than maximum count.',
-      })
-    );
-  }
-
-  if (
-    managedRepository &&
-    managedRepository.name === repository &&
-    managedRepository.policy &&
-    !(isEditing && managedRepository.policy === policyName)
-  ) {
-    validation.errors.repository.push(
-      i18n.translate('xpack.snapshotRestore.policyValidation.invalidRepoErrorMessage', {
-        defaultMessage: 'Policy "{policyName}" is already associated with this repository.',
-        values: {
-          policyName: managedRepository.policy,
-        },
       })
     );
   }

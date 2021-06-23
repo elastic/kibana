@@ -60,7 +60,7 @@ describe('buildSignal', () => {
           depth: 0,
         },
       ],
-      original_time: '2020-04-20T21:27:45+0000',
+      original_time: '2020-04-20T21:27:45.000Z',
       status: 'open',
       rule: {
         author: [],
@@ -141,7 +141,7 @@ describe('buildSignal', () => {
           depth: 0,
         },
       ],
-      original_time: '2020-04-20T21:27:45+0000',
+      original_time: '2020-04-20T21:27:45.000Z',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',

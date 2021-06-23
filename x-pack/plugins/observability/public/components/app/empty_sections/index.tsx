@@ -8,31 +8,29 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { Alert } from '../../../../../alerts/common';
+import { Alert } from '../../../../../alerting/common';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getEmptySections } from '../../../pages/overview/empty_section';
-import { UXHasDataResponse } from '../../../typings';
 import { EmptySection } from './empty_section';
 
 export function EmptySections() {
   const { core } = usePluginContext();
   const theme = useContext(ThemeContext);
-  const { hasData } = useHasData();
+  const { hasDataMap } = useHasData();
 
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
-      const { status, hasData: alerts } = hasData.alert || {};
+      const { status, hasData: alerts } = hasDataMap.alert || {};
       return (
         status === FETCH_STATUS.FAILURE ||
         (status === FETCH_STATUS.SUCCESS && (alerts as Alert[]).length === 0)
       );
     } else {
-      const app = hasData[id];
+      const app = hasDataMap[id];
       if (app) {
-        const _hasData = id === 'ux' ? (app.hasData as UXHasDataResponse)?.hasData : app.hasData;
-        return app.status === FETCH_STATUS.FAILURE || !_hasData;
+        return app.status === FETCH_STATUS.FAILURE || !app.hasData;
       }
     }
     return false;

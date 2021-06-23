@@ -11,7 +11,8 @@ import styled from 'styled-components';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentPolicy } from '../../../../../types';
+
+import type { AgentPolicy } from '../../../../../types';
 import {
   useLink,
   useStartServices,
@@ -19,13 +20,13 @@ import {
   sendUpdateAgentPolicy,
   useConfig,
   sendGetAgentStatus,
+  useAgentPolicyRefresh,
 } from '../../../../../hooks';
 import {
   AgentPolicyForm,
   agentPolicyFormValidation,
   ConfirmDeployAgentPolicyModal,
 } from '../../../components';
-import { useAgentPolicyRefresh } from '../../hooks';
 
 const FormWrapper = styled.div`
   max-width: 800px;

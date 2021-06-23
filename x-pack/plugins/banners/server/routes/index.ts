@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { BannerConfiguration } from '../../common';
+import { BannersConfigType } from '../config';
 import { BannersRouter } from '../types';
 import { registerInfoRoute } from './info';
 
-export const registerRoutes = (router: BannersRouter, config: BannerConfiguration) => {
+export const registerRoutes = (router: BannersRouter, config: BannersConfigType) => {
   registerInfoRoute(router, config);
 };

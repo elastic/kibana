@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test/jest';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -17,7 +17,7 @@ import { act } from 'react-dom/test-utils';
 import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 
-jest.mock('../../../containers/source/use_source_via_http', () => ({
+jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
@@ -89,6 +89,44 @@ describe('Expression', () => {
       },
     ]);
   });
+
+  it('should pass the elasticsearch query to the expression chart', async () => {
+    const FILTER_QUERY =
+      '{"bool":{"should":[{"match_phrase":{"host.name":"testHostName"}}],"minimum_should_match":1}}';
+
+    const alertParams = {
+      criteria: [
+        {
+          metric: 'cpu',
+          timeSize: 1,
+          timeUnit: 'm',
+          threshold: [10],
+          comparator: Comparator.GT,
+        },
+      ],
+      nodeType: undefined,
+      filterQueryText: 'host.name: "testHostName"',
+      filterQuery: FILTER_QUERY,
+    };
+
+    const wrapper = shallowWithIntl(
+      <Expressions
+        alertInterval="1m"
+        alertThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
+        alertParams={alertParams as any}
+        errors={{}}
+        setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
+        setAlertProperty={() => {}}
+        metadata={{}}
+      />
+    );
+
+    const chart = wrapper.find('[data-test-subj="preview-chart"]');
+
+    expect(chart.prop('filterQuery')).toBe(FILTER_QUERY);
+  });
+
   describe('using custom metrics', () => {
     it('should prefill the alert using the context metadata', async () => {
       const currentOptions = {

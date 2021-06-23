@@ -32,7 +32,7 @@ export class DuplicateField extends KbnError {
 export class SavedObjectNotFound extends KbnError {
   public savedObjectType: string;
   public savedObjectId?: string;
-  constructor(type: string, id?: string, link?: string) {
+  constructor(type: string, id?: string, link?: string, customMessage?: string) {
     const idMsg = id ? ` (id: ${id})` : '';
     let message = `Could not locate that ${type}${idMsg}`;
 
@@ -40,10 +40,28 @@ export class SavedObjectNotFound extends KbnError {
       message += `, [click here to re-create it](${link})`;
     }
 
-    super(message);
+    super(customMessage || message);
 
     this.savedObjectType = type;
     this.savedObjectId = id;
+  }
+}
+
+/**
+ * A saved field doesn't exist anymore
+ */
+export class SavedFieldNotFound extends KbnError {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+/**
+ * A saved field type isn't compatible with aggregation
+ */
+export class SavedFieldTypeInvalidForAgg extends KbnError {
+  constructor(message: string) {
+    super(message);
   }
 }
 

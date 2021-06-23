@@ -7,15 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-export { BASE_ALERT_API_PATH } from '../../../../alerts/common';
+export {
+  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
+} from '../../../../alerting/common';
 export { BASE_ACTION_API_PATH } from '../../../../actions/common';
 
-export type Section = 'connectors' | 'alerts';
+export type Section = 'connectors' | 'rules';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
-export const routeToAlerts = `/alerts`;
-export const routeToAlertDetails = `/alert/:alertId`;
+export const routeToRules = `/rules`;
+export const routeToRuleDetails = `/rule/:ruleId`;
+export const legacyRouteToRules = `/alerts`;
+export const legacyRouteToRuleDetails = `/alert/:alertId`;
 
 export const recoveredActionGroupMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.RecoveredMessage',

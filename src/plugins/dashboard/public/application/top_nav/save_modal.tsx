@@ -12,7 +12,7 @@ import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
 import type { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { SavedObjectSaveModal } from '../../services/saved_objects';
-import { DashboardSaveOptions } from '../types';
+import { DashboardSaveOptions } from '../../types';
 
 interface Props {
   onSave: ({
@@ -147,6 +147,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         onClose={this.props.onClose}
         title={this.props.title}
         showCopyOnSave={this.props.showCopyOnSave}
+        initialCopyOnSave={this.props.showCopyOnSave}
         objectType="dashboard"
         options={this.renderDashboardSaveOptions()}
         showDescription={false}

@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IconType } from '@elastic/eui';
-import { ReactNode } from 'react';
-import { Adapters } from 'src/plugins/inspector';
-import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
-import { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
+import type { IconType } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import type { Adapters } from 'src/plugins/inspector';
+import type { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
+import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
+import { VisGroups } from './vis_groups_enum';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
@@ -18,12 +19,6 @@ export interface VisTypeOptions {
   showFilterBar: boolean;
   showIndexSelection: boolean;
   hierarchicalData: boolean;
-}
-
-export enum VisGroups {
-  PROMOTED = 'promoted',
-  TOOLS = 'tools',
-  AGGBASED = 'aggbased',
 }
 
 export interface ISchemas {
@@ -96,7 +91,7 @@ export interface VisTypeDefinition<TVisParams> {
   /**
    * If given, it will return the supported triggers for this vis.
    */
-  readonly getSupportedTriggers?: () => string[];
+  readonly getSupportedTriggers?: (params?: VisParams) => string[];
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.

@@ -222,7 +222,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('advanced job', function () {
     this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -613,7 +613,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
 
           await ml.testExecution.logTestStep('job cloning persists custom urls');
-          await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
+          await ml.customUrls.assertCustomUrlLabel(0, 'check-kibana-dashboard');
 
           await ml.testExecution.logTestStep('job cloning persists assigned calendars');
           await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);

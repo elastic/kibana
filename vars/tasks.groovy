@@ -9,7 +9,9 @@ def check() {
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
     kibanaPipeline.scriptTask('Check Jest Configs', 'test/scripts/checks/jest_configs.sh'),
     kibanaPipeline.scriptTask('Check Doc API Changes', 'test/scripts/checks/doc_api_changes.sh'),
-    kibanaPipeline.scriptTask('Check Types', 'test/scripts/checks/type_check.sh'),
+    kibanaPipeline.scriptTask('Check @kbn/pm Distributable', 'test/scripts/checks/kbn_pm_dist.sh'),
+    kibanaPipeline.scriptTask('Check Plugin List Docs', 'test/scripts/checks/plugin_list_docs.sh'),
+    kibanaPipeline.scriptTask('Check Types and Public API Docs', 'test/scripts/checks/type_check_plugin_public_api_docs.sh'),
     kibanaPipeline.scriptTask('Check Bundle Limits', 'test/scripts/checks/bundle_limits.sh'),
     kibanaPipeline.scriptTask('Check i18n', 'test/scripts/checks/i18n.sh'),
     kibanaPipeline.scriptTask('Check File Casing', 'test/scripts/checks/file_casing.sh'),
@@ -36,6 +38,31 @@ def test() {
   ])
 }
 
+def ossCiGroups() {
+  def ciGroups = 1..12
+  tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
+}
+
+def xpackCiGroups() {
+  def ciGroups = 1..13
+  tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it, true) })
+}
+
+def xpackCiGroupDocker() {
+  task {
+    workers.ci(name: 'xpack-cigroups-docker', size: 'm', ramDisk: true) {
+      kibanaPipeline.downloadDefaultBuildArtifacts()
+      kibanaPipeline.bash("""
+        cd '${env.WORKSPACE}'
+        mkdir -p kibana-build
+        tar -xzf kibana-default.tar.gz -C kibana-build --strip=1
+        tar -xzf kibana-default-plugins.tar.gz -C kibana
+      """, "Extract Default Build artifacts")
+      kibanaPipeline.xpackCiGroupProcess('Docker', true)()
+    }
+  }
+}
+
 def functionalOss(Map params = [:]) {
   def config = params ?: [
     serverIntegration: true,
@@ -47,11 +74,8 @@ def functionalOss(Map params = [:]) {
   ]
 
   task {
-    kibanaPipeline.buildOss(6)
-
     if (config.ciGroups) {
-      def ciGroups = 1..12
-      tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
+      ossCiGroups()
     }
 
     if (config.firefox) {
@@ -88,11 +112,9 @@ def functionalXpack(Map params = [:]) {
   ]
 
   task {
-    kibanaPipeline.buildXpack(10)
-
     if (config.ciGroups) {
-      def ciGroups = 1..13
-      tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it, true) })
+      xpackCiGroups()
+      xpackCiGroupDocker()
     }
 
     if (config.firefox) {
@@ -118,9 +140,17 @@ def functionalXpack(Map params = [:]) {
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
     ]) {
       if (githubPr.isPr()) {
-        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
+        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressChrome', './test/scripts/jenkins_security_solution_cypress_chrome.sh'))
+        // Temporarily disabled to figure out test flake
+        // task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressFirefox', './test/scripts/jenkins_security_solution_cypress_firefox.sh'))
       }
     }
+  }
+}
+
+def storybooksCi() {
+  task {
+    storybooks.buildAndUpload()
   }
 }
 

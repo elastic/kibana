@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-export {
-  LegacyClusterClient,
-  ILegacyClusterClient,
-  ILegacyCustomClusterClient,
-} from './cluster_client';
-export { ILegacyScopedClusterClient, LegacyScopedClusterClient } from './scoped_cluster_client';
-export { LegacyElasticsearchClientConfig } from './elasticsearch_client_config';
-export { LegacyElasticsearchError, LegacyElasticsearchErrorHelpers } from './errors';
+export { LegacyClusterClient } from './cluster_client';
+export type { ILegacyClusterClient, ILegacyCustomClusterClient } from './cluster_client';
+export type {
+  ILegacyScopedClusterClient,
+  LegacyScopedClusterClient,
+} from './scoped_cluster_client';
+export type { LegacyElasticsearchClientConfig } from './elasticsearch_client_config';
+export { LegacyElasticsearchErrorHelpers } from './errors';
+export type { LegacyElasticsearchError } from './errors';
 export * from './api_types';

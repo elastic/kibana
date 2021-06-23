@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+  mockKibanaValues,
+} from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -25,6 +30,7 @@ import { DisplaySettingsLogic, defaultSearchResultConfig } from './display_setti
 
 describe('DisplaySettingsLogic', () => {
   const { http } = mockHttpValues;
+  const { navigateToUrl } = mockKibanaValues;
   const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(DisplaySettingsLogic);
 
@@ -40,6 +46,7 @@ describe('DisplaySettingsLogic', () => {
     serverRoute: '',
     editFieldIndex: null,
     dataLoading: true,
+    navigatingBetweenTabs: false,
     addFieldModalVisible: false,
     titleFieldHover: false,
     urlFieldHover: false,
@@ -203,6 +210,12 @@ describe('DisplaySettingsLogic', () => {
       });
     });
 
+    it('setNavigatingBetweenTabs', () => {
+      DisplaySettingsLogic.actions.setNavigatingBetweenTabs(true);
+
+      expect(DisplaySettingsLogic.values.navigatingBetweenTabs).toEqual(true);
+    });
+
     it('addDetailField', () => {
       const newField = { label: 'Monkey', fieldName: 'primate' };
       DisplaySettingsLogic.actions.setServerResponseData(serverProps);
@@ -349,6 +362,31 @@ describe('DisplaySettingsLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+    });
+
+    describe('handleSelectedTabChanged', () => {
+      beforeEach(() => {
+        DisplaySettingsLogic.actions.onInitializeDisplaySettings(serverProps);
+      });
+
+      it('calls sets navigatingBetweenTabs', async () => {
+        const setNavigatingBetweenTabsSpy = jest.spyOn(
+          DisplaySettingsLogic.actions,
+          'setNavigatingBetweenTabs'
+        );
+        DisplaySettingsLogic.actions.handleSelectedTabChanged('search_results');
+        await nextTick();
+
+        expect(setNavigatingBetweenTabsSpy).toHaveBeenCalledWith(true);
+        expect(navigateToUrl).toHaveBeenCalledWith('/p/sources/123/display_settings/');
+      });
+
+      it('calls calls correct route for "result_detail"', async () => {
+        DisplaySettingsLogic.actions.handleSelectedTabChanged('result_detail');
+        await nextTick();
+
+        expect(navigateToUrl).toHaveBeenCalledWith('/p/sources/123/display_settings/result_detail');
       });
     });
   });

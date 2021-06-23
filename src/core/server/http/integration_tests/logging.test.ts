@@ -50,16 +50,16 @@ describe('request logging', () => {
             silent: true,
             appenders: {
               'test-console': {
-                kind: 'console',
+                type: 'console',
                 layout: {
-                  kind: 'pattern',
+                  type: 'pattern',
                   pattern: '%level|%logger|%message|%meta',
                 },
               },
             },
             loggers: [
               {
-                context: 'http.server.response',
+                name: 'http.server.response',
                 appenders: ['test-console'],
                 level: 'debug',
               },
@@ -96,16 +96,16 @@ describe('request logging', () => {
           silent: true,
           appenders: {
             'test-console': {
-              kind: 'console',
+              type: 'console',
               layout: {
-                kind: 'pattern',
+                type: 'pattern',
                 pattern: '%level|%logger|%message|%meta',
               },
             },
           },
           loggers: [
             {
-              context: 'http.server.response',
+              name: 'http.server.response',
               appenders: ['test-console'],
               level: 'debug',
             },
@@ -251,7 +251,7 @@ describe('request logging', () => {
           expect(JSON.parse(meta).http.response.headers.bar).toBe('world');
         });
 
-        it('filters sensitive request headers', async () => {
+        it('filters sensitive request headers by default', async () => {
           const { http } = await root.setup();
 
           http.createRouter('/').post(
@@ -283,7 +283,139 @@ describe('request logging', () => {
           expect(JSON.parse(meta).http.request.headers.authorization).toBe('[REDACTED]');
         });
 
-        it('filters sensitive response headers', async () => {
+        it('filters sensitive request headers when RewriteAppender is configured', async () => {
+          root = kbnTestServer.createRoot({
+            logging: {
+              silent: true,
+              appenders: {
+                'test-console': {
+                  type: 'console',
+                  layout: {
+                    type: 'pattern',
+                    pattern: '%level|%logger|%message|%meta',
+                  },
+                },
+                rewrite: {
+                  type: 'rewrite',
+                  appenders: ['test-console'],
+                  policy: {
+                    type: 'meta',
+                    mode: 'update',
+                    properties: [
+                      { path: 'http.request.headers.authorization', value: '[REDACTED]' },
+                    ],
+                  },
+                },
+              },
+              loggers: [
+                {
+                  name: 'http.server.response',
+                  appenders: ['rewrite'],
+                  level: 'debug',
+                },
+              ],
+            },
+            plugins: {
+              initialize: false,
+            },
+          });
+          const { http } = await root.setup();
+
+          http.createRouter('/').post(
+            {
+              path: '/ping',
+              validate: {
+                body: schema.object({ message: schema.string() }),
+              },
+              options: {
+                authRequired: 'optional',
+                body: {
+                  accepts: ['application/json'],
+                },
+                timeout: { payload: 100 },
+              },
+            },
+            (context, req, res) => res.ok({ body: { message: req.body.message } })
+          );
+          await root.start();
+
+          await kbnTestServer.request
+            .post(root, '/ping')
+            .set('content-type', 'application/json')
+            .set('authorization', 'abc')
+            .send({ message: 'hi' })
+            .expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.request.headers.authorization).toBe('[REDACTED]');
+        });
+
+        it('filters sensitive response headers by defaut', async () => {
+          const { http } = await root.setup();
+
+          http.createRouter('/').post(
+            {
+              path: '/ping',
+              validate: {
+                body: schema.object({ message: schema.string() }),
+              },
+              options: {
+                authRequired: 'optional',
+                body: {
+                  accepts: ['application/json'],
+                },
+                timeout: { payload: 100 },
+              },
+            },
+            (context, req, res) =>
+              res.ok({ headers: { 'set-cookie': ['123'] }, body: { message: req.body.message } })
+          );
+          await root.start();
+
+          await kbnTestServer.request
+            .post(root, '/ping')
+            .set('Content-Type', 'application/json')
+            .send({ message: 'hi' })
+            .expect(200);
+          expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+          const [, , , meta] = mockConsoleLog.mock.calls[0][0].split('|');
+          expect(JSON.parse(meta).http.response.headers['set-cookie']).toBe('[REDACTED]');
+        });
+
+        it('filters sensitive response headers when RewriteAppender is configured', async () => {
+          root = kbnTestServer.createRoot({
+            logging: {
+              silent: true,
+              appenders: {
+                'test-console': {
+                  type: 'console',
+                  layout: {
+                    type: 'pattern',
+                    pattern: '%level|%logger|%message|%meta',
+                  },
+                },
+                rewrite: {
+                  type: 'rewrite',
+                  appenders: ['test-console'],
+                  policy: {
+                    type: 'meta',
+                    mode: 'update',
+                    properties: [{ path: 'http.response.headers.set-cookie', value: '[REDACTED]' }],
+                  },
+                },
+              },
+              loggers: [
+                {
+                  name: 'http.server.response',
+                  appenders: ['rewrite'],
+                  level: 'debug',
+                },
+              ],
+            },
+            plugins: {
+              initialize: false,
+            },
+          });
           const { http } = await root.setup();
 
           http.createRouter('/').post(

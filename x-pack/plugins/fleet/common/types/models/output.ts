@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { outputType } from '../../constants';
+import type { outputType } from '../../constants';
 import type { ValueOf } from '../index';
 
 export type OutputType = typeof outputType;
@@ -17,8 +17,6 @@ export interface NewOutput {
   hosts?: string[];
   ca_sha256?: string;
   api_key?: string;
-  fleet_enroll_username?: string;
-  fleet_enroll_password?: string;
   config?: Record<string, any>;
   config_yaml?: string;
 }

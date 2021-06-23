@@ -61,17 +61,26 @@ function usingWorkerProc<T>(
 ) {
   return Rx.using(
     (): ProcResource => {
-      const proc = execa.node(require.resolve('../worker/run_worker'), [], {
-        nodeOptions: [
-          ...(inspectFlag && config.inspectWorkers
-            ? [`${inspectFlag}=${inspectPortCounter++}`]
-            : []),
-          ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
-        ],
-        buffer: false,
-        stderr: 'pipe',
-        stdout: 'pipe',
-      });
+      const workerPath = require.resolve('../worker/run_worker');
+      const proc = execa.node(
+        workerPath.endsWith('.ts')
+          ? require.resolve('../worker/run_worker_from_source') // workerFromSourcePath
+          : workerPath,
+        [],
+        {
+          nodeOptions: [
+            '--preserve-symlinks',
+            '--preserve-symlinks-main',
+            ...(inspectFlag && config.inspectWorkers
+              ? [`${inspectFlag}=${inspectPortCounter++}`]
+              : []),
+            ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
+          ],
+          buffer: false,
+          stderr: 'pipe',
+          stdout: 'pipe',
+        }
+      );
 
       return {
         proc,

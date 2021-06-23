@@ -29,7 +29,9 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
       job.data_description.time_field,
       job.data_counts.earliest_record_timestamp,
       job.data_counts.latest_record_timestamp,
-      intervalMs
+      intervalMs,
+      job.datafeed_config.runtime_mappings,
+      job.datafeed_config.indices_options
     );
     if (resp.error !== undefined) {
       throw resp.error;

@@ -7,6 +7,7 @@
  */
 
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
+export const KIBANA_USER_QUERY_LANGUAGE_KEY = 'kibana.userQueryLanguage';
 
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',

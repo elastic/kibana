@@ -6,8 +6,9 @@
  */
 
 import { coreMock } from 'src/core/server/mocks';
-import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
+
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
+import { SPACES_USAGE_STATS_TYPE } from '../usage_stats';
 import { SpacesSavedObjectsService } from './saved_objects_service';
 
 describe('SpacesSavedObjectsService', () => {

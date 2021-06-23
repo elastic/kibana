@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
 import createContainer from 'constate';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
-import { esKuery, esQuery, Query } from '../../../../../../../src/plugins/data/public';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
 import { useSubscription } from '../../../utils/use_observable';
 import { LogSourceConfigurationProperties } from '../log_source';
@@ -17,11 +17,13 @@ import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
 import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 
+export type BuiltEsQuery = ReturnType<typeof esQuery.buildEsQuery>;
+
 interface LogStreamProps {
   sourceId: string;
   startTimestamp: number;
   endTimestamp: number;
-  query?: string | Query;
+  query?: BuiltEsQuery;
   center?: LogEntryCursor;
   columns?: LogSourceConfigurationProperties['logColumns'];
 }
@@ -75,29 +77,15 @@ export function useLogStream({
     }
   }, [prevEndTimestamp, endTimestamp, setState]);
 
-  const parsedQuery = useMemo(() => {
-    if (!query) {
-      return undefined;
-    } else if (typeof query === 'string') {
-      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query));
-    } else if (query.language === 'kuery') {
-      return esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string));
-    } else if (query.language === 'lucene') {
-      return esQuery.luceneStringToDsl(query.query as string);
-    } else {
-      return undefined;
-    }
-  }, [query]);
-
   const commonFetchArguments = useMemo(
     () => ({
       sourceId,
       startTimestamp,
       endTimestamp,
-      query: parsedQuery,
+      query,
       columnOverrides: columns,
     }),
-    [columns, endTimestamp, parsedQuery, sourceId, startTimestamp]
+    [columns, endTimestamp, query, sourceId, startTimestamp]
   );
 
   const {

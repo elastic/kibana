@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import type { KibanaRequest } from 'src/core/server';
+
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
+import type { AuthenticationProviderOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 interface HTTPAuthenticationProviderOptions {
   supportedSchemes: Set<string>;

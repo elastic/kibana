@@ -10,7 +10,7 @@ import { SavedObject } from 'src/core/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const randomness = getService('randomness');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -29,13 +29,12 @@ export default function ({ getService }: FtrProviderContext) {
   ) {
     async function getRawSavedObjectAttributes({ id, type }: SavedObject) {
       const {
-        _source: { [type]: savedObject },
+        body: { _source },
       } = await es.get<Record<string, any>>({
         id: generateRawID(id, type),
         index: '.kibana',
-      } as any);
-
-      return savedObject;
+      });
+      return _source?.[type];
     }
 
     let savedObjectOriginalAttributes: {
@@ -445,6 +444,7 @@ export default function ({ getService }: FtrProviderContext) {
           index: '.kibana',
           q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
           refresh: true,
+          body: {},
         });
       });
 
@@ -493,6 +493,7 @@ export default function ({ getService }: FtrProviderContext) {
           index: '.kibana',
           q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
           refresh: true,
+          body: {},
         });
       });
 
@@ -515,11 +516,15 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('migrations', () => {
       before(async () => {
-        await esArchiver.load('encrypted_saved_objects');
+        await esArchiver.load(
+          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('encrypted_saved_objects');
+        await esArchiver.unload(
+          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects'
+        );
       });
 
       it('migrates unencrypted fields on saved objects', async () => {
@@ -579,11 +584,15 @@ export default function ({ getService }: FtrProviderContext) {
           roles: ['kibana_admin'],
           full_name: 'a kibana admin',
         });
-        await esArchiver.load('key_rotation');
+        await esArchiver.load(
+          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/key_rotation'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('key_rotation');
+        await esArchiver.unload(
+          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/key_rotation'
+        );
         await security.user.delete('admin');
       });
 

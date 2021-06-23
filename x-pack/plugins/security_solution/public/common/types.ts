@@ -10,3 +10,7 @@ export interface ServerApiError {
   error: string;
   message: string;
 }
+
+export interface SecuritySolutionUiConfigType {
+  enableExperimental: string[];
+}

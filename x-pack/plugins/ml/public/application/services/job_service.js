@@ -13,7 +13,6 @@ import { ml } from './ml_api_service';
 
 import { getToastNotificationService } from '../services/toast_notification_service';
 import { isWebUrl } from '../util/url_utils';
-import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { validateTimeRange } from '../../../common/util/date_utils';
@@ -88,26 +87,6 @@ class JobService {
         }),
         value: 0,
         show: true,
-      },
-    };
-  }
-
-  getBlankJob() {
-    return {
-      job_id: '',
-      description: '',
-      groups: [],
-      analysis_config: {
-        bucket_span: '15m',
-        influencers: [],
-        detectors: [],
-      },
-      data_description: {
-        time_field: '',
-        time_format: '', // 'epoch',
-        field_delimiter: '',
-        quote_character: '"',
-        format: 'delimited',
       },
     };
   }
@@ -348,165 +327,6 @@ class JobService {
     return job;
   }
 
-  searchPreview(job) {
-    return new Promise((resolve, reject) => {
-      if (job.datafeed_config) {
-        // if query is set, add it to the search, otherwise use match_all
-        let query = { match_all: {} };
-        if (job.datafeed_config.query) {
-          query = job.datafeed_config.query;
-        }
-
-        // Get bucket span
-        // Get first doc time for datafeed
-        // Create a new query - must user query and must range query.
-        // Time range 'to' first doc time plus < 10 buckets
-
-        // Do a preliminary search to get the date of the earliest doc matching the
-        // query in the datafeed. This will be used to apply a time range criteria
-        // on the datafeed search preview.
-        // This time filter is required for datafeed searches using aggregations to ensure
-        // the search does not create too many buckets (default 10000 max_bucket limit),
-        // but apply it to searches without aggregations too for consistency.
-        ml.getTimeFieldRange({
-          index: job.datafeed_config.indices,
-          timeFieldName: job.data_description.time_field,
-          query,
-        })
-          .then((timeRange) => {
-            const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-            const earliestMs = timeRange.start.epoch;
-            const latestMs = +timeRange.start.epoch + 10 * bucketSpan.asMilliseconds();
-
-            const body = {
-              query: {
-                bool: {
-                  must: [
-                    {
-                      range: {
-                        [job.data_description.time_field]: {
-                          gte: earliestMs,
-                          lt: latestMs,
-                          format: 'epoch_millis',
-                        },
-                      },
-                    },
-                    query,
-                  ],
-                },
-              },
-            };
-
-            // if aggs or aggregations is set, add it to the search
-            const aggregations = job.datafeed_config.aggs || job.datafeed_config.aggregations;
-            if (aggregations && Object.keys(aggregations).length) {
-              body.size = 0;
-              body.aggregations = aggregations;
-
-              // add script_fields if present
-              const scriptFields = job.datafeed_config.script_fields;
-              if (scriptFields && Object.keys(scriptFields).length) {
-                body.script_fields = scriptFields;
-              }
-
-              // add runtime_mappings if present
-              const runtimeMappings = job.datafeed_config.runtime_mappings;
-              if (runtimeMappings && Object.keys(runtimeMappings).length) {
-                body.runtime_mappings = runtimeMappings;
-              }
-            } else {
-              // if aggregations is not set and retrieveWholeSource is not set, add all of the fields from the job
-              body.size = ML_DATA_PREVIEW_COUNT;
-
-              // add script_fields if present
-              const scriptFields = job.datafeed_config.script_fields;
-              if (scriptFields && Object.keys(scriptFields).length) {
-                body.script_fields = scriptFields;
-              }
-
-              // add runtime_mappings if present
-              const runtimeMappings = job.datafeed_config.runtime_mappings;
-              if (runtimeMappings && Object.keys(runtimeMappings).length) {
-                body.runtime_mappings = runtimeMappings;
-              }
-
-              const fields = {};
-
-              // get fields from detectors
-              if (job.analysis_config.detectors) {
-                each(job.analysis_config.detectors, (dtr) => {
-                  if (dtr.by_field_name) {
-                    fields[dtr.by_field_name] = {};
-                  }
-                  if (dtr.field_name) {
-                    fields[dtr.field_name] = {};
-                  }
-                  if (dtr.over_field_name) {
-                    fields[dtr.over_field_name] = {};
-                  }
-                  if (dtr.partition_field_name) {
-                    fields[dtr.partition_field_name] = {};
-                  }
-                });
-              }
-
-              // get fields from influencers
-              if (job.analysis_config.influencers) {
-                each(job.analysis_config.influencers, (inf) => {
-                  fields[inf] = {};
-                });
-              }
-
-              // get fields from categorizationFieldName
-              if (job.analysis_config.categorization_field_name) {
-                fields[job.analysis_config.categorization_field_name] = {};
-              }
-
-              // get fields from summary_count_field_name
-              if (job.analysis_config.summary_count_field_name) {
-                fields[job.analysis_config.summary_count_field_name] = {};
-              }
-
-              // get fields from time_field
-              if (job.data_description.time_field) {
-                fields[job.data_description.time_field] = {};
-              }
-
-              // add runtime fields
-              if (runtimeMappings) {
-                Object.keys(runtimeMappings).forEach((fieldName) => {
-                  fields[fieldName] = {};
-                });
-              }
-
-              const fieldsList = Object.keys(fields);
-              if (fieldsList.length) {
-                body.fields = fieldsList;
-                body._source = false;
-              }
-            }
-
-            const data = {
-              index: job.datafeed_config.indices,
-              body,
-              ...(job.datafeed_config.indices_options || {}),
-            };
-
-            ml.esSearch(data)
-              .then((resp) => {
-                resolve(resp);
-              })
-              .catch((resp) => {
-                reject(resp);
-              });
-          })
-          .catch((resp) => {
-            reject(resp);
-          });
-      }
-    });
-  }
-
   openJob(jobId) {
     return ml.openJob({ jobId });
   }
@@ -588,10 +408,6 @@ class JobService {
       datafeedId = `datafeed-${jobId}`;
     }
     return datafeedId;
-  }
-
-  getDatafeedPreview(datafeedId) {
-    return ml.datafeedPreview({ datafeedId });
   }
 
   // get the list of job group ids as well as how many jobs are in each group

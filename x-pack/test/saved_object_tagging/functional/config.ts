@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -22,10 +21,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     services,
     pageObjects,
-
-    esArchiver: {
-      directory: path.resolve(__dirname, '..', 'common', 'fixtures', 'es_archiver'),
-    },
 
     junit: {
       reportName: 'X-Pack Saved Object Tagging Functional Tests',

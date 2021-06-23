@@ -6,7 +6,6 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { SortOptions } from '../../../../../typings/elasticsearch';
 import {
   AGENT,
   CLOUD,
@@ -21,7 +20,7 @@ import {
   SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../server/utils/queries';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -32,7 +31,7 @@ type ServiceMetadataDetailsRaw = Pick<
   'service' | 'agent' | 'host' | 'container' | 'kubernetes' | 'cloud'
 >;
 
-interface ServiceMetadataDetails {
+export interface ServiceMetadataDetails {
   service?: {
     versions?: string[];
     runtime?: {
@@ -72,7 +71,7 @@ export async function getServiceMetadataDetails({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    ...rangeQuery(start, end),
   ];
 
   const params = {
@@ -94,7 +93,7 @@ export async function getServiceMetadataDetails({
           terms: {
             field: SERVICE_VERSION,
             size: 10,
-            order: { _key: 'desc' } as SortOptions,
+            order: { _key: 'desc' as const },
           },
         },
         availabilityZones: {
@@ -114,7 +113,10 @@ export async function getServiceMetadataDetails({
     },
   };
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(
+    'get_service_metadata_details',
+    params
+  );
 
   if (response.hits.total.value === 0) {
     return {

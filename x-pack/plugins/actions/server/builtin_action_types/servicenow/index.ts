@@ -76,7 +76,12 @@ export function getServiceNowITSMActionType(params: GetActionTypeParams): Servic
       }),
       params: ExecutorParamsSchemaITSM,
     },
-    executor: curry(executor)({ logger, configurationUtilities, table: serviceNowITSMTable }),
+    executor: curry(executor)({
+      logger,
+      configurationUtilities,
+      table: serviceNowITSMTable,
+      commentFieldKey: 'work_notes',
+    }),
   };
 }
 

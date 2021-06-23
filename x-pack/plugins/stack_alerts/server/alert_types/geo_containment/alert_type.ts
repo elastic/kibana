@@ -16,7 +16,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   AlertTypeParams,
-} from '../../../../alerts/server';
+} from '../../../../alerting/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
@@ -120,6 +120,7 @@ export interface GeoContainmentParams extends AlertTypeParams {
 export interface GeoContainmentState extends AlertTypeState {
   shapesFilters: Record<string, unknown>;
   shapesIdsNamesMap: Record<string, unknown>;
+  prevLocationMap: Record<string, unknown>;
 }
 export interface GeoContainmentInstanceState extends AlertInstanceState {
   location: number[];

@@ -9,6 +9,7 @@
 import Path from 'path';
 
 import globby from 'globby';
+import normalize from 'normalize-path';
 
 import { parseKibanaPlatformPlugin } from './parse_kibana_platform_plugin';
 
@@ -32,7 +33,7 @@ export function simpleKibanaPlatformPluginDiscovery(scanDirs: string[], pluginPa
       ),
       ...pluginPaths.map((path) => Path.resolve(path, `kibana.json`)),
     ])
-  );
+  ).map((path) => normalize(path));
 
   const manifestPaths = globby.sync(patterns, { absolute: true }).map((path) =>
     // absolute paths returned from globby are using normalize or

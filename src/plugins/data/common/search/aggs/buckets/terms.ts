@@ -8,8 +8,8 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { RequestAdapter } from 'src/plugins/inspector/common';
 
+import moment from 'moment';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
@@ -21,7 +21,6 @@ import { aggTermsFnName } from './terms_fn';
 import { AggConfigSerialized, BaseAggParams } from '../types';
 
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { getRequestInspectorStats, getResponseInspectorStats } from '../../expressions';
 
 import {
   buildOtherBucketAgg,
@@ -103,36 +102,24 @@ export const getTermsBucketAgg = () =>
 
         nestedSearchSource.setField('aggs', filterAgg);
 
-        let request: ReturnType<RequestAdapter['start']> | undefined;
-        if (inspectorRequestAdapter) {
-          request = inspectorRequestAdapter.start(
-            i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
-              defaultMessage: 'Other bucket',
-            }),
-            {
+        const { rawResponse: response } = await nestedSearchSource
+          .fetch$({
+            abortSignal,
+            sessionId: searchSessionId,
+            inspector: {
+              adapter: inspectorRequestAdapter,
+              title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
+                defaultMessage: 'Other bucket',
+              }),
               description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
                 defaultMessage:
                   'This request counts the number of documents that fall ' +
                   'outside the criterion of the data buckets.',
               }),
-              searchSessionId,
-            }
-          );
-          nestedSearchSource.getSearchRequestBody().then((body) => {
-            request!.json(body);
-          });
-          request.stats(getRequestInspectorStats(nestedSearchSource));
-        }
+            },
+          })
+          .toPromise();
 
-        const response = await nestedSearchSource.fetch({
-          abortSignal,
-          sessionId: searchSessionId,
-        });
-        if (request) {
-          request
-            .stats(getResponseInspectorStats(response, nestedSearchSource))
-            .ok({ json: response });
-        }
         resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
       }
       if (aggConfig.params.missingBucket) {
@@ -193,6 +180,54 @@ export const getTermsBucketAgg = () =>
             return;
           }
 
+          if (
+            aggs?.hasTimeShifts() &&
+            Object.keys(aggs?.getTimeShifts()).length > 1 &&
+            aggs.timeRange
+          ) {
+            const shift = orderAgg.getTimeShift();
+            orderAgg = aggs.createAggConfig(
+              {
+                type: 'filtered_metric',
+                id: orderAgg.id,
+                params: {
+                  customBucket: aggs
+                    .createAggConfig(
+                      {
+                        type: 'filter',
+                        id: 'shift',
+                        params: {
+                          filter: {
+                            language: 'lucene',
+                            query: {
+                              range: {
+                                [aggs.timeFields![0]]: {
+                                  gte: moment(aggs.timeRange.from)
+                                    .subtract(shift || 0)
+                                    .toISOString(),
+                                  lte: moment(aggs.timeRange.to)
+                                    .subtract(shift || 0)
+                                    .toISOString(),
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      {
+                        addToAggConfigs: false,
+                      }
+                    )
+                    .serialize(),
+                  customMetric: orderAgg.serialize(),
+                },
+                enabled: false,
+              },
+              {
+                addToAggConfigs: false,
+              }
+            );
+          }
           if (orderAgg.type.name === 'count') {
             order._count = dir;
             return;

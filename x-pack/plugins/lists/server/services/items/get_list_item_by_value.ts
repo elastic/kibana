@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
-
-import { ListItemArraySchema, Type } from '../../../common/schemas';
+import { ElasticsearchClient } from 'kibana/server';
+import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getListItemByValues } from '.';
 
 export interface GetListItemByValueOptions {
   listId: string;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   type: Type;
   value: string;
@@ -21,13 +20,13 @@ export interface GetListItemByValueOptions {
 
 export const getListItemByValue = async ({
   listId,
-  callCluster,
+  esClient,
   listItemIndex,
   type,
   value,
 }: GetListItemByValueOptions): Promise<ListItemArraySchema> =>
   getListItemByValues({
-    callCluster,
+    esClient,
     listId,
     listItemIndex,
     type,

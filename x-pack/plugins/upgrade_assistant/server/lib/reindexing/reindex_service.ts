@@ -219,14 +219,14 @@ export const reindexServiceFactory = (
         .cancel({
           task_id: reindexOp.attributes.reindexTaskId ?? undefined,
         })
-        .catch((e) => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
+        .catch(() => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
     }
 
     // Set index back to writable if we ever got past this point.
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { 'index.blocks.write': false },
+        body: { settings: { blocks: { write: false } } },
       });
     }
 
@@ -290,7 +290,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const { body: putReadonly } = await esClient.indices.putSettings({
       index: indexName,
-      body: { 'index.blocks.write': true },
+      body: { settings: { blocks: { write: true } } },
     });
 
     if (!putReadonly.acknowledged) {
@@ -347,6 +347,11 @@ export const reindexServiceFactory = (
       await esClient.indices.open({ index: indexName });
     }
 
+    const flatSettings = await actions.getFlatSettings(indexName);
+    if (!flatSettings) {
+      throw error.indexNotFound(`Index ${indexName} does not exist.`);
+    }
+
     const { body: startReindexResponse } = await esClient.reindex({
       refresh: true,
       wait_for_completion: false,
@@ -358,7 +363,10 @@ export const reindexServiceFactory = (
 
     return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.reindexStarted,
-      reindexTaskId: startReindexResponse.task,
+      reindexTaskId:
+        startReindexResponse.task === undefined
+          ? startReindexResponse.task
+          : String(startReindexResponse.task),
       reindexTaskPercComplete: 0,
       reindexOptions: {
         ...(reindexOptions ?? {}),
@@ -384,11 +392,11 @@ export const reindexServiceFactory = (
 
     if (!taskResponse.completed) {
       // Updated the percent complete
-      const perc = taskResponse.task.status.created / taskResponse.task.status.total;
+      const perc = taskResponse.task.status!.created / taskResponse.task.status!.total;
       return actions.updateReindexOp(reindexOp, {
         reindexTaskPercComplete: perc,
       });
-    } else if (taskResponse.task.status.canceled === 'by user request') {
+    } else if (taskResponse.task.status?.canceled === 'by user request') {
       // Set the status to cancelled
       reindexOp = await actions.updateReindexOp(reindexOp, {
         status: ReindexStatus.cancelled,
@@ -398,9 +406,11 @@ export const reindexServiceFactory = (
       reindexOp = await cleanupChanges(reindexOp);
     } else {
       // Check that it reindexed all documents
-      const { body: count } = await esClient.count({ index: reindexOp.attributes.indexName });
+      const {
+        body: { count },
+      } = await esClient.count({ index: reindexOp.attributes.indexName });
 
-      if (taskResponse.task.status.created < count) {
+      if (taskResponse.task.status!.created < count) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
         throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);

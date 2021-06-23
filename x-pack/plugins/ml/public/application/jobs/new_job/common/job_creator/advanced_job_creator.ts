@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
@@ -28,9 +29,10 @@ export interface RichDetector {
   byField: SplitField;
   overField: SplitField;
   partitionField: SplitField;
-  excludeFrequent: string | null;
+  excludeFrequent: estypes.MlExcludeFrequent | null;
   description: string | null;
   customRules: CustomRule[] | null;
+  useNull: boolean | null;
 }
 
 export class AdvancedJobCreator extends JobCreator {
@@ -56,8 +58,9 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
-    description: string | null
+    excludeFrequent: estypes.MlExcludeFrequent | null,
+    description: string | null,
+    useNull: boolean | null
   ) {
     // addDetector doesn't support adding new custom rules.
     // this will be added in the future once it's supported in the UI
@@ -70,7 +73,8 @@ export class AdvancedJobCreator extends JobCreator {
       partitionField,
       excludeFrequent,
       description,
-      customRules
+      customRules,
+      useNull
     );
 
     this._addDetector(detector, agg, field);
@@ -83,9 +87,10 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
-    index: number
+    index: number,
+    useNull: boolean | null
   ) {
     const customRules =
       this._detectors[index] !== undefined ? this._detectors[index].custom_rules || null : null;
@@ -98,7 +103,8 @@ export class AdvancedJobCreator extends JobCreator {
       partitionField,
       excludeFrequent,
       description,
-      customRules
+      customRules,
+      useNull
     );
 
     this._editDetector(detector, agg, field, index);
@@ -114,9 +120,10 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.MlExcludeFrequent | null,
     description: string | null,
-    customRules: CustomRule[] | null
+    customRules: CustomRule[] | null,
+    useNull: boolean | null
   ): { detector: Detector; richDetector: RichDetector } {
     const detector: Detector = createBasicDetector(agg, field);
 
@@ -138,6 +145,9 @@ export class AdvancedJobCreator extends JobCreator {
     if (customRules !== null) {
       detector.custom_rules = customRules;
     }
+    if (useNull !== null) {
+      detector.use_null = useNull;
+    }
 
     const richDetector: RichDetector = {
       agg,
@@ -148,6 +158,7 @@ export class AdvancedJobCreator extends JobCreator {
       excludeFrequent,
       description,
       customRules,
+      useNull,
     };
 
     return { detector, richDetector };
@@ -177,16 +188,14 @@ export class AdvancedJobCreator extends JobCreator {
   // load the start and end times for the selected index
   // and apply them to the job creator
   public async autoSetTimeRange() {
-    try {
-      const { start, end } = await ml.getTimeFieldRange({
-        index: this._indexPatternTitle,
-        timeFieldName: this.timeFieldName,
-        query: this.query,
-      });
-      this.setTimeRange(start.epoch, end.epoch);
-    } catch (error) {
-      throw Error(error);
-    }
+    const { start, end } = await ml.getTimeFieldRange({
+      index: this._indexPatternTitle,
+      timeFieldName: this.timeFieldName,
+      query: this.query,
+      runtimeMappings: this.datafeedConfig.runtime_mappings,
+      indicesOptions: this.datafeedConfig.indices_options,
+    });
+    this.setTimeRange(start.epoch, end.epoch);
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
@@ -209,7 +218,8 @@ export class AdvancedJobCreator extends JobCreator {
           dtr.overField,
           dtr.partitionField,
           dtr.excludeFrequent,
-          dtr.description
+          dtr.description,
+          dtr.useNull
         );
       }
     });

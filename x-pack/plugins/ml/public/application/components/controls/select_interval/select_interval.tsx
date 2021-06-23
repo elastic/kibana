@@ -6,11 +6,11 @@
  */
 
 import React, { FC } from 'react';
-import { EuiSelect } from '@elastic/eui';
+import { EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '../../../util/url_state';
 
-interface TableInterval {
+export interface TableInterval {
   display: string;
   val: string;
 }
@@ -64,16 +64,38 @@ export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] 
 export const SelectInterval: FC = () => {
   const [interval, setInterval] = useTableInterval();
 
-  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setInterval(optionValueToInterval(e.target.value));
+  return <SelectIntervalUI interval={interval} onChange={setInterval} />;
+};
+
+interface SelectIntervalUIProps {
+  interval: TableInterval;
+  onChange: (interval: TableInterval) => void;
+}
+export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange }) => {
+  const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onChange(optionValueToInterval(e.target.value));
   };
 
   return (
     <EuiSelect
+      prepend={i18n.translate('xpack.ml.explorer.intervalLabel', {
+        defaultMessage: 'Interval',
+      })}
+      append={
+        <EuiToolTip
+          content={i18n.translate('xpack.ml.explorer.intervalTooltip', {
+            defaultMessage:
+              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
+          })}
+        >
+          <EuiIcon type="questionInCircle" color="subdued" />
+        </EuiToolTip>
+      }
+      compressed
+      id="selectInterval"
       options={OPTIONS}
-      className="ml-select-interval"
       value={interval.val}
-      onChange={onChange}
+      onChange={handleOnChange}
     />
   );
 };

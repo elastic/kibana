@@ -35,7 +35,7 @@ export function BreakdownSeries({
     ? EUI_CHARTS_THEME_DARK
     : EUI_CHARTS_THEME_LIGHT;
 
-  const { data, status } = useBreakdowns({
+  const { breakdowns, status } = useBreakdowns({
     field,
     value,
     percentileRange,
@@ -49,7 +49,7 @@ export function BreakdownSeries({
   // so don't user that here
   return (
     <>
-      {data?.map(({ data: seriesData, name }, sortIndex) => (
+      {breakdowns.map(({ data: seriesData, name }, sortIndex) => (
         <LineSeries
           id={`${field}-${value}-${name}`}
           key={`${field}-${value}-${name}`}

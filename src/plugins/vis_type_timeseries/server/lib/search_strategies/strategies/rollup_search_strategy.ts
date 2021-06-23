@@ -6,38 +6,64 @@
  * Side Public License, v 1.
  */
 
-import { ReqFacade, AbstractSearchStrategy } from './abstract_search_strategy';
+import { getCapabilitiesForRollupIndices, IndexPatternsService } from '../../../../../data/server';
+import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
-import type { VisPayload } from '../../../../common/types';
 
-import { getCapabilitiesForRollupIndices } from '../../../../../data/server';
+import type { FetchedIndexPattern } from '../../../../common/types';
+import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
+import type {
+  VisTypeTimeseriesRequest,
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
+import { MAX_BUCKETS_SETTING } from '../../../../common/constants';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
-const isIndexPatternValid = (indexPattern: string) =>
-  indexPattern && typeof indexPattern === 'string' && !isIndexPatternContainsWildcard(indexPattern);
 
 export class RollupSearchStrategy extends AbstractSearchStrategy {
-  async search(req: ReqFacade<VisPayload>, bodies: any[]) {
-    return super.search(req, bodies, 'rollup');
+  async search(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesVisDataRequest,
+    bodies: any[]
+  ) {
+    return super.search(requestContext, req, bodies, 'rollup');
   }
 
-  async getRollupData(req: ReqFacade, indexPattern: string) {
-    return req.requestContext.core.elasticsearch.client.asCurrentUser.rollup
-      .getRollupIndexCaps({
+  async getRollupData(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    indexPattern: string
+  ) {
+    try {
+      const {
+        body,
+      } = await requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
         index: indexPattern,
-      })
-      .then((data) => data.body)
-      .catch(() => Promise.resolve({}));
+      });
+
+      return body;
+    } catch (e) {
+      return {};
+    }
   }
 
-  async checkForViability(req: ReqFacade<VisPayload>, indexPattern: string) {
+  async checkForViability(
+    requestContext: VisTypeTimeseriesRequestHandlerContext,
+    req: VisTypeTimeseriesRequest,
+    { indexPatternString, indexPattern }: FetchedIndexPattern
+  ) {
     let isViable = false;
     let capabilities = null;
 
-    if (isIndexPatternValid(indexPattern)) {
-      const rollupData = await this.getRollupData(req, indexPattern);
+    if (
+      indexPatternString &&
+      ((!indexPattern && !isIndexPatternContainsWildcard(indexPatternString)) ||
+        indexPattern?.type === 'rollup')
+    ) {
+      const rollupData = await this.getRollupData(requestContext, indexPatternString);
       const rollupIndices = getRollupIndices(rollupData);
+      const uiSettings = requestContext.core.uiSettings.client;
 
       isViable = rollupIndices.length === 1;
 
@@ -45,7 +71,13 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
         const [rollupIndex] = rollupIndices;
         const fieldsCapabilities = getCapabilitiesForRollupIndices(rollupData);
 
-        capabilities = new RollupSearchCapabilities(req, fieldsCapabilities, rollupIndex);
+        capabilities = new RollupSearchCapabilities(
+          {
+            maxBucketsLimit: await uiSettings.get(MAX_BUCKETS_SETTING),
+          },
+          fieldsCapabilities,
+          rollupIndex
+        );
       }
     }
 
@@ -55,14 +87,15 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     };
   }
 
-  async getFieldsForWildcard<TPayload = unknown>(
-    req: ReqFacade<TPayload>,
-    indexPattern: string,
+  async getFieldsForWildcard(
+    fetchedIndexPattern: FetchedIndexPattern,
+    indexPatternsService: IndexPatternsService,
+    getCachedIndexPatternFetcher: CachedIndexPatternFetcher,
     capabilities?: unknown
   ) {
-    return super.getFieldsForWildcard(req, indexPattern, capabilities, {
+    return super.getFieldsForWildcard(fetchedIndexPattern, indexPatternsService, capabilities, {
       type: 'rollup',
-      rollupIndex: indexPattern,
+      rollupIndex: fetchedIndexPattern.indexPatternString,
     });
   }
 }

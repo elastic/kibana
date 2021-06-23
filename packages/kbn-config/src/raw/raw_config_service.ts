@@ -13,7 +13,7 @@ import typeDetect from 'type-detect';
 
 import { getConfigFromFiles } from './read_config';
 
-type RawConfigAdapter = (rawConfig: Record<string, any>) => Record<string, any>;
+export type RawConfigAdapter = (rawConfig: Record<string, any>) => Record<string, any>;
 
 export type RawConfigurationProvider = Pick<RawConfigService, 'getConfig$'>;
 

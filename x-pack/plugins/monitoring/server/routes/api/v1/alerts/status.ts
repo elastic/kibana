@@ -43,7 +43,7 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
           alertsClient,
           npRoute.licenseService,
           alertTypeIds,
-          clusterUuid,
+          [clusterUuid],
           filters as CommonAlertFilter[]
         );
         return response.ok({ body: status });

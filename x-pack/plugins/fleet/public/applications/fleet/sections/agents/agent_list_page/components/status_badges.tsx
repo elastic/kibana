@@ -7,12 +7,13 @@
 
 import { EuiFlexGroup, EuiHealth, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+
 import {
   AGENT_STATUSES,
   getColorForAgentStatus,
   getLabelForAgentStatus,
 } from '../../services/agent_status';
-import { SimplifiedAgentStatus } from '../../../../types';
+import type { SimplifiedAgentStatus } from '../../../../types';
 
 export const AgentStatusBadges: React.FC<{
   showInactive?: boolean;

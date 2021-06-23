@@ -19,9 +19,10 @@ const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
 };
 
 export function useTransactionListFetcher() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { environment, kuery, transactionType, start, end },
+  } = useUrlParams();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { transactionType, start, end } = urlParams;
   const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
@@ -30,16 +31,17 @@ export function useTransactionListFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
+              kuery,
               start,
               end,
               transactionType,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, transactionType, uiFilters]
+    [environment, kuery, serviceName, start, end, transactionType]
   );
 
   return {

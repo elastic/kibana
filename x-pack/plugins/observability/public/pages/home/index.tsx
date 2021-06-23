@@ -16,9 +16,9 @@ export function HomePage() {
 
   useEffect(() => {
     if (hasAnyData === true) {
-      history.push({ pathname: '/overview' });
+      history.replace({ pathname: '/overview' });
     } else if (hasAnyData === false && isAllRequestsComplete === true) {
-      history.push({ pathname: '/landing' });
+      history.replace({ pathname: '/landing' });
     }
   }, [hasAnyData, isAllRequestsComplete, history]);
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SpacesPluginSetup } from '../../../spaces/server';
-import { AuditServiceSetup } from '../audit';
-import { AuthorizationServiceSetup } from '../authorization';
+import type { SpacesPluginSetup } from '../../../spaces/server';
+import type { AuditServiceSetup } from '../audit';
+import type { AuthorizationServiceSetup } from '../authorization';
 import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 

@@ -33,7 +33,6 @@ import {
   chartExtendedLimits,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -63,7 +62,7 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService } = this.props;
+    const { tooManyBuckets, tooltipService, timeBuckets, showSelectedInterval } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -263,7 +262,6 @@ export class ExplorerChartDistribution extends React.Component {
 
     function drawRareChartAxes() {
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = getTimeBucketsFromCache();
       const bounds = { min: moment(config.plotEarliest), max: moment(config.plotLatest) };
       timeBuckets.setBounds(bounds);
       timeBuckets.setInterval('auto');
@@ -359,6 +357,7 @@ export class ExplorerChartDistribution extends React.Component {
     }
 
     function drawRareChartHighlightedSpan() {
+      if (showSelectedInterval === false) return;
       // Draws a rectangle which highlights the time span that has been selected for view.
       // Note depending on the overall time range and the bucket span, the selected time
       // span may be longer than the range actually being plotted.

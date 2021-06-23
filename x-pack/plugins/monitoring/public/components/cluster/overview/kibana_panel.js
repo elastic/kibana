@@ -49,7 +49,7 @@ export function KibanaPanel(props) {
     return null;
   }
 
-  const statusIndicator = <HealthStatusIndicator status={props.status} />;
+  const statusIndicator = <HealthStatusIndicator status={props.status} product={'kb'} />;
 
   const goToKibana = () => getSafeForExternalLink('#/kibana');
   const goToInstances = () => getSafeForExternalLink('#/kibana/instances');

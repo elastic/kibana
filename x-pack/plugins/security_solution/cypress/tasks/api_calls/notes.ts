@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-export const addNoteToTimeline = (note: string, timelineId: string) =>
+export const addNoteToTimeline = (
+  note: string,
+  timelineId: string
+): Cypress.Chainable<Cypress.Response> =>
   cy.request({
-    method: 'POST',
-    url: '/api/solutions/security/graphql',
+    method: 'PATCH',
+    url: '/api/note',
     body: {
-      operationName: 'PersistTimelineNoteMutation',
-      variables: {
-        noteId: null,
-        version: null,
-        note: { note, timelineId },
-      },
-      query:
-        'mutation PersistTimelineNoteMutation($noteId: ID, $version: String, $note: NoteInput!) {\n  persistNote(noteId: $noteId, version: $version, note: $note) {\n    code\n    message\n    note {\n      eventId\n      note\n      timelineId\n      timelineVersion\n      noteId\n      created\n      createdBy\n      updated\n      updatedBy\n      version\n      __typename\n    }\n    __typename\n  }\n}\n',
+      noteId: null,
+      version: null,
+      note: { note, timelineId },
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });

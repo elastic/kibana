@@ -29,6 +29,7 @@ import { InternalStatusServiceSetup } from './status';
 import { InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
+import { InternalDeprecationsServiceSetup } from './deprecations';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -45,6 +46,7 @@ export interface InternalCoreSetup {
   httpResources: InternalHttpResourcesSetup;
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
+  deprecations: InternalDeprecationsServiceSetup;
 }
 
 /**

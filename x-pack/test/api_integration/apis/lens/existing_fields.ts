@@ -45,6 +45,7 @@ const fieldsWithData = [
   'machine.os',
   'machine.os.raw',
   'machine.ram',
+  'machine.ram_range',
   'memory',
   'phpmemory',
   'referer',
@@ -161,12 +162,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('existing_fields apis', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('visualize/default');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
     });
     after(async () => {
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('visualize/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
     });
 
     describe('existence', () => {

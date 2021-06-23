@@ -82,6 +82,7 @@ describe('Aggs service', () => {
           "avg",
           "sum",
           "median",
+          "single_percentile",
           "min",
           "max",
           "std_dev",
@@ -97,6 +98,7 @@ describe('Aggs service', () => {
           "sum_bucket",
           "min_bucket",
           "max_bucket",
+          "filtered_metric",
           "geo_bounds",
           "geo_centroid",
         ]
@@ -127,6 +129,7 @@ describe('Aggs service', () => {
           "avg",
           "sum",
           "median",
+          "single_percentile",
           "min",
           "max",
           "std_dev",
@@ -142,6 +145,7 @@ describe('Aggs service', () => {
           "sum_bucket",
           "min_bucket",
           "max_bucket",
+          "filtered_metric",
           "geo_bounds",
           "geo_centroid",
         ]
@@ -192,9 +196,8 @@ describe('Aggs service', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(5);
+      expect(Object.keys(start).length).toBe(4);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
-      expect(start).toHaveProperty('getDateMetaByDatatableColumn');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
       expect(start).toHaveProperty('datatableUtilities');

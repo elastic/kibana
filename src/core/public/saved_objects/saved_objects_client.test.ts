@@ -223,6 +223,26 @@ describe('SavedObjectsClient', () => {
       `);
     });
 
+    test('handles the `upsert` option', () => {
+      savedObjectsClient.update('index-pattern', 'logstash-*', attributes, {
+        upsert: {
+          hello: 'dolly',
+        },
+      });
+      expect(http.fetch.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "/api/saved_objects/index-pattern/logstash-*",
+            Object {
+              "body": "{\\"attributes\\":{\\"foo\\":\\"Foo\\",\\"bar\\":\\"Bar\\"},\\"upsert\\":{\\"hello\\":\\"dolly\\"}}",
+              "method": "PUT",
+              "query": undefined,
+            },
+          ],
+        ]
+      `);
+    });
+
     test('rejects when HTTP call fails', async () => {
       http.fetch.mockRejectedValueOnce(new Error('Request failed'));
       await expect(

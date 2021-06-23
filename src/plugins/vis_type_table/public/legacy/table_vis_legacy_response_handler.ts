@@ -8,9 +8,16 @@
 
 import { Required } from '@kbn/utility-types';
 
+import { SchemaConfig } from 'src/plugins/visualizations/public';
 import { getFormatService } from '../services';
-import { Dimensions } from '../types';
 import { Input } from './table_vis_legacy_fn';
+
+interface Dimensions {
+  buckets: SchemaConfig[];
+  metrics: SchemaConfig[];
+  splitColumn?: SchemaConfig[];
+  splitRow?: SchemaConfig[];
+}
 
 export interface TableContext {
   tables: Array<TableGroup | Table>;

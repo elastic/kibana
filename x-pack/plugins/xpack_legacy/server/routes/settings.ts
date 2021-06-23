@@ -42,9 +42,7 @@ export function registerSettingsRoute({
       validate: false,
     },
     async (context, req, res) => {
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
       const collectorFetchContext = {
-        callCluster: callAsCurrentUser,
         esClient: context.core.elasticsearch.client.asCurrentUser,
         soClient: context.core.savedObjects.client,
       };
@@ -53,7 +51,7 @@ export function registerSettingsRoute({
         | KibanaSettingsCollector
         | undefined;
       if (!settingsCollector) {
-        return res.internalError();
+        throw new Error('The settings collector is not registered');
       }
 
       const settings =

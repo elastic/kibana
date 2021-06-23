@@ -12,15 +12,11 @@ import minimatch from 'minimatch';
 import { IndexPatternMapping } from './types';
 import { getLayerList } from './map_config';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
-import {
+import type {
+  RenderTooltipContentParams,
   MapEmbeddable,
   MapEmbeddableInput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/maps/public/embeddable';
-import {
-  RenderTooltipContentParams,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../plugins/maps/public/classes/tooltips/tooltip_property';
+} from '../../../../../../plugins/maps/public';
 import * as i18n from './translations';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import {
@@ -74,7 +70,6 @@ export const createEmbeddable = async (
     filters,
     hidePanelTitles: true,
     query,
-    refreshConfig: { value: 0, pause: true },
     timeRange: {
       from: new Date(startDate).toISOString(),
       to: new Date(endDate).toISOString(),

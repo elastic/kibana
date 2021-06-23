@@ -13,7 +13,7 @@ import { register as registerEsQuery } from './es_query';
 interface RegisterAlertTypesParams {
   logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
 }
 
 export function registerBuiltInAlertTypes(params: RegisterAlertTypesParams) {

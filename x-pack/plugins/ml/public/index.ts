@@ -49,7 +49,9 @@ export {
   getSeverityColor,
   getSeverityType,
   getFormattedSeverityScore,
+  getSeverity,
 } from '../common/util/anomaly_utils';
+export { ES_CLIENT_TOTAL_HITS_RELATION } from '../common/types/es_client';
 
 export { ANOMALY_SEVERITY } from '../common';
 export { useMlHref, ML_PAGES, MlUrlGenerator } from './ml_url_generator';

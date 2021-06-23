@@ -56,10 +56,16 @@ export default function ({ getService }) {
         expect(body.doesMatchIndices).to.be(true);
         expect(body.doesMatchRollupIndices).to.be(false);
         expect(body.dateFields).to.eql(['testCreatedField']);
-        expect(body.keywordFields).to.eql(['testTagField']);
-
-        // Allowing the test to account for future addition of doc_count
-        expect(body.numericFields.indexOf('testTotalField')).to.be.greaterThan(-1);
+        // '_tier' is an expected metadata field from ES
+        // Order is not guaranteed, so we assert against individual field names
+        ['_tier', 'testTagField'].forEach((keywordField) => {
+          expect(body.keywordFields.includes(keywordField)).to.be(true);
+        });
+        // '_doc_count' is an expected metadata field from ES
+        // Order is not guaranteed, so we assert against individual field names
+        ['_doc_count', 'testTotalField'].forEach((numericField) => {
+          expect(body.numericFields.includes(numericField)).to.be(true);
+        });
       });
 
       it("should not return any fields when the index pattern doesn't match any indices", async () => {

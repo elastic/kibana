@@ -13,6 +13,9 @@ export const config = {
   schema: ConfigSchema,
   exposeToBrowser: {
     enabled: true,
+    actionEnabled: true,
+    savedQueries: true,
+    packs: true,
   },
 };
 export function plugin(initializerContext: PluginInitializerContext) {

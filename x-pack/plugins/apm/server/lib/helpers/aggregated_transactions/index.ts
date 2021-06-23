@@ -6,7 +6,7 @@
  */
 
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeQuery } from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   TRANSACTION_DURATION,
@@ -24,22 +24,25 @@ export async function getHasAggregatedTransactions({
   end?: number;
   apmEventClient: APMEventClient;
 }) {
-  const response = await apmEventClient.search({
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-            ...(start && end ? [{ range: rangeFilter(start, end) }] : []),
-          ],
+  const response = await apmEventClient.search(
+    'get_has_aggregated_transactions',
+    {
+      apm: {
+        events: [ProcessorEvent.metric],
+      },
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+              ...(start && end ? rangeQuery(start, end) : []),
+            ],
+          },
         },
       },
-    },
-    terminateAfter: 1,
-  });
+      terminateAfter: 1,
+    }
+  );
 
   if (response.hits.total.value > 0) {
     return true;

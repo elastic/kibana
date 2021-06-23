@@ -382,7 +382,7 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       <ContinueButton
         isDisabled={isStepInvalid}
         onClick={() => {
-          setCurrentStep(ANALYTICS_STEPS.CREATE);
+          setCurrentStep(ANALYTICS_STEPS.VALIDATION);
         }}
       />
     </Fragment>

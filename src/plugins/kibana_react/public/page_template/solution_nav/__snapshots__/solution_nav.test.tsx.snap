@@ -1,0 +1,238 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
+<div
+  className="kbnPageTemplateSolutionNav"
+>
+  <EuiTitle
+    className="kbnPageTemplateSolutionNav__title"
+    id="kbnPageTemplateSolutionNav__title_generated-id"
+    size="xs"
+  >
+    <h2>
+      <strong>
+        Solution
+      </strong>
+    </h2>
+  </EuiTitle>
+  <EuiSideNav
+    aria-labelledby="kbnPageTemplateSolutionNav__title_generated-id"
+    data-test-subj="DTS"
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "name": "Ingest Node Pipelines",
+            },
+            Object {
+              "id": "1.2",
+              "name": "Logstash Pipelines",
+            },
+            Object {
+              "id": "1.3",
+              "name": "Beats Central Management",
+            },
+          ],
+          "name": "Ingest",
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "name": "Index Management",
+            },
+            Object {
+              "id": "2.2",
+              "name": "Index Lifecycle Policies",
+            },
+            Object {
+              "id": "2.3",
+              "name": "Snapshot and Restore",
+            },
+          ],
+          "name": "Data",
+        },
+      ]
+    }
+    mobileTitle={
+      <h2>
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </h2>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+</div>
+`;
+
+exports[`KibanaPageTemplateSolutionNav renders 1`] = `
+<div
+  className="kbnPageTemplateSolutionNav"
+>
+  <EuiTitle
+    className="kbnPageTemplateSolutionNav__title"
+    id="kbnPageTemplateSolutionNav__title_generated-id"
+    size="xs"
+  >
+    <h2>
+      <strong>
+        Solution
+      </strong>
+    </h2>
+  </EuiTitle>
+  <EuiSideNav
+    aria-labelledby="kbnPageTemplateSolutionNav__title_generated-id"
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "name": "Ingest Node Pipelines",
+            },
+            Object {
+              "id": "1.2",
+              "name": "Logstash Pipelines",
+            },
+            Object {
+              "id": "1.3",
+              "name": "Beats Central Management",
+            },
+          ],
+          "name": "Ingest",
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "name": "Index Management",
+            },
+            Object {
+              "id": "2.2",
+              "name": "Index Lifecycle Policies",
+            },
+            Object {
+              "id": "2.3",
+              "name": "Snapshot and Restore",
+            },
+          ],
+          "name": "Data",
+        },
+      ]
+    }
+    mobileTitle={
+      <h2>
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </h2>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+</div>
+`;
+
+exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
+<div
+  className="kbnPageTemplateSolutionNav"
+>
+  <EuiTitle
+    className="kbnPageTemplateSolutionNav__title"
+    id="kbnPageTemplateSolutionNav__title_generated-id"
+    size="xs"
+  >
+    <h2>
+      <KibanaPageTemplateSolutionNavAvatar
+        iconType="logoElastic"
+        name="Solution"
+      />
+      <strong>
+        Solution
+      </strong>
+    </h2>
+  </EuiTitle>
+  <EuiSideNav
+    aria-labelledby="kbnPageTemplateSolutionNav__title_generated-id"
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "name": "Ingest Node Pipelines",
+            },
+            Object {
+              "id": "1.2",
+              "name": "Logstash Pipelines",
+            },
+            Object {
+              "id": "1.3",
+              "name": "Beats Central Management",
+            },
+          ],
+          "name": "Ingest",
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "name": "Index Management",
+            },
+            Object {
+              "id": "2.2",
+              "name": "Index Lifecycle Policies",
+            },
+            Object {
+              "id": "2.3",
+              "name": "Snapshot and Restore",
+            },
+          ],
+          "name": "Data",
+        },
+      ]
+    }
+    mobileTitle={
+      <h2>
+        <KibanaPageTemplateSolutionNavAvatar
+          iconType="logoElastic"
+          name="Solution"
+        />
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </h2>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+</div>
+`;

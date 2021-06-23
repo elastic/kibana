@@ -21,7 +21,6 @@ export interface KueryParseOptions {
   };
   startRule: string;
   allowLeadingWildcards: boolean;
-  errorOnLuceneSyntax: boolean;
   cursorSymbol?: string;
   parseCursor?: boolean;
 }

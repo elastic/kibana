@@ -98,6 +98,7 @@ export const getAreaVisTypeDefinition = (
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
+          circlesRadius: 3,
           interpolate: InterpolationMode.Linear,
           valueAxis: 'ValueAxis-1',
         },
@@ -133,7 +134,7 @@ export const getAreaVisTypeDefinition = (
         title: i18n.translate('visTypeXy.area.metricsTitle', {
           defaultMessage: 'Y-axis',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
         min: 1,
         defaults: [{ schema: 'metric', type: 'count' }],
       },

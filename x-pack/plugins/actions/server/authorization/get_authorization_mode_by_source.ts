@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { ActionExecutionSource, isSavedObjectExecutionSource } from '../lib';
-import { ALERT_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { ALERT_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 const LEGACY_VERSION = 'pre-7.10.0';
 

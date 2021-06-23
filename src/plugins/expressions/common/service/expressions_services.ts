@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { take } from 'rxjs/operators';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from 'src/core/server';
 
@@ -18,6 +19,20 @@ import { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { SavedObjectReference } from '../../../../core/types';
 import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { Adapters } from '../../../inspector/common/adapters';
+import {
+  clog,
+  font,
+  variableSet,
+  variable,
+  theme,
+  cumulativeSum,
+  derivative,
+  movingAverage,
+  mapColumn,
+  overallMetric,
+  math,
+  mathColumn,
+} from '../expression_functions';
 
 /**
  * The public contract that `ExpressionsService` provides to other plugins
@@ -228,7 +243,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   ): void => this.renderers.register(definition);
 
   public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
-    this.executor.run(ast, input, params);
+    this.executor.run(ast, input, params).pipe(take(1)).toPromise<any>();
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);
@@ -268,7 +283,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public readonly fork = () => {
     const executor = this.executor.fork();
     const renderers = this.renderers;
-    const fork = new ExpressionsService({ executor, renderers });
+    const fork = new (this.constructor as typeof ExpressionsService)({ executor, renderers });
 
     return fork;
   };
@@ -317,7 +332,24 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
    * Returns Kibana Platform *setup* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
    */
-  public setup(): ExpressionsServiceSetup {
+  public setup(...args: unknown[]): ExpressionsServiceSetup {
+    for (const fn of [
+      clog,
+      font,
+      variableSet,
+      variable,
+      theme,
+      cumulativeSum,
+      derivative,
+      movingAverage,
+      overallMetric,
+      mapColumn,
+      math,
+      mathColumn,
+    ]) {
+      this.registerFunction(fn);
+    }
+
     return this;
   }
 
@@ -325,7 +357,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
    * Returns Kibana Platform *start* life-cycle contract. Useful to return the
    * same contract on server-side and browser-side.
    */
-  public start(): ExpressionsServiceStart {
+  public start(...args: unknown[]): ExpressionsServiceStart {
     return this;
   }
 

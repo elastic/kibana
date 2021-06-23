@@ -15,7 +15,7 @@ area of Core API's and does not apply to internal types.
 
  - 1.1 All API types must be exported from the top-level `server` or `public`
    directories.
-   
+
    ```ts
    // -- good --
    import { IRouter } from 'src/core/server';
@@ -23,15 +23,15 @@ area of Core API's and does not apply to internal types.
    // -- bad --
    import { IRouter } from 'src/core/server/http/router.ts';
    ```
-   
+
    > Why? This is required for generating documentation from our inline
    > typescript doc comments, makes it easier for API consumers to find the
    > relevant types and creates a clear distinction between external and
    > internal types.
- 
+
  - 1.2 Classes must not be exposed directly. Instead, use a separate type,
    prefixed with an 'I', to describe the public contract of the class.
-   
+
    ```ts
    // -- good (alternative 1) --
    /**
@@ -66,14 +66,14 @@ area of Core API's and does not apply to internal types.
    ```
 
    > Why? Classes' private members form part of their type signature making it
-   > impossible to mock a dependency typed as a `class`. 
+   > impossible to mock a dependency typed as a `class`.
    >
    > Until we can use ES private field support in Typescript 3.8
    > https://github.com/elastic/kibana/issues/54906 we have two alternatives
    > each with their own pro's and cons:
    >
    > #### Using a derived class (alternative 1)
-   > 
+   >
    > Pro's:
    > - TSDoc comments are located with the source code
    > - The class acts as a single source of type information
@@ -81,12 +81,12 @@ area of Core API's and does not apply to internal types.
    > Con's:
    > - "Go to definition" first takes you to where the type gets derived
    >   requiring a second "Go to definition" to navigate to the type source.
-   >  
+   >
    > #### Using a separate interface (alternative 2)
    > Pro's:
    > - Creates an explicit external API contract
    > - "Go to definition" will take you directly to the type definition.
-   > 
+   >
    > Con's:
    > - TSDoc comments are located with the interface not next to the
    >   implementation source code.

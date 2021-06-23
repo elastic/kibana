@@ -14,7 +14,7 @@ const paramsSchema = schema.object({
   names: schema.string(),
 });
 
-export const registerDeleteRoute = ({ router, license }: RouteDependencies): void => {
+export const registerDeleteRoute = ({ router }: RouteDependencies): void => {
   router.delete(
     {
       path: `${API_BASE_PATH}/{names}`,
@@ -22,8 +22,8 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+    async (ctx, req, res) => {
+      const { client: clusterClient } = ctx.core.elasticsearch;
       const { names } = req.params;
       const pipelineNames = names.split(',');
 
@@ -34,18 +34,20 @@ export const registerDeleteRoute = ({ router, license }: RouteDependencies): voi
 
       await Promise.all(
         pipelineNames.map((pipelineName) => {
-          return callAsCurrentUser('ingest.deletePipeline', { id: pipelineName })
+          return clusterClient.asCurrentUser.ingest
+            .deletePipeline({ id: pipelineName })
             .then(() => response.itemsDeleted.push(pipelineName))
-            .catch((e) =>
+            .catch((e) => {
               response.errors.push({
+                error: e?.meta?.body?.error ?? e,
+                status: e?.meta?.body?.status,
                 name: pipelineName,
-                error: e,
-              })
-            );
+              });
+            });
         })
       );
 
       return res.ok({ body: response });
-    })
+    }
   );
 };

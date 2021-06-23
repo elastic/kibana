@@ -24,7 +24,7 @@ import { EMSFileSelect } from '../../../components/ems_file_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getGeoFields, getSourceFields, getTermsFields } from '../../../index_pattern_util';
-import { getEmsFileLayers } from '../../../meta';
+import { getEmsFileLayers } from '../../../util';
 import { getIndexPatternSelectComponent, getIndexPatternService } from '../../../kibana_services';
 import {
   createEmsChoroplethLayerDescriptor,

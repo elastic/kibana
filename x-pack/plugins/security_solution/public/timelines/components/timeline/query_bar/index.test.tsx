@@ -96,8 +96,8 @@ describe('Timeline QueryBar ', () => {
     );
     const queryBarProps = wrapper.find(QueryBar).props();
 
-    expect(queryBarProps.dateRangeFrom).toEqual('now-24h');
-    expect(queryBarProps.dateRangeTo).toEqual('now');
+    expect(queryBarProps.dateRangeFrom).toEqual('now/d');
+    expect(queryBarProps.dateRangeTo).toEqual('now/d');
     expect(queryBarProps.filterQuery).toEqual({ query: 'here: query', language: 'kuery' });
     expect(queryBarProps.savedQuery).toEqual(undefined);
     expect(queryBarProps.filters).toHaveLength(1);

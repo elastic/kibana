@@ -223,118 +223,6 @@ describe('getSplits(resp, panel, series)', () => {
     ]);
   });
 
-  describe('terms group bys', () => {
-    const resp = {
-      aggregations: {
-        SERIES: {
-          buckets: [
-            {
-              key: 'example-01',
-              timeseries: { buckets: [] },
-              SIBAGG: { value: 1 },
-            },
-            {
-              key: 'example-02',
-              timeseries: { buckets: [] },
-              SIBAGG: { value: 2 },
-            },
-          ],
-          meta: { bucketSize: 10 },
-        },
-      },
-    };
-
-    test('should return a splits with no color', async () => {
-      const series = {
-        id: 'SERIES',
-        color: '#F00',
-        split_mode: 'terms',
-        terms_field: 'beat.hostname',
-        terms_size: 10,
-        metrics: [
-          { id: 'AVG', type: 'avg', field: 'cpu' },
-          { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
-        ],
-      };
-      const panel = { type: 'timeseries' };
-
-      expect(await getSplits(resp, panel, series)).toEqual([
-        {
-          id: 'SERIES:example-01',
-          key: 'example-01',
-          label: 'example-01',
-          labelFormatted: '',
-          meta: { bucketSize: 10 },
-          color: undefined,
-          splitByLabel: 'Overall Average of Average of cpu',
-          timeseries: { buckets: [] },
-          SIBAGG: { value: 1 },
-        },
-        {
-          id: 'SERIES:example-02',
-          key: 'example-02',
-          label: 'example-02',
-          labelFormatted: '',
-          meta: { bucketSize: 10 },
-          color: undefined,
-          splitByLabel: 'Overall Average of Average of cpu',
-          timeseries: { buckets: [] },
-          SIBAGG: { value: 2 },
-        },
-      ]);
-    });
-
-    test('should return gradient color', async () => {
-      const series = {
-        id: 'SERIES',
-        color: '#F00',
-        split_mode: 'terms',
-        split_color_mode: 'gradient',
-        terms_field: 'beat.hostname',
-        terms_size: 10,
-        metrics: [
-          { id: 'AVG', type: 'avg', field: 'cpu' },
-          { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
-        ],
-      };
-      const panel = { type: 'timeseries' };
-
-      expect(await getSplits(resp, panel, series)).toEqual([
-        expect.objectContaining({
-          color: 'rgb(255, 0, 0)',
-        }),
-        expect.objectContaining({
-          color: 'rgb(147, 0, 0)',
-        }),
-      ]);
-    });
-
-    test('should return rainbow color', async () => {
-      const series = {
-        id: 'SERIES',
-        color: '#F00',
-        split_mode: 'terms',
-        split_color_mode: 'rainbow',
-        terms_field: 'beat.hostname',
-        terms_size: 10,
-        metrics: [
-          { id: 'AVG', type: 'avg', field: 'cpu' },
-          { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
-        ],
-      };
-      const panel = { type: 'timeseries' };
-
-      expect(await getSplits(resp, panel, series)).toEqual([
-        expect.objectContaining({
-          color: '#68BC00',
-        }),
-        expect.objectContaining({
-          color: '#009CE0',
-        }),
-      ]);
-    });
-  });
-
   test('should return a splits for filters group bys', async () => {
     const resp = {
       aggregations: {
@@ -369,6 +257,7 @@ describe('getSplits(resp, panel, series)', () => {
         key: 'filter-1',
         label: '200s',
         meta: { bucketSize: 10 },
+        splitByLabel: 'Count',
         color: '#F00',
         timeseries: { buckets: [] },
       },
@@ -376,6 +265,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:filter-2',
         key: 'filter-2',
         label: '300s',
+        splitByLabel: 'Count',
         meta: { bucketSize: 10 },
         color: '#0F0',
         timeseries: { buckets: [] },

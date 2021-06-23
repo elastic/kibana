@@ -16,7 +16,7 @@ import {
   HOST_OS_PLATFORM,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../server/utils/queries';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -26,7 +26,7 @@ type ServiceMetadataIconsRaw = Pick<
   'kubernetes' | 'cloud' | 'container' | 'agent'
 >;
 
-interface ServiceMetadataIcons {
+export interface ServiceMetadataIcons {
   agentName?: string;
   containerType?: ContainerType;
   cloudProvider?: string;
@@ -53,7 +53,7 @@ export async function getServiceMetadataIcons({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    ...rangeQuery(start, end),
   ];
 
   const params = {
@@ -73,7 +73,10 @@ export async function getServiceMetadataIcons({
     },
   };
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search(
+    'get_service_metadata_icons',
+    params
+  );
 
   if (response.hits.total.value === 0) {
     return {

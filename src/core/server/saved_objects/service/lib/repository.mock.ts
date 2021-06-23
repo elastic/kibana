@@ -6,26 +6,36 @@
  * Side Public License, v 1.
  */
 
+import { savedObjectsPointInTimeFinderMock } from './point_in_time_finder.mock';
 import { ISavedObjectsRepository } from './repository';
 
-const create = (): jest.Mocked<ISavedObjectsRepository> => ({
-  checkConflicts: jest.fn(),
-  create: jest.fn(),
-  bulkCreate: jest.fn(),
-  bulkUpdate: jest.fn(),
-  delete: jest.fn(),
-  bulkGet: jest.fn(),
-  find: jest.fn(),
-  get: jest.fn(),
-  closePointInTime: jest.fn(),
-  openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
-  resolve: jest.fn(),
-  update: jest.fn(),
-  addToNamespaces: jest.fn(),
-  deleteFromNamespaces: jest.fn(),
-  deleteByNamespace: jest.fn(),
-  incrementCounter: jest.fn(),
-  removeReferencesTo: jest.fn(),
-});
+const create = () => {
+  const mock: jest.Mocked<ISavedObjectsRepository> = {
+    checkConflicts: jest.fn(),
+    create: jest.fn(),
+    bulkCreate: jest.fn(),
+    bulkUpdate: jest.fn(),
+    delete: jest.fn(),
+    bulkGet: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    closePointInTime: jest.fn(),
+    createPointInTimeFinder: jest.fn(),
+    openPointInTimeForType: jest.fn().mockResolvedValue({ id: 'some_pit_id' }),
+    resolve: jest.fn(),
+    update: jest.fn(),
+    deleteByNamespace: jest.fn(),
+    incrementCounter: jest.fn(),
+    removeReferencesTo: jest.fn(),
+    collectMultiNamespaceReferences: jest.fn(),
+    updateObjectsSpaces: jest.fn(),
+  };
+
+  mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({
+    savedObjectsMock: mock,
+  });
+
+  return mock;
+};
 
 export const savedObjectsRepositoryMock = { create };

@@ -8,8 +8,15 @@
 
 import { ID } from './constants';
 import { lexerRules, languageConfiguration } from './lexer_rules';
-import { getSuggestionProvider } from './language';
+import { getSuggestionProvider, getSyntaxErrors } from './language';
+import { CompleteLangModule as CompleteLangModuleType } from '../types';
 
-export const PainlessLang = { ID, getSuggestionProvider, lexerRules, languageConfiguration };
+export const PainlessLang: CompleteLangModuleType = {
+  ID,
+  getSuggestionProvider,
+  lexerRules,
+  languageConfiguration,
+  getSyntaxErrors,
+};
 
 export { PainlessContext, PainlessAutocompleteField } from './types';

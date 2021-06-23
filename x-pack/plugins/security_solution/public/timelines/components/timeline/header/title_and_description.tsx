@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiOverlayMask,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -177,83 +176,76 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     }, [isSubmitted, isSaving, prevIsSaving, closeSaveTimeline]);
 
     return (
-      <EuiOverlayMask>
-        <EuiModal
-          data-test-subj="save-timeline-modal"
-          maxWidth={NOTES_PANEL_WIDTH}
-          onClose={closeSaveTimeline}
-        >
-          {isSaving && (
-            <EuiProgress
-              size="s"
-              color="primary"
-              position="absolute"
-              data-test-subj="progress-bar"
-            />
-          )}
-          <EuiModalHeader data-test-subj="modal-header">{modalHeader}</EuiModalHeader>
+      <EuiModal
+        data-test-subj="save-timeline-modal"
+        maxWidth={NOTES_PANEL_WIDTH}
+        onClose={closeSaveTimeline}
+      >
+        {isSaving && (
+          <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
+        )}
+        <EuiModalHeader data-test-subj="modal-header">{modalHeader}</EuiModalHeader>
 
-          <EuiModalBody>
-            {showWarning && (
-              <EuiFlexItem grow={true}>
-                <EuiCallOut
-                  title={calloutMessage}
-                  color="danger"
-                  iconType="alert"
-                  data-test-subj="save-timeline-callout"
-                />
-                <EuiSpacer size="m" />
-              </EuiFlexItem>
-            )}
-            <Form form={form}>
-              <EuiFlexItem grow={true}>
-                <CommonUseField
-                  path="title"
-                  fullWidth
-                  label={i18n.TITLE}
-                  euiFieldProps={titleFieldProps}
-                />
-                <EuiSpacer />
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <CommonUseField
-                  label={descriptionLabel}
-                  path="description"
-                  fullWidth
-                  euiFieldProps={descriptionFieldProps}
-                />
-                <EuiSpacer />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                  <EuiFlexItem grow={false} component="span">
-                    <EuiButton
-                      size="s"
-                      fill={false}
-                      onClick={handleCancel}
-                      isDisabled={isSaving}
-                      data-test-subj="close-button"
-                    >
-                      {closeModalText}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} component="span">
-                    <EuiButton
-                      size="s"
-                      isDisabled={isSaving || isSubmitting}
-                      fill={true}
-                      onClick={submit}
-                      data-test-subj="save-button"
-                    >
-                      {saveButtonTitle}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </Form>
-          </EuiModalBody>
-        </EuiModal>
-      </EuiOverlayMask>
+        <EuiModalBody>
+          {showWarning && (
+            <EuiFlexItem grow={true}>
+              <EuiCallOut
+                title={calloutMessage}
+                color="danger"
+                iconType="alert"
+                data-test-subj="save-timeline-callout"
+              />
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+          )}
+          <Form form={form}>
+            <EuiFlexItem grow={true}>
+              <CommonUseField
+                path="title"
+                fullWidth
+                label={i18n.TITLE}
+                euiFieldProps={titleFieldProps}
+              />
+              <EuiSpacer />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <CommonUseField
+                label={descriptionLabel}
+                path="description"
+                fullWidth
+                euiFieldProps={descriptionFieldProps}
+              />
+              <EuiSpacer />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false} component="span">
+                  <EuiButton
+                    size="s"
+                    fill={false}
+                    onClick={handleCancel}
+                    isDisabled={isSaving}
+                    data-test-subj="close-button"
+                  >
+                    {closeModalText}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} component="span">
+                  <EuiButton
+                    size="s"
+                    isDisabled={isSaving || isSubmitting}
+                    fill={true}
+                    onClick={submit}
+                    data-test-subj="save-button"
+                  >
+                    {saveButtonTitle}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </Form>
+        </EuiModalBody>
+      </EuiModal>
     );
   }
 );

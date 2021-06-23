@@ -89,11 +89,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t1_analyst], this action is granted by the cluster privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
@@ -139,11 +136,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t2_analyst], this action is granted by the cluster privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
@@ -239,11 +233,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [soc_manager], this action is granted by the cluster privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
@@ -289,11 +280,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [hunter], this action is granted by the cluster privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
@@ -389,11 +377,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [reader], this action is granted by the cluster privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as being outdated.', async () => {
@@ -439,11 +424,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [rule_author], this action is granted by the cluster privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as being outdated.', async () => {

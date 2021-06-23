@@ -1,11 +1,20 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "incremental": true,
     "outDir": "target",
     "stripInternal": false,
     "declaration": true,
     "declarationMap": true,
-    "types": ["jest", "node"]
+    "rootDir": "src",
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-logging/src",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["./src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

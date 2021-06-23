@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { ISavedObjectTypeRegistry, SavedObjectsUtils } from '../../../../../src/core/server';
+import type { ISavedObjectTypeRegistry } from 'src/core/server';
+
+import { SavedObjectsUtils } from '../../../../../src/core/server';
 
 export const getDescriptorNamespace = (
   typeRegistry: ISavedObjectTypeRegistry,
@@ -24,5 +26,5 @@ export const getDescriptorNamespace = (
  * Ensure that a namespace is always in its namespace ID representation.
  * This allows `'default'` to be used interchangeably with `undefined`.
  */
-const normalizeNamespace = (namespace?: string) =>
+export const normalizeNamespace = (namespace?: string) =>
   namespace === undefined ? namespace : SavedObjectsUtils.namespaceStringToId(namespace);

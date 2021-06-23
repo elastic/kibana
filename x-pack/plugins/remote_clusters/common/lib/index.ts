@@ -10,4 +10,5 @@ export {
   serializeCluster,
   Cluster,
   ClusterInfoEs,
+  ClusterPayloadEs,
 } from './cluster_serialization';

@@ -7,4 +7,5 @@
 
 export interface PostIngestSetupResponse {
   isInitialized: boolean;
+  nonFatalErrors?: Array<{ error: Error }>;
 }

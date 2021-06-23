@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
-import { RoleValidator } from '../../validate_role';
-import { IndexPrivilegeForm } from './index_privilege_form';
-import { IndexPrivileges } from './index_privileges';
 
 import { licenseMock } from '../../../../../../common/licensing/index.mock';
 import { indicesAPIClientMock } from '../../../index.mock';
+import { RoleValidator } from '../../validate_role';
+import { IndexPrivilegeForm } from './index_privilege_form';
+import { IndexPrivileges } from './index_privileges';
 
 // the IndexPrivileges post-mount hook kicks off some promises;
 // we need to wait for those promises to resolve to ensure any errors are properly caught
@@ -55,6 +56,9 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', async () 
     allowRoleDocumentLevelSecurity: true,
   } as any);
 
+  const indicesAPIClient = indicesAPIClientMock.create();
+  indicesAPIClient.getFields.mockResolvedValue(['foo']);
+
   const props = {
     role: {
       name: '',
@@ -79,7 +83,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', async () 
     editable: true,
     validator: new RoleValidator(),
     availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    indicesAPIClient: indicesAPIClientMock.create(),
+    indicesAPIClient,
     license,
   };
   const wrapper = mountWithIntl(<IndexPrivileges {...props} />);

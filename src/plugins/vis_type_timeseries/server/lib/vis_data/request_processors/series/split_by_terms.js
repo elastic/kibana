@@ -10,12 +10,15 @@ import { overwrite } from '../../helpers';
 import { basicAggs } from '../../../../../common/basic_aggs';
 import { getBucketsPath } from '../../helpers/get_buckets_path';
 import { bucketTransform } from '../../helpers/bucket_transform';
+import { validateField } from '../../../../../common/fields_utils';
 
-export function splitByTerms(req, panel, series) {
+export function splitByTerms(req, panel, series, esQueryConfig, seriesIndex) {
   return (next) => (doc) => {
     if (series.split_mode === 'terms' && series.terms_field) {
       const termsField = series.terms_field;
       const orderByTerms = series.terms_order_by;
+
+      validateField(termsField, seriesIndex);
 
       const direction = series.terms_direction || 'desc';
       const metric = series.metrics.find((item) => item.id === orderByTerms);

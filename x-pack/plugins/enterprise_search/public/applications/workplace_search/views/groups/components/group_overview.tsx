@@ -12,23 +12,24 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiConfirmModal,
-  EuiOverlayMask,
+  EuiEmptyPrompt,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiSpacer,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../../shared/loading';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { AppLogic } from '../../../app_logic';
+import noSharedSourcesIcon from '../../../assets/share_circle.svg';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { CANCEL_BUTTON } from '../../../constants';
+import { NAV, CANCEL_BUTTON } from '../../../constants';
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
 import { GroupUsersTable } from './group_users_table';
@@ -125,9 +126,7 @@ export const GroupOverview: React.FC = () => {
 
   const { isFederatedAuth } = useValues(AppLogic);
 
-  if (dataLoading) return <Loading />;
-
-  const truncatedName = (
+  const truncatedName = name && (
     <TruncatedContent tooltipType="title" content={name} length={MAX_NAME_LENGTH} />
   );
 
@@ -146,6 +145,12 @@ export const GroupOverview: React.FC = () => {
       values: { name },
     }
   );
+  const GROUP_SOURCES_TITLE = i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupSourcesTitle',
+    {
+      defaultMessage: 'Group content sources',
+    }
+  );
   const GROUP_SOURCES_DESCRIPTION = i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.groups.overview.groupSourcesDescription',
     {
@@ -154,8 +159,8 @@ export const GroupOverview: React.FC = () => {
     }
   );
 
-  const hasContentSources = contentSources.length > 0;
-  const hasUsers = users.length > 0;
+  const hasContentSources = contentSources?.length > 0;
+  const hasUsers = users?.length > 0;
 
   const manageSourcesButton = (
     <EuiButton color="primary" onClick={showSharedSourcesModal}>
@@ -171,13 +176,27 @@ export const GroupOverview: React.FC = () => {
 
   const sourcesSection = (
     <ContentSection
-      title="Group content sources"
-      description={hasContentSources ? GROUP_SOURCES_DESCRIPTION : EMPTY_SOURCES_DESCRIPTION}
+      title={GROUP_SOURCES_TITLE}
+      description={GROUP_SOURCES_DESCRIPTION}
       action={manageSourcesButton}
       data-test-subj="GroupContentSourcesSection"
     >
-      {hasContentSources && sourcesTable}
+      {sourcesTable}
     </ContentSection>
+  );
+
+  const sourcesEmptyState = (
+    <>
+      <EuiPanel paddingSize="none" color="subdued">
+        <EuiEmptyPrompt
+          iconType={noSharedSourcesIcon}
+          title={<h2>{GROUP_SOURCES_TITLE}</h2>}
+          body={<p>{EMPTY_SOURCES_DESCRIPTION}</p>}
+          actions={manageSourcesButton}
+        />
+      </EuiPanel>
+      <EuiSpacer />
+    </>
   );
 
   const usersSection = !isFederatedAuth && (
@@ -226,18 +245,16 @@ export const GroupOverview: React.FC = () => {
       <EuiSpacer size="xxl" />
       <ContentSection title={REMOVE_SECTION_TITLE} description={REMOVE_SECTION_DESCRIPTION}>
         {confirmDeleteModalVisible && (
-          <EuiOverlayMask>
-            <EuiConfirmModal
-              onCancel={hideConfirmDeleteModal}
-              onConfirm={deleteGroup}
-              confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
-              title={CONFIRM_TITLE_TEXT}
-              cancelButtonText={CANCEL_BUTTON}
-              defaultFocusedButton="confirm"
-            >
-              {CONFIRM_REMOVE_DESCRIPTION}
-            </EuiConfirmModal>
-          </EuiOverlayMask>
+          <EuiConfirmModal
+            onCancel={hideConfirmDeleteModal}
+            onConfirm={deleteGroup}
+            confirmButtonText={CONFIRM_REMOVE_BUTTON_TEXT}
+            title={CONFIRM_TITLE_TEXT}
+            cancelButtonText={CANCEL_BUTTON}
+            defaultFocusedButton="confirm"
+          >
+            {CONFIRM_REMOVE_DESCRIPTION}
+          </EuiConfirmModal>
         )}
         <EuiButton
           color="danger"
@@ -252,13 +269,16 @@ export const GroupOverview: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader title={truncatedName} />
-      <EuiSpacer />
-      {sourcesSection}
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS, name || '...']}
+      pageViewTelemetry="group_overview"
+      pageHeader={{ pageTitle: truncatedName }}
+      isLoading={dataLoading}
+    >
+      {hasContentSources ? sourcesSection : sourcesEmptyState}
       {usersSection}
       {nameSection}
       {canDeleteGroup && deleteSection}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

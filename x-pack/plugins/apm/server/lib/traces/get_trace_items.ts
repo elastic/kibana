@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   TRACE_ID,
@@ -15,11 +16,11 @@ import {
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseValueType } from '../../../typings/common';
 
-interface ErrorsPerTransaction {
+export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 
@@ -31,7 +32,7 @@ export async function getTraceItems(
   const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
-  const errorResponsePromise = apmEventClient.search({
+  const errorResponsePromise = apmEventClient.search('get_trace_items', {
     apm: {
       events: [ProcessorEvent.error],
     },
@@ -41,7 +42,7 @@ export async function getTraceItems(
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { range: rangeFilter(start, end) },
+            ...rangeQuery(start, end),
           ],
           must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
         },
@@ -59,7 +60,7 @@ export async function getTraceItems(
     },
   });
 
-  const traceResponsePromise = apmEventClient.search({
+  const traceResponsePromise = apmEventClient.search('get_trace_span_items', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
@@ -69,8 +70,8 @@ export async function getTraceItems(
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { range: rangeFilter(start, end) },
-          ],
+            ...rangeQuery(start, end),
+          ] as QueryDslQueryContainer[],
           should: {
             exists: { field: PARENT_ID },
           },

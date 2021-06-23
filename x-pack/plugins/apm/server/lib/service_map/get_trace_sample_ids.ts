@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -16,8 +17,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { environmentQuery, rangeQuery } from '../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const MAX_TRACES_TO_INSPECT = 1000;
@@ -33,8 +33,6 @@ export async function getTraceSampleIds({
 }) {
   const { start, end, apmEventClient, config } = setup;
 
-  const rangeQuery = { range: rangeFilter(start, end) };
-
   const query = {
     bool: {
       filter: [
@@ -43,7 +41,7 @@ export async function getTraceSampleIds({
             field: SPAN_DESTINATION_SERVICE_RESOURCE,
           },
         },
-        rangeQuery,
+        ...rangeQuery(start, end),
       ] as ESFilter[],
     },
   } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
@@ -52,7 +50,7 @@ export async function getTraceSampleIds({
     query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
   }
 
-  query.bool.filter.push(...getEnvironmentUiFilterES(environment));
+  query.bool.filter.push(...environmentQuery(environment));
 
   const fingerprintBucketSize = serviceName
     ? config['xpack.apm.serviceMapFingerprintBucketSize']
@@ -74,7 +72,7 @@ export async function getTraceSampleIds({
       aggs: {
         connections: {
           composite: {
-            sources: [
+            sources: asMutableArray([
               {
                 [SPAN_DESTINATION_SERVICE_RESOURCE]: {
                   terms: {
@@ -97,7 +95,7 @@ export async function getTraceSampleIds({
                   },
                 },
               },
-            ],
+            ] as const),
             size: fingerprintBucketSize,
           },
           aggs: {
@@ -127,7 +125,10 @@ export async function getTraceSampleIds({
   };
 
   try {
-    const tracesSampleResponse = await apmEventClient.search(params);
+    const tracesSampleResponse = await apmEventClient.search(
+      'get_trace_sample_ids',
+      params
+    );
     // make sure at least one trace per composite/connection bucket
     // is queried
     const traceIdsWithPriority =

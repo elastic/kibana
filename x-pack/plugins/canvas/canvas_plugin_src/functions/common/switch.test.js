@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { switchFn } from './switch';
 
 describe('switch', () => {
   const fn = functionWrapper(switchFn);
-  const getter = (value) => () => value;
+  const getter = (value) => () => of(value);
   const mockCases = [
     {
       type: 'case',
@@ -38,7 +40,13 @@ describe('switch', () => {
       result: 5,
     },
   ];
-  const nonMatchingCases = mockCases.filter((c) => !c.matches);
+  const nonMatchingCases = mockCases.filter(({ matches }) => !matches);
+
+  let testScheduler;
+
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));
+  });
 
   describe('spec', () => {
     it('is a function', () => {
@@ -48,41 +56,56 @@ describe('switch', () => {
 
   describe('function', () => {
     describe('with no cases', () => {
-      it('should return the context if no default is provided', async () => {
+      it('should return the context if no default is provided', () => {
         const context = 'foo';
-        expect(await fn(context, {})).toBe(context);
+
+        testScheduler.run(({ expectObservable }) =>
+          expectObservable(fn(context, {})).toBe('(0|)', [context])
+        );
       });
 
-      it('should return the default if provided', async () => {
+      it('should return the default if provided', () => {
         const context = 'foo';
-        const args = { default: () => 'bar' };
-        expect(await fn(context, args)).toBe(args.default());
+        const args = { default: () => of('bar') };
+
+        testScheduler.run(({ expectObservable }) =>
+          expectObservable(fn(context, args)).toBe('(0|)', ['bar'])
+        );
       });
     });
 
     describe('with no matching cases', () => {
-      it('should return the context if no default is provided', async () => {
+      it('should return the context if no default is provided', () => {
         const context = 'foo';
         const args = { case: nonMatchingCases.map(getter) };
-        expect(await fn(context, args)).toBe(context);
+
+        testScheduler.run(({ expectObservable }) =>
+          expectObservable(fn(context, args)).toBe('(0|)', [context])
+        );
       });
 
-      it('should return the default if provided', async () => {
+      it('should return the default if provided', () => {
         const context = 'foo';
         const args = {
           case: nonMatchingCases.map(getter),
-          default: () => 'bar',
+          default: () => of('bar'),
         };
-        expect(await fn(context, args)).toBe(args.default());
+
+        testScheduler.run(({ expectObservable }) =>
+          expectObservable(fn(context, args)).toBe('(0|)', ['bar'])
+        );
       });
     });
 
     describe('with matching cases', () => {
-      it('should return the first match', async () => {
+      it('should return the first match', () => {
         const context = 'foo';
         const args = { case: mockCases.map(getter) };
-        const firstMatch = mockCases.find((c) => c.matches);
-        expect(await fn(context, args)).toBe(firstMatch.result);
+        const { result } = mockCases.find(({ matches }) => matches);
+
+        testScheduler.run(({ expectObservable }) =>
+          expectObservable(fn(context, args)).toBe('(0|)', [result])
+        );
       });
     });
   });

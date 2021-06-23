@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin } from '@elastic/eui/node_modules/unified';
+import { Plugin } from 'unified';
 import { RemarkTokenizer } from '@elastic/eui';
 import { parse } from 'query-string';
 import { decodeRisonUrlState } from '../../../url_state/helpers';

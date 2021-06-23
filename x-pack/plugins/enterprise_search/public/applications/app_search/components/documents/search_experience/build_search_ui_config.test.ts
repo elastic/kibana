@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaType } from '../../../../shared/schema/types';
 
 import { buildSearchUIConfig } from './build_search_ui_config';
 
@@ -13,8 +13,8 @@ describe('buildSearchUIConfig', () => {
   it('builds a configuration object for Search UI', () => {
     const connector = {};
     const schema = {
-      foo: 'text' as SchemaTypes,
-      bar: 'number' as SchemaTypes,
+      foo: SchemaType.Text,
+      bar: SchemaType.Number,
     };
     const fields = {
       filterFields: ['fieldA', 'fieldB'],

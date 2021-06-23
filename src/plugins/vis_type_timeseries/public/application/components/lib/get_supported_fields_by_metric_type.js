@@ -7,7 +7,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../common/enums';
 
 export function getSupportedFieldsByMetricType(type) {
   switch (type) {
@@ -17,6 +17,8 @@ export function getSupportedFieldsByMetricType(type) {
       return Object.values(KBN_FIELD_TYPES);
     case METRIC_TYPES.AVERAGE:
     case METRIC_TYPES.SUM:
+    case METRIC_TYPES.MIN:
+    case METRIC_TYPES.MAX:
       return [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
     default:
       return [KBN_FIELD_TYPES.NUMBER];

@@ -92,9 +92,11 @@ const createActions = (testBed: TestBed<TestSubject>) => {
           jsonContent: JSON.stringify(options),
         });
       });
+      component.update();
       await act(async () => {
         find('addProcessorForm.submitButton').simulate('click');
       });
+      component.update();
     },
 
     removeProcessor(processorSelector: string) {
@@ -152,6 +154,17 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find(`${processorSelector}.moreMenu.button`).simulate('click');
       act(() => {
         find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
+      });
+    },
+    openProcessorEditor: (processorSelector: string) => {
+      act(() => {
+        find(`${processorSelector}.manageItemButton`).simulate('click');
+      });
+      component.update();
+    },
+    submitProcessorForm: async () => {
+      await act(async () => {
+        find('editProcessorForm.submitButton').simulate('click');
       });
     },
   };

@@ -75,6 +75,7 @@ export function registerListRoute({
     'ml.enabled',
     'ml.machine_memory',
     'ml.max_open_jobs',
+    'ml.max_jvm_size',
     // Used by ML to identify nodes that have transform enabled:
     // https://github.com/elastic/elasticsearch/pull/52712/files#diff-225cc2c1291b4c60a8c3412a619094e1R147
     'transform.node',

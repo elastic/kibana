@@ -6,39 +6,67 @@
  */
 
 import { createStaticIndexPattern } from '../lib/index_pattern/create_static_index_pattern';
-import { createRoute } from './create_route';
+import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
 import { getDynamicIndexPattern } from '../lib/index_pattern/get_dynamic_index_pattern';
+import { createApmServerRoute } from './create_apm_server_route';
 
-export const staticIndexPatternRoute = createRoute((core) => ({
+const staticIndexPatternRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/index_pattern/static',
   options: { tags: ['access:apm'] },
-  handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
-    const savedObjectsClient = await getInternalSavedObjectsClient(core);
+  handler: async (resources) => {
+    const {
+      request,
+      core,
+      plugins: { spaces },
+      config,
+    } = resources;
 
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    const [setup, savedObjectsClient] = await Promise.all([
+      setupRequest(resources),
+      core
+        .start()
+        .then((coreStart) => coreStart.savedObjects.createInternalRepository()),
+    ]);
 
-    // send empty response regardless of outcome
-    return undefined;
+    const spaceId = spaces?.setup.spacesService.getSpaceId(request);
+
+    const didCreateIndexPattern = await createStaticIndexPattern(
+      setup,
+      config,
+      savedObjectsClient,
+      spaceId
+    );
+
+    return { created: didCreateIndexPattern };
   },
-}));
+});
 
-export const dynamicIndexPatternRoute = createRoute({
+const dynamicIndexPatternRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/index_pattern/dynamic',
   options: { tags: ['access:apm'] },
-  handler: async ({ context }) => {
-    const dynamicIndexPattern = await getDynamicIndexPattern({ context });
+  handler: async ({ context, config, logger }) => {
+    const dynamicIndexPattern = await getDynamicIndexPattern({
+      context,
+      config,
+      logger,
+    });
     return { dynamicIndexPattern };
   },
 });
 
-export const apmIndexPatternTitleRoute = createRoute({
+const indexPatternTitleRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/index_pattern/title',
   options: { tags: ['access:apm'] },
-  handler: async ({ context }) => {
-    return getApmIndexPatternTitle(context);
+  handler: async ({ config }) => {
+    return {
+      indexPatternTitle: getApmIndexPatternTitle(config),
+    };
   },
 });
+
+export const indexPatternRouteRepository = createApmServerRouteRepository()
+  .add(staticIndexPatternRoute)
+  .add(dynamicIndexPatternRoute)
+  .add(indexPatternTitleRoute);

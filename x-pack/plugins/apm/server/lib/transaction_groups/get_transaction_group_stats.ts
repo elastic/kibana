@@ -6,9 +6,9 @@
  */
 
 import { merge } from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { AggregationInputMap } from '../../../../../typings/elasticsearch';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
 import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
@@ -22,8 +22,11 @@ type BucketKey = string | Record<string, string>;
 
 function mergeRequestWithAggs<
   TRequestBase extends TransactionGroupRequestBase,
-  TInputMap extends AggregationInputMap
->(request: TRequestBase, aggs: TInputMap) {
+  TAggregationMap extends Record<
+    string,
+    estypes.AggregationsAggregationContainer
+  >
+>(request: TRequestBase, aggs: TAggregationMap) {
   return merge({}, request, {
     body: {
       aggs: {
@@ -50,7 +53,10 @@ export async function getAverages({
     },
   });
 
-  const response = await setup.apmEventClient.search(params);
+  const response = await setup.apmEventClient.search(
+    'get_avg_transaction_group_duration',
+    params
+  );
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
@@ -62,33 +68,36 @@ export async function getAverages({
   });
 }
 
-export async function getCounts({
-  request,
-  setup,
-  searchAggregatedTransactions,
-}: MetricParams) {
+export async function getCounts({ request, setup }: MetricParams) {
   const params = mergeRequestWithAggs(request, {
     transaction_type: {
-      top_hits: {
-        size: 1,
-        _source: [TRANSACTION_TYPE],
+      top_metrics: {
+        sort: {
+          '@timestamp': 'desc' as const,
+        },
+        metrics: [
+          {
+            field: TRANSACTION_TYPE,
+          } as const,
+        ],
       },
     },
   });
 
-  const response = await setup.apmEventClient.search(params);
+  const response = await setup.apmEventClient.search(
+    'get_transaction_group_transaction_count',
+    params
+  );
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
   ).map((bucket) => {
-    // type is Transaction | APMBaseDoc because it could be a metric document
-    const source = (bucket.transaction_type.hits.hits[0]
-      ._source as unknown) as { transaction: { type: string } };
-
     return {
       key: bucket.key as BucketKey,
       count: bucket.doc_count,
-      transactionType: source.transaction.type,
+      transactionType: bucket.transaction_type.top[0].metrics[
+        TRANSACTION_TYPE
+      ] as string,
     };
   });
 }
@@ -108,7 +117,10 @@ export async function getSums({
     },
   });
 
-  const response = await setup.apmEventClient.search(params);
+  const response = await setup.apmEventClient.search(
+    'get_transaction_group_latency_sums',
+    params
+  );
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []
@@ -137,7 +149,10 @@ export async function getPercentiles({
     },
   });
 
-  const response = await setup.apmEventClient.search(params);
+  const response = await setup.apmEventClient.search(
+    'get_transaction_group_latency_percentiles',
+    params
+  );
 
   return arrayUnionToCallable(
     response.aggregations?.transaction_groups.buckets ?? []

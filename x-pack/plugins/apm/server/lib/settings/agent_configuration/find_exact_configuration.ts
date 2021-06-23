@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchHit } from '../../../../../../typings/elasticsearch';
+import { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import {
   SERVICE_ENVIRONMENT,
@@ -41,10 +41,11 @@ export async function findExactConfiguration({
   };
 
   const resp = await internalClient.search<AgentConfiguration, typeof params>(
+    'find_exact_agent_configuration',
     params
   );
 
-  const hit = resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
+  const hit = resp.hits.hits[0] as SearchHit<AgentConfiguration> | undefined;
 
   if (!hit) {
     return;

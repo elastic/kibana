@@ -5,23 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { CoreStart, HttpStart } from 'kibana/public';
 import React from 'react';
 import type { SessionsConfigSchema } from '../';
+import { IManagementSectionsPluginsSetup } from '../';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
-import { TableText } from './';
 import { SearchSessionsMgmtTable } from './table';
 
 interface Props {
@@ -31,50 +22,42 @@ interface Props {
   http: HttpStart;
   timezone: string;
   config: SessionsConfigSchema;
+  plugins: IManagementSectionsPluginsSetup;
 }
 
 export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
   return (
-    <EuiPageBody component="div">
-      <EuiPageContent>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={true}>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="xpack.data.mgmt.searchSessions.main.sectionTitle"
-                  defaultMessage="Search Sessions"
-                />
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={documentation.getElasticsearchDocLink()}
-              target="_blank"
-              iconType="help"
-            >
-              <FormattedMessage
-                id="xpack.data.mgmt.searchSessions.main.backgroundSessionsDocsLinkText"
-                defaultMessage="Documentation"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <TableText>
-          <p>
+    <>
+      <EuiPageHeader
+        pageTitle={
+          <FormattedMessage
+            id="xpack.data.mgmt.searchSessions.main.sectionTitle"
+            defaultMessage="Search Sessions"
+          />
+        }
+        description={
+          <FormattedMessage
+            id="xpack.data.mgmt.searchSessions.main.sectionDescription"
+            defaultMessage="Manage your saved search sessions."
+          />
+        }
+        bottomBorder
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={documentation.getElasticsearchDocLink()}
+            target="_blank"
+            iconType="help"
+          >
             <FormattedMessage
-              id="xpack.data.mgmt.searchSessions.main.sectionDescription"
-              defaultMessage="Manage your saved search sessions."
+              id="xpack.data.mgmt.searchSessions.main.backgroundSessionsDocsLinkText"
+              defaultMessage="Documentation"
             />
-          </p>
-        </TableText>
+          </EuiButtonEmpty>,
+        ]}
+      />
 
-        <EuiHorizontalRule />
-
-        <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
-      </EuiPageContent>
-    </EuiPageBody>
+      <EuiSpacer size="l" />
+      <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+    </>
   );
 }

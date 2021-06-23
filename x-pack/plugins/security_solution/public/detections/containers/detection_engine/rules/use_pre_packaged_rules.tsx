@@ -8,11 +8,7 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import {
-  errorToToaster,
-  useStateToaster,
-  displaySuccessToast,
-} from '../../../../common/components/toasters';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { getPrePackagedRulesStatus, createPrepackagedRules } from './api';
 import * as i18n from './translations';
 
@@ -114,7 +110,8 @@ export const usePrePackagedRules = ({
 
   const [loadingCreatePrePackagedRules, setLoadingCreatePrePackagedRules] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [, dispatchToaster] = useStateToaster();
+  const { addError, addSuccess } = useAppToasts();
+
   const getSuccessToastMessage = (result: {
     rules_installed: number;
     rules_updated: number;
@@ -173,7 +170,7 @@ export const usePrePackagedRules = ({
             timelinesNotUpdated: null,
           });
 
-          errorToToaster({ title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE, error, dispatchToaster });
+          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
         }
       }
       if (isSubscribed) {
@@ -231,7 +228,7 @@ export const usePrePackagedRules = ({
                       timelinesNotInstalled: prePackagedRuleStatusResponse.timelines_not_installed,
                       timelinesNotUpdated: prePackagedRuleStatusResponse.timelines_not_updated,
                     });
-                    displaySuccessToast(getSuccessToastMessage(result), dispatchToaster);
+                    addSuccess(getSuccessToastMessage(result));
                     stopTimeOut();
                     resolve(true);
                   } else {
@@ -246,10 +243,8 @@ export const usePrePackagedRules = ({
         } catch (error) {
           if (isSubscribed) {
             setLoadingCreatePrePackagedRules(false);
-            errorToToaster({
+            addError(error, {
               title: i18n.RULE_AND_TIMELINE_PREPACKAGED_FAILURE,
-              error,
-              dispatchToaster,
             });
             resolve(false);
           }
@@ -269,7 +264,8 @@ export const usePrePackagedRules = ({
     isAuthenticated,
     hasEncryptionKey,
     isSignalIndexExists,
-    dispatchToaster,
+    addError,
+    addSuccess,
   ]);
 
   const prePackagedRuleStatus = useMemo(

@@ -44,3 +44,87 @@ describe('ui_settings 7.9.0 migrations', () => {
     });
   });
 });
+
+describe('ui_settings 7.12.0 migrations', () => {
+  const migration = migrations['7.12.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+  test('properly migrates timepicker:quickRanges', () => {
+    const initialQuickRange: any = {
+      from: '123',
+      to: '321',
+      display: 'abc',
+      section: 2,
+    };
+    const { section, ...migratedQuickRange } = initialQuickRange;
+
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'timepicker:quickRanges': JSON.stringify([initialQuickRange]),
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    const migrated = migration(doc);
+    expect(JSON.parse(migrated.attributes['timepicker:quickRanges'])).toEqual([migratedQuickRange]);
+  });
+
+  // https://github.com/elastic/kibana/issues/95616
+  test('returns doc when "timepicker:quickRanges" is null', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'timepicker:quickRanges': null,
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    const migrated = migration(doc);
+    expect(migrated).toEqual(doc);
+  });
+});
+
+describe('ui_settings 7.13.0 migrations', () => {
+  const migration = migrations['7.13.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+  test('properly renames ml:fileDataVisualizerMaxFileSize to fileUpload:maxFileSize', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'ml:fileDataVisualizerMaxFileSize': '250MB',
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    expect(migration(doc)).toEqual({
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'fileUpload:maxFileSize': '250MB',
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    });
+  });
+});

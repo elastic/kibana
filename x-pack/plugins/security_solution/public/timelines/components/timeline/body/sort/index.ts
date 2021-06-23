@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../../graphql/types';
-import { ColumnId } from '../column_id';
-
-/** Specifies a column's sort direction */
-export type SortDirection = 'none' | Direction;
+import { SortColumnTimeline } from '../../../../../../common/types/timeline';
 
 /** Specifies which column the timeline is sorted on */
-export interface Sort {
-  columnId: ColumnId;
-  columnType: string;
-  sortDirection: SortDirection;
-}
+export type Sort = SortColumnTimeline;

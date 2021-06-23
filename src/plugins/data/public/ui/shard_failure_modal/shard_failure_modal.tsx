@@ -21,14 +21,14 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
 } from '@elastic/eui';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { ShardFailureTable } from './shard_failure_table';
 import { ShardFailureRequest } from './shard_failure_types';
 
 export interface Props {
   onClose: () => void;
   request: ShardFailureRequest;
-  response: SearchResponse<any>;
+  response: estypes.SearchResponse<any>;
   title: string;
 }
 

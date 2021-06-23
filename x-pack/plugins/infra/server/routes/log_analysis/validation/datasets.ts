@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
@@ -31,7 +32,7 @@ export const initValidateLogAnalysisDatasetsRoute = ({
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       try {
         const {
-          data: { indices, timestampField, startTime, endTime },
+          data: { indices, timestampField, startTime, endTime, runtimeMappings },
         } = request.body;
 
         const datasets = await Promise.all(
@@ -41,7 +42,8 @@ export const initValidateLogAnalysisDatasetsRoute = ({
               timestampField,
               indexName,
               startTime,
-              endTime
+              endTime,
+              runtimeMappings as estypes.MappingRuntimeFields
             );
 
             return {

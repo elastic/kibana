@@ -17,7 +17,7 @@
     "visualizations",
     "dashboard",
     "embeddable",
-    "mapsLegacy",
+    "mapsEms",
     "usageCollection",
     "savedObjects",
     "share",
@@ -36,6 +36,7 @@
   "requiredBundles": [
     "kibanaReact",
     "kibanaUtils",
-    "home"
+    "home",
+    "mapsEms"
   ]
 }

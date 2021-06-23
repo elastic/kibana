@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { AuthenticatedUser } from '../../../common/model';
+import React from 'react';
 
-interface Props {
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { AuthenticatedUser } from '../../../common/model';
+
+export interface PersonalInfoProps {
   user: AuthenticatedUser;
 }
 
-export const PersonalInfo = (props: Props) => {
+export const PersonalInfo = (props: PersonalInfoProps) => {
   return (
     <EuiDescribedFormGroup
       fullWidth

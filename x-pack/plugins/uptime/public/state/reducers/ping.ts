@@ -6,7 +6,7 @@
  */
 
 import { handleActions, Action } from 'redux-actions';
-import { getPingHistogram, getPingHistogramSuccess, getPingHistogramFail } from '../actions';
+import { getPingHistogram } from '../actions';
 import { HistogramResult } from '../../../common/runtime_types';
 
 export interface PingState {
@@ -25,18 +25,18 @@ type MonitorStatusPayload = HistogramResult & Error;
 
 export const pingReducer = handleActions<PingState, MonitorStatusPayload>(
   {
-    [String(getPingHistogram)]: (state) => ({
+    [String(getPingHistogram.get)]: (state) => ({
       ...state,
       loading: true,
     }),
 
-    [String(getPingHistogramSuccess)]: (state: PingState, action: Action<HistogramResult>) => ({
+    [String(getPingHistogram.success)]: (state: PingState, action: Action<HistogramResult>) => ({
       ...state,
       loading: false,
       pingHistogram: { ...action.payload },
     }),
 
-    [String(getPingHistogramFail)]: (state, action: Action<Error>) => ({
+    [String(getPingHistogram.fail)]: (state, action: Action<Error>) => ({
       ...state,
       errors: [...state.errors, action.payload],
       loading: false,

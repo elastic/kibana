@@ -7,8 +7,8 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { Direction } from '../../../../../../common/search_strategy';
 
-import { Direction } from '../../../../../graphql/types';
 import * as i18n from '../translations';
 
 import { getDirection, SortIndicator } from './sort_indicator';

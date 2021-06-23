@@ -16,8 +16,17 @@
   margin-left: $euiSizeS;
 }
 
+.visListingTable__titleLink {
+  text-align: left;
+}
+
 .visListingCallout {
-  max-width: 1000px;
+  @include kbnThemeStyle('v7') {
+    max-width: 1000px;
+  }
+  @include kbnThemeStyle('v8') {
+    max-width: 1200px;
+  }
   width: 100%;
 
   margin-left: auto;

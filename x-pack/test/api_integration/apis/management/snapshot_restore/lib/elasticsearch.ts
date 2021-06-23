@@ -14,7 +14,7 @@ interface SlmPolicy {
   repository: string;
   isManagedPolicy: boolean;
   config?: {
-    indices?: string | string[];
+    indices: string | string[];
     ignoreUnavailable?: boolean;
     includeGlobalState?: boolean;
     partial?: boolean;
@@ -36,19 +36,21 @@ interface SlmPolicy {
 export const registerEsHelpers = (getService: FtrProviderContext['getService']) => {
   let policiesCreated: string[] = [];
 
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const createRepository = (repoName: string) => {
-    return es.snapshot.createRepository({
-      repository: repoName,
-      body: {
-        type: 'fs',
-        settings: {
-          location: '/tmp/',
+    return es.snapshot
+      .createRepository({
+        repository: repoName,
+        body: {
+          type: 'fs',
+          settings: {
+            location: '/tmp/',
+          },
         },
-      },
-      verify: false,
-    });
+        verify: false,
+      })
+      .then(({ body }) => body);
   };
 
   const createPolicy = (policy: SlmPolicy, cachePolicy?: boolean) => {
@@ -56,20 +58,27 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
       policiesCreated.push(policy.name);
     }
 
-    return es.sr.updatePolicy({
-      name: policy.name,
-      body: policy,
-    });
+    return es.slm
+      .putLifecycle({
+        policy_id: policy.name,
+        // TODO: bring {@link SlmPolicy} in line with {@link PutSnapshotLifecycleRequest['body']}
+        // @ts-expect-error
+        body: policy,
+      })
+      .then(({ body }) => body);
   };
 
   const getPolicy = (policyName: string) => {
-    return es.sr.policy({
-      name: policyName,
-      human: true,
-    });
+    return es.slm
+      .getLifecycle({
+        policy_id: policyName,
+        human: true,
+      })
+      .then(({ body }) => body);
   };
 
-  const deletePolicy = (policyName: string) => es.sr.deletePolicy({ name: policyName });
+  const deletePolicy = (policyName: string) =>
+    es.slm.deleteLifecycle({ policy_id: policyName }).then(({ body }) => body);
 
   const cleanupPolicies = () =>
     Promise.all(policiesCreated.map(deletePolicy))

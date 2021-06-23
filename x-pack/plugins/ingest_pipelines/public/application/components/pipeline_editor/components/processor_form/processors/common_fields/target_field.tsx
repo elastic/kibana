@@ -10,12 +10,13 @@ import { i18n } from '@kbn/i18n';
 
 import { Field, FIELD_TYPES, UseField, FieldConfig } from '../../../../../../../shared_imports';
 
-import { FieldsConfig } from '../shared';
+import { FieldsConfig, from } from '../shared';
 
 const fieldsConfig: FieldsConfig = {
   target_field: {
     type: FIELD_TYPES.TEXT,
     deserializer: String,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.targetFieldLabel', {
       defaultMessage: 'Target field (optional)',
     }),

@@ -3,6 +3,9 @@
   "version": "5.0.3",
   "description": "elasticsearch datemath parser, used in kibana",
   "license": "Apache-2.0",
-  "main": "index.js",
-  "typings": "index.d.ts"
+  "main": "./target/index.js",
+  "types": "./target/index.d.ts",
+  "peerDependencies": {
+    "moment": "^2.24.0"
+  }
 }

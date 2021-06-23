@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types/ping';
 
@@ -13,10 +14,21 @@ export interface GetJourneyScreenshotParams {
   stepIndex: number;
 }
 
+export interface GetJourneyScreenshotResults {
+  blob: string | null;
+  mimeType: string | null;
+  stepName: string;
+  totalSteps: number;
+}
+
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   GetJourneyScreenshotParams,
   any
-> = async ({ uptimeEsClient, checkGroup, stepIndex }) => {
+> = async ({
+  uptimeEsClient,
+  checkGroup,
+  stepIndex,
+}): Promise<GetJourneyScreenshotResults | null> => {
   const params = {
     track_total_hits: true,
     size: 0,
@@ -33,7 +45,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
               'synthetics.type': 'step/screenshot',
             },
           },
-        ],
+        ] as QueryDslQueryContainer[],
       },
     },
     aggs: {
@@ -47,7 +59,7 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
           image: {
             top_hits: {
               size: 1,
-              _source: ['synthetics.blob', 'synthetics.step.name'],
+              _source: ['synthetics.blob', 'synthetics.blob_mime', 'synthetics.step.name'],
             },
           },
         },
@@ -60,10 +72,11 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
     return null;
   }
 
-  const stepHit = result?.aggregations?.step.image.hits.hits[0]._source as Ping;
+  const stepHit = result?.aggregations?.step.image.hits.hits[0]?._source as Ping;
 
   return {
-    blob: stepHit.synthetics?.blob ?? null,
+    blob: stepHit?.synthetics?.blob ?? null,
+    mimeType: stepHit?.synthetics?.blob_mime ?? null,
     stepName: stepHit?.synthetics?.step?.name ?? '',
     totalSteps: result?.hits?.total.value,
   };

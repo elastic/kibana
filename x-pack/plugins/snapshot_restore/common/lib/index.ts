@@ -6,10 +6,7 @@
  */
 
 export { flatten } from './flatten';
-export {
-  deserializeRestoreSettings,
-  serializeRestoreSettings,
-} from './restore_settings_serialization';
+export { serializeRestoreSettings } from './restore_settings_serialization';
 export {
   deserializeSnapshotDetails,
   deserializeSnapshotConfig,

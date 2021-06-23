@@ -9,7 +9,7 @@ import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { ViewSourceConfigurationButton } from '../../../../components/source_configuration';
+import { ViewSourceConfigurationButton } from '../../../../components/source_configuration/view_source_configuration_button';
 import { useLinkProps } from '../../../../hooks/use_link_props';
 
 interface InvalidNodeErrorProps {

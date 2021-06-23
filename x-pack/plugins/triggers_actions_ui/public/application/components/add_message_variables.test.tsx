@@ -88,4 +88,45 @@ describe('AddMessageVariables', () => {
       useWithTripleBracesInTemplates: true,
     });
   });
+
+  test('it renders deprecated variables as disabled', () => {
+    const wrapper = mountWithIntl(
+      <AddMessageVariables
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+          },
+          {
+            name: 'deprecatedVar',
+            description: 'This variable is deprecated',
+            deprecated: true,
+          },
+        ]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+      />
+    );
+
+    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
+
+    expect(
+      wrapper.find('button[data-test-subj="variableMenuButton-myVar"]').getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="variableMenuButton-deprecatedVar"]').getDOMNode()
+    ).toBeDisabled();
+  });
+
+  test(`it does't render when no variables exist`, () => {
+    const wrapper = mountWithIntl(
+      <AddMessageVariables
+        messageVariables={[]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="fooAddVariableButton"]')).toHaveLength(0);
+  });
 });

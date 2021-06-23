@@ -8,7 +8,6 @@
 import {
   Logger,
   CoreSetup,
-  LegacyAPICaller,
   SavedObjectsBulkGetObject,
   SavedObjectsBaseOptions,
 } from 'kibana/server';
@@ -69,11 +68,14 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex: string) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
-    const callCluster = (...args: Parameters<LegacyAPICaller>) => {
-      return core.getStartServices().then(([{ elasticsearch: { legacy: { client } } }]) =>
-        client.callAsInternalUser(...args)
+    const getEsClient = () =>
+      core.getStartServices().then(
+        ([
+          {
+            elasticsearch: { client },
+          },
+        ]) => client.asInternalUser
       );
-    };
     const actionsBulkGet = (
       objects?: SavedObjectsBulkGetObject[],
       options?: SavedObjectsBaseOptions
@@ -86,9 +88,10 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
     };
     return {
       async run() {
+        const esClient = await getEsClient();
         return Promise.all([
-          getTotalCount(callCluster, kibanaIndex),
-          getInUseTotalCount(callCluster, actionsBulkGet, kibanaIndex),
+          getTotalCount(esClient, kibanaIndex),
+          getInUseTotalCount(esClient, actionsBulkGet, kibanaIndex),
         ])
           .then(([totalAggegations, totalInUse]) => {
             return {
@@ -98,6 +101,7 @@ export function telemetryTaskRunner(logger: Logger, core: CoreSetup, kibanaIndex
                 count_by_type: totalAggegations.countByType,
                 count_active_total: totalInUse.countTotal,
                 count_active_by_type: totalInUse.countByType,
+                count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
               },
               runAt: getNextMidnight(),
             };

@@ -10,12 +10,15 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
+import {
+  TimelineTypeLiteral,
+  TimelineType,
+  TimelineStatus,
+} from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
-import { TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 
@@ -24,8 +27,6 @@ const NotesCountBadge = (styled(EuiBadge)`
 ` as unknown) as typeof EuiBadge;
 
 NotesCountBadge.displayName = 'NotesCountBadge';
-
-export type SaveTimeline = (args: TimelineInput) => void;
 
 interface AddToFavoritesButtonProps {
   timelineId: string;
@@ -39,6 +40,12 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isFavorite
   );
 
+  const status = useShallowEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).status
+  );
+
+  const disableFavoriteButton = status === TimelineStatus.immutable;
+
   const handleClick = useCallback(
     () => dispatch(timelineActions.updateIsFavorite({ id: timelineId, isFavorite: !isFavorite })),
     [dispatch, timelineId, isFavorite]
@@ -51,6 +58,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ ti
       iconType={isFavorite ? 'starFilled' : 'starEmpty'}
       onClick={handleClick}
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
+      disabled={disableFavoriteButton}
     >
       {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
     </EuiButton>

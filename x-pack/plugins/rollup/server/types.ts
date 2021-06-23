@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, ILegacyScopedClusterClient, RequestHandlerContext } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { VisTypeTimeseriesSetup } from 'src/plugins/vis_type_timeseries/server';
 
@@ -15,7 +15,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { LicensingPluginSetup } from '../../licensing/server';
 import { License } from './services';
 import { IndexPatternsFetcher } from './shared_imports';
-import { isEsError } from './shared_imports';
+import { handleEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 
 export interface Dependencies {
@@ -27,10 +27,10 @@ export interface Dependencies {
 }
 
 export interface RouteDependencies {
-  router: RollupPluginRouter;
+  router: IRouter;
   license: License;
   lib: {
-    isEsError: typeof isEsError;
+    handleEsError: typeof handleEsError;
     formatEsError: typeof formatEsError;
     getCapabilitiesForRollupIndices: typeof getCapabilitiesForRollupIndices;
   };
@@ -38,22 +38,3 @@ export interface RouteDependencies {
     IndexPatternsFetcher: typeof IndexPatternsFetcher;
   };
 }
-
-/**
- * @internal
- */
-interface RollupApiRequestHandlerContext {
-  client: ILegacyScopedClusterClient;
-}
-
-/**
- * @internal
- */
-export interface RollupHandlerContext extends RequestHandlerContext {
-  rollup: RollupApiRequestHandlerContext;
-}
-
-/**
- * @internal
- */
-export type RollupPluginRouter = IRouter<RollupHandlerContext>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegacyAuditLogger } from '../audit';
+import type { LegacyAuditLogger } from '../audit';
 
 /**
  * @deprecated will be removed in 8.0

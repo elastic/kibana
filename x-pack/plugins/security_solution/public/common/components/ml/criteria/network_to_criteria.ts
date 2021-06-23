@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { FlowTarget } from '../../../../../common/search_strategy';
 import { CriteriaFields } from '../types';
-import { FlowTarget } from '../../../../graphql/types';
 
 export const networkToCriteria = (ip: string, flowTarget: FlowTarget): CriteriaFields[] => {
   if (flowTarget === FlowTarget.source) {

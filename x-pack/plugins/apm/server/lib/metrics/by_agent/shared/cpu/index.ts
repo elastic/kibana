@@ -52,16 +52,22 @@ const chartBase: ChartBase = {
   series,
 };
 
-export async function getCPUChartData({
+export function getCPUChartData({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  const metricsChart = await fetchAndTransformMetrics({
+  return fetchAndTransformMetrics({
+    environment,
+    kuery,
     setup,
     serviceName,
     serviceNodeName,
@@ -72,7 +78,6 @@ export async function getCPUChartData({
       processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
       processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
     },
+    operationName: 'get_cpu_metric_charts',
   });
-
-  return metricsChart;
 }

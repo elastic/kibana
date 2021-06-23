@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
-  const inspector = getService('inspector');
   const security = getService('security');
 
   const VECTOR_SOURCE_ID = '67c1de2c-2fc5-4425-8983-094b589afe61';
@@ -25,15 +24,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should request source clusters for destination locations', async () => {
-      await inspector.open();
-      await inspector.openInspectorRequestsView();
-      const requestStats = await inspector.getTableData();
-      const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-      const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-      await inspector.close();
-
-      expect(hits).to.equal('0');
-      expect(totalHits).to.equal('4');
+      const { rawResponse: response } = await PageObjects.maps.getResponse();
+      expect(response.aggregations.destSplit.buckets.length).to.equal(2);
     });
 
     it('should render lines', async () => {

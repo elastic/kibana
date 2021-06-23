@@ -19,6 +19,7 @@ const createStartContractMock = () => ({ contracts: new Map() });
 
 const createServiceMock = (): PluginsServiceMock => ({
   discover: jest.fn(),
+  getExposedPluginConfigsToUsage: jest.fn(),
   setup: jest.fn().mockResolvedValue(createSetupContractMock()),
   start: jest.fn().mockResolvedValue(createStartContractMock()),
   stop: jest.fn(),

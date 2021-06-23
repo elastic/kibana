@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+export { Header } from './header';
 export { LoadingIndicator } from './loading_indicator';
-export {
-  Header,
+export type {
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,

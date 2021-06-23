@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
+import type { PrivilegeCollection } from '../../../../model/privilege_collection';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
-import { KibanaPrivileges, PrimaryFeaturePrivilege, SecuredFeature } from '../../../../model';
-import { PrivilegeCollection } from '../../../../model/privilege_collection';
 
 export interface EffectiveFeaturePrivileges {
   [featureId: string]: {

@@ -19,6 +19,7 @@ import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
+import { isPopulatedObject } from '../../../../../common/util/object_utils';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -346,12 +347,18 @@ export function filterJobs(jobs, clauses) {
         // if it's an array of job ids
         if (c.field === 'id') {
           js = jobs.filter((job) => c.value.indexOf(jobProperty(job, c.field)) >= 0);
-        } else {
+        } else if (c.field === 'groups') {
           // the groups value is an array of group ids
           js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        } else if (c.field === 'job_tags') {
+          js = jobTagFilter(jobs, c.value);
         }
       } else {
-        js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
+        if (c.field === 'job_tags') {
+          js = js = jobTagFilter(jobs, [c.value]);
+        } else {
+          js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
+        }
       }
     }
 
@@ -368,6 +375,25 @@ export function filterJobs(jobs, clauses) {
   return filteredJobs;
 }
 
+function jobProperty(job, prop) {
+  const propMap = {
+    job_state: 'jobState',
+    datafeed_state: 'datafeedState',
+    groups: 'groups',
+    id: 'id',
+    job_tags: 'jobTags',
+  };
+  return job[propMap[prop]];
+}
+
+function jobTagFilter(jobs, value) {
+  return jobs.filter((job) => {
+    const tags = jobProperty(job, 'job_tags');
+    return Object.entries(tags)
+      .map((t) => t.join(':'))
+      .find((t) => value.some((t1) => t1 === t));
+  });
+}
 // check to see if a job has been stored in mlJobService.tempJobCloningObjects
 // if it has, return an object with the minimum properties needed for the
 // start datafeed modal.
@@ -379,7 +405,7 @@ export function checkForAutoStartDatafeed() {
     mlJobService.tempJobCloningObjects.datafeed = undefined;
     mlJobService.tempJobCloningObjects.createdBy = undefined;
 
-    const hasDatafeed = typeof datafeed === 'object' && Object.keys(datafeed).length > 0;
+    const hasDatafeed = isPopulatedObject(datafeed);
     const datafeedId = hasDatafeed ? datafeed.datafeed_id : '';
     return {
       id: job.job_id,
@@ -388,14 +414,4 @@ export function checkForAutoStartDatafeed() {
       datafeedId,
     };
   }
-}
-
-function jobProperty(job, prop) {
-  const propMap = {
-    job_state: 'jobState',
-    datafeed_state: 'datafeedState',
-    groups: 'groups',
-    id: 'id',
-  };
-  return job[propMap[prop]];
 }

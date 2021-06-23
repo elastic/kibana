@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import { TaskRunCreatorFunction } from '../../../../task_manager/server';
 import { ReportSource, TaskRunResult } from '../../../common/types';
 import { BasePayload } from '../../types';
+
+export const REPORTING_EXECUTE_TYPE = 'report:execute';
+export const REPORTING_MONITOR_TYPE = 'reports:monitor';
+
+export { ExecuteReportTask } from './execute_report';
+export { MonitorReportsTask } from './monitor_reports';
+export { TaskRunResult };
 
 /*
  * The document created by Reporting to store as task parameters for Task
@@ -19,8 +27,31 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
   created_at: ReportSource['created_at'];
   created_by: ReportSource['created_by'];
   jobtype: ReportSource['jobtype'];
+  max_attempts: ReportSource['max_attempts'];
   attempts: ReportSource['attempts'];
   meta: ReportSource['meta'];
 }
 
-export { TaskRunResult };
+export interface ReportingExecuteTaskInstance /* extends TaskInstanceWithDeprecatedFields */ {
+  state: object;
+  taskType: string;
+  params: ReportTaskParams;
+  runAt?: Date;
+}
+
+export enum ReportingTaskStatus {
+  UNINITIALIZED = 'uninitialized',
+  INITIALIZED = 'initialized',
+}
+
+export interface ReportingTask {
+  getTaskDefinition: () => {
+    type: string;
+    title: string;
+    createTaskRunner: TaskRunCreatorFunction;
+    maxAttempts: number;
+    timeout: string;
+  };
+
+  getStatus: () => ReportingTaskStatus;
+}

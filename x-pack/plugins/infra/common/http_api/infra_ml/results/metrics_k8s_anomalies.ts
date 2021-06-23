@@ -13,17 +13,23 @@ import { paginationCursorRT, anomalyTypeRT, sortRT, paginationRT, metricRT } fro
 export const INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH =
   '/api/infra/infra_ml/results/metrics_k8s_anomalies';
 
-const metricsK8sAnomalyCommonFieldsRT = rt.type({
-  id: rt.string,
-  anomalyScore: rt.number,
-  typical: rt.number,
-  actual: rt.number,
-  type: anomalyTypeRT,
-  influencers: rt.array(rt.string),
-  duration: rt.number,
-  startTime: rt.number,
-  jobId: rt.string,
-});
+const metricsK8sAnomalyCommonFieldsRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    anomalyScore: rt.number,
+    typical: rt.number,
+    actual: rt.number,
+    type: anomalyTypeRT,
+    influencers: rt.array(rt.string),
+    duration: rt.number,
+    startTime: rt.number,
+    jobId: rt.string,
+  }),
+  rt.partial({
+    partitionFieldName: rt.string,
+    partitionFieldValue: rt.string,
+  }),
+]);
 const metricsK8sAnomalyRT = metricsK8sAnomalyCommonFieldsRT;
 
 export type MetricsK8sAnomaly = rt.TypeOf<typeof metricsK8sAnomalyRT>;
@@ -67,13 +73,12 @@ export const getMetricsK8sAnomaliesRequestPayloadRT = rt.type({
       timeRange: timeRangeRT,
     }),
     rt.partial({
+      query: rt.string,
       metric: metricRT,
       // Pagination properties
       pagination: paginationRT,
       // Sort properties
       sort: sortRT,
-      // Dataset filters
-      datasets: rt.array(rt.string),
     }),
   ]),
 });

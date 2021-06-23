@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import {
-  AnnotationDomainTypes,
+  AnnotationDomainType,
   LineAnnotation,
   LineAnnotationDatum,
   LineAnnotationStyle,
@@ -58,7 +58,7 @@ export function PercentileAnnotations({ percentiles }: Props) {
         <LineAnnotation
           id={index + 'annotation_' + annotation.dataValue}
           key={index + 'percentile_' + annotation.dataValue}
-          domainType={AnnotationDomainTypes.XDomain}
+          domainType={AnnotationDomainType.XDomain}
           dataValues={[annotation]}
           style={style}
           hideTooltips={true}

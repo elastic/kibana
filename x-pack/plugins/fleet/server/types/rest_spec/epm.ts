@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 export const GetCategoriesRequestSchema = {
   query: schema.object({
     experimental: schema.maybe(schema.boolean()),
+    include_policy_templates: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -65,4 +66,9 @@ export const DeletePackageRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),
   }),
+  body: schema.nullable(
+    schema.object({
+      force: schema.boolean(),
+    })
+  ),
 };

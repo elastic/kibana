@@ -12,8 +12,8 @@ import { UIMetricUsage } from './telemetry_ui_metric_collector';
 const commonSchema: MakeSchemaFrom<UIMetricUsage>[string] = {
   type: 'array',
   items: {
-    key: { type: 'keyword' },
-    value: { type: 'long' },
+    key: { type: 'keyword', _meta: { description: 'The event that is tracked' } },
+    value: { type: 'long', _meta: { description: 'The value of the event' } },
   },
 };
 

@@ -20,18 +20,16 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useFormData } from '../../../../../../shared_imports';
-
 import { i18nTexts } from '../../../i18n_texts';
-
-import { usePhaseTimings } from '../../../form';
-
-import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
-import './delete_phase.scss';
+import { usePhaseTimings, globalFields } from '../../../form';
 import { PhaseIcon } from '../../phase_icon';
+import { MinAgeField, SnapshotPoliciesField } from '../shared_fields';
 import { PhaseErrorIndicator } from '../phase/phase_error_indicator';
 
+import './delete_phase.scss';
+
 const formFieldPaths = {
-  enabled: '_meta.delete.enabled',
+  enabled: globalFields.deleteEnabled.path,
 };
 
 export const DeletePhase: FunctionComponent = () => {
@@ -72,18 +70,21 @@ export const DeletePhase: FunctionComponent = () => {
   );
 
   return (
-    <EuiComment
-      data-test-subj="delete-phaseContent"
-      username={phaseTitle}
-      actions={<MinAgeField phase={'delete'} />}
-      className="ilmDeletePhase ilmPhase"
-      timelineIcon={<PhaseIcon enabled={enabled} phase={'delete'} />}
-    >
-      <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
-        {i18nTexts.editPolicy.descriptions.delete}
-      </EuiText>
+    <>
       <EuiSpacer />
-      <SnapshotPoliciesField />
-    </EuiComment>
+      <EuiComment
+        data-test-subj="delete-phase"
+        username={phaseTitle}
+        actions={<MinAgeField phase={'delete'} />}
+        className="ilmDeletePhase ilmPhase"
+        timelineIcon={<PhaseIcon enabled={enabled} phase={'delete'} />}
+      >
+        <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
+          {i18nTexts.editPolicy.descriptions.delete}
+        </EuiText>
+        <EuiSpacer />
+        <SnapshotPoliciesField />
+      </EuiComment>
+    </>
   );
 };

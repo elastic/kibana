@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-iconType?: string;
+iconType?: EuiIconProps['type'];
 ```

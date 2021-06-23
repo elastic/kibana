@@ -27,3 +27,16 @@ export const getSignalsMigrationSavedObjectMock = (
     ...overrides,
   },
 });
+
+export const getSignalsMigrationSavedObjectErrorMock = (
+  overrides: Partial<SignalsMigrationSO['error']> = {}
+): SignalsMigrationSO =>
+  ({
+    id: 'dne-migration',
+    error: {
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
+      ...overrides,
+    },
+  } as SignalsMigrationSO);

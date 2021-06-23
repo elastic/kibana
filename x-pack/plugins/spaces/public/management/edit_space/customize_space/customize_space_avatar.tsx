@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
 import {
+  EuiButton,
   EuiColorPicker,
   EuiFieldText,
+  EuiFilePicker,
   EuiFlexItem,
   EuiFormRow,
-  // @ts-ignore (elastic/eui#1262) EuiFilePicker is not exported yet
-  EuiFilePicker,
-  EuiButton,
   EuiSpacer,
   isValidHex,
 } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
-import { imageTypes, encode } from '../../../../common/lib/dataurl';
-import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { MAX_SPACE_INITIALS } from '../../../../common';
+import { encode, imageTypes } from '../../../../common/lib/dataurl';
+import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
+
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;

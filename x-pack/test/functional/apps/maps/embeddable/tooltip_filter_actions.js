@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }) {
         // const hasSourceFilter = await filterBar.hasFilter('name', 'charlie');
         // expect(hasSourceFilter).to.be(true);
 
-        const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
+        const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);
       });
     });
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }) {
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.equal(2);
 
-        const hasJoinFilter = await filterBar.hasFilter('shape_name', 'charlie');
+        const hasJoinFilter = await filterBar.hasFilter('runtime_shape_name', 'charlie');
         expect(hasJoinFilter).to.be(true);
       });
 

@@ -22,5 +22,5 @@ export async function deleteConfiguration({
     id: configurationId,
   };
 
-  return internalClient.delete(params);
+  return internalClient.delete('delete_agent_configuration', params);
 }

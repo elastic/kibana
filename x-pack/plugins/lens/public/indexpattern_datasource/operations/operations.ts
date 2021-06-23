@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { memoize } from 'lodash';
 import { OperationMetadata } from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
   GenericOperationDefinition,
   OperationType,
+  renameOperationsMapping,
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
 
 export { operationDefinitionMap } from './definitions';
-
+/**
+ * Map aggregation names from Elasticsearch to Lens names.
+ * Used when loading indexpatterns to map metadata (i.e. restrictions)
+ */
+export function translateToOperationName(agg: string): OperationType {
+  return agg in renameOperationsMapping ? renameOperationsMapping[agg] : (agg as OperationType);
+}
 /**
  * Returns all available operation types as a list at runtime.
  * This will be an array of each member of the union type `OperationType`
@@ -86,7 +93,7 @@ export function isDocumentOperation(type: string) {
   return documentOperations.has(type);
 }
 
-type OperationFieldTuple =
+export type OperationFieldTuple =
   | {
       type: 'field';
       operationType: OperationType;
@@ -98,6 +105,10 @@ type OperationFieldTuple =
     }
   | {
       type: 'fullReference';
+      operationType: OperationType;
+    }
+  | {
+      type: 'managedReference';
       operationType: OperationType;
     };
 
@@ -131,7 +142,11 @@ type OperationFieldTuple =
  * ]
  * ```
  */
-export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
+export function getAvailableOperationsByMetadata(
+  indexPattern: IndexPattern,
+  // For consistency in testing
+  customOperationDefinitionMap?: Record<string, GenericOperationDefinition>
+) {
   const operationByMetadata: Record<
     string,
     { operationMetaData: OperationMetadata; operations: OperationFieldTuple[] }
@@ -154,36 +169,51 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
     }
   };
 
-  operationDefinitions.sort(getSortScoreByPriority).forEach((operationDefinition) => {
-    if (operationDefinition.input === 'field') {
-      indexPattern.fields.forEach((field) => {
+  (customOperationDefinitionMap
+    ? Object.values(customOperationDefinitionMap)
+    : operationDefinitions
+  )
+    .sort(getSortScoreByPriority)
+    .forEach((operationDefinition) => {
+      if (operationDefinition.input === 'field') {
+        indexPattern.fields.forEach((field) => {
+          addToMap(
+            {
+              type: 'field',
+              operationType: operationDefinition.type,
+              field: field.name,
+            },
+            operationDefinition.getPossibleOperationForField(field)
+          );
+        });
+      } else if (operationDefinition.input === 'none') {
         addToMap(
           {
-            type: 'field',
+            type: 'none',
             operationType: operationDefinition.type,
-            field: field.name,
           },
-          operationDefinition.getPossibleOperationForField(field)
+          operationDefinition.getPossibleOperation()
         );
-      });
-    } else if (operationDefinition.input === 'none') {
-      addToMap(
-        {
-          type: 'none',
-          operationType: operationDefinition.type,
-        },
-        operationDefinition.getPossibleOperation()
-      );
-    } else if (operationDefinition.input === 'fullReference') {
-      const validOperation = operationDefinition.getPossibleOperation(indexPattern);
-      if (validOperation) {
-        addToMap(
-          { type: 'fullReference', operationType: operationDefinition.type },
-          validOperation
-        );
+      } else if (operationDefinition.input === 'fullReference') {
+        const validOperation = operationDefinition.getPossibleOperation(indexPattern);
+        if (validOperation) {
+          addToMap(
+            { type: 'fullReference', operationType: operationDefinition.type },
+            validOperation
+          );
+        }
+      } else if (operationDefinition.input === 'managedReference') {
+        const validOperation = operationDefinition.getPossibleOperation();
+        if (validOperation) {
+          addToMap(
+            { type: 'managedReference', operationType: operationDefinition.type },
+            validOperation
+          );
+        }
       }
-    }
-  });
+    });
 
   return Object.values(operationByMetadata);
 }
+
+export const memoizedGetAvailableOperationsByMetadata = memoize(getAvailableOperationsByMetadata);

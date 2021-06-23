@@ -4,10 +4,5 @@
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "private": true,
   "main": "src/index.js",
-  "types": "tinymath.d.ts",
-  "scripts": {
-    "kbn:bootstrap": "yarn build",
-    "build": "../../node_modules/.bin/pegjs -o src/grammar.js src/grammar.pegjs"
-  },
-  "dependencies": {}
+  "types": "index.d.ts"
 }

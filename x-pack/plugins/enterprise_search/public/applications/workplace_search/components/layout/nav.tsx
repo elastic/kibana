@@ -7,20 +7,66 @@
 
 import React from 'react';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSideNavItemType, EuiSpacer } from '@elastic/eui';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
-import { SideNav, SideNavLink } from '../../../shared/layout';
+import { generateNavLink, SideNav, SideNavLink } from '../../../shared/layout';
 import { NAV } from '../../constants';
 import {
-  ALPHA_PATH,
   SOURCES_PATH,
   SECURITY_PATH,
   ROLE_MAPPINGS_PATH,
   GROUPS_PATH,
   ORG_SETTINGS_PATH,
 } from '../../routes';
+import { useSourceSubNav } from '../../views/content_sources/components/source_sub_nav';
+import { useGroupSubNav } from '../../views/groups/components/group_sub_nav';
+import { useSettingsSubNav } from '../../views/settings/components/settings_sub_nav';
+
+export const useWorkplaceSearchNav = () => {
+  const navItems: Array<EuiSideNavItemType<unknown>> = [
+    {
+      id: 'root',
+      name: NAV.OVERVIEW,
+      ...generateNavLink({ to: '/', isRoot: true }),
+    },
+    {
+      id: 'sources',
+      name: NAV.SOURCES,
+      ...generateNavLink({ to: SOURCES_PATH }),
+      items: useSourceSubNav(),
+    },
+    {
+      id: 'groups',
+      name: NAV.GROUPS,
+      ...generateNavLink({ to: GROUPS_PATH }),
+      items: useGroupSubNav(),
+    },
+    {
+      id: 'usersRoles',
+      name: NAV.ROLE_MAPPINGS,
+      ...generateNavLink({ to: ROLE_MAPPINGS_PATH }),
+    },
+    {
+      id: 'security',
+      name: NAV.SECURITY,
+      ...generateNavLink({ to: SECURITY_PATH }),
+    },
+    {
+      id: 'settings',
+      name: NAV.SETTINGS,
+      ...generateNavLink({ to: ORG_SETTINGS_PATH }),
+      items: useSettingsSubNav(),
+    },
+  ];
+
+  // Root level items are meant to be section headers, but the WS nav (currently)
+  // isn't organized this way. So we crate a fake empty parent item here
+  // to cause all our navItems to properly render as nav links.
+  return [{ id: '', name: '', items: navItems }];
+};
+
+// TODO: Delete below once fully migrated to KibanaPageTemplate
 
 interface Props {
   sourcesSubNav?: React.ReactNode;
@@ -34,7 +80,7 @@ export const WorkplaceSearchNav: React.FC<Props> = ({
   settingsSubNav,
 }) => (
   <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
-    <SideNavLink to={ALPHA_PATH} isRoot>
+    <SideNavLink to="/" isRoot>
       {NAV.OVERVIEW}
     </SideNavLink>
     <SideNavLink to={SOURCES_PATH} subNav={sourcesSubNav}>
@@ -43,7 +89,7 @@ export const WorkplaceSearchNav: React.FC<Props> = ({
     <SideNavLink to={GROUPS_PATH} subNav={groupsSubNav}>
       {NAV.GROUPS}
     </SideNavLink>
-    <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
+    <SideNavLink shouldShowActiveForSubroutes to={ROLE_MAPPINGS_PATH}>
       {NAV.ROLE_MAPPINGS}
     </SideNavLink>
     <SideNavLink to={SECURITY_PATH}>{NAV.SECURITY}</SideNavLink>

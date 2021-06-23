@@ -9,12 +9,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['dashboard', 'header']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89476
-  describe.skip('dashboard save', function describeIndexTests() {
+  describe('dashboard save', function describeIndexTests() {
     this.tags('includeFirefox');
     const dashboardName = 'Dashboard Save Test';
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
@@ -127,10 +127,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.expectExistsQuickSaveOption();
+      await dashboardAddPanel.clickMarkdownQuickButton();
+      await PageObjects.visualize.saveVisualizationAndReturn();
+      await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.dashboard.clickQuickSave();
 
       await testSubjects.existOrFail('saveDashboardSuccess');
-      await testSubjects.existOrFail('dashboardEditMode');
+    });
+
+    it('Stays in edit mode after performing a quick save', async function () {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('dashboardQuickSaveMenuItem');
     });
   });
 }

@@ -14,6 +14,7 @@ export interface TabProps {
   currentTime: number;
   node: InfraWaffleMapNode;
   nodeType: InventoryItemType;
+  onClose(): void;
 }
 
 export const OVERLAY_Y_START = 266;

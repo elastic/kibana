@@ -11,7 +11,6 @@ import React from 'react';
 
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -63,23 +62,11 @@ describe('OverviewHost', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(
-      myState,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders the expected widget title', () => {

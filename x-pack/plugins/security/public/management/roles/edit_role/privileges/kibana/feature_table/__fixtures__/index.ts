@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
-
-import { EuiCheckbox, EuiCheckboxProps, EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
+import type { EuiButtonGroupProps, EuiCheckboxProps } from '@elastic/eui';
+import { EuiAccordion, EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
 
 import { findTestSubject } from '@kbn/test/jest';
-import { EuiAccordion } from '@elastic/eui';
+
 import { SubFeatureForm } from '../sub_feature_form';
 
 export function getDisplayedFeaturePrivileges(wrapper: ReactWrapper<any>) {

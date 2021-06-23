@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { fromEventPattern, of, fromEvent } from 'rxjs';
-import { concatMap, delay, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { fromEventPattern, fromEvent } from 'rxjs';
+import { map, mergeMap, takeUntil, bufferCount } from 'rxjs/operators';
 import jsonStream from './json_stream';
-import { pipe, noop, green, always } from './utils';
-import { ingest } from './ingest';
+import { pipe, noop } from './utils';
+import { ingestList } from './ingest';
 import {
   staticSite,
   statsAndstaticSiteUrl,
@@ -31,14 +31,12 @@ import * as moment from 'moment';
 const ROOT = '../../../..';
 const COVERAGE_INGESTION_KIBANA_ROOT =
   process.env.COVERAGE_INGESTION_KIBANA_ROOT || resolve(__dirname, ROOT);
-const ms = process.env.DELAY || 0;
+const BUFFER_SIZE = process.env.BUFFER_SIZE || 100;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || 'https://kibana-coverage.elastic.dev';
 const format = 'YYYY-MM-DDTHH:mm:SS';
 // eslint-disable-next-line import/namespace
 const formatted = `${moment.utc().format(format)}Z`;
 const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP || formatted);
-const preamble = pipe(statsAndstaticSiteUrl, rootDirAndOrigPath, buildId, addPrePopulatedTimeStamp);
-const addTestRunnerAndStaticSiteUrl = pipe(testRunner, staticSite(staticSiteUrlBase));
 
 const transform = (jsonSummaryPath) => (log) => (vcsInfo) => (teamAssignmentsPath) => {
   const objStream = jsonStream(jsonSummaryPath).on('done', noop);
@@ -49,16 +47,24 @@ const transform = (jsonSummaryPath) => (log) => (vcsInfo) => (teamAssignmentsPat
 
   fromEventPattern(jsonSummary$)
     .pipe(
-      map(preamble),
-      map(coveredFilePath),
-      map(itemizeVcsInfo),
-      map(ciRunUrl),
-      map(addJsonSummaryPath(jsonSummaryPath)),
-      map(addTestRunnerAndStaticSiteUrl),
+      map(
+        pipe(
+          statsAndstaticSiteUrl,
+          rootDirAndOrigPath,
+          buildId,
+          addPrePopulatedTimeStamp,
+          coveredFilePath,
+          itemizeVcsInfo,
+          ciRunUrl,
+          addJsonSummaryPath(jsonSummaryPath),
+          testRunner,
+          staticSite(staticSiteUrlBase)
+        )
+      ),
       mergeMap(assignTeams),
-      concatMap((x) => of(x).pipe(delay(ms)))
+      bufferCount(BUFFER_SIZE)
     )
-    .subscribe(ingest(log));
+    .subscribe(ingestList(log));
 };
 
 function rootDirAndOrigPath(obj) {
@@ -77,23 +83,17 @@ const vcsInfoLines$ = (vcsInfoFilePath) => {
 
 export const prok = ({ jsonSummaryPath, vcsInfoFilePath, teamAssignmentsPath }, log) => {
   validateRoot(COVERAGE_INGESTION_KIBANA_ROOT, log);
-  logAll(jsonSummaryPath, log);
 
   const xformWithPath = transform(jsonSummaryPath)(log); // On complete
 
   const vcsInfo = [];
+
   vcsInfoLines$(vcsInfoFilePath).subscribe(
     mutateVcsInfo(vcsInfo),
     (err) => log.error(err),
-    always(xformWithPath(vcsInfo)(teamAssignmentsPath))
+    () => xformWithPath(vcsInfo)(teamAssignmentsPath)
   );
 };
-
-function logAll(jsonSummaryPath, log) {
-  log.debug(`### Code coverage ingestion set to delay for: ${green(ms)} ms`);
-  log.debug(`### COVERAGE_INGESTION_KIBANA_ROOT: \n\t${green(COVERAGE_INGESTION_KIBANA_ROOT)}`);
-  log.debug(`### Ingesting from summary json: \n\t[${green(jsonSummaryPath)}]`);
-}
 
 function validateRoot(x, log) {
   return /kibana$/.test(x) ? noop() : log.warning(`✖✖✖ 'kibana' NOT FOUND in ROOT: ${x}\n`);

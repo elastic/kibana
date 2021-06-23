@@ -32,7 +32,7 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
     license.guardApiRoute<IndexPatternTitleSchema, undefined, FieldHistogramsRequestSchema>(
       async (ctx, req, res) => {
         const { indexPatternTitle } = req.params;
-        const { query, fields, samplerShardSize } = req.body;
+        const { query, fields, runtimeMappings, samplerShardSize } = req.body;
 
         try {
           const resp = await getHistogramsForFields(
@@ -40,7 +40,8 @@ export function registerFieldHistogramsRoutes({ router, license }: RouteDependen
             indexPatternTitle,
             query,
             fields,
-            samplerShardSize
+            samplerShardSize,
+            runtimeMappings
           );
 
           return res.ok({ body: resp });

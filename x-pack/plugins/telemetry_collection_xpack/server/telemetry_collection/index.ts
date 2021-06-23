@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ESLicense } from './get_license';
+export type { ESLicense } from './get_license';
 export { getStatsWithXpack } from './get_stats_with_xpack';

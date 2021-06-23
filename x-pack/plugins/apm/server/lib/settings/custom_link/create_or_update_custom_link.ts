@@ -13,7 +13,7 @@ import { Setup } from '../../helpers/setup_request';
 import { toESFormat } from './helper';
 import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
 
-export async function createOrUpdateCustomLink({
+export function createOrUpdateCustomLink({
   customLinkId,
   customLink,
   setup,
@@ -38,5 +38,5 @@ export async function createOrUpdateCustomLink({
     params.id = customLinkId;
   }
 
-  return internalClient.index(params);
+  return internalClient.index('create_or_update_custom_link', params);
 }

@@ -9,7 +9,7 @@ Updates an SavedObject
 <b>Signature:</b>
 
 ```typescript
-update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
+update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
 ```
 
 ## Parameters
@@ -19,7 +19,7 @@ update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: 
 |  type | <code>string</code> |  |
 |  id | <code>string</code> |  |
 |  attributes | <code>Partial&lt;T&gt;</code> |  |
-|  options | <code>SavedObjectsUpdateOptions</code> |  |
+|  options | <code>SavedObjectsUpdateOptions&lt;T&gt;</code> |  |
 
 <b>Returns:</b>
 

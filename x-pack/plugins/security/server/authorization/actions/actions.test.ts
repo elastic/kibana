@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Actions } from '.';
+import { Actions } from './actions';
 
 describe('#constructor', () => {
   test(`doesn't allow an empty string`, () => {

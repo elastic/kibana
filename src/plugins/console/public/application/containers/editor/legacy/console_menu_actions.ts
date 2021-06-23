@@ -9,7 +9,7 @@
 import { getEndpointFromPosition } from '../../../../lib/autocomplete/get_endpoint_from_position';
 import { SenseEditor } from '../../../models/sense_editor';
 
-export async function autoIndent(editor: SenseEditor, event: Event) {
+export async function autoIndent(editor: SenseEditor, event: React.MouseEvent) {
   event.preventDefault();
   await editor.autoIndent();
   editor.getCoreEditor().getContainer().focus();

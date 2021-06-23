@@ -1,0 +1,13 @@
+- name: stat
+  become: yes
+  register: keystore
+  stat:
+    path: /etc/kibana/kibana.keystore
+
+- name: 0660 root:kibana
+  assert:
+    that:
+      - keystore.stat.exists
+      - keystore.stat.mode == "0660"
+      - keystore.stat.pw_name == "root"
+      - keystore.stat.gr_name == "kibana"

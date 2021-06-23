@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import {
+  transformError,
+  getIndexExists,
+  getPolicyExists,
+  setPolicy,
+  setTemplate,
+  createBootstrapIndex,
+} from '@kbn/securitysolution-es-utils';
 import type {
   AppClient,
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
-import { transformError, buildSiemResponse } from '../utils';
-import { getIndexExists } from '../../index/get_index_exists';
-import { getPolicyExists } from '../../index/get_policy_exists';
-import { setPolicy } from '../../index/set_policy';
-import { setTemplate } from '../../index/set_template';
+import { buildSiemResponse } from '../utils';
 import { getSignalsTemplate, SIGNALS_TEMPLATE_VERSION } from './get_signals_template';
-import { createBootstrapIndex } from '../../index/create_bootstrap_index';
 import { ensureMigrationCleanupPolicy } from '../../migrations/migration_cleanup';
 import signalsPolicy from './signals_policy.json';
 import { templateNeedsUpdate } from './check_template_version';
@@ -66,9 +69,7 @@ export const createDetectionIndex = async (
   context: SecuritySolutionRequestHandlerContext,
   siemClient: AppClient
 ): Promise<void> => {
-  const clusterClient = context.core.elasticsearch.legacy.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = clusterClient.callAsCurrentUser;
 
   if (!siemClient) {
     throw new CreateIndexError('', 404);
@@ -76,20 +77,20 @@ export const createDetectionIndex = async (
 
   const index = siemClient.getSignalsIndex();
   await ensureMigrationCleanupPolicy({ alias: index, esClient });
-  const policyExists = await getPolicyExists(callCluster, index);
+  const policyExists = await getPolicyExists(esClient, index);
   if (!policyExists) {
-    await setPolicy(callCluster, index, signalsPolicy);
+    await setPolicy(esClient, index, signalsPolicy);
   }
   if (await templateNeedsUpdate({ alias: index, esClient })) {
-    await setTemplate(callCluster, index, getSignalsTemplate(index));
+    await setTemplate(esClient, index, getSignalsTemplate(index));
   }
-  const indexExists = await getIndexExists(callCluster, index);
+  const indexExists = await getIndexExists(esClient, index);
   if (indexExists) {
-    const indexVersion = await getIndexVersion(callCluster, index);
+    const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
-      await callCluster('indices.rollover', { alias: index });
+      await esClient.indices.rollover({ alias: index });
     }
   } else {
-    await createBootstrapIndex(callCluster, index);
+    await createBootstrapIndex(esClient, index);
   }
 };

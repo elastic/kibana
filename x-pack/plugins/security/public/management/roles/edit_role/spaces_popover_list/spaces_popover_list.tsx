@@ -15,15 +15,19 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Component, memo } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
-import { Space, SpaceAvatar } from '../../../../../../spaces/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { Space } from 'src/plugins/spaces_oss/common';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
 
 interface Props {
   spaces: Space[];
   buttonText: string;
+  spacesApiUi: SpacesApiUi;
 }
 
 interface State {
@@ -191,7 +195,8 @@ export class SpacesPopoverList extends Component<Props, State> {
   };
 
   private renderSpaceMenuItem = (space: Space): JSX.Element => {
-    const icon = <SpaceAvatar space={space} size={'s'} />;
+    const LazySpaceAvatar = memo(this.props.spacesApiUi.components.getSpaceAvatar);
+    const icon = <LazySpaceAvatar space={space} size={'s'} />; // wrapped in a Suspense above
     return (
       <EuiContextMenuItem
         key={space.id}

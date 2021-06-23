@@ -8,7 +8,6 @@
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
-// @ts-expect-error untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 import { elasticLogo } from '../../lib/elastic_logo';
 
@@ -64,7 +63,7 @@ export function image(): ExpressionFunctionDefinition<'image', null, Arguments, 
       return {
         type: 'image',
         mode: modeStyle,
-        dataurl: resolveWithMissingImage(dataurl, elasticLogo),
+        dataurl: resolveWithMissingImage(dataurl, elasticLogo) as string,
       };
     },
   };

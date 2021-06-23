@@ -7,18 +7,20 @@
 
 import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import { rangeQuery, kqlQuery } from '../../server/utils/queries';
 import { ProcessorEvent } from '../../common/processor_event';
 import { getProcessorEventForAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 
 export function getServicesProjection({
+  kuery,
   setup,
   searchAggregatedTransactions,
 }: {
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, esFilter } = setup;
+  const { start, end } = setup;
 
   return {
     apm: {
@@ -34,7 +36,7 @@ export function getServicesProjection({
       size: 0,
       query: {
         bool: {
-          filter: [{ range: rangeFilter(start, end) }, ...esFilter],
+          filter: [...rangeQuery(start, end), ...kqlQuery(kuery)],
         },
       },
       aggs: {

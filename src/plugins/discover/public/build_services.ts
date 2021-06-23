@@ -8,6 +8,7 @@
 
 import { History } from 'history';
 
+import type { auto } from 'angular';
 import {
   Capabilities,
   ChromeStart,
@@ -34,6 +35,7 @@ import { getHistory } from './kibana_services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -54,18 +56,19 @@ export interface DiscoverServices {
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id: string) => Promise<SavedSearch>;
+  getSavedSearchById: (id?: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  getEmbeddableInjector: any;
+  getEmbeddableInjector: () => Promise<auto.IInjectorService>;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export async function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
-  getEmbeddableInjector: any
+  getEmbeddableInjector: () => Promise<auto.IInjectorService>
 ): Promise<DiscoverServices> {
   const services = {
     savedObjectsClient: core.savedObjects.client,
@@ -84,7 +87,7 @@ export async function buildServices(
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
     getEmbeddableInjector,
-    getSavedSearchById: async (id: string) => savedObjectService.get(id),
+    getSavedSearchById: async (id?: string) => savedObjectService.get(id),
     getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
     indexPatterns: plugins.data.indexPatterns,
@@ -100,5 +103,6 @@ export async function buildServices(
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
+    indexPatternFieldEditor: plugins.indexPatternFieldEditor,
   };
 }

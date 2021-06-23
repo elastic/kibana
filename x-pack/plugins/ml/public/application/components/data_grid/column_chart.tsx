@@ -13,7 +13,9 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import './column_chart.scss';
 
-import { isUnsupportedChartData, useColumnChart, ChartData } from './use_column_chart';
+import { isUnsupportedChartData, ChartData } from '../../../../common/types/field_histograms';
+
+import { useColumnChart } from './use_column_chart';
 
 interface Props {
   chartData: ChartData;

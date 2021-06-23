@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { addGeoJsonMbSource, syncVectorSource } from './utils';
+export { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
 export { IVectorLayer, VectorLayer, VectorLayerArguments } from './vector_layer';

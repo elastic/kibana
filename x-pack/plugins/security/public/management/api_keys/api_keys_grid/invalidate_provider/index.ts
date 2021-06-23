@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { InvalidateProvider } from './invalidate_provider';
+export { InvalidateProvider, InvalidateApiKeys } from './invalidate_provider';

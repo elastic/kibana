@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/types';
+import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/schema/types';
 import { ApiToken } from '../credentials/types';
 
+export enum EngineTypes {
+  default = 'default',
+  indexed = 'indexed',
+  meta = 'meta',
+}
 export interface Engine {
   name: string;
-  type: string;
+  type: EngineTypes;
   language: string | null;
   result_fields: {
     [key: string]: ResultField;

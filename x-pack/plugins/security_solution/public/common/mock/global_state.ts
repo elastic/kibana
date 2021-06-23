@@ -39,6 +39,12 @@ export const mockGlobalState: State = {
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
+    enableExperimental: {
+      trustedAppsByPolicyEnabled: false,
+      metricsEntitiesEnabled: false,
+      ruleRegistryEnabled: false,
+      tGridEnabled: false,
+    },
   },
   hosts: {
     page: {
@@ -204,6 +210,7 @@ export const mockGlobalState: State = {
     timelineById: {
       test: {
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.notes,
         deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
@@ -212,6 +219,11 @@ export const mockGlobalState: State = {
         itemsPerPage: 5,
         dataProviders: [],
         description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+        },
         eventIdToNoteIds: {},
         excludedRowRendererIds: [],
         expandedDetail: {},

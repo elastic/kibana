@@ -7,7 +7,9 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+
 import { shallowWithIntl } from '@kbn/test/jest';
+
 import { ReservedSpaceBadge } from './reserved_space_badge';
 
 const reservedSpace = {

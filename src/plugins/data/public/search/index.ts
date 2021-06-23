@@ -8,7 +8,12 @@
 
 export * from './expressions';
 
-export { ISearchSetup, ISearchStart, ISearchStartSearchSource, SearchEnhancements } from './types';
+export {
+  ISearchSetup,
+  ISearchStart,
+  ISearchStartSearchSource,
+  SearchUsageCollector,
+} from './types';
 
 export {
   ES_SEARCH_STRATEGY,
@@ -39,6 +44,8 @@ export {
   ISessionsClient,
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
+  waitUntilNextSessionCompletes$,
+  WaitUntilNextSessionCompletesOptions,
 } from './session';
 export { getEsPreference } from './es_search';
 

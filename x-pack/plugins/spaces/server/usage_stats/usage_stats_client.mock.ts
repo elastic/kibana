@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsageStatsClient } from './usage_stats_client';
+import type { UsageStatsClient } from './usage_stats_client';
 
 const createUsageStatsClientMock = () =>
   (({

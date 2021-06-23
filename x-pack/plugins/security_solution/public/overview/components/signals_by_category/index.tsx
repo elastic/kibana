@@ -19,6 +19,7 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
+  combinedQueries?: string;
   filters?: Filter[];
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
@@ -29,6 +30,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
+  combinedQueries,
   deleteQuery,
   filters,
   from,
@@ -61,6 +63,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
 
   return (
     <AlertsHistogramPanel
+      combinedQueries={combinedQueries}
       deleteQuery={deleteQuery}
       filters={filters}
       from={from}

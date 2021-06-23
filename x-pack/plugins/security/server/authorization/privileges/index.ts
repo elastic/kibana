@@ -6,4 +6,3 @@
  */
 
 export { privilegesFactory, PrivilegesService } from './privileges';
-export { featurePrivilegeIterator } from './feature_privilege_iterator';

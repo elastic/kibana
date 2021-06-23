@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import {
   mockFleetObjectsResponse,
   mockFleetEventsObjectsResponse,
@@ -13,23 +13,31 @@ import {
   MockOSPlatform,
   MockOSVersion,
 } from './endpoint.mocks';
-import { ISavedObjectsRepository, SavedObjectsFindResponse } from 'src/core/server';
-import { AgentEventSOAttributes } from '../../../../fleet/common/types/models/agent';
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from 'src/core/server';
 import { Agent } from '../../../../fleet/common';
 import * as endpointTelemetry from './index';
 import * as fleetSavedObjects from './fleet_saved_objects';
+import { createMockEndpointAppContext } from '../../endpoint/mocks';
+import { EndpointAppContext } from '../../endpoint/types';
 
 describe('test security solution endpoint telemetry', () => {
-  let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;
-  let getFleetSavedObjectsMetadataSpy: jest.SpyInstance<Promise<SavedObjectsFindResponse<Agent>>>;
-  let getLatestFleetEndpointEventSpy: jest.SpyInstance<
-    Promise<SavedObjectsFindResponse<AgentEventSOAttributes>>
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockEndpointAppContext: EndpointAppContext;
+  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let getEndpointIntegratedFleetMetadataSpy: jest.SpyInstance<
+    Promise<{ agents: Agent[]; total: number; page: number; perPage: number } | undefined>
   >;
+  let getLatestFleetEndpointEventSpy: jest.SpyInstance<Promise<SavedObjectsFindResponse>>;
 
   beforeAll(() => {
     getLatestFleetEndpointEventSpy = jest.spyOn(fleetSavedObjects, 'getLatestFleetEndpointEvent');
-    getFleetSavedObjectsMetadataSpy = jest.spyOn(fleetSavedObjects, 'getFleetSavedObjectsMetadata');
-    mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
+    getEndpointIntegratedFleetMetadataSpy = jest.spyOn(
+      fleetSavedObjects,
+      'getEndpointIntegratedFleetMetadata'
+    );
+    mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockEndpointAppContext = createMockEndpointAppContext();
+    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
   });
 
   afterAll(() => {
@@ -55,28 +63,32 @@ describe('test security solution endpoint telemetry', () => {
 
   describe('when a request for endpoint agents fails', () => {
     it('should return an empty object', async () => {
-      getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+      getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
         Promise.reject(Error('No agents for you'))
       );
 
       const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-        mockSavedObjectsRepository
+        mockSavedObjectsClient,
+        mockEndpointAppContext,
+        mockEsClient
       );
-      expect(getFleetSavedObjectsMetadataSpy).toHaveBeenCalled();
+      expect(getEndpointIntegratedFleetMetadataSpy).toHaveBeenCalled();
       expect(endpointUsage).toEqual({});
     });
   });
 
   describe('when an agent has not been installed', () => {
     it('should return the default shape if no agents are found', async () => {
-      getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
-        Promise.resolve({ saved_objects: [], total: 0, per_page: 0, page: 0 })
+      getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
+        Promise.resolve({ agents: [], total: 0, perPage: 0, page: 0 })
       );
 
       const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-        mockSavedObjectsRepository
+        mockSavedObjectsClient,
+        mockEndpointAppContext,
+        mockEsClient
       );
-      expect(getFleetSavedObjectsMetadataSpy).toHaveBeenCalled();
+      expect(getEndpointIntegratedFleetMetadataSpy).toHaveBeenCalled();
       expect(endpointUsage).toEqual({
         total_installed: 0,
         active_within_last_24_hours: 0,
@@ -95,7 +107,7 @@ describe('test security solution endpoint telemetry', () => {
   describe('when agent(s) have been installed', () => {
     describe('when a request for events has failed', () => {
       it('should show only one endpoint installed but it is inactive', async () => {
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse())
         );
         getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -103,7 +115,9 @@ describe('test security solution endpoint telemetry', () => {
         );
 
         const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-          mockSavedObjectsRepository
+          mockSavedObjectsClient,
+          mockEndpointAppContext,
+          mockEsClient
         );
         expect(endpointUsage).toEqual({
           total_installed: 1,
@@ -129,7 +143,7 @@ describe('test security solution endpoint telemetry', () => {
 
     describe('when a request for events is successful', () => {
       it('should show one endpoint installed but endpoint has failed to run', async () => {
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse())
         );
         getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -137,7 +151,9 @@ describe('test security solution endpoint telemetry', () => {
         );
 
         const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-          mockSavedObjectsRepository
+          mockSavedObjectsClient,
+          mockEndpointAppContext,
+          mockEsClient
         );
         expect(endpointUsage).toEqual({
           total_installed: 1,
@@ -161,7 +177,7 @@ describe('test security solution endpoint telemetry', () => {
       });
 
       it('should show two endpoints installed but both endpoints have failed to run', async () => {
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse(false))
         );
         getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -169,7 +185,9 @@ describe('test security solution endpoint telemetry', () => {
         );
 
         const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-          mockSavedObjectsRepository
+          mockSavedObjectsClient,
+          mockEndpointAppContext,
+          mockEsClient
         );
         expect(endpointUsage).toEqual({
           total_installed: 2,
@@ -197,7 +215,7 @@ describe('test security solution endpoint telemetry', () => {
         twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
         const twoDaysAgoISOString = twoDaysAgo.toISOString();
 
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse(false, twoDaysAgoISOString))
         );
         getLatestFleetEndpointEventSpy.mockImplementation(
@@ -205,7 +223,9 @@ describe('test security solution endpoint telemetry', () => {
         );
 
         const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-          mockSavedObjectsRepository
+          mockSavedObjectsClient,
+          mockEndpointAppContext,
+          mockEsClient
         );
         expect(endpointUsage).toEqual({
           total_installed: 2,
@@ -229,7 +249,7 @@ describe('test security solution endpoint telemetry', () => {
       });
 
       it('should show one endpoint installed and endpoint is running', async () => {
-        getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+        getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
           Promise.resolve(mockFleetObjectsResponse())
         );
         getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -237,7 +257,9 @@ describe('test security solution endpoint telemetry', () => {
         );
 
         const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-          mockSavedObjectsRepository
+          mockSavedObjectsClient,
+          mockEndpointAppContext,
+          mockEsClient
         );
         expect(endpointUsage).toEqual({
           total_installed: 1,
@@ -262,7 +284,7 @@ describe('test security solution endpoint telemetry', () => {
 
       describe('malware policy', () => {
         it('should have failed to enable', async () => {
-          getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+          getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
             Promise.resolve(mockFleetObjectsResponse())
           );
           getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -272,7 +294,9 @@ describe('test security solution endpoint telemetry', () => {
           );
 
           const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-            mockSavedObjectsRepository
+            mockSavedObjectsClient,
+            mockEndpointAppContext,
+            mockEsClient
           );
           expect(endpointUsage).toEqual({
             total_installed: 1,
@@ -296,7 +320,7 @@ describe('test security solution endpoint telemetry', () => {
         });
 
         it('should be enabled successfully', async () => {
-          getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+          getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
             Promise.resolve(mockFleetObjectsResponse())
           );
           getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -304,7 +328,9 @@ describe('test security solution endpoint telemetry', () => {
           );
 
           const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-            mockSavedObjectsRepository
+            mockSavedObjectsClient,
+            mockEndpointAppContext,
+            mockEsClient
           );
           expect(endpointUsage).toEqual({
             total_installed: 1,
@@ -328,7 +354,7 @@ describe('test security solution endpoint telemetry', () => {
         });
 
         it('should be disabled successfully', async () => {
-          getFleetSavedObjectsMetadataSpy.mockImplementation(() =>
+          getEndpointIntegratedFleetMetadataSpy.mockImplementation(() =>
             Promise.resolve(mockFleetObjectsResponse())
           );
           getLatestFleetEndpointEventSpy.mockImplementation(() =>
@@ -338,7 +364,9 @@ describe('test security solution endpoint telemetry', () => {
           );
 
           const endpointUsage = await endpointTelemetry.getEndpointTelemetryFromFleet(
-            mockSavedObjectsRepository
+            mockSavedObjectsClient,
+            mockEndpointAppContext,
+            mockEsClient
           );
           expect(endpointUsage).toEqual({
             total_installed: 1,

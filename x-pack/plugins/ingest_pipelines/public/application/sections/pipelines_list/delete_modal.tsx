@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -78,49 +78,47 @@ export const PipelineDeleteModal = ({
   };
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor="danger"
-        data-test-subj="deletePipelinesConfirmation"
-        title={
+    <EuiConfirmModal
+      buttonColor="danger"
+      data-test-subj="deletePipelinesConfirmation"
+      title={
+        <FormattedMessage
+          id="xpack.ingestPipelines.deleteModal.modalTitleText"
+          defaultMessage="Delete {numPipelinesToDelete, plural, one {pipeline} other {# pipelines}}"
+          values={{ numPipelinesToDelete }}
+        />
+      }
+      onCancel={handleOnCancel}
+      onConfirm={handleDeletePipelines}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.ingestPipelines.deleteModal.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.ingestPipelines.deleteModal.confirmButtonLabel"
+          defaultMessage="Delete {numPipelinesToDelete, plural, one {pipeline} other {pipelines} }"
+          values={{ numPipelinesToDelete }}
+        />
+      }
+    >
+      <>
+        <p>
           <FormattedMessage
-            id="xpack.ingestPipelines.deleteModal.modalTitleText"
-            defaultMessage="Delete {numPipelinesToDelete, plural, one {pipeline} other {# pipelines}}"
+            id="xpack.ingestPipelines.deleteModal.deleteDescription"
+            defaultMessage="You are about to delete {numPipelinesToDelete, plural, one {this pipeline} other {these pipelines} }:"
             values={{ numPipelinesToDelete }}
           />
-        }
-        onCancel={handleOnCancel}
-        onConfirm={handleDeletePipelines}
-        cancelButtonText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.deleteModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
-        confirmButtonText={
-          <FormattedMessage
-            id="xpack.ingestPipelines.deleteModal.confirmButtonLabel"
-            defaultMessage="Delete {numPipelinesToDelete, plural, one {pipeline} other {pipelines} }"
-            values={{ numPipelinesToDelete }}
-          />
-        }
-      >
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.ingestPipelines.deleteModal.deleteDescription"
-              defaultMessage="You are about to delete {numPipelinesToDelete, plural, one {this pipeline} other {these pipelines} }:"
-              values={{ numPipelinesToDelete }}
-            />
-          </p>
+        </p>
 
-          <ul>
-            {pipelinesToDelete.map((name) => (
-              <li key={name}>{name}</li>
-            ))}
-          </ul>
-        </>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+        <ul>
+          {pipelinesToDelete.map((name) => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
+      </>
+    </EuiConfirmModal>
   );
 };

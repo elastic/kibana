@@ -10,8 +10,9 @@ import { detectorToString } from '../../../../util/string_utils';
 import { formatValues, filterObjects } from './format_values';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
+import { EditAlertRule } from '../../../../../alerting/ml_alerting_flyout';
 
-export function extractJobDetails(job, basePath) {
+export function extractJobDetails(job, basePath, refreshJobList) {
   if (Object.keys(job).length === 0) {
     return {};
   }
@@ -25,19 +26,33 @@ export function extractJobDetails(job, basePath) {
     items: filterObjects(job, true).map(formatValues),
   };
 
+  const { job_tags: tags, custom_urls: urls, ...settings } = job.custom_settings ?? {};
   const customUrl = {
     id: 'customUrl',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.customUrlsTitle', {
       defaultMessage: 'Custom URLs',
     }),
     position: 'right',
-    items: [],
+    items: urls ? urls.map((cu) => [cu.url_name, cu.url_value, cu.time_range]) : [],
   };
-  if (job.custom_settings && job.custom_settings.custom_urls) {
-    customUrl.items.push(
-      ...job.custom_settings.custom_urls.map((cu) => [cu.url_name, cu.url_value, cu.time_range])
-    );
-  }
+
+  const customSettings = {
+    id: 'analysisConfig',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.customSettingsTitle', {
+      defaultMessage: 'Custom settings',
+    }),
+    position: 'right',
+    items: settings ? filterObjects(settings, true, true) : [],
+  };
+
+  const jobTags = {
+    id: 'analysisConfig',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.jobTagsTitle', {
+      defaultMessage: 'Job tags',
+    }),
+    position: 'right',
+    items: tags ? filterObjects(tags) : [],
+  };
 
   const node = {
     id: 'node',
@@ -73,6 +88,17 @@ export function extractJobDetails(job, basePath) {
       general.items.splice(i, 1);
     }
   }
+
+  const alertRules = {
+    id: 'alertRules',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.alertRulesTitle', {
+      defaultMessage: 'Alert rules',
+    }),
+    position: 'right',
+    items: (job.alerting_rules ?? []).map((v) => {
+      return ['', <EditAlertRule initialAlert={v} onSave={refreshJobList} />];
+    }),
+  };
 
   const detectors = {
     id: 'detectors',
@@ -201,10 +227,13 @@ export function extractJobDetails(job, basePath) {
     analysisConfig,
     analysisLimits,
     dataDescription,
+    customSettings,
+    jobTags,
     datafeed,
     counts,
     modelSizeStats,
     jobTimingStats,
     datafeedTimingStats,
+    alertRules,
   };
 }

@@ -27,7 +27,10 @@ import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 
-interface RequestFixtureOptions<P = any, Q = any, B = any> {
+/**
+ * @internal
+ */
+export interface RequestFixtureOptions<P = any, Q = any, B = any> {
   auth?: { isAuthenticated: boolean };
   headers?: Record<string, string>;
   params?: Record<string, any>;
@@ -151,7 +154,6 @@ const createResponseFactoryMock = (): jest.Mocked<KibanaResponseFactory> => ({
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
-  internalError: jest.fn(),
   customError: jest.fn(),
 });
 
@@ -162,7 +164,6 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   forbidden: jest.fn(),
   notFound: jest.fn(),
   conflict: jest.fn(),
-  internalError: jest.fn(),
   customError: jest.fn(),
 });
 

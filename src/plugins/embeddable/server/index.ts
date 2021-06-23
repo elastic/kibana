@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableServerPlugin, EmbeddableSetup } from './plugin';
+import { EmbeddableServerPlugin, EmbeddableSetup, EmbeddableStart } from './plugin';
 
-export { EmbeddableSetup };
+export { EmbeddableSetup, EmbeddableStart };
 
 export { EnhancementRegistryDefinition, EmbeddableRegistryDefinition } from './types';
 

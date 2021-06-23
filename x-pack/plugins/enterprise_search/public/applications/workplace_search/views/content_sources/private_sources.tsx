@@ -13,16 +13,17 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../shared/licensing';
-import { Loading } from '../../../shared/loading';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { AppLogic } from '../../app_logic';
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
+import { PersonalDashboardLayout } from '../../components/layout';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
+import { NAV } from '../../constants';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
+import { toSentenceSerial } from '../../utils';
 
 import {
-  AND,
   PRIVATE_LINK_TITLE,
   PRIVATE_HEADER_TITLE,
   PRIVATE_HEADER_DESCRIPTION,
@@ -53,8 +54,6 @@ export const PrivateSources: React.FC = () => {
     account: { canCreatePersonalSources, groups },
   } = useValues(AppLogic);
 
-  if (dataLoading) return <Loading />;
-
   const hasConfiguredConnectors = serviceTypes.some(({ configured }) => configured);
   const canAddSources = canCreatePersonalSources && hasConfiguredConnectors;
   const hasPrivateSources = privateContentSources?.length > 0;
@@ -81,7 +80,7 @@ export const PrivateSources: React.FC = () => {
   );
 
   const privateSourcesEmptyState = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt iconType="lock" title={<h2>{PRIVATE_EMPTY_TITLE}</h2>} />
       <EuiSpacer size="xxl" />
@@ -107,7 +106,7 @@ export const PrivateSources: React.FC = () => {
   );
 
   const sharedSourcesEmptyState = (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} color="subdued">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt
         iconType={noSharedSourcesIcon}
@@ -122,13 +121,6 @@ export const PrivateSources: React.FC = () => {
     <SourcesTable showDetails={false} isOrganization={false} sources={contentSources} />
   );
 
-  const groupsSentence =
-    groups.length === 1
-      ? `${groups}`
-      : `${groups.slice(0, groups.length - 1).join(', ')}${
-          groups.length === 2 ? '' : ','
-        } ${AND} ${groups.slice(-1)}`;
-
   const sharedSourcesSection = (
     <ContentSection
       title={PRIVATE_SHARED_SOURCES_TITLE}
@@ -137,7 +129,11 @@ export const PrivateSources: React.FC = () => {
           <FormattedMessage
             id="xpack.enterpriseSearch.workplaceSearch.sources.private.privateShared.header.description"
             defaultMessage="You have access to the following sources through {newline}the {groups, plural, one {group} other {groups}} {groupsSentence}."
-            values={{ groups: groups.length, groupsSentence, newline: <br /> }}
+            values={{
+              groups: groups.length,
+              groupsSentence: toSentenceSerial(groups),
+              newline: <br />,
+            }}
           />
         )
       }
@@ -147,10 +143,12 @@ export const PrivateSources: React.FC = () => {
   );
 
   return (
-    <SourcesView>
-      {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
-      {canCreatePersonalSources && privateSourcesSection}
-      {sharedSourcesSection}
-    </SourcesView>
+    <PersonalDashboardLayout pageChrome={[NAV.SOURCES]} isLoading={dataLoading}>
+      <SourcesView>
+        {hasPrivateSources && !hasPlatinumLicense && licenseCallout}
+        {canCreatePersonalSources && privateSourcesSection}
+        {sharedSourcesSection}
+      </SourcesView>
+    </PersonalDashboardLayout>
   );
 };

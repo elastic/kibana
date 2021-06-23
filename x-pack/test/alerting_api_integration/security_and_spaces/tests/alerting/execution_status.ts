@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AlertExecutionStatusErrorReasons } from '../../../../../plugins/alerts/common';
+import { AlertExecutionStatusErrorReasons } from '../../../../../plugins/alerting/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -25,17 +25,17 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     it('should eventually have error reason "decrypt" when appropriate', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(spaceId)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestAlertData({
-            alertTypeId: 'test.noop',
+            rule_type_id: 'test.noop',
             schedule: { interval: '1s' },
           })
         );
       expect(response.status).to.eql(200);
       const alertId = response.body.id;
-      objectRemover.add(spaceId, alertId, 'alert', 'alerts');
+      objectRemover.add(spaceId, alertId, 'rule', 'alerting');
 
       let executionStatus = await waitForStatus(alertId, new Set(['ok']), 10000);
 
@@ -70,15 +70,15 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       expect().fail(`waiting for alert ${id} statuses ${Array.from(statuses)} timed out`);
     }
 
-    const response = await supertest.get(`${getUrlPrefix(spaceId)}/api/alerts/alert/${id}`);
+    const response = await supertest.get(`${getUrlPrefix(spaceId)}/api/alerting/rule/${id}`);
     expect(response.status).to.eql(200);
-    const { status } = response.body.executionStatus;
-    if (statuses.has(status)) return response.body.executionStatus;
+    const { status } = response.body.execution_status;
+    if (statuses.has(status)) return response.body.execution_status;
 
     // eslint-disable-next-line no-console
     console.log(
       `waitForStatus(${Array.from(statuses)}): got ${JSON.stringify(
-        response.body.executionStatus
+        response.body.execution_status
       )}, retrying`
     );
 

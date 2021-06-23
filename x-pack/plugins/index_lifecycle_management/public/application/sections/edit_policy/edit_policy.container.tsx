@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
@@ -52,43 +52,47 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
 
   if (isLoading) {
     return (
-      <EuiEmptyPrompt
-        title={<EuiLoadingSpinner size="xl" />}
-        body={
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.policiesLoading"
-            defaultMessage="Loading policies..."
-          />
-        }
-      />
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <EuiEmptyPrompt
+          title={<EuiLoadingSpinner size="xl" />}
+          body={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.policiesLoading"
+              defaultMessage="Loading policies..."
+            />
+          }
+        />
+      </EuiPageContent>
     );
   }
   if (error || !policies) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
     return (
-      <EuiEmptyPrompt
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesLoadingFailedTitle"
-              defaultMessage="Unable to load existing lifecycle policies"
-            />
-          </h2>
-        }
-        body={
-          <p>
-            {message} ({statusCode})
-          </p>
-        }
-        actions={
-          <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesReloadButton"
-              defaultMessage="Try again"
-            />
-          </EuiButton>
-        }
-      />
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesLoadingFailedTitle"
+                defaultMessage="Unable to load existing lifecycle policies"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              {message} ({statusCode})
+            </p>
+          }
+          actions={
+            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesReloadButton"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
+          }
+        />
+      </EuiPageContent>
     );
   }
 

@@ -8,7 +8,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode } from '@elastic/eui';
 import { PainlessLang, PainlessContext } from '@kbn/monaco';
 import {
   EuiFlexGroup,
@@ -19,6 +18,7 @@ import {
   EuiComboBoxOptionOption,
   EuiLink,
   EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
 
 import {

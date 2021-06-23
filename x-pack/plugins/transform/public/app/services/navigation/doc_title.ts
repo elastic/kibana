@@ -7,10 +7,12 @@
 
 import { textService } from '../text';
 
-class DocTitleService {
-  private changeDocTitle: any = () => {};
+type ChangeDocTitle = (docTitle: string) => void;
 
-  public init(changeDocTitle: any): void {
+class DocTitleService {
+  private changeDocTitle: ChangeDocTitle = () => {};
+
+  public init(changeDocTitle: ChangeDocTitle): void {
     this.changeDocTitle = changeDocTitle;
   }
 

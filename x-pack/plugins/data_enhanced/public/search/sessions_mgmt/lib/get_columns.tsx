@@ -21,8 +21,8 @@ import { capitalize } from 'lodash';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
-import { SessionsConfigSchema } from '../';
-import { SearchSessionStatus } from '../../../../common/search';
+import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../';
+import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
 import { TableText } from '../components';
 import { OnActionComplete, PopoverActionsMenu } from '../components';
 import { StatusIndicator } from '../components/status';
@@ -45,6 +45,7 @@ function isSessionRestorable(status: SearchSessionStatus) {
 
 export const getColumns = (
   core: CoreStart,
+  plugins: IManagementSectionsPluginsSetup,
   api: SearchSessionsMgmtAPI,
   config: SessionsConfigSchema,
   timezone: string,
@@ -83,6 +84,10 @@ export const getColumns = (
       width: '20%',
       render: (name: UISession['name'], { restoreUrl, reloadUrl, status }) => {
         const isRestorable = isSessionRestorable(status);
+        const href = isRestorable ? restoreUrl : reloadUrl;
+        const trackAction = isRestorable
+          ? plugins.data.search.usageCollector?.trackSessionViewRestored
+          : plugins.data.search.usageCollector?.trackSessionReloaded;
         const notRestorableWarning = isRestorable ? null : (
           <>
             {' '}
@@ -99,8 +104,10 @@ export const getColumns = (
         );
         return (
           <RedirectAppLinks application={core.application}>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiLink
-              href={isRestorable ? restoreUrl : reloadUrl}
+              href={href}
+              onClick={() => trackAction?.()}
               data-test-subj="sessionManagementNameCol"
             >
               <TableText>

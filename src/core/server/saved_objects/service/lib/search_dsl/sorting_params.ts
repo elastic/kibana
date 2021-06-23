@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { getProperty, IndexMapping } from '../../../mappings';
-import { SavedObjectsPitParams } from '../../../types';
-
-// TODO: The plan is for ES to automatically add this tiebreaker when
-// using PIT. We should remove this logic once that is resolved.
-// https://github.com/elastic/elasticsearch/issues/56828
-const ES_PROVIDED_TIEBREAKER = { _shard_doc: 'asc' };
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 
@@ -21,9 +16,8 @@ export function getSortingParams(
   mappings: IndexMapping,
   type: string | string[],
   sortField?: string,
-  sortOrder?: string,
-  pit?: SavedObjectsPitParams
-) {
+  sortOrder?: estypes.SearchSortOrder
+): { sort?: estypes.SearchSortContainer[] } {
   if (!sortField) {
     return {};
   }
@@ -38,7 +32,6 @@ export function getSortingParams(
             order: sortOrder,
           },
         },
-        ...(pit ? [ES_PROVIDED_TIEBREAKER] : []),
       ],
     };
   }
@@ -59,7 +52,6 @@ export function getSortingParams(
             unmapped_type: rootField.type,
           },
         },
-        ...(pit ? [ES_PROVIDED_TIEBREAKER] : []),
       ],
     };
   }
@@ -84,7 +76,6 @@ export function getSortingParams(
           unmapped_type: field.type,
         },
       },
-      ...(pit ? [ES_PROVIDED_TIEBREAKER] : []),
     ],
   };
 }

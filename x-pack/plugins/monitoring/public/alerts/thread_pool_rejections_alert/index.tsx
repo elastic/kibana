@@ -12,6 +12,7 @@ import { Expression, Props } from '../components/param_details_form/expression';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { CommonAlertParamDetails } from '../../../common/types/alerts';
+import { ALERT_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 
 interface ThreadPoolTypes {
   [key: string]: unknown;
@@ -32,7 +33,7 @@ export function createThreadPoolRejectionsAlertType(
     description: threadPoolAlertDetails.description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.links.monitoring.alertsKibana}`;
+      return `${docLinks.links.monitoring.alertsKibanaThreadpoolRejections}`;
     },
     alertParamsExpression: (props: Props) => (
       <>
@@ -60,6 +61,6 @@ export function createThreadPoolRejectionsAlertType(
       return { errors };
     },
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: true,
+    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
   };
 }

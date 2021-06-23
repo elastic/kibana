@@ -15,21 +15,24 @@ import { createGetterSetter } from '../../kibana_utils/public';
 import { search } from '../../data/public';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 
-let angularModule: any = null;
+let angularModule: ng.IModule | null = null;
 let services: DiscoverServices | null = null;
 let uiActions: UiActionsStart;
 
 /**
  * set bootstrapped inner angular module
  */
-export function setAngularModule(module: any) {
+export function setAngularModule(module: ng.IModule) {
   angularModule = module;
 }
 
 /**
  * get boostrapped inner angular module
  */
-export function getAngularModule() {
+export function getAngularModule(): ng.IModule {
+  if (!angularModule) {
+    throw new Error('Discover angular module not yet available');
+  }
   return angularModule;
 }
 
@@ -40,7 +43,7 @@ export function getServices(): DiscoverServices {
   return services;
 }
 
-export function setServices(newServices: any) {
+export function setServices(newServices: DiscoverServices) {
   services = newServices;
 }
 
@@ -59,10 +62,17 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
 export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
   'DocViewsRegistry'
 );
+
 /**
  * Makes sure discover and context are using one instance of history.
  */
-export const getHistory = _.once(() => createHashHistory());
+export const getHistory = _.once(() => {
+  const history = createHashHistory();
+  history.listen(() => {
+    // keep at least one listener so that `history.location` always in sync
+  });
+  return history;
+});
 
 /**
  * Discover currently uses two `history` instances: one from Kibana Platform and
@@ -81,7 +91,7 @@ export const [getScopedHistory, setScopedHistory] = createGetterSetter<ScopedHis
   'scopedHistory'
 );
 
-export const { getRequestInspectorStats, getResponseInspectorStats, tabifyAggResponse } = search;
+export const { tabifyAggResponse } = search;
 export { unhashUrl, redirectWhenMissing } from '../../kibana_utils/public';
 export { formatMsg, formatStack, subscribeWithScope } from '../../kibana_legacy/public';
 

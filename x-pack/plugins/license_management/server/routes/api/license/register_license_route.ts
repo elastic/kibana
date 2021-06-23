@@ -10,7 +10,11 @@ import { putLicense } from '../../../lib/license';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
 
-export function registerLicenseRoute({ router, plugins: { licensing } }: RouteDependencies) {
+export function registerLicenseRoute({
+  router,
+  lib: { handleEsError },
+  plugins: { licensing },
+}: RouteDependencies) {
   router.put(
     {
       path: addBasePath(''),
@@ -22,18 +26,18 @@ export function registerLicenseRoute({ router, plugins: { licensing } }: RouteDe
       },
     },
     async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
+      const { client } = ctx.core.elasticsearch;
       try {
         return res.ok({
           body: await putLicense({
             acknowledge: Boolean(req.query.acknowledge),
-            callAsCurrentUser,
+            client,
             licensing,
             license: req.body,
           }),
         });
-      } catch (e) {
-        return res.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response: res });
       }
     }
   );

@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ENGINES_PAGE_SIZE } from '../../../common/constants';
 import { RouteDependencies } from '../../plugin';
 
 interface EnginesResponse {
@@ -25,20 +24,14 @@ export function registerEnginesRoutes({
       validate: {
         query: schema.object({
           type: schema.oneOf([schema.literal('indexed'), schema.literal('meta')]),
-          pageIndex: schema.number(),
+          'page[current]': schema.number(),
+          'page[size]': schema.number(),
         }),
       },
     },
     async (context, request, response) => {
-      const { type, pageIndex } = request.query;
-
       return enterpriseSearchRequestHandler.createRequest({
         path: '/as/engines/collection',
-        params: {
-          type,
-          'page[current]': pageIndex,
-          'page[size]': ENGINES_PAGE_SIZE,
-        },
         hasValidData: (body?: EnginesResponse) =>
           Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number',
       })(context, request, response);
@@ -52,6 +45,8 @@ export function registerEnginesRoutes({
         body: schema.object({
           name: schema.string(),
           language: schema.maybe(schema.string()),
+          source_engines: schema.maybe(schema.arrayOf(schema.string())),
+          type: schema.maybe(schema.string()),
         }),
       },
     },
@@ -72,6 +67,19 @@ export function registerEnginesRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:name/details',
+    })
+  );
+  router.delete(
+    {
+      path: '/api/app_search/engines/{name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name',
     })
   );
   router.get(

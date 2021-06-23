@@ -6,21 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { AppWrapper, AppContainer } from './app_containers';
+import { AppWrapper } from './app_containers';
 
 describe('AppWrapper', () => {
   it('toggles the `hidden-chrome` class depending on the chrome visibility state', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
 
-    const component = mount(<AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>);
+    const component = mount(
+      <AppWrapper chromeVisible$={chromeVisible$} classes$={of([])}>
+        app-content
+      </AppWrapper>
+    );
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="app-wrapper"
+        class="kbnAppWrapper"
       >
         app-content
       </div>
@@ -30,7 +34,7 @@ describe('AppWrapper', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="app-wrapper hidden-chrome"
+        class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
       >
         app-content
       </div>
@@ -40,22 +44,25 @@ describe('AppWrapper', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="app-wrapper"
+        class="kbnAppWrapper"
       >
         app-content
       </div>
     `);
   });
-});
 
-describe('AppContainer', () => {
   it('adds classes supplied by chrome', () => {
+    const chromeVisible$ = new BehaviorSubject<boolean>(true);
     const appClasses$ = new BehaviorSubject<string[]>([]);
 
-    const component = mount(<AppContainer classes$={appClasses$}>app-content</AppContainer>);
+    const component = mount(
+      <AppWrapper chromeVisible$={chromeVisible$} classes$={appClasses$}>
+        app-content
+      </AppWrapper>
+    );
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="application"
+        class="kbnAppWrapper"
       >
         app-content
       </div>
@@ -65,7 +72,7 @@ describe('AppContainer', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="application classA classB"
+        class="kbnAppWrapper classA classB"
       >
         app-content
       </div>
@@ -75,7 +82,7 @@ describe('AppContainer', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="application classC"
+        class="kbnAppWrapper classC"
       >
         app-content
       </div>
@@ -85,7 +92,7 @@ describe('AppContainer', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="application"
+        class="kbnAppWrapper"
       >
         app-content
       </div>

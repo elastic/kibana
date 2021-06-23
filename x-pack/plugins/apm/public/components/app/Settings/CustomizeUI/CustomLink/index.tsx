@@ -8,10 +8,9 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
   EuiTitle,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -20,7 +19,7 @@ import { INVALID_LICENSE } from '../../../../../../common/custom_link';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../../../context/license/use_license_context';
-import { LicensePrompt } from '../../../../shared/LicensePrompt';
+import { LicensePrompt } from '../../../../shared/license_prompt';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 import { CreateEditCustomLinkFlyout } from './CreateEditCustomLinkFlyout';
 import { CustomLinkTable } from './CustomLinkTable';
@@ -35,7 +34,7 @@ export function CustomLinkOverview() {
     CustomLink | undefined
   >();
 
-  const { data: customLinks = [], status, refetch } = useFetcher(
+  const { data, status, refetch } = useFetcher(
     async (callApmApi) => {
       if (hasValidLicense) {
         return callApmApi({
@@ -45,6 +44,8 @@ export function CustomLinkOverview() {
     },
     [hasValidLicense]
   );
+
+  const customLinks = data?.customLinks ?? [];
 
   useEffect(() => {
     if (customLinkSelected) {
@@ -81,62 +82,51 @@ export function CustomLinkOverview() {
           }}
         />
       )}
-      <EuiPanel>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
+
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.customizeUI.customLink.info', {
+          defaultMessage:
+            'These links will be shown in the Actions context menu in selected areas of the app, e.g. by the transactions detail.',
+        })}
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.apm.settings.customizeUI.customLink', {
+                defaultMessage: 'Custom Links',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {hasValidLicense && !showEmptyPrompt && (
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiTitle>
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <h2>
-                        {i18n.translate(
-                          'xpack.apm.settings.customizeUI.customLink',
-                          {
-                            defaultMessage: 'Custom Links',
-                          }
-                        )}
-                      </h2>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiTitle>
+                <CreateCustomLinkButton onClick={onCreateCustomLinkClick} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {hasValidLicense && !showEmptyPrompt && (
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <CreateCustomLinkButton onClick={onCreateCustomLinkClick} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <EuiText>
-          {i18n.translate('xpack.apm.settings.customizeUI.customLink.info', {
-            defaultMessage:
-              'These links will be shown in the Actions context menu for transactions.',
-          })}
-        </EuiText>
-        {hasValidLicense ? (
-          showEmptyPrompt ? (
-            <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
-          ) : (
-            <CustomLinkTable
-              items={customLinks}
-              onCustomLinkSelected={setCustomLinkSelected}
-            />
-          )
-        ) : (
-          <LicensePrompt text={INVALID_LICENSE} />
         )}
-      </EuiPanel>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      {hasValidLicense ? (
+        showEmptyPrompt ? (
+          <EmptyPrompt onCreateCustomLinkClick={onCreateCustomLinkClick} />
+        ) : (
+          <CustomLinkTable
+            items={customLinks}
+            onCustomLinkSelected={setCustomLinkSelected}
+          />
+        )
+      ) : (
+        <LicensePrompt text={INVALID_LICENSE} />
+      )}
     </>
   );
 }

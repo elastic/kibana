@@ -35,13 +35,14 @@ const createMigrator = (
 ) => {
   const mockMigrator: jest.Mocked<IKibanaMigrator> = {
     kibanaVersion: '8.0.0-testing',
-    savedObjectsConfig: {
+    soMigrationsConfig: {
       batchSize: 100,
       scrollDuration: '15m',
       pollInterval: 1500,
       skip: false,
-      // TODO migrationsV2: remove/deprecate once we release migrations v2
+      // TODO migrationsV2: remove/deprecate once we remove migrations v1
       enableV2: false,
+      retryAttempts: 10,
     },
     runMigrations: jest.fn(),
     getActiveMappings: jest.fn(),

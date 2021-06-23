@@ -60,6 +60,26 @@ export const isProcessStoppedOrTerminationEvent = (
 ): boolean => ['process_stopped', 'termination_event'].includes(`${eventAction}`.toLowerCase());
 
 export const showVia = (eventAction: string | null | undefined): boolean =>
-  ['file_create_event', 'created', 'creation', 'file_delete_event', 'deleted', 'deletion'].includes(
-    `${eventAction}`.toLowerCase()
-  );
+  [
+    'created',
+    'creation',
+    'deleted',
+    'deletion',
+    'file_create_event',
+    'file_delete_event',
+    'files-encrypted',
+    'load',
+    'modification',
+    'overwrite',
+    'rename',
+  ].includes(`${eventAction}`.toLowerCase());
+
+export const excludeFileNameAndPath = ({
+  eventAction,
+  eventCategory,
+  eventType,
+}: {
+  eventAction: string | null | undefined;
+  eventCategory: string | null | undefined;
+  eventType: string | null | undefined;
+}) => false;

@@ -6,9 +6,12 @@
  */
 
 import { IRouter } from 'kibana/server';
+
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { CloudSetup } from '../../cloud/server';
+
+import { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -21,6 +24,9 @@ export interface RouteDependencies {
   getLicenseStatus: () => LicenseStatus;
   config: {
     isCloudEnabled: boolean;
+  };
+  lib: {
+    handleEsError: typeof handleEsError;
   };
 }
 

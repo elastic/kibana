@@ -12,7 +12,6 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
     >
       <div
         class="euiPopover euiPopover--anchorDownLeft"
-        id="QuickSelectPopover"
       >
         <div
           class="euiPopover__anchor euiQuickSelectPopover__anchor"
@@ -28,6 +27,7 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
             >
               <span
                 class="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="arrowDown"
               />
               <span
@@ -78,6 +78,7 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
         >
           <span
             class="euiButtonContent__icon"
+            color="inherit"
             data-euiicon-type="refresh"
           />
           <span

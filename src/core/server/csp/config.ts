@@ -27,5 +27,8 @@ export const config = {
     }),
     strict: schema.boolean({ defaultValue: true }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
+    disableEmbedding: schema.oneOf([schema.literal<boolean>(false)], { defaultValue: false }),
   }),
 };
+
+export const FRAME_ANCESTORS_RULE = `frame-ancestors 'self'`; // only used by CspConfig when embedding is disabled

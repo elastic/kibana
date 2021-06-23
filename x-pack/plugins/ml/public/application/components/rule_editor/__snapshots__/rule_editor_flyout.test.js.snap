@@ -21,7 +21,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
           id="flyoutTitle"
         >
           <FormattedMessage
-            defaultMessage="Create rule"
+            defaultMessage="Create job rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
             values={Object {}}
           />
@@ -91,7 +91,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       <EuiText>
         <p>
           <FormattedMessage
-            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            defaultMessage="Job rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a job rule, you can specify conditions, scope, and actions. When the conditions of a job rule are satisfied, its actions are triggered. {learnMoreLink}"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
               Object {
@@ -151,7 +151,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
         disabled={true}
         id="enable_conditions_checkbox"
         indeterminate={false}
-        label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
+        label="Add numeric conditions for when the job rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
       <EuiSpacer
@@ -195,7 +195,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       >
         <p>
           <FormattedMessage
-            defaultMessage="Changes to rules take effect for new results only."
+            defaultMessage="Changes to job rules take effect for new results only."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
             values={Object {}}
           />
@@ -266,7 +266,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
           id="flyoutTitle"
         >
           <FormattedMessage
-            defaultMessage="Edit rule"
+            defaultMessage="Edit job rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
             values={Object {}}
           />
@@ -350,7 +350,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       <EuiText>
         <p>
           <FormattedMessage
-            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            defaultMessage="Job rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a job rule, you can specify conditions, scope, and actions. When the conditions of a job rule are satisfied, its actions are triggered. {learnMoreLink}"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
               Object {
@@ -410,7 +410,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
         disabled={true}
         id="enable_conditions_checkbox"
         indeterminate={false}
-        label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
+        label="Add numeric conditions for when the job rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
       <EuiSpacer
@@ -454,7 +454,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       >
         <p>
           <FormattedMessage
-            defaultMessage="Changes to rules take effect for new results only."
+            defaultMessage="Changes to job rules take effect for new results only."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
             values={Object {}}
           />
@@ -525,7 +525,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
           id="flyoutTitle"
         >
           <FormattedMessage
-            defaultMessage="Create rule"
+            defaultMessage="Create job rule"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
             values={Object {}}
           />
@@ -595,7 +595,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       <EuiText>
         <p>
           <FormattedMessage
-            defaultMessage="Rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are satisfied, its actions are triggered. {learnMoreLink}"
+            defaultMessage="Job rules instruct anomaly detectors to change their behavior based on domain-specific knowledge that you provide. When you create a job rule, you can specify conditions, scope, and actions. When the conditions of a job rule are satisfied, its actions are triggered. {learnMoreLink}"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
             values={
               Object {
@@ -655,7 +655,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
         disabled={true}
         id="enable_conditions_checkbox"
         indeterminate={false}
-        label="Add numeric conditions for when the rule applies. Multiple conditions are combined using AND."
+        label="Add numeric conditions for when the job rule applies. Multiple conditions are combined using AND."
         onChange={[Function]}
       />
       <EuiSpacer
@@ -691,7 +691,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       >
         <p>
           <FormattedMessage
-            defaultMessage="Changes to rules take effect for new results only."
+            defaultMessage="Changes to job rules take effect for new results only."
             id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
             values={Object {}}
           />
@@ -762,7 +762,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
           id="flyoutTitle"
         >
           <FormattedMessage
-            defaultMessage="Edit rules"
+            defaultMessage="Edit job rules"
             id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
             values={Object {}}
           />

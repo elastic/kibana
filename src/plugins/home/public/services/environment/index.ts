@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { EnvironmentService, Environment, EnvironmentServiceSetup } from './environment';
+export { EnvironmentService } from './environment';
+export type { Environment, EnvironmentServiceSetup } from './environment';

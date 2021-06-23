@@ -36,22 +36,20 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
         try {
-          const indexExists = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-            'indices.exists',
-            { index }
-          );
+          const {
+            body: indexExists,
+          } = await context.core.elasticsearch.client.asCurrentUser.indices.exists({
+            index,
+          });
           if (!indexExists) {
             sampleDataset.status = NOT_INSTALLED;
             return;
           }
 
-          const { count } = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-            'count',
-            {
-              index,
-            }
-          );
-          if (count === 0) {
+          const { body: count } = await context.core.elasticsearch.client.asCurrentUser.count({
+            index,
+          });
+          if (count.count === 0) {
             sampleDataset.status = NOT_INSTALLED;
             return;
           }

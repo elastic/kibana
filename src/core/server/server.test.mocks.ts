@@ -58,7 +58,7 @@ jest.doMock('./ui_settings/ui_settings_service', () => ({
 }));
 
 export const mockEnsureValidConfiguration = jest.fn();
-jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
+jest.doMock('./config/ensure_valid_configuration', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 

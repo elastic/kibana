@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export interface PercentileHdrProps {
   value: number | undefined;
-  onChange: () => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const PercentileHdr = ({ value, onChange }: PercentileHdrProps) => (

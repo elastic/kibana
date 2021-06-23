@@ -11,4 +11,7 @@ import { IFieldType } from '../../../../../../plugins/data/public';
 export interface IndexedFieldItem extends IFieldType {
   info: string[];
   excluded: boolean;
+  kbnType: string;
+  isMapped: boolean;
+  hasRuntime: boolean;
 }

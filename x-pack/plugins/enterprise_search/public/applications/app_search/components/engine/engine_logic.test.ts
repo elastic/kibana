@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
+
+import { ApiTokenTypes } from '../credentials/constants';
+
+import { EngineTypes } from './types';
 
 import { EngineLogic } from './';
 
@@ -17,7 +21,7 @@ describe('EngineLogic', () => {
 
   const mockEngineData = {
     name: 'some-engine',
-    type: 'default',
+    type: EngineTypes.default,
     created_at: 'some date timestamp',
     language: null,
     document_count: 1,
@@ -41,9 +45,11 @@ describe('EngineLogic', () => {
     engineName: '',
     isMetaEngine: false,
     isSampleEngine: false,
+    hasSchemaErrors: false,
     hasSchemaConflicts: false,
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
+    searchKey: '',
   };
 
   beforeEach(() => {
@@ -80,28 +86,6 @@ describe('EngineLogic', () => {
           expect(EngineLogic.values).toEqual({
             ...DEFAULT_VALUES,
             engineName: 'some-new-engine',
-          });
-        });
-      });
-    });
-
-    describe('setIndexingStatus', () => {
-      describe('engine', () => {
-        it('should set the nested obj property to the provided value', () => {
-          mount({ engine: mockEngineData });
-          const mockReindexJob = {
-            percentageComplete: 50,
-            numDocumentsWithErrors: 2,
-            activeReindexJobId: '123',
-          };
-          EngineLogic.actions.setIndexingStatus(mockReindexJob);
-
-          expect(EngineLogic.values).toEqual({
-            ...DEFAULT_VALUES,
-            engine: {
-              ...mockEngineData,
-              activeReindexJob: mockReindexJob,
-            },
           });
         });
       });
@@ -170,7 +154,9 @@ describe('EngineLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('initializeEngine', () => {
       it('fetches and sets engine data', async () => {
         mount({ engineName: 'some-engine' });
@@ -213,13 +199,31 @@ describe('EngineLogic', () => {
 
     describe('isMetaEngine', () => {
       it('should be set based on engine.type', () => {
-        const mockMetaEngine = { ...mockEngineData, type: 'meta' };
+        const mockMetaEngine = { ...mockEngineData, type: EngineTypes.meta };
         mount({ engine: mockMetaEngine });
 
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES,
           engine: mockMetaEngine,
           isMetaEngine: true,
+        });
+      });
+    });
+
+    describe('hasSchemaErrors', () => {
+      it('should be set based on engine.activeReindexJob.numDocumentsWithErrors', () => {
+        const mockSchemaEngine = {
+          ...mockEngineData,
+          activeReindexJob: {
+            numDocumentsWithErrors: 10,
+          },
+        };
+        mount({ engine: mockSchemaEngine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          engine: mockSchemaEngine,
+          hasSchemaErrors: true,
         });
       });
     });
@@ -259,6 +263,58 @@ describe('EngineLogic', () => {
           ...DEFAULT_VALUES,
           engine: mockUnconfirmedFieldsEngine,
           hasUnconfirmedSchemaFields: true,
+        });
+      });
+    });
+
+    describe('searchKey', () => {
+      it('should select the first available search key for this engine', () => {
+        const engine = {
+          ...mockEngineData,
+          apiTokens: [
+            {
+              key: 'private-123xyz',
+              name: 'privateKey',
+              type: ApiTokenTypes.Private,
+            },
+            {
+              key: 'search-123xyz',
+              name: 'searchKey',
+              type: ApiTokenTypes.Search,
+            },
+            {
+              key: 'search-8910abc',
+              name: 'searchKey2',
+              type: ApiTokenTypes.Search,
+            },
+          ],
+        };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          engine,
+          searchKey: 'search-123xyz',
+        });
+      });
+
+      it('should return an empty string if none are available', () => {
+        const engine = {
+          ...mockEngineData,
+          apiTokens: [
+            {
+              key: 'private-123xyz',
+              name: 'privateKey',
+              type: ApiTokenTypes.Private,
+            },
+          ],
+        };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          engine,
+          searchKey: '',
         });
       });
     });

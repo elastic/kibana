@@ -11,7 +11,6 @@ let loadModulesPromise: Promise<LazyLoadedMapsLegacyModules>;
 interface LazyLoadedMapsLegacyModules {
   KibanaMap: unknown;
   L: unknown;
-  ServiceSettings: unknown;
 }
 
 export async function lazyLoadMapsLegacyModules(): Promise<LazyLoadedMapsLegacyModules> {
@@ -20,12 +19,11 @@ export async function lazyLoadMapsLegacyModules(): Promise<LazyLoadedMapsLegacyM
   }
 
   loadModulesPromise = new Promise(async (resolve) => {
-    const { KibanaMap, L, ServiceSettings } = await import('./lazy');
+    const { KibanaMap, L } = await import('./lazy');
 
     resolve({
       KibanaMap,
       L,
-      ServiceSettings,
     });
   });
   return loadModulesPromise;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchQuery } from 'src/core/public';
+import type { HttpFetchQuery } from 'src/core/public';
 
 export interface ListWithKuery extends HttpFetchQuery {
   page?: number;
@@ -13,4 +13,11 @@ export interface ListWithKuery extends HttpFetchQuery {
   sortField?: string;
   sortOrder?: 'desc' | 'asc';
   kuery?: string;
+}
+
+export interface ListResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  perPage: number;
 }

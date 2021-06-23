@@ -6,7 +6,6 @@
  */
 
 import './dimension_editor.scss';
-import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -35,19 +34,30 @@ import { FieldSelect } from './field_select';
 import { hasField } from '../utils';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { VisualizationDimensionGroupConfig } from '../../types';
+import { IndexPatternDimensionEditorProps } from './dimension_panel';
 
 const operationPanels = getOperationDisplay();
 
 export interface ReferenceEditorProps {
   layer: IndexPatternLayer;
-  selectionStyle: 'full' | 'field';
+  layerId: string;
+  activeData?: IndexPatternDimensionEditorProps['activeData'];
+  selectionStyle: 'full' | 'field' | 'hidden';
   validation: RequiredReference;
   columnId: string;
-  updateLayer: (newLayer: IndexPatternLayer) => void;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
   currentIndexPattern: IndexPattern;
+
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
   labelAppend?: EuiFormRowProps['labelAppend'];
+  dimensionGroups: VisualizationDimensionGroupConfig[];
+  isFullscreen: boolean;
+  toggleFullscreen: () => void;
+  setIsCloseable: (isCloseable: boolean) => void;
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -60,6 +70,8 @@ export interface ReferenceEditorProps {
 export function ReferenceEditor(props: ReferenceEditorProps) {
   const {
     layer,
+    layerId,
+    activeData,
     columnId,
     updateLayer,
     currentIndexPattern,
@@ -68,6 +80,10 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     selectionStyle,
     dateRange,
     labelAppend,
+    dimensionGroups,
+    isFullscreen,
+    toggleFullscreen,
+    setIsCloseable,
     ...services
   } = props;
 
@@ -89,6 +105,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     const operationByField: Partial<Record<string, Set<OperationType>>> = {};
     const fieldByOperation: Partial<Record<OperationType, Set<string>>> = {};
     Object.values(operationDefinitionMap)
+      .filter(({ hidden }) => !hidden)
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
@@ -168,6 +185,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
           op: operationType,
           indexPattern: currentIndexPattern,
           field: currentIndexPattern.getFieldByName(column.sourceField),
+          visualizationGroups: dimensionGroups,
         })
       );
     } else {
@@ -185,11 +203,16 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
           op: operationType,
           indexPattern: currentIndexPattern,
           field: possibleField,
+          visualizationGroups: dimensionGroups,
         })
       );
     }
     trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
     return;
+  }
+
+  if (selectionStyle === 'hidden') {
+    return null;
   }
 
   const selectedOption = incompleteOperation
@@ -257,7 +280,11 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                 onChange={(choices) => {
                   if (choices.length === 0) {
                     updateLayer(
-                      deleteColumn({ layer, columnId, indexPattern: currentIndexPattern })
+                      deleteColumn({
+                        layer,
+                        columnId,
+                        indexPattern: currentIndexPattern,
+                      })
                     );
                     return;
                   }
@@ -298,7 +325,13 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               incompleteOperation={incompleteOperation}
               markAllFieldsCompatible={selectionStyle === 'field'}
               onDeleteColumn={() => {
-                updateLayer(deleteColumn({ layer, columnId, indexPattern: currentIndexPattern }));
+                updateLayer(
+                  deleteColumn({
+                    layer,
+                    columnId,
+                    indexPattern: currentIndexPattern,
+                  })
+                );
               }}
               onChoose={(choice) => {
                 updateLayer(
@@ -308,6 +341,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                     indexPattern: currentIndexPattern,
                     op: choice.operationType,
                     field: currentIndexPattern.getFieldByName(choice.field),
+                    visualizationGroups: dimensionGroups,
                   })
                 );
               }}
@@ -321,9 +355,15 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               updateLayer={updateLayer}
               currentColumn={column}
               layer={layer}
+              layerId={layerId}
+              activeData={activeData}
               columnId={columnId}
               indexPattern={currentIndexPattern}
               dateRange={dateRange}
+              operationDefinitionMap={operationDefinitionMap}
+              isFullscreen={isFullscreen}
+              toggleFullscreen={toggleFullscreen}
+              setIsCloseable={setIsCloseable}
               {...services}
             />
           </>

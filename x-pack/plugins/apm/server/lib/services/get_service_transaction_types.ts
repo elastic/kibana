@@ -9,7 +9,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -44,7 +44,7 @@ export async function getServiceTransactionTypes({
               searchAggregatedTransactions
             ),
             { term: { [SERVICE_NAME]: serviceName } },
-            { range: rangeFilter(start, end) },
+            ...rangeQuery(start, end),
           ],
         },
       },
@@ -56,7 +56,10 @@ export async function getServiceTransactionTypes({
     },
   };
 
-  const { aggregations } = await apmEventClient.search(params);
+  const { aggregations } = await apmEventClient.search(
+    'get_service_transaction_types',
+    params
+  );
   const transactionTypes =
     aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
   return { transactionTypes };

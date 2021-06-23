@@ -28,6 +28,18 @@ describe('VisualizationContainer', () => {
     expect(reportingEl.prop('data-shared-item')).toBeTruthy();
   });
 
+  test('increments counter in data attribute for each render', () => {
+    const component = mount(<VisualizationContainer isReady={true}>Hello!</VisualizationContainer>);
+
+    let reportingEl = component.find('[data-shared-item]').first();
+    expect(reportingEl.prop('data-rendering-count')).toEqual(1);
+
+    component.setProps({ children: 'Hello2!' });
+
+    reportingEl = component.find('[data-shared-item]').first();
+    expect(reportingEl.prop('data-rendering-count')).toEqual(2);
+  });
+
   test('renders child content', () => {
     const component = mount(
       <VisualizationContainer isReady={false}>Hello!</VisualizationContainer>

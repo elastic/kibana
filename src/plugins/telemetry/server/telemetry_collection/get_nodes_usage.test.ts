@@ -40,7 +40,7 @@ describe('get_nodes_usage', () => {
     const response = Promise.resolve({ body: mockedNodesFetchResponse });
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     esClient.nodes.usage.mockImplementationOnce(
-      // @ts-ignore
+      // @ts-expect-error
       async (_params = { timeout: TIMEOUT }) => {
         return response;
       }

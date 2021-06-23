@@ -51,10 +51,10 @@ export class SavedObjectsUtils {
   /**
    * Creates an empty response for a find operation. This is only intended to be used by saved objects client wrappers.
    */
-  public static createEmptyFindResponse = <T>({
+  public static createEmptyFindResponse = <T, A>({
     page = FIND_DEFAULT_PAGE,
     perPage = FIND_DEFAULT_PER_PAGE,
-  }: SavedObjectsFindOptions): SavedObjectsFindResponse<T> => ({
+  }: SavedObjectsFindOptions): SavedObjectsFindResponse<T, A> => ({
     page,
     per_page: perPage,
     total: 0,

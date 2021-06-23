@@ -60,7 +60,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           display="inlineBlock"
           hasArrow={true}
           isOpen={false}
-          ownFocus={false}
+          ownFocus={true}
           panelPaddingSize="m"
         >
           <EuiFormRow
@@ -276,7 +276,7 @@ exports[`Table should render normally 1`] = `
           display="inlineBlock"
           hasArrow={true}
           isOpen={false}
-          ownFocus={false}
+          ownFocus={true}
           panelPaddingSize="m"
         >
           <EuiFormRow

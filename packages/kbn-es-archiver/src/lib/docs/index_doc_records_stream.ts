@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 export function createIndexDocRecordsStream(
-  client: Client,
+  client: KibanaClient,
   stats: Stats,
   progress: Progress,
   useCreate: boolean = false
@@ -23,27 +24,32 @@ export function createIndexDocRecordsStream(
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
 
-    await client.helpers.bulk({
-      retries: 5,
-      datasource: docs.map((doc) => {
-        const body = doc.source;
-        ops.set(body, {
-          [operation]: {
-            _index: doc.index,
-            _id: doc.id,
-          },
-        });
-        return body;
-      }),
-      onDocument(doc) {
-        return ops.get(doc);
+    await client.helpers.bulk(
+      {
+        retries: 5,
+        datasource: docs.map((doc) => {
+          const body = doc.source;
+          ops.set(body, {
+            [operation]: {
+              _index: doc.index,
+              _id: doc.id,
+            },
+          });
+          return body;
+        }),
+        onDocument(doc) {
+          return ops.get(doc);
+        },
+        onDrop(dropped) {
+          const dj = JSON.stringify(dropped.document);
+          const ej = JSON.stringify(dropped.error);
+          errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
+        },
       },
-      onDrop(dropped) {
-        const dj = JSON.stringify(dropped.document);
-        const ej = JSON.stringify(dropped.error);
-        errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
-      },
-    });
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
 
     if (errors.length) {
       throw new AggregateError(errors);

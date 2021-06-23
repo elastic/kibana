@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component, Fragment } from 'react';
-import { NotificationsStart } from 'src/core/public';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { SpacesManager } from '../../spaces_manager';
+import type { NotificationsStart } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 
 interface Props {
@@ -92,44 +95,13 @@ export class DeleteSpacesButton extends Component<Props, State> {
             showConfirmDeleteModal: false,
           });
         }}
-        onConfirm={this.deleteSpaces}
+        onSuccess={() => {
+          this.setState({
+            showConfirmDeleteModal: false,
+          });
+          this.props.onDelete?.();
+        }}
       />
     );
-  };
-
-  public deleteSpaces = async () => {
-    const { spacesManager, space } = this.props;
-
-    this.setState({
-      showConfirmDeleteModal: false,
-    });
-
-    try {
-      await spacesManager.deleteSpace(space);
-    } catch (error) {
-      const { message: errorMessage = '' } = error.data || error.body || {};
-
-      this.props.notifications.toasts.addDanger(
-        i18n.translate('xpack.spaces.management.deleteSpacesButton.deleteSpaceErrorTitle', {
-          defaultMessage: 'Error deleting space: {errorMessage}',
-          values: { errorMessage },
-        })
-      );
-      return;
-    }
-
-    const message = i18n.translate(
-      'xpack.spaces.management.deleteSpacesButton.spaceSuccessfullyDeletedNotificationMessage',
-      {
-        defaultMessage: 'Deleted {spaceName} space.',
-        values: { spaceName: space.name },
-      }
-    );
-
-    this.props.notifications.toasts.addSuccess(message);
-
-    if (this.props.onDelete) {
-      this.props.onDelete();
-    }
   };
 }

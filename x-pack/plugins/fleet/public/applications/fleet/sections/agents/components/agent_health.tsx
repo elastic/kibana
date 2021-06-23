@@ -8,7 +8,8 @@
 import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import { Agent } from '../../../types';
+
+import type { Agent } from '../../../types';
 
 interface Props {
   agent: Agent;
@@ -81,9 +82,6 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent }) => {
                 lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
               }}
             />
-            {agent.current_error_events.map((event, idx) => (
-              <p key={idx}>{event.message}</p>
-            ))}
           </>
         ) : (
           <FormattedMessage

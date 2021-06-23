@@ -8,7 +8,7 @@
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
 import type { ListsApiRequestHandlerContext } from '../../lists/server';
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerts/server';
+import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 
 import { AppClient } from './client';
 

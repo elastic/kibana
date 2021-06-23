@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  AggregationOptionsByType,
-  AggregationInputMap,
-  ESSearchBody,
-} from '../../../../typings/elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../src/core/types/elasticsearch';
 import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
 export type Projection = Omit<APMEventESSearchRequest, 'body'> & {
-  body: Omit<ESSearchBody, 'aggs'> & {
+  body: Omit<
+    Required<APMEventESSearchRequest>['body'],
+    'aggs' | 'aggregations'
+  > & {
     aggs?: {
       [key: string]: {
         terms: AggregationOptionsByType['terms'] & { field: string };
-        aggs?: AggregationInputMap;
+        aggs?: Record<string, estypes.AggregationsAggregationContainer>;
       };
     };
   };

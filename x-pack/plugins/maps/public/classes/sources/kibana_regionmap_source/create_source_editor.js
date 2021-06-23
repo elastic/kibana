@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiPanel } from '@elastic/eui';
-import { getKibanaRegionList } from '../../../meta';
+import { getKibanaRegionList } from '../../../util';
 import { i18n } from '@kbn/i18n';
 
 export function CreateSourceEditor({ onSourceConfigChange }) {

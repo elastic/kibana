@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageContent,
@@ -39,7 +40,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
 
   const { esTransform } = useDocumentationLinks();
 
-  const { searchItems } = useSearchItems(match.params.savedObjectId);
+  const { error: searchItemsError, searchItems } = useSearchItems(match.params.savedObjectId);
 
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
@@ -71,6 +72,9 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
         </EuiTitle>
         <EuiPageContentBody>
           <EuiSpacer size="l" />
+          {searchItemsError !== undefined && (
+            <EuiCallOut title={searchItemsError} color="danger" iconType="alert" />
+          )}
           {searchItems !== undefined && <Wizard searchItems={searchItems} />}
         </EuiPageContentBody>
       </EuiPageContent>

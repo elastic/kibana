@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { isEqual, debounce } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -28,7 +28,6 @@ import { JobFilterBar } from '../job_filter_bar';
 import { EditJobFlyout } from '../edit_job_flyout';
 import { DeleteJobModal } from '../delete_job_modal';
 import { StartDatafeedModal } from '../start_datafeed_modal';
-import { CreateWatchFlyout } from '../create_watch_flyout';
 import { MultiJobActions } from '../multi_job_actions';
 import { NewJobButton } from '../new_job_button';
 import { JobStatsBar } from '../jobs_stats_bar';
@@ -40,8 +39,14 @@ import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
+import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 
 let deletingJobsRefreshTimeout = null;
+
+const filterJobsDebounce = debounce((jobsSummaryList, filterClauses, callback) => {
+  const ss = filterJobs(jobsSummaryList, filterClauses);
+  callback(ss);
+}, 500);
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsListView extends Component {
@@ -61,13 +66,12 @@ export class JobsListView extends Component {
       jobsAwaitingNodeCount: 0,
     };
 
-    this.spacesEnabled = props.spacesEnabled ?? false;
     this.updateFunctions = {};
 
     this.showEditJobFlyout = () => {};
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
-    this.showCreateWatchFlyout = () => {};
+    this.showCreateAlertFlyout = () => {};
     // work around to keep track of whether the component is mounted
     // used to block timeouts for results polling
     // which can run after unmounting
@@ -206,14 +210,14 @@ export class JobsListView extends Component {
     this.showStartDatafeedModal = () => {};
   };
 
-  setShowCreateWatchFlyoutFunction = (func) => {
-    this.showCreateWatchFlyout = func;
+  setShowCreateAlertFlyoutFunction = (func) => {
+    this.showCreateAlertFlyout = func;
   };
-  unsetShowCreateWatchFlyoutFunction = () => {
-    this.showCreateWatchFlyout = () => {};
+  unsetShowCreateAlertFlyoutFunction = () => {
+    this.showCreateAlertFlyout = () => {};
   };
-  getShowCreateWatchFlyoutFunction = () => {
-    return this.showCreateWatchFlyout;
+  getShowCreateAlertFlyoutFunction = () => {
+    return this.showCreateAlertFlyout;
   };
 
   selectJobChange = (selectedJobs) => {
@@ -222,7 +226,7 @@ export class JobsListView extends Component {
 
   refreshSelectedJobs() {
     const selectedJobsIds = this.state.selectedJobs.map((j) => j.id);
-    const filteredJobIds = this.state.filteredJobsSummaryList.map((j) => j.id);
+    const filteredJobIds = (this.state.filteredJobsSummaryList ?? []).map((j) => j.id);
 
     // refresh the jobs stored as selected
     // only select those which are also in the filtered list
@@ -233,9 +237,17 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
-  setFilters = (query) => {
-    const filterClauses = (query && query.ast && query.ast.clauses) || [];
-    const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+  setFilters = async (query) => {
+    if (query === null) {
+      this.setState(
+        { filteredJobsSummaryList: this.state.jobsSummaryList, filterClauses: [] },
+        () => {
+          this.refreshSelectedJobs();
+        }
+      );
+
+      return;
+    }
 
     this.props.onJobsViewStateUpdate(
       {
@@ -245,11 +257,30 @@ export class JobsListView extends Component {
       this._isFiltersSet === false
     );
 
-    this._isFiltersSet = true;
+    const filterClauses = (query && query.ast && query.ast.clauses) || [];
 
-    this.setState({ filteredJobsSummaryList, filterClauses }, () => {
-      this.refreshSelectedJobs();
-    });
+    if (filterClauses.length === 0) {
+      this.setState({ filteredJobsSummaryList: this.state.jobsSummaryList, filterClauses }, () => {
+        this.refreshSelectedJobs();
+      });
+      return;
+    }
+
+    if (this._isFiltersSet === true) {
+      filterJobsDebounce(this.state.jobsSummaryList, filterClauses, (jobsSummaryList) => {
+        this.setState({ filteredJobsSummaryList: jobsSummaryList, filterClauses }, () => {
+          this.refreshSelectedJobs();
+        });
+      });
+    } else {
+      // first use after page load, do not debounce.
+      const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+      this.setState({ filteredJobsSummaryList, filterClauses }, () => {
+        this.refreshSelectedJobs();
+      });
+    }
+
+    this._isFiltersSet = true;
   };
 
   onRefreshClick = () => {
@@ -269,10 +300,10 @@ export class JobsListView extends Component {
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
-        let spaces = {};
-        if (this.props.spacesEnabled && this.props.isManagementTable) {
+        let jobsSpaces = {};
+        if (this.props.spacesApi && this.props.isManagementTable) {
           const allSpaces = await ml.savedObjects.jobsSpaces();
-          spaces = allSpaces['anomaly-detector'];
+          jobsSpaces = allSpaces['anomaly-detector'];
         }
 
         let jobsAwaitingNodeCount = 0;
@@ -285,11 +316,11 @@ export class JobsListView extends Component {
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
           job.spaceIds =
-            this.props.spacesEnabled &&
+            this.props.spacesApi &&
             this.props.isManagementTable &&
-            spaces &&
-            spaces[job.id] !== undefined
-              ? spaces[job.id]
+            jobsSpaces &&
+            jobsSpaces[job.id] !== undefined
+              ? jobsSpaces[job.id]
               : [];
 
           if (job.awaitingNodeAssignment === true) {
@@ -410,7 +441,7 @@ export class JobsListView extends Component {
             loading={loading}
             isManagementTable={true}
             isMlEnabledInSpace={this.props.isMlEnabledInSpace}
-            spacesEnabled={this.props.spacesEnabled}
+            spacesApi={this.props.spacesApi}
             jobsViewState={this.props.jobsViewState}
             onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
             refreshJobs={() => this.refreshJobSummaryList(true)}
@@ -478,6 +509,7 @@ export class JobsListView extends Component {
                   allJobIds={jobIds}
                   showStartDatafeedModal={this.showStartDatafeedModal}
                   showDeleteJobModal={this.showDeleteJobModal}
+                  showCreateAlertFlyout={this.showCreateAlertFlyout}
                   refreshJobs={() => this.refreshJobSummaryList(true)}
                 />
                 <JobFilterBar
@@ -498,6 +530,7 @@ export class JobsListView extends Component {
                 jobsViewState={this.props.jobsViewState}
                 onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
                 selectedJobsCount={this.state.selectedJobs.length}
+                showCreateAlertFlyout={this.showCreateAlertFlyout}
                 loading={loading}
               />
               <EditJobFlyout
@@ -514,12 +547,13 @@ export class JobsListView extends Component {
               <StartDatafeedModal
                 setShowFunction={this.setShowStartDatafeedModalFunction}
                 unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-                getShowCreateWatchFlyoutFunction={this.getShowCreateWatchFlyoutFunction}
+                getShowCreateAlertFlyoutFunction={this.getShowCreateAlertFlyoutFunction}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
               />
-              <CreateWatchFlyout
-                setShowFunction={this.setShowCreateWatchFlyoutFunction}
-                unsetShowFunction={this.unsetShowCreateWatchFlyoutFunction}
+              <JobListMlAnomalyAlertFlyout
+                setShowFunction={this.setShowCreateAlertFlyoutFunction}
+                unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
+                onSave={this.onRefreshClick}
               />
             </div>
           </EuiPageContent>

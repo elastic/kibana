@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListItemSchema, SearchListItemArraySchema, Type } from '../../../common/schemas';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 import { transformElasticHitsToListItem } from './transform_elastic_to_list_item';
 
 export interface TransformElasticMSearchToListItemOptions {
-  response: SearchResponse<SearchEsListItemSchema>;
+  response: estypes.SearchResponse<SearchEsListItemSchema>;
   type: Type;
   value: unknown[];
 }

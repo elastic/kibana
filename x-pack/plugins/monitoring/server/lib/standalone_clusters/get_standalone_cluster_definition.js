@@ -18,5 +18,15 @@ export const getStandaloneClusterDefinition = () => {
         count: {},
       },
     },
+    elasticsearch: {
+      cluster: {
+        stats: {
+          nodes: {
+            jvm: {},
+            count: {},
+          },
+        },
+      },
+    },
   };
 };

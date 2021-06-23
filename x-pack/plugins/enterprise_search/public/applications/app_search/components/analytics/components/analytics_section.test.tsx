@@ -9,6 +9,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiIcon } from '@elastic/eui';
+
 import { AnalyticsSection } from './';
 
 describe('AnalyticsSection', () => {
@@ -22,5 +24,13 @@ describe('AnalyticsSection', () => {
     expect(wrapper.find('h2').text()).toEqual('Lorem ipsum');
     expect(wrapper.find('p').text()).toEqual('Dolor sit amet.');
     expect(wrapper.find('[data-test-subj="HelloWorld"]')).toHaveLength(1);
+  });
+
+  it('renders an optional icon', () => {
+    const wrapper = shallow(
+      <AnalyticsSection title="Lorem ipsum" subtitle="Dolor sit amet." iconType="eye" />
+    );
+
+    expect(wrapper.find(EuiIcon).prop('type')).toEqual('eye');
   });
 });

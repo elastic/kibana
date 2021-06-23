@@ -7,7 +7,8 @@
 
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import { Agent } from '../types';
+
+import type { Agent } from '../types';
 
 export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {
   let agentVersion: string;
@@ -16,13 +17,19 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string) {
   } else {
     return false;
   }
-  if (agent.unenrollment_started_at || agent.unenrolled_at) return false;
-  if (!agent.local_metadata.elastic.agent.upgradeable) return false;
+  if (agent.unenrollment_started_at || agent.unenrolled_at) {
+    return false;
+  }
+  if (!agent.local_metadata.elastic.agent.upgradeable) {
+    return false;
+  }
 
   // make sure versions are only the number before comparison
   const agentVersionNumber = semverCoerce(agentVersion);
   if (!agentVersionNumber) throw new Error('agent version is invalid');
   const kibanaVersionNumber = semverCoerce(kibanaVersion);
   if (!kibanaVersionNumber) throw new Error('kibana version is invalid');
-  return semverLt(agentVersionNumber, kibanaVersionNumber);
+  const isAgentLessThanKibana = semverLt(agentVersionNumber, kibanaVersionNumber);
+
+  return isAgentLessThanKibana;
 }

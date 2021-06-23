@@ -102,6 +102,7 @@ export const getHistogramVisTypeDefinition = (
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
+          circlesRadius: 3,
         },
       ],
       radiusRatio: 0,
@@ -137,7 +138,7 @@ export const getHistogramVisTypeDefinition = (
           defaultMessage: 'Y-axis',
         }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchFeatureConfig } from '../../../features/server';
+import type { ElasticsearchFeatureConfig } from '../../../features/server';
 
 const userManagementFeature: ElasticsearchFeatureConfig = {
   id: 'users',

@@ -7,7 +7,7 @@
 
 import { Setup } from '../../helpers/setup_request';
 
-export async function deleteCustomLink({
+export function deleteCustomLink({
   customLinkId,
   setup,
 }: {
@@ -22,5 +22,5 @@ export async function deleteCustomLink({
     id: customLinkId,
   };
 
-  return internalClient.delete(params);
+  return internalClient.delete('delete_custom_link', params);
 }

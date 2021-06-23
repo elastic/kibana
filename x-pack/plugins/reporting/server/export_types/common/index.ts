@@ -12,7 +12,6 @@ export { omitBlockedHeaders } from './omit_blocked_headers';
 export { validateUrls } from './validate_urls';
 
 export interface TimeRangeParams {
-  timezone: string;
   min?: Date | string | number | null;
   max?: Date | string | number | null;
 }

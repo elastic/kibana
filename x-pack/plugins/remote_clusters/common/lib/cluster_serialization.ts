@@ -8,13 +8,17 @@
 import { PROXY_MODE } from '../constants';
 
 // Values returned from ES GET /_remote/info
+/**
+ * TODO: This interface needs to be updated with values from {@link RemoteInfo} provided
+ * by the @elastic/elasticsearch client
+ */
 export interface ClusterInfoEs {
   seeds?: string[];
   mode?: 'proxy' | 'sniff';
   connected?: boolean;
   num_nodes_connected?: number;
-  max_connections_per_cluster?: number;
-  initial_connect_timeout?: string;
+  max_connections_per_cluster?: string | number;
+  initial_connect_timeout: string | number;
   skip_unavailable?: boolean;
   transport?: {
     ping_schedule?: string;
@@ -39,13 +43,13 @@ export interface Cluster {
   transportPingSchedule?: string;
   transportCompress?: boolean;
   connectedNodesCount?: number;
-  maxConnectionsPerCluster?: number;
-  initialConnectTimeout?: string;
+  maxConnectionsPerCluster?: string | number;
+  initialConnectTimeout?: string | number;
   connectedSocketsCount?: number;
   hasDeprecatedProxySetting?: boolean;
 }
 
-interface ClusterPayloadEs {
+export interface ClusterPayloadEs {
   skip_unavailable?: boolean | null;
   mode?: 'sniff' | 'proxy' | null;
   proxy_address?: string | null;

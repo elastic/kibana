@@ -20,6 +20,7 @@ const symlink = promisify(fs.symlink);
 export const chmod = promisify(fs.chmod);
 const cmdShim = promisify<string, string>(cmdShimCb);
 const mkdir = promisify(fs.mkdir);
+const realpathNative = promisify(fs.realpath.native);
 export const mkdirp = async (path: string) => await mkdir(path, { recursive: true });
 export const rmdirp = async (path: string) => await del(path, { force: true });
 export const unlink = promisify(fs.unlink);
@@ -95,4 +96,18 @@ async function forceCreate(src: string, dest: string, type: string) {
   }
 
   await symlink(src, dest, type);
+}
+
+export async function tryRealpath(path: string): Promise<string> {
+  let calculatedPath = path;
+
+  try {
+    calculatedPath = await realpathNative(path);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  return calculatedPath;
 }

@@ -9,7 +9,7 @@ import React, { Fragment, FC, useContext, useState } from 'react';
 
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Aggregation, Field } from '../../../../../../../../../common/types/fields';
 import { MetricSelector } from './metric_selector';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
@@ -29,6 +29,7 @@ const emptyRichDetector: RichDetector = {
   excludeFrequent: null,
   description: null,
   customRules: null,
+  useNull: null,
 };
 
 export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
@@ -51,7 +52,8 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
         dtr.overField,
         dtr.partitionField,
         dtr.excludeFrequent,
-        dtr.description
+        dtr.description,
+        dtr.useNull
       );
     } else {
       jobCreator.editDetector(
@@ -62,7 +64,8 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
         dtr.partitionField,
         dtr.excludeFrequent,
         dtr.description,
-        index
+        index,
+        dtr.useNull
       );
     }
     jobCreatorUpdate();

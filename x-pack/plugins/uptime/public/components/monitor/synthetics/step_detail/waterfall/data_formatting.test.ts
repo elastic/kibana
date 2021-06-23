@@ -7,6 +7,7 @@
 import moment from 'moment';
 import {
   colourPalette,
+  formatTooltipHeading,
   getConnectingTime,
   getSeriesAndDomain,
   getSidebarItems,
@@ -30,7 +31,6 @@ export const networkItems: NetworkItems = [
     status: 200,
     mimeType: 'text/css',
     requestSentTime: 18098833.175,
-    requestStartTime: 18098835.439,
     loadEndTime: 18098957.145,
     timings: {
       connect: 81.10800000213203,
@@ -44,7 +44,8 @@ export const networkItems: NetworkItems = [
       ssl: 55.38700000033714,
       dns: 3.559999997378327,
     },
-    bytesDownloadedCompressed: 1000,
+    resourceSize: 1000,
+    transferSize: 1000,
     requestHeaders: {
       sample_request_header: 'sample request header',
     },
@@ -53,8 +54,8 @@ export const networkItems: NetworkItems = [
     },
     certificates: {
       issuer: 'Sample Issuer',
-      validFrom: 1578441600000,
-      validTo: 1617883200000,
+      validFrom: '2021-02-22T18:35:26.000Z',
+      validTo: '2021-04-05T22:28:43.000Z',
       subjectName: '*.elastic.co',
     },
     ip: '104.18.8.22',
@@ -66,7 +67,6 @@ export const networkItems: NetworkItems = [
     status: 200,
     mimeType: 'application/javascript',
     requestSentTime: 18098833.537,
-    requestStartTime: 18098837.233999997,
     loadEndTime: 18098977.648000002,
     timings: {
       blocked: 84.54599999822676,
@@ -152,7 +152,6 @@ export const networkItemsWithUncommonMimeType: NetworkItems = [
     status: 200,
     mimeType: 'application/x-javascript',
     requestSentTime: 18098833.537,
-    requestStartTime: 18098837.233999997,
     loadEndTime: 18098977.648000002,
     timings: {
       blocked: 84.54599999822676,
@@ -548,6 +547,10 @@ describe('getSeriesAndDomain', () => {
             "certificates": undefined,
             "details": Array [
               Object {
+                "name": "Status",
+                "value": undefined,
+              },
+              Object {
                 "name": "Content type",
                 "value": "text/javascript",
               },
@@ -576,7 +579,11 @@ describe('getSeriesAndDomain', () => {
                 "value": undefined,
               },
               Object {
-                "name": "Bytes downloaded (compressed)",
+                "name": "Resource size",
+                "value": undefined,
+              },
+              Object {
+                "name": "Transfer size",
                 "value": undefined,
               },
               Object {
@@ -643,6 +650,7 @@ describe('getSeriesAndDomain', () => {
   });
 
   it.each([
+    [FriendlyFlyoutLabels[Metadata.Status], '200'],
     [FriendlyFlyoutLabels[Metadata.MimeType], 'text/css'],
     [FriendlyFlyoutLabels[Metadata.RequestStart], '0.000 ms'],
     [FriendlyTimingLabels[Timings.Dns], '3.560 ms'],
@@ -650,7 +658,8 @@ describe('getSeriesAndDomain', () => {
     [FriendlyTimingLabels[Timings.Ssl], '55.387 ms'],
     [FriendlyTimingLabels[Timings.Wait], '34.578 ms'],
     [FriendlyTimingLabels[Timings.Receive], '0.552 ms'],
-    [FriendlyFlyoutLabels[Metadata.BytesDownloadedCompressed], '1.000 KB'],
+    [FriendlyFlyoutLabels[Metadata.TransferSize], '1.000 KB'],
+    [FriendlyFlyoutLabels[Metadata.ResourceSize], '1.000 KB'],
     [FriendlyFlyoutLabels[Metadata.IP], '104.18.8.22'],
   ])('handles metadata details formatting', (name, value) => {
     const { metadata } = getSeriesAndDomain(networkItems);
@@ -719,5 +728,15 @@ describe('getSidebarItems', () => {
   it('passes the item index offset by 1 to offsetIndex for visual display', () => {
     const actual = getSidebarItems(networkItems, false, '', []);
     expect(actual[0].offsetIndex).toBe(1);
+  });
+});
+
+describe('formatTooltipHeading', () => {
+  it('puts index and URL text together', () => {
+    expect(formatTooltipHeading(1, 'http://www.elastic.co/')).toEqual('1. http://www.elastic.co/');
+  });
+
+  it('returns only the text if `index` is NaN', () => {
+    expect(formatTooltipHeading(NaN, 'http://www.elastic.co/')).toEqual('http://www.elastic.co/');
   });
 });

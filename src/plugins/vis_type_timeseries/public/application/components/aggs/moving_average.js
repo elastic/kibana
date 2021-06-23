@@ -14,7 +14,7 @@ import { MetricSelect } from './metric_select';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createNumberHandler } from '../lib/create_number_handler';
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES, MODEL_TYPES } from '../../../../common/enums';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -26,7 +26,6 @@ import {
   EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MODEL_TYPES } from '../../../../common/model_options';
 
 const DEFAULTS = {
   model_type: MODEL_TYPES.UNWEIGHTED,
@@ -305,7 +304,7 @@ export const MovingAverageAgg = (props) => {
 MovingAverageAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
-  indexPattern: PropTypes.string,
+  indexPattern: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

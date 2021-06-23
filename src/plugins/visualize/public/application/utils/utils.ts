@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 
 import { ChromeStart, DocLinksStart } from 'kibana/public';
 import { Filter } from '../../../../data/public';
+import { redirectWhenMissing } from '../../../../kibana_utils/public';
+import { VisualizeConstants } from '../visualize_constants';
 import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
@@ -32,7 +34,7 @@ export const addBadgeToAppChrome = (chrome: ChromeStart) => {
       defaultMessage: 'Read only',
     }),
     tooltip: i18n.translate('visualize.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save visualizations',
+      defaultMessage: 'Unable to save visualizations to the library',
     }),
     iconType: 'glasses',
   });
@@ -57,4 +59,37 @@ export const visStateToEditorState = (
     vis: { ...savedVisState.visState, title: vis.title },
     linked: savedVis && savedVis.id ? !!savedVis.savedSearchId : !!savedVisState.savedSearchId,
   };
+};
+
+export const redirectToSavedObjectPage = (
+  services: VisualizeServices,
+  error: any,
+  savedVisualizationsId?: string
+) => {
+  const {
+    history,
+    setActiveUrl,
+    toastNotifications,
+    http: { basePath },
+    application: { navigateToApp },
+  } = services;
+  const managementRedirectTarget = {
+    app: 'management',
+    path: `kibana/objects/savedVisualizations/${savedVisualizationsId}`,
+  };
+  redirectWhenMissing({
+    history,
+    navigateToApp,
+    toastNotifications,
+    basePath,
+    mapping: {
+      visualization: VisualizeConstants.LANDING_PAGE_PATH,
+      search: managementRedirectTarget,
+      'index-pattern': managementRedirectTarget,
+      'index-pattern-field': managementRedirectTarget,
+    },
+    onBeforeRedirect() {
+      setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
+    },
+  })(error);
 };

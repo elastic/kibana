@@ -5,57 +5,18 @@
  * 2.0.
  */
 
-import { HostsData } from '../../../graphql/types';
+import { HostsEdges } from '../../../../common/search_strategy/security_solution/hosts';
 
-export const mockData: { Hosts: HostsData } = {
-  Hosts: {
-    totalCount: 4,
-    edges: [
-      {
-        node: {
-          _id: 'cPsuhGcB0WOhS6qyTKC0',
-          host: {
-            name: ['elrond.elstc.co'],
-            os: {
-              name: ['Ubuntu'],
-              version: ['18.04.1 LTS (Bionic Beaver)'],
-            },
-          },
-        },
-        cursor: {
-          value: '98966fa2013c396155c460d35c0902be',
-        },
+export const mockData: HostsEdges[] = [
+  {
+    node: {
+      _id: 'beats-ci-immutable-ubuntu-1804-1615475026535098510',
+      lastSeen: ['2021-03-11T15:05:36.783Z'],
+      host: {
+        name: ['beats-ci-immutable-ubuntu-1804-1615475026535098510'],
+        os: { name: ['Ubuntu'], version: ['18.04.5 LTS (Bionic Beaver)'] },
       },
-      {
-        node: {
-          _id: 'KwQDiWcB0WOhS6qyXmrW',
-          host: {
-            name: ['siem-kibana'],
-            os: {
-              name: ['Debian GNU/Linux'],
-              version: ['9 (stretch)'],
-            },
-          },
-          cloud: {
-            instance: {
-              id: ['423232333829362673777'],
-            },
-            machine: {
-              type: ['custom-4-16384'],
-            },
-            provider: ['gce'],
-            region: ['us-east-1'],
-          },
-        },
-        cursor: {
-          value: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-        },
-      },
-    ],
-    pageInfo: {
-      activePage: 1,
-      fakeTotalCount: 50,
-      showMorePagesIndicator: true,
     },
+    cursor: { value: 'beats-ci-immutable-ubuntu-1804-1615475026535098510', tiebreaker: null },
   },
-};
+];

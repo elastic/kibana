@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { EuiLink, EuiToolTip, EuiIcon } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
-import { Role, isRoleDeprecated, getExtendedRoleDeprecationNotice } from '../../../common/model';
+
+import type { ApplicationStart } from 'src/core/public';
+
+import type { Role } from '../../../common/model';
+import { getExtendedRoleDeprecationNotice, isRoleDeprecated } from '../../../common/model';
 
 interface Props {
   role: Role | string;

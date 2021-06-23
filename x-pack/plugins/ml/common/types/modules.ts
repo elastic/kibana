@@ -16,6 +16,7 @@ export interface ModuleJob {
 
 export interface ModuleDatafeed {
   id: string;
+  job_id: string;
   config: Omit<Datafeed, 'datafeed_id'>;
 }
 
@@ -48,13 +49,26 @@ export interface Module {
   title: string;
   description: string;
   type: string;
-  logoFile: string;
+  logoFile?: string;
+  logo?: Logo;
   defaultIndexPattern: string;
   query: any;
   jobs: ModuleJob[];
   datafeeds: ModuleDatafeed[];
   kibana: KibanaObjects;
 }
+
+export interface FileBasedModule extends Omit<Module, 'jobs' | 'datafeeds' | 'kibana'> {
+  jobs: Array<{ file: string; id: string }>;
+  datafeeds: Array<{ file: string; job_id: string; id: string }>;
+  kibana: {
+    search: Array<{ file: string; id: string }>;
+    visualization: Array<{ file: string; id: string }>;
+    dashboard: Array<{ file: string; id: string }>;
+  };
+}
+
+export type Logo = { icon: string } | null;
 
 export interface ResultItem {
   id: string;

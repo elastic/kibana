@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  Severity,
-  SeverityMappingOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Severity, SeverityMappingOrUndefined } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import { sampleDocSeverity } from '../__mocks__/es_results';
 import {
   buildSeverityFromMapping,
@@ -148,6 +146,7 @@ interface TestCase {
 
 function testIt({ fieldName, fieldValue, severityDefault, severityMapping, expected }: TestCase) {
   const result = buildSeverityFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: sampleDocSeverity(fieldValue, fieldName)._source,
     severity: severityDefault,
     severityMapping,

@@ -9,6 +9,7 @@ import { ApplicationStart } from 'kibana/public';
 import { NewPackagePolicy, PackagePolicy } from '../../../../fleet/common';
 import { ManifestSchema } from '../schema/manifest';
 
+export * from './actions';
 export * from './os';
 export * from './trusted_apps';
 
@@ -58,9 +59,14 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   : ImmutableObject<T>;
 
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
-type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
-type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
-type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
+export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+
+/**
+ * Utility type that will return back a union of the given [T]ype and an Immutable version of it
+ */
+export type MaybeImmutable<T> = T | Immutable<T>;
 
 /**
  * Stats for related events for a particular node in a resolver graph.
@@ -375,12 +381,12 @@ export enum HostStatus {
    * Default state of the host when no host information is present or host information cannot
    * be retrieved. e.g. API error
    */
-  ERROR = 'error',
+  UNHEALTHY = 'unhealthy',
 
   /**
    * Host is online as indicated by its checkin status during the last checkin window
    */
-  ONLINE = 'online',
+  HEALTHY = 'healthy',
 
   /**
    * Host is offline as indicated by its checkin status during the last checkin window
@@ -388,9 +394,14 @@ export enum HostStatus {
   OFFLINE = 'offline',
 
   /**
-   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   * Host is unenrolling, enrolling or updating as indicated by its checkin status during the last checkin window
    */
-  UNENROLLING = 'unenrolling',
+  UPDATING = 'updating',
+
+  /**
+   * Host is inactive as indicated by its checkin status during the last checkin window
+   */
+  INACTIVE = 'inactive',
 }
 
 export enum MetadataQueryStrategyVersions {
@@ -402,6 +413,11 @@ export type PolicyInfo = Immutable<{
   revision: number;
   id: string;
 }>;
+
+export interface HostMetadataInfo {
+  metadata: HostMetadata;
+  query_strategy_version: MetadataQueryStrategyVersions;
+}
 
 export type HostInfo = Immutable<{
   metadata: HostMetadata;
@@ -452,9 +468,24 @@ export type HostMetadata = Immutable<{
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
+        /** The endpoint integration policy revision number in kibana */
         endpoint_policy_version: number;
         version: number;
       };
+    };
+    configuration?: {
+      /**
+       * Shows whether the endpoint is set up to be isolated. (e.g. a user has isolated a host,
+       * and the endpoint successfully received that action and applied the setting)
+       */
+      isolation?: boolean;
+    };
+    state?: {
+      /**
+       * Shows what the current state of the host is. This could differ from `Endpoint.configuration.isolation`
+       * in some cases, but normally they will match
+       */
+      isolation?: boolean;
     };
   };
   agent: {
@@ -813,7 +844,7 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields;
-    ransomware: ProtectionFields;
+    ransomware: ProtectionFields & SupportedFields;
     logging: {
       file: string;
     };
@@ -839,13 +870,8 @@ export interface PolicyConfig {
       network: boolean;
     };
     malware: ProtectionFields;
-    ransomware: ProtectionFields;
     popup: {
       malware: {
-        message: string;
-        enabled: boolean;
-      };
-      ransomware: {
         message: string;
         enabled: boolean;
       };
@@ -860,6 +886,13 @@ export interface PolicyConfig {
       file: boolean;
       process: boolean;
       network: boolean;
+    };
+    malware: ProtectionFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
     };
     logging: {
       file: string;
@@ -881,16 +914,21 @@ export interface UIPolicyConfig {
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'ransomware' | 'events' | 'popup' | 'advanced'>;
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
+  linux: Pick<PolicyConfig['linux'], 'malware' | 'events' | 'popup' | 'advanced'>;
 }
 
 /** Policy:  Protection fields */
 export interface ProtectionFields {
   mode: ProtectionModes;
+}
+
+/** Policy:  Supported fields */
+export interface SupportedFields {
+  supported: boolean;
 }
 
 /** Policy protection mode options */
@@ -933,6 +971,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 /**
@@ -1064,4 +1103,26 @@ export interface GetAgentSummaryResponse {
     policy_id?: string;
     versions_count: { [key: string]: number };
   };
+}
+
+/**
+ * REST API response for retrieving exception summary
+ */
+export interface GetExceptionSummaryResponse {
+  total: number;
+  windows: number;
+  macos: number;
+  linux: number;
+}
+
+/**
+ * Supported React-Router state for the Generic List page
+ */
+export interface ListPageRouteState {
+  /** Where the user should be redirected to when the `Back` button is clicked */
+  onBackButtonNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
+  /** The URL for the `Back` button */
+  backButtonUrl?: string;
+  /** The label for the button */
+  backButtonLabel?: string;
 }

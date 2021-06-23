@@ -22,19 +22,21 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ReadOnlyRulesCallOut } from '../../../components/callouts/read_only_rules_callout';
 import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
   getPrePackagedRuleStatus,
   getPrePackagedTimelineStatus,
   redirectToDetections,
-  userHasNoPermissions,
+  userHasPermissions,
 } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { LinkButton } from '../../../../common/components/links';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
+import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
+import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
 
 type Func = () => Promise<void>;
 
@@ -129,7 +131,7 @@ const RulesPageComponent: React.FC = () => {
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading,
         onClick: handleCreatePrePackagedRules,
       }),
     [canUserCRUD, getLoadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
@@ -138,7 +140,7 @@ const RulesPageComponent: React.FC = () => {
   const reloadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getReloadPrebuiltRulesAndTemplatesButton({
-        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading,
         onClick: handleCreatePrePackagedRules,
       }),
     [canUserCRUD, getReloadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
@@ -158,7 +160,9 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
-      <ReadOnlyRulesCallOut />
+      <NeedAdminForUpdateRulesCallOut />
+      <MissingPrivilegesCallOut />
+      <MlJobCompatibilityCallout />
       <ValueListsModal
         showModal={showValueListsModal}
         onClose={() => setShowValueListsModal(false)}
@@ -209,7 +213,7 @@ const RulesPageComponent: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"
-                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                isDisabled={!userHasPermissions(canUserCRUD) || loading}
                 onClick={() => {
                   setShowImportModal(true);
                 }}
@@ -224,7 +228,7 @@ const RulesPageComponent: React.FC = () => {
                 onClick={goToNewRule}
                 href={formatUrl(getCreateRuleUrl())}
                 iconType="plusInCircle"
-                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                isDisabled={!userHasPermissions(canUserCRUD) || loading}
               >
                 {i18n.ADD_NEW_RULE}
               </LinkButton>
@@ -246,7 +250,7 @@ const RulesPageComponent: React.FC = () => {
           data-test-subj="all-rules"
           loading={loading || prePackagedRuleLoading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-          hasNoPermissions={userHasNoPermissions(canUserCRUD)}
+          hasPermissions={userHasPermissions(canUserCRUD)}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}

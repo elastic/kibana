@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -18,14 +19,14 @@ import {
   AlertInstanceState,
   AlertNodesChangedState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   ALERT_NODES_CHANGED,
   LEGACY_ALERT_DETAILS,
   INDEX_PATTERN_ELASTICSEARCH,
 } from '../../common/constants';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -102,7 +103,7 @@ export class NodesChangedAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -111,7 +112,7 @@ export class NodesChangedAlert extends BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const nodesFromClusterStats = await fetchNodesFromClusterStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern
     );

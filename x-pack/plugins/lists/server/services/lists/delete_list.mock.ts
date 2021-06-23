@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
 import { DeleteListOptions } from '../lists';
 import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
 export const getDeleteListOptionsMock = (): DeleteListOptions => ({
-  callCluster: getCallClusterMock(),
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   id: LIST_ID,
   listIndex: LIST_INDEX,
   listItemIndex: LIST_ITEM_INDEX,

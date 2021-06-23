@@ -16,6 +16,7 @@ import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_serv
 import { PluginDependencies } from '.';
 
 const Sec = 1000;
+
 /** @internal */
 export class PluginsSystem {
   private readonly plugins = new Map<PluginName, PluginWrapper>();

@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiCallOut, EuiCheckbox, EuiBadge } from '@elastic/eui';
+import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -81,95 +81,93 @@ export const TemplateDeleteModal = ({
   };
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor="danger"
-        data-test-subj="deleteTemplatesConfirmation"
-        title={
+    <EuiConfirmModal
+      buttonColor="danger"
+      data-test-subj="deleteTemplatesConfirmation"
+      title={
+        <FormattedMessage
+          id="xpack.idxMgmt.deleteTemplatesModal.modalTitleText"
+          defaultMessage="Delete {numTemplatesToDelete, plural, one {template} other {# templates}}"
+          values={{ numTemplatesToDelete }}
+        />
+      }
+      onCancel={handleOnCancel}
+      onConfirm={handleDeleteTemplates}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.idxMgmt.deleteTemplatesModal.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.idxMgmt.deleteTemplatesModal.confirmButtonLabel"
+          defaultMessage="Delete {numTemplatesToDelete, plural, one {template} other {templates} }"
+          values={{ numTemplatesToDelete }}
+        />
+      }
+      confirmButtonDisabled={hasSystemTemplate ? !isDeleteConfirmed : false}
+    >
+      <Fragment>
+        <p>
           <FormattedMessage
-            id="xpack.idxMgmt.deleteTemplatesModal.modalTitleText"
-            defaultMessage="Delete {numTemplatesToDelete, plural, one {template} other {# templates}}"
+            id="xpack.idxMgmt.deleteTemplatesModal.deleteDescription"
+            defaultMessage="You are about to delete {numTemplatesToDelete, plural, one {this template} other {these templates} }:"
             values={{ numTemplatesToDelete }}
           />
-        }
-        onCancel={handleOnCancel}
-        onConfirm={handleDeleteTemplates}
-        cancelButtonText={
-          <FormattedMessage
-            id="xpack.idxMgmt.deleteTemplatesModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
-        confirmButtonText={
-          <FormattedMessage
-            id="xpack.idxMgmt.deleteTemplatesModal.confirmButtonLabel"
-            defaultMessage="Delete {numTemplatesToDelete, plural, one {template} other {templates} }"
-            values={{ numTemplatesToDelete }}
-          />
-        }
-        confirmButtonDisabled={hasSystemTemplate ? !isDeleteConfirmed : false}
-      >
-        <Fragment>
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.deleteTemplatesModal.deleteDescription"
-              defaultMessage="You are about to delete {numTemplatesToDelete, plural, one {this template} other {these templates} }:"
-              values={{ numTemplatesToDelete }}
-            />
-          </p>
+        </p>
 
-          <ul>
-            {templatesToDelete.map(({ name }) => (
-              <li key={name}>
-                {name}
-                {name.startsWith('.') ? (
-                  <Fragment>
-                    {' '}
-                    <EuiBadge iconType="alert" color="hollow">
-                      <FormattedMessage
-                        id="xpack.idxMgmt.deleteTemplatesModal.systemTemplateLabel"
-                        defaultMessage="System template"
-                      />
-                    </EuiBadge>
-                  </Fragment>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-          {hasSystemTemplate && (
-            <EuiCallOut
-              title={
+        <ul>
+          {templatesToDelete.map(({ name }) => (
+            <li key={name}>
+              {name}
+              {name.startsWith('.') ? (
+                <Fragment>
+                  {' '}
+                  <EuiBadge iconType="alert" color="hollow">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.deleteTemplatesModal.systemTemplateLabel"
+                      defaultMessage="System template"
+                    />
+                  </EuiBadge>
+                </Fragment>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+        {hasSystemTemplate && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutTitle"
+                defaultMessage="Deleting a system template can break Kibana"
+              />
+            }
+            color="danger"
+            iconType="alert"
+            data-test-subj="deleteSystemTemplateCallOut"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutDescription"
+                defaultMessage="System templates are critical for internal operations.
+                  If you delete this template, you can’t recover it."
+              />
+            </p>
+            <EuiCheckbox
+              id="confirmDeleteTemplatesCheckbox"
+              label={
                 <FormattedMessage
-                  id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutTitle"
-                  defaultMessage="Deleting a system template can break Kibana"
+                  id="xpack.idxMgmt.deleteTemplatesModal.confirmDeleteCheckboxLabel"
+                  defaultMessage="I understand the consequences of deleting a system template"
                 />
               }
-              color="danger"
-              iconType="alert"
-              data-test-subj="deleteSystemTemplateCallOut"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.idxMgmt.deleteTemplatesModal.proceedWithCautionCallOutDescription"
-                  defaultMessage="System templates are critical for internal operations.
-                  If you delete this template, you can’t recover it."
-                />
-              </p>
-              <EuiCheckbox
-                id="confirmDeleteTemplatesCheckbox"
-                label={
-                  <FormattedMessage
-                    id="xpack.idxMgmt.deleteTemplatesModal.confirmDeleteCheckboxLabel"
-                    defaultMessage="I understand the consequences of deleting a system template"
-                  />
-                }
-                checked={isDeleteConfirmed}
-                onChange={(e) => setIsDeleteConfirmed(e.target.checked)}
-              />
-            </EuiCallOut>
-          )}
-        </Fragment>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+              checked={isDeleteConfirmed}
+              onChange={(e) => setIsDeleteConfirmed(e.target.checked)}
+            />
+          </EuiCallOut>
+        )}
+      </Fragment>
+    </EuiConfirmModal>
   );
 };

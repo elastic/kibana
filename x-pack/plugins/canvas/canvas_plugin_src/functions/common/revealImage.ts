@@ -6,7 +6,6 @@
  */
 
 import { ExpressionFunctionDefinition, ExpressionValueRender } from 'src/plugins/expressions';
-// @ts-expect-error untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 import { elasticOutline } from '../../lib/elastic_outline';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
@@ -75,8 +74,8 @@ export function revealImage(): ExpressionFunctionDefinition<
         value: {
           percent,
           ...args,
-          image: resolveWithMissingImage(args.image, elasticOutline),
-          emptyImage: resolveWithMissingImage(args.emptyImage),
+          image: resolveWithMissingImage(args.image, elasticOutline) as string,
+          emptyImage: resolveWithMissingImage(args.emptyImage) as string,
         },
       };
     },

@@ -6,8 +6,8 @@
  */
 
 import datemath from '@elastic/datemath';
-import { scaleUtc } from 'd3-scale';
 import { compact, pickBy } from 'lodash';
+import moment from 'moment';
 import { IUrlParams } from './types';
 
 function getParsedDate(rawDate?: string, options = {}) {
@@ -17,6 +17,16 @@ function getParsedDate(rawDate?: string, options = {}) {
       return parsed.toDate();
     }
   }
+}
+
+export function getExactDate(rawDate: string) {
+  const isRelativeDate = rawDate.startsWith('now');
+  if (isRelativeDate) {
+    // remove rounding from relative dates "Today" (now/d) and "This week" (now/w)
+    const rawDateWithouRounding = rawDate.replace(/\/([smhdw])$/, '');
+    return getParsedDate(rawDateWithouRounding);
+  }
+  return getParsedDate(rawDate);
 }
 
 export function getDateRange({
@@ -30,25 +40,38 @@ export function getDateRange({
 }) {
   // If the previous state had the same range, just return that instead of calculating a new range.
   if (state.rangeFrom === rangeFrom && state.rangeTo === rangeTo) {
-    return { start: state.start, end: state.end };
+    return {
+      start: state.start,
+      end: state.end,
+      exactStart: state.exactStart,
+      exactEnd: state.exactEnd,
+    };
   }
-
   const start = getParsedDate(rangeFrom);
   const end = getParsedDate(rangeTo, { roundUp: true });
+
+  const exactStart = rangeFrom ? getExactDate(rangeFrom) : undefined;
+  const exactEnd = rangeTo ? getExactDate(rangeTo) : undefined;
 
   // `getParsedDate` will return undefined for invalid or empty dates. We return
   // the previous state if either date is undefined.
   if (!start || !end) {
-    return { start: state.start, end: state.end };
+    return {
+      start: state.start,
+      end: state.end,
+      exactStart: state.exactStart,
+      exactEnd: state.exactEnd,
+    };
   }
 
-  // Calculate ticks for the time ranges to produce nicely rounded values.
-  const ticks = scaleUtc().domain([start, end]).nice().ticks();
+  // rounds down start to minute
+  const roundedStart = moment(start).startOf('minute');
 
-  // Return the first and last tick values.
   return {
-    start: ticks[0].toISOString(),
-    end: ticks[ticks.length - 1].toISOString(),
+    start: roundedStart.toISOString(),
+    end: end.toISOString(),
+    exactStart: exactStart?.toISOString(),
+    exactEnd: exactEnd?.toISOString(),
   };
 }
 

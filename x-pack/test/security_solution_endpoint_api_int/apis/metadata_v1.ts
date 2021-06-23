@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { deleteMetadataStream } from './data_stream_helper';
 import { METADATA_REQUEST_V1_ROUTE } from '../../../plugins/security_solution/server/endpoint/routes/metadata';
@@ -40,7 +40,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`POST ${METADATA_REQUEST_V1_ROUTE} when index is not empty`, () => {
       before(
-        async () => await esArchiver.load('endpoint/metadata/api_feature', { useCreate: true })
+        async () =>
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/endpoint/metadata/api_feature',
+            { useCreate: true }
+          )
       );
       // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
       // to do it manually
@@ -214,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
           (ip: string) => ip === targetEndpointIp
         );
         expect(resultIp).to.eql([targetEndpointIp]);
-        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
+        expect(body.hosts[0].metadata.event.created).to.eql(1618841405309);
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);
@@ -240,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.from(statuses)).to.eql(['failure']);
       });
 
-      it('metadata api should return the endpoint based on the elastic agent id, and status should be error', async () => {
+      it('metadata api should return the endpoint based on the elastic agent id, and status should be unhealthy', async () => {
         const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
         const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';
         const { body } = await supertest
@@ -257,8 +261,8 @@ export default function ({ getService }: FtrProviderContext) {
         const resultElasticAgentId: string = body.hosts[0].metadata.elastic.agent.id;
         expect(resultHostId).to.eql(targetEndpointId);
         expect(resultElasticAgentId).to.eql(targetElasticAgentId);
-        expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
-        expect(body.hosts[0].host_status).to.eql('error');
+        expect(body.hosts[0].metadata.event.created).to.eql(1618841405309);
+        expect(body.hosts[0].host_status).to.eql('unhealthy');
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);

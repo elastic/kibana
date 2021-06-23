@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -13,6 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   describe('Home page', function () {
     before(async () => {
@@ -31,17 +31,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('Loads the app', async () => {
       await security.testUser.setRoles(['test_api_keys']);
-      log.debug('Checking for section header');
-      const headers = await testSubjects.findAll('noApiKeysHeader');
-      if (headers.length > 0) {
-        expect(await headers[0].getVisibleText()).to.be('No API keys');
-        const goToConsoleButton = await pageObjects.apiKeys.getGoToConsoleButton();
-        expect(await goToConsoleButton.isDisplayed()).to.be(true);
-      } else {
-        // page may already contain EiTable with data, then check API Key Admin text
-        const description = await pageObjects.apiKeys.getApiKeyAdminDesc();
-        expect(description).to.be('You are an API Key administrator.');
-      }
+      log.debug('Checking for create API key call to action');
+      await find.existsByLinkText('Create API key');
     });
   });
 };

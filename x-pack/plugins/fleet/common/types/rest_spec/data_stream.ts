@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStream } from '../models';
+import type { DataStream } from '../models';
 
 export interface GetDataStreamsResponse {
   data_streams: DataStream[];

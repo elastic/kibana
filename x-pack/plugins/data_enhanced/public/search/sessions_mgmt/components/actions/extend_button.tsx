@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
@@ -52,26 +52,24 @@ const ExtendConfirm = ({
   });
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={title}
-        onCancel={onConfirmDismiss}
-        onConfirm={async () => {
-          setIsLoading(true);
-          await api.sendExtend(id, `${newExpiration.toISOString()}`);
-          setIsLoading(false);
-          onConfirmDismiss();
-          onActionComplete();
-        }}
-        confirmButtonText={confirm}
-        confirmButtonDisabled={isLoading}
-        cancelButtonText={extend}
-        defaultFocusedButton="confirm"
-        buttonColor="primary"
-      >
-        {message}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={title}
+      onCancel={onConfirmDismiss}
+      onConfirm={async () => {
+        setIsLoading(true);
+        await api.sendExtend(id, `${newExpiration.toISOString()}`);
+        setIsLoading(false);
+        onConfirmDismiss();
+        onActionComplete();
+      }}
+      confirmButtonText={confirm}
+      confirmButtonDisabled={isLoading}
+      cancelButtonText={extend}
+      defaultFocusedButton="confirm"
+      buttonColor="primary"
+    >
+      {message}
+    </EuiConfirmModal>
   );
 };
 

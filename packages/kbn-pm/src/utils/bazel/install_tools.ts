@@ -26,7 +26,7 @@ async function readBazelToolsVersionFile(repoRootPath: string, versionFilename: 
   return version;
 }
 
-async function isBazelBinAvailable() {
+export async function isBazelBinAvailable() {
   try {
     await spawn('bazel', ['--version'], { stdio: 'pipe' });
 

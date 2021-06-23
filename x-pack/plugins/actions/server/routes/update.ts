@@ -7,9 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
-import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
-import { ActionsRequestHandlerContext } from '../types';
+import { ILicenseState } from '../lib';
+import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
+import { ActionResult, ActionsRequestHandlerContext } from '../types';
+import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -21,40 +22,45 @@ const bodySchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
+const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
+  actionTypeId,
+  isPreconfigured,
+  isMissingSecrets,
+  ...res
+}) => ({
+  ...res,
+  connector_type_id: actionTypeId,
+  is_preconfigured: isPreconfigured,
+  is_missing_secrets: isMissingSecrets,
+});
+
 export const updateActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.put(
     {
-      path: `${BASE_ACTION_API_PATH}/action/{id}`,
+      path: `${BASE_ACTION_API_PATH}/connector/{id}`,
       validate: {
         body: bodySchema,
         params: paramSchema,
       },
     },
-    router.handleLegacyErrors(async function (context, req, res) {
-      verifyApiAccess(licenseState);
-      if (!context.actions) {
-        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
-      }
-      const actionsClient = context.actions.getActionsClient();
-      const { id } = req.params;
-      const { name, config, secrets } = req.body;
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const actionsClient = context.actions.getActionsClient();
+        const { id } = req.params;
+        const { name, config, secrets } = req.body;
 
-      try {
         return res.ok({
-          body: await actionsClient.update({
-            id,
-            action: { name, config, secrets },
-          }),
+          body: rewriteBodyRes(
+            await actionsClient.update({
+              id,
+              action: { name, config, secrets },
+            })
+          ),
         });
-      } catch (e) {
-        if (isErrorThatHandlesItsOwnResponse(e)) {
-          return e.sendResponse(res);
-        }
-        throw e;
-      }
-    })
+      })
+    )
   );
 };

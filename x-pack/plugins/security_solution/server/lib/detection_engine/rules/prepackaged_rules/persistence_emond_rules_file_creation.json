@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation or modification of the Event Monitor Daemon (emond) rules. Adversaries may abuse this service by writing a rule to execute commands when a defined event occurs, such as system start up or user authentication.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Emond Rules Creation or Modification",
+  "query": "file where event.type != \"deletion\" and\n file.path : (\"/private/etc/emond.d/rules/*.plist\", \"/etc/emon.d/rules/*.plist\")\n",
+  "references": [
+    "https://www.xorrior.com/emond-persistence/"
+  ],
+  "risk_score": 47,
+  "rule_id": "a6bf4dd4-743e-4da8-8c03-3ebd753a6c90",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.014",
+              "name": "Emond",
+              "reference": "https://attack.mitre.org/techniques/T1546/014/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

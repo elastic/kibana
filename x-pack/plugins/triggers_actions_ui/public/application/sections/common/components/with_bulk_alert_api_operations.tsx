@@ -97,12 +97,12 @@ export function withBulkAlertOperations<T>(
         }
         muteAlert={async (alert: Alert) => {
           if (!isAlertMuted(alert)) {
-            return muteAlert({ http, id: alert.id });
+            return await muteAlert({ http, id: alert.id });
           }
         }}
         unmuteAlert={async (alert: Alert) => {
           if (isAlertMuted(alert)) {
-            return unmuteAlert({ http, id: alert.id });
+            return await unmuteAlert({ http, id: alert.id });
           }
         }}
         muteAlertInstance={async (alert: Alert, instanceId: string) => {
@@ -117,12 +117,12 @@ export function withBulkAlertOperations<T>(
         }}
         enableAlert={async (alert: Alert) => {
           if (isAlertDisabled(alert)) {
-            return enableAlert({ http, id: alert.id });
+            return await enableAlert({ http, id: alert.id });
           }
         }}
         disableAlert={async (alert: Alert) => {
           if (!isAlertDisabled(alert)) {
-            return disableAlert({ http, id: alert.id });
+            return await disableAlert({ http, id: alert.id });
           }
         }}
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}

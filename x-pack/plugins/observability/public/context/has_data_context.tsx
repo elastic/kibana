@@ -7,23 +7,30 @@
 
 import { uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
-import { Alert } from '../../../alerts/common';
+import { useRouteMatch } from 'react-router-dom';
+import { Alert } from '../../../alerting/common';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useTimeRange } from '../hooks/use_time_range';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
-import { ObservabilityFetchDataPlugins, UXHasDataResponse } from '../typings/fetch_overview_data';
+import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
+import { ApmIndicesConfig } from '../../common/typings';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
 export type HasDataMap = Record<
   DataContextApps,
-  { status: FETCH_STATUS; hasData?: boolean | UXHasDataResponse | Alert[] }
+  {
+    status: FETCH_STATUS;
+    hasData?: boolean | Alert[];
+    indices?: string | ApmIndicesConfig;
+    serviceName?: string;
+  }
 >;
 
 export interface HasDataContextValue {
-  hasData: Partial<HasDataMap>;
+  hasDataMap: Partial<HasDataMap>;
   hasAnyData: boolean;
   isAllRequestsComplete: boolean;
   onRefreshTimeRange: () => void;
@@ -32,54 +39,87 @@ export interface HasDataContextValue {
 
 export const HasDataContext = createContext({} as HasDataContextValue);
 
-const apps: DataContextApps[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
+const apps: DataContextApps[] = ['apm', 'synthetics', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
   const { core } = usePluginContext();
   const [forceUpdate, setForceUpdate] = useState('');
   const { absoluteStart, absoluteEnd } = useTimeRange();
 
-  const [hasData, setHasData] = useState<HasDataContextValue['hasData']>({});
+  const [hasDataMap, setHasDataMap] = useState<HasDataContextValue['hasDataMap']>({});
+
+  const isExploratoryView = useRouteMatch('/exploratory-view');
 
   useEffect(
     () => {
-      apps.forEach(async (app) => {
-        try {
-          if (app !== 'alert') {
-            const params =
-              app === 'ux'
-                ? { absoluteTime: { start: absoluteStart, end: absoluteEnd } }
-                : undefined;
+      if (!isExploratoryView)
+        apps.forEach(async (app) => {
+          try {
+            const updateState = ({
+              hasData,
+              indices,
+              serviceName,
+            }: {
+              hasData?: boolean;
+              serviceName?: string;
+              indices?: string | ApmIndicesConfig;
+            }) => {
+              setHasDataMap((prevState) => ({
+                ...prevState,
+                [app]: {
+                  hasData,
+                  ...(serviceName ? { serviceName } : {}),
+                  ...(indices ? { indices } : {}),
+                  status: FETCH_STATUS.SUCCESS,
+                },
+              }));
+            };
+            switch (app) {
+              case 'ux':
+                const params = { absoluteTime: { start: absoluteStart, end: absoluteEnd } };
+                const resultUx = await getDataHandler(app)?.hasData(params);
+                updateState({
+                  hasData: resultUx?.hasData,
+                  indices: resultUx?.indices,
+                  serviceName: resultUx?.serviceName as string,
+                });
+                break;
+              case 'synthetics':
+                const resultSy = await getDataHandler(app)?.hasData();
+                updateState({ hasData: resultSy?.hasData, indices: resultSy?.indices });
 
-            const result = await getDataHandler(app)?.hasData(params);
-            setHasData((prevState) => ({
+                break;
+              case 'apm':
+                const resultApm = await getDataHandler(app)?.hasData();
+                updateState({ hasData: resultApm?.hasData, indices: resultApm?.indices });
+
+                break;
+              case 'infra_logs':
+              case 'infra_metrics':
+                const resultInfra = await getDataHandler(app)?.hasData();
+                updateState({ hasData: resultInfra });
+                break;
+            }
+          } catch (e) {
+            setHasDataMap((prevState) => ({
               ...prevState,
               [app]: {
-                hasData: result,
-                status: FETCH_STATUS.SUCCESS,
+                hasData: undefined,
+                status: FETCH_STATUS.FAILURE,
               },
             }));
           }
-        } catch (e) {
-          setHasData((prevState) => ({
-            ...prevState,
-            [app]: {
-              hasData: undefined,
-              status: FETCH_STATUS.FAILURE,
-            },
-          }));
-        }
-      });
+        });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [isExploratoryView]
   );
 
   useEffect(() => {
     async function fetchAlerts() {
       try {
         const alerts = await getObservabilityAlerts({ core });
-        setHasData((prevState) => ({
+        setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
             hasData: alerts,
@@ -87,7 +127,7 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
           },
         }));
       } catch (e) {
-        setHasData((prevState) => ({
+        setHasDataMap((prevState) => ({
           ...prevState,
           alert: {
             hasData: undefined,
@@ -101,18 +141,18 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
   }, [forceUpdate, core]);
 
   const isAllRequestsComplete = apps.every((app) => {
-    const appStatus = hasData[app]?.status;
+    const appStatus = hasDataMap[app]?.status;
     return appStatus !== undefined && appStatus !== FETCH_STATUS.LOADING;
   });
 
-  const hasAnyData = (Object.keys(hasData) as ObservabilityFetchDataPlugins[]).some(
-    (app) => hasData[app]?.hasData === true
+  const hasAnyData = (Object.keys(hasDataMap) as ObservabilityFetchDataPlugins[]).some(
+    (app) => hasDataMap[app]?.hasData === true
   );
 
   return (
     <HasDataContext.Provider
       value={{
-        hasData,
+        hasDataMap,
         hasAnyData,
         isAllRequestsComplete,
         forceUpdate,

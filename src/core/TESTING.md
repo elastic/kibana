@@ -792,8 +792,8 @@ To do that we'll write a Jest integration test using `TestUtils` to start
 Kibana and esArchiver to load fixture data into Elasticsearch.
 
 1. Create the fixtures data you need in Elasticsearch
-2. Create a fixtures archive with `node scripts/es_archiver save <name> [index patterns...]`
-3. Load the fixtures in your test using esArchiver `esArchiver.load('name')`;
+2. Create a fixtures archive with `node scripts/es_archiver save <path> [index patterns...]`
+3. Load the fixtures in your test using esArchiver `esArchiver.load('path from root of repo')`;
 
 _todo: fully worked out example_
 
@@ -830,6 +830,7 @@ data.
 
 ```typescript
 // src/plugins/myplugin/public/plugin.ts
+import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
@@ -853,8 +854,10 @@ export class MyPlugin implements Plugin<MyPluginSetup, MyPluginStart, MyPluginSe
 
     // an example on using an optional dependency that will be tested
     if (usageCollection) {
-      usageCollection.allowTrackUserAgent(true);
+      usageCollection.reportUiCounter('my_plugin', METRIC_TYPE.LOADED, 'my_event');
     }
+    // or in a shorter version
+    usageCollection?.reportUiCounter('my_plugin', METRIC_TYPE.LOADED, 'my_event');
 
     return {};
   }
@@ -1074,6 +1077,8 @@ import { coreMock } from '../../../core/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
 
+import { METRIC_TYPE } from '@kbn/analytics';
+
 import { MyPlugin } from './plugin';
 
 describe('Plugin', () => {
@@ -1090,8 +1095,8 @@ describe('Plugin', () => {
 
     plugin.setup(coreSetup, setupDeps);
 
-    expect(usageCollectionSetup.allowTrackUserAgent).toHaveBeenCalledTimes(1);
-    expect(usageCollectionSetup.allowTrackUserAgent).toHaveBeenCalledWith(true);
+    expect(usageCollectionSetup.reportUiCounter).toHaveBeenCalledTimes(2);
+    expect(usageCollectionSetup.reportUiCounter).toHaveBeenCalledWith('my_plugin', METRIC_TYPE.LOADED, 'my_event');
   });
 });
 ```

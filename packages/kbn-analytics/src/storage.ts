@@ -8,10 +8,10 @@
 
 import { Report } from './report';
 
-export interface Storage<T = any, S = void> {
-  get: (key: string) => T | null;
+export interface Storage<T = Report, S = void> {
+  get: (key: string) => T | undefined;
   set: (key: string, value: T) => S;
-  remove: (key: string) => T | null;
+  remove: (key: string) => T | undefined;
   clear: () => void;
 }
 

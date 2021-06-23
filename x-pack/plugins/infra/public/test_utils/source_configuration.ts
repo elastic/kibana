@@ -16,13 +16,17 @@ export const DEFAULT_SOURCE_CONFIGURATION: GetLogSourceConfigurationSuccessRespo
     configuration: {
       name: 'Default',
       description: '',
-      logAlias: 'kibana_sample_data_logs*',
+      logIndices: {
+        type: 'index_pattern',
+        indexPatternId: 'some-test-id',
+      },
       fields: {
         container: 'container.id',
         host: 'host.name',
         pod: 'kubernetes.pod.uid',
         tiebreaker: '_doc',
         timestamp: '@timestamp',
+        message: ['message'],
       },
       logColumns: [
         {

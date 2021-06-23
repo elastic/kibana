@@ -63,7 +63,7 @@ describe('waterfall filter', () => {
 
     expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL)).toHaveAttribute(
       'class',
-      'euiButtonIcon euiButtonIcon--primary'
+      'euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall'
     );
 
     // toggle it back to inactive
@@ -71,7 +71,7 @@ describe('waterfall filter', () => {
 
     expect(getByLabelText(FILTER_POPOVER_OPEN_LABEL)).toHaveAttribute(
       'class',
-      'euiButtonIcon euiButtonIcon--text'
+      'euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall'
     );
   });
 

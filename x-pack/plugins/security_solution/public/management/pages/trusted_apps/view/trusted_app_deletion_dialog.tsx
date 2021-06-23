@@ -19,7 +19,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiText,
 } from '@elastic/eui';
 
@@ -46,7 +45,7 @@ const getTranslations = (entry: Immutable<TrustedApp> | undefined) => ({
     <FormattedMessage
       id="xpack.securitySolution.trustedapps.deletionDialog.mainMessage"
       defaultMessage='You are removing trusted application "{name}".'
-      values={{ name: <strong>{entry?.name}</strong> }}
+      values={{ name: <b className="eui-textBreakWord">{entry?.name}</b> }}
     />
   ),
   subMessage: (
@@ -100,36 +99,34 @@ export const TrustedAppDeletionDialog = memo(() => {
 
   if (useTrustedAppsSelector(isDeletionDialogOpen)) {
     return (
-      <EuiOverlayMask>
-        <EuiModal onClose={onCancel}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{translations.title}</EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <EuiModal onClose={onCancel}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{translations.title}</EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody>
-            <EuiText>
-              <p>{translations.mainMessage}</p>
-              <p>{translations.subMessage}</p>
-            </EuiText>
-          </EuiModalBody>
+        <EuiModalBody>
+          <EuiText>
+            <p>{translations.mainMessage}</p>
+            <p>{translations.subMessage}</p>
+          </EuiText>
+        </EuiModalBody>
 
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={onCancel} isDisabled={isBusy} data-test-subj={CANCEL_SUBJ}>
-              {translations.cancelButton}
-            </EuiButtonEmpty>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={onCancel} isDisabled={isBusy} data-test-subj={CANCEL_SUBJ}>
+            {translations.cancelButton}
+          </EuiButtonEmpty>
 
-            <AutoFocusButton
-              fill
-              color="danger"
-              onClick={onConfirm}
-              isLoading={isBusy}
-              data-test-subj={CONFIRM_SUBJ}
-            >
-              {translations.confirmButton}
-            </AutoFocusButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+          <AutoFocusButton
+            fill
+            color="danger"
+            onClick={onConfirm}
+            isLoading={isBusy}
+            data-test-subj={CONFIRM_SUBJ}
+          >
+            {translations.confirmButton}
+          </AutoFocusButton>
+        </EuiModalFooter>
+      </EuiModal>
     );
   } else {
     return <></>;

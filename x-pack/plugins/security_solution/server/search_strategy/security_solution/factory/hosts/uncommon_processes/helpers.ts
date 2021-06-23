@@ -14,7 +14,7 @@ import {
   HostsUncommonProcessesEdges,
   HostsUncommonProcessHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
-import { toStringArray } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { HostHits } from '../../../../../../common/search_strategy';
 
 export const uncommonProcessesFields = [
@@ -82,7 +82,11 @@ export const formatUncommonProcessesData = (
         fieldPath = `node.hosts.0.name`;
         fieldValue = get(fieldPath, mergedResult);
       }
-      return set(fieldPath, toStringArray(fieldValue), mergedResult);
+      return set(
+        fieldPath,
+        toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+        mergedResult
+      );
     },
     {
       node: {

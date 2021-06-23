@@ -8,16 +8,24 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  CreateRulesSchema,
+  EqlCreateSchema,
+  QueryCreateSchema,
+  ThreatMatchCreateSchema,
+  ThresholdCreateSchema,
+} from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
-import { deleteAllExceptions } from '../../../lists_api_integration/utils';
+import {
+  createListsIndex,
+  deleteAllExceptions,
+  deleteListsIndex,
+  importFile,
+} from '../../../lists_api_integration/utils';
 import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
 import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
-import { CreateExceptionListItemSchema } from '../../../../plugins/lists/common';
-import {
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '../../../../plugins/lists/common/constants';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -39,6 +47,9 @@ import {
   getSignalsByIds,
   findImmutableRuleById,
   getPrePackagedRulesStatus,
+  getRuleForSignalTesting,
+  getOpenSignals,
+  createRuleWithExceptionEntries,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
@@ -54,14 +65,14 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules with exceptions', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
         await deleteAllExceptions(es);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       describe('elastic admin', () => {
@@ -519,14 +530,14 @@ export default ({ getService }: FtrProviderContext) => {
       describe('tests with auditbeat data', () => {
         beforeEach(async () => {
           await createSignalsIndex(supertest);
-          await esArchiver.load('auditbeat/hosts');
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
           await deleteAllExceptions(es);
-          await esArchiver.unload('auditbeat/hosts');
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('should be able to execute against an exception list that does not include valid entries and get back 10 signals', async () => {
@@ -576,25 +587,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be able to execute against an exception list that does include valid entries and get back 0 signals', async () => {
-          const { id, list_id, namespace_type, type } = await createExceptionList(
-            supertest,
-            getCreateExceptionListMinimalSchemaMock()
-          );
-
-          const exceptionListItem: CreateExceptionListItemSchema = {
-            ...getCreateExceptionListItemMinimalSchemaMock(),
-            entries: [
-              {
-                field: 'host.name', // This matches the query below which will exclude everything
-                operator: 'included',
-                type: 'match',
-                value: 'suricata-sensor-amsterdam',
-              },
-            ],
-          };
-          await createExceptionListItem(supertest, exceptionListItem);
-
-          const ruleWithException: CreateRulesSchema = {
+          const rule: QueryCreateSchema = {
             name: 'Simple Rule Query',
             description: 'Simple Rule Query',
             enabled: true,
@@ -605,19 +598,199 @@ export default ({ getService }: FtrProviderContext) => {
             type: 'query',
             from: '1900-01-01T00:00:00.000Z',
             query: 'host.name: "suricata-sensor-amsterdam"',
-            exceptions_list: [
+          };
+          const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+            [
               {
-                id,
-                list_id,
-                namespace_type,
-                type,
+                field: 'host.name', // This matches the query above which will exclude everything
+                operator: 'included',
+                type: 'match',
+                value: 'suricata-sensor-amsterdam',
               },
             ],
-          };
-          const rule = await createRule(supertest, ruleWithException);
-          await waitForRuleSuccessOrStatus(supertest, rule.id);
-          const signalsOpen = await getSignalsByIds(supertest, [rule.id]);
+          ]);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
           expect(signalsOpen.hits.hits.length).equal(0);
+        });
+
+        it('generates no signals when an exception is added for an EQL rule', async () => {
+          const rule: EqlCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: 'eql-rule',
+            type: 'eql',
+            language: 'eql',
+            query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+          };
+          const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+            [
+              {
+                field: 'host.id',
+                operator: 'included',
+                type: 'match',
+                value: '8cc95778cce5407c809480e8e32ad76b',
+              },
+            ],
+          ]);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          expect(signalsOpen.hits.hits.length).equal(0);
+        });
+
+        it('generates no signals when an exception is added for a threshold rule', async () => {
+          const rule: ThresholdCreateSchema = {
+            ...getRuleForSignalTesting(['auditbeat-*']),
+            rule_id: 'threshold-rule',
+            type: 'threshold',
+            language: 'kuery',
+            query: '*:*',
+            threshold: {
+              field: 'host.id',
+              value: 700,
+            },
+          };
+          const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+            [
+              {
+                field: 'host.id',
+                operator: 'included',
+                type: 'match',
+                value: '8cc95778cce5407c809480e8e32ad76b',
+              },
+            ],
+          ]);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          expect(signalsOpen.hits.hits.length).equal(0);
+        });
+
+        it('generates no signals when an exception is added for a threat match rule', async () => {
+          const rule: ThreatMatchCreateSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: '*:*',
+            threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
+            threat_index: ['auditbeat-*'], // We use auditbeat as both the matching index and the threat list for simplicity
+            threat_mapping: [
+              // We match host.name against host.name
+              {
+                entries: [
+                  {
+                    field: 'host.name',
+                    value: 'host.name',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+            [
+              {
+                field: 'source.ip',
+                operator: 'included',
+                type: 'match',
+                value: '188.166.120.93',
+              },
+            ],
+          ]);
+          const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+          expect(signalsOpen.hits.hits.length).equal(0);
+        });
+        describe('rules with value list exceptions', () => {
+          beforeEach(async () => {
+            await createListsIndex(supertest);
+          });
+
+          afterEach(async () => {
+            await deleteListsIndex(supertest);
+          });
+
+          it('generates no signals when a value list exception is added for a query rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
+            const rule: QueryCreateSchema = {
+              name: 'Simple Rule Query',
+              description: 'Simple Rule Query',
+              enabled: true,
+              risk_score: 1,
+              rule_id: 'rule-1',
+              severity: 'high',
+              index: ['auditbeat-*'],
+              type: 'query',
+              from: '1900-01-01T00:00:00.000Z',
+              query: 'host.name: "suricata-sensor-amsterdam"',
+            };
+            const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
+
+          it('generates no signals when a value list exception is added for a threat match rule', async () => {
+            const valueListId = 'value-list-id';
+            await importFile(supertest, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
+            const rule: ThreatMatchCreateSchema = {
+              description: 'Detecting root and admin users',
+              name: 'Query with a rule id',
+              severity: 'high',
+              index: ['auditbeat-*'],
+              type: 'threat_match',
+              risk_score: 55,
+              language: 'kuery',
+              rule_id: 'rule-1',
+              from: '1900-01-01T00:00:00.000Z',
+              query: '*:*',
+              threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
+              threat_index: ['auditbeat-*'], // We use auditbeat as both the matching index and the threat list for simplicity
+              threat_mapping: [
+                // We match host.name against host.name
+                {
+                  entries: [
+                    {
+                      field: 'host.name',
+                      value: 'host.name',
+                      type: 'mapping',
+                    },
+                  ],
+                },
+              ],
+              threat_filters: [],
+            };
+
+            const createdRule = await createRuleWithExceptionEntries(supertest, rule, [
+              [
+                {
+                  field: 'host.name',
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: 'keyword',
+                  },
+                },
+              ],
+            ]);
+            const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+            expect(signalsOpen.hits.hits.length).equal(0);
+          });
         });
       });
     });

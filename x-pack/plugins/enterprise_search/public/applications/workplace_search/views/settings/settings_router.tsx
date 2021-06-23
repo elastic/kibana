@@ -10,7 +10,6 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { FlashMessages } from '../../../shared/flash_messages';
 import {
   ORG_SETTINGS_PATH,
   ORG_SETTINGS_CUSTOMIZE_PATH,
@@ -33,25 +32,22 @@ export const SettingsRouter: React.FC = () => {
   }, []);
 
   return (
-    <>
-      <FlashMessages />
-      <Switch>
-        <Redirect exact from={ORG_SETTINGS_PATH} to={ORG_SETTINGS_CUSTOMIZE_PATH} />
-        <Route exact path={ORG_SETTINGS_CUSTOMIZE_PATH}>
-          <Customize />
+    <Switch>
+      <Redirect exact from={ORG_SETTINGS_PATH} to={ORG_SETTINGS_CUSTOMIZE_PATH} />
+      <Route exact path={ORG_SETTINGS_CUSTOMIZE_PATH}>
+        <Customize />
+      </Route>
+      <Route exact path={ORG_SETTINGS_CONNECTORS_PATH}>
+        <Connectors />
+      </Route>
+      <Route exact path={ORG_SETTINGS_OAUTH_APPLICATION_PATH}>
+        <OauthApplication />
+      </Route>
+      {staticSourceData.map(({ editPath }, i) => (
+        <Route key={i} exact path={editPath}>
+          <SourceConfig sourceIndex={i} />
         </Route>
-        <Route exact path={ORG_SETTINGS_CONNECTORS_PATH}>
-          <Connectors />
-        </Route>
-        <Route exact path={ORG_SETTINGS_OAUTH_APPLICATION_PATH}>
-          <OauthApplication />
-        </Route>
-        {staticSourceData.map(({ editPath }, i) => (
-          <Route key={i} exact path={editPath}>
-            <SourceConfig sourceIndex={i} />
-          </Route>
-        ))}
-      </Switch>
-    </>
+      ))}
+    </Switch>
   );
 };

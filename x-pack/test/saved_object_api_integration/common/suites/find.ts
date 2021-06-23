@@ -107,6 +107,13 @@ export const getTestCases = (
         savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype'),
       },
     } as FindTestCase,
+    multiNamespaceIsolatedType: {
+      title: buildTitle('find multi-namespace isolated type'),
+      query: `type=sharecapabletype&fields=title${namespacesQueryParam}`,
+      successResult: {
+        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharecapabletype'),
+      },
+    } as FindTestCase,
     namespaceAgnosticType: {
       title: buildTitle('find namespace-agnostic type'),
       query: `type=globaltype&fields=title${namespacesQueryParam}`,
@@ -271,8 +278,16 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     const { user, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

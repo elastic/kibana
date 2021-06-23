@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiLink,
   EuiCallOut,
-  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,8 +25,6 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
-import { IndexPatternTableItem } from '../types';
-import { getIndexPatterns } from '../utils';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -36,7 +33,7 @@ export interface EditIndexPatternProps extends RouteComponentProps {
 const mappingAPILink = i18n.translate(
   'indexPatternManagement.editIndexPattern.timeFilterLabel.mappingAPILink',
   {
-    defaultMessage: 'Mapping API',
+    defaultMessage: 'field mappings',
   }
 );
 
@@ -62,7 +59,6 @@ export const EditIndexPattern = withRouter(
       uiSettings,
       indexPatternManagementStart,
       overlays,
-      savedObjects,
       chrome,
       data,
     } = useKibana<IndexPatternManagmentContext>().services;
@@ -97,11 +93,7 @@ export const EditIndexPattern = withRouter(
     const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
-          const indexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-            savedObjects.client,
-            uiSettings.get('defaultIndex'),
-            indexPatternManagementStart
-          );
+          const indexPatterns = await data.indexPatterns.getIdsWithTitle();
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
@@ -152,15 +144,13 @@ export const EditIndexPattern = withRouter(
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
     return (
-      <EuiPanel paddingSize={'l'}>
-        <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
-          <IndexHeader
-            indexPattern={indexPattern}
-            setDefault={setDefaultPattern}
-            deleteIndexPatternClick={removePattern}
-            defaultIndex={defaultIndex}
-          />
-          <EuiSpacer size="s" />
+      <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
+        <IndexHeader
+          indexPattern={indexPattern}
+          setDefault={setDefaultPattern}
+          deleteIndexPatternClick={removePattern}
+          defaultIndex={defaultIndex}
+        >
           {showTagsSection && (
             <EuiFlexGroup wrap>
               {Boolean(indexPattern.timeFieldName) && (
@@ -180,12 +170,16 @@ export const EditIndexPattern = withRouter(
             <p>
               <FormattedMessage
                 id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-                defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by Elasticsearch. To change a field type, use the Elasticsearch"
-                values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
+                defaultMessage="View and edit fields in {indexPatternTitle}. Field attributes, such as type and searchability, are based on {mappingAPILink} in Elasticsearch."
+                values={{
+                  indexPatternTitle: <strong>{indexPattern.title}</strong>,
+                  mappingAPILink: (
+                    <EuiLink href={docsUrl} target="_blank" external>
+                      {mappingAPILink}
+                    </EuiLink>
+                  ),
+                }}
               />{' '}
-              <EuiLink href={docsUrl} target="_blank" external>
-                {mappingAPILink}
-              </EuiLink>
             </p>
           </EuiText>
           {conflictedFields.length > 0 && (
@@ -196,16 +190,19 @@ export const EditIndexPattern = withRouter(
               </EuiCallOut>
             </>
           )}
-          <EuiSpacer />
-          <Tabs
-            indexPattern={indexPattern}
-            saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
-            fields={fields}
-            history={history}
-            location={location}
-          />
-        </div>
-      </EuiPanel>
+        </IndexHeader>
+        <EuiSpacer />
+        <Tabs
+          indexPattern={indexPattern}
+          saveIndexPattern={data.indexPatterns.updateSavedObject.bind(data.indexPatterns)}
+          fields={fields}
+          history={history}
+          location={location}
+          refreshFields={() => {
+            setFields(indexPattern.getNonScriptedFields());
+          }}
+        />
+      </div>
     );
   }
 );

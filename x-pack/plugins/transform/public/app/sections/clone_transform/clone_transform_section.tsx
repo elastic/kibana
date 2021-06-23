@@ -56,9 +56,16 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
   const [transformConfig, setTransformConfig] = useState<TransformPivotConfig>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
-  const { searchItems, setSavedObjectId } = useSearchItems(undefined);
+  const { error: searchItemsError, searchItems, setSavedObjectId } = useSearchItems(undefined);
 
   const fetchTransformConfig = async () => {
+    if (searchItemsError !== undefined) {
+      setTransformConfig(undefined);
+      setErrorMessage(searchItemsError);
+      setIsInitialized(true);
+      return;
+    }
+
     const transformConfigs = await api.getTransform(transformId);
     if (isHttpFetchError(transformConfigs)) {
       setTransformConfig(undefined);

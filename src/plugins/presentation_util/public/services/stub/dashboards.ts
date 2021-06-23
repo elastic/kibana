@@ -7,7 +7,7 @@
  */
 
 import { PluginServiceFactory } from '../create';
-import { PresentationDashboardsService } from '..';
+import { PresentationDashboardsService } from '../dashboards';
 
 // TODO (clint): Create set of dashboards to stub and return.
 

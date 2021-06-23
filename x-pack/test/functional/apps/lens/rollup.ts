@@ -16,13 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('lens rollup tests', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('lens/rollup/data');
-      await esArchiver.loadIfNeeded('lens/rollup/config');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/data');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/rollup/config');
     });
 
     after(async () => {
-      await esArchiver.unload('lens/rollup/data');
-      await esArchiver.unload('lens/rollup/config');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/data');
+      await esArchiver.unload('x-pack/test/functional/es_archives/lens/rollup/config');
     });
 
     it('should allow creation of lens xy chart', async () => {
@@ -84,12 +84,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'sum',
         field: 'bytes',
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
 
       await PageObjects.lens.switchFirstLayerIndexPattern('lens_rolled_up_data');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
     });

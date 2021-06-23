@@ -14,10 +14,10 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerFreezeRoute({ router, license, lib }: RouteDependencies) {
+export function registerFreezeRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/freeze'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const body = req.body as typeof bodySchema.type;
       const { indices = [] } = body;
 
@@ -40,8 +40,8 @@ export function registerFreezeRoute({ router, license, lib }: RouteDependencies)
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

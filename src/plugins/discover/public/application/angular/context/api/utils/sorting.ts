@@ -27,7 +27,6 @@ export function getFirstSortableField(indexPattern: IndexPattern, fieldNames: st
   const sortableFields = fieldNames.filter(
     (fieldName) =>
       META_FIELD_NAMES.includes(fieldName) ||
-      // @ts-ignore
       (indexPattern.fields.getByName(fieldName) || { sortable: false }).sortable
   );
   return sortableFields[0];

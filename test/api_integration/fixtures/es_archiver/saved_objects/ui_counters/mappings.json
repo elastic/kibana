@@ -1,7 +1,10 @@
 {
   "type": "index",
   "value": {
-    "index": ".kibana",
+    "aliases": {
+      ".kibana": {}
+    },
+    "index": ".kibana_1",
     "settings": {
       "index": {
         "number_of_shards": "1",
@@ -32,6 +35,15 @@
           "properties": {
             "count": {
               "type": "integer"
+            }
+          }
+        },
+        "usage-counters": {
+          "dynamic": false,
+          "properties": {
+            "domainId": {
+              "type": "keyword",
+              "ignore_above": 256
             }
           }
         },

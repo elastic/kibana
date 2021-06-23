@@ -120,5 +120,5 @@ export const query = async (
     ThrowReporter.report(HistogramResponseRT.decode(response.aggregations));
   }
 
-  throw new Error('Elasticsearch responsed with an unrecoginzed format.');
+  throw new Error('Elasticsearch responded with an unrecognized format.');
 };

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
+
+import { getDefaultHotPhasePolicy, POLICY_NAME } from '../edit_policy/constants';
+import { setupEnvironment } from '../helpers';
+
 import {
   AppTestBed,
   getDoubleEncodedPolicyEditPath,
   getEncodedPolicyEditPath,
   setup,
 } from './app.helpers';
-import { setupEnvironment } from '../helpers/setup_environment';
-import { getDefaultHotPhasePolicy, POLICY_NAME } from '../edit_policy/constants';
-import { act } from 'react-dom/test-utils';
 
 const SPECIAL_CHARS_NAME = 'test?#$+=&@:';
 const PERCENT_SIGN_NAME = 'test%';
@@ -22,8 +24,8 @@ const PERCENT_SIGN_NAME = 'test%';
 const PERCENT_SIGN_WITH_OTHER_CHARS_NAME = 'test%#';
 const PERCENT_SIGN_25_SEQUENCE = 'test%25';
 
-const createPolicyTitle = 'Create Policy';
-const editPolicyTitle = 'Edit Policy';
+const createPolicyTitle = 'Create policy';
+const editPolicyTitle = 'Edit policy';
 
 window.scrollTo = jest.fn();
 

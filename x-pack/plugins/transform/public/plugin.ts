@@ -7,11 +7,12 @@
 
 import { i18n as kbnI18n } from '@kbn/i18n';
 
-import { CoreSetup } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { HomePublicPluginSetup } from 'src/plugins/home/public';
-import { SavedObjectsStart } from 'src/plugins/saved_objects/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import type { CoreSetup } from 'src/core/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { HomePublicPluginSetup } from 'src/plugins/home/public';
+import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
+import type { ManagementSetup } from 'src/plugins/management/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
 import { registerFeature } from './register_feature';
 
 export interface PluginsDependencies {
@@ -19,6 +20,7 @@ export interface PluginsDependencies {
   management: ManagementSetup;
   home: HomePublicPluginSetup;
   savedObjects: SavedObjectsStart;
+  share: SharePluginStart;
 }
 
 export class TransformUiPlugin {

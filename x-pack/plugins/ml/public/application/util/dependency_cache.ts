@@ -23,6 +23,7 @@ import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/d
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SecurityPluginSetup } from '../../../../security/public';
 import type { MapsStartApi } from '../../../../maps/public';
+import type { DataVisualizerPluginStart } from '../../../../data_visualizer/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -43,6 +44,7 @@ export interface DependencyCache {
   i18n: I18nStart | null;
   urlGenerators: SharePluginStart['urlGenerators'] | null;
   maps: MapsStartApi | null;
+  dataVisualizer: DataVisualizerPluginStart | null;
 }
 
 const cache: DependencyCache = {
@@ -64,6 +66,7 @@ const cache: DependencyCache = {
   i18n: null,
   urlGenerators: null,
   maps: null,
+  dataVisualizer: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -84,6 +87,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.security = deps.security || null;
   cache.i18n = deps.i18n || null;
   cache.urlGenerators = deps.urlGenerators || null;
+  cache.dataVisualizer = deps.dataVisualizer || null;
 }
 
 export function getTimefilter() {
@@ -208,4 +212,11 @@ export function clearCache() {
   Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });
+}
+
+export function getFileDataVisualizer() {
+  if (cache.dataVisualizer === null) {
+    throw new Error("dataVisualizer hasn't been initialized");
+  }
+  return cache.dataVisualizer;
 }

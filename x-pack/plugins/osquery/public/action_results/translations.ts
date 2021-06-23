@@ -7,10 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_ALL_RESULTS = i18n.translate('xpack.osquery.results.errorSearchDescription', {
-  defaultMessage: `An error has occurred on all results search`,
-});
+export const ERROR_ACTION_RESULTS = i18n.translate(
+  'xpack.osquery.action_results.errorSearchDescription',
+  {
+    defaultMessage: `An error has occurred on action results search`,
+  }
+);
 
-export const FAIL_ALL_RESULTS = i18n.translate('xpack.osquery.results.failSearchDescription', {
-  defaultMessage: `Failed to fetch results`,
-});
+export const FAIL_ACTION_RESULTS = i18n.translate(
+  'xpack.osquery.action_results.failSearchDescription',
+  {
+    defaultMessage: `Failed to fetch action results`,
+  }
+);

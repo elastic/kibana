@@ -30,15 +30,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
 import { DOCS_PREFIX } from '../../../routes';
 import { EngineLogic } from '../../engine';
 import { EngineDetails } from '../../engine/types';
-import {
-  DOCUMENTS_API_JSON_EXAMPLE,
-  FLYOUT_ARIA_LABEL_ID,
-  FLYOUT_CANCEL_BUTTON,
-} from '../constants';
+
+import { DOCUMENTS_API_JSON_EXAMPLE, FLYOUT_ARIA_LABEL_ID } from '../constants';
 import { DocumentCreationLogic } from '../index';
 
 export const ApiCodeExample: React.FC = () => (
@@ -98,7 +96,7 @@ export const FlyoutBody: React.FC = () => {
         </p>
       </EuiText>
       <EuiSpacer />
-      <EuiPanel hasShadow={false} paddingSize="s" className="eui-textBreakAll">
+      <EuiPanel hasBorder paddingSize="s" className="eui-textBreakAll">
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiBadge color="primary">POST</EuiBadge>
@@ -136,7 +134,7 @@ export const FlyoutFooter: React.FC = () => {
 
   return (
     <EuiFlyoutFooter>
-      <EuiButtonEmpty onClick={closeDocumentCreation}>{FLYOUT_CANCEL_BUTTON}</EuiButtonEmpty>
+      <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
     </EuiFlyoutFooter>
   );
 };

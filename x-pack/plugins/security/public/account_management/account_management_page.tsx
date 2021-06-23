@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreStart, NotificationsStart } from 'src/core/public';
-import { getUserDisplayName, AuthenticatedUser } from '../../common/model';
-import { AuthenticationServiceSetup } from '../authentication';
-import { UserAPIClient } from '../management';
+import type { CoreStart, NotificationsStart } from 'src/core/public';
+
+import type { AuthenticatedUser } from '../../common/model';
+import { getUserDisplayName } from '../../common/model';
+import type { AuthenticationServiceSetup } from '../authentication';
+import type { UserAPIClient } from '../management';
 import { ChangePassword } from './change_password';
 import { PersonalInfo } from './personal_info';
 
@@ -37,7 +41,13 @@ export const AccountManagementPage = ({ userAPIClient, authc, notifications }: P
       <EuiPageBody restrictWidth>
         <EuiPanel>
           <EuiText data-test-subj={'userDisplayName'}>
-            <h1>{getUserDisplayName(currentUser)}</h1>
+            <h1>
+              <FormattedMessage
+                id="xpack.security.account.pageTitle"
+                defaultMessage="Settings for {strongUsername}"
+                values={{ strongUsername: <strong>{getUserDisplayName(currentUser)}</strong> }}
+              />
+            </h1>
           </EuiText>
 
           <EuiSpacer size="xl" />

@@ -21,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Network DNS', () => {
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('packetbeat/dns'));
-      after(() => esArchiver.unload('packetbeat/dns'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/dns'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/dns'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -32,15 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             factoryQueryType: NetworkQueries.dns,
             filterQuery:
@@ -53,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -70,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({
             ip: '151.205.0.17',
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             factoryQueryType: NetworkQueries.dns,
             docValueFields: [],
             inspect: false,
@@ -87,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 

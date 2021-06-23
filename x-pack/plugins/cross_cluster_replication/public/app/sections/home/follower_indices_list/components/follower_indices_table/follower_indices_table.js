@@ -11,16 +11,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiHealth,
+  EuiButton,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingKibana,
   EuiOverlayMask,
 } from '@elastic/eui';
+
 import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import { FollowerIndexActionsProvider } from '../../../../../components';
 import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 const actionI18nTexts = {
   pause: i18n.translate(
@@ -54,7 +57,8 @@ const getFilteredIndices = (followerIndices, queryText) => {
     const normalizedSearchText = queryText.toLowerCase();
 
     return followerIndices.filter((followerIndex) => {
-      const { name, remoteCluster, leaderIndex } = followerIndex;
+      // default values to avoid undefined errors
+      const { name = '', remoteCluster = '', leaderIndex = '' } = followerIndex;
 
       if (name.toLowerCase().includes(normalizedSearchText)) {
         return true;
@@ -288,6 +292,19 @@ export class FollowerIndicesTable extends PureComponent {
       toolsLeft: selectedItems.length ? (
         <ContextMenu followerIndices={selectedItems} testSubj="contextMenuButton" />
       ) : undefined,
+      toolsRight: (
+        <EuiButton
+          {...reactRouterNavigate(routing._reactRouter.history, `/follower_indices/add`)}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="createFollowerIndexButton"
+        >
+          <FormattedMessage
+            id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
+            defaultMessage="Create a follower index"
+          />
+        </EuiButton>
+      ),
       onChange: this.onSearch,
       box: {
         incremental: true,

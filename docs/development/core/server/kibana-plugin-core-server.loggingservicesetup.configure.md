@@ -34,7 +34,7 @@ Customize the configuration for the plugins.data.search context.
 core.logging.configure(
   of({
     appenders: new Map(),
-    loggers: [{ context: 'search', appenders: ['default'] }]
+    loggers: [{ name: 'search', appenders: ['default'] }]
   })
 )
 

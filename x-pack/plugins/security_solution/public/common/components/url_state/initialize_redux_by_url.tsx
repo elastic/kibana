@@ -29,7 +29,6 @@ import { SecurityPageName } from '../../../../common/constants';
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch
 ): DispatchSetInitialStateFromUrl => ({
-  apolloClient,
   detailName,
   filterManager,
   indexPattern,
@@ -99,7 +98,6 @@ export const dispatchSetInitialStateFromUrl = (
       if (timeline != null && timeline.id !== '') {
         queryTimelineById({
           activeTimelineTab: timeline.activeTab,
-          apolloClient,
           duplicate: false,
           graphEventId: timeline.graphEventId,
           timelineId: timeline.id,

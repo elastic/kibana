@@ -23,6 +23,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { DocLinksStart, HttpSetup } from 'kibana/public';
+import type { estypes } from '@elastic/elasticsearch';
+
 import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
@@ -34,10 +36,14 @@ import {
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { validateExpression } from './validation';
-import { parseDuration } from '../../../../alerts/common';
+import { parseDuration } from '../../../../alerting/common';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';
+
+function totalHitsToNumber(total: estypes.SearchHitsMetadata['total']): number {
+  return typeof total === 'number' ? total : total.value;
+}
 
 const DEFAULT_VALUES = {
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
@@ -191,7 +197,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         setTestQueryResult(
           i18n.translate('xpack.stackAlerts.esQuery.ui.numQueryMatchesText', {
             defaultMessage: 'Query matched {count} documents in the last {window}.',
-            values: { count: hits.total, window },
+            values: { count: totalHitsToNumber(hits.total), window },
           })
         );
       } catch (err) {
@@ -270,7 +276,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         <h5>
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.queryPrompt"
-            defaultMessage="Define the ES query"
+            defaultMessage="Define the Elasticsearch query"
           />
         </h5>
       </EuiTitle>
@@ -281,19 +287,16 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
         label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.queryPrompt.label"
-            defaultMessage="ES query"
+            defaultMessage="Elasticsearch query"
           />
         }
         isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
         helpText={
-          <EuiLink
-            href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/query-dsl.html`}
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.queryPrompt.help"
-              defaultMessage="ES Query DSL documentation"
+              defaultMessage="Elasticsearch Query DSL documentation"
             />
           </EuiLink>
         }
@@ -305,7 +308,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
           theme="github"
           data-test-subj="queryJsonEditor"
           aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
-            defaultMessage: 'ES query editor',
+            defaultMessage: 'Elasticsearch query editor',
           })}
           value={xJson}
           onChange={(xjson: string) => {

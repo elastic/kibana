@@ -156,9 +156,11 @@ const createErrorTransportRequestPromise = (err: any): MockedTransportRequestPro
   return promise as MockedTransportRequestPromise<never>;
 };
 
-function createApiResponse(opts: Partial<ApiResponse> = {}): ApiResponse {
+function createApiResponse<TResponse = Record<string, any>>(
+  opts: Partial<ApiResponse<TResponse>> = {}
+): ApiResponse<TResponse> {
   return {
-    body: {},
+    body: {} as any,
     statusCode: 200,
     headers: {},
     warnings: [],

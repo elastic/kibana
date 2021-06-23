@@ -23,8 +23,8 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
+import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 import { PLUGIN_ID } from '../../../../../../common/constants/app';
-import { createSpacesContext, SpacesContext } from '../../../../contexts/spaces';
 import { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public/';
 
 import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
@@ -38,8 +38,9 @@ import { getDocLinks } from '../../../../util/dependency_cache';
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
+import { InsufficientLicensePage } from '../insufficient_license_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
-import { SpacesPluginStart } from '../../../../../../../spaces/public';
+import type { SpacesPluginStart } from '../../../../../../../spaces/public';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
 import { getMlGlobalServices } from '../../../../app';
@@ -68,7 +69,9 @@ function usePageState<T extends ListingPageUrlState>(
   return [pageState, updateState];
 }
 
-function useTabs(isMlEnabledInSpace: boolean, spacesEnabled: boolean): Tab[] {
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+
+function useTabs(isMlEnabledInSpace: boolean, spacesApi: SpacesPluginStart | undefined): Tab[] {
   const [adPageState, updateAdPageState] = usePageState(getDefaultAnomalyDetectionJobsListState());
   const [dfaPageState, updateDfaPageState] = usePageState(getDefaultDFAListState());
 
@@ -88,7 +91,7 @@ function useTabs(isMlEnabledInSpace: boolean, spacesEnabled: boolean): Tab[] {
               onJobsViewStateUpdate={updateAdPageState}
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
-              spacesEnabled={spacesEnabled}
+              spacesApi={spacesApi}
             />
           </Fragment>
         ),
@@ -105,7 +108,7 @@ function useTabs(isMlEnabledInSpace: boolean, spacesEnabled: boolean): Tab[] {
             <DataFrameAnalyticsList
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
-              spacesEnabled={spacesEnabled}
+              spacesApi={spacesApi}
               pageState={dfaPageState}
               updatePageState={updateDfaPageState}
             />
@@ -121,30 +124,28 @@ export const JobsListPage: FC<{
   coreStart: CoreStart;
   share: SharePluginStart;
   history: ManagementAppMountParams['history'];
-  spaces?: SpacesPluginStart;
-}> = ({ coreStart, share, history, spaces }) => {
-  const spacesEnabled = spaces !== undefined;
+  spacesApi?: SpacesPluginStart;
+}> = ({ coreStart, share, history, spacesApi }) => {
+  const spacesEnabled = spacesApi !== undefined;
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
+  const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [isMlEnabledInSpace, setIsMlEnabledInSpace] = useState(false);
-  const tabs = useTabs(isMlEnabledInSpace, spacesEnabled);
+  const tabs = useTabs(isMlEnabledInSpace, spacesApi);
   const [currentTabId, setCurrentTabId] = useState(tabs[0].id);
   const I18nContext = coreStart.i18n.Context;
-  const spacesContext = useMemo(() => createSpacesContext(coreStart.http, spacesEnabled), []);
 
   const check = async () => {
     try {
       const { mlFeatureEnabledInSpace } = await checkGetManagementMlJobsResolver();
       setIsMlEnabledInSpace(mlFeatureEnabledInSpace);
-      spacesContext.spacesEnabled = spacesEnabled;
-      if (spacesEnabled && spacesContext.spacesManager !== null) {
-        spacesContext.allSpaces = (await spacesContext.spacesManager.getSpaces()).filter(
-          (space) => space.disabledFeatures.includes(PLUGIN_ID) === false
-        );
-      }
     } catch (e) {
-      setAccessDenied(true);
+      if (e.mlFeatureEnabledInSpace && e.isPlatinumOrTrialLicense === false) {
+        setIsPlatinumOrTrialLicense(false);
+      } else {
+        setAccessDenied(true);
+      }
     }
     setInitialized(true);
   };
@@ -152,6 +153,11 @@ export const JobsListPage: FC<{
   useEffect(() => {
     check();
   }, []);
+
+  const ContextWrapper = useCallback(
+    spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spacesApi]
+  );
 
   if (initialized === false) {
     return null;
@@ -191,13 +197,17 @@ export const JobsListPage: FC<{
     return <AccessDeniedPage />;
   }
 
+  if (isPlatinumOrTrialLicense === false) {
+    return <InsufficientLicensePage basePath={coreStart.http.basePath} />;
+  }
+
   return (
     <RedirectAppLinks application={coreStart.application}>
       <I18nContext>
         <KibanaContextProvider
           services={{ ...coreStart, share, mlServices: getMlGlobalServices(coreStart.http) }}
         >
-          <SpacesContext.Provider value={spacesContext}>
+          <ContextWrapper feature={PLUGIN_ID}>
             <Router history={history}>
               <EuiPageContent
                 id="kibanaManagementMLSection"
@@ -256,7 +266,7 @@ export const JobsListPage: FC<{
                 </EuiPageContentBody>
               </EuiPageContent>
             </Router>
-          </SpacesContext.Provider>
+          </ContextWrapper>
         </KibanaContextProvider>
       </I18nContext>
     </RedirectAppLinks>

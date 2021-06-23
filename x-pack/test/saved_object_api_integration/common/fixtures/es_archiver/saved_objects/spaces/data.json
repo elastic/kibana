@@ -544,6 +544,7 @@
       "type": "legacy-url-alias",
       "updated_at": "2017-09-21T18:51:23.794Z",
       "legacy-url-alias": {
+        "sourceId": "alias-match",
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "alias-match-newid"
@@ -561,6 +562,7 @@
       "type": "legacy-url-alias",
       "updated_at": "2017-09-21T18:51:23.794Z",
       "legacy-url-alias": {
+        "sourceId": "disabled",
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "alias-match-newid",
@@ -611,10 +613,45 @@
       "type": "legacy-url-alias",
       "updated_at": "2017-09-21T18:51:23.794Z",
       "legacy-url-alias": {
+        "sourceId": "conflict",
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "conflict-newid"
       }
     }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharecapabletype:only_default_space",
+    "index": ".kibana",
+    "source": {
+      "sharecapabletype": {
+        "title": "A share-capable (isolated) saved-object only in the default space"
+      },
+      "type": "sharecapabletype",
+      "namespaces": ["default"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharecapabletype:only_space_1",
+    "index": ".kibana",
+    "source": {
+      "sharecapabletype": {
+        "title": "A share-capable (isolated) saved-object only in space_1"
+      },
+      "type": "sharecapabletype",
+      "namespaces": ["space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
   }
 }

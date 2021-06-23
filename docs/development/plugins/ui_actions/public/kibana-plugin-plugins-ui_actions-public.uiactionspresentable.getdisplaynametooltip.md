@@ -9,7 +9,7 @@ Returns tooltip text which should be displayed when user hovers this object. Sho
 <b>Signature:</b>
 
 ```typescript
-getDisplayNameTooltip(context: Context): string;
+getDisplayNameTooltip?(context: Context): string;
 ```
 
 ## Parameters

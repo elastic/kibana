@@ -91,7 +91,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
       )}
       {stepData != null && stepDataDetails != null && (
         <FlexGroupFullHeight gutterSize="xs" direction="column">
-          <EuiFlexItem grow={1} key="header">
+          <EuiFlexItem grow={false} key="header">
             <HeaderSection title={i18n.ABOUT_TEXT}>
               {!isEmpty(stepDataDetails.note) && stepDataDetails.note.trim() !== '' && (
                 <EuiButtonGroup
@@ -106,7 +106,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
               )}
             </HeaderSection>
           </EuiFlexItem>
-          <EuiFlexItem grow={5} key="details">
+          <EuiFlexItem key="details">
             {selectedToggleOption === 'details' ? (
               <EuiResizeObserver data-test-subj="stepAboutDetailsContent" onResize={onResize}>
                 {(resizeRef) => (

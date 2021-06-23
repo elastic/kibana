@@ -1,12 +1,20 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
+    "incremental": true,
     "outDir": "./target",
     "stripInternal": false,
+    "declaration": true,
     "declarationMap": true,
-    "types": ["jest", "node"]
+    "rootDir": "./src",
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-apm-config-loader/src",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": ["./src/**/*.ts"],
-  "exclude": ["target"]
+  "include": [
+    "src/**/*.ts"
+  ]
 }

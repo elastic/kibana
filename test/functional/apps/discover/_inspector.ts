@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const STATS_ROW_VALUE_INDEX = 1;
   function getHitCount(requestStats: string[][]): string | undefined {
     const hitsCountStatsRow = requestStats.find((statsRow) => {
-      return statsRow[STATS_ROW_NAME_INDEX] === 'Hits (total)';
+      return statsRow[STATS_ROW_NAME_INDEX] === 'Hits';
     });
 
     if (!hitsCountStatsRow) {
@@ -32,8 +32,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('inspect', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
@@ -59,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await inspector.open();
       const requestStats = await inspector.getTableData();
 
-      expect(getHitCount(requestStats)).to.be('14004');
+      expect(getHitCount(requestStats)).to.be('500');
     });
   });
 }

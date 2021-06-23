@@ -7,12 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
-import { ISavedObjectsRepository, SavedObject } from 'src/core/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { Space } from 'src/plugins/spaces_oss/common';
-import { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../../common';
+
+import type { ISavedObjectsRepository, SavedObject } from 'src/core/server';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../../common';
 import { isReservedSpace } from '../../common';
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
 
 const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
   'any',
@@ -22,9 +23,46 @@ const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
 ];
 const DEFAULT_PURPOSE = 'any';
 
-export type ISpacesClient = PublicMethodsOf<SpacesClient>;
+/**
+ * Client interface for interacting with spaces.
+ */
+export interface ISpacesClient {
+  /**
+   * Retrieve all available spaces.
+   * @param options controls which spaces are retrieved.
+   */
+  getAll(options?: GetAllSpacesOptions): Promise<GetSpaceResult[]>;
 
-export class SpacesClient {
+  /**
+   * Retrieve a space by its id.
+   * @param id the space id.
+   */
+  get(id: string): Promise<Space>;
+
+  /**
+   * Creates a space.
+   * @param space the space to create.
+   */
+  create(space: Space): Promise<Space>;
+
+  /**
+   * Updates a space.
+   * @param id  the id of the space to update.
+   * @param space the updated space.
+   */
+  update(id: string, space: Space): Promise<Space>;
+
+  /**
+   * Deletes a space, and all saved objects belonging to that space.
+   * @param id the id of the space to delete.
+   */
+  delete(id: string): Promise<void>;
+}
+
+/**
+ * Client for interacting with spaces.
+ */
+export class SpacesClient implements ISpacesClient {
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly config: ConfigType,

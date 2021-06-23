@@ -22,15 +22,15 @@ import {
   getInspectorAdapters,
 } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   SOURCE_DATA_REQUEST_ID,
+  SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
-  SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
@@ -39,13 +39,13 @@ import {
   AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
+  EditState,
   Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   MapCenter,
   MapExtent,
   MapQuery,
-  MapRefreshConfig,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
@@ -56,6 +56,7 @@ import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
 import { ILayer } from '../classes/layers/layer';
+import { getIsReadOnly } from './ui_selectors';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
@@ -176,12 +177,17 @@ export const getMouseCoordinates = ({ map }: MapStoreState) => map.mapState.mous
 export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
   map.mapState.timeFilters ? map.mapState.timeFilters : getTimeFilter().getTime();
 
+export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
+
 export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
+
+export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
+  map.mapState.searchSessionMapBuffer;
 
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
@@ -192,21 +198,8 @@ export const isUsingSearch = (state: MapStoreState): boolean => {
 export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
-export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
-  return !!map.mapState.drawState;
-};
-
-export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
-  if (map.mapState.refreshConfig) {
-    return map.mapState.refreshConfig;
-  }
-
-  const refreshInterval = getTimeFilter().getRefreshInterval();
-  return {
-    isPaused: refreshInterval.pause,
-    interval: refreshInterval.value,
-  };
-};
+export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
+  map.mapState.editState;
 
 export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
   map.mapState.refreshTimerLastTriggeredAt;
@@ -231,29 +224,37 @@ export const getDataFilters = createSelector(
   getMapBuffer,
   getMapZoom,
   getTimeFilters,
+  getTimeslice,
   getRefreshTimerLastTriggeredAt,
   getQuery,
   getFilters,
   getSearchSessionId,
+  getSearchSessionMapBuffer,
+  getIsReadOnly,
   (
     mapExtent,
     mapBuffer,
     mapZoom,
     timeFilters,
+    timeslice,
     refreshTimerLastTriggeredAt,
     query,
     filters,
-    searchSessionId
+    searchSessionId,
+    searchSessionMapBuffer,
+    isReadOnly
   ) => {
     return {
       extent: mapExtent,
-      buffer: mapBuffer,
+      buffer: searchSessionId && searchSessionMapBuffer ? searchSessionMapBuffer : mapBuffer,
       zoom: mapZoom,
       timeFilters,
+      timeslice,
       refreshTimerLastTriggeredAt,
       query,
       filters,
       searchSessionId,
+      isReadOnly,
     };
   }
 );
@@ -372,16 +373,6 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
   });
 });
 
-// Get list of unique index patterns used by all layers
-export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
-  const indexPatternIds: string[] = [];
-  layerList.forEach((layer) => {
-    indexPatternIds.push(...layer.getIndexPatternIds());
-  });
-  return _.uniq(indexPatternIds).sort();
-});
-
-// Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
 export const getQueryableUniqueIndexPatternIds = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
@@ -391,14 +382,38 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
         const layer = createLayerInstance(layerDescriptor);
-        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        }
       });
     } else {
       layerList.forEach((layer) => {
-        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        }
       });
     }
     return _.uniq(indexPatternIds);
+  }
+);
+
+export const getGeoFieldNames = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const geoFieldNames: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor);
+        geoFieldNames.push(...layer.getGeoFieldNames());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        geoFieldNames.push(...layer.getGeoFieldNames());
+      });
+    }
+    return _.uniq(geoFieldNames);
   }
 );
 
@@ -428,7 +443,12 @@ export const areLayersLoaded = createSelector(
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.isDataLoaded()) {
+      if (
+        layer.isVisible() &&
+        layer.showAtZoomLevel(zoom) &&
+        !layer.hasErrors() &&
+        !layer.isInitialDataLoadComplete()
+      ) {
         return false;
       }
     }

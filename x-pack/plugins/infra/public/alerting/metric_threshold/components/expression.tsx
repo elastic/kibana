@@ -26,20 +26,16 @@ import {
   Aggregators,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../../common/alerting/metrics';
-import {
-  ForLastExpression,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/common';
+import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import {
   IErrorObject,
   AlertTypeParams,
   AlertTypeParamsExpressionProps,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../triggers_actions_ui/public/types';
+} from '../../../../../triggers_actions_ui/public';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
-import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 import { ExpressionRow } from './expression_row';
@@ -77,14 +73,13 @@ export const Expressions: React.FC<Props> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
-    type: 'metrics',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
+  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
     createDerivedIndexPattern,
   ]);
 
@@ -102,7 +97,7 @@ export const Expressions: React.FC<Props> = (props) => {
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
       const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
-      exp[id] = { ...exp[id], ...e };
+      exp[id] = e;
       setAlertParams('criteria', exp);
     },
     [setAlertParams, alertParams.criteria]

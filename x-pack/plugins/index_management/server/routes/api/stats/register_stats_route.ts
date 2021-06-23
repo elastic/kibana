@@ -23,10 +23,10 @@ function formatHit(hit: { _shards: any; indices: { [key: string]: any } }, index
   };
 }
 
-export function registerStatsRoute({ router, license, lib }: RouteDependencies) {
+export function registerStatsRoute({ router, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/stats/{indexName}'), validate: { params: paramsSchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { indexName } = req.params as typeof paramsSchema.type;
       const params = {
         expand_wildcards: 'none',
@@ -47,8 +47,8 @@ export function registerStatsRoute({ router, license, lib }: RouteDependencies) 
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

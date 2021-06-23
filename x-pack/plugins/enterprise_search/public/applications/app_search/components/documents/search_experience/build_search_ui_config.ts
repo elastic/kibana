@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Schema } from '../../../../shared/types';
+import { Schema } from '../../../../shared/schema/types';
 
 import { Fields } from './types';
 

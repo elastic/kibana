@@ -49,6 +49,7 @@ describe('createMetricsK8sAnomaliesQuery', () => {
           'record_score',
           'typical',
           'actual',
+          'partition_field_name',
           'partition_field_value',
           'timestamp',
           'bucket_span',

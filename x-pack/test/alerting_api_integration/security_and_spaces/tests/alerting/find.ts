@@ -27,17 +27,17 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle find alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
+              )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -47,7 +47,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find any alert types`,
+                message: `Unauthorized to find rules for any rule types`,
                 statusCode: 403,
               });
               break;
@@ -58,33 +58,33 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
-              expect(response.body.perPage).to.be.greaterThan(0);
+              expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
                 tags: ['foo'],
-                alertTypeId: 'test.noop',
+                rule_type_id: 'test.noop',
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
                 actions: [],
                 params: {},
-                createdBy: 'elastic',
-                scheduledTaskId: match.scheduledTaskId,
-                createdAt: match.createdAt,
-                updatedAt: match.updatedAt,
+                created_by: 'elastic',
+                scheduled_task_id: match.scheduled_task_id,
+                created_at: match.created_at,
+                updated_at: match.updated_at,
                 throttle: '1m',
-                notifyWhen: 'onThrottleInterval',
-                updatedBy: 'elastic',
-                apiKeyOwner: 'elastic',
-                muteAll: false,
-                mutedInstanceIds: [],
-                executionStatus: match.executionStatus,
+                notify_when: 'onThrottleInterval',
+                updated_by: 'elastic',
+                api_key_owner: 'elastic',
+                mute_all: false,
+                muted_alert_ids: [],
+                execution_status: match.execution_status,
               });
-              expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
-              expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
+              expect(Date.parse(match.created_at)).to.be.greaterThan(0);
+              expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -95,25 +95,25 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           async function createNoOpAlert(overrides = {}) {
             const alert = getTestAlertData(overrides);
             const { body: createdAlert } = await supertest
-              .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+              .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
               .send(alert)
               .expect(200);
-            objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+            objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
             return {
               id: createdAlert.id,
-              alertTypeId: alert.alertTypeId,
+              rule_type_id: alert.rule_type_id,
             };
           }
           function createRestrictedNoOpAlert() {
             return createNoOpAlert({
-              alertTypeId: 'test.restricted-noop',
+              rule_type_id: 'test.restricted-noop',
               consumer: 'alertsRestrictedFixture',
             });
           }
           function createUnrestrictedNoOpAlert() {
             return createNoOpAlert({
-              alertTypeId: 'test.unrestricted-noop',
+              rule_type_id: 'test.unrestricted-noop',
               consumer: 'alertsFixture',
             });
           }
@@ -131,7 +131,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(space.id)}/api/alerts/_find?per_page=${perPage}&sort_field=createdAt`
+              `${getUrlPrefix(
+                space.id
+              )}/api/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -141,7 +143,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find any alert types`,
+                message: `Unauthorized to find rules for any rule types`,
                 statusCode: 403,
               });
               break;
@@ -149,12 +151,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
-              expect(response.body.perPage).to.be.equal(perPage);
+              expect(response.body.per_page).to.be.equal(perPage);
               expect(response.body.total).to.be.equal(6);
               {
                 const [firstPage] = chunk(
                   allAlerts
-                    .filter((alert) => alert.alertTypeId !== 'test.restricted-noop')
+                    .filter((alert) => alert.rule_type_id !== 'test.restricted-noop')
                     .map((alert) => alert.id),
                   perPage
                 );
@@ -166,7 +168,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
-              expect(response.body.perPage).to.be.equal(perPage);
+              expect(response.body.per_page).to.be.equal(perPage);
               expect(response.body.total).to.be.equal(8);
 
               {
@@ -180,7 +182,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                   .get(
                     `${getUrlPrefix(
                       space.id
-                    )}/api/alerts/_find?per_page=${perPage}&sort_field=createdAt&page=2`
+                    )}/api/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
                   )
                   .auth(user.username, user.password);
 
@@ -195,18 +197,18 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         it('should handle find alert request with filter appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.noop',
+              connector_type_id: 'test.noop',
               config: {},
               secrets: {},
             })
             .expect(200);
 
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -221,13 +223,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alerts/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
+              )}/api/alerting/rules/_find?filter=alert.attributes.actions:{ actionTypeId: test.noop }`
             )
             .auth(user.username, user.password);
 
@@ -237,7 +239,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find any alert types`,
+                message: `Unauthorized to find rules for any rule types`,
                 statusCode: 403,
               });
               break;
@@ -248,14 +250,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
-              expect(response.body.perPage).to.be.greaterThan(0);
+              expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
               expect(match).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
                 tags: ['foo'],
-                alertTypeId: 'test.noop',
+                rule_type_id: 'test.noop',
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: false,
@@ -263,24 +265,24 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                   {
                     id: createdAction.id,
                     group: 'default',
-                    actionTypeId: 'test.noop',
+                    connector_type_id: 'test.noop',
                     params: {},
                   },
                 ],
                 params: {},
-                createdBy: 'elastic',
+                created_by: 'elastic',
                 throttle: '1m',
-                updatedBy: 'elastic',
-                apiKeyOwner: null,
-                muteAll: false,
-                mutedInstanceIds: [],
-                notifyWhen: 'onThrottleInterval',
-                createdAt: match.createdAt,
-                updatedAt: match.updatedAt,
-                executionStatus: match.executionStatus,
+                updated_by: 'elastic',
+                api_key_owner: null,
+                mute_all: false,
+                muted_alert_ids: [],
+                notify_when: 'onThrottleInterval',
+                created_at: match.created_at,
+                updated_at: match.updated_at,
+                execution_status: match.execution_status,
               });
-              expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
-              expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
+              expect(Date.parse(match.created_at)).to.be.greaterThan(0);
+              expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -290,38 +292,38 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         it('should handle find alert request with fields appropriately', async () => {
           const myTag = uuid.v4();
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
                 tags: [myTag],
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           // create another type with same tag
           const { body: createdSecondAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 tags: [myTag],
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdSecondAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdSecondAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alerts/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
+              )}/api/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -331,7 +333,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find any alert types`,
+                message: `Unauthorized to find rules for any rule types`,
                 statusCode: 403,
               });
               break;
@@ -345,7 +347,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
-              expect(response.body.perPage).to.be.greaterThan(0);
+              expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const [matchFirst, matchSecond] = response.body.data;
               expect(omit(matchFirst, 'updatedAt')).to.eql({
@@ -367,38 +369,38 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         it('should handle find alert request with executionStatus field appropriately', async () => {
           const myTag = uuid.v4();
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 enabled: false,
                 tags: [myTag],
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           // create another type with same tag
           const { body: createdSecondAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
                 tags: [myTag],
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdSecondAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdSecondAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alerts/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
+              )}/api/alerting/rules/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -408,7 +410,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find any alert types`,
+                message: `Unauthorized to find rules for any rule types`,
                 statusCode: 403,
               });
               break;
@@ -422,20 +424,20 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.page).to.equal(1);
-              expect(response.body.perPage).to.be.greaterThan(0);
+              expect(response.body.per_page).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const [matchFirst, matchSecond] = response.body.data;
               expect(omit(matchFirst, 'updatedAt')).to.eql({
                 id: createdAlert.id,
                 actions: [],
                 tags: [myTag],
-                executionStatus: matchFirst.executionStatus,
+                execution_status: matchFirst.execution_status,
               });
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
-                executionStatus: matchSecond.executionStatus,
+                execution_status: matchSecond.execution_status,
               });
               break;
             default:
@@ -445,15 +447,17 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't find alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix('other')}/api/alerts/_find?search=test.noop&search_fields=alertTypeId`
+              `${getUrlPrefix(
+                'other'
+              )}/api/alerting/rules/_find?search=test.noop&search_fields=alertTypeId`
             )
             .auth(user.username, user.password);
 
@@ -466,7 +470,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `Unauthorized to find any alert types`,
+                message: `Unauthorized to find rules for any rule types`,
                 statusCode: 403,
               });
               break;
@@ -475,7 +479,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 page: 1,
-                perPage: 10,
+                per_page: 10,
                 total: 0,
                 data: [],
               });

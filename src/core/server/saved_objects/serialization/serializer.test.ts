@@ -158,7 +158,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        hello: {},
       },
     });
     expect(actual).not.toHaveProperty('version');
@@ -171,7 +170,6 @@ describe('#rawToSavedObject', () => {
       _primary_term: 1,
       _source: {
         type: 'foo',
-        hello: {},
       },
     });
     expect(actual).toHaveProperty('version', encodeVersion(4, 1));
@@ -184,7 +182,6 @@ describe('#rawToSavedObject', () => {
         _seq_no: 4,
         _source: {
           type: 'foo',
-          hello: {},
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(`"_primary_term from elasticsearch must be an integer"`);
@@ -197,7 +194,6 @@ describe('#rawToSavedObject', () => {
         _primary_term: 1,
         _source: {
           type: 'foo',
-          hello: {},
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(`"_seq_no from elasticsearch must be an integer"`);
@@ -249,7 +245,7 @@ describe('#rawToSavedObject', () => {
 
   test('it does not pass unknown properties through', () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
-      _id: 'universe',
+      _id: 'hello:universe',
       _source: {
         type: 'hello',
         hello: {
@@ -270,7 +266,7 @@ describe('#rawToSavedObject', () => {
 
   test('it does not create attributes if [type] is missing', () => {
     const actual = singleNamespaceSerializer.rawToSavedObject({
-      _id: 'universe',
+      _id: 'hello:universe',
       _source: {
         type: 'hello',
       },
@@ -285,14 +281,14 @@ describe('#rawToSavedObject', () => {
   test('it fails for documents which do not specify a type', () => {
     expect(() =>
       singleNamespaceSerializer.rawToSavedObject({
-        _id: 'universe',
+        _id: 'hello:universe',
         _source: {
           hello: {
             world: 'earth',
           },
         } as any,
       })
-    ).toThrow(/Expected "undefined" to be a saved object type/);
+    ).toThrow(`Raw document 'hello:universe' is missing _source.type field`);
   });
 
   test('it is complimentary with savedObjectToRaw', () => {
@@ -325,29 +321,30 @@ describe('#rawToSavedObject', () => {
     ).toEqual(raw);
   });
 
-  test('it handles unprefixed ids', () => {
-    const actual = singleNamespaceSerializer.rawToSavedObject({
-      _id: 'universe',
-      _source: {
-        type: 'hello',
-      },
-    });
-
-    expect(actual).toHaveProperty('id', 'universe');
+  test('fails for documents which do not have a type prefix in their _id', () => {
+    expect(() =>
+      singleNamespaceSerializer.rawToSavedObject({
+        _id: 'universe',
+        _source: {
+          type: 'hello',
+        },
+      })
+    ).toThrow(`Raw document 'universe' does not start with expected prefix 'hello:'`);
   });
 
   describe('namespace-agnostic type with a namespace', () => {
-    const raw = createSampleDoc({ _source: { namespace: 'baz' } });
+    const raw = createSampleDoc({ _source: { namespace: 'baz' } }); // namespace field should be ignored
     const actual = namespaceAgnosticSerializer.rawToSavedObject(raw);
 
     test(`removes type prefix from _id`, () => {
       expect(actual).toHaveProperty('id', 'bar');
     });
 
-    test(`copies _id to id if prefixed by namespace and type`, () => {
+    test(`fails for documents which have a namespace prefix in their _id`, () => {
       const _id = `${raw._source.namespace}:${raw._id}`;
-      const _actual = namespaceAgnosticSerializer.rawToSavedObject({ ...raw, _id });
-      expect(_actual).toHaveProperty('id', _id);
+      expect(() => namespaceAgnosticSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
+        `Raw document 'baz:foo:bar' does not start with expected prefix 'foo:'`
+      );
     });
 
     test(`doesn't copy _source.namespace to namespace`, () => {
@@ -372,10 +369,11 @@ describe('#rawToSavedObject', () => {
       expect(actual).toHaveProperty('id', 'bar');
     });
 
-    test(`copies _id to id if prefixed by random prefix and type`, () => {
+    test(`fails for documents which have any extra prefix in their _id`, () => {
       const _id = `random:${raw._id}`;
-      const _actual = singleNamespaceSerializer.rawToSavedObject({ ...raw, _id });
-      expect(_actual).toHaveProperty('id', _id);
+      expect(() => singleNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
+        `Raw document 'random:foo:bar' does not start with expected prefix 'foo:'`
+      );
     });
 
     test(`doesn't specify namespace`, () => {
@@ -385,23 +383,28 @@ describe('#rawToSavedObject', () => {
 
   describe('single-namespace type with a namespace', () => {
     const namespace = 'baz';
-    const raw = createSampleDoc({ _source: { namespace } });
+    const raw = createSampleDoc({
+      _id: `${namespace}:${sampleTemplate._id}`,
+      _source: { namespace },
+    });
     const actual = singleNamespaceSerializer.rawToSavedObject(raw);
 
     test(`removes type and namespace prefix from _id`, () => {
-      const _id = `${namespace}:${raw._id}`;
-      const _actual = singleNamespaceSerializer.rawToSavedObject({ ...raw, _id });
-      expect(_actual).toHaveProperty('id', 'bar');
+      expect(actual).toHaveProperty('id', 'bar');
     });
 
-    test(`copies _id to id if prefixed only by type`, () => {
-      expect(actual).toHaveProperty('id', raw._id);
+    test(`fails for documents which do not have a namespace prefix in their _id`, () => {
+      const _id = sampleTemplate._id;
+      expect(() => singleNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
+        `Raw document 'foo:bar' does not start with expected prefix 'baz:foo:'`
+      );
     });
 
-    test(`copies _id to id if prefixed by random prefix and type`, () => {
+    test(`fails for documents which have any extra prefix in their _id`, () => {
       const _id = `random:${raw._id}`;
-      const _actual = singleNamespaceSerializer.rawToSavedObject({ ...raw, _id });
-      expect(_actual).toHaveProperty('id', _id);
+      expect(() => singleNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
+        `Raw document 'random:baz:foo:bar' does not start with expected prefix 'baz:foo:'`
+      );
     });
 
     test(`copies _source.namespace to namespace`, () => {
@@ -419,17 +422,25 @@ describe('#rawToSavedObject', () => {
   });
 
   describe('multi-namespace type with a namespace', () => {
-    const raw = createSampleDoc({ _source: { namespace: 'baz' } });
+    const raw = createSampleDoc({ _source: { namespace: 'baz' } }); // namespace should be ignored
     const actual = multiNamespaceSerializer.rawToSavedObject(raw);
 
     test(`removes type prefix from _id`, () => {
       expect(actual).toHaveProperty('id', 'bar');
     });
 
-    test(`copies _id to id if prefixed by namespace and type`, () => {
+    test(`fails for documents which have a namespace prefix in their _id`, () => {
       const _id = `${raw._source.namespace}:${raw._id}`;
-      const _actual = multiNamespaceSerializer.rawToSavedObject({ ...raw, _id });
-      expect(_actual).toHaveProperty('id', _id);
+      expect(() => multiNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
+        `Raw document 'baz:foo:bar' does not start with expected prefix 'foo:'`
+      );
+    });
+
+    test(`fails for documents which have any extra prefix in their _id`, () => {
+      const _id = `random:${raw._id}`;
+      expect(() => multiNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
+        `Raw document 'random:foo:bar' does not start with expected prefix 'foo:'`
+      );
     });
 
     test(`doesn't copy _source.namespace to namespace`, () => {
@@ -785,7 +796,7 @@ describe('#isRawSavedObject', () => {
       ).toBeFalsy();
     });
 
-    test('is false if there is no [type] attribute', () => {
+    test('is true if there is no [type] attribute', () => {
       expect(
         singleNamespaceSerializer.isRawSavedObject({
           _id: 'hello:world',
@@ -794,7 +805,7 @@ describe('#isRawSavedObject', () => {
             jam: {},
           },
         })
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
   });
 
@@ -1014,7 +1025,7 @@ describe('#isRawSavedObject', () => {
       ).toBeFalsy();
     });
 
-    test('is false if there is no [type] attribute', () => {
+    test('is true if there is no [type] attribute', () => {
       expect(
         multiNamespaceSerializer.isRawSavedObject({
           _id: 'hello:world',
@@ -1024,7 +1035,7 @@ describe('#isRawSavedObject', () => {
             namespace: 'foo',
           },
         })
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
   });
 
@@ -1107,7 +1118,7 @@ describe('#isRawSavedObject', () => {
       ).toBeFalsy();
     });
 
-    test('is false if there is no [type] attribute', () => {
+    test('is true if there is no [type] attribute', () => {
       expect(
         namespaceAgnosticSerializer.isRawSavedObject({
           _id: 'hello:world',
@@ -1117,7 +1128,7 @@ describe('#isRawSavedObject', () => {
             namespace: 'foo',
           },
         })
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
   });
 });

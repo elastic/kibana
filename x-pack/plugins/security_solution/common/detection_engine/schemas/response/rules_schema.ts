@@ -10,50 +10,64 @@ import { isObject } from 'lodash/fp';
 import { Either, left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import {
+  actions,
+  from,
+  machine_learning_job_id,
+  risk_score,
+  DefaultRiskScoreMappingArray,
+  DefaultSeverityMappingArray,
+  threat_index,
+  concurrent_searches,
+  items_per_search,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+  threat_indicator_path,
+  threats,
+  type,
+  language,
+  severity,
+  throttle,
+  max_signals,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import { DefaultStringArray, version } from '@kbn/securitysolution-io-ts-types';
+
+import { DefaultListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
 import {
-  actions,
   anomaly_threshold,
   description,
   enabled,
   event_category_override,
   false_positives,
-  from,
   id,
   immutable,
   index,
   interval,
   rule_id,
-  language,
   name,
   output_index,
-  max_signals,
-  machine_learning_job_id,
   query,
   references,
-  severity,
   updated_by,
   tags,
   to,
-  risk_score,
   created_at,
   created_by,
   updated_at,
   saved_id,
   timeline_id,
   timeline_title,
-  type,
-  threats,
   threshold,
-  throttle,
   job_status,
   status_date,
   last_success_at,
   last_success_message,
   last_failure_at,
   last_failure_message,
-  version,
   filters,
   meta,
   note,
@@ -62,22 +76,7 @@ import {
   rule_name_override,
   timestamp_override,
 } from '../common/schemas';
-import {
-  threat_index,
-  concurrent_searches,
-  items_per_search,
-  threat_query,
-  threat_filters,
-  threat_mapping,
-  threat_language,
-} from '../types/threat_mapping';
 
-import { DefaultListArray } from '../types/lists_default_array';
-import {
-  DefaultStringArray,
-  DefaultRiskScoreMappingArray,
-  DefaultSeverityMappingArray,
-} from '../types';
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
 
 /**
@@ -151,6 +150,7 @@ export const dependentRulesSchema = t.partial({
   items_per_search,
   threat_mapping,
   threat_language,
+  threat_indicator_path,
 });
 
 /**
@@ -286,6 +286,9 @@ export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): 
       t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),
       t.exact(t.partial({ threat_language: dependentRulesSchema.props.threat_language })),
       t.exact(t.partial({ threat_filters: dependentRulesSchema.props.threat_filters })),
+      t.exact(
+        t.partial({ threat_indicator_path: dependentRulesSchema.props.threat_indicator_path })
+      ),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
       t.exact(t.partial({ concurrent_searches: dependentRulesSchema.props.concurrent_searches })),
       t.exact(

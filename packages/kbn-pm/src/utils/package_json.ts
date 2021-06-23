@@ -35,7 +35,7 @@ export const createProductionPackageJson = (pkgJson: IPackageJson) => ({
 export const isLinkDependency = (depVersion: string) => depVersion.startsWith('link:');
 
 export const isBazelPackageDependency = (depVersion: string) =>
-  depVersion.startsWith('link:bazel/bin/');
+  depVersion.startsWith('link:bazel-bin/');
 
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing
@@ -46,7 +46,7 @@ export const isBazelPackageDependency = (depVersion: string) =>
  * will then _copy_ the `file:` dependencies into `node_modules` instead of
  * symlinking like we do in development.
  *
- * Additionally it also taken care of replacing `link:bazel/bin/` with
+ * Additionally it also taken care of replacing `link:bazel-bin/` with
  * `file:` so we can also support the copy of the Bazel packages dist already into
  * build/packages to be copied into the node_modules
  */
@@ -61,7 +61,7 @@ export function transformDependencies(dependencies: IPackageDependencies = {}) {
     }
 
     if (isBazelPackageDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:bazel/bin/', 'file:');
+      newDeps[name] = depVersion.replace('link:bazel-bin/', 'file:');
       continue;
     }
 

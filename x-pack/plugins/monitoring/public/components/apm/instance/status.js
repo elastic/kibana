@@ -15,7 +15,7 @@ import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-export function Status({ alerts, stats }) {
+export function Status({ alerts = null, stats }) {
   const { name, output, version, uptime, timeOfLastEvent } = stats;
 
   const metrics = [

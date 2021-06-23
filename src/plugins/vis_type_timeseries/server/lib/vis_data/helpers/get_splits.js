@@ -10,7 +10,6 @@ import Color from 'color';
 import { calculateLabel } from '../../../../common/calculate_label';
 import _ from 'lodash';
 import { getLastMetric } from './get_last_metric';
-import { getSplitColors } from './get_split_colors';
 import { formatKey } from './format_key';
 
 const getTimeSeries = (resp, series) =>
@@ -24,20 +23,17 @@ export async function getSplits(resp, panel, series, meta, extractFields) {
   const color = new Color(series.color);
   const metric = getLastMetric(series);
   const buckets = _.get(resp, `aggregations.${series.id}.buckets`);
-
-  const fieldsForMetaIndex = meta.index ? await extractFields(meta.index) : [];
-  const splitByLabel = calculateLabel(metric, series.metrics, fieldsForMetaIndex);
+  const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+  const splitByLabel = calculateLabel(metric, series.metrics, fieldsForSeries);
 
   if (buckets) {
     if (Array.isArray(buckets)) {
-      const size = buckets.length;
-      const colors = getSplitColors(series.color, size, series.split_color_mode);
       return buckets.map((bucket) => {
         bucket.id = `${series.id}:${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
         bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
-        bucket.color = panel.type === 'top_n' ? color.string() : colors.shift();
+        bucket.color = color.string();
         bucket.meta = meta;
         return bucket;
       });
@@ -48,6 +44,7 @@ export async function getSplits(resp, panel, series, meta, extractFields) {
         const bucket = _.get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
         bucket.id = `${series.id}:${filter.id}`;
         bucket.key = filter.id;
+        bucket.splitByLabel = splitByLabel;
         bucket.color = filter.color;
         bucket.label = filter.label || filter.filter.query || '*';
         bucket.meta = meta;

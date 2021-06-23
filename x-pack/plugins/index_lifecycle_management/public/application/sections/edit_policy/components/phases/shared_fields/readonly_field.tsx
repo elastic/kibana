@@ -12,7 +12,7 @@ import { LearnMoreLink } from '../../learn_more_link';
 import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
 
 interface Props {
-  phase: 'hot' | 'warm';
+  phase: 'hot' | 'warm' | 'cold';
 }
 
 export const ReadonlyField: React.FunctionComponent<Props> = ({ phase }) => {

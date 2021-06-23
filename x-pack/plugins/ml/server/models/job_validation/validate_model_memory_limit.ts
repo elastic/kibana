@@ -69,14 +69,14 @@ export async function validateModelMemoryLimit(
       true,
       job.datafeed_config
     );
-    // @ts-expect-error
+    // @ts-expect-error numeral missing value
     const mmlEstimateBytes: number = numeral(modelMemoryLimit).value();
 
     let runEstimateGreaterThenMml = true;
     // if max_model_memory_limit has been set,
     // make sure the estimated value is not greater than it.
     if (typeof maxModelMemoryLimit !== 'undefined') {
-      // @ts-expect-error
+      // @ts-expect-error numeral missing value
       const maxMmlBytes: number = numeral(maxModelMemoryLimit).value();
       if (mmlEstimateBytes > maxMmlBytes) {
         runEstimateGreaterThenMml = false;
@@ -93,7 +93,7 @@ export async function validateModelMemoryLimit(
     // do not run this if we've already found that it's larger than
     // the max mml
     if (runEstimateGreaterThenMml && mml !== null) {
-      // @ts-expect-error
+      // @ts-expect-error numeral missing value
       const mmlBytes: number = numeral(mml).value();
       if (mmlBytes < MODEL_MEMORY_LIMIT_MINIMUM_BYTES) {
         messages.push({
@@ -120,11 +120,11 @@ export async function validateModelMemoryLimit(
   // make sure the user defined MML is not greater than it
   if (mml !== null) {
     let maxMmlExceeded = false;
-    // @ts-expect-error
+    // @ts-expect-error numeral missing value
     const mmlBytes = numeral(mml).value();
 
     if (maxModelMemoryLimit !== undefined) {
-      // @ts-expect-error
+      // @ts-expect-error numeral missing value
       const maxMmlBytes = numeral(maxModelMemoryLimit).value();
       if (mmlBytes > maxMmlBytes) {
         maxMmlExceeded = true;
@@ -137,7 +137,7 @@ export async function validateModelMemoryLimit(
     }
 
     if (effectiveMaxModelMemoryLimit !== undefined && maxMmlExceeded === false) {
-      // @ts-expect-error
+      // @ts-expect-error numeral missing value
       const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
       if (mmlBytes > effectiveMaxMmlBytes) {
         messages.push({

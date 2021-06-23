@@ -9,7 +9,8 @@
     "licensing",
     "management",
     "features",
-    "savedObjects"
+    "savedObjects",
+    "share"
   ],
   "optionalPlugins": [
     "security",

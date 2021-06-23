@@ -6,33 +6,47 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL';
 const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED';
 
-const environmentLabels: Record<string, string> = {
-  [ENVIRONMENT_ALL_VALUE]: i18n.translate(
-    'xpack.apm.filter.environment.allLabel',
-    { defaultMessage: 'All' }
-  ),
-  [ENVIRONMENT_NOT_DEFINED_VALUE]: i18n.translate(
-    'xpack.apm.filter.environment.notDefinedLabel',
-    { defaultMessage: 'Not defined' }
-  ),
-};
+export function getEnvironmentLabel(environment: string) {
+  if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
+    return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+      defaultMessage: 'Not defined',
+    });
+  }
+
+  if (environment === ENVIRONMENT_ALL_VALUE) {
+    return i18n.translate('xpack.apm.filter.environment.allLabel', {
+      defaultMessage: 'All',
+    });
+  }
+
+  return environment;
+}
 
 export const ENVIRONMENT_ALL = {
   value: ENVIRONMENT_ALL_VALUE,
-  text: environmentLabels[ENVIRONMENT_ALL_VALUE],
+  text: getEnvironmentLabel(ENVIRONMENT_ALL_VALUE),
 };
 
 export const ENVIRONMENT_NOT_DEFINED = {
   value: ENVIRONMENT_NOT_DEFINED_VALUE,
-  text: environmentLabels[ENVIRONMENT_NOT_DEFINED_VALUE],
+  text: getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE),
 };
 
-export function getEnvironmentLabel(environment: string) {
-  return environmentLabels[environment] || environment;
+export function getEnvironmentEsField(environment: string) {
+  if (
+    !environment ||
+    environment === ENVIRONMENT_NOT_DEFINED_VALUE ||
+    environment === ENVIRONMENT_ALL_VALUE
+  ) {
+    return {};
+  }
+
+  return { [SERVICE_ENVIRONMENT]: environment };
 }
 
 // returns the environment url param that should be used

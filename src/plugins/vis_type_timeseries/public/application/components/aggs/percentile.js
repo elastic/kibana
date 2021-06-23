@@ -39,8 +39,9 @@ export function PercentileAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
 
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
 
   useEffect(() => {
     if (!checkModel(model)) {
@@ -77,24 +78,20 @@ export function PercentileAgg(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('field')}
+          <FieldSelect
             label={
               <FormattedMessage
                 id="visTypeTimeseries.percentile.fieldLabel"
                 defaultMessage="Field"
               />
             }
-          >
-            <FieldSelect
-              fields={fields}
-              type={model.type}
-              restrict={RESTRICT_FIELDS}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </EuiFormRow>
+            fields={fields}
+            type={model.type}
+            restrict={RESTRICT_FIELDS}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow

@@ -70,7 +70,6 @@ interface TableState {
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
   activeAction?: SavedObjectsManagementAction;
-  isColumnDataLoaded: boolean;
 }
 
 export class Table extends PureComponent<TableProps, TableState> {
@@ -80,21 +79,11 @@ export class Table extends PureComponent<TableProps, TableState> {
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
     activeAction: undefined,
-    isColumnDataLoaded: false,
   };
 
   constructor(props: TableProps) {
     super(props);
   }
-
-  componentDidMount() {
-    this.loadColumnData();
-  }
-
-  loadColumnData = async () => {
-    await Promise.all(this.props.columnRegistry.getAll().map((column) => column.loadData()));
-    this.setState({ isColumnDataLoaded: true });
-  };
 
   onChange = ({ query, error }: any) => {
     if (error) {

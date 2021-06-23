@@ -15,19 +15,16 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
-import {
-  ListSchema,
-  exportList,
-  useFindLists,
-  useDeleteList,
-  useCursor,
-} from '../../../shared_imports';
+import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useFindLists, useDeleteList, useCursor } from '@kbn/securitysolution-list-hooks';
+
+import { exportList } from '@kbn/securitysolution-list-api';
+
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -211,7 +208,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const columns = buildColumns(handleExport, handleDelete);
 
   return (
-    <EuiOverlayMask onClick={onClose}>
+    <>
       <EuiModal onClose={onClose} maxWidth={800}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
@@ -255,7 +252,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         name={exportDownload.name}
         onDownload={() => setExportDownload({})}
       />
-    </EuiOverlayMask>
+    </>
   );
 };
 

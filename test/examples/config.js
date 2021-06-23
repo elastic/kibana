@@ -6,11 +6,19 @@
  * Side Public License, v 1.
  */
 
-import path from 'path';
+import { resolve } from 'path';
 import { services } from '../plugin_functional/services';
+import fs from 'fs';
+import { KIBANA_ROOT } from '@kbn/test';
 
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+
+  // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
+  const examplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'examples'));
+  const examples = examplesFiles.filter((file) =>
+    fs.statSync(resolve(KIBANA_ROOT, 'examples', file)).isDirectory()
+  );
 
   return {
     testFiles: [
@@ -20,6 +28,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./state_sync'),
       require.resolve('./routing'),
       require.resolve('./expressions_explorer'),
+      require.resolve('./index_pattern_field_editor_example'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -39,9 +48,6 @@ export default async function ({ readConfigFile }) {
       serverArgs: ['xpack.security.enabled=false'],
     },
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives'),
-    },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'Example plugin functional tests',
@@ -50,9 +56,11 @@ export default async function ({ readConfigFile }) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--run-examples',
-        // Required to run examples
+        // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
+        ...examples.map(
+          (exampleDir) => `--plugin-path=${resolve(KIBANA_ROOT, 'examples', exampleDir)}`
+        ),
       ],
     },
   };

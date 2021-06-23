@@ -150,8 +150,11 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
         </button>
       </div>
       <div
+        aria-labelledby="generated-id"
         className="euiAccordion__childWrapper"
         id="advanced-options"
+        role="region"
+        tabIndex={-1}
       />
     </div>
   </div>

@@ -107,7 +107,11 @@ export function ErrorCountAlertTrigger(props: Props) {
   ];
 
   const chartPreview = (
-    <ChartPreview data={data} threshold={threshold} yTickFormat={asInteger} />
+    <ChartPreview
+      data={data?.errorCountChartPreview}
+      threshold={threshold}
+      yTickFormat={asInteger}
+    />
   );
 
   return (

@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { createGunzip } from 'zlib';
 import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 
 import mockFs from 'mock-fs';
 import { createReadStream } from 'fs';
+import { PassThrough } from 'stream';
+import { createGunzip, createGzip } from 'zlib';
 
 import { loggerMock, MockedLogger } from '../../logging/logger.mock';
 
@@ -55,59 +56,107 @@ describe('getPayloadSize', () => {
     });
   });
 
-  describe('handles fs streams', () => {
+  describe('handles streams', () => {
     afterEach(() => mockFs.restore());
 
-    test('with ascii characters', async () => {
-      mockFs({ 'test.txt': 'heya' });
-      const source = createReadStream('test.txt');
-
-      let data = '';
-      for await (const chunk of source) {
-        data += chunk;
-      }
-
+    test('ignores streams that are not fs or zlib streams', async () => {
       const result = getResponsePayloadBytes(
         {
           variety: 'stream',
-          source,
-        } as Response,
-        logger
-      );
-
-      expect(result).toBe(Buffer.byteLength(data));
-    });
-
-    test('with special characters', async () => {
-      mockFs({ 'test.txt': '¡hola!' });
-      const source = createReadStream('test.txt');
-
-      let data = '';
-      for await (const chunk of source) {
-        data += chunk;
-      }
-
-      const result = getResponsePayloadBytes(
-        {
-          variety: 'stream',
-          source,
-        } as Response,
-        logger
-      );
-
-      expect(result).toBe(Buffer.byteLength(data));
-    });
-
-    test('ignores streams that are not instances of ReadStream', async () => {
-      const result = getResponsePayloadBytes(
-        {
-          variety: 'stream',
-          source: createGunzip(),
+          source: new PassThrough(),
         } as Response,
         logger
       );
 
       expect(result).toBe(undefined);
+    });
+
+    describe('fs streams', () => {
+      test('with ascii characters', async () => {
+        mockFs({ 'test.txt': 'heya' });
+        const source = createReadStream('test.txt');
+
+        let data = '';
+        for await (const chunk of source) {
+          data += chunk;
+        }
+
+        const result = getResponsePayloadBytes(
+          {
+            variety: 'stream',
+            source,
+          } as Response,
+          logger
+        );
+
+        expect(result).toBe(Buffer.byteLength(data));
+      });
+
+      test('with special characters', async () => {
+        mockFs({ 'test.txt': '¡hola!' });
+        const source = createReadStream('test.txt');
+
+        let data = '';
+        for await (const chunk of source) {
+          data += chunk;
+        }
+
+        const result = getResponsePayloadBytes(
+          {
+            variety: 'stream',
+            source,
+          } as Response,
+          logger
+        );
+
+        expect(result).toBe(Buffer.byteLength(data));
+      });
+    });
+
+    describe('zlib streams', () => {
+      test('with ascii characters', async () => {
+        mockFs({ 'test.txt': 'heya' });
+        const readStream = createReadStream('test.txt');
+        const source = readStream.pipe(createGzip()).pipe(createGunzip());
+
+        let data = '';
+        for await (const chunk of source) {
+          data += chunk;
+        }
+
+        const result = getResponsePayloadBytes(
+          {
+            variety: 'stream',
+            source,
+          } as Response,
+          logger
+        );
+
+        expect(data).toBe('heya');
+        expect(result).toBe(source.bytesWritten);
+      });
+
+      test('with special characters', async () => {
+        mockFs({ 'test.txt': '¡hola!' });
+        const readStream = createReadStream('test.txt');
+        const source = readStream.pipe(createGzip()).pipe(createGunzip());
+
+        let data = '';
+        for await (const chunk of source) {
+          data += chunk;
+        }
+
+        const result = getResponsePayloadBytes(
+          {
+            variety: 'stream',
+            source,
+          } as Response,
+          logger
+        );
+
+        expect(data).toBe('¡hola!');
+        expect(result).toBe(source.bytesWritten);
+      });
     });
   });
 
@@ -134,7 +183,7 @@ describe('getPayloadSize', () => {
       expect(result).toBe(7);
     });
 
-    test('when source is object', () => {
+    test('when source is plain object', () => {
       const payload = { message: 'heya' };
       const result = getResponsePayloadBytes(
         {
@@ -146,11 +195,26 @@ describe('getPayloadSize', () => {
       expect(result).toBe(JSON.stringify(payload).length);
     });
 
-    test('returns undefined when source is not a plain object', () => {
+    test('when source is array object', () => {
+      const payload = [{ message: 'hey' }, { message: 'ya' }];
       const result = getResponsePayloadBytes(
         {
           variety: 'plain',
-          source: [1, 2, 3],
+          source: payload,
+        } as Response,
+        logger
+      );
+      expect(result).toBe(JSON.stringify(payload).length);
+    });
+
+    test('returns undefined when source is not a plain object', () => {
+      class TestClass {
+        constructor() {}
+      }
+      const result = getResponsePayloadBytes(
+        {
+          variety: 'plain',
+          source: new TestClass(),
         } as Response,
         logger
       );

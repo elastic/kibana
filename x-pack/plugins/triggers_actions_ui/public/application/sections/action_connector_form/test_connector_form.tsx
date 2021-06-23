@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,15 +46,27 @@ export const TestConnectorForm = ({
   isExecutingAction,
   actionTypeRegistry,
 }: ConnectorAddFlyoutProps) => {
+  const [actionErrors, setActionErrors] = useState<IErrorObject>({});
+  const [hasErrors, setHasErrors] = useState<boolean>(false);
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const ParamsFieldsComponent = actionTypeModel.actionParamsFields;
 
-  const actionErrors = actionTypeModel?.validateParams(actionParams).errors as IErrorObject;
-  const hasErrors = !!Object.values(actionErrors).find((errors) => errors.length > 0);
+  useEffect(() => {
+    (async () => {
+      const res = (await actionTypeModel?.validateParams(actionParams)).errors as IErrorObject;
+      setActionErrors({ ...res });
+      setHasErrors(!!Object.values(res).find((errors) => errors.length > 0));
+    })();
+  }, [actionTypeModel, actionParams]);
 
   const steps = [
     {
-      title: 'Create an action',
+      title: i18n.translate(
+        'xpack.triggersActionsUI.sections.testConnectorForm.createActionHeader',
+        {
+          defaultMessage: 'Create an action',
+        }
+      ),
       children: ParamsFieldsComponent ? (
         <EuiErrorBoundary>
           <Suspense
@@ -83,16 +95,23 @@ export const TestConnectorForm = ({
         </EuiErrorBoundary>
       ) : (
         <EuiText>
-          <p>This Connector does not require any Action Parameter.</p>
+          <p>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.testConnectorForm.noActionParametersRequiredText"
+              defaultMessage="This Connector does not require any Action Parameter."
+            />
+          </p>
         </EuiText>
       ),
     },
     {
-      title: 'Run the action',
+      title: i18n.translate('xpack.triggersActionsUI.sections.testConnectorForm.runTestHeader', {
+        defaultMessage: 'Run the test',
+      }),
       children: (
-        <Fragment>
+        <>
           {executeEnabled ? null : (
-            <Fragment>
+            <>
               <EuiCallOut iconType="alert" color="warning">
                 <p>
                   <FormattedMessage
@@ -102,7 +121,7 @@ export const TestConnectorForm = ({
                 </p>
               </EuiCallOut>
               <EuiSpacer size="s" />
-            </Fragment>
+            </>
           )}
           <EuiText>
             <EuiButton
@@ -118,11 +137,16 @@ export const TestConnectorForm = ({
               />
             </EuiButton>
           </EuiText>
-        </Fragment>
+        </>
       ),
     },
     {
-      title: 'Results',
+      title: i18n.translate(
+        'xpack.triggersActionsUI.sections.testConnectorForm.testResultsHeader',
+        {
+          defaultMessage: 'Results',
+        }
+      ),
       children: pipe(
         executionResult,
         map((result) =>
@@ -144,7 +168,7 @@ const AwaitingExecution = () => (
   <EuiCallOut data-test-subj="executionAwaiting">
     <p>
       <FormattedMessage
-        defaultMessage="When you run the action, the results will show up here."
+        defaultMessage="When you run the test, the results will show up here."
         id="xpack.triggersActionsUI.sections.testConnectorForm.awaitingExecutionDescription"
       />
     </p>
@@ -156,7 +180,7 @@ const SuccessfulExecution = () => (
     title={i18n.translate(
       'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
       {
-        defaultMessage: 'Action was successful',
+        defaultMessage: 'Test was successful',
         values: {},
       }
     )}
@@ -212,7 +236,7 @@ const FailedExecussion = ({
       title={i18n.translate(
         'xpack.triggersActionsUI.sections.testConnectorForm.executionFailureTitle',
         {
-          defaultMessage: 'Action failed to run',
+          defaultMessage: 'Test failed to run',
         }
       )}
       data-test-subj="executionFailureResult"

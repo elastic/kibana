@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { LICENSE_WHITELIST, DEV_ONLY_LICENSE_WHITELIST, LICENSE_OVERRIDES } from './config';
+export { LICENSE_ALLOWED, DEV_ONLY_LICENSE_ALLOWED, LICENSE_OVERRIDES } from './config';
 export { assertLicensesValid } from './valid';

@@ -17,7 +17,7 @@ import { NavigateToPath, useNotifications } from '../../contexts/kibana';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
-import { getDateFormatTz, TimeRangeBounds } from '../../explorer/explorer_utils';
+import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { mlForecastService } from '../../services/forecast_service';
@@ -43,7 +43,8 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { useTimeSeriesExplorerUrlState } from '../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state';
-import { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
+import type { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
+import type { TimeRangeBounds } from '../../util/time_buckets';
 
 export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,

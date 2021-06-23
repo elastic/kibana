@@ -12,13 +12,13 @@ import { addBasePath } from '../index';
 
 const bodySchema = schema.object({}, { unknowns: 'allow' });
 
-export function registerSimulateRoute({ router, license, lib }: RouteDependencies) {
+export function registerSimulateRoute({ router, lib }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/index_templates/simulate'),
       validate: { body: bodySchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const template = req.body as TypeOf<typeof bodySchema>;
 
@@ -40,8 +40,8 @@ export function registerSimulateRoute({ router, license, lib }: RouteDependencie
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

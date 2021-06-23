@@ -16,6 +16,7 @@ export const config = {
   exposeToBrowser: {
     serviceMapEnabled: true,
     ui: true,
+    profilingEnabled: true,
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
@@ -47,6 +48,7 @@ export const config = {
     metricsInterval: schema.number({ defaultValue: 30 }),
     maxServiceEnvironments: schema.number({ defaultValue: 100 }),
     maxServiceSelection: schema.number({ defaultValue: 50 }),
+    profilingEnabled: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -118,5 +120,9 @@ export function mergeConfigs(
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
-export { APMPlugin, APMPluginSetup } from './plugin';
+export { APMPlugin } from './plugin';
+export { APMPluginSetup } from './types';
+export { APMServerRouteRepository } from './routes/get_global_apm_server_route_repository';
+export { InspectResponse, APMRouteHandlerResources } from './routes/typings';
+
 export type { ProcessorEvent } from '../common/processor_event';

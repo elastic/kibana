@@ -39,6 +39,10 @@ import {
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
+import { isPopulatedObject } from '../../../common/util/object_utils';
+import type { AlertsClient } from '../../../../alerting/server';
+import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
+import { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 
 interface Results {
   [id: string]: {
@@ -47,10 +51,15 @@ interface Results {
   };
 }
 
-export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
+export function jobsProvider(
+  client: IScopedClusterClient,
+  mlClient: MlClient,
+  alertsClient?: AlertsClient
+) {
   const { asInternalUser } = client;
 
   const { forceDeleteDatafeed, getDatafeedIdsByJobId, getDatafeedByJobId } = datafeedsProvider(
+    client,
     mlClient
   );
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
@@ -141,7 +150,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const { body } = await mlClient.stopDatafeed({ datafeed_id: datafeedId, force: true });
+    const { body } = await mlClient.stopDatafeed({
+      datafeed_id: datafeedId,
+      body: { force: true },
+    });
     if (body.stopped !== true) {
       return { success: false };
     }
@@ -172,8 +184,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     });
 
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed =
-        typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+      const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const dataCounts = job.data_counts;
       const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
@@ -206,6 +217,8 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         nodeName: job.node ? job.node.name : undefined,
         deleting: job.deleting || undefined,
         awaitingNodeAssignment: isJobAwaitingNodeAssignment(job),
+        alertingRules: job.alerting_rules,
+        jobTags: job.custom_settings?.job_tags ?? {},
       };
       if (jobIds.find((j) => j === tempJob.id)) {
         tempJob.fullJob = job;
@@ -233,8 +246,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
 
     const jobs = fullJobsList.map((job) => {
       jobsMap[job.job_id] = job.groups || [];
-      const hasDatafeed =
-        typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+      const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const timeRange: { to?: number; from?: number } = {};
 
       const dataCounts = job.data_counts;
@@ -408,6 +420,39 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
 
         jobs.push(tempJob);
       });
+
+      if (alertsClient) {
+        const mlAlertingRules = await alertsClient.find<MlAnomalyDetectionAlertParams>({
+          options: {
+            filter: `alert.attributes.alertTypeId:${ML_ALERT_TYPES.ANOMALY_DETECTION}`,
+            perPage: 1000,
+          },
+        });
+
+        mlAlertingRules.data.forEach((curr) => {
+          const {
+            params: {
+              jobSelection: { jobIds: ruleJobIds, groupIds: ruleGroupIds },
+            },
+          } = curr;
+
+          jobs.forEach((j) => {
+            const isIncluded =
+              (Array.isArray(ruleJobIds) && ruleJobIds.includes(j.job_id)) ||
+              (Array.isArray(ruleGroupIds) &&
+                Array.isArray(j.groups) &&
+                j.groups.some((g) => ruleGroupIds.includes(g)));
+
+            if (isIncluded) {
+              if (Array.isArray(j.alerting_rules)) {
+                j.alerting_rules.push(curr);
+              } else {
+                j.alerting_rules = [curr];
+              }
+            }
+          });
+        });
+      }
     }
     return jobs;
   }
@@ -417,13 +462,19 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     const detailed = true;
     const jobIds: string[] = [];
     try {
-      const { body } = await asInternalUser.tasks.list({ actions, detailed });
-      Object.keys(body.nodes).forEach((nodeId) => {
-        const tasks = body.nodes[nodeId].tasks;
-        Object.keys(tasks).forEach((taskId) => {
-          jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
-        });
+      const { body } = await asInternalUser.tasks.list({
+        actions,
+        detailed,
       });
+
+      if (body.nodes) {
+        Object.keys(body.nodes).forEach((nodeId) => {
+          const tasks = body.nodes![nodeId].tasks;
+          Object.keys(tasks).forEach((taskId) => {
+            jobIds.push(tasks[taskId].description!.replace(/^delete-job-/, ''));
+          });
+        });
+      }
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs

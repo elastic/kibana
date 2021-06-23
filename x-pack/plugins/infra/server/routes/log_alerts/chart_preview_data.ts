@@ -14,6 +14,7 @@ import {
 } from '../../../common/http_api/log_alerts/chart_preview_data';
 import { createValidationFunction } from '../../../common/runtime_types';
 import { getChartPreviewData } from '../../lib/alerting/log_threshold/log_threshold_chart_preview';
+import { resolveLogSourceConfiguration } from '../../../common/log_sources';
 
 export const initGetLogAlertsChartPreviewDataRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -29,15 +30,20 @@ export const initGetLogAlertsChartPreviewDataRoute = ({ framework, sources }: In
         data: { sourceId, buckets, alertParams },
       } = request.body;
 
-      const sourceConfiguration = await sources.getSourceConfiguration(
+      const { configuration } = await sources.getSourceConfiguration(
         requestContext.core.savedObjects.client,
         sourceId
+      );
+
+      const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
+        configuration,
+        await framework.getIndexPatternsServiceWithRequestContext(requestContext)
       );
 
       try {
         const { series } = await getChartPreviewData(
           requestContext,
-          sourceConfiguration,
+          resolvedLogSourceConfiguration,
           framework.callWithRequest,
           alertParams,
           buckets

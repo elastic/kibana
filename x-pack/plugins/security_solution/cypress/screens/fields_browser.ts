@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+export const CLOSE_BTN = '[data-test-subj="close"]';
+
 export const FIELDS_BROWSER_CATEGORIES_COUNT = '[data-test-subj="categories-count"]';
 
 export const FIELDS_BROWSER_CHECKBOX = (id: string) => {
-  return `[data-test-subj="field-${id}-checkbox`;
+  return `[data-test-subj="category-table-container"] [data-test-subj="field-${id}-checkbox"]`;
 };
 
 export const FIELDS_BROWSER_CONTAINER = '[data-test-subj="fields-browser-container"]';

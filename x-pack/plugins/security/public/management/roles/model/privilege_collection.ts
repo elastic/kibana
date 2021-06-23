@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaPrivilege } from './kibana_privilege';
+import type { KibanaPrivilege } from './kibana_privilege';
 
 export class PrivilegeCollection {
   private actions: ReadonlySet<string>;

@@ -8,6 +8,7 @@
 const createAppToastsMock = () => ({
   addError: jest.fn(),
   addSuccess: jest.fn(),
+  addWarning: jest.fn(),
 });
 
 export const useAppToastsMock = {

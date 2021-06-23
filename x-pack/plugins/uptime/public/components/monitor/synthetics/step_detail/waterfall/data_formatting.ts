@@ -239,13 +239,15 @@ const formatMetadata = ({
   requestStart: number;
 }) => {
   const {
-    bytesDownloadedCompressed,
     certificates,
     ip,
     mimeType,
     requestHeaders,
     responseHeaders,
     url,
+    resourceSize,
+    transferSize,
+    status,
   } = item;
   const { dns, connect, ssl, wait, receive, total } = item.timings || {};
   const contentDownloaded = receive && receive > 0 ? receive : total;
@@ -277,6 +279,7 @@ const formatMetadata = ({
         ]
       : undefined,
     details: [
+      { name: FriendlyFlyoutLabels[Metadata.Status], value: status ? `${status}` : undefined },
       { name: FriendlyFlyoutLabels[Metadata.MimeType], value: mimeType },
       {
         name: FriendlyFlyoutLabels[Metadata.RequestStart],
@@ -306,9 +309,16 @@ const formatMetadata = ({
         }),
       },
       {
-        name: FriendlyFlyoutLabels[Metadata.BytesDownloadedCompressed],
+        name: FriendlyFlyoutLabels[Metadata.ResourceSize],
         value: getFriendlyMetadataValue({
-          value: bytesDownloadedCompressed ? bytesDownloadedCompressed / 1000 : undefined,
+          value: resourceSize ? resourceSize / 1000 : undefined,
+          postFix: 'KB',
+        }),
+      },
+      {
+        name: FriendlyFlyoutLabels[Metadata.TransferSize],
+        value: getFriendlyMetadataValue({
+          value: transferSize ? transferSize / 1000 : undefined,
           postFix: 'KB',
         }),
       },
@@ -440,3 +450,6 @@ const MIME_TYPE_PALETTE = buildMimeTypePalette();
 type ColourPalette = TimingColourPalette & MimeTypeColourPalette;
 
 export const colourPalette: ColourPalette = { ...TIMING_PALETTE, ...MIME_TYPE_PALETTE };
+
+export const formatTooltipHeading = (index: number, fullText: string): string =>
+  isNaN(index) ? fullText : `${index}. ${fullText}`;

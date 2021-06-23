@@ -6,6 +6,7 @@
  */
 
 import createContainer from 'constate';
+import { estypes } from '@elastic/elasticsearch';
 import { useMemo } from 'react';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
@@ -19,11 +20,13 @@ export const useLogEntryCategoriesModule = ({
   sourceId,
   spaceId,
   timestampField,
+  runtimeMappings,
 }: {
   indexPattern: string;
   sourceId: string;
   spaceId: string;
   timestampField: string;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }) => {
   const sourceConfiguration: ModuleSourceConfiguration = useMemo(
     () => ({
@@ -31,8 +34,9 @@ export const useLogEntryCategoriesModule = ({
       sourceId,
       spaceId,
       timestampField,
+      runtimeMappings,
     }),
-    [indexPattern, sourceId, spaceId, timestampField]
+    [indexPattern, sourceId, spaceId, timestampField, runtimeMappings]
   );
 
   const logAnalysisModule = useLogAnalysisModule({

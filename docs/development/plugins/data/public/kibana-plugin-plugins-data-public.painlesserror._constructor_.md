@@ -9,7 +9,7 @@ Constructs a new instance of the `PainlessError` class
 <b>Signature:</b>
 
 ```typescript
-constructor(err: IEsError);
+constructor(err: IEsError, indexPattern?: IndexPattern);
 ```
 
 ## Parameters
@@ -17,4 +17,5 @@ constructor(err: IEsError);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  err | <code>IEsError</code> |  |
+|  indexPattern | <code>IndexPattern</code> |  |
 

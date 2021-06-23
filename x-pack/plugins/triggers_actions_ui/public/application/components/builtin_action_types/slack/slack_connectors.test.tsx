@@ -62,6 +62,25 @@ describe('SlackActionFields renders', () => {
     expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
   });
 
+  test('should display a message for missing secrets after import', () => {
+    const actionConnector = {
+      actionTypeId: '.email',
+      isMissingSecrets: true,
+      config: {},
+      secrets: {},
+    } as SlackActionConnector;
+    const wrapper = mountWithIntl(
+      <SlackActionFields
+        action={actionConnector}
+        errors={{ index: [], webhookUrl: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="missingSecretsMessage"]').length).toBeGreaterThan(0);
+  });
+
   test('should display a message on edit to re-enter credentials', () => {
     const actionConnector = {
       secrets: {

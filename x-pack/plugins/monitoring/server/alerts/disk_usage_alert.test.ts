@@ -9,6 +9,7 @@ import { DiskUsageAlert } from './disk_usage_alert';
 import { ALERT_DISK_USAGE } from '../../common/constants';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 type IDiskUsageAlertMock = DiskUsageAlert & {
   defaultParams: {
@@ -95,7 +96,7 @@ describe('DiskUsageAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,

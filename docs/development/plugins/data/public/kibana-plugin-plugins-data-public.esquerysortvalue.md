@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
+export declare type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric | SortDirectionFormat>;
 ```

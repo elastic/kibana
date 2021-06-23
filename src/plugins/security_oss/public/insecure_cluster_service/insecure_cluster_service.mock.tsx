@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   InsecureClusterServiceSetup,
   InsecureClusterServiceStart,
 } from './insecure_cluster_service';

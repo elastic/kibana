@@ -23,6 +23,10 @@ export const DEFAULT_INITIAL_APP_DATA = {
       },
     },
   },
+  access: {
+    hasAppSearchAccess: true,
+    hasWorkplaceSearchAccess: true,
+  },
   appSearch: {
     accountId: 'some-id-string',
     onboardingComplete: true,

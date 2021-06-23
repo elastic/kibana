@@ -36,3 +36,15 @@ export const STATUS_FAILED_LABEL = i18n.translate(
     defaultMessage: 'Failed',
   }
 );
+
+export const SECONDS_LABEL = i18n.translate('xpack.uptime.seconds.label', {
+  defaultMessage: 'seconds',
+});
+
+export const SEC_LABEL = i18n.translate('xpack.uptime.seconds.shortForm.label', {
+  defaultMessage: 'sec',
+});
+
+export const MS_LABEL = i18n.translate('xpack.uptime.millisecond.abbreviation.label', {
+  defaultMessage: 'ms',
+});

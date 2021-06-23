@@ -14,7 +14,7 @@ import { AuthorizationContext } from '../../../../lib/authorization';
 
 import { editActionNameText, EditActionName } from './edit_action_name';
 
-export const useEditAction = (forceDisable: boolean) => {
+export const useEditAction = (forceDisable: boolean, transformNodes: number) => {
   const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
 
   const [config, setConfig] = useState<TransformConfigUnion>();
@@ -28,14 +28,14 @@ export const useEditAction = (forceDisable: boolean) => {
   const action: TransformListAction = useMemo(
     () => ({
       name: () => <EditActionName />,
-      enabled: () => canCreateTransform || !forceDisable,
+      enabled: () => canCreateTransform && !forceDisable && transformNodes > 0,
       description: editActionNameText,
       icon: 'pencil',
       type: 'icon',
       onClick: (item: TransformListRow) => showFlyout(item.config),
       'data-test-subj': 'transformActionEdit',
     }),
-    [canCreateTransform, forceDisable]
+    [canCreateTransform, forceDisable, transformNodes]
   );
 
   return {

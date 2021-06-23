@@ -17,7 +17,9 @@ import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
 import { useTimelineEvents } from '../../containers/index';
+import { DefaultCellRenderer } from './cell_rendering/default_cell_renderer';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from './styles';
+import { defaultRowRenderers } from './body/renderers';
 
 jest.mock('../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -25,7 +27,15 @@ jest.mock('../../containers/index', () => ({
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
@@ -55,6 +65,8 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
+    renderCellValue: DefaultCellRenderer,
+    rowRenderers: defaultRowRenderers,
     timelineId: TimelineId.test,
   };
 

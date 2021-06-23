@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { Role } from '../../common/model';
 import {
-  Role,
-  isRoleEnabled,
-  isRoleReserved,
-  isRoleDeprecated,
-  isRoleReadOnly,
   copyRole,
-  prepareRoleClone,
   getExtendedRoleDeprecationNotice,
+  isRoleDeprecated,
+  isRoleEnabled,
+  isRoleReadOnly,
+  isRoleReserved,
+  prepareRoleClone,
 } from '../../common/model';
 
 describe('role', () => {

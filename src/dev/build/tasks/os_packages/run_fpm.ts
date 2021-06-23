@@ -87,6 +87,10 @@ export async function runFpm(
     '--rpm-posttrans',
     resolve(__dirname, 'package_scripts/post_trans.sh'),
 
+    // for RHEL 8+ package verification
+    '--rpm-digest',
+    'sha256',
+
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
     `/etc/kibana/kibana.yml`,

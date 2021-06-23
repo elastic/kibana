@@ -9,6 +9,7 @@ import { LogstashVersionMismatchAlert } from './logstash_version_mismatch_alert'
 import { ALERT_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const RealDate = Date;
 
@@ -85,7 +86,7 @@ describe('LogstashVersionMismatchAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,

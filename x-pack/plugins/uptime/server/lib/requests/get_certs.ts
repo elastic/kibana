@@ -48,7 +48,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
                 {
                   multi_match: {
                     query: escape(search),
-                    type: 'phrase_prefix',
+                    type: 'phrase_prefix' as const,
                     fields: [
                       'monitor.id.text',
                       'monitor.name.text',
@@ -98,7 +98,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
           field: 'monitor.id',
         },
         name: 'monitors',
-        sort: [{ 'monitor.id': 'asc' }],
+        sort: [{ 'monitor.id': 'asc' as const }],
       },
     },
     aggs: {
@@ -154,7 +154,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     const sha1 = server?.hash?.sha1;
     const sha256 = server?.hash?.sha256;
 
-    const monitors = hit.inner_hits.monitors.hits.hits.map((monitor: any) => ({
+    const monitors = hit.inner_hits!.monitors.hits.hits.map((monitor: any) => ({
       name: monitor._source?.monitor.name,
       id: monitor._source?.monitor.id,
       url: monitor._source?.url?.full,

@@ -5,12 +5,25 @@
  * 2.0.
  */
 
-export const useMlKibana = jest.fn(() => {
-  return {
-    services: {
-      application: {
-        navigateToApp: jest.fn(),
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
+
+export const kibanaContextMock = {
+  services: {
+    uiSettings: { get: jest.fn() },
+    chrome: { recentlyAccessed: { add: jest.fn() } },
+    application: { navigateToApp: jest.fn() },
+    http: {
+      basePath: {
+        get: jest.fn(),
       },
     },
-  };
+    share: {
+      urlGenerators: { getUrlGenerator: jest.fn() },
+    },
+    data: dataPluginMock.createStartContract(),
+  },
+};
+
+export const useMlKibana = jest.fn(() => {
+  return kibanaContextMock;
 });

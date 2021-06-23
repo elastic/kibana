@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import { ElasticsearchClient } from 'kibana/server';
+import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Id, ListItemSchema, SearchEsListItemSchema } from '../../../common/schemas';
 import { transformElasticToListItem } from '../utils';
 import { findSourceType } from '../utils/find_source_type';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 interface GetListItemOptions {
   id: Id;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
 }
 
 export const getListItem = async ({
   id,
-  callCluster,
+  esClient,
   listItemIndex,
 }: GetListItemOptions): Promise<ListItemSchema | null> => {
-  // Note: This typing of response = await callCluster<SearchResponse<SearchEsListSchema>>
+  // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
   // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
   // to explicitly define the type <T>.
-  const listItemES = await callCluster<SearchResponse<SearchEsListItemSchema>>('search', {
+  const { body: listItemES } = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {
         term: {
@@ -34,12 +34,13 @@ export const getListItem = async ({
         },
       },
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: listItemIndex,
     seq_no_primary_term: true,
   });
 
   if (listItemES.hits.hits.length) {
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const type = findSourceType(listItemES.hits.hits[0]._source);
     if (type != null) {
       const listItems = transformElasticToListItem({ response: listItemES, type });

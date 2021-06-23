@@ -64,6 +64,29 @@ describe('Range filter builder', () => {
     });
   });
 
+  it('should convert strings to numbers if the field is scripted and type number', () => {
+    const field = getField('script number');
+
+    expect(buildRangeFilter(field, { gte: '1', lte: '3' }, indexPattern)).toEqual({
+      meta: {
+        field: 'script number',
+        index: 'id',
+        params: {},
+      },
+      script: {
+        script: {
+          lang: 'expression',
+          source: '(' + field!.script + ')>=gte && (' + field!.script + ')<=lte',
+          params: {
+            value: '>=1 <=3',
+            gte: 1,
+            lte: 3,
+          },
+        },
+      },
+    });
+  });
+
   it('should wrap painless scripts in comparator lambdas', () => {
     const field = getField('script date');
     const expected =

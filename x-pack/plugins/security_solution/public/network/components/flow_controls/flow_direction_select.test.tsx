@@ -7,8 +7,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-
-import { FlowDirection } from '../../../graphql/types';
+import { FlowDirection } from '../../../../common/search_strategy';
 
 import { FlowDirectionSelect } from './flow_direction_select';
 

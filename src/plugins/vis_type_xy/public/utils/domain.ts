@@ -14,22 +14,20 @@ import { DomainRange } from '@elastic/charts';
 import { getAdjustedInterval } from '../../../charts/public';
 import { Datatable } from '../../../expressions/public';
 
-import { getTimefilter } from '../services';
 import { Aspect, DateHistogramParams, HistogramParams } from '../types';
 
 export const getXDomain = (params: Aspect['params']): DomainRange => {
   const minInterval = (params as DateHistogramParams | HistogramParams)?.interval ?? undefined;
+  const bounds = (params as DateHistogramParams).date
+    ? (params as DateHistogramParams).bounds
+    : null;
 
-  if ((params as DateHistogramParams).date) {
-    const bounds = getTimefilter().getActiveBounds();
-
-    if (bounds) {
-      return {
-        min: bounds.min ? bounds.min.valueOf() : undefined,
-        max: bounds.max ? bounds.max.valueOf() : undefined,
-        minInterval,
-      };
-    }
+  if (bounds) {
+    return {
+      min: bounds.min as number,
+      max: bounds.max as number,
+      minInterval,
+    };
   }
 
   return {
@@ -59,8 +57,8 @@ export const getAdjustedDomain = (
     const lastXValue = xValues[xValues.length - 1];
 
     const domainMin = Math.min(firstXValue, domain.min);
-    const domainMaxValue = hasBars ? domain.max - interval : lastXValue + interval;
-    const domainMax = Math.max(domainMaxValue, lastXValue);
+    const domainMaxValue = Math.max(domain.max - interval, lastXValue);
+    const domainMax = hasBars ? domainMaxValue : domainMaxValue + interval;
     const minInterval = getAdjustedInterval(
       xValues,
       intervalESValue,

@@ -5,41 +5,28 @@
  * 2.0.
  */
 
-import { IRouter, ILegacyScopedClusterClient, RequestHandlerContext } from 'src/core/server';
+import { IRouter } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
 import { RemoteClustersPluginSetup } from '../../remote_clusters/server';
-import { License } from './services';
-import { isEsError } from './shared_imports';
-import { formatEsError } from './lib/format_es_error';
+import { License, handleEsError } from './shared_imports';
 
-export interface Dependencies {
+export interface SetupDependencies {
   licensing: LicensingPluginSetup;
   indexManagement: IndexManagementPluginSetup;
   remoteClusters: RemoteClustersPluginSetup;
   features: FeaturesPluginSetup;
 }
 
+export interface StartDependencies {
+  licensing: LicensingPluginStart;
+}
+
 export interface RouteDependencies {
-  router: CcrPluginRouter;
+  router: IRouter;
   license: License;
   lib: {
-    isEsError: typeof isEsError;
-    formatEsError: typeof formatEsError;
+    handleEsError: typeof handleEsError;
   };
 }
-
-/**
- * @internal
- */
-export interface CcrRequestHandlerContext extends RequestHandlerContext {
-  crossClusterReplication: {
-    client: ILegacyScopedClusterClient;
-  };
-}
-
-/**
- * @internal
- */
-type CcrPluginRouter = IRouter<CcrRequestHandlerContext>;

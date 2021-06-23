@@ -7,7 +7,8 @@
 
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SimplifiedAgentStatus } from '../../../types';
+
+import type { SimplifiedAgentStatus } from '../../../types';
 
 const visColors = euiPaletteColorBlindBehindText();
 const colorToHexMap = {
@@ -18,6 +19,7 @@ const colorToHexMap = {
   accent: visColors[2],
   warning: visColors[5],
   danger: visColors[9],
+  inactive: '#98A2B3',
 };
 
 export const AGENT_STATUSES: SimplifiedAgentStatus[] = [
@@ -33,8 +35,9 @@ export function getColorForAgentStatus(agentStatus: SimplifiedAgentStatus): stri
     case 'healthy':
       return colorToHexMap.secondary;
     case 'offline':
-    case 'inactive':
       return colorToHexMap.default;
+    case 'inactive':
+      return colorToHexMap.inactive;
     case 'unhealthy':
       return colorToHexMap.warning;
     case 'updating':

@@ -57,6 +57,7 @@ import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { LatestFunctionForm } from './latest_function_form';
+import { AdvancedRuntimeMappingsSettings } from '../advanced_runtime_mappings_settings';
 
 export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
@@ -67,7 +68,6 @@ export interface StepDefineFormProps {
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { indexPattern } = searchItems;
-
   const {
     ml: { DataGrid },
   } = useAppDependencies();
@@ -87,11 +87,14 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const pivotQuery = stepDefineForm.searchBar.state.pivotQuery;
 
   const indexPreviewProps = {
-    ...useIndexData(indexPattern, stepDefineForm.searchBar.state.pivotQuery),
+    ...useIndexData(
+      indexPattern,
+      stepDefineForm.searchBar.state.pivotQuery,
+      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
+    ),
     dataTestSubj: 'transformIndexPreview',
     toastNotifications,
   };
-
   const { requestPayload, validationStatus } =
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? stepDefineForm.pivotConfig.state
@@ -102,7 +105,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     pivotQuery,
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? stepDefineForm.pivotConfig.state.requestPayload
-      : stepDefineForm.latestFunctionConfig.requestPayload
+      : stepDefineForm.latestFunctionConfig.requestPayload,
+    stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
   );
 
   const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern.title);
@@ -122,7 +126,13 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   );
 
   const pivotPreviewProps = {
-    ...usePivotData(indexPattern.title, pivotQuery, validationStatus, requestPayload),
+    ...usePivotData(
+      indexPattern.title,
+      pivotQuery,
+      validationStatus,
+      requestPayload,
+      stepDefineForm.runtimeMappingsEditor.state.runtimeMappings
+    ),
     dataTestSubj: 'transformPivotPreview',
     title: i18n.translate('xpack.transform.pivotPreview.transformPreviewTitle', {
       defaultMessage: 'Transform preview',
@@ -181,8 +191,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     stepDefineForm.advancedPivotEditor.actions.setAdvancedPivotEditorApplyButtonEnabled(false);
   };
 
-  const { esQueryDsl } = useDocumentationLinks();
-  const { esTransformPivot } = useDocumentationLinks();
+  const { esQueryDsl, esTransformPivot } = useDocumentationLinks();
 
   const advancedEditorsSidebarWidth = '220px';
 
@@ -218,7 +227,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           }
         >
           <>
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween">
               <EuiFlexItem>
                 {/* Flex Column #1: Search Bar / Advanced Search Editor */}
                 {searchItems.savedSearch === undefined && (
@@ -273,7 +282,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                             defaultMessage:
                               'The advanced editor allows you to edit the source query clause of the transform configuration.',
                           }
-                        )}{' '}
+                        )}
                         <EuiLink href={esQueryDsl} target="_blank">
                           {i18n.translate(
                             'xpack.transform.stepDefineForm.advancedEditorHelpTextLink',
@@ -304,6 +313,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
+            <AdvancedRuntimeMappingsSettings {...stepDefineForm} />
+            <EuiSpacer size="s" />
+
             <DataGrid {...indexPreviewProps} />
           </>
         </EuiFormRow>

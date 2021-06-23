@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Role } from './role';
+
 export interface ApiKey {
   id: string;
   name: string;
@@ -13,9 +15,12 @@ export interface ApiKey {
   creation: number;
   expiration: number;
   invalidated: boolean;
+  metadata: Record<string, any>;
 }
 
 export interface ApiKeyToInvalidate {
   id: string;
   name: string;
 }
+
+export type ApiKeyRoleDescriptors = Record<string, Role['elasticsearch']>;

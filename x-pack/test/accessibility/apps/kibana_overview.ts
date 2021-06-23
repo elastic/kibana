@@ -15,28 +15,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('kibanaOverview');
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.removeSampleDataSet('flights');
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
-    it('Getting started view', async () => {
-      await a11y.testAppSnapshot();
-    });
-
-    it('Overview view', async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await PageObjects.home.addSampleDataSet('flights');
-      await PageObjects.common.navigateToApp('kibanaOverview');
+    it('Kibana overview', async () => {
       await a11y.testAppSnapshot();
     });
   });

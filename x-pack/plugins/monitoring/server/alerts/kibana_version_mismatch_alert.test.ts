@@ -9,6 +9,7 @@ import { KibanaVersionMismatchAlert } from './kibana_version_mismatch_alert';
 import { ALERT_KIBANA_VERSION_MISMATCH } from '../../common/constants';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const RealDate = Date;
 
@@ -87,7 +88,7 @@ describe('KibanaVersionMismatchAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,

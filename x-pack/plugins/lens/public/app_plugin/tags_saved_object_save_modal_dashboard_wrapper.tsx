@@ -9,13 +9,15 @@ import React, { FC, useState, useMemo, useCallback } from 'react';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import {
   SaveModalDashboardProps,
-  SavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
 } from '../../../../../src/plugins/presentation_util/public';
 import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
 
 export type DashboardSaveProps = OnSaveProps & {
   returnToOrigin: boolean;
   dashboardId?: string | null;
+  addToLibrary?: boolean;
   newTags?: string[];
 };
 
@@ -27,6 +29,8 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   onSave: (props: DashboardSaveProps) => void;
 };
+
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObjectSaveModalDashboardProps> = ({
   initialTags,

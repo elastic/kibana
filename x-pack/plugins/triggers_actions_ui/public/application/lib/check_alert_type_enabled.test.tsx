@@ -61,7 +61,7 @@ describe('checkAlertTypeEnabled', () => {
     expect(checkAlertTypeEnabled(alertType)).toMatchInlineSnapshot(`
       Object {
         "isEnabled": false,
-        "message": "This alert type requires a Gold license.",
+        "message": "This rule type requires a Gold license.",
       }
     `);
   });

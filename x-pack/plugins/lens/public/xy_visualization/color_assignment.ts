@@ -95,7 +95,7 @@ export function getColorAssignments(
 
 export function getAccessorColorConfig(
   colorAssignments: ColorAssignments,
-  frame: FramePublicAPI,
+  frame: Pick<FramePublicAPI, 'datasourceLayers'>,
   layer: XYLayerConfig,
   paletteService: PaletteRegistry
 ): AccessorConfig[] {
@@ -118,7 +118,7 @@ export function getAccessorColorConfig(
     );
     const customColor =
       currentYConfig?.color ||
-      paletteService.get(currentPalette.name).getColor(
+      paletteService.get(currentPalette.name).getCategoricalColor(
         [
           {
             name: columnToLabel[accessor] || accessor,

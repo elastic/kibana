@@ -11,6 +11,9 @@ To access these settings, click *Map settings* in the application toolbar.
 *Background color*::
 Set the map background color.
 
+*Show scale*::
+When enabled, display the map scale.
+
 [float]
 [[maps-settings-navigation]]
 === Navigation

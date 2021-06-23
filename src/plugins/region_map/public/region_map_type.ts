@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { VisTypeDefinition } from '../../visualizations/public';
-import { ORIGIN } from '../../maps_legacy/public';
+import { ORIGIN, VectorLayer } from '../../maps_ems/public';
 
 import { getDeprecationMessage } from './get_deprecation_message';
 import { RegionMapVisualizationDependencies } from './plugin';
@@ -107,11 +107,12 @@ provided base maps, or add your own. Darker colors represent higher values.',
         const newLayers = layers
           .map(mapToLayerWithId.bind(null, ORIGIN.EMS))
           .filter(
-            (layer) => !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
+            (layer: VectorLayer) =>
+              !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
           );
 
         // backfill v1 manifest for now
-        newLayers.forEach((layer) => {
+        newLayers.forEach((layer: VectorLayer) => {
           if (layer.format === 'geojson') {
             layer.format = {
               type: 'geojson',

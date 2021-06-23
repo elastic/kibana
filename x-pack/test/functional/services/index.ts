@@ -58,6 +58,7 @@ import {
   DashboardDrilldownsManageProvider,
   DashboardPanelTimeRangeProvider,
 } from './dashboard';
+import { SearchSessionsService } from './search_sessions';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -106,4 +107,5 @@ export const services = {
   dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
   dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
+  searchSessions: SearchSessionsService,
 };

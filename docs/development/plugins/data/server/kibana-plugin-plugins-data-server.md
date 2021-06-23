@@ -12,6 +12,7 @@
 |  [IndexPattern](./kibana-plugin-plugins-data-server.indexpattern.md) |  |
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
+|  [IndexPatternsServiceProvider](./kibana-plugin-plugins-data-server.indexpatternsserviceprovider.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
 
@@ -34,7 +35,7 @@
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
-|  [searchUsageObserver(logger, usage)](./kibana-plugin-plugins-data-server.searchusageobserver.md) | Rxjs observer for easily doing <code>tap(searchUsageObserver(logger, usage))</code> in an rxjs chain. |
+|  [searchUsageObserver(logger, usage, { isRestore })](./kibana-plugin-plugins-data-server.searchusageobserver.md) | Rxjs observer for easily doing <code>tap(searchUsageObserver(logger, usage))</code> in an rxjs chain. |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
 |  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
@@ -44,6 +45,8 @@
 |  --- | --- |
 |  [AggFunctionsMapping](./kibana-plugin-plugins-data-server.aggfunctionsmapping.md) | A global list of the expression function definitions for each agg type function. |
 |  [AggParamOption](./kibana-plugin-plugins-data-server.aggparamoption.md) |  |
+|  [AsyncSearchResponse](./kibana-plugin-plugins-data-server.asyncsearchresponse.md) |  |
+|  [AsyncSearchStatusResponse](./kibana-plugin-plugins-data-server.asyncsearchstatusresponse.md) |  |
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
@@ -51,6 +54,7 @@
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
 |  [IndexPatternAttributes](./kibana-plugin-plugins-data-server.indexpatternattributes.md) | Interface for an index pattern saved object |
+|  [IScopedSearchClient](./kibana-plugin-plugins-data-server.iscopedsearchclient.md) |  |
 |  [ISearchOptions](./kibana-plugin-plugins-data-server.isearchoptions.md) |  |
 |  [ISearchSessionService](./kibana-plugin-plugins-data-server.isearchsessionservice.md) |  |
 |  [ISearchSetup](./kibana-plugin-plugins-data-server.isearchsetup.md) |  |

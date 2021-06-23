@@ -10,24 +10,33 @@ import { LensIconChartDonut } from '../assets/chart_donut';
 import { LensIconChartPie } from '../assets/chart_pie';
 import { LensIconChartTreemap } from '../assets/chart_treemap';
 
+const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
+  defaultMessage: 'Proportion',
+});
+
 export const CHART_NAMES = {
   donut: {
     icon: LensIconChartDonut,
     label: i18n.translate('xpack.lens.pie.donutLabel', {
       defaultMessage: 'Donut',
     }),
+    groupLabel,
   },
   pie: {
     icon: LensIconChartPie,
     label: i18n.translate('xpack.lens.pie.pielabel', {
       defaultMessage: 'Pie',
     }),
+
+    groupLabel,
   },
   treemap: {
     icon: LensIconChartTreemap,
     label: i18n.translate('xpack.lens.pie.treemaplabel', {
       defaultMessage: 'Treemap',
     }),
+
+    groupLabel,
   },
 };
 

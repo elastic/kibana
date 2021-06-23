@@ -36,7 +36,6 @@ test('correctly creates default environment in dev mode.', () => {
     REPO_ROOT,
     getEnvOptions({
       configs: ['/test/cwd/config/kibana.yml'],
-      isDevCliParent: true,
     })
   );
 

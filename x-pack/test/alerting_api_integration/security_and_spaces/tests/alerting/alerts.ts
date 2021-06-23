@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -56,11 +57,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         before(async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -78,7 +79,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             objectRemover,
           });
         });
-        after(() => objectRemover.add(space.id, indexRecordActionId, 'action', 'actions'));
+        after(() => objectRemover.add(space.id, indexRecordActionId, 'connector', 'actions'));
 
         it('should schedule task, run alert and schedule actions when appropriate', async () => {
           const testStart = new Date();
@@ -128,7 +129,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference
               );
               expect(alertSearchResult.hits.total.value).to.eql(1);
-              expect(alertSearchResult.hits.hits[0]._source).to.eql({
+              const alertSearchResultWithoutDates = omit(alertSearchResult.hits.hits[0]._source, [
+                'alertInfo.createdAt',
+                'alertInfo.updatedAt',
+              ]);
+              expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
                 state: {},
@@ -138,14 +143,40 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 },
                 alertInfo: {
                   alertId,
+                  consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
                   name: 'abc',
+                  enabled: true,
+                  notifyWhen: 'onActiveAlert',
+                  schedule: {
+                    interval: '1m',
+                  },
                   tags: ['tag-A', 'tag-B'],
+                  throttle: '1m',
                   createdBy: user.fullName,
                   updatedBy: user.fullName,
+                  actions: response.body.actions.map((action: any) => {
+                    /* eslint-disable @typescript-eslint/naming-convention */
+                    const { connector_type_id, group, id, params } = action;
+                    return {
+                      actionTypeId: connector_type_id,
+                      group,
+                      id,
+                      params,
+                    };
+                  }),
+                  producer: 'alertsFixture',
+                  ruleTypeId: 'test.always-firing',
+                  ruleTypeName: 'Test: Always Firing',
                 },
               });
+              expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+                /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+              );
+              expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+                /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+              );
 
               // Ensure only 1 action executed with proper params
               const actionSearchResult = await esTestIndexTool.search(
@@ -183,8 +214,10 @@ instanceStateValue: true
               await validateEventLog({
                 spaceId: space.id,
                 alertId,
+                ruleTypeId: 'test.always-firing',
                 outcome: 'success',
                 message: `alert executed: test.always-firing:${alertId}: 'abc'`,
+                ruleObject: alertSearchResultWithoutDates,
               });
               break;
             default:
@@ -243,7 +276,11 @@ instanceStateValue: true
                 reference
               );
               expect(alertSearchResult.hits.total.value).to.eql(1);
-              expect(alertSearchResult.hits.hits[0]._source).to.eql({
+              const alertSearchResultWithoutDates = omit(alertSearchResult.hits.hits[0]._source, [
+                'alertInfo.createdAt',
+                'alertInfo.updatedAt',
+              ]);
+              expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
                 state: {},
@@ -253,15 +290,41 @@ instanceStateValue: true
                 },
                 alertInfo: {
                   alertId,
+                  consumer: 'alertsFixture',
                   spaceId: space.id,
                   namespace: space.id,
                   name: 'abc',
+                  enabled: true,
+                  notifyWhen: 'onActiveAlert',
+                  schedule: {
+                    interval: '1m',
+                  },
                   tags: ['tag-A', 'tag-B'],
+                  throttle: '1m',
                   createdBy: user.fullName,
                   updatedBy: user.fullName,
+                  actions: response.body.actions.map((action: any) => {
+                    /* eslint-disable @typescript-eslint/naming-convention */
+                    const { connector_type_id, group, id, params } = action;
+                    return {
+                      actionTypeId: connector_type_id,
+                      group,
+                      id,
+                      params,
+                    };
+                  }),
+                  producer: 'alertsFixture',
+                  ruleTypeId: 'test.always-firing',
+                  ruleTypeName: 'Test: Always Firing',
                 },
               });
 
+              expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+                /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+              );
+              expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+                /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+              );
               // Ensure only 1 action executed with proper params
               const actionSearchResult = await esTestIndexTool.search(
                 'action:test.index-record',
@@ -348,15 +411,46 @@ instanceStateValue: true
           );
 
           expect(alertSearchResult.hits.total.value).to.be.greaterThan(0);
-          expect(alertSearchResult.hits.hits[0]._source.alertInfo).to.eql({
+          const alertSearchResultInfoWithoutDates = omit(
+            alertSearchResult.hits.hits[0]._source.alertInfo,
+            ['createdAt', 'updatedAt']
+          );
+          expect(alertSearchResultInfoWithoutDates).to.eql({
             alertId,
+            consumer: 'alertsFixture',
             spaceId: space.id,
             namespace: space.id,
             name: 'def',
+            enabled: true,
+            notifyWhen: 'onActiveAlert',
+            schedule: {
+              interval: '59s',
+            },
             tags: ['fee', 'fi', 'fo'],
+            throttle: '1m',
             createdBy: user.fullName,
             updatedBy: Superuser.fullName,
+            actions: response2.body.actions.map((action: any) => {
+              /* eslint-disable @typescript-eslint/naming-convention */
+              const { connector_type_id, group, id, params } = action;
+              return {
+                actionTypeId: connector_type_id,
+                group,
+                id,
+                params,
+              };
+            }),
+            producer: 'alertsFixture',
+            ruleTypeId: 'test.always-firing',
+            ruleTypeName: 'Test: Always Firing',
           });
+
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+            /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+          );
+          expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+            /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+          );
         });
 
         it('should handle custom retry logic when appropriate', async () => {
@@ -365,24 +459,24 @@ instanceStateValue: true
           const retryDate = new Date(Date.now() + 60000);
 
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'Test rate limit',
-              actionTypeId: 'test.rate-limit',
+              connector_type_id: 'test.rate-limit',
               config: {},
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'connector', 'actions');
 
           const reference = alertUtils.generateReference();
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
               getTestAlertData({
-                alertTypeId: 'test.always-firing',
+                rule_type_id: 'test.always-firing',
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference: 'create-test-2',
@@ -428,7 +522,7 @@ instanceStateValue: true
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Wait for the task to be attempted once and idle
               const scheduledActionTask = await retry.try(async () => {
@@ -482,12 +576,12 @@ instanceStateValue: true
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
               getTestAlertData({
-                alertTypeId: 'test.authorization',
+                rule_type_id: 'test.authorization',
                 params: {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
@@ -517,7 +611,7 @@ instanceStateValue: true
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
@@ -533,11 +627,9 @@ instanceStateValue: true
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callClusterError,
-                  statusCode: 403,
                 },
                 callScopedClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
-                  statusCode: 403,
                 },
                 savedObjectsClientError: {
                   ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
@@ -550,7 +642,7 @@ instanceStateValue: true
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
@@ -583,21 +675,21 @@ instanceStateValue: true
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.authorization',
+              connector_type_id: 'test.authorization',
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'connector', 'actions');
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
               getTestAlertData({
-                alertTypeId: 'test.always-firing',
+                rule_type_id: 'test.always-firing',
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
@@ -636,7 +728,7 @@ instanceStateValue: true
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);
@@ -652,11 +744,9 @@ instanceStateValue: true
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callClusterError,
-                  statusCode: 403,
                 },
                 callScopedClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
-                  statusCode: 403,
                 },
                 savedObjectsClientError: {
                   ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
@@ -677,7 +767,7 @@ instanceStateValue: true
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);
@@ -1156,13 +1246,15 @@ instanceStateValue: true
   interface ValidateEventLogParams {
     spaceId: string;
     alertId: string;
+    ruleTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
+    ruleObject: any;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, alertId, outcome, message, errorMessage } = params;
+    const { spaceId, alertId, outcome, message, errorMessage, ruleObject } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -1203,8 +1295,18 @@ instanceStateValue: true
         type: 'alert',
         id: alertId,
         namespace: spaceId,
+        type_id: ruleObject.alertInfo.ruleTypeId,
       },
     ]);
+
+    expect(event?.rule).to.eql({
+      id: alertId,
+      license: 'basic',
+      category: ruleObject.alertInfo.ruleTypeId,
+      ruleset: ruleObject.alertInfo.producer,
+      namespace: spaceId,
+      name: ruleObject.alertInfo.name,
+    });
 
     expect(event?.message).to.eql(message);
 

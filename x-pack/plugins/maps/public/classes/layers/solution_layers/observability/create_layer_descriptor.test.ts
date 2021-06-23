@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { emsWorldLayerId } from '../../../../../common';
+
 jest.mock('../../../../kibana_services', () => {
   return {
     getIsDarkMode() {
@@ -43,6 +45,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       joins: [
         {
           leftField: 'iso2',
@@ -71,7 +74,7 @@ describe('createLayerDescriptor', () => {
       maxZoom: 24,
       minZoom: 0,
       sourceDescriptor: {
-        id: 'world_countries',
+        id: emsWorldLayerId,
         tooltipProperties: ['name', 'iso2'],
         type: 'EMS_FILE',
       },
@@ -176,6 +179,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       label: '[Performance] Duration',
       maxZoom: 24,
       minZoom: 0,
@@ -218,6 +222,7 @@ describe('createLayerDescriptor', () => {
       __dataRequests: [],
       alpha: 0.75,
       id: '12345',
+      includeInFitToBounds: true,
       joins: [],
       label: '[Performance] Duration',
       maxZoom: 24,

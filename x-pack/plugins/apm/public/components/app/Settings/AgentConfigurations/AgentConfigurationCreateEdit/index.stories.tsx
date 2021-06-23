@@ -7,7 +7,7 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { HttpSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { AgentConfiguration } from '../../../../../../common/agent_configuration/configuration_types';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
@@ -23,10 +23,10 @@ storiesOf(
   module
 )
   .addDecorator((storyFn) => {
-    const httpMock = {};
+    const coreMock = ({} as unknown) as CoreStart;
 
     // mock
-    createCallApmApi((httpMock as unknown) as HttpSetup);
+    createCallApmApi(coreMock);
 
     const contextMock = {
       core: {

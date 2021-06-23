@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // TODO add test for 'scripted filter and query' viz
     // TODO add test for 'animal weight linked to search' viz
     // TODO add test for the last vega viz
-    await dashboardExpect.savedSearchRowCount(50);
+    await dashboardExpect.savedSearchRowCount(11);
   };
 
   const expectNoDataRenders = async () => {
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
-      await esArchiver.load('dashboard/current/kibana');
+      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });

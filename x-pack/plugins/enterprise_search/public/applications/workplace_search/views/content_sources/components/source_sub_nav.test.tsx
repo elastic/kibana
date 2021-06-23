@@ -5,36 +5,94 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
-import React from 'react';
+jest.mock('../../../../shared/layout', () => ({
+  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+}));
 
-import { shallow } from 'enzyme';
+import { useSourceSubNav } from './source_sub_nav';
 
-import { SideNavLink } from '../../../../shared/layout';
-import { CUSTOM_SERVICE_TYPE } from '../../../constants';
-
-import { SourceSubNav } from './source_sub_nav';
-
-describe('SourceSubNav', () => {
-  it('renders empty when no group id present', () => {
+describe('useSourceSubNav', () => {
+  it('returns undefined when no content source id present', () => {
     setMockValues({ contentSource: {} });
-    const wrapper = shallow(<SourceSubNav />);
 
-    expect(wrapper.find(SideNavLink)).toHaveLength(0);
+    expect(useSourceSubNav()).toEqual(undefined);
   });
 
-  it('renders nav items', () => {
-    setMockValues({ contentSource: { id: '1' } });
-    const wrapper = shallow(<SourceSubNav />);
+  it('returns EUI nav items', () => {
+    setMockValues({ isOrganization: true, contentSource: { id: '1' } });
 
-    expect(wrapper.find(SideNavLink)).toHaveLength(3);
+    expect(useSourceSubNav()).toEqual([
+      {
+        id: 'sourceOverview',
+        name: 'Overview',
+        href: '/sources/1',
+      },
+      {
+        id: 'sourceContent',
+        name: 'Content',
+        href: '/sources/1/content',
+      },
+      {
+        id: 'sourceSettings',
+        name: 'Settings',
+        href: '/sources/1/settings',
+      },
+    ]);
   });
 
-  it('renders custom source nav items', () => {
-    setMockValues({ contentSource: { id: '1', serviceType: CUSTOM_SERVICE_TYPE } });
-    const wrapper = shallow(<SourceSubNav />);
+  it('returns extra nav items for custom sources', () => {
+    setMockValues({ isOrganization: true, contentSource: { id: '2', serviceType: 'custom' } });
 
-    expect(wrapper.find(SideNavLink)).toHaveLength(5);
+    expect(useSourceSubNav()).toEqual([
+      {
+        id: 'sourceOverview',
+        name: 'Overview',
+        href: '/sources/2',
+      },
+      {
+        id: 'sourceContent',
+        name: 'Content',
+        href: '/sources/2/content',
+      },
+      {
+        id: 'sourceSchema',
+        name: 'Schema',
+        href: '/sources/2/schemas',
+      },
+      {
+        id: 'sourceDisplaySettings',
+        name: 'Display Settings',
+        href: '/sources/2/display_settings',
+      },
+      {
+        id: 'sourceSettings',
+        name: 'Settings',
+        href: '/sources/2/settings',
+      },
+    ]);
+  });
+
+  it('returns nav links to personal dashboard when not on an organization page', () => {
+    setMockValues({ isOrganization: false, contentSource: { id: '3' } });
+
+    expect(useSourceSubNav()).toEqual([
+      {
+        id: 'sourceOverview',
+        name: 'Overview',
+        href: '/p/sources/3',
+      },
+      {
+        id: 'sourceContent',
+        name: 'Content',
+        href: '/p/sources/3/content',
+      },
+      {
+        id: 'sourceSettings',
+        name: 'Settings',
+        href: '/p/sources/3/settings',
+      },
+    ]);
   });
 });

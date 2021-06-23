@@ -8,14 +8,34 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ActionResult, ActionsRequestHandlerContext } from '../types';
-import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
-import { BASE_ACTION_API_PATH } from '../../common';
+import { ILicenseState } from '../lib';
+import { BASE_ACTION_API_PATH, RewriteRequestCase, RewriteResponseCase } from '../../common';
+import { verifyAccessAndContext } from './verify_access_and_context';
+import { CreateOptions } from '../actions_client';
 
 export const bodySchema = schema.object({
   name: schema.string(),
-  actionTypeId: schema.string(),
+  connector_type_id: schema.string(),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+});
+
+const rewriteBodyReq: RewriteRequestCase<CreateOptions['action']> = ({
+  connector_type_id: actionTypeId,
+  name,
+  config,
+  secrets,
+}) => ({ actionTypeId, name, config, secrets });
+const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
+  actionTypeId,
+  isPreconfigured,
+  isMissingSecrets,
+  ...res
+}) => ({
+  ...res,
+  connector_type_id: actionTypeId,
+  is_preconfigured: isPreconfigured,
+  is_missing_secrets: isMissingSecrets,
 });
 
 export const createActionRoute = (
@@ -24,30 +44,19 @@ export const createActionRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/action`,
+      path: `${BASE_ACTION_API_PATH}/connector`,
       validate: {
         body: bodySchema,
       },
     },
-    router.handleLegacyErrors(async function (context, req, res) {
-      verifyApiAccess(licenseState);
-
-      if (!context.actions) {
-        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
-      }
-      const actionsClient = context.actions.getActionsClient();
-      const action = req.body;
-      try {
-        const actionRes: ActionResult = await actionsClient.create({ action });
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const actionsClient = context.actions.getActionsClient();
+        const action = rewriteBodyReq(req.body);
         return res.ok({
-          body: actionRes,
+          body: rewriteBodyRes(await actionsClient.create({ action })),
         });
-      } catch (e) {
-        if (isErrorThatHandlesItsOwnResponse(e)) {
-          return e.sendResponse(res);
-        }
-        throw e;
-      }
-    })
+      })
+    )
   );
 };

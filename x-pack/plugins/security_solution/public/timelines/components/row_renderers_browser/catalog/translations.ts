@@ -7,6 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERTS_NAME = i18n.translate('xpack.securitySolution.eventRenderers.alertsName', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventRenderers.alertsDescription',
+  {
+    defaultMessage: 'Alerts are displayed when malware or ransomware is prevented and detected',
+  }
+);
+
 export const AUDITD_NAME = i18n.translate('xpack.securitySolution.eventRenderers.auditdName', {
   defaultMessage: 'Auditd',
 });
@@ -112,6 +123,18 @@ export const FLOW_DESCRIPTION_PART2 = i18n.translate(
   }
 );
 
+export const LIBRARY_NAME = i18n.translate('xpack.securitySolution.eventRenderers.libraryName', {
+  defaultMessage: 'Library',
+});
+
+export const LIBRARY_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventRenderers.libraryDescription',
+  {
+    defaultMessage:
+      'Library events display a Dynamically Linked Library (DLL) being loaded by a process',
+  }
+);
+
 export const PROCESS = i18n.translate('xpack.securitySolution.eventRenderers.processName', {
   defaultMessage: 'Process',
 });
@@ -129,6 +152,17 @@ export const PROCESS_DESCRIPTION_PART2 = i18n.translate(
   {
     defaultMessage:
       'Details including the command line arguments, parent process, and if applicable, file hashes are displayed when available.',
+  }
+);
+
+export const REGISTRY_NAME = i18n.translate('xpack.securitySolution.eventRenderers.registryName', {
+  defaultMessage: 'Registry',
+});
+
+export const REGISTRY_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventRenderers.registryDescription',
+  {
+    defaultMessage: 'Registry events show updates to the Windows Registry',
   }
 );
 
@@ -194,6 +228,19 @@ export const SYSTEM_DESCRIPTION_PART3 = i18n.translate(
   {
     defaultMessage:
       'All datasets send both periodic state information (e.g. all currently running processes) and real-time changes (e.g. when a new process starts or stops).',
+  }
+);
+export const THREAT_MATCH_NAME = i18n.translate(
+  'xpack.securitySolution.eventRenderers.threatMatchName',
+  {
+    defaultMessage: 'Threat Indicator Match',
+  }
+);
+
+export const THREAT_MATCH_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.eventRenderers.threatMatchDescription',
+  {
+    defaultMessage: 'Summarizes events that matched threat indicators',
   }
 );
 

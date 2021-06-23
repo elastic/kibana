@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeQuery } from '../../../server/utils/queries';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
@@ -40,7 +40,7 @@ export async function fetchServicePathsFromTraceIds(
                 [TRACE_ID]: traceIds,
               },
             },
-            { range: rangeFilter(start, end) },
+            ...rangeQuery(start, end),
           ],
         },
       },
@@ -208,12 +208,13 @@ export async function fetchServicePathsFromTraceIds(
               return response;`,
             },
           },
-        },
+        } as const,
       },
     },
   };
 
   const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
+    'get_service_paths_from_trace_ids',
     serviceMapParams
   );
 

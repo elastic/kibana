@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { Observable } from 'rxjs';
+
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type {
-  PluginInitializerContext,
-  ConfigDeprecationProvider,
   ConfigDeprecation,
+  ConfigDeprecationProvider,
+  PluginInitializerContext,
 } from 'src/core/server';
-import { Observable } from 'rxjs';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -22,13 +24,15 @@ export function createConfig$(context: PluginInitializerContext) {
   return context.config.create<TypeOf<typeof ConfigSchema>>();
 }
 
-const disabledDeprecation: ConfigDeprecation = (config, fromPath, log) => {
+const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation) => {
   if (config.xpack?.spaces?.enabled === false) {
-    log(
-      `Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`
-    );
+    addDeprecation({
+      message: `Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`,
+      correctiveActions: {
+        manualSteps: [`Remove "xpack.spaces.enabled: false" from your Kibana configuration`],
+      },
+    });
   }
-  return config;
 };
 
 export const spacesConfigDeprecationProvider: ConfigDeprecationProvider = () => {

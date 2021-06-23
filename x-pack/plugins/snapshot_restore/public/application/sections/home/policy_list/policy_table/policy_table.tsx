@@ -117,11 +117,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         // Alert user if last snapshot failed
         if (lastSuccess && lastFailure && lastFailure.time > lastSuccess.time) {
           return (
-            <EuiFlexGroup
-              gutterSize="s"
-              alignItems="center"
-              className="snapshotRestorePolicyTableSnapshotFailureContainer"
-            >
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
@@ -382,7 +378,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       >
         <FormattedMessage
           id="xpack.snapshotRestore.policyList.table.addPolicyButton"
-          defaultMessage="Create a policy"
+          defaultMessage="Create policy"
         />
       </EuiButton>,
     ],

@@ -12,7 +12,6 @@ import { SecurityApp } from './app';
 import { RenderAppProps } from './types';
 
 export const renderApp = ({
-  apolloClient,
   element,
   history,
   onAppLeave,
@@ -21,13 +20,7 @@ export const renderApp = ({
   SubPluginRoutes,
 }: RenderAppProps): (() => void) => {
   render(
-    <SecurityApp
-      apolloClient={apolloClient}
-      history={history}
-      onAppLeave={onAppLeave}
-      services={services}
-      store={store}
-    >
+    <SecurityApp history={history} onAppLeave={onAppLeave} services={services} store={store}>
       <SubPluginRoutes />
     </SecurityApp>,
     element

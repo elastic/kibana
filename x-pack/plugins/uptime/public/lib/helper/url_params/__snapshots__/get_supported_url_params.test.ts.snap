@@ -11,6 +11,7 @@ Object {
   "filters": "",
   "focusConnectorField": false,
   "pagination": undefined,
+  "query": "",
   "search": "",
   "statusFilter": "",
 }
@@ -27,6 +28,7 @@ Object {
   "filters": "",
   "focusConnectorField": false,
   "pagination": undefined,
+  "query": "",
   "search": "",
   "statusFilter": "",
 }
@@ -43,6 +45,7 @@ Object {
   "filters": "",
   "focusConnectorField": false,
   "pagination": undefined,
+  "query": "",
   "search": "monitor.status: down",
   "statusFilter": "",
 }
@@ -59,6 +62,7 @@ Object {
   "filters": "",
   "focusConnectorField": false,
   "pagination": undefined,
+  "query": "",
   "search": "",
   "statusFilter": "",
 }
@@ -75,6 +79,7 @@ Object {
   "filters": "",
   "focusConnectorField": false,
   "pagination": undefined,
+  "query": "",
   "search": "",
   "statusFilter": "",
 }

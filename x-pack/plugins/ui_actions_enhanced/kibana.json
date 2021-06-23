@@ -2,13 +2,13 @@
   "id": "uiActionsEnhanced",
   "version": "kibana",
   "configPath": ["xpack", "ui_actions_enhanced"],
+  "server": true,
+  "ui": true,
   "requiredPlugins": [
     "embeddable",
     "uiActions",
     "licensing"
   ],
-  "server": true,
-  "ui": true,
   "requiredBundles": [
     "kibanaUtils",
     "kibanaReact",

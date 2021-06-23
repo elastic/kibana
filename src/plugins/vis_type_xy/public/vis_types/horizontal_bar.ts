@@ -103,6 +103,7 @@ export const getHorizontalBarVisTypeDefinition = (
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
+          circlesRadius: 3,
         },
       ],
       addTooltip: true,
@@ -136,7 +137,7 @@ export const getHorizontalBarVisTypeDefinition = (
           defaultMessage: 'Y-axis',
         }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {

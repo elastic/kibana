@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -15,26 +15,21 @@ interface VisualizationNoResultsProps {
 }
 
 export class VisualizationNoResults extends React.Component<VisualizationNoResultsProps> {
-  private containerDiv = React.createRef<HTMLDivElement>();
-
   public render() {
     return (
-      <div data-test-subj="visNoResult" className="visError" ref={this.containerDiv}>
-        <div className="item top" />
-        <div className="item">
-          <EuiText size="xs" color="subdued">
-            <EuiIcon type="visualizeApp" size="m" color="subdued" />
-
-            <EuiSpacer size="s" />
-
-            <p>
+      <div data-test-subj="visNoResult" className="visError">
+        <EuiEmptyPrompt
+          iconType="visualizeApp"
+          iconColor="default"
+          data-test-subj="visualization-error"
+          body={
+            <EuiText size="xs">
               {i18n.translate('visualizations.noResultsFoundTitle', {
                 defaultMessage: 'No results found',
               })}
-            </p>
-          </EuiText>
-        </div>
-        <div className="item bottom" />
+            </EuiText>
+          }
+        />
       </div>
     );
   }
@@ -53,3 +48,6 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
     }
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default VisualizationNoResults;

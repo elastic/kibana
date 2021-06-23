@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { IndexPatternsContract } from '../index_patterns';
 import { IndexPatternSpec } from '..';
+import { SavedObjectReference } from '../../../../../core/types';
 
 const name = 'indexPatternLoad';
 const type = 'index_pattern';
@@ -56,5 +57,30 @@ export const getIndexPatternLoadMeta = (): Omit<
         defaultMessage: 'index pattern id to load',
       }),
     },
+  },
+  extract(state) {
+    const refName = 'indexPatternLoad.id';
+    const references: SavedObjectReference[] = [
+      {
+        name: refName,
+        type: 'search',
+        id: state.id[0] as string,
+      },
+    ];
+    return {
+      state: {
+        ...state,
+        id: [refName],
+      },
+      references,
+    };
+  },
+
+  inject(state, references) {
+    const reference = references.find((ref) => ref.name === 'indexPatternLoad.id');
+    if (reference) {
+      state.id[0] = reference.id;
+    }
+    return state;
   },
 });

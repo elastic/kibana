@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState, useEffect } from 'react';
-import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
-import { SpaceAvatar } from '../../../space_avatar';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import { getSpaceAvatarComponent } from '../../../space_avatar';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   getActiveSpace: () => Promise<Space>;
@@ -27,7 +34,9 @@ export const AdvancedSettingsTitle = (props: Props) => {
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems={'center'}>
       <EuiFlexItem grow={false}>
-        <SpaceAvatar space={activeSpace} />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazySpaceAvatar space={activeSpace} />
+        </Suspense>
       </EuiFlexItem>
       <EuiFlexItem style={{ marginLeft: '10px' }}>
         <EuiTitle size="m">

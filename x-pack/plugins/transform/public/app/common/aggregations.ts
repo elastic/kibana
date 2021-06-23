@@ -9,7 +9,7 @@ import { composeValidators, patternValidator } from '../../../common/shared_impo
 
 import { AggName } from '../../../common/types/aggregations';
 
-export function isAggName(arg: any): arg is AggName {
+export function isAggName(arg: unknown): arg is AggName {
   // allow all characters except `[]>` and must not start or end with a space.
   const validatorFn = composeValidators(
     patternValidator(/^[^\s]/),

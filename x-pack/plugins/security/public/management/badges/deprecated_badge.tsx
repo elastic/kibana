@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { EuiToolTipProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiBadge, EuiToolTipProps } from '@elastic/eui';
+
 import { OptionalToolTip } from './optional_tooltip';
 
 interface Props {

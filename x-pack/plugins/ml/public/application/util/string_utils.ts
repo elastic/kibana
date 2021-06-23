@@ -74,7 +74,7 @@ export function detectorToString(dtr: Detector): string {
     txt += PARTITION_FIELD_OPTION + quoteField(dtr.partition_field_name);
   }
 
-  if (dtr.exclude_frequent !== undefined && dtr.exclude_frequent !== '') {
+  if (dtr.exclude_frequent !== undefined) {
     txt += EXCLUDE_FREQUENT_OPTION + dtr.exclude_frequent;
   }
 

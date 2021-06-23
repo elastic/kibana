@@ -6,13 +6,23 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
+import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
+
+export type {
+  ObservabilityRouteCreateOptions,
+  ObservabilityRouteHandlerResources,
+  AbstractObservabilityServerRouteRepository,
+  ObservabilityServerRouteRepository,
+  ObservabilityAPIReturnType,
+} from './routes/types';
 
 /**
  * @internal
  */
 export interface ObservabilityRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
 }
 
 /**

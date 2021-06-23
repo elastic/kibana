@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from 'src/core/public';
+import type { DocLinksStart } from 'src/core/public';
 
 export class DocumentationLinksService {
   private readonly kbnPrivileges: string;

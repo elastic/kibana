@@ -57,10 +57,10 @@ export default ({ getService }: FtrProviderContext): void => {
       createdMigrations = [];
       await createSignalsIndex(supertest);
       legacySignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/legacy_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
       );
       outdatedSignalsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('signals/outdated_signals_index')
+        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
 
       ({
@@ -75,8 +75,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await esArchiver.unload('signals/outdated_signals_index');
-      await esArchiver.unload('signals/legacy_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
       await deleteMigrations({
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
@@ -221,14 +221,17 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indicesAfter).not.to.contain(createdMigration.index);
     });
 
-    it('returns an empty array indicating a no-op for DNE migrations', async () => {
+    it('returns a 404 for DNE migrations', async () => {
       const { body } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
         .send({ migration_ids: ['dne-migration'] })
-        .expect(200);
+        .expect(404);
 
-      expect(body).to.eql({ migrations: [] });
+      expect(body).to.eql({
+        message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
+        status_code: 404,
+      });
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
@@ -241,16 +244,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .auth(ROLES.t1_analyst, 'changeme')
         .expect(200);
 
-      const finalizeResponse: FinalizeResponse = body.migrations[0];
+      const finalizeResponse: FinalizeResponse & {
+        error: { message: string; status_code: number };
+      } = body.migrations[0];
 
       expect(finalizeResponse.id).to.eql(createdMigration.migration_id);
       expect(finalizeResponse.completed).not.to.eql(true);
-      expect(finalizeResponse.error).to.eql({
-        message:
-          'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst], this action is granted by the cluster privileges [monitor,manage,all]',
-        status_code: 403,
-      });
-
+      expect(finalizeResponse.error.message).to.match(/^security_exception/);
+      expect(finalizeResponse.error.status_code).to.eql(403);
       await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });

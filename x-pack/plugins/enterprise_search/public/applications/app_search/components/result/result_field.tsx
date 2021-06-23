@@ -9,7 +9,7 @@ import React from 'react';
 
 import { FieldType, Raw, Snippet } from './types';
 
-import { ResultFieldValue } from '.';
+import { ResultFieldValue, ResultToken } from '.';
 
 import './result_field.scss';
 
@@ -23,7 +23,10 @@ interface Props {
 export const ResultField: React.FC<Props> = ({ field, raw, snippet, type }) => {
   return (
     <div className="appSearchResultField">
-      <div className="appSearchResultField__key eui-textTruncate">{field}</div>
+      <div className="appSearchResultField__key eui-textTruncate">
+        {type && <ResultToken fieldType={type} />}
+        {field}
+      </div>
       <div className="appSearchResultField__separator" aria-hidden />
       <div className="appSearchResultField__value">
         <ResultFieldValue className="eui-textTruncate" raw={raw} snippet={snippet} type={type} />

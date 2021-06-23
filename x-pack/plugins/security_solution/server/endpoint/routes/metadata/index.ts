@@ -11,12 +11,14 @@ import { HostStatus, MetadataQueryStrategyVersions } from '../../../../common/en
 import { EndpointAppContext } from '../../types';
 import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
+import {
+  BASE_ENDPOINT_ROUTE,
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+} from '../../../../common/endpoint/constants';
 
-export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const METADATA_REQUEST_V1_ROUTE = `${BASE_ENDPOINT_ROUTE}/v1/metadata`;
 export const GET_METADATA_REQUEST_V1_ROUTE = `${METADATA_REQUEST_V1_ROUTE}/{id}`;
-export const METADATA_REQUEST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
-export const GET_METADATA_REQUEST_ROUTE = `${METADATA_REQUEST_ROUTE}/{id}`;
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({
@@ -24,10 +26,11 @@ export const endpointFilters = schema.object({
   host_status: schema.nullable(
     schema.arrayOf(
       schema.oneOf([
-        schema.literal(HostStatus.ONLINE.toString()),
+        schema.literal(HostStatus.HEALTHY.toString()),
         schema.literal(HostStatus.OFFLINE.toString()),
-        schema.literal(HostStatus.UNENROLLING.toString()),
-        schema.literal(HostStatus.ERROR.toString()),
+        schema.literal(HostStatus.UPDATING.toString()),
+        schema.literal(HostStatus.UNHEALTHY.toString()),
+        schema.literal(HostStatus.INACTIVE.toString()),
       ])
     )
   ),
@@ -81,7 +84,7 @@ export function registerEndpointRoutes(
 
   router.post(
     {
-      path: `${METADATA_REQUEST_ROUTE}`,
+      path: `${HOST_METADATA_LIST_ROUTE}`,
       validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
@@ -99,7 +102,7 @@ export function registerEndpointRoutes(
 
   router.get(
     {
-      path: `${GET_METADATA_REQUEST_ROUTE}`,
+      path: `${HOST_METADATA_GET_ROUTE}`,
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },

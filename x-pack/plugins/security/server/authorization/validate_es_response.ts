@@ -6,8 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HasPrivilegesResponse } from './types';
 
+import type { HasPrivilegesResponse } from './types';
+
+const anyBoolean = schema.boolean();
+const anyBooleanArray = schema.arrayOf(anyBoolean);
+const anyString = schema.string();
+const anyObject = schema.object({}, { unknowns: 'allow' });
+
+/**
+ * Validates an Elasticsearch "Has privileges" response against the expected application, actions, and resources.
+ *
+ * Note: the `actions` and `resources` parameters must be unique string arrays; any duplicates will cause validation to fail.
+ */
 export function validateEsPrivilegeResponse(
   response: HasPrivilegesResponse,
   application: string,
@@ -24,21 +35,26 @@ export function validateEsPrivilegeResponse(
   return response;
 }
 
-function buildActionsValidationSchema(actions: string[]) {
-  return schema.object({
-    ...actions.reduce<Record<string, any>>((acc, action) => {
-      return {
-        ...acc,
-        [action]: schema.boolean(),
-      };
-    }, {}),
-  });
-}
-
 function buildValidationSchema(application: string, actions: string[], resources: string[]) {
-  const actionValidationSchema = buildActionsValidationSchema(actions);
+  const actionsValidationSchema = schema.object(
+    {},
+    {
+      unknowns: 'allow',
+      validate: (value) => {
+        const actualActions = Object.keys(value).sort();
+        if (
+          actions.length !== actualActions.length ||
+          ![...actions].sort().every((x, i) => x === actualActions[i])
+        ) {
+          throw new Error('Payload did not match expected actions');
+        }
 
-  const resourceValidationSchema = schema.object(
+        anyBooleanArray.validate(Object.values(value));
+      },
+    }
+  );
+
+  const resourcesValidationSchema = schema.object(
     {},
     {
       unknowns: 'allow',
@@ -46,25 +62,25 @@ function buildValidationSchema(application: string, actions: string[], resources
         const actualResources = Object.keys(value).sort();
         if (
           resources.length !== actualResources.length ||
-          !resources.sort().every((x, i) => x === actualResources[i])
+          ![...resources].sort().every((x, i) => x === actualResources[i])
         ) {
           throw new Error('Payload did not match expected resources');
         }
 
         Object.values(value).forEach((actionResult) => {
-          actionValidationSchema.validate(actionResult);
+          actionsValidationSchema.validate(actionResult);
         });
       },
     }
   );
 
   return schema.object({
-    username: schema.string(),
-    has_all_requested: schema.boolean(),
-    cluster: schema.object({}, { unknowns: 'allow' }),
+    username: anyString,
+    has_all_requested: anyBoolean,
+    cluster: anyObject,
     application: schema.object({
-      [application]: resourceValidationSchema,
+      [application]: resourcesValidationSchema,
     }),
-    index: schema.object({}, { unknowns: 'allow' }),
+    index: anyObject,
   });
 }

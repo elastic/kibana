@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SerializedPolicy } from '../../../../common/types';
 
 export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
@@ -16,6 +15,7 @@ export interface DataAllocationMetaFields {
 
 export interface MinAgeField {
   minAgeUnit?: string;
+  minAgeToMilliSeconds: number;
 }
 
 export interface ForcemergeFields {
@@ -37,8 +37,13 @@ interface HotPhaseMetaFields extends ForcemergeFields {
    */
   customRollover: {
     enabled: boolean;
-    maxStorageSizeUnit?: string;
+    maxPrimaryShardSizeUnit?: string;
     maxAgeUnit?: string;
+
+    /**
+     * @deprecated This is the byte size unit for the max_size field which will by removed in version 8+ of the stack.
+     */
+    maxStorageSizeUnit?: string;
   };
 }
 
@@ -49,6 +54,12 @@ interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, For
 }
 
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
+  enabled: boolean;
+  freezeEnabled: boolean;
+  readonlyEnabled: boolean;
+}
+
+interface FrozenPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   enabled: boolean;
   freezeEnabled: boolean;
 }
@@ -69,6 +80,10 @@ export interface FormInternal extends SerializedPolicy {
     hot: HotPhaseMetaFields;
     warm: WarmPhaseMetaFields;
     cold: ColdPhaseMetaFields;
+    frozen: FrozenPhaseMetaFields;
     delete: DeletePhaseMetaFields;
+    searchableSnapshot: {
+      repository: string;
+    };
   };
 }

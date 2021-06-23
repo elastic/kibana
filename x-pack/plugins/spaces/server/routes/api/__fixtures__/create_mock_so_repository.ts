@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, SavedObjectsErrorHelpers } from 'src/core/server';
+import type { ISavedObjectsRepository } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 
 export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
   const mockSavedObjectsClientContract = ({

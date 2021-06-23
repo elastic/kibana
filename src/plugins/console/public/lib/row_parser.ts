@@ -75,7 +75,7 @@ export default class RowParser {
     return MODE.REQUEST_START;
   }
 
-  rowPredicate(lineNumber: number | undefined, editor: CoreEditor, value: any) {
+  rowPredicate(lineNumber: number | undefined, editor: CoreEditor, value: number) {
     const mode = this.getRowParseMode(lineNumber);
     // eslint-disable-next-line no-bitwise
     return (mode & value) > 0;

@@ -427,6 +427,7 @@ describe('OptimizerConfig::create()', () => {
   it('passes parsed options to findKibanaPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
+      limitsPath: '/foo/limits.yml',
     });
 
     expect(config).toMatchInlineSnapshot(`
@@ -456,7 +457,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          22,
+          25,
         ],
         "results": Array [
           Object {
@@ -479,7 +480,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          25,
+          28,
         ],
         "results": Array [
           Object {
@@ -504,7 +505,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          23,
+          26,
         ],
         "results": Array [
           Object {

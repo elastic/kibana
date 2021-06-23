@@ -9,14 +9,19 @@
 // @ts-ignore
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 // @ts-ignore
-import { setToasts, setUiSettings, setKibanaVersion, setMapsLegacyConfig } from './kibana_services';
+import {
+  setToasts,
+  setUiSettings,
+  setMapsEmsConfig,
+  setGetServiceSettings,
+} from './kibana_services';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
 import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
 import { MapsLegacyConfig } from '../config';
 // @ts-ignore
 import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
-import { getServiceSettings } from './get_service_settings';
+import type { MapsEmsPluginSetup } from '../../maps_ems/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -24,19 +29,9 @@ import { getServiceSettings } from './get_service_settings';
  * @public
  */
 
-export const bindSetupCoreAndPlugins = (
-  core: CoreSetup,
-  config: MapsLegacyConfig,
-  kibanaVersion: string
-) => {
-  setToasts(core.notifications.toasts);
-  setUiSettings(core.uiSettings);
-  setKibanaVersion(kibanaVersion);
-  setMapsLegacyConfig(config);
-};
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MapsLegacySetupDependencies {}
+export interface MapsLegacySetupDependencies {
+  mapsEms: MapsEmsPluginSetup;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacyStartDependencies {}
 
@@ -48,18 +43,16 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
   }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    const config = this._initializerContext.config.get<MapsLegacyConfig>();
-    const kibanaVersion = this._initializerContext.env.packageInfo.version;
-
-    bindSetupCoreAndPlugins(core, config, kibanaVersion);
+    setToasts(core.notifications.toasts);
+    setUiSettings(core.uiSettings);
+    setMapsEmsConfig(plugins.mapsEms.config);
+    setGetServiceSettings(plugins.mapsEms.getServiceSettings);
 
     const getBaseMapsVis = () => new BaseMapsVisualizationProvider();
 
     return {
-      getServiceSettings,
       getZoomPrecision,
       getPrecision,
-      config,
       getBaseMapsVis,
     };
   }

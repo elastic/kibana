@@ -37,9 +37,13 @@ async function getCcrStat(req: LegacyRequest, esIndexPattern: string, filters: u
     size: 1,
     filterPath: [
       'hits.hits._source.ccr_stats',
+      'hits.hits._source.elasticsearch.ccr',
       'hits.hits._source.timestamp',
+      'hits.hits._source.@timestamp',
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.operations_written',
+      'hits.hits.inner_hits.oldest.hits.hits._source.elasticsearch.ccr.follower.operations_written',
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.failed_read_requests',
+      'hits.hits.inner_hits.oldest.hits.hits._source.elasticsearch.ccr.requests.failed.read.count',
     ],
     body: {
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
@@ -102,10 +106,23 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
 
       const filters = [
         {
-          term: {
-            type: {
-              value: 'ccr_stats',
-            },
+          bool: {
+            should: [
+              {
+                term: {
+                  type: {
+                    value: 'ccr_stats',
+                  },
+                },
+              },
+              {
+                term: {
+                  'metricset.name': {
+                    value: 'ccr',
+                  },
+                },
+              },
+            ],
           },
         },
         {
@@ -138,16 +155,23 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
           getCcrStat(req, esIndexPattern, filters),
         ]);
 
-        const stat = ccrResponse.hits?.hits[0]?._source.ccr_stats ?? {};
-        const oldestStat =
-          ccrResponse.hits?.hits[0].inner_hits?.oldest.hits?.hits[0]?._source.ccr_stats ?? {};
+        const legacyStat = ccrResponse.hits?.hits[0]?._source.ccr_stats;
+        const mbStat = ccrResponse.hits?.hits[0]?._source.elasticsearch?.ccr;
+        const oldestLegacyStat =
+          ccrResponse.hits?.hits[0].inner_hits?.oldest.hits?.hits[0]?._source.ccr_stats;
+        const oldestMBStat =
+          ccrResponse.hits?.hits[0].inner_hits?.oldest.hits?.hits[0]?._source.elasticsearch?.ccr;
+
+        const leaderIndex = mbStat ? mbStat?.leader?.index : legacyStat?.leader_index;
 
         return {
           metrics,
-          stat,
-          formattedLeader: getFormattedLeaderIndex(stat.leader_index ?? ''),
-          timestamp: ccrResponse.hits?.hits[0]?._source.timestamp,
-          oldestStat,
+          stat: mbStat ?? legacyStat,
+          formattedLeader: getFormattedLeaderIndex(leaderIndex ?? ''),
+          timestamp:
+            ccrResponse.hits?.hits[0]?._source['@timestamp'] ??
+            ccrResponse.hits?.hits[0]?._source.timestamp,
+          oldestStat: oldestMBStat ?? oldestLegacyStat,
         };
       } catch (err) {
         return handleError(err, req);

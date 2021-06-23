@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
+import {
+  SearchSessionSavedObjectAttributes,
+  SearchSessionStatus,
+} from '../../../../../../src/plugins/data/common';
 import { ACTION } from './components/actions';
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
@@ -22,13 +25,15 @@ export type PersistedSearchSessionSavedObjectAttributes = SearchSessionSavedObje
     >
   >;
 
+export type UISearchSessionState = SearchSessionStatus;
+
 export interface UISession {
   id: string;
   name: string;
   appId: string;
   created: string;
   expires: string | null;
-  status: SearchSessionStatus;
+  status: UISearchSessionState;
   actions?: ACTION[];
   reloadUrl: string;
   restoreUrl: string;

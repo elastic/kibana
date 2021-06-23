@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockFlashMessageHelpers,
+  mockHttpValues,
+} from '../../../__mocks__/kea_logic';
+import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { Boost, BoostType } from './types';
+import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
 import { RelevanceTuningLogic } from './';
-
-jest.mock('../engine', () => ({
-  EngineLogic: { values: { engineName: 'test-engine' } },
-}));
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);
@@ -24,8 +25,9 @@ describe('RelevanceTuningLogic', () => {
     boosts: {
       foo: [
         {
-          type: 'value' as BoostType,
+          type: BoostType.Value,
           factor: 5,
+          value: [],
         },
       ],
     },
@@ -64,7 +66,6 @@ describe('RelevanceTuningLogic', () => {
     query: '',
     resultsLoading: false,
     searchResults: null,
-    showSchemaConflictCallout: true,
     engineHasSchemaFields: false,
     schemaFields: [],
     schemaFieldsWithConflicts: [],
@@ -74,6 +75,9 @@ describe('RelevanceTuningLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEngineValues.engineName = 'test-engine';
+    mockEngineValues.engine.invalidBoosts = false;
+    mockEngineValues.engine.unsearchedUnconfirmedFields = false;
   });
 
   it('has expected default values', () => {
@@ -96,6 +100,18 @@ describe('RelevanceTuningLogic', () => {
           dataLoading: false,
           schemaConflicts,
         });
+      });
+
+      it('should default schemaConflicts if it is not passed', () => {
+        mount({
+          dataLoading: true,
+        });
+        RelevanceTuningLogic.actions.onInitializeRelevanceTuning({
+          searchSettings,
+          schema,
+        });
+
+        expect(RelevanceTuningLogic.values.schemaConflicts).toEqual({});
       });
     });
 
@@ -195,20 +211,6 @@ describe('RelevanceTuningLogic', () => {
       });
     });
 
-    describe('dismissSchemaConflictCallout', () => {
-      it('should set showSchemaConflictCallout to false', () => {
-        mount({
-          showSchemaConflictCallout: true,
-        });
-        RelevanceTuningLogic.actions.dismissSchemaConflictCallout();
-
-        expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          showSchemaConflictCallout: false,
-        });
-      });
-    });
-
     describe('setSearchSettingsResponse', () => {
       it('should set searchSettings state and unsavedChanges to false', () => {
         mount({
@@ -227,7 +229,7 @@ describe('RelevanceTuningLogic', () => {
 
   describe('listeners', () => {
     const { http } = mockHttpValues;
-    const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+    const { flashAPIErrors, setSuccessMessage, clearFlashMessages } = mockFlashMessageHelpers;
     let scrollToSpy: jest.SpyInstance;
     let confirmSpy: jest.SpyInstance;
 
@@ -237,7 +239,7 @@ describe('RelevanceTuningLogic', () => {
         foo: [
           {
             factor: 1,
-            type: 'functional',
+            type: BoostType.Functional,
           },
           boost,
         ],
@@ -265,7 +267,7 @@ describe('RelevanceTuningLogic', () => {
               boosts: {
                 foo: [
                   {
-                    type: 'value' as BoostType,
+                    type: BoostType.Value,
                     factor: 5,
                     value: 5,
                   },
@@ -289,7 +291,7 @@ describe('RelevanceTuningLogic', () => {
             boosts: {
               foo: [
                 {
-                  type: 'value' as BoostType,
+                  type: BoostType.Value,
                   factor: 5,
                   value: ['5'],
                 },
@@ -319,25 +321,33 @@ describe('RelevanceTuningLogic', () => {
         jest.useRealTimers();
       });
 
-      it('should make an API call and set state based on the response', async () => {
+      it('should make an API call, set state based on the response, and clear flash messages', async () => {
         const searchSettingsWithNewBoostProp = {
           boosts: {
             foo: [
               {
-                type: 'value' as BoostType,
+                type: BoostType.Value,
                 factor: 5,
                 newBoost: true, // This should be deleted before sent to the server
+                value: ['test'],
               },
             ],
+          },
+          search_fields: {
+            bar: {
+              weight: 1,
+            },
           },
         };
 
         const searchSettingsWithoutNewBoostProp = {
+          ...searchSettingsWithNewBoostProp,
           boosts: {
             foo: [
               {
-                type: 'value' as BoostType,
+                type: BoostType.Value,
                 factor: 5,
+                value: ['test'],
               },
             ],
           },
@@ -370,6 +380,7 @@ describe('RelevanceTuningLogic', () => {
           }
         );
         expect(RelevanceTuningLogic.actions.setSearchResults).toHaveBeenCalledWith(searchResults);
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
 
       it("won't send boosts or search_fields on the API call if there are none", async () => {
@@ -475,9 +486,10 @@ describe('RelevanceTuningLogic', () => {
           boosts: {
             foo: [
               {
-                type: 'value' as BoostType,
+                type: BoostType.Value,
                 factor: 5,
                 newBoost: true, // This should be deleted before sent to the server
+                value: [''],
               },
             ],
           },
@@ -487,8 +499,9 @@ describe('RelevanceTuningLogic', () => {
           boosts: {
             foo: [
               {
-                type: 'value' as BoostType,
+                type: BoostType.Value,
                 factor: 5,
+                value: [''],
               },
             ],
           },
@@ -527,6 +540,28 @@ describe('RelevanceTuningLogic', () => {
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
       });
+
+      it('will re-fetch the current engine after settings are updated if there were invalid boosts', async () => {
+        mockEngineValues.engine.invalidBoosts = true;
+        mount({});
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await nextTick();
+
+        expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
+      });
+
+      it('will re-fetch the current engine after settings are updated if there were unconfirmed search fields', async () => {
+        mockEngineValues.engine.unsearchedUnconfirmedFields = true;
+        mount({});
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await nextTick();
+
+        expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
+      });
     });
 
     describe('resetSearchSettings', () => {
@@ -555,10 +590,9 @@ describe('RelevanceTuningLogic', () => {
         confirmSpy.mockImplementation(() => false);
 
         RelevanceTuningLogic.actions.resetSearchSettings();
+        await nextTick();
 
-        expect(http.post).not.toHaveBeenCalledWith(
-          '/api/app_search/engines/test-engine/search_settings/reset'
-        );
+        expect(http.post).not.toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
@@ -672,7 +706,8 @@ describe('RelevanceTuningLogic', () => {
               foo: [
                 {
                   factor: 2,
-                  type: 'value',
+                  type: BoostType.Value,
+                  value: [''],
                 },
               ],
             },
@@ -680,7 +715,7 @@ describe('RelevanceTuningLogic', () => {
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
 
-        RelevanceTuningLogic.actions.addBoost('foo', 'functional');
+        RelevanceTuningLogic.actions.addBoost('foo', BoostType.Functional);
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
           ...searchSettings,
@@ -688,12 +723,16 @@ describe('RelevanceTuningLogic', () => {
             foo: [
               {
                 factor: 2,
-                type: 'value',
+                type: BoostType.Value,
+                value: [''],
               },
               {
                 factor: 1,
                 newBoost: true,
-                type: 'functional',
+                type: BoostType.Functional,
+                function: 'logarithmic',
+                operation: 'multiply',
+                value: undefined,
               },
             ],
           },
@@ -709,7 +748,7 @@ describe('RelevanceTuningLogic', () => {
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
 
-        RelevanceTuningLogic.actions.addBoost('foo', 'functional');
+        RelevanceTuningLogic.actions.addBoost('foo', BoostType.Functional);
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith({
           ...searchSettings,
@@ -718,7 +757,10 @@ describe('RelevanceTuningLogic', () => {
               {
                 factor: 1,
                 newBoost: true,
-                type: 'functional',
+                type: BoostType.Functional,
+                function: 'logarithmic',
+                operation: 'multiply',
+                value: undefined,
               },
             ],
           },
@@ -735,11 +777,12 @@ describe('RelevanceTuningLogic', () => {
               foo: [
                 {
                   factor: 1,
-                  type: 'functional',
+                  type: BoostType.Functional,
                 },
                 {
                   factor: 2,
-                  type: 'value',
+                  type: BoostType.Value,
+                  value: [''],
                 },
               ],
             },
@@ -756,7 +799,7 @@ describe('RelevanceTuningLogic', () => {
             foo: [
               {
                 factor: 1,
-                type: 'functional',
+                type: BoostType.Functional,
               },
             ],
           },
@@ -771,7 +814,7 @@ describe('RelevanceTuningLogic', () => {
               foo: [
                 {
                   factor: 1,
-                  type: 'functional',
+                  type: BoostType.Functional,
                 },
               ],
             },
@@ -796,7 +839,7 @@ describe('RelevanceTuningLogic', () => {
               foo: [
                 {
                   factor: 1,
-                  type: 'functional',
+                  type: BoostType.Functional,
                 },
               ],
             },
@@ -816,7 +859,7 @@ describe('RelevanceTuningLogic', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
-            type: 'functional',
+            type: BoostType.Functional,
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
@@ -826,7 +869,7 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
           searchSettingsWithBoost({
             factor: 5,
-            type: 'functional',
+            type: BoostType.Functional,
           })
         );
       });
@@ -835,7 +878,7 @@ describe('RelevanceTuningLogic', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
-            type: 'functional',
+            type: BoostType.Functional,
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
@@ -845,50 +888,30 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
           searchSettingsWithBoost({
             factor: 5.3,
-            type: 'functional',
+            type: BoostType.Functional,
           })
         );
       });
     });
 
     describe('updateBoostValue', () => {
-      it('will update the boost value and update search reuslts', () => {
+      it('will update the boost value and update search results', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
-            type: 'functional',
+            type: BoostType.Functional,
             value: ['a', 'b', 'c'],
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
 
-        RelevanceTuningLogic.actions.updateBoostValue('foo', 1, 1, 'a');
+        RelevanceTuningLogic.actions.updateBoostValue('foo', 1, ['x', 'y', 'z']);
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
           searchSettingsWithBoost({
             factor: 1,
-            type: 'functional',
-            value: ['a', 'a', 'c'],
-          })
-        );
-      });
-
-      it('will create a new array if no array exists yet for value', () => {
-        mount({
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.updateBoostValue('foo', 1, 0, 'a');
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
-          searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-            value: ['a'],
+            type: BoostType.Functional,
+            value: ['x', 'y', 'z'],
           })
         );
       });
@@ -902,7 +925,7 @@ describe('RelevanceTuningLogic', () => {
           },
           searchSettings: searchSettingsWithBoost({
             factor: 1,
-            type: 'proximity',
+            type: BoostType.Proximity,
             center: 1,
           }),
         });
@@ -913,111 +936,10 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
           searchSettingsWithBoost({
             factor: 1,
-            type: 'proximity',
+            type: BoostType.Proximity,
             center: 4,
           })
         );
-      });
-    });
-
-    describe('addBoostValue', () => {
-      it('will add an empty boost value', () => {
-        mount({
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-            value: ['a'],
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.addBoostValue('foo', 1);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
-          searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-            value: ['a', ''],
-          })
-        );
-      });
-
-      it('will add two empty boost values if none exist yet', () => {
-        mount({
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.addBoostValue('foo', 1);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
-          searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-            value: ['', ''],
-          })
-        );
-      });
-
-      it('will still work if the boost index is out of range', () => {
-        mount({
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-            value: ['a', ''],
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.addBoostValue('foo', 10);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
-          searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-            value: ['a', ''],
-          })
-        );
-      });
-    });
-
-    describe('removeBoostValue', () => {
-      it('will remove a boost value', () => {
-        mount({
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-            value: ['a', 'b', 'c'],
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.removeBoostValue('foo', 1, 1);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
-          searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-            value: ['a', 'c'],
-          })
-        );
-      });
-
-      it('will do nothing if boost values do not exist', () => {
-        mount({
-          searchSettings: searchSettingsWithBoost({
-            factor: 1,
-            type: 'functional',
-          }),
-        });
-        jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
-
-        RelevanceTuningLogic.actions.removeBoostValue('foo', 1, 1);
-
-        expect(RelevanceTuningLogic.actions.setSearchSettings).not.toHaveBeenCalled();
       });
     });
 
@@ -1026,18 +948,23 @@ describe('RelevanceTuningLogic', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
-            type: 'functional',
+            type: BoostType.Functional,
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
 
-        RelevanceTuningLogic.actions.updateBoostSelectOption('foo', 1, 'function', 'exponential');
+        RelevanceTuningLogic.actions.updateBoostSelectOption(
+          'foo',
+          1,
+          'function',
+          FunctionalBoostFunction.Exponential
+        );
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
           searchSettingsWithBoost({
             factor: 1,
-            type: 'functional',
-            function: 'exponential',
+            type: BoostType.Functional,
+            function: FunctionalBoostFunction.Exponential,
           })
         );
       });
@@ -1046,18 +973,23 @@ describe('RelevanceTuningLogic', () => {
         mount({
           searchSettings: searchSettingsWithBoost({
             factor: 1,
-            type: 'functional',
+            type: BoostType.Functional,
           }),
         });
         jest.spyOn(RelevanceTuningLogic.actions, 'setSearchSettings');
 
-        RelevanceTuningLogic.actions.updateBoostSelectOption('foo', 1, 'operation', 'add');
+        RelevanceTuningLogic.actions.updateBoostSelectOption(
+          'foo',
+          1,
+          'operation',
+          BoostOperation.Add
+        );
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
           searchSettingsWithBoost({
             factor: 1,
-            type: 'functional',
-            operation: 'add',
+            type: BoostType.Functional,
+            operation: BoostOperation.Add,
           })
         );
       });

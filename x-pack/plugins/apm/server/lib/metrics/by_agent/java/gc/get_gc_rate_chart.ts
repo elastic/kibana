@@ -32,20 +32,27 @@ const chartBase: ChartBase = {
 };
 
 function getGcRateChart({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return fetchAndTransformGcMetrics({
+    environment,
+    kuery,
     setup,
     serviceName,
     serviceNodeName,
     chartBase,
     fieldName: METRIC_JAVA_GC_COUNT,
+    operationName: 'get_gc_rate_charts',
   });
 }
 

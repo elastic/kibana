@@ -61,6 +61,16 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
       ...fail409(!overwrite && spaceId === SPACE_2_ID),
       ...destinationId(spaceId !== SPACE_2_ID),
     },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE,
+      ...fail409(!overwrite && spaceId === DEFAULT_SPACE_ID),
+      ...destinationId(spaceId !== DEFAULT_SPACE_ID),
+    },
+    {
+      ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1,
+      ...fail409(!overwrite && spaceId === SPACE_1_ID),
+      ...destinationId(spaceId !== SPACE_1_ID),
+    },
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     { ...CASES.HIDDEN, ...fail400() },
     { ...CASES.CONFLICT_1A_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
@@ -90,7 +100,7 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const { addTests, createTestDefinitions } = importTestSuiteFactory(es, esArchiver, supertest);
   const createTests = (overwrite: boolean, createNewCopies: boolean, spaceId: string) => {

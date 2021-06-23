@@ -17,6 +17,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
+import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -25,6 +26,7 @@ export interface IndexPatternManagementSetupDependencies {
 
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export type IndexPatternManagementSetup = IndexPatternManagementServiceSetup;
@@ -75,17 +77,16 @@ export class IndexPatternManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, () =>
-          this.indexPatternManagementService.environmentService.getEnvironment().ml()
-        );
+        return mountManagementSection(core.getStartServices, params);
       },
     });
-
-    return this.indexPatternManagementService.setup({ httpClient: core.http });
   }
 
   public start(core: CoreStart, plugins: IndexPatternManagementStartDependencies) {
-    return this.indexPatternManagementService.start();
+    return this.indexPatternManagementService.start({
+      httpClient: core.http,
+      uiSettings: core.uiSettings,
+    });
   }
 
   public stop() {

@@ -64,10 +64,9 @@ export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { uiFilters, urlParams } = useUrlParams();
+  const { urlParams } = useUrlParams();
 
-  const { environment } = uiFilters;
-  const { start, end } = urlParams;
+  const { environment, start, end } = urlParams;
   const { environments, status = 'loading' } = useEnvironmentsFetcher({
     serviceName,
     start,
@@ -79,12 +78,14 @@ export function EnvironmentFilter() {
   // the contents.
   const minWidth = 200;
 
+  const options = getOptions(environments);
+
   return (
     <EuiSelect
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
         defaultMessage: 'Environment',
       })}
-      options={getOptions(environments)}
+      options={options}
       value={environment || ENVIRONMENT_ALL.value}
       onChange={(event) => {
         updateEnvironmentUrl(history, location, event.target.value);

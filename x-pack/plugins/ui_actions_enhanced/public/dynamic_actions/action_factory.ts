@@ -6,23 +6,23 @@
  */
 
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
-import { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
-import { ActionFactoryDefinition } from './action_factory_definition';
-import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
-import {
+import type { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
+import type { ActionFactoryDefinition } from './action_factory_definition';
+import type { Configurable } from '../../../../../src/plugins/kibana_utils/public';
+import type {
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedAction,
   SerializedEvent,
 } from './types';
-import { ILicense, LicensingPluginStart } from '../../../licensing/public';
-import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
-import { SavedObjectReference } from '../../../../../src/core/types';
-import { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
+import type { ILicense, LicensingPluginStart } from '../../../licensing/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
+import type { SavedObjectReference } from '../../../../../src/core/types';
+import type { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
 
 export interface ActionFactoryDeps {
-  readonly getLicense: () => ILicense;
-  readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'];
+  readonly getLicense?: () => ILicense;
+  readonly getFeatureUsageStart?: () => LicensingPluginStart['featureUsage'];
 }
 
 export class ActionFactory<
@@ -82,7 +82,7 @@ export class ActionFactory<
    * compatible with current license?
    */
   public isCompatibleLicense() {
-    if (!this.minimalLicense) return true;
+    if (!this.minimalLicense || !this.deps.getLicense) return true;
     const license = this.deps.getLicense();
     return license.isAvailable && license.isActive && license.hasAtLeast(this.minimalLicense);
   }
@@ -110,7 +110,7 @@ export class ActionFactory<
   }
 
   private notifyFeatureUsage(): void {
-    if (!this.minimalLicense || !this.licenseFeatureName) return;
+    if (!this.minimalLicense || !this.licenseFeatureName || !this.deps.getFeatureUsageStart) return;
     this.deps
       .getFeatureUsageStart()
       .notifyUsage(this.licenseFeatureName)
@@ -123,7 +123,7 @@ export class ActionFactory<
   }
 
   public telemetry(state: SerializedEvent, telemetryData: Record<string, any>) {
-    return this.def.telemetry ? this.def.telemetry(state, telemetryData) : {};
+    return this.def.telemetry ? this.def.telemetry(state, telemetryData) : telemetryData;
   }
 
   public extract(state: SerializedEvent) {

@@ -22,7 +22,7 @@ import { FiltersSection } from './FiltersSection';
 import { FlyoutFooter } from './FlyoutFooter';
 import { LinkSection } from './LinkSection';
 import { saveCustomLink } from './saveCustomLink';
-import { LinkPreview } from './LinkPreview';
+import { LinkPreview } from './link_preview';
 import { Documentation } from './Documentation';
 
 interface Props {

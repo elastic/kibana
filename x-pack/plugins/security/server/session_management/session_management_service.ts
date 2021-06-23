@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { Observable, Subscription } from 'rxjs';
-import {
-  ElasticsearchClient,
-  HttpServiceSetup,
-  Logger,
-  SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../../task_manager/server';
-import { ConfigType } from '../config';
-import { OnlineStatusRetryScheduler } from '../elasticsearch';
+import type { Observable, Subscription } from 'rxjs';
+
+import type { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
+
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../task_manager/server';
+import type { ConfigType } from '../config';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
+import { Session } from './session';
 import { SessionCookie } from './session_cookie';
 import { SessionIndex } from './session_index';
-import { Session } from './session';
 
 export interface SessionManagementServiceSetupParams {
   readonly http: Pick<HttpServiceSetup, 'basePath' | 'createCookieSessionStorageFactory'>;

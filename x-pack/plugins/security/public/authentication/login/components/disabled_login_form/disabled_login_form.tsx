@@ -6,7 +6,8 @@
  */
 
 import { EuiPanel, EuiText } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 interface Props {
   title: ReactNode;

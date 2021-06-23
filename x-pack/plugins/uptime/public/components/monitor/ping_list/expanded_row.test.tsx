@@ -98,14 +98,35 @@ describe('PingListExpandedRow', () => {
       >
         <EuiFlexItem>
           <EuiCallOut
-            iconType="beaker"
-            title="Experimental feature"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <BrowserExpandedRow
-            checkGroup="check_group_id"
-          />
+            color="primary"
+          >
+            <EuiDescriptionList
+              listItems={
+                Array [
+                  Object {
+                    "description": <React.Fragment>
+                      <BodyDescription
+                        body={
+                          Object {
+                            "bytes": 1200000,
+                            "content": "<http><head><title>The Title</title></head><body></body></http>",
+                            "hash": "testhash",
+                          }
+                        }
+                      />
+                      <EuiSpacer
+                        size="s"
+                      />
+                      <BodyExcerpt
+                        content="<http><head><title>The Title</title></head><body></body></http>"
+                      />
+                    </React.Fragment>,
+                    "title": "Response Body",
+                  },
+                ]
+              }
+            />
+          </EuiCallOut>
         </EuiFlexItem>
       </EuiFlexGroup>
     `);

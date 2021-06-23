@@ -127,6 +127,7 @@ describe('routing', () => {
         page_size: 20,
         show: 'create',
         view_type: 'list',
+        filter: '',
       };
 
       expect(getTrustedAppsListPath(location)).toEqual(

@@ -76,6 +76,6 @@ export const validateEntities = {
     /**
      * Indices to search in.
      */
-    indices: schema.arrayOf(schema.string()),
+    indices: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
   }),
 };

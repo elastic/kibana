@@ -10,6 +10,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import { ScopedHistory } from 'kibana/public';
 
+import { EuiErrorBoundary } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -64,13 +66,15 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
   const I18nContext = appDependencies.i18n.Context;
 
   render(
-    <KibanaContextProvider services={appDependencies}>
-      <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
-        <I18nContext>
-          <App history={appDependencies.history} />
-        </I18nContext>
-      </AuthorizationProvider>
-    </KibanaContextProvider>,
+    <EuiErrorBoundary>
+      <KibanaContextProvider services={appDependencies}>
+        <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
+          <I18nContext>
+            <App history={appDependencies.history} />
+          </I18nContext>
+        </AuthorizationProvider>
+      </KibanaContextProvider>
+    </EuiErrorBoundary>,
     element
   );
 

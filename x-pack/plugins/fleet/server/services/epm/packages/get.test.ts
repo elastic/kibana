@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicySOAttributes } from '../../../../common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { PackagePolicySOAttributes } from '../../../../common';
+
 import { getPackageUsageStats } from './get';
 
 describe('When using EPM `get` services', () => {

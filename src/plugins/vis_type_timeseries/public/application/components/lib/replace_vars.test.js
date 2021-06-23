@@ -7,6 +7,7 @@
  */
 
 import { replaceVars } from './replace_vars';
+import { emptyLabel } from '../../../../common/empty_label';
 
 describe('replaceVars(str, args, vars)', () => {
   test('replaces vars with values', () => {
@@ -26,5 +27,12 @@ describe('replaceVars(str, args, vars)', () => {
     const args = { host: 'test-01' };
     const template = '# {{args.host}} {{total';
     expect(replaceVars(template, args, vars)).toEqual('# {{args.host}} {{total');
+  });
+
+  test('replaces (empty).some_path with values', () => {
+    const vars = { [emptyLabel]: { d: { raw: 100 } } };
+    const args = {};
+    const template = `# {{ ${emptyLabel}.d.raw }} {{ ${emptyLabel}.d.raw }}`;
+    expect(replaceVars(template, args, vars)).toEqual('# 100 100');
   });
 });

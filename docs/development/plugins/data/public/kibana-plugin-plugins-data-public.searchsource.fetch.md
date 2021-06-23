@@ -14,7 +14,7 @@ Fetch this source and reject the returned Promise on error
 <b>Signature:</b>
 
 ```typescript
-fetch(options?: ISearchOptions): Promise<import("elasticsearch").SearchResponse<any>>;
+fetch(options?: ISearchOptions): Promise<estypes.SearchResponse<any>>;
 ```
 
 ## Parameters
@@ -25,5 +25,5 @@ fetch(options?: ISearchOptions): Promise<import("elasticsearch").SearchResponse<
 
 <b>Returns:</b>
 
-`Promise<import("elasticsearch").SearchResponse<any>>`
+`Promise<estypes.SearchResponse<any>>`
 

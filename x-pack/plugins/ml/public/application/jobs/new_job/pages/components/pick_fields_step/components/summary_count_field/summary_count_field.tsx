@@ -9,7 +9,7 @@ import React, { FC, useContext, useEffect, useState } from 'react';
 
 import { SummaryCountFieldSelect } from './summary_count_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities_service';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import {
   MultiMetricJobCreator,
   PopulationJobCreator,

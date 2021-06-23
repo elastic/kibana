@@ -6,14 +6,15 @@
  */
 
 import { EuiFieldPassword } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { User } from '../../../../../common/model';
-import { ChangePasswordForm } from './change_password_form';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import type { User } from '../../../../../common/model';
 import { userAPIClientMock } from '../../index.mock';
+import { ChangePasswordForm } from './change_password_form';
 
 function getCurrentPasswordField(wrapper: ReactWrapper<any>) {
   return wrapper.find(EuiFieldPassword).filter('[data-test-subj="currentPassword"]');

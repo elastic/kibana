@@ -18,16 +18,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
-import {
-  EventDetails,
-  EventsViewType,
-  View,
-} from '../../../../common/components/event_details/event_details';
+import { EventDetails } from '../../../../common/components/event_details/event_details';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
@@ -51,7 +47,8 @@ interface ExpandableEventTitleProps {
 }
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  flex: 0;
+  flex: 0 1 auto;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeS};`}
 `;
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
@@ -67,7 +64,7 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
   ({ isAlert, loading, handleOnEventClosed }) => (
-    <StyledEuiFlexGroup justifyContent="spaceBetween" wrap={true}>
+    <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="s">
           {!loading ? <h4>{isAlert ? i18n.ALERT_DETAILS : i18n.EVENT_DETAILS}</h4> : <></>}
@@ -86,8 +83,6 @@ ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
   ({ browserFields, event, timelineId, timelineTabType, isAlert, loading, detailsData }) => {
-    const [view, setView] = useState<View>(EventsViewType.summaryView);
-
     const message = useMemo(() => {
       if (detailsData) {
         const messageField = find({ category: 'base', field: 'message' }, detailsData) as
@@ -130,10 +125,8 @@ export const ExpandableEvent = React.memo<Props>(
             data={detailsData!}
             id={event.eventId!}
             isAlert={isAlert}
-            onViewSelected={setView}
-            timelineTabType={timelineTabType}
             timelineId={timelineId}
-            view={view}
+            timelineTabType={timelineTabType}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>

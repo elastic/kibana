@@ -19,7 +19,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
       );
 
       expect(response.status).to.be(200);
-      expect(response.body).to.eql([]);
+      expect(response.body.rumServices).to.eql([]);
     });
   });
 
@@ -34,7 +34,7 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expect(response.status).to.be(200);
 
-        expectSnapshot(response.body).toMatchInline(`Array []`);
+        expectSnapshot(response.body.rumServices).toMatchInline(`Array []`);
       });
     }
   );

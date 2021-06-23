@@ -7,7 +7,7 @@
 
 import {
   EuiFlexGroup,
-  EuiPage,
+  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -18,7 +18,6 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { SearchBar } from '../../shared/search_bar';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 
@@ -27,8 +26,9 @@ interface ErrorGroupOverviewProps {
 }
 
 export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
-  const { urlParams, uiFilters } = useUrlParams();
-  const { start, end, sortField, sortDirection } = urlParams;
+  const {
+    urlParams: { environment, kuery, start, end, sortField, sortDirection },
+  } = useUrlParams();
   const { errorDistributionData } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
@@ -46,17 +46,18 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
               serviceName,
             },
             query: {
+              environment,
+              kuery,
               start,
               end,
               sortField,
               sortDirection: normalizedSortDirection,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, sortField, sortDirection, uiFilters]
+    [environment, kuery, serviceName, start, end, sortField, sortDirection]
   );
 
   useTrackPageview({
@@ -70,37 +71,37 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   }
 
   return (
-    <>
-      <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiPanel>
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                {
-                  defaultMessage: 'Error occurrences',
-                }
-              )}
-            />
-          </EuiPanel>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiPanel hasBorder={true}>
+          <ErrorDistribution
+            distribution={errorDistributionData}
+            title={i18n.translate(
+              'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+              { defaultMessage: 'Error occurrences' }
+            )}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
 
+      <EuiFlexItem>
+        <EuiPanel hasBorder={true}>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorsList.title',
+                { defaultMessage: 'Errors' }
+              )}
+            </h3>
+          </EuiTitle>
           <EuiSpacer size="s" />
 
-          <EuiPanel>
-            <EuiTitle size="xs">
-              <h3>Errors</h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-
-            <ErrorGroupList
-              items={errorGroupListData}
-              serviceName={serviceName}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
-    </>
+          <ErrorGroupList
+            items={errorGroupListData.errorGroups}
+            serviceName={serviceName}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

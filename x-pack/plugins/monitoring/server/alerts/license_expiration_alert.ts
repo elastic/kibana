@@ -6,6 +6,7 @@
  */
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -19,7 +20,7 @@ import {
   AlertLicense,
   AlertLicenseState,
 } from '../../common/types/alerts';
-import { AlertExecutorOptions, AlertInstance } from '../../../alerts/server';
+import { AlertExecutorOptions, AlertInstance } from '../../../alerting/server';
 import {
   ALERT_LICENSE_EXPIRATION,
   LEGACY_ALERT_DETAILS,
@@ -27,7 +28,7 @@ import {
 } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { SanitizedAlert } from '../../../alerts/common';
+import { SanitizedAlert } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
@@ -78,7 +79,7 @@ export class LicenseExpirationAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -86,7 +87,7 @@ export class LicenseExpirationAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const licenses = await fetchLicenses(callCluster, clusters, esIndexPattern);
+    const licenses = await fetchLicenses(esClient, clusters, esIndexPattern);
 
     return licenses.map((license) => {
       const { clusterUuid, type, expiryDateMS, status, ccs } = license;

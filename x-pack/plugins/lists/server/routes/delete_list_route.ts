@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
-import { LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   EntriesArray,
   ExceptionListItemSchema,
@@ -16,9 +14,15 @@ import {
   deleteListSchema,
   exceptionListItemSchema,
   listSchema,
-} from '../../common/schemas';
-import { getSavedObjectType } from '../services/exception_lists/utils';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import { LIST_URL } from '@kbn/securitysolution-list-constants';
+
+import type { ListsPluginRouter } from '../types';
 import { ExceptionListClient } from '../services/exception_lists/exception_list_client';
+import { escapeQuotes } from '../services/utils/escape_query';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getExceptionListClient, getListClient } from '.';
 
@@ -142,7 +146,7 @@ const getReferencedExceptionLists = async (
       (item) =>
         `${getSavedObjectType({
           namespaceType: item.namespace_type,
-        })}.attributes.list_id: ${item.list_id}`
+        })}.attributes.list_id: "${escapeQuotes(item.list_id)}"`
     )
     .join(' OR ');
   return exceptionLists.findExceptionList({

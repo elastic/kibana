@@ -123,7 +123,10 @@ const CountIndicators: FC<{ importItems: ImportItem[] }> = ({ importItems }) => 
       {errorCount && (
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h4 className="savedObjectsManagementImportSummary__errorCount">
+            <h4
+              data-test-subj="importSavedObjectsErrorsCount"
+              className="savedObjectsManagementImportSummary__errorCount"
+            >
               <FormattedMessage
                 id="savedObjectsManagement.importSummary.errorCountHeader"
                 defaultMessage="{errorCount} error"

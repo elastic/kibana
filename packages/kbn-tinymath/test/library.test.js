@@ -11,7 +11,7 @@
   Need tests for spacing, etc
 */
 
-import { evaluate, parse } from '..';
+import { evaluate, parse } from '@kbn/tinymath';
 
 function variableEqual(value) {
   return expect.objectContaining({ type: 'variable', value });
@@ -38,6 +38,35 @@ describe('Parser', () => {
     it('negatives', () => {
       expect(parse('-10')).toEqual(-10);
       expect(parse('-10.5')).toEqual(-10.5);
+    });
+  });
+
+  describe('Math', () => {
+    it('converts basic symbols into left-to-right pairs', () => {
+      expect(parse('a + b + c - d')).toEqual({
+        args: [
+          {
+            name: 'add',
+            type: 'function',
+            args: [
+              {
+                name: 'add',
+                type: 'function',
+                args: [
+                  expect.objectContaining({ location: { min: 0, max: 2 } }),
+                  expect.objectContaining({ location: { min: 3, max: 6 } }),
+                ],
+              },
+              expect.objectContaining({ location: { min: 7, max: 10 } }),
+            ],
+          },
+          expect.objectContaining({ location: { min: 11, max: 13 } }),
+        ],
+        name: 'subtract',
+        type: 'function',
+        text: 'a + b + c - d',
+        location: { min: 0, max: 13 },
+      });
     });
   });
 
@@ -73,6 +102,7 @@ describe('Parser', () => {
       expect(parse('"foo bar"')).toEqual(variableEqual('foo bar'));
       expect(parse('"foo bar fizz buzz"')).toEqual(variableEqual('foo bar fizz buzz'));
       expect(parse('"foo   bar   baby"')).toEqual(variableEqual('foo   bar   baby'));
+      expect(parse(`"f'oo"`)).toEqual(variableEqual(`f'oo`));
     });
 
     it('strings with single quotes', () => {
@@ -88,6 +118,7 @@ describe('Parser', () => {
       expect(parse("' foo bar'")).toEqual(variableEqual(" foo bar"));
       expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
       expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
+      expect(parse(`'f"oo'`)).toEqual(variableEqual(`f"oo`));
       /* eslint-enable prettier/prettier */
     });
 
@@ -138,9 +169,17 @@ describe('Parser', () => {
       );
     });
 
+    it('named argument is empty string', () => {
+      expect(parse('foo(q="")')).toEqual(functionEqual('foo', [namedArgumentEqual('q', '')]));
+      expect(parse(`foo(q='')`)).toEqual(functionEqual('foo', [namedArgumentEqual('q', '')]));
+    });
+
     it('named and positional', () => {
       expect(parse('foo(ref, q="bar")')).toEqual(
         functionEqual('foo', [variableEqual('ref'), namedArgumentEqual('q', 'bar')])
+      );
+      expect(parse(`foo(ref, q='ba"r')`)).toEqual(
+        functionEqual('foo', [variableEqual('ref'), namedArgumentEqual('q', `ba"r`)])
       );
     });
 
@@ -181,6 +220,21 @@ describe('Parser', () => {
 
     it('invalid named', () => {
       expect(() => parse('foo(offset-type="1d")')).toThrow('but "(" found');
+    });
+
+    it('named with complex strings', () => {
+      expect(parse(`foo(filter='😀 > "\ttab"')`)).toEqual(
+        functionEqual('foo', [namedArgumentEqual('filter', `😀 > "\ttab"`)])
+      );
+    });
+
+    it('named with escape characters', () => {
+      expect(parse(`foo(filter='Women\\'s Clothing')`)).toEqual(
+        functionEqual('foo', [namedArgumentEqual('filter', `Women's Clothing`)])
+      );
+      expect(parse(`foo(filter="\\"Quoted inner string\\"")`)).toEqual(
+        functionEqual('foo', [namedArgumentEqual('filter', `"Quoted inner string"`)])
+      );
     });
   });
 
@@ -238,6 +292,8 @@ describe('Evaluate', () => {
     expect(evaluate('5/20')).toEqual(0.25);
     expect(evaluate('1 + 1 + 2 + 3 + 12')).toEqual(19);
     expect(evaluate('100 / 10 / 10')).toEqual(1);
+    expect(evaluate('0 * 1 - 100 / 10 / 10')).toEqual(-1);
+    expect(evaluate('100 / (10 / 10)')).toEqual(100);
   });
 
   it('equations with functions', () => {

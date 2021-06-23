@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { act } from '@testing-library/react';
 import { SideEffectSimulator } from '../types';
 

@@ -5,46 +5,13 @@
  * 2.0.
  */
 
-import { EuiAvatar, isValidHex } from '@elastic/eui';
-import React, { FC } from 'react';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
-import { MAX_SPACE_INITIALS } from '../../common';
-import { getSpaceColor, getSpaceInitials, getSpaceImageUrl } from './space_attributes';
+import React from 'react';
 
-interface Props {
-  space: Partial<Space>;
-  size?: 's' | 'm' | 'l' | 'xl';
-  className?: string;
-  announceSpaceName?: boolean;
-}
+import type { SpaceAvatarProps } from 'src/plugins/spaces_oss/public';
 
-export const SpaceAvatar: FC<Props> = (props: Props) => {
-  const { space, size, announceSpaceName, ...rest } = props;
-
-  const spaceName = space.name ? space.name.trim() : '';
-
-  const spaceColor = getSpaceColor(space);
-
-  return (
-    <EuiAvatar
-      type="space"
-      data-test-subj={`space-avatar-${space.id}`}
-      name={spaceName}
-      {...(!announceSpaceName && {
-        // provide empty aria-label so EUI doesn't try to provide its own
-        'aria-label': '',
-        'aria-hidden': true,
-      })}
-      size={size || 'm'}
-      initialsLength={MAX_SPACE_INITIALS}
-      initials={getSpaceInitials(space)}
-      color={isValidHex(spaceColor) ? spaceColor : ''}
-      imageUrl={getSpaceImageUrl(space)}
-      {...rest}
-    />
-  );
-};
-
-SpaceAvatar.defaultProps = {
-  announceSpaceName: true,
+export const getSpaceAvatarComponent = async (): Promise<React.FC<SpaceAvatarProps>> => {
+  const { SpaceAvatarInternal } = await import('./space_avatar_internal');
+  return (props: SpaceAvatarProps) => {
+    return <SpaceAvatarInternal {...props} />;
+  };
 };

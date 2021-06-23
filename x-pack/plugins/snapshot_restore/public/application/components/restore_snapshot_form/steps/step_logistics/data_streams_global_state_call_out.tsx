@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-
-import { documentationLinksService } from '../../../../services/documentation';
+import { useCore } from '../../../../app_context';
 
 const i18nTexts = {
   callout: {
@@ -20,13 +19,13 @@ const i18nTexts = {
           'This snapshot contains {count, plural, one {a data stream} other {data streams}}',
         values: { count },
       }),
-    body: () => (
+    body: (docLink: string) => (
       <FormattedMessage
         id="xpack.snapshotRestore.restoreForm.dataStreamsWarningCallOut.body"
         defaultMessage="Each data stream requires a matching index template. Please ensure any restored data streams have a matching index template. You can restore index templates by restoring the global cluster state. However, this may overwrite existing templates, cluster settings, ingest pipelines, and lifecycle policies. {learnMoreLink} about restoring snapshots that contain data streams."
         values={{
           learnMoreLink: (
-            <EuiLink target="_blank" href={documentationLinksService.getSnapshotDocUrl()}>
+            <EuiLink target="_blank" href={docLink}>
               {i18n.translate(
                 'xpack.snapshotRestore.restoreForm.dataStreamsWarningCallOut.body.learnMoreLink',
                 { defaultMessage: 'Learn more' }
@@ -44,6 +43,7 @@ interface Props {
 }
 
 export const DataStreamsGlobalStateCallOut: FunctionComponent<Props> = ({ dataStreamsCount }) => {
+  const { docLinks } = useCore();
   return (
     <EuiCallOut
       data-test-subj="dataStreamWarningCallOut"
@@ -51,7 +51,7 @@ export const DataStreamsGlobalStateCallOut: FunctionComponent<Props> = ({ dataSt
       iconType="alert"
       color="warning"
     >
-      {i18nTexts.callout.body()}
+      {i18nTexts.callout.body(docLinks.links.snapshotRestore.createSnapshot)}
     </EuiCallOut>
   );
 };

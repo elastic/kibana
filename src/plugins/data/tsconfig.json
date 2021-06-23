@@ -7,7 +7,14 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "config.ts", "common/**/*.json"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "config.ts",
+    "common/**/*.json",
+    "public/**/*.json"
+  ],
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../bfetch/tsconfig.json" },
@@ -16,6 +23,6 @@
     { "path": "../inspector/tsconfig.json" },
     { "path": "../usage_collection/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" }
   ]
 }

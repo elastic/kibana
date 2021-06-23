@@ -11,7 +11,7 @@ import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
 
-import { runBazel } from '../utils/bazel';
+import { isBazelBinAvailable, runBazel } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import { ICommand } from './';
@@ -53,8 +53,10 @@ export const CleanCommand: ICommand = {
     }
 
     // Runs Bazel soft clean
-    await runBazel(['clean']);
-    log.success('Soft cleaned bazel');
+    if (await isBazelBinAvailable()) {
+      await runBazel(['clean']);
+      log.success('Soft cleaned bazel');
+    }
 
     if (toDelete.length === 0) {
       log.success('Nothing to delete');

@@ -8,10 +8,12 @@
     "declarationMap": true
   },
   "include": [
+    "__jest__/**/*",
     "common/**/*",
     "fixtures/**/*",
     "public/**/*",
     "server/**/*",
+    "../../../typings/**/*",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

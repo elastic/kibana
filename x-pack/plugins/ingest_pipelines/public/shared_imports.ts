@@ -51,6 +51,8 @@ export {
   ValidationFunc,
   ValidationConfig,
   useFormData,
+  FormOptions,
+  SerializerFunc,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {

@@ -22,12 +22,11 @@ export default function ({ getService, getPageObjects }) {
   describe('context view for date_nanos with custom timestamp', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
-      await esArchiver.loadIfNeeded('date_nanos_custom');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_custom');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'discover:searchFieldsFromSource': true,
       });
     });
 
@@ -35,16 +34,16 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
       const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
-        'Oct 21, 2019 @ 08:30:04.828733000 -',
-        'Oct 21, 2019 @ 00:30:04.828740000 -',
-        'Oct 21, 2019 @ 00:30:04.828723000 -',
+        'Oct 21, 2019 @ 08:30:04.828733000',
+        'Oct 21, 2019 @ 00:30:04.828740000',
+        'Oct 21, 2019 @ 00:30:04.828723000',
       ];
       expect(actualRowsText).to.eql(expectedRowsText);
     });
 
     after(async function () {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('date_nanos_custom');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_custom');
     });
   });
 }

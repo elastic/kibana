@@ -9,6 +9,7 @@
 import { getAngularModule } from '../../../../../kibana_services';
 import { ActionBar } from './action_bar';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 getAngularModule().directive('contextActionBar', function (reactDirective: any) {
   return reactDirective(ActionBar);
 });

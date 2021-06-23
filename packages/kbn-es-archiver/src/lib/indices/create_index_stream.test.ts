@@ -65,6 +65,9 @@ describe('esArchiver: createCreateIndexStream()', () => {
               ],
             },
             Object {
+              "headers": Object {
+                "x-elastic-product-origin": "kibana",
+              },
               "ignore": Array [
                 404,
               ],
@@ -80,6 +83,11 @@ describe('esArchiver: createCreateIndexStream()', () => {
               "index": Array [
                 "actual-index",
               ],
+            },
+            Object {
+              "headers": Object {
+                "x-elastic-product-origin": "kibana",
+              },
             },
           ],
         ]
@@ -117,7 +125,6 @@ describe('esArchiver: createCreateIndexStream()', () => {
       ]);
 
       sinon.assert.calledWith(client.indices.create as sinon.SinonSpy, {
-        method: 'PUT',
         index: 'index',
         body: {
           settings: undefined,

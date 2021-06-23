@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'some-engine' } },
@@ -21,7 +25,6 @@ describe('EngineOverviewLogic', () => {
   const { flashAPIErrors } = mockFlashMessageHelpers;
 
   const mockEngineMetrics = {
-    apiLogsUnavailable: true,
     documentCount: 10,
     startDate: '1970-01-30',
     operationsPerDay: [0, 0, 0, 0, 0, 0, 0],
@@ -32,7 +35,6 @@ describe('EngineOverviewLogic', () => {
 
   const DEFAULT_VALUES = {
     dataLoading: true,
-    apiLogsUnavailable: false,
     documentCount: 0,
     startDate: '',
     operationsPerDay: [],
@@ -78,7 +80,9 @@ describe('EngineOverviewLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('pollForOverviewMetrics', () => {
       it('fetches data and calls onPollingSuccess', async () => {
         mount();

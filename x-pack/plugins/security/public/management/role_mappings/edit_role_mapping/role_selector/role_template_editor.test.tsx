@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+
+import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+
 import { RoleTemplateEditor } from './role_template_editor';
-import { findTestSubject } from '@kbn/test/jest';
 
 describe('RoleTemplateEditor', () => {
   it('allows inline templates to be edited', () => {

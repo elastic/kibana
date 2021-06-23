@@ -30,7 +30,7 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('index connector validation', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
@@ -43,7 +43,7 @@ describe('index connector validation', () => {
       },
     } as EsIndexActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           index: [],
@@ -57,7 +57,7 @@ describe('index connector validation', () => {
 });
 
 describe('index connector validation with minimal config', () => {
-  test('connector validation succeeds when connector config is valid', () => {
+  test('connector validation succeeds when connector config is valid', async () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
@@ -68,7 +68,7 @@ describe('index connector validation with minimal config', () => {
       },
     } as EsIndexActionConnector;
 
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+    expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
           index: [],
@@ -82,32 +82,71 @@ describe('index connector validation with minimal config', () => {
 });
 
 describe('action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
-    const actionParams = {
-      documents: [{ test: 1234 }],
-    };
-
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+  test('action params validation succeeds when action params are valid', async () => {
+    expect(
+      await actionTypeModel.validateParams({
+        documents: [{ test: 1234 }],
+      })
+    ).toEqual({
       errors: {
         documents: [],
+        indexOverride: [],
       },
     });
 
-    const emptyActionParams = {};
+    expect(
+      await actionTypeModel.validateParams({
+        documents: [{ test: 1234 }],
+        indexOverride: 'kibana-alert-history-anything',
+      })
+    ).toEqual({
+      errors: {
+        documents: [],
+        indexOverride: [],
+      },
+    });
+  });
 
-    expect(actionTypeModel.validateParams(emptyActionParams)).toEqual({
+  test('action params validation fails when action params are invalid', async () => {
+    expect(await actionTypeModel.validateParams({})).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
+        indexOverride: [],
       },
     });
 
-    const invalidDocumentActionParams = {
-      documents: [{}],
-    };
-
-    expect(actionTypeModel.validateParams(invalidDocumentActionParams)).toEqual({
+    expect(
+      await actionTypeModel.validateParams({
+        documents: [{}],
+      })
+    ).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
+        indexOverride: [],
+      },
+    });
+
+    expect(
+      await actionTypeModel.validateParams({
+        documents: [{}],
+        indexOverride: 'kibana-alert-history-',
+      })
+    ).toEqual({
+      errors: {
+        documents: ['Document is required and should be a valid JSON object.'],
+        indexOverride: ['Alert history index must contain valid suffix.'],
+      },
+    });
+
+    expect(
+      await actionTypeModel.validateParams({
+        documents: [{}],
+        indexOverride: 'this.is-a_string',
+      })
+    ).toEqual({
+      errors: {
+        documents: ['Document is required and should be a valid JSON object.'],
+        indexOverride: ['Alert history index must begin with "kibana-alert-history-".'],
       },
     });
   });

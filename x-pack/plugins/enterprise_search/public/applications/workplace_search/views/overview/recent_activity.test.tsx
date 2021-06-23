@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockTelemetryActions } from '../../../__mocks__';
-
+import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
+import { setMockValues } from './__mocks__';
 import './__mocks__/overview_logic.mock';
 
 import React from 'react';
@@ -18,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
-import { setMockValues } from './__mocks__';
 import { RecentActivity, RecentActivityItem } from './recent_activity';
 
 const organization = { name: 'foo', defaultOrgName: 'bar' };

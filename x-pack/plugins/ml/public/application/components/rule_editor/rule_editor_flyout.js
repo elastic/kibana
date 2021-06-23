@@ -105,7 +105,7 @@ class RuleEditorFlyoutUI extends Component {
           'xpack.ml.ruleEditor.ruleEditorFlyout.unableToConfigureRulesNotificationMesssage',
           {
             defaultMessage:
-              'Unable to configure rules as an error occurred obtaining details for job ID {jobId}',
+              'Unable to configure job rules as an error occurred obtaining details for job ID {jobId}',
             values: { jobId: anomaly.jobId },
           }
         )
@@ -159,7 +159,7 @@ class RuleEditorFlyoutUI extends Component {
             i18n.translate(
               'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithLoadingFilterListsNotificationMesssage',
               {
-                defaultMessage: 'Error loading the filter lists used in the rule scope',
+                defaultMessage: 'Error loading the filter lists used in the job rule scope',
               }
             )
           );
@@ -510,7 +510,7 @@ class RuleEditorFlyoutUI extends Component {
               <h1 id="flyoutTitle">
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
-                  defaultMessage="Edit rules"
+                  defaultMessage="Edit job rules"
                 />
               </h1>
             </EuiTitle>
@@ -555,7 +555,7 @@ class RuleEditorFlyoutUI extends Component {
         'xpack.ml.ruleEditor.ruleEditorFlyout.conditionsDescription',
         {
           defaultMessage:
-            'Add numeric conditions for when the rule applies. Multiple conditions are combined using AND.',
+            'Add numeric conditions for when the job rule applies. Multiple conditions are combined using AND.',
         }
       );
 
@@ -571,12 +571,12 @@ class RuleEditorFlyoutUI extends Component {
                 {isCreate === true ? (
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.createRuleTitle"
-                    defaultMessage="Create rule"
+                    defaultMessage="Create job rule"
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.editRuleTitle"
-                    defaultMessage="Edit rule"
+                    defaultMessage="Edit job rule"
                   />
                 )}
               </h1>
@@ -590,9 +590,9 @@ class RuleEditorFlyoutUI extends Component {
               <p>
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription"
-                  defaultMessage="Rules instruct anomaly detectors to change their behavior
+                  defaultMessage="Job rules instruct anomaly detectors to change their behavior
                     based on domain-specific knowledge that you provide.
-                    When you create a rule, you can specify conditions, scope, and actions. When the conditions of a rule are
+                    When you create a job rule, you can specify conditions, scope, and actions. When the conditions of a job rule are
                     satisfied, its actions are triggered. {learnMoreLink}"
                   values={{
                     learnMoreLink: (
@@ -689,7 +689,7 @@ class RuleEditorFlyoutUI extends Component {
               <p>
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.whenChangesTakeEffectDescription"
-                  defaultMessage="Changes to rules take effect for new results only."
+                  defaultMessage="Changes to job rules take effect for new results only."
                 />
               </p>
               <p>

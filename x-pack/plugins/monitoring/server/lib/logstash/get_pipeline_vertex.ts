@@ -99,7 +99,7 @@ export function _enrichVertexStateWithStatsAggregation(
   }
 
   // Next, iterate over timeseries metrics and attach them to vertex
-  const timeSeriesBuckets = vertexStatsAggregation.aggregations.timeseries.buckets;
+  const timeSeriesBuckets = vertexStatsAggregation.aggregations?.timeseries.buckets ?? [];
   timeSeriesBuckets.forEach((timeSeriesBucket: any) => {
     // each bucket calculates stats for total pipeline CPU time for the associated timeseries
     const totalDurationStats = timeSeriesBucket.pipelines.scoped.total_processor_duration_stats;
@@ -160,7 +160,7 @@ export async function getPipelineVertex(
     getPipelineVertexStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
   ]);
 
-  if (stateDocument === null) {
+  if (stateDocument === null || !statsAggregation) {
     return boom.notFound(
       `Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`
     );

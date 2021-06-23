@@ -30,6 +30,7 @@ export enum ES_FIELD_TYPES {
 
   DATE = 'date',
   DATE_NANOS = 'date_nanos',
+  DATE_RANGE = 'date_range',
 
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
@@ -43,9 +44,15 @@ export enum ES_FIELD_TYPES {
   SHORT = 'short',
   UNSIGNED_LONG = 'unsigned_long',
 
+  FLOAT_RANGE = 'float_range',
+  DOUBLE_RANGE = 'double_range',
+  INTEGER_RANGE = 'integer_range',
+  LONG_RANGE = 'long_range',
+
   NESTED = 'nested',
   BYTE = 'byte',
   IP = 'ip',
+  IP_RANGE = 'ip_range',
   ATTACHMENT = 'attachment',
   TOKEN_COUNT = 'token_count',
   MURMUR3 = 'murmur3',
@@ -59,15 +66,19 @@ export enum KBN_FIELD_TYPES {
   ATTACHMENT = 'attachment',
   BOOLEAN = 'boolean',
   DATE = 'date',
+  DATE_RANGE = 'date_range',
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
   IP = 'ip',
+  IP_RANGE = 'ip_range',
   MURMUR3 = 'murmur3',
   NUMBER = 'number',
+  NUMBER_RANGE = 'number_range',
   STRING = 'string',
   UNKNOWN = 'unknown',
   CONFLICT = 'conflict',
   OBJECT = 'object',
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
+  MISSING = 'missing',
 }

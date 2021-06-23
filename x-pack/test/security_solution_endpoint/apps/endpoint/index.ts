@@ -16,7 +16,6 @@ export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
   describe('endpoint', function () {
-    this.tags('ciGroup7');
     const ingestManager = getService('ingestManager');
     const log = getService('log');
 
@@ -32,7 +31,6 @@ export default function (providerContext: FtrProviderContext) {
     });
     loadTestFile(require.resolve('./endpoint_list'));
     loadTestFile(require.resolve('./policy_details'));
-    loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./trusted_apps_list'));
     loadTestFile(require.resolve('./fleet_integrations'));

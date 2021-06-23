@@ -50,35 +50,153 @@ for example, `logstash-*`.
 
 [float]
 ==== Default logging timezone is now the system's timezone
-*Details:* In prior releases the timezone used in logs defaulted to UTC.  We now use the host machine's timezone by default.
+*Details:* In prior releases the timezone used in logs defaulted to UTC. We now use the host machine's timezone by default.
 
-*Impact:* To restore the previous behavior, in kibana.yml use the pattern layout, with a date modifier:
+*Impact:* To restore the previous behavior, in kibana.yml use the pattern layout, with a {kibana-ref}/logging-service.html#date-format[date modifier]:
 [source,yaml]
 -------------------
 logging:
   appenders:
-    console:
-      kind: console
+    custom:
+      type: console
       layout:
-        kind: pattern
+        type: pattern
         pattern: "%date{ISO8601_TZ}{UTC}"
 -------------------
 See https://github.com/elastic/kibana/pull/90368 for more details.
 
 [float]
 ==== Responses are never logged by default
-*Details:* Previously responses would be logged if either `logging.json` was true, `logging.dest` was specified, or a `TTY` was detected.
+*Details:* Previously responses would be logged if either `logging.json` was true, `logging.dest` was specified, or a `TTY` was detected. With the new logging configuration, these are provided by a dedicated logger.
 
-*Impact:* To restore the previous behavior, in kibana.yml enable `debug` logs for the `http.server.response` context under `logging.loggers`:
+*Impact:* To restore the previous behavior, in `kibana.yml` enable `debug` for the `http.server.response` logger:
 [source,yaml]
 -------------------
 logging:
+  appenders:
+    custom:
+      type: console
+      layout:
+        type: pattern
   loggers:
-    - context: http.server.response
-      appenders: [console]
+    - name: http.server.response
+      appenders: [custom]
       level: debug
 -------------------
 See https://github.com/elastic/kibana/pull/87939 for more details.
+
+[float]
+==== Logging destination is specified by the appender
+*Details:* Previously log destination would be `stdout` and could be changed to `file` using `logging.dest`. With the new logging configuration, you can specify the destination using {kibana-ref}/logging-service.html#logging-appenders[appenders]. 
+
+*Impact:* To restore the previous behavior and log records to *stdout*, in `kibana.yml` use an appender with `type: console`.
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    custom:
+      type: console
+      layout:
+        type: pattern
+  root:
+    appenders: [default, custom]
+-------------------
+
+To send logs to `file` with a given file path, you should define a custom appender with `type:file`:
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: /var/log/kibana.log
+      layout:
+        type: pattern
+  root:
+    appenders: [default, file]
+-------------------
+
+[float]
+==== Set log verbosity with root
+*Details:* Previously logging output would be specified by `logging.silent` (none), `logging.quiet` (error messages only) and `logging.verbose` (all). With the new logging configuration, set the minimum required {kibana-ref}/logging-service.html#log-level[log level].
+
+*Impact:* To restore the previous behavior, in `kibana.yml` specify `logging.root.level`:
+[source,yaml]
+-------------------
+# suppress all logs
+logging:
+  root:
+    level: off
+-------------------
+
+[source,yaml]
+-------------------
+# only log error messages
+logging:
+  root:
+    level: error
+-------------------
+
+[source,yaml]
+-------------------
+# log all events
+logging:
+  root:
+    level: all
+-------------------
+
+[float]
+==== Declare log message format
+*Details:* Previously all events would be logged in `json` format when `logging.json` was true. With the new logging configuration you can specify the output format with layouts. You can choose between `json` and pattern format depending on your needs.
+
+*Impact:* To restore the previous behavior, in `kibana.yml` configure the logging format for each custom appender with the `appender.layout` property. There is no default for custom appenders and each one must be configured expilictly. 
+
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    custom_console:
+      type: console
+      layout:
+        type: pattern
+    custom_json:
+      type: console
+      layout:
+        type: json
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [custom_console]
+  root:
+    appenders: [default, custom_json]
+    level: warn
+-------------------
+
+[float]
+==== Configure log rotation with the rolling-file appender
+*Details:* Previously log rotation would be enabled when `logging.rotate.enabled` was true.
+
+*Impact:* To restore the previous behavior, in `kibana.yml` use the {kibana-ref}/logging-service.html#rolling-file-appender[`rolling-file`] appender.
+
+[source,yaml]
+-------------------
+logging:
+  appenders:
+    rolling-file:
+      type: rolling-file
+      fileName: /var/logs/kibana.log
+      policy:
+        type: size-limit
+        size: 50mb
+      strategy:
+        type: numeric
+        pattern: '-%i'
+        max: 2
+      layout:
+        type: pattern
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [rolling-file]
+-------------------
 
 [float]
 ==== `xpack.security.authProviders` is no longer valid
@@ -202,5 +320,22 @@ All supported operating systems support using systemd service files.  Any system
 *Impact:*
 Any installations using `.deb` or `.rpm` packages using SysV will need to migrate to systemd.
 
+[float]
+=== TLS v1.0 and v1.1 are disabled by default
+
+*Details:*
+Support can be re-enabled by setting `--tls-min-1.0` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KBN_PATH_CONF` (for example in Debian based system would be `/etc/kibana`).
+
+*Impact:*
+Browser and proxy clients communicating over TLS v1.0 and v1.1.
+
+[float]
+=== Platform removed from root folder name for `.tar.gz` and `.zip` archives
+
+*Details:*
+The output directory after extracting an archive no longer includes the target platform.  For example, `kibana-8.0.0-linux-aarch64.tar.gz` will produce a folder named `kibana-8.0.0`.
+
+*Impact:*
+Configuration management tools and automation will need to be updated to use the new directory.
 
 // end::notable-breaking-changes[]

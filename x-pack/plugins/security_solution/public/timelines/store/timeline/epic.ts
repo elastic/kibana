@@ -35,14 +35,15 @@ import {
   Filter,
   MatchAllFilter,
 } from '../../../../../../.../../../src/plugins/data/public';
-import { TimelineStatus, TimelineErrorResponse } from '../../../../common/types/timeline';
-import { inputsModel } from '../../../common/store/inputs';
 import {
+  TimelineStatus,
+  TimelineErrorResponse,
   TimelineType,
-  TimelineInput,
   ResponseTimeline,
   TimelineResult,
-} from '../../../graphql/types';
+  ColumnHeaderOptions,
+} from '../../../../common/types/timeline';
+import { inputsModel } from '../../../common/store/inputs';
 import { addError } from '../../../common/store/app/actions';
 
 import { persistTimeline } from '../../containers/api';
@@ -56,6 +57,7 @@ import {
   removeColumn,
   removeProvider,
   updateColumns,
+  updateEqlOptions,
   updateEventType,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
@@ -80,7 +82,7 @@ import {
   showCallOutUnauthorizedMsg,
   saveTimeline,
 } from './actions';
-import { ColumnHeaderOptions, TimelineModel } from './model';
+import { TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
 import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
 import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
@@ -88,29 +90,32 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineEpicDependencies } from './types';
+import { TimelineInput } from '../../../../common/search_strategy';
 
 const timelineActionsType = [
   applyKqlFilterQuery.type,
   addProvider.type,
   addTimeline.type,
   dataProviderEdited.type,
-  removeColumn.type,
   removeProvider.type,
   saveTimeline.type,
   setExcludedRowRendererIds.type,
   setFilters.type,
   setSavedQueryId.type,
-  updateColumns.type,
   updateDataProviderEnabled.type,
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
   updateDataProviderType.type,
+  updateEqlOptions.type,
   updateEventType.type,
   updateKqlMode.type,
-  updateIndexNames.type,
   updateProviders.type,
-  updateSort.type,
   updateTitleAndDescription.type,
+
+  updateIndexNames.type,
+  removeColumn.type,
+  updateColumns.type,
+  updateSort.type,
   updateRange.type,
   upsertColumn.type,
 ];
@@ -131,7 +136,6 @@ export const createTimelineEpic = <State>(): Epic<
     selectNotesByIdSelector,
     timelineByIdSelector,
     timelineTimeRangeSelector,
-    apolloClient$,
     kibana$,
   }
 ) => {
@@ -193,8 +197,8 @@ export const createTimelineEpic = <State>(): Epic<
     ),
     dispatcherTimelinePersistQueue.pipe(
       delay(500),
-      withLatestFrom(timeline$, apolloClient$, notes$, timelineTimeRange$),
-      concatMap(([objAction, timeline, apolloClient, notes, timelineTimeRange]) => {
+      withLatestFrom(timeline$, notes$, timelineTimeRange$),
+      concatMap(([objAction, timeline, notes, timelineTimeRange]) => {
         const action: ActionTimeline = get('action', objAction);
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
@@ -203,7 +207,6 @@ export const createTimelineEpic = <State>(): Epic<
 
         if (timelineNoteActionsType.includes(action.type)) {
           return epicPersistNote(
-            apolloClient,
             action,
             timeline,
             notes,
@@ -213,17 +216,9 @@ export const createTimelineEpic = <State>(): Epic<
             allTimelineQuery$
           );
         } else if (timelinePinnedEventActionsType.includes(action.type)) {
-          return epicPersistPinnedEvent(
-            apolloClient,
-            action,
-            timeline,
-            action$,
-            timeline$,
-            allTimelineQuery$
-          );
+          return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
         } else if (timelineFavoriteActionsType.includes(action.type)) {
           return epicPersistTimelineFavorite(
-            apolloClient,
             action,
             timeline,
             action$,
@@ -337,6 +332,7 @@ const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
   description: null,
+  eqlOptions: null,
   eventType: null,
   excludedRowRendererIds: null,
   filters: null,
@@ -366,7 +362,9 @@ export const convertTimelineAsInput = (
       } else if (key === 'columns' && get(key, timeline) != null) {
         return set(
           key,
-          get(key, timeline).map((col: ColumnHeaderOptions) => omit(['width', '__typename'], col)),
+          get(key, timeline).map((col: ColumnHeaderOptions) =>
+            omit(['initialWidth', 'width', '__typename'], col)
+          ),
           acc
         );
       } else if (key === 'filters' && get(key, timeline) != null) {

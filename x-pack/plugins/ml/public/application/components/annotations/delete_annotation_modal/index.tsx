@@ -8,7 +8,7 @@
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -26,33 +26,31 @@ export const DeleteAnnotationModal: React.FC<Props> = ({
   return (
     <Fragment>
       {isVisible === true && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={
-              <FormattedMessage
-                id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteAnnotationTitle"
-                defaultMessage="Delete this annotation?"
-              />
-            }
-            onCancel={cancelAction}
-            onConfirm={deleteAction}
-            cancelButtonText={
-              <FormattedMessage
-                id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            }
-            confirmButtonText={
-              <FormattedMessage
-                id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            }
-            buttonColor="danger"
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-            className="eui-textBreakWord"
-          />
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteAnnotationTitle"
+              defaultMessage="Delete this annotation?"
+            />
+          }
+          onCancel={cancelAction}
+          onConfirm={deleteAction}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.deleteAnnotationModal.deleteButtonLabel"
+              defaultMessage="Delete"
+            />
+          }
+          buttonColor="danger"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+          className="eui-textBreakWord"
+        />
       )}
     </Fragment>
   );

@@ -19,12 +19,12 @@ import {
 
 interface RegisterParams {
   logger: Logger;
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, alerts } = params;
-  alerts.registerType<
+  const { logger, alerting } = params;
+  alerting.registerType<
     GeoContainmentParams,
     GeoContainmentState,
     GeoContainmentInstanceState,

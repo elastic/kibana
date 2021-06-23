@@ -15,10 +15,10 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agents_actions', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     it('should return a 200 if this a valid actions request', async () => {
@@ -86,7 +86,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return a 404 when agent does not exist', async () => {
-      const { body: apiResponse } = await supertest
+      await supertest
         .post(`/api/fleet/agents/agent100/actions`)
         .set('kbn-xsrf', 'xx')
         .send({
@@ -96,7 +96,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(404);
-      expect(apiResponse.message).to.eql('Saved object [fleet-agents/agent100] not found');
     });
   });
 }

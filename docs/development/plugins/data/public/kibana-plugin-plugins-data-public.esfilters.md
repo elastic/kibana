@@ -9,6 +9,7 @@
 ```typescript
 esFilters: {
     FilterLabel: (props: import("./ui/filter_bar/filter_editor/lib/filter_label").FilterLabelProps) => JSX.Element;
+    FilterItem: (props: import("./ui/filter_bar/filter_item").FilterItemProps) => JSX.Element;
     FILTERS: typeof FILTERS;
     FilterStateStore: typeof FilterStateStore;
     buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
@@ -32,6 +33,7 @@ esFilters: {
             disabled: boolean;
             controlledBy?: string | undefined;
             index?: string | undefined;
+            isMultiIndex?: boolean | undefined;
             type?: string | undefined;
             key?: string | undefined;
             params?: any;

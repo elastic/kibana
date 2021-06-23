@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import React from 'react';
+
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {

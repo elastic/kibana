@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import supertestAsPromised from 'supertest-as-promised';
+import { FtrConfigProviderContext } from '@kbn/test';
+import supertest from 'supertest';
 import { format, UrlObject } from 'url';
-import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
@@ -18,6 +17,7 @@ import { registry } from './registry';
 interface Config {
   name: APMFtrConfigName;
   license: 'basic' | 'trial';
+  kibanaConfig?: Record<string, string>;
 }
 
 const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async (
@@ -33,11 +33,11 @@ const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async 
     auth: `${apmUser}:${APM_TEST_PASSWORD}`,
   });
 
-  return supertestAsPromised(url);
+  return supertest(url);
 };
 
 export function createTestConfig(config: Config) {
-  const { license, name } = config;
+  const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackAPITestsConfig = await readConfigFile(
@@ -54,9 +54,6 @@ export function createTestConfig(config: Config) {
     return {
       testFiles: [require.resolve('../tests')],
       servers,
-      esArchiver: {
-        directory: path.resolve(__dirname, './fixtures/es_archiver'),
-      },
       services: {
         ...services,
         supertest: supertestAsApmReadUser,
@@ -79,7 +76,15 @@ export function createTestConfig(config: Config) {
         ...xPackAPITestsConfig.get('esTestCluster'),
         license,
       },
-      kbnTestServer: xPackAPITestsConfig.get('kbnTestServer'),
+      kbnTestServer: {
+        ...xPackAPITestsConfig.get('kbnTestServer'),
+        serverArgs: [
+          ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+          ...(kibanaConfig
+            ? Object.entries(kibanaConfig).map(([key, value]) => `--${key}=${value}`)
+            : []),
+        ],
+      },
     };
   };
 }

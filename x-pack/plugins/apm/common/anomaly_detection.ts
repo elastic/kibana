@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ANOMALY_SEVERITY } from '../../ml/common';
+import { ANOMALY_SEVERITY } from './ml_constants';
 import {
   getSeverityType,
   getSeverityColor as mlGetSeverityColor,

@@ -46,6 +46,7 @@ const createTestCases = (overwrite: boolean) => {
   const group2 = [
     { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE, ...fail409(!overwrite) },
     { ...CASES.CONFLICT_1A_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     { ...CASES.CONFLICT_1B_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
@@ -61,7 +62,7 @@ const createTestCases = (overwrite: boolean) => {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   const {
     addTests,
@@ -85,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
               'globaltype',
               'isolatedtype',
               'sharedtype',
+              'sharecapabletype',
             ]),
           }),
         ].flat(),

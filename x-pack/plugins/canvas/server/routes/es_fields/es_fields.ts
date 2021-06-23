@@ -9,7 +9,7 @@ import { mapValues, keys } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { API_ROUTE } from '../../../common/lib';
 import { catchErrorHandler } from '../catch_error_handler';
-import { normalizeType } from '../../lib/normalize_type';
+import { normalizeType } from '../../../common/lib/request/normalize_type';
 import { RouteInitializerDeps } from '..';
 
 const ESFieldsRequestSchema = schema.object({

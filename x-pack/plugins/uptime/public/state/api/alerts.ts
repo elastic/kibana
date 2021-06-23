@@ -12,10 +12,11 @@ import { ActionConnector } from '../alerts/alerts';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { ActionType, AlertAction } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { Alert, AlertTypeParams } from '../../../../alerts/common';
+import { Alert, AlertTypeParams } from '../../../../alerting/common';
 import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
 import { populateAlertActions } from './alert_actions';
+import { Ping } from '../../../common/runtime_types/ping';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 
@@ -24,8 +25,7 @@ export const fetchConnectors = async () => {
 };
 
 export interface NewAlertParams extends AlertTypeParams {
-  monitorId: string;
-  monitorName?: string;
+  selectedMonitor: Ping;
   defaultActions: ActionConnector[];
 }
 
@@ -46,9 +46,12 @@ type NewMonitorStatusAlert = Omit<
 export const createAlert = async ({
   defaultActions,
   monitorId,
-  monitorName,
+  selectedMonitor,
 }: NewAlertParams): Promise<Alert> => {
-  const actions: AlertAction[] = populateAlertActions({ defaultActions, monitorId, monitorName });
+  const actions: AlertAction[] = populateAlertActions({
+    defaultActions,
+    selectedMonitor,
+  });
 
   const data: NewMonitorStatusAlert = {
     actions,
@@ -67,7 +70,7 @@ export const createAlert = async ({
     schedule: { interval: '1m' },
     notifyWhen: 'onActionGroupChange',
     tags: [UPTIME_AUTO_ALERT],
-    name: `${monitorName} (Simple status alert)`,
+    name: `${selectedMonitor?.monitor.name || selectedMonitor?.url?.full}(Simple status alert)`,
     enabled: true,
     throttle: null,
   };

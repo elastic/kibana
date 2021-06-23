@@ -6,9 +6,12 @@
  */
 
 import { CoreSetup } from 'src/core/server';
+import { EndpointAppContext } from '../endpoint/types';
 import { SetupPlugins } from '../plugin';
 
-export type CollectorDependencies = { kibanaIndex: string; core: CoreSetup } & Pick<
-  SetupPlugins,
-  'ml' | 'usageCollection'
->;
+export type CollectorDependencies = {
+  kibanaIndex: string;
+  signalsIndex: string;
+  core: CoreSetup;
+  endpointAppContext: EndpointAppContext;
+} & Pick<SetupPlugins, 'ml' | 'usageCollection'>;

@@ -10,9 +10,9 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -24,8 +24,10 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 import { AgentConfigurationList } from './List';
 
+const INITIAL_DATA = { configurations: [] };
+
 export function AgentConfigurations() {
-  const { refetch, data = [], status } = useFetcher(
+  const { refetch, data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) =>
       callApmApi({ endpoint: 'GET /api/apm/settings/agent-configuration' }),
     [],
@@ -35,38 +37,40 @@ export function AgentConfigurations() {
   useTrackPageview({ app: 'apm', path: 'agent_configuration' });
   useTrackPageview({ app: 'apm', path: 'agent_configuration', delay: 15000 });
 
-  const hasConfigurations = !isEmpty(data);
+  const hasConfigurations = !isEmpty(data.configurations);
 
   return (
     <>
-      <EuiTitle size="l">
-        <h1>
-          {i18n.translate('xpack.apm.agentConfig.titleText', {
-            defaultMessage: 'Agent remote configuration',
-          })}
-        </h1>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiPanel>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2>
-                {i18n.translate(
-                  'xpack.apm.agentConfig.configurationsPanelTitle',
-                  { defaultMessage: 'Configurations' }
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
+          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+        })}
+      </EuiText>
 
-          {hasConfigurations ? <CreateConfigurationButton /> : null}
-        </EuiFlexGroup>
+      <EuiSpacer size="m" />
 
-        <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate(
+                'xpack.apm.agentConfig.configurationsPanelTitle',
+                { defaultMessage: 'Configurations' }
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
 
-        <AgentConfigurationList status={status} data={data} refetch={refetch} />
-      </EuiPanel>
+        {hasConfigurations ? <CreateConfigurationButton /> : null}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <AgentConfigurationList
+        status={status}
+        configurations={data.configurations}
+        refetch={refetch}
+      />
     </>
   );
 }

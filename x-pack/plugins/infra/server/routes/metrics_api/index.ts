@@ -29,23 +29,17 @@ export const initMetricsAPIRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const options = pipe(
-          MetricsAPIRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const options = pipe(
+        MetricsAPIRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const client = createSearchClient(requestContext, framework);
-        const metricsApiResponse = await query(client, options);
+      const client = createSearchClient(requestContext, framework);
+      const metricsApiResponse = await query(client, options);
 
-        return response.ok({
-          body: MetricsAPIResponseRT.encode(metricsApiResponse),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: MetricsAPIResponseRT.encode(metricsApiResponse),
+      });
     }
   );
 };

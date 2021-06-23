@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPage,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
+import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
@@ -25,7 +20,6 @@ import { SearchBar } from '../../shared/search_bar';
 import { NoServicesMessage } from './no_services_message';
 import { ServiceList } from './ServiceList';
 import { MLCallout } from './ServiceList/MLCallout';
-import { useAnomalyDetectionJobsFetcher } from './use_anomaly_detection_jobs_fetcher';
 
 const initialData = {
   items: [],
@@ -36,22 +30,29 @@ const initialData = {
 let hasDisplayedToast = false;
 
 function useServicesFetcher() {
-  const { urlParams, uiFilters } = useUrlParams();
+  const {
+    urlParams: { environment, kuery, start, end },
+  } = useUrlParams();
   const { core } = useApmPluginContext();
   const upgradeAssistantHref = useUpgradeAssistantHref();
-  const { start, end } = urlParams;
+
   const { data = initialData, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/services',
           params: {
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+            },
           },
         });
       }
     },
-    [start, end, uiFilters]
+    [environment, kuery, start, end]
   );
 
   useEffect(() => {
@@ -101,7 +102,7 @@ export function ServiceInventory() {
   const {
     anomalyDetectionJobsData,
     anomalyDetectionJobsStatus,
-  } = useAnomalyDetectionJobsFetcher();
+  } = useAnomalyDetectionJobsContext();
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     'apm.userHasDismissedServiceInventoryMlCallout',
@@ -118,29 +119,25 @@ export function ServiceInventory() {
 
   return (
     <>
-      <SearchBar showTimeComparison />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {displayMlCallout ? (
-            <EuiFlexItem>
-              <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
-            </EuiFlexItem>
-          ) : null}
+      <SearchBar />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {displayMlCallout && (
           <EuiFlexItem>
-            <EuiPanel>
-              <ServiceList
-                items={servicesData.items}
-                noItemsMessage={
-                  <NoServicesMessage
-                    historicalDataFound={servicesData.hasHistoricalData}
-                    status={servicesStatus}
-                  />
-                }
-              />
-            </EuiPanel>
+            <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPage>
+        )}
+        <EuiFlexItem>
+          <ServiceList
+            items={servicesData.items}
+            noItemsMessage={
+              <NoServicesMessage
+                historicalDataFound={servicesData.hasHistoricalData}
+                status={servicesStatus}
+              />
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }

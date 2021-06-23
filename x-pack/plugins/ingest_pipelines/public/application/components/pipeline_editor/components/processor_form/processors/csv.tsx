@@ -18,13 +18,14 @@ import {
   ToggleField,
   ComboBoxField,
   ValidationFunc,
+  SerializerFunc,
 } from '../../../../../../shared_imports';
 
 import { FieldsConfig } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';
 
-import { to } from './shared';
+import { to, from } from './shared';
 
 const { minLengthField } = fieldValidators;
 
@@ -72,7 +73,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
   separator: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.separatorFieldLabel', {
       defaultMessage: 'Separator (optional)',
     }),
@@ -85,13 +86,13 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.separatorHelpText"
         defaultMessage="Delimiter used in the CSV data. Defaults to {value}."
-        values={{ value: <EuiCode inline>{','}</EuiCode> }}
+        values={{ value: <EuiCode>{','}</EuiCode> }}
       />
     ),
   },
   quote: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v ? v : undefined),
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.quoteFieldLabel', {
       defaultMessage: 'Quote (optional)',
     }),
@@ -104,7 +105,7 @@ const fieldsConfig: FieldsConfig = {
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.convertForm.quoteHelpText"
         defaultMessage="Escape character used in the CSV data. Defaults to {value}."
-        values={{ value: <EuiCode inline>{'"'}</EuiCode> }}
+        values={{ value: <EuiCode>{'"'}</EuiCode> }}
       />
     ),
   },
@@ -112,6 +113,7 @@ const fieldsConfig: FieldsConfig = {
     type: FIELD_TYPES.TOGGLE,
     defaultValue: false,
     deserializer: to.booleanOrUndef,
+    serializer: from.undefinedIfValue(false),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.csvForm.trimFieldLabel', {
       defaultMessage: 'Trim',
     }),
@@ -121,6 +123,7 @@ const fieldsConfig: FieldsConfig = {
   },
   empty_value: {
     type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.emptyValueFieldLabel', {
       defaultMessage: 'Empty value (optional)',
     }),
@@ -147,17 +150,41 @@ export const CSV: FunctionComponent = () => {
         config={fieldsConfig.target_fields}
         component={ComboBoxField}
         path="fields.target_fields"
+        data-test-subj="targetFieldsField"
       />
 
-      <UseField config={fieldsConfig.separator} component={Field} path="fields.separator" />
+      <UseField
+        config={fieldsConfig.separator}
+        component={Field}
+        path="fields.separator"
+        data-test-subj="separatorValueField"
+      />
 
-      <UseField config={fieldsConfig.quote} component={Field} path="fields.quote" />
+      <UseField
+        config={fieldsConfig.quote}
+        component={Field}
+        path="fields.quote"
+        data-test-subj="quoteValueField"
+      />
 
-      <UseField config={fieldsConfig.trim} component={ToggleField} path="fields.trim" />
+      <UseField
+        config={fieldsConfig.trim}
+        component={ToggleField}
+        path="fields.trim"
+        data-test-subj="trimSwitch"
+      />
 
-      <UseField config={fieldsConfig.empty_value} component={Field} path="fields.empty_value" />
+      <UseField
+        config={fieldsConfig.empty_value}
+        component={Field}
+        path="fields.empty_value"
+        data-test-subj="emptyValueField"
+      />
 
-      <IgnoreMissingField />
+      <IgnoreMissingField
+        defaultValue={true}
+        serializer={from.undefinedIfValue(true) as SerializerFunc<boolean>}
+      />
     </>
   );
 };

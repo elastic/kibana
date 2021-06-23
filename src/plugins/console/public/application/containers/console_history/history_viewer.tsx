@@ -20,7 +20,7 @@ import { applyCurrentSettings } from '../editor/legacy/console_editor/apply_edit
 
 interface Props {
   settings: DevToolsSettings;
-  req: any | null;
+  req: { method: string; endpoint: string; data: string; time: string } | null;
 }
 
 export function HistoryViewer({ settings, req }: Props) {

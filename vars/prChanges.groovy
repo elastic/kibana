@@ -14,6 +14,7 @@ def getSkippablePaths() {
     /^.ci\/Jenkinsfile_[^\/]+$/,
     /^\.github\//,
     /\.md$/,
+    /^\.backportrc\.json$/
   ]
 }
 

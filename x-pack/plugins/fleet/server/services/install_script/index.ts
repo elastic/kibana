@@ -6,6 +6,7 @@
  */
 
 import { appContextService } from '../app_context';
+
 import { macosInstallTemplate } from './install_templates/macos';
 import { linuxInstallTemplate } from './install_templates/linux';
 

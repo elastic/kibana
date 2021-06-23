@@ -22,6 +22,11 @@ describe('getKID', () => {
     const kid = getKID(useProdKey);
     expect(kid).toBe('kibana1');
   });
+
+  it(`should fallback to development`, async () => {
+    const kid = getKID();
+    expect(kid).toBe('kibana_dev1');
+  });
 });
 
 describe('encryptTelemetry', () => {
@@ -44,6 +49,12 @@ describe('encryptTelemetry', () => {
   it('uses kibana_dev1 kid on { useProdKey: false }', async () => {
     const payload = { some: 'value' };
     await encryptTelemetry(payload, { useProdKey: false });
+    expect(mockEncrypt).toBeCalledWith('kibana_dev1', payload);
+  });
+
+  it('should fallback to { useProdKey: false }', async () => {
+    const payload = { some: 'value' };
+    await encryptTelemetry(payload);
     expect(mockEncrypt).toBeCalledWith('kibana_dev1', payload);
   });
 });

@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
-import { getThrouputChartSelector } from '../selectors/throuput_chart_selectors';
+import { getThroughputChartSelector } from '../selectors/throughput_chart_selectors';
 import { useTheme } from './use_theme';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 
@@ -18,8 +18,7 @@ export function useTransactionThroughputChartsFetcher() {
   const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {
-    urlParams: { start, end, transactionName },
-    uiFilters,
+    urlParams: { environment, kuery, start, end, transactionName },
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
@@ -31,21 +30,30 @@ export function useTransactionThroughputChartsFetcher() {
           params: {
             path: { serviceName },
             query: {
+              environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
       }
     },
-    [serviceName, start, end, transactionName, transactionType, uiFilters]
+    [
+      environment,
+      kuery,
+      serviceName,
+      start,
+      end,
+      transactionName,
+      transactionType,
+    ]
   );
 
   const memoizedData = useMemo(
-    () => getThrouputChartSelector({ throuputChart: data, theme }),
+    () => getThroughputChartSelector({ throughputChart: data, theme }),
     [data, theme]
   );
 

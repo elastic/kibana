@@ -8,10 +8,8 @@
 import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
 import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 
-import { isEsError } from '../../../shared_imports';
-import { formatEsError } from '../../../lib/format_es_error';
-import { License } from '../../../services';
-import { mockRouteContext } from '../test_lib';
+import { handleEsError } from '../../../shared_imports';
+import { mockRouteContext, mockLicense } from '../test_lib';
 import { registerGetRoute } from './register_get_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -24,12 +22,9 @@ describe('[CCR API] Get one auto-follow pattern', () => {
 
     registerGetRoute({
       router,
-      license: {
-        guardApiRoute: (route: any) => route,
-      } as License,
+      license: mockLicense,
       lib: {
-        isEsError,
-        formatEsError,
+        handleEsError,
       },
     });
 
@@ -38,21 +33,25 @@ describe('[CCR API] Get one auto-follow pattern', () => {
 
   it('should return a single resource even though ES returns an array with 1 item', async () => {
     const ccrAutoFollowPatternResponseMock = {
-      patterns: [
-        {
-          name: 'autoFollowPattern',
-          pattern: {
-            active: true,
-            remote_cluster: 'remoteCluster',
-            leader_index_patterns: ['leader*'],
-            follow_index_pattern: 'follow',
+      body: {
+        patterns: [
+          {
+            name: 'autoFollowPattern',
+            pattern: {
+              active: true,
+              remote_cluster: 'remoteCluster',
+              leader_index_patterns: ['leader*'],
+              follow_index_pattern: 'follow',
+            },
           },
-        },
-      ],
+        ],
+      },
     };
 
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest.fn().mockResolvedValueOnce(ccrAutoFollowPatternResponseMock),
+      ccr: {
+        getAutoFollowPattern: jest.fn().mockResolvedValueOnce(ccrAutoFollowPatternResponseMock),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest();

@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
+import { enableInspectEsQueries } from '../../../../observability/public';
 import { FetchOptions } from '../../../common/fetch_options';
 
-function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
+function fetchOptionsWithDebug(
+  fetchOptions: FetchOptions,
+  inspectableEsQueriesEnabled: boolean
+) {
   const debugEnabled =
-    sessionStorage.getItem('apm_debug') === 'true' &&
+    inspectableEsQueriesEnabled &&
     startsWith(fetchOptions.pathname, '/api/apm');
 
   const { body, ...rest } = fetchOptions;
@@ -23,7 +27,7 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     query: {
       ...fetchOptions.query,
-      ...(debugEnabled ? { _debug: true } : {}),
+      ...(debugEnabled ? { _inspect: true } : {}),
     },
   };
 }
@@ -37,9 +41,12 @@ export function clearCache() {
 export type CallApi = typeof callApi;
 
 export async function callApi<T = void>(
-  http: HttpSetup,
+  { http, uiSettings }: CoreStart | CoreSetup,
   fetchOptions: FetchOptions
 ): Promise<T> {
+  const inspectableEsQueriesEnabled: boolean = uiSettings.get(
+    enableInspectEsQueries
+  );
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
   if (cacheResponse) {
@@ -47,7 +54,8 @@ export async function callApi<T = void>(
   }
 
   const { pathname, method = 'get', ...options } = fetchOptionsWithDebug(
-    fetchOptions
+    fetchOptions,
+    inspectableEsQueriesEnabled
   );
 
   const lowercaseMethod = method.toLowerCase() as

@@ -10,7 +10,7 @@ export interface BannerInfoResponse {
   banner: BannerConfiguration;
 }
 
-export type BannerPlacement = 'disabled' | 'header';
+export type BannerPlacement = 'disabled' | 'top';
 
 export interface BannerConfiguration {
   placement: BannerPlacement;

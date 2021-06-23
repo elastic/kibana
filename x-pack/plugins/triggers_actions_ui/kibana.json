@@ -3,9 +3,9 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "optionalPlugins": ["alerts", "features", "home"],
+  "optionalPlugins": ["alerting", "features", "home", "spaces"],
   "requiredPlugins": ["management", "charts", "data", "kibanaReact", "kibanaUtils", "savedObjects"],
   "configPath": ["xpack", "trigger_actions_ui"],
   "extraPublicDirs": ["public/common", "public/common/constants"],
-  "requiredBundles": ["home", "alerts", "esUiShared", "kibanaReact", "kibanaUtils"]
+  "requiredBundles": ["home", "alerting", "esUiShared", "kibanaReact", "kibanaUtils"]
 }

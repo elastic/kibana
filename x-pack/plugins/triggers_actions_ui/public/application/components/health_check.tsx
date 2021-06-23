@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Option, none, some, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -15,12 +15,12 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { DocLinksStart } from 'kibana/public';
-import { alertingFrameworkHealth } from '../lib/alert_api';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
+import { alertingFrameworkHealth } from '../lib/alert_api';
 
 interface Props {
   inFlyout?: boolean;
@@ -69,16 +69,16 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
     fold(
       () =>
         waitForCheck ? (
-          <Fragment>
+          <>
             <EuiSpacer size="m" />
             <CenterJustifiedSpinner />
-          </Fragment>
+          </>
         ) : (
-          <Fragment>{children}</Fragment>
+          <>{children}</>
         ),
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
-          <Fragment>{children}</Fragment>
+          <>{children}</>
         ) : !healthCheck.isAlertsAvailable ? (
           <AlertsError docLinks={docLinks} className={className} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
@@ -94,15 +94,11 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
 };
 
 interface PromptErrorProps {
-  docLinks: Pick<DocLinksStart, 'ELASTIC_WEBSITE_URL' | 'DOC_LINK_VERSION'>;
+  docLinks: DocLinksStart;
   className?: string;
 }
 
-const EncryptionError = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  className,
-}: PromptErrorProps) => (
+const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
@@ -122,7 +118,7 @@ const EncryptionError = ({
           {i18n.translate(
             'xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey',
             {
-              defaultMessage: 'To create an alert, set a value for ',
+              defaultMessage: 'To create a rule, set a value for ',
             }
           )}
           <EuiCode>{'xpack.encryptedSavedObjects.encryptionKey'}</EuiCode>
@@ -133,11 +129,7 @@ const EncryptionError = ({
                 ' in your kibana.yml file and ensure the Encrypted Saved Objects plugin is enabled. ',
             }
           )}
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`}
-            external
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAction',
               {
@@ -151,11 +143,7 @@ const EncryptionError = ({
   />
 );
 
-const TlsError = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  className,
-}: PromptErrorProps) => (
+const TlsError = ({ docLinks, className }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
@@ -176,11 +164,7 @@ const TlsError = ({
             defaultMessage:
               'Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. ',
           })}
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`}
-            external
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.security.kibanaTLS} external target="_blank">
             {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsErrorAction', {
               defaultMessage: 'Learn how to enable TLS.',
             })}
@@ -191,11 +175,7 @@ const TlsError = ({
   />
 );
 
-const AlertsError = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  className,
-}: PromptErrorProps) => (
+const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="alertsNeededEmptyPrompt"
@@ -205,7 +185,7 @@ const AlertsError = ({
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.healthCheck.alertsErrorTitle"
-          defaultMessage="You must enable Alerts and Actions"
+          defaultMessage="You must enable Alerting and Actions"
         />
       </h2>
     }
@@ -213,15 +193,11 @@ const AlertsError = ({
       <div className={`${className}__body`}>
         <p role="banner">
           {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsError', {
-            defaultMessage: 'To create an alert, set alerts and actions plugins enabled. ',
+            defaultMessage: 'To create a rule, you must enable the alerting and actions plugins. ',
           })}
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html`}
-            external
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
             {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsErrorAction', {
-              defaultMessage: 'Learn how to enable Alerts and Actions.',
+              defaultMessage: 'Learn how.',
             })}
           </EuiLink>
         </p>
@@ -230,11 +206,7 @@ const AlertsError = ({
   />
 );
 
-const TlsAndEncryptionError = ({
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
-  className,
-}: PromptErrorProps) => (
+const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
@@ -255,15 +227,11 @@ const TlsAndEncryptionError = ({
             defaultMessage:
               'You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. ',
           })}
-          <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`}
-            external
-            target="_blank"
-          >
+          <EuiLink href={docLinks.links.alerting.setupPrerequisites} external target="_blank">
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorAction',
               {
-                defaultMessage: 'Learn how',
+                defaultMessage: 'Learn how.',
               }
             )}
           </EuiLink>

@@ -11,8 +11,8 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const es = getService('legacyEs');
-  const PageObjects = getPageObjects(['settings', 'common']);
+  const es = getService('es');
+  const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const security = getService('security');
 
   describe('"Create Index Pattern" wizard', function () {
@@ -58,6 +58,12 @@ export default function ({ getService, getPageObjects }) {
         });
 
         await PageObjects.settings.createIndexPattern('alias1', false);
+      });
+
+      it('can delete an index pattern', async () => {
+        await PageObjects.settings.removeIndexPattern();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.exists('indexPatternTable');
       });
 
       after(async () => {

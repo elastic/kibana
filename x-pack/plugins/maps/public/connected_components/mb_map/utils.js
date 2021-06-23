@@ -51,11 +51,6 @@ export function removeOrphanedSourcesAndLayers(mbMap, layerList, spatialFilterLa
   mbSourcesToRemove.forEach((mbSourceId) => mbMap.removeSource(mbSourceId));
 }
 
-export async function addSpritesheetToMap(json, imgUrl, mbMap) {
-  const imgData = await loadSpriteSheetImageData(imgUrl);
-  addSpriteSheetToMapFromImageData(json, imgData, mbMap);
-}
-
 function getImageData(img) {
   const canvas = window.document.createElement('canvas');
   const context = canvas.getContext('2d');

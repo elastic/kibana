@@ -9,8 +9,12 @@
 import { IncomingMessage } from 'http';
 import { Readable } from 'stream';
 
-export function createResponseStub(response: any) {
-  const resp: any = new Readable({
+export function createResponseStub(response?: string) {
+  const resp: Readable & {
+    statusCode?: number;
+    statusMessage?: string;
+    headers?: Record<string, unknown>;
+  } = new Readable({
     read() {
       if (response) {
         this.push(response);

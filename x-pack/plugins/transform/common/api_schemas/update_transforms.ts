@@ -9,7 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { TransformPivotConfig } from '../types/transform';
 
-import { settingsSchema, sourceSchema, syncSchema } from './transforms';
+import { retentionPolicySchema, settingsSchema, sourceSchema, syncSchema } from './transforms';
 
 // POST _transform/{transform_id}/_update
 export const postTransformsUpdateRequestSchema = schema.object({
@@ -22,6 +22,7 @@ export const postTransformsUpdateRequestSchema = schema.object({
     })
   ),
   frequency: schema.maybe(schema.string()),
+  retention_policy: schema.maybe(retentionPolicySchema),
   settings: schema.maybe(settingsSchema),
   source: schema.maybe(sourceSchema),
   sync: schema.maybe(syncSchema),

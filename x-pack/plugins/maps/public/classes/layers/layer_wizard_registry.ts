@@ -16,6 +16,7 @@ export type RenderWizardArguments = {
   mapColors: string[];
   // multi-step arguments for wizards that supply 'prerequisiteSteps'
   currentStepId: string | null;
+  isOnFinalStep: boolean;
   enableNextBtn: () => void;
   disableNextBtn: () => void;
   startStepLoading: () => void;

@@ -11,7 +11,7 @@ import { fetchMlJob, MappedAnomalyHit, InfluencerFilter } from './common';
 import { getJobId, metricsK8SJobTypes, ANOMALY_THRESHOLD } from '../../../common/infra_ml';
 import { Sort, Pagination } from '../../../common/http_api/infra_ml';
 import type { MlSystem, MlAnomalyDetectors } from '../../types';
-import { InsufficientAnomalyMlJobsConfigured, isMlPrivilegesError } from './errors';
+import { isMlPrivilegesError } from './errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   metricsK8sAnomaliesResponseRT,
@@ -60,17 +60,29 @@ async function getCompatibleAnomaliesJobIds(
   };
 }
 
-export async function getMetricK8sAnomalies(
-  context: Required<InfraRequestHandlerContext>,
-  sourceId: string,
-  anomalyThreshold: ANOMALY_THRESHOLD,
-  startTime: number,
-  endTime: number,
-  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined,
-  sort: Sort,
-  pagination: Pagination,
-  influencerFilter?: InfluencerFilter
-) {
+export async function getMetricK8sAnomalies({
+  context,
+  sourceId,
+  anomalyThreshold,
+  startTime,
+  endTime,
+  metric,
+  sort,
+  pagination,
+  influencerFilter,
+  query,
+}: {
+  context: Required<InfraRequestHandlerContext>;
+  sourceId: string;
+  anomalyThreshold: ANOMALY_THRESHOLD;
+  startTime: number;
+  endTime: number;
+  metric: 'memory_usage' | 'network_in' | 'network_out' | undefined;
+  sort: Sort;
+  pagination: Pagination;
+  influencerFilter?: InfluencerFilter;
+  query?: string;
+}) {
   const finalizeMetricsK8sAnomaliesSpan = startTracingSpan('get metrics k8s entry anomalies');
 
   const {
@@ -84,9 +96,11 @@ export async function getMetricK8sAnomalies(
   );
 
   if (jobIds.length === 0) {
-    throw new InsufficientAnomalyMlJobsConfigured(
-      'Log rate or categorisation ML jobs need to be configured to search anomalies'
-    );
+    return {
+      data: [],
+      hasMoreEntries: false,
+      timimg: { spans: [] },
+    };
   }
 
   const {
@@ -102,7 +116,8 @@ export async function getMetricK8sAnomalies(
     endTime,
     sort,
     pagination,
-    influencerFilter
+    influencerFilter,
+    query
   );
 
   const data = anomalies.map((anomaly) => {
@@ -132,6 +147,8 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     duration,
     influencers,
     startTime: anomalyStartTime,
+    partitionFieldName,
+    partitionFieldValue,
   } = anomaly;
 
   return {
@@ -144,6 +161,8 @@ const parseAnomalyResult = (anomaly: MappedAnomalyHit, jobId: string) => {
     influencers,
     type: 'metrics_k8s' as const,
     jobId,
+    partitionFieldName,
+    partitionFieldValue,
   };
 };
 
@@ -155,7 +174,8 @@ async function fetchMetricK8sAnomalies(
   endTime: number,
   sort: Sort,
   pagination: Pagination,
-  influencerFilter?: InfluencerFilter | undefined
+  influencerFilter?: InfluencerFilter | undefined,
+  query?: string
 ) {
   // We'll request 1 extra entry on top of our pageSize to determine if there are
   // more entries to be fetched. This avoids scenarios where the client side can't
@@ -175,6 +195,7 @@ async function fetchMetricK8sAnomalies(
         sort,
         pagination: expandedPagination,
         influencerFilter,
+        jobQuery: query,
       }),
       jobIds
     )
@@ -215,6 +236,8 @@ async function fetchMetricK8sAnomalies(
       timestamp: anomalyStartTime,
       by_field_value: categoryId,
       influencers,
+      partition_field_value: partitionFieldValue,
+      partition_field_name: partitionFieldName,
     } = result._source;
 
     const podInfluencers = influencers.filter(
@@ -233,6 +256,8 @@ async function fetchMetricK8sAnomalies(
       startTime: anomalyStartTime,
       duration: duration * 1000,
       categoryId,
+      partitionFieldValue,
+      partitionFieldName,
     };
   });
 

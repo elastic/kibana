@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, memo, useState } from 'react';
+import React, { useMemo, useCallback, memo, useContext } from 'react';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
   EuiLink,
-  EuiHealth,
+  EuiBadge,
   EuiToolTip,
   EuiSelectableProps,
   EuiSuperDatePicker,
   EuiSpacer,
-  EuiPopover,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiContextMenuPanelProps,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
@@ -31,17 +26,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
-import { EuiContextMenuItemProps } from '@elastic/eui/src/components/context_menu/context_menu_item';
-import { NavigateToAppOptions } from 'kibana/public';
+import { ThemeContext } from 'styled-components';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
-import {
-  HOST_STATUS_TO_HEALTH_COLOR,
-  POLICY_STATUS_TO_HEALTH_COLOR,
-  POLICY_STATUS_TO_TEXT,
-} from './host_constants';
+import { POLICY_STATUS_TO_BADGE_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { CreateStructuredSelector } from '../../../../common/store';
 import { Immutable, HostInfo } from '../../../../../common/endpoint/types';
@@ -63,8 +53,9 @@ import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { APP_ID } from '../../../../../common/constants';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
+import { TableRowActions } from './components/table_row_actions';
+import { EndpointAgentStatus } from './components/endpoint_agent_status';
 
 const MAX_PAGINATED_ITEM = 9999;
 
@@ -72,11 +63,24 @@ const EndpointListNavLink = memo<{
   name: string;
   href: string;
   route: string;
+  isBadge?: boolean;
   dataTestSubj: string;
-}>(({ name, href, route, dataTestSubj }) => {
+}>(({ name, href, route, isBadge = false, dataTestSubj }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
+  const theme = useContext(ThemeContext);
 
-  return (
+  return isBadge ? (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink
+      data-test-subj={dataTestSubj}
+      className="eui-textTruncate"
+      href={href}
+      onClick={clickHandler}
+      style={{ color: theme.eui.euiColorInk }}
+    >
+      {name}
+    </EuiLink>
+  ) : (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
       data-test-subj={dataTestSubj}
@@ -90,36 +94,7 @@ const EndpointListNavLink = memo<{
 });
 EndpointListNavLink.displayName = 'EndpointListNavLink';
 
-const TableRowActions = memo<{
-  items: EuiContextMenuPanelProps['items'];
-}>(({ items }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
-  const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-
-  return (
-    <EuiPopover
-      anchorPosition="downRight"
-      panelPaddingSize="none"
-      button={
-        <EuiButtonIcon
-          data-test-subj="endpointTableRowActions"
-          iconType="boxesHorizontal"
-          onClick={handleToggleMenu}
-          aria-label={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
-            defaultMessage: 'Open',
-          })}
-        />
-      }
-      isOpen={isOpen}
-      closePopover={handleCloseMenu}
-    >
-      <EuiContextMenuPanel items={items} />
-    </EuiPopover>
-  );
-});
-TableRowActions.displayName = 'EndpointTableRowActions';
-
+// FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const EndpointList = () => {
   const history = useHistory();
@@ -138,7 +113,6 @@ export const EndpointList = () => {
     policyItemsLoading,
     endpointPackageVersion,
     endpointsExist,
-    agentPolicies,
     autoRefreshInterval,
     isAutoRefreshEnabled,
     patternsError,
@@ -148,7 +122,6 @@ export const EndpointList = () => {
     isTransformEnabled,
   } = useEndpointSelector(selector);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
-
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
@@ -182,9 +155,9 @@ export const EndpointList = () => {
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'fleet',
     {
-      path: `#/integrations${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}/add-integration` : ''
-      }`,
+      path: `#/integrations/${
+        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
+      }/add-integration`,
       state: {
         onCancelNavigateTo: [
           'securitySolution:administration',
@@ -220,7 +193,7 @@ export const EndpointList = () => {
 
   const NOOP = useCallback(() => {}, []);
 
-  const PAD_LEFT: React.CSSProperties = { paddingLeft: '6px' };
+  const PAD_LEFT: React.CSSProperties = useMemo(() => ({ paddingLeft: '6px' }), []);
 
   const handleDeployEndpointsClick = useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>(
     'fleet',
@@ -299,24 +272,14 @@ export const EndpointList = () => {
       },
       {
         field: 'host_status',
-        width: '9%',
+        width: '14%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostStatus', {
           defaultMessage: 'Agent Status',
         }),
         // eslint-disable-next-line react/display-name
-        render: (hostStatus: HostInfo['host_status']) => {
+        render: (hostStatus: HostInfo['host_status'], endpointInfo) => {
           return (
-            <EuiHealth
-              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
-              data-test-subj="rowHostStatus"
-              className="eui-textTruncate"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
-                values={{ hostStatus }}
-              />
-            </EuiHealth>
+            <EndpointAgentStatus hostStatus={hostStatus} endpointMetadata={endpointInfo.metadata} />
           );
         },
       },
@@ -375,8 +338,8 @@ export const EndpointList = () => {
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <EuiHealth
-              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+            <EuiBadge
+              color={POLICY_STATUS_TO_BADGE_COLOR[policy.status]}
               className="eui-textTruncate"
               data-test-subj="rowPolicyStatus"
             >
@@ -384,15 +347,16 @@ export const EndpointList = () => {
                 name={POLICY_STATUS_TO_TEXT[policy.status]}
                 href={toRouteUrl}
                 route={toRoutePath}
+                isBadge
                 dataTestSubj="policyStatusCellLink"
               />
-            </EuiHealth>
+            </EuiBadge>
           );
         },
       },
       {
         field: 'metadata.host.os.name',
-        width: '10%',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.os', {
           defaultMessage: 'Operating System',
         }),
@@ -446,79 +410,13 @@ export const EndpointList = () => {
           {
             // eslint-disable-next-line react/display-name
             render: (item: HostInfo) => {
-              return (
-                <TableRowActions
-                  items={[
-                    <EuiContextMenuItemNavByRouter
-                      data-test-subj="hostLink"
-                      icon="logoSecurity"
-                      key="hostDetailsLink"
-                      navigateAppId={APP_ID}
-                      navigateOptions={{ path: `hosts/${item.metadata.host.hostname}` }}
-                      href={`${services?.application?.getUrlForApp('securitySolution')}/hosts/${
-                        item.metadata.host.hostname
-                      }`}
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.actions.hostDetails"
-                        defaultMessage="View Host Details"
-                      />
-                    </EuiContextMenuItemNavByRouter>,
-                    <EuiContextMenuItemNavByRouter
-                      icon="logoObservability"
-                      key="agentConfigLink"
-                      data-test-subj="agentPolicyLink"
-                      navigateAppId="fleet"
-                      navigateOptions={{
-                        path: `#${pagePathGetters.policy_details({
-                          policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
-                        })}`,
-                      }}
-                      href={`${services?.application?.getUrlForApp(
-                        'fleet'
-                      )}#${pagePathGetters.policy_details({
-                        policyId: agentPolicies[item.metadata.Endpoint.policy.applied.id],
-                      })}`}
-                      disabled={
-                        agentPolicies[item.metadata.Endpoint.policy.applied.id] === undefined
-                      }
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.actions.agentPolicy"
-                        defaultMessage="View Agent Policy"
-                      />
-                    </EuiContextMenuItemNavByRouter>,
-                    <EuiContextMenuItemNavByRouter
-                      icon="logoObservability"
-                      key="agentDetailsLink"
-                      data-test-subj="agentDetailsLink"
-                      navigateAppId="fleet"
-                      navigateOptions={{
-                        path: `#${pagePathGetters.fleet_agent_details({
-                          agentId: item.metadata.elastic.agent.id,
-                        })}`,
-                      }}
-                      href={`${services?.application?.getUrlForApp(
-                        'fleet'
-                      )}#${pagePathGetters.fleet_agent_details({
-                        agentId: item.metadata.elastic.agent.id,
-                      })}`}
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.actions.agentDetails"
-                        defaultMessage="View Agent Details"
-                      />
-                    </EuiContextMenuItemNavByRouter>,
-                  ]}
-                />
-              );
+              return <TableRowActions endpointMetadata={item.metadata} />;
             },
           },
         ],
       },
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formatUrl, queryParams, search, agentPolicies, services?.application?.getUrlForApp]);
+  }, [queryParams, search, formatUrl, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -617,13 +515,13 @@ export const EndpointList = () => {
                   agentsLink: (
                     <LinkToApp
                       appId="fleet"
-                      appPath={`#${pagePathGetters.fleet_agent_list({
-                        kuery: 'fleet-agents.packages : "endpoint"',
+                      appPath={`#${pagePathGetters.agent_list({
+                        kuery: 'packages : "endpoint"',
                       })}`}
                       href={`${services?.application?.getUrlForApp(
                         'fleet'
-                      )}#${pagePathGetters.fleet_agent_list({
-                        kuery: 'fleet-agents.packages : "endpoint"',
+                      )}#${pagePathGetters.agent_list({
+                        kuery: 'packages : "endpoint"',
                       })}`}
                     >
                       <FormattedMessage
@@ -682,20 +580,3 @@ export const EndpointList = () => {
     </AdministrationListPage>
   );
 };
-
-const EuiContextMenuItemNavByRouter = memo<
-  Omit<EuiContextMenuItemProps, 'onClick'> & {
-    navigateAppId: string;
-    navigateOptions: NavigateToAppOptions;
-    children: React.ReactNode;
-  }
->(({ navigateAppId, navigateOptions, children, ...otherMenuItemProps }) => {
-  const handleOnClick = useNavigateToAppEventHandler(navigateAppId, navigateOptions);
-
-  return (
-    <EuiContextMenuItem {...otherMenuItemProps} onClick={handleOnClick}>
-      {children}
-    </EuiContextMenuItem>
-  );
-});
-EuiContextMenuItemNavByRouter.displayName = 'EuiContextMenuItemNavByRouter';

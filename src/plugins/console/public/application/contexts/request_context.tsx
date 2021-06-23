@@ -10,8 +10,8 @@ import React, { createContext, useReducer, Dispatch } from 'react';
 import { createUseContext } from './create_use_context';
 import * as store from '../stores/request';
 
-const RequestReadContext = createContext<store.Store>(null as any);
-const RequestActionContext = createContext<Dispatch<store.Actions>>(null as any);
+const RequestReadContext = createContext<store.Store>(store.initialValue);
+const RequestActionContext = createContext<Dispatch<store.Actions>>(() => {});
 
 export function RequestContextProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(store.reducer, store.initialValue);

@@ -17,15 +17,17 @@ import { mergeProjection } from '../../projections/util/merge_projection';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 const getServiceNodes = async ({
+  kuery,
   setup,
   serviceName,
 }: {
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
 }) => {
   const { apmEventClient } = setup;
 
-  const projection = getServiceNodesProjection({ setup, serviceName });
+  const projection = getServiceNodesProjection({ kuery, setup, serviceName });
 
   const params = mergeProjection(projection, {
     body: {
@@ -63,7 +65,7 @@ const getServiceNodes = async ({
     },
   });
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_service_nodes', params);
 
   if (!response.aggregations) {
     return [];

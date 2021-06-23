@@ -7,7 +7,6 @@
 
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
-import { Direction } from '../../../graphql/types';
 import { defaultHeaders } from '../../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 import { SubsetTimelineModel, TimelineModel } from './model';
@@ -15,13 +14,22 @@ import { SubsetTimelineModel, TimelineModel } from './model';
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
 
-export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filters'> = {
+export const timelineDefaults: SubsetTimelineModel &
+  Pick<TimelineModel, 'filters' | 'eqlOptions'> = {
   activeTab: TimelineTabs.query,
+  prevActiveTab: TimelineTabs.query,
   columns: defaultHeaders,
   dataProviders: [],
   dateRange: { start, end },
   deletedEventIds: [],
   description: '',
+  eqlOptions: {
+    eventCategoryField: 'event.category',
+    tiebreakerField: '',
+    timestampField: '@timestamp',
+    query: '',
+    size: 100,
+  },
   eventType: 'all',
   eventIdToNoteIds: {},
   excludedRowRendererIds: [],
@@ -57,7 +65,7 @@ export const timelineDefaults: SubsetTimelineModel & Pick<TimelineModel, 'filter
     {
       columnId: '@timestamp',
       columnType: 'number',
-      sortDirection: Direction.desc,
+      sortDirection: 'desc',
     },
   ],
   status: TimelineStatus.draft,

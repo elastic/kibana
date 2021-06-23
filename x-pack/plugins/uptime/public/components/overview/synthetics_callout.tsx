@@ -58,6 +58,7 @@ export const SyntheticsCallout = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="uptimeDismissSyntheticsCallout"
               onClick={() => {
                 if (shouldShow) {
                   hideSyntheticsCallout();

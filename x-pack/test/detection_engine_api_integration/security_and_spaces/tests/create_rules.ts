@@ -27,11 +27,13 @@ import {
   getSimpleMlRuleOutput,
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
+  waitForAlertToComplete,
   getRuleForSignalTesting,
   getRuleForSignalTestingWithTimestampOverride,
 } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
+import { RuleStatusResponse } from '../../../../plugins/security_solution/server/lib/detection_engine/rules/types';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -59,13 +61,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       describe('elastic admin', () => {
@@ -118,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(statusBody[body.id].current_status.status).to.eql('succeeded');
         });
 
-        it('should create a single rule with a rule_id and an index pattern that does not match anything available and fail the rule', async () => {
+        it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
@@ -126,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
             .send(simpleRule)
             .expect(200);
 
-          await waitForRuleSuccessOrStatus(supertest, body.id, 'failed');
+          await waitForRuleSuccessOrStatus(supertest, body.id, 'partial failure');
 
           const { body: statusBody } = await supertest
             .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -134,9 +136,9 @@ export default ({ getService }: FtrProviderContext) => {
             .send({ ids: [body.id] })
             .expect(200);
 
-          expect(statusBody[body.id].current_status.status).to.eql('failed');
-          expect(statusBody[body.id].current_status.last_failure_message).to.eql(
-            'The following index patterns did not match any indices: ["does-not-exist-*"]'
+          expect(statusBody[body.id].current_status.status).to.eql('partial failure');
+          expect(statusBody[body.id].current_status.last_success_message).to.eql(
+            'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated.'
           );
         });
 
@@ -222,6 +224,21 @@ export default ({ getService }: FtrProviderContext) => {
           expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
         });
 
+        it('creates a single Machine Learning rule from a legacy ML Rule format', async () => {
+          const legacyMlRule = {
+            ...getSimpleMlRule(),
+            machine_learning_job_id: 'some_job_id',
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(legacyMlRule)
+            .expect(200);
+
+          const bodyToCompare = removeServerGeneratedProperties(body);
+          expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
+        });
+
         it('should create a single Machine Learning rule', async () => {
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
@@ -280,17 +297,50 @@ export default ({ getService }: FtrProviderContext) => {
         await createSignalsIndex(supertest);
         // to edit these files run the following script
         // cd $HOME/kibana/x-pack && nvm use && node ../scripts/es_archiver edit security_solution/timestamp_override
-        await esArchiver.load('security_solution/timestamp_override');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override'
+        );
       });
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('security_solution/timestamp_override');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override'
+        );
       });
-      it('should create a single rule which has a timestamp override and generates two signals with a failing status', async () => {
-        // should be a failing status because one of the indices in the index pattern is missing
-        // the timestamp override field.
 
+      it('should create a single rule which has a timestamp override for an index pattern that does not exist and write a partial failure status', async () => {
+        // defaults to event.ingested timestamp override.
+        // event.ingested is one of the timestamp fields set on the es archive data
+        // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
+        const simpleRule = getRuleForSignalTestingWithTimestampOverride(['myfakeindex-1']);
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(simpleRule)
+          .expect(200);
+        const bodyId = body.id;
+
+        await waitForAlertToComplete(supertest, bodyId);
+        await waitForRuleSuccessOrStatus(supertest, bodyId, 'partial failure');
+
+        const { body: statusBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send({ ids: [bodyId] })
+          .expect(200);
+
+        expect((statusBody as RuleStatusResponse)[bodyId].current_status?.status).to.eql(
+          'partial failure'
+        );
+        expect(
+          (statusBody as RuleStatusResponse)[bodyId].current_status?.last_success_message
+        ).to.eql(
+          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1"]'
+        );
+      });
+
+      it('should create a single rule which has a timestamp override and generates two signals with a "partial failure" status', async () => {
         // defaults to event.ingested timestamp override.
         // event.ingested is one of the timestamp fields set on the es archive data
         // inside of x-pack/test/functional/es_archives/security_solution/timestamp_override/data.json.gz
@@ -311,8 +361,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ ids: [bodyId] })
           .expect(200);
 
-        // set to "failed" for now. Will update this with a partial failure
-        // once I figure out the logic
         expect(statusBody[bodyId].current_status.status).to.eql('partial failure');
       });
     });

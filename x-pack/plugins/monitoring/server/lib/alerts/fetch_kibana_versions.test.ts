@@ -6,9 +6,12 @@
  */
 
 import { fetchKibanaVersions } from './fetch_kibana_versions';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 describe('fetchKibanaVersions', () => {
-  let callCluster = jest.fn();
+  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
   const clusters = [
     {
       clusterUuid: 'cluster123',
@@ -19,8 +22,9 @@ describe('fetchKibanaVersions', () => {
   const size = 10;
 
   it('fetch as expected', async () => {
-    callCluster = jest.fn().mockImplementation(() => {
-      return {
+    esClient.search.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           index: {
             buckets: [
@@ -59,10 +63,10 @@ describe('fetchKibanaVersions', () => {
             ],
           },
         },
-      };
-    });
+      })
+    );
 
-    const result = await fetchKibanaVersions(callCluster, clusters, index, size);
+    const result = await fetchKibanaVersions(esClient, clusters, index, size);
     expect(result).toEqual([
       {
         clusterUuid: clusters[0].clusterUuid,

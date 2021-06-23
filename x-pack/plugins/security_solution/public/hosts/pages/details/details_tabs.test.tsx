@@ -19,6 +19,8 @@ import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
 jest.mock('../../../common/containers/source', () => ({
@@ -120,6 +122,18 @@ describe('body', () => {
             { name: 'agent.test7', searchable: true, type: 'string', aggregatable: true },
             { name: 'agent.test8', searchable: true, type: 'string', aggregatable: true },
             { name: 'host.name', searchable: true, type: 'string', aggregatable: true },
+            {
+              aggregatable: false,
+              name: 'nestedField.firstAttributes',
+              searchable: true,
+              type: 'string',
+            },
+            {
+              aggregatable: false,
+              name: 'nestedField.secondAttributes',
+              searchable: true,
+              type: 'string',
+            },
           ],
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },

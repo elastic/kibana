@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
   GetPackagePoliciesRequestSchema,
@@ -14,6 +15,7 @@ import {
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
 } from '../../types';
+
 import {
   getPackagePoliciesHandler,
   getOnePackagePolicyHandler,

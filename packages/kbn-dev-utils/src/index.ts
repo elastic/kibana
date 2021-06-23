@@ -23,7 +23,6 @@ export {
   KBN_P12_PATH,
   KBN_P12_PASSWORD,
 } from './certs';
-export * from './kbn_client';
 export * from './run';
 export * from './axios';
 export * from './stdio';

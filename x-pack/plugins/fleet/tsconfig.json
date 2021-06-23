@@ -5,16 +5,17 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
   },
   "include": [
     // add all the folders containg files to be compiled
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "../../typings/**/*"
+    "../../../typings/**/*"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

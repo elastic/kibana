@@ -14,7 +14,9 @@ import { EuiCallOut } from '@elastic/eui';
 import { EuiButton } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import moment from 'moment';
-import { SubscriptionSplashContent } from '../../../../../../components/subscription_splash_content';
+import { EuiTabs } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
+import { SubscriptionSplashPrompt } from '../../../../../../components/subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../../../../containers/ml/infra_ml_capabilities';
 import {
   MissingResultsPrivilegesPrompt,
@@ -22,17 +24,20 @@ import {
 } from '../../../../../../components/logging/log_analysis_setup';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
-import { LoadingPage } from '../../../../../../components/loading_page';
+import { LoadingPrompt } from '../../../../../../components/loading_page';
 import { useLinkProps } from '../../../../../../hooks/use_link_props';
+import { AnomaliesTable } from './anomalies_table/anomalies_table';
 
 interface Props {
   hasSetupCapabilities: boolean;
   goToSetup(type: 'hosts' | 'kubernetes'): void;
+  closeFlyout(): void;
 }
 
+type Tab = 'jobs' | 'anomalies';
 export const FlyoutHome = (props: Props) => {
-  const [tab] = useState<'jobs' | 'anomalies'>('jobs');
-  const { goToSetup } = props;
+  const [tab, setTab] = useState<Tab>('jobs');
+  const { goToSetup, closeFlyout } = props;
   const {
     fetchJobStatus: fetchHostJobStatus,
     setupStatus: hostSetupStatus,
@@ -69,13 +74,19 @@ export const FlyoutHome = (props: Props) => {
     }
   }, [fetchK8sJobStatus, fetchHostJobStatus, hasInfraMLReadCapabilities]);
 
+  const hasJobs = hostJobSummaries.length > 0 || k8sJobSummaries.length > 0;
+  const manageJobsLinkProps = useLinkProps({
+    app: 'ml',
+    pathname: '/jobs',
+  });
+
   if (!hasInfraMLCapabilities) {
-    return <SubscriptionSplashContent />;
+    return <SubscriptionSplashPrompt />;
   } else if (!hasInfraMLReadCapabilities) {
     return <MissingResultsPrivilegesPrompt />;
   } else if (hostSetupStatus.type === 'initializing' || k8sSetupStatus.type === 'initializing') {
     return (
-      <LoadingPage
+      <LoadingPrompt
         message={i18n.translate('xpack.infra.ml.anomalyFlyout.jobStatusLoadingMessage', {
           defaultMessage: 'Checking status of metrics jobs...',
         })}
@@ -97,38 +108,70 @@ export const FlyoutHome = (props: Props) => {
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody>
-          <div>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
-                  id="xpack.infra.ml.anomalyFlyout.create.description"
-                />
-              </p>
-            </EuiText>
-          </div>
+        <EuiTabs>
+          <EuiTab isSelected={tab === 'jobs'} onClick={() => setTab('jobs')}>
+            Jobs
+          </EuiTab>
+          <EuiTab
+            isSelected={tab === 'anomalies'}
+            onClick={() => setTab('anomalies')}
+            data-test-subj="anomalyFlyoutAnomaliesTab"
+          >
+            Anomalies
+          </EuiTab>
+        </EuiTabs>
 
-          <EuiSpacer size="l" />
-          {(hostJobSummaries.length > 0 || k8sJobSummaries.length > 0) && (
-            <>
+        <EuiFlyoutBody
+          banner={
+            tab === 'jobs' &&
+            hasJobs && (
               <JobsEnabledCallout
                 hasHostJobs={hostJobSummaries.length > 0}
                 hasK8sJobs={k8sJobSummaries.length > 0}
                 jobIds={jobIds}
               />
+            )
+          }
+        >
+          {tab === 'jobs' && (
+            <>
+              {hasJobs && (
+                <>
+                  <EuiFlexGroup gutterSize={'s'}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton {...manageJobsLinkProps} style={{ marginRight: 5 }}>
+                        <FormattedMessage
+                          defaultMessage="Manage jobs in ML"
+                          id="xpack.infra.ml.anomalyFlyout.manageJobs"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="l" />
+                </>
+              )}
+              <EuiText>
+                <h4>Create ML Jobs</h4>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="Anomaly detection is powered by machine learning. Machine learning jobs are available for the following resource types. Enable these jobs to begin detecting anomalies in your infrastructure metrics."
+                    id="xpack.infra.ml.anomalyFlyout.createJobs"
+                  />
+                </p>
+              </EuiText>
               <EuiSpacer size="l" />
+
+              <CreateJobTab
+                hasHostJobs={hostJobSummaries.length > 0}
+                hasK8sJobs={k8sJobSummaries.length > 0}
+                hasSetupCapabilities={props.hasSetupCapabilities}
+                createHosts={createHosts}
+                createK8s={createK8s}
+              />
             </>
           )}
-          {tab === 'jobs' && (
-            <CreateJobTab
-              hasHostJobs={hostJobSummaries.length > 0}
-              hasK8sJobs={k8sJobSummaries.length > 0}
-              hasSetupCapabilities={props.hasSetupCapabilities}
-              createHosts={createHosts}
-              createK8s={createK8s}
-            />
-          )}
+
+          {tab === 'anomalies' && <AnomaliesTable closeFlyout={closeFlyout} />}
         </EuiFlyoutBody>
       </>
     );
@@ -158,39 +201,8 @@ const JobsEnabledCallout = (props: CalloutProps) => {
     });
   }
 
-  const manageJobsLinkProps = useLinkProps({
-    app: 'ml',
-    pathname: '/jobs',
-  });
-
-  const anomaliesUrl = useLinkProps({
-    app: 'ml',
-    pathname: `/explorer?_g=${createResultsUrl(props.jobIds)}`,
-  });
-
   return (
     <>
-      <EuiFlexGroup gutterSize={'s'}>
-        <EuiFlexItem grow={false}>
-          <EuiButton {...manageJobsLinkProps} style={{ marginRight: 5 }}>
-            <FormattedMessage
-              defaultMessage="Manage jobs"
-              id="xpack.infra.ml.anomalyFlyout.manageJobs"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton {...anomaliesUrl}>
-            <FormattedMessage
-              defaultMessage="View anomalies"
-              id="xpack.infra.ml.anomalyFlyout.anomaliesTabLabel"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
       <EuiCallOut
         size="m"
         color="success"
@@ -223,7 +235,7 @@ const CreateJobTab = (props: CreateJobTab) => {
         <EuiFlexItem>
           <EuiCard
             isDisabled={!props.hasSetupCapabilities}
-            icon={<EuiIcon type={'storage'} />}
+            icon={<EuiIcon type={'storage'} size="xl" />}
             // title="Hosts"
             title={
               <FormattedMessage
@@ -262,7 +274,7 @@ const CreateJobTab = (props: CreateJobTab) => {
         <EuiFlexItem>
           <EuiCard
             isDisabled={!props.hasSetupCapabilities}
-            icon={<EuiIcon type={'logoKubernetes'} />}
+            icon={<EuiIcon type={'logoKubernetes'} size="xl" />}
             title={
               <FormattedMessage
                 defaultMessage="Kubernetes Pods"
@@ -302,7 +314,7 @@ const CreateJobTab = (props: CreateJobTab) => {
   );
 };
 
-function createResultsUrl(jobIds: string[], mode = 'absolute') {
+export const createResultsUrl = (jobIds: string[], mode = 'absolute') => {
   const idString = jobIds.map((j) => `'${j}'`).join(',');
   let path = '';
 
@@ -318,4 +330,4 @@ function createResultsUrl(jobIds: string[], mode = 'absolute') {
   path += "))&_a=(query:(query_string:(analyze_wildcard:!t,query:'*')))";
 
   return path;
-}
+};

@@ -96,7 +96,7 @@ describe('createManagedConfiguration()', () => {
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" error(s).'
+        'Max workers configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
       );
     });
 
@@ -180,7 +180,7 @@ describe('createManagedConfiguration()', () => {
       errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" error(s).'
+        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
       );
     });
 

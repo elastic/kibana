@@ -11,6 +11,6 @@ export { getTimeZone } from './get_time_zone';
 export { getLegendActions } from './get_legend_actions';
 export { getSeriesNameFn } from './get_series_name_fn';
 export { getXDomain, getAdjustedDomain } from './domain';
-export { useColorPicker } from './use_color_picker';
+export { getColorPicker } from './get_color_picker';
 export { getXAccessor } from './accessors';
 export { getAllSeries } from './get_all_series';

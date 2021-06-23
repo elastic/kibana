@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '../../../../src/core/server';
 import { FileUploadPlugin } from './plugin';
 
-export const plugin = () => new FileUploadPlugin();
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new FileUploadPlugin(initializerContext);

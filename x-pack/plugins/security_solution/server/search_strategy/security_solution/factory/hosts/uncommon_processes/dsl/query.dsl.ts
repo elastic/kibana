@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
 import {
@@ -24,8 +24,8 @@ export const buildQuery = ({
   const processUserFields = reduceFields(uncommonProcessesFields, {
     ...processFieldsMap,
     ...userFieldsMap,
-  });
-  const hostFields = reduceFields(uncommonProcessesFields, hostFieldsMap);
+  }) as string[];
+  const hostFields = reduceFields(uncommonProcessesFields, hostFieldsMap) as string[];
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -60,21 +60,21 @@ export const buildQuery = ({
             field: 'process.name',
             order: [
               {
-                host_count: 'asc',
+                host_count: 'asc' as const,
               },
               {
-                _count: 'asc',
+                _count: 'asc' as const,
               },
               {
-                _key: 'asc',
+                _key: 'asc' as const,
               },
-            ],
+            ] as estypes.AggregationsTermsAggregationOrder,
           },
           aggregations: {
             process: {
               top_hits: {
                 size: 1,
-                sort: [{ '@timestamp': { order: 'desc' } }],
+                sort: [{ '@timestamp': { order: 'desc' as const } }],
                 _source: processUserFields,
               },
             },
@@ -120,7 +120,7 @@ export const buildQuery = ({
                       'event.action': 'executed',
                     },
                   },
-                ],
+                ] as estypes.QueryDslQueryContainer[],
               },
             },
             {
@@ -146,7 +146,7 @@ export const buildQuery = ({
                       'event.action': 'process_started',
                     },
                   },
-                ],
+                ] as estypes.QueryDslQueryContainer[],
               },
             },
             {

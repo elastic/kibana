@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -36,6 +37,7 @@ export type FactoryQueryTypes = OsqueryQueries;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   filterQuery: ESQuery | string | undefined;
+  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
 }

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  RiskScore,
-  RiskScoreMappingOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+import { RiskScore, RiskScoreMappingOrUndefined } from '@kbn/securitysolution-io-ts-alerting-types';
 import { sampleDocRiskScore } from '../__mocks__/es_results';
 import {
   buildRiskScoreFromMapping,
@@ -195,6 +192,7 @@ interface TestCase {
 
 function testIt({ fieldValue, scoreDefault, scoreMapping, expected }: TestCase) {
   const result = buildRiskScoreFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: sampleDocRiskScore(fieldValue)._source,
     riskScore: scoreDefault,
     riskScoreMapping: scoreMapping,

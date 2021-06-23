@@ -5,7 +5,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Choose the action(s) to take when the rule matches an anomaly."
+        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
         id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
         values={Object {}}
       />
@@ -105,7 +105,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Choose the action(s) to take when the rule matches an anomaly."
+        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
         id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
         values={Object {}}
       />
@@ -205,7 +205,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
   <EuiText>
     <p>
       <FormattedMessage
-        defaultMessage="Choose the action(s) to take when the rule matches an anomaly."
+        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
         id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
         values={Object {}}
       />

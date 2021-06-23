@@ -11,13 +11,55 @@
 const execa = require('execa');
 const Listr = require('listr');
 const { resolve } = require('path');
+const { argv } = require('yargs');
 
-const cwd = resolve(__dirname, '../../../..');
+const root = resolve(__dirname, '../../../..');
 
-const execaOpts = { cwd, stderr: 'pipe' };
+const execaOpts = { cwd: root, stderr: 'pipe' };
+
+const useOptimizedTsConfig = !!argv.optimizeTs;
+
+const tsconfig = useOptimizedTsConfig
+  ? resolve(root, 'tsconfig.json')
+  : resolve(root, 'x-pack/plugins/apm/tsconfig.json');
+
+const testTsconfig = resolve(root, 'x-pack/test/tsconfig.json');
 
 const tasks = new Listr(
   [
+    {
+      title: 'Lint',
+      task: () => execa('node', [resolve(__dirname, 'eslint.js')], execaOpts),
+    },
+    {
+      title: 'Typescript',
+      task: () =>
+        execa(
+          'node',
+          [
+            resolve(
+              __dirname,
+              useOptimizedTsConfig
+                ? './optimize-tsconfig.js'
+                : './unoptimize-tsconfig.js'
+            ),
+          ],
+          execaOpts
+        ).then(() =>
+          Promise.all([
+            execa(
+              require.resolve('typescript/bin/tsc'),
+              ['--project', tsconfig, '--pretty', '--noEmit'],
+              execaOpts
+            ),
+            execa(
+              require.resolve('typescript/bin/tsc'),
+              ['--project', testTsconfig, '--pretty', '--noEmit'],
+              execaOpts
+            ),
+          ])
+        ),
+    },
     {
       title: 'Jest',
       task: () =>
@@ -33,38 +75,16 @@ const tasks = new Listr(
           execaOpts
         ),
     },
-    {
-      title: 'Typescript',
-      task: () =>
-        execa('node', [resolve(__dirname, 'optimize-tsconfig.js')]).then(() =>
-          execa(
-            require.resolve('typescript/bin/tsc'),
-            [
-              '--project',
-              resolve(__dirname, '../../../tsconfig.json'),
-              '--pretty',
-              '--noEmit',
-              '--skipLibCheck',
-            ],
-            execaOpts
-          )
-        ),
-    },
-    {
-      title: 'Lint',
-      task: () => execa('node', [resolve(__dirname, 'eslint.js')], execaOpts),
-    },
   ],
-  { exitOnError: false, concurrent: true }
+  { exitOnError: true, concurrent: false }
 );
 
 tasks.run().catch((error) => {
   // from src/dev/typescript/exec_in_projects.ts
   process.exitCode = 1;
-
   const errors = error.errors || [error];
 
   for (const e of errors) {
-    process.stderr.write(e.stdout);
+    process.stderr.write(e.stderr || e.stdout);
   }
 });

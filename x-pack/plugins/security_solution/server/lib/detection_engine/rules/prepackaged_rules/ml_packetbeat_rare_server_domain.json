@@ -9,7 +9,7 @@
   ],
   "from": "now-45m",
   "interval": "15m",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "machine_learning_job_id": "packetbeat_rare_server_domain",
   "name": "Unusual Network Destination Domain Name",
   "references": [
@@ -25,5 +25,5 @@
     "ML"
   ],
   "type": "machine_learning",
-  "version": 3
+  "version": 4
 }

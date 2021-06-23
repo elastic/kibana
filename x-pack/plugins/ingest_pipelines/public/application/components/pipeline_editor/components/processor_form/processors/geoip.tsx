@@ -22,7 +22,7 @@ const fieldsConfig: FieldsConfig = {
   /* Optional field config */
   database_file: {
     type: FIELD_TYPES.TEXT,
-    serializer: (v) => (v === 'GeoLite2-City.mmdb' ? undefined : v),
+    serializer: (v) => (v === 'GeoLite2-City.mmdb' || v === '' ? undefined : v),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.geoIPForm.databaseFileLabel', {
       defaultMessage: 'Database file (optional)',
     }),
@@ -31,8 +31,8 @@ const fieldsConfig: FieldsConfig = {
         id="xpack.ingestPipelines.pipelineEditor.geoIPForm.databaseFileHelpText"
         defaultMessage="GeoIP2 database file in the {ingestGeoIP} configuration directory. Defaults to {databaseFile}."
         values={{
-          databaseFile: <EuiCode inline>{'GeoLite2-City.mmdb'}</EuiCode>,
-          ingestGeoIP: <EuiCode inline>{'ingest-geoip'}</EuiCode>,
+          databaseFile: <EuiCode>{'GeoLite2-City.mmdb'}</EuiCode>,
+          ingestGeoIP: <EuiCode>{'ingest-geoip'}</EuiCode>,
         }}
       />
     ),

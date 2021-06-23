@@ -25,7 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
 
-      await esArchiver.unload('ml/farequote');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
 
       await ml.testResources.resetKibanaTimeZone();
     });

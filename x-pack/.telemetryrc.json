@@ -1,5 +1,14 @@
-{
-  "output": "plugins/telemetry_collection_xpack/schema/xpack_plugins.json",
-  "root": "plugins/",
-  "exclude": []
-}
+[
+  {
+    "output": "plugins/telemetry_collection_xpack/schema/xpack_plugins.json",
+    "root": "plugins/",
+    "exclude": [
+      "plugins/monitoring/server/telemetry_collection/"
+    ]
+  },
+  {
+    "output": "plugins/telemetry_collection_xpack/schema/xpack_monitoring.json",
+    "root": "plugins/monitoring/server/telemetry_collection/",
+    "exclude": []
+  }
+]

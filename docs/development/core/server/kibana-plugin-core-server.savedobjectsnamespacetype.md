@@ -4,10 +4,10 @@
 
 ## SavedObjectsNamespaceType type
 
-The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces. \* agnostic: this type of saved object is global.
+The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces. \* multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be \*share-capable\*, but will not actually be shareable until the namespace type is changed to "multiple". \* agnostic: This type of saved object is global.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+export declare type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 ```

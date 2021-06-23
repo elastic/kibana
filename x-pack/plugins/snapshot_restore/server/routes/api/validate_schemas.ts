@@ -176,4 +176,5 @@ export const restoreSettingsSchema = schema.object({
   indexSettings: schema.maybe(schema.string()),
   ignoreIndexSettings: schema.maybe(schema.arrayOf(schema.string())),
   ignoreUnavailable: schema.maybe(schema.boolean()),
+  includeAliases: schema.maybe(schema.boolean()),
 });

@@ -12,11 +12,10 @@ import {
   jobsAndSpaces,
   jobsAndCurrentSpace,
   syncJobObjects,
-  jobTypeSchema,
   canDeleteJobSchema,
+  jobTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import { JobType } from '../../common/types/saved_objects';
 
 /**
  * Routes for job saved object management
@@ -127,15 +126,15 @@ export function savedObjectsRoutes(
   /**
    * @apiGroup JobSavedObjects
    *
-   * @api {post} /api/ml/saved_objects/assign_job_to_space Assign jobs to spaces
-   * @apiName AssignJobsToSpaces
-   * @apiDescription Add list of spaces to a list of jobs
+   * @api {post} /api/ml/saved_objects/update_jobs_spaces Update what spaces jobs are assigned to
+   * @apiName UpdateJobsSpaces
+   * @apiDescription Update a list of jobs to add and/or remove them from given spaces
    *
    * @apiSchema (body) jobsAndSpaces
    */
   router.post(
     {
-      path: '/api/ml/saved_objects/assign_job_to_space',
+      path: '/api/ml/saved_objects/update_jobs_spaces',
       validate: {
         body: jobsAndSpaces,
       },
@@ -145,43 +144,14 @@ export function savedObjectsRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
       try {
-        const { jobType, jobIds, spaces } = request.body;
+        const { jobType, jobIds, spacesToAdd, spacesToRemove } = request.body;
 
-        const body = await jobSavedObjectService.assignJobsToSpaces(jobType, jobIds, spaces);
-
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup JobSavedObjects
-   *
-   * @api {post} /api/ml/saved_objects/remove_job_from_space Remove jobs from spaces
-   * @apiName RemoveJobsFromSpaces
-   * @apiDescription Remove a list of spaces from a list of jobs
-   *
-   * @apiSchema (body) jobsAndSpaces
-   */
-  router.post(
-    {
-      path: '/api/ml/saved_objects/remove_job_from_space',
-      validate: {
-        body: jobsAndSpaces,
-      },
-      options: {
-        tags: ['access:ml:canCreateJob', 'access:ml:canCreateDataFrameAnalytics'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
-      try {
-        const { jobType, jobIds, spaces } = request.body;
-
-        const body = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, spaces);
+        const body = await jobSavedObjectService.updateJobsSpaces(
+          jobType,
+          jobIds,
+          spacesToAdd,
+          spacesToRemove
+        );
 
         return response.ok({
           body,
@@ -213,7 +183,7 @@ export function savedObjectsRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService }) => {
       try {
-        const { jobType, jobIds }: { jobType: JobType; jobIds: string[] } = request.body;
+        const { jobType, jobIds } = request.body;
         const { getCurrentSpaceId } = spacesUtilsProvider(getSpaces, request);
 
         const currentSpaceId = await getCurrentSpaceId();
@@ -228,9 +198,12 @@ export function savedObjectsRoutes(
           });
         }
 
-        const body = await jobSavedObjectService.removeJobsFromSpaces(jobType, jobIds, [
-          currentSpaceId,
-        ]);
+        const body = await jobSavedObjectService.updateJobsSpaces(
+          jobType,
+          jobIds,
+          [], // spacesToAdd
+          [currentSpaceId] // spacesToRemove
+        );
 
         return response.ok({
           body,
@@ -318,7 +291,7 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService, client }) => {
       try {
         const { jobType } = request.params;
-        const { jobIds }: { jobIds: string[] } = request.body;
+        const { jobIds } = request.body;
 
         const { canDeleteJobs } = checksFactory(client, jobSavedObjectService);
         const body = await canDeleteJobs(

@@ -2,17 +2,16 @@
 [[canvas-tutorial]]
 == Tutorial: Create a workpad for monitoring sales
 
-To get up and running with Canvas, add the Sample eCommerce orders data, then use the data to create a workpad for monitoring sales at an eCommerce store.
+To familiarize yourself with *Canvas*, add the Sample eCommerce orders data, then use the data to create a workpad for monitoring sales at an eCommerce store.
 
 [float]
-=== Before you begin
+=== Open and set up Canvas
 
-For this tutorial, you'll need to add the <<add-sample-data, Sample eCommerce orders data>>.
+To create a workpad of the eCommerce store data, add the data set, then create the workpad.
 
-[float]
-=== Create your workpad
+. On the {kib} *Home* page, click *Try our sample data*.
 
-Your first step to working with Canvas is to create a workpad.
+. From *Sample eCommerce orders data*, click *Add data*.
 
 . Open the main menu, then click *Canvas*.
 
@@ -59,7 +58,7 @@ The query selects the total price field and sets it to the sum_total_price field
 
 .. Change the *Label* to `Total sales`.
 
-. The error is gone, but the element could use some formatting. To format the number, use the Canvas expression language.
+. The error is gone, but the element could use some formatting. To format the number, use the *Canvas* expression language.
 
 .. Click *Expression editor*.
 +
@@ -118,7 +117,7 @@ Your workpad is complete!
 
 [float]
 === What's next?
-Now that you know the Canvas basics, you're ready to explore on your own.
+Now that you know the basics, you're ready to explore on your own.
 
 Here are some things to try:
 
@@ -126,4 +125,4 @@ Here are some things to try:
 
 * Build presentations of your own data with <<create-workpads,workpads>>.
 
-* Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.
+* Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive *Canvas*.

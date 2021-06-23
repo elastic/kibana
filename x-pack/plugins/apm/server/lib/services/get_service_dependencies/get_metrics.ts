@@ -13,9 +13,8 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -28,64 +27,71 @@ export const getMetrics = async ({
 }: {
   setup: Setup & SetupTimeRange;
   serviceName: string;
-  environment: string;
+  environment?: string;
   numBuckets: number;
 }) => {
   const { start, end, apmEventClient } = setup;
 
-  const response = await apmEventClient.search({
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    body: {
-      track_total_hits: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { exists: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT } },
-            { range: rangeFilter(start, end) },
-            ...getEnvironmentUiFilterES(environment),
-          ],
-        },
+  const response = await apmEventClient.search(
+    'get_service_destination_metrics',
+    {
+      apm: {
+        events: [ProcessorEvent.metric],
       },
-      aggs: {
-        connections: {
-          terms: {
-            field: SPAN_DESTINATION_SERVICE_RESOURCE,
-            size: 100,
-          },
-          aggs: {
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: getBucketSize({ start, end, numBuckets })
-                  .intervalString,
-                extended_bounds: {
-                  min: start,
-                  max: end,
+      body: {
+        track_total_hits: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { [SERVICE_NAME]: serviceName } },
+              {
+                exists: {
+                  field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
                 },
               },
-              aggs: {
-                latency_sum: {
-                  sum: {
-                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+            ],
+          },
+        },
+        aggs: {
+          connections: {
+            terms: {
+              field: SPAN_DESTINATION_SERVICE_RESOURCE,
+              size: 100,
+            },
+            aggs: {
+              timeseries: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: getBucketSize({ start, end, numBuckets })
+                    .intervalString,
+                  extended_bounds: {
+                    min: start,
+                    max: end,
                   },
                 },
-                count: {
-                  sum: {
-                    field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                aggs: {
+                  latency_sum: {
+                    sum: {
+                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+                    },
                   },
-                },
-                [EVENT_OUTCOME]: {
-                  terms: {
-                    field: EVENT_OUTCOME,
+                  count: {
+                    sum: {
+                      field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                    },
                   },
-                  aggs: {
-                    count: {
-                      sum: {
-                        field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                  [EVENT_OUTCOME]: {
+                    terms: {
+                      field: EVENT_OUTCOME,
+                    },
+                    aggs: {
+                      count: {
+                        sum: {
+                          field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+                        },
                       },
                     },
                   },
@@ -95,8 +101,8 @@ export const getMetrics = async ({
           },
         },
       },
-    },
-  });
+    }
+  );
 
   return (
     response.aggregations?.connections.buckets.map((bucket) => ({

@@ -405,6 +405,15 @@ describe('Detections Rules API', () => {
       });
     });
 
+    test('check duplicated rules are disabled by default', async () => {
+      await duplicateRules({ rules: rulesMock.data.map((rule) => ({ ...rule, enabled: true })) });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [path, options] = fetchMock.mock.calls[0];
+      expect(path).toBe('/api/detection_engine/rules/_bulk_create');
+      const rules = JSON.parse(options.body);
+      expect(rules).toMatchObject([{ enabled: false }, { enabled: false }]);
+    });
+
     test('happy path', async () => {
       const ruleResp = await duplicateRules({ rules: rulesMock.data });
       expect(ruleResp).toEqual(rulesMock);

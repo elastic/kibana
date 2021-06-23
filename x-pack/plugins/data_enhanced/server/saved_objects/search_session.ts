@@ -6,9 +6,10 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { SEARCH_SESSION_TYPE } from '../../common';
+import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
+import { searchSessionSavedObjectMigrations } from './search_session_migration';
 
-export const searchSessionMapping: SavedObjectsType = {
+export const searchSessionSavedObjectType: SavedObjectsType = {
   name: SEARCH_SESSION_TYPE,
   namespaceType: 'single',
   hidden: true,
@@ -32,6 +33,9 @@ export const searchSessionMapping: SavedObjectsType = {
       touched: {
         type: 'date',
       },
+      completed: {
+        type: 'date',
+      },
       status: {
         type: 'keyword',
       },
@@ -53,6 +57,16 @@ export const searchSessionMapping: SavedObjectsType = {
         type: 'object',
         enabled: false,
       },
+      realmType: {
+        type: 'keyword',
+      },
+      realmName: {
+        type: 'keyword',
+      },
+      username: {
+        type: 'keyword',
+      },
     },
   },
+  migrations: searchSessionSavedObjectMigrations,
 };

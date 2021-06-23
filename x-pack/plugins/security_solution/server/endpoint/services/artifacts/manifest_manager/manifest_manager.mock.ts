@@ -12,7 +12,7 @@ import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas/response';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   createPackagePolicyWithManifestMock,
   createPackagePolicyWithInitialManifestMock,
@@ -20,9 +20,9 @@ import {
   getMockArtifactsWithDiff,
   getEmptyMockArtifacts,
 } from '../../../lib/artifacts/mocks';
-import { ArtifactClient } from '../artifact_client';
-import { getManifestClientMock } from '../manifest_client.mock';
+import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
 import { ManifestManager, ManifestManagerContext } from './manifest_manager';
+import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
   data,
@@ -33,17 +33,24 @@ export const createExceptionListResponse = (data: ExceptionListItemSchema[], tot
 
 type FindExceptionListItemOptions = Parameters<ExceptionListClient['findExceptionListItem']>[0];
 
-const FILTER_REGEXP = /^exception-list-agnostic\.attributes\.os_types:"(\w+)"$/;
+const FILTER_PROPERTY_PREFIX = 'exception-list-agnostic\\.attributes';
+const FILTER_REGEXP = new RegExp(
+  `^${FILTER_PROPERTY_PREFIX}\.os_types:"([^"]+)"( and \\(${FILTER_PROPERTY_PREFIX}\.tags:"policy:all"( or ${FILTER_PROPERTY_PREFIX}\.tags:"policy:([^"]+)")?\\))?$`
+);
 
 export const mockFindExceptionListItemResponses = (
   responses: Record<string, Record<string, ExceptionListItemSchema[]>>
 ) => {
   return jest.fn().mockImplementation((options: FindExceptionListItemOptions) => {
-    const os = FILTER_REGEXP.test(options.filter || '')
-      ? options.filter!.match(FILTER_REGEXP)![1]
-      : '';
+    const matches = options.filter!.match(FILTER_REGEXP) || [];
 
-    return createExceptionListResponse(responses[options.listId]?.[os] || []);
+    if (matches[4] && responses[options.listId]?.[`${matches![1]}-${matches[4]}`]) {
+      return createExceptionListResponse(
+        responses[options.listId]?.[`${matches![1]}-${matches[4]}`] || []
+      );
+    } else {
+      return createExceptionListResponse(responses[options.listId]?.[matches![1] || ''] || []);
+    }
   });
 };
 
@@ -62,13 +69,16 @@ export interface ManifestManagerMockOptions {
 
 export const buildManifestManagerMockOptions = (
   opts: Partial<ManifestManagerMockOptions>
-): ManifestManagerMockOptions => ({
-  cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
-  exceptionListClient: listMock.getExceptionListClient(),
-  packagePolicyService: createPackagePolicyServiceMock(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  ...opts,
-});
+): ManifestManagerMockOptions => {
+  const savedObjectMock = savedObjectsClientMock.create();
+  return {
+    cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
+    exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
+    packagePolicyService: createPackagePolicyServiceMock(),
+    savedObjectsClient: savedObjectMock,
+    ...opts,
+  };
+};
 
 export const buildManifestManagerContextMock = (
   opts: Partial<ManifestManagerMockOptions>
@@ -77,8 +87,9 @@ export const buildManifestManagerContextMock = (
 
   return {
     ...fullOpts,
-    artifactClient: new ArtifactClient(fullOpts.savedObjectsClient),
+    artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
+    experimentalFeatures: parseExperimentalConfigValue([]),
   };
 };
 
@@ -118,7 +129,7 @@ export const getManifestManagerMock = (
           context.exceptionListClient.findExceptionListItem = jest
             .fn()
             .mockRejectedValue(new Error('unexpected thing happened'));
-          return super.buildExceptionListArtifacts('v1');
+          return super.buildExceptionListArtifacts();
         case ManifestManagerMockType.NormalFlow:
           return getMockArtifactsWithDiff();
       }
@@ -129,7 +140,7 @@ export const getManifestManagerMock = (
         case ManifestManagerMockType.InitialSystemState:
           return null;
         case ManifestManagerMockType.NormalFlow:
-          return getMockManifest({ compress: true });
+          return getMockManifest();
       }
     });
 

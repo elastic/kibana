@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import '../../../__mocks__/react_router';
 import '../../../__mocks__/shallow_useeffect.mock';
-
-import { setMockValues, setMockActions } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
@@ -34,7 +34,7 @@ describe('SourcesRouter', () => {
   });
 
   it('renders sources routes', () => {
-    const TOTAL_ROUTES = 62;
+    const TOTAL_ROUTES = 61;
     const wrapper = shallow(<SourcesRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);

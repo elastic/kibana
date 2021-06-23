@@ -25,11 +25,14 @@ describe('Discover cell actions ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterInBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}
@@ -50,11 +53,14 @@ describe('Discover cell actions ', function () {
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
       isDarkMode: false,
+      selectedDocs: [],
+      setSelectedDocs: jest.fn(),
     };
 
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterOutBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           Component={(props: any) => <EuiButton {...props} />}
           rowIndex={1}
           columnId={'extension'}

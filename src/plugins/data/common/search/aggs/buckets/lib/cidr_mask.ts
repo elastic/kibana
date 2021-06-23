@@ -6,42 +6,60 @@
  * Side Public License, v 1.
  */
 
-import { Ipv4Address } from '../../utils';
-
-const NUM_BITS = 32;
-
-function throwError(mask: string) {
-  throw Error('Invalid CIDR mask: ' + mask);
-}
+import ipaddr from 'ipaddr.js';
+import { IpAddress } from '../../utils';
 
 export class CidrMask {
-  public readonly initialAddress: Ipv4Address;
-  public readonly prefixLength: number;
+  private address: number[];
+  private netmask: number;
 
-  constructor(mask: string) {
-    const splits = mask.split('/');
-    if (splits.length !== 2) {
-      throwError(mask);
-    }
-    this.initialAddress = new Ipv4Address(splits[0]);
-    this.prefixLength = Number(splits[1]);
-    if (isNaN(this.prefixLength) || this.prefixLength < 1 || this.prefixLength > NUM_BITS) {
-      throwError(mask);
+  constructor(cidr: string) {
+    try {
+      const [address, netmask] = ipaddr.parseCIDR(cidr);
+
+      this.address = address.toByteArray();
+      this.netmask = netmask;
+    } catch {
+      throw Error('Invalid CIDR mask: ' + cidr);
     }
   }
 
-  public getRange() {
-    const variableBits = NUM_BITS - this.prefixLength;
-    // eslint-disable-next-line no-bitwise
-    const fromAddress = ((this.initialAddress.valueOf() >> variableBits) << variableBits) >>> 0; // >>> 0 coerces to unsigned
-    const numAddresses = Math.pow(2, variableBits);
+  private getBroadcastAddress() {
+    /* eslint-disable no-bitwise */
+    const netmask = (1n << BigInt(this.address.length * 8 - this.netmask)) - 1n;
+    const broadcast = this.address.map((byte, index) => {
+      const offset = BigInt(this.address.length - index - 1) * 8n;
+      const mask = Number((netmask >> offset) & 255n);
+
+      return byte | mask;
+    });
+    /* eslint-enable no-bitwise */
+
+    return new IpAddress(broadcast).toString();
+  }
+
+  private getNetworkAddress() {
+    /* eslint-disable no-bitwise */
+    const netmask = (1n << BigInt(this.address.length * 8 - this.netmask)) - 1n;
+    const network = this.address.map((byte, index) => {
+      const offset = BigInt(this.address.length - index - 1) * 8n;
+      const mask = Number((netmask >> offset) & 255n) ^ 255;
+
+      return byte & mask;
+    });
+    /* eslint-enable no-bitwise */
+
+    return new IpAddress(network).toString();
+  }
+
+  getRange() {
     return {
-      from: new Ipv4Address(fromAddress).toString(),
-      to: new Ipv4Address(fromAddress + numAddresses - 1).toString(),
+      from: this.getNetworkAddress(),
+      to: this.getBroadcastAddress(),
     };
   }
 
-  public toString() {
-    return this.initialAddress.toString() + '/' + this.prefixLength;
+  toString() {
+    return `${new IpAddress(this.address)}/${this.netmask}`;
   }
 }

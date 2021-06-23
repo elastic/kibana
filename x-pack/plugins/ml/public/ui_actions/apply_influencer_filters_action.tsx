@@ -44,7 +44,7 @@ export function createApplyInfluencerFiltersAction(
             },
             meta: {
               alias: i18n.translate('xpack.ml.actions.influencerFilterAliasLabel', {
-                defaultMessage: 'Influencer {labelValue}',
+                defaultMessage: '{labelValue}',
                 values: {
                   labelValue: `${data.viewByFieldName}:${influencerValue}`,
                 },

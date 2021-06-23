@@ -13,20 +13,29 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/90552
-  describe.skip('DELETE /api/saved_objects_tagging/tags/{id}', () => {
+  describe('DELETE /api/saved_objects_tagging/tags/{id}', () => {
     beforeEach(async () => {
-      await esArchiver.load('delete_with_references');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/delete_with_references'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('delete_with_references');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/delete_with_references'
+      );
     });
 
     it('should delete the tag', async () => {
-      await supertest.get(`/api/saved_objects_tagging/tags/tag-1`).expect(200);
+      const getRes = await supertest.get(`/api/saved_objects_tagging/tags/tag-1`);
+      // eslint-disable-next-line no-console
+      console.trace('%O', getRes.body);
+      expect(getRes.status).to.eql(200);
 
-      await supertest.delete(`/api/saved_objects_tagging/tags/tag-1`).expect(200);
+      const delRes = await supertest.delete(`/api/saved_objects_tagging/tags/tag-1`);
+      // eslint-disable-next-line no-console
+      console.trace('%O', delRes.body);
+      expect(delRes.status).to.eql(200);
 
       await supertest.get(`/api/saved_objects_tagging/tags/tag-1`).expect(404);
     });

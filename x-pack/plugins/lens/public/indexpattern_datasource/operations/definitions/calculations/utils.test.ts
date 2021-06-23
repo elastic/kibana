@@ -7,7 +7,7 @@
 
 import { checkReferences } from './utils';
 import { operationDefinitionMap } from '..';
-import { createMockedReferenceOperation } from '../../mocks';
+import { createMockedFullReference } from '../../mocks';
 
 // Mock prevents issue with circular loading
 jest.mock('..');
@@ -15,7 +15,7 @@ jest.mock('..');
 describe('utils', () => {
   beforeEach(() => {
     // @ts-expect-error test-only operation type
-    operationDefinitionMap.testReference = createMockedReferenceOperation();
+    operationDefinitionMap.testReference = createMockedFullReference();
   });
 
   describe('checkReferences', () => {

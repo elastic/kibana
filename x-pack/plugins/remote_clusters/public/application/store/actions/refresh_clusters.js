@@ -14,7 +14,7 @@ import { REFRESH_CLUSTERS_SUCCESS } from '../action_types';
 export const refreshClusters = () => async (dispatch) => {
   let clusters;
   try {
-    clusters = await sendLoadClustersRequest();
+    clusters = await sendLoadClustersRequest({ asSystemRequest: true });
   } catch (error) {
     return showApiWarning(
       error,

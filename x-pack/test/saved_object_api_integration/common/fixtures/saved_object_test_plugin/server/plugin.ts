@@ -22,7 +22,7 @@ export class Plugin {
       properties: {
         title: { type: 'text' },
       },
-    };
+    } as const;
 
     core.savedObjects.registerType({
       name: 'isolatedtype',
@@ -49,6 +49,13 @@ export class Plugin {
       name: 'sharedtype',
       hidden: false,
       namespaceType: 'multiple',
+      management,
+      mappings,
+    });
+    core.savedObjects.registerType({
+      name: 'sharecapabletype',
+      hidden: false,
+      namespaceType: 'multiple-isolated',
       management,
       mappings,
     });

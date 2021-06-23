@@ -41,9 +41,9 @@ export class PluginServiceProvider<Service extends {}, StartParameters = {}> {
   }
 
   /**
-   * Private getter that will enforce proper setup throughout the class.
+   * Getter that will enforce proper setup throughout the class.
    */
-  private getService() {
+  public getService() {
     if (!this.pluginService) {
       throw new Error('Service not started');
     }
@@ -62,7 +62,7 @@ export class PluginServiceProvider<Service extends {}, StartParameters = {}> {
   /**
    * Returns a function for providing a Context hook for the service.
    */
-  getUseServiceHook() {
+  getServiceReactHook() {
     return () => {
       const service = useContext(this.context);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerts/common';
+import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerting/common';
 import {
   AlertParamType,
   AlertMessageTokenType,

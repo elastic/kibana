@@ -17,6 +17,7 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
+  EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
 import { CreateAlert } from './create_alert';
@@ -46,9 +47,16 @@ export const DocumentationPage = (
           <h2>Plugin Structure</h2>
           <p>
             This example solution has both `server` and a `public` plugins. The `server` handles
-            registration of example the AlertTypes, while the `public` handles creation of, and
-            navigation for, these alert types.
+            registration of example the RuleTypes, while the `public` handles creation of, and
+            navigation for, these rule types.
           </p>
+          <EuiCallOut title="Transport Layer Security" iconType="alert" color="warning">
+            If you see a message about needing to enable the Transport Layer Security, start ES with{' '}
+            <code>yarn es snapshot --ssl --license trial</code> and Kibana with{' '}
+            <code>yarn start --run-examples --ssl</code>. If you running chrome on a mac, you may
+            need to type in <code>thisisunsafe</code> if you see the Certificate invalid screen with
+            no way to &lsquo;proceed anyway&rsquo;.
+          </EuiCallOut>
         </EuiText>
         <EuiSpacer />
         <CreateAlert {...deps} />

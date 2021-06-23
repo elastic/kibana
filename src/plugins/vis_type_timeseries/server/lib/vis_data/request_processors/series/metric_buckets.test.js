@@ -14,7 +14,7 @@ describe('metricBuckets(req, panel, series)', () => {
   beforeEach(() => {
     metricBucketsProcessor = metricBuckets(
       {
-        payload: {
+        body: {
           timerange: {
             min: '2017-01-01T00:00:00Z',
             max: '2017-01-01T01:00:00Z',
@@ -50,7 +50,7 @@ describe('metricBuckets(req, panel, series)', () => {
       },
       {},
       {},
-      undefined,
+      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
       {
         get: async () => 50,
       }

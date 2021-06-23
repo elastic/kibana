@@ -18,5 +18,12 @@ export function filterMatchesIndex(filter: Filter, indexPattern?: IIndexPattern 
   if (!filter.meta?.key || !indexPattern) {
     return true;
   }
+
+  // Fixes https://github.com/elastic/kibana/issues/89878
+  // Custom filters may refer multiple fields. Validate the index id only.
+  if (filter.meta?.type === 'custom') {
+    return filter.meta.index === indexPattern.id;
+  }
+
   return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
 }

@@ -11,17 +11,13 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfig } from './config';
+import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
+import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import { ProxySettings } from './types';
+import { ProxySettings, ResponseSettings, TLSSettings } from './types';
+import { getTLSSettingsFromConfig } from './builtin_action_types/lib/get_node_tls_options';
 
-export enum AllowedHosts {
-  Any = '*',
-}
-
-export enum EnabledActionTypes {
-  Any = '*',
-}
+export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {
   URL = 'url',
@@ -35,8 +31,10 @@ export interface ActionsConfigurationUtilities {
   ensureHostnameAllowed: (hostname: string) => void;
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
-  isRejectUnauthorizedCertificatesEnabled: () => boolean;
+  getTLSSettings: () => TLSSettings;
   getProxySettings: () => undefined | ProxySettings;
+  getResponseSettings: () => ResponseSettings;
+  getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -93,9 +91,47 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
 
   return {
     proxyUrl: config.proxyUrl,
+    proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
+    proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
-    proxyRejectUnauthorizedCertificates: config.proxyRejectUnauthorizedCertificates,
+    proxyTLSSettings: getTLSSettingsFromConfig(
+      config.tls?.proxyVerificationMode,
+      config.proxyRejectUnauthorizedCertificates
+    ),
   };
+}
+
+function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
+  if (!arr) return;
+  return new Set(arr);
+}
+
+function getResponseSettingsFromConfig(config: ActionsConfig): ResponseSettings {
+  return {
+    maxContentLength: config.maxResponseContentLength.getValueInBytes(),
+    timeout: config.responseTimeout.asMilliseconds(),
+  };
+}
+
+function getCustomHostSettings(
+  config: ActionsConfig,
+  targetUrl: string
+): CustomHostSettings | undefined {
+  const customHostSettings = config.customHostSettings;
+  if (!customHostSettings) {
+    return;
+  }
+
+  let parsedUrl: URL | undefined;
+  try {
+    parsedUrl = new URL(targetUrl);
+  } catch (err) {
+    // presumably this bad URL is reported elsewhere
+    return;
+  }
+
+  const canonicalUrl = getCanonicalCustomHostUrl(parsedUrl);
+  return customHostSettings.find((settings) => settings.url === canonicalUrl);
 }
 
 export function getActionsConfigurationUtilities(
@@ -109,7 +145,9 @@ export function getActionsConfigurationUtilities(
     isUriAllowed,
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
-    isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
+    getResponseSettings: () => getResponseSettingsFromConfig(config),
+    getTLSSettings: () =>
+      getTLSSettingsFromConfig(config.tls?.verificationMode, config.rejectUnauthorized),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
@@ -125,5 +163,6 @@ export function getActionsConfigurationUtilities(
         throw new ActionTypeDisabledError(disabledActionTypeErrorMessage(actionType), 'config');
       }
     },
+    getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
   };
 }

@@ -7,7 +7,6 @@
 
 export * from './ml';
 export * from './ping_list';
-export * from './status_details/location_map';
 export * from './status_details';
 export * from './ping_histogram';
 export * from './monitor_charts';

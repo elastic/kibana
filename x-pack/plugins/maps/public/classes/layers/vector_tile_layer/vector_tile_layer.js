@@ -8,7 +8,7 @@
 import { TileLayer } from '../tile_layer/tile_layer';
 import _ from 'lodash';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
-import { isRetina } from '../../../meta';
+import { isRetina } from '../../../util';
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,

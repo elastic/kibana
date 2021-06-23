@@ -303,11 +303,11 @@ export default function ({ getService }) {
         expect(loginViewResponse.headers.location).to.be('/');
       });
 
-      it('should redirect to home page if cookie is not provided', async () => {
+      it('should redirect to login page if cookie is not provided', async () => {
         const logoutResponse = await supertest.get('/api/security/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
-        expect(logoutResponse.headers.location).to.be('/');
+        expect(logoutResponse.headers.location).to.be('/login?msg=LOGGED_OUT');
       });
     });
   });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { mockTelemetryActions } from '../../../__mocks__';
-
+import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
+import { setMockValues } from './__mocks__';
 import './__mocks__/overview_logic.mock';
 
 import React from 'react';
@@ -15,7 +15,6 @@ import { shallow } from 'enzyme';
 
 import { SOURCES_PATH, USERS_PATH } from '../../routes';
 
-import { setMockValues } from './__mocks__';
 import { OnboardingCard } from './onboarding_card';
 import { OnboardingSteps, OrgNameOnboarding } from './onboarding_steps';
 

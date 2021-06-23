@@ -42,6 +42,7 @@ const prettifyFormJson = (policy: SerializedPolicy): SerializedPolicy => ({
     hot: policy.phases.hot,
     warm: policy.phases.warm,
     cold: policy.phases.cold,
+    frozen: policy.phases.frozen,
     delete: policy.phases.delete,
   },
 });

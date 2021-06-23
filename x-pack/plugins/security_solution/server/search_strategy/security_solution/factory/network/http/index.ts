@@ -24,6 +24,7 @@ import { getHttpEdges } from './helpers';
 import { buildHttpQuery } from './query.http_network.dsl';
 
 export const networkHttp: SecuritySolutionFactory<NetworkQueries.http> = {
+  // @ts-expect-error dns_name_query_count is not conpatible with @elastic/elasticsearch
   buildDsl: (options: NetworkHttpRequestOptions) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);

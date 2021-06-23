@@ -5,329 +5,91 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
-
-import { licensingMock } from '../../../../licensing/public/mocks';
-
-import { EditPolicy } from '../../../public/application/sections/edit_policy';
-import { DataTierAllocationType } from '../../../public/application/sections/edit_policy/types';
-
-import { Phases as PolicyPhases } from '../../../common/types';
-
-import { KibanaContextProvider } from '../../../public/shared_imports';
+import { TestBedConfig } from '@kbn/test/jest';
 import { AppServicesContext } from '../../../public/types';
-import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
 
-type Phases = keyof PolicyPhases;
+import { Phase } from '../../../common/types';
 
-import { POLICY_NAME } from './constants';
-import { TestSubjects } from '../helpers';
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-    // which does not produce a valid component wrapper
-    EuiComboBox: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockComboBox'}
-        data-currentvalue={props.selectedOptions}
-        onChange={async (syntheticEvent: any) => {
-          props.onChange([syntheticEvent['0']]);
-        }}
-      />
-    ),
-    EuiIcon: 'eui-icon', // using custom react-svg icon causes issues, mocking for now.
-  };
-});
-
-const testBedConfig: TestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`/policies/edit/${POLICY_NAME}`],
-    componentRoutePath: `/policies/edit/:policyName`,
-  },
-  defaultProps: {
-    getUrlForApp: () => {},
-  },
-};
-
-const breadcrumbService = createBreadcrumbsMock();
-
-const MyComponent = ({ appServicesContext, ...rest }: any) => {
-  return (
-    <KibanaContextProvider
-      services={{
-        breadcrumbService,
-        license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
-        ...appServicesContext,
-      }}
-    >
-      <EditPolicy {...rest} />
-    </KibanaContextProvider>
-  );
-};
-
-const initTestBed = registerTestBed<TestSubjects>(MyComponent, testBedConfig);
+import {
+  createNodeAllocationActions,
+  createFormToggleAction,
+  createFormSetValueAction,
+  setReplicas,
+  createSearchableSnapshotActions,
+  createTogglePhaseAction,
+  createSavePolicyAction,
+  createErrorsActions,
+  createRolloverActions,
+  createSetWaitForSnapshotAction,
+  createMinAgeActions,
+  createShrinkActions,
+  createFreezeActions,
+  createForceMergeActions,
+  createReadonlyActions,
+  createIndexPriorityActions,
+} from '../helpers';
+import { initTestBed } from './init_test_bed';
 
 type SetupReturn = ReturnType<typeof setup>;
-
 export type EditPolicyTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setup = async (arg?: { appServicesContext: Partial<AppServicesContext> }) => {
+export const setup = async (arg?: {
+  appServicesContext?: Partial<AppServicesContext>;
+  testBedConfig?: Partial<TestBedConfig>;
+}) => {
   const testBed = await initTestBed(arg);
 
-  const { find, component, form, exists } = testBed;
-
-  const createFormToggleAction = (dataTestSubject: string) => async (checked: boolean) => {
-    await act(async () => {
-      form.toggleEuiSwitch(dataTestSubject, checked);
-    });
-    component.update();
-  };
-
-  const createFormCheckboxAction = (dataTestSubject: string) => async (checked: boolean) => {
-    await act(async () => {
-      form.selectCheckBox(dataTestSubject, checked);
-    });
-    component.update();
-  };
-
-  function createFormSetValueAction<V extends string = string>(dataTestSubject: string) {
-    return async (value: V) => {
-      await act(async () => {
-        form.setInputValue(dataTestSubject, value);
-      });
-      component.update();
-    };
-  }
-
-  const setWaitForSnapshotPolicy = async (snapshotPolicyName: string) => {
-    act(() => {
-      find('snapshotPolicyCombobox').simulate('change', [{ label: snapshotPolicyName }]);
-    });
-    component.update();
-  };
-
-  const savePolicy = async () => {
-    await act(async () => {
-      find('savePolicyButton').simulate('click');
-    });
-    component.update();
-  };
-
-  const toggleDefaultRollover = createFormToggleAction('useDefaultRolloverSwitch');
-
-  const toggleRollover = createFormToggleAction('rolloverSwitch');
-
-  const setMaxSize = async (value: string, units?: string) => {
-    await act(async () => {
-      find('hot-selectedMaxSizeStored').simulate('change', { target: { value } });
-      if (units) {
-        find('hot-selectedMaxSizeStoredUnits.select').simulate('change', {
-          target: { value: units },
-        });
-      }
-    });
-    component.update();
-  };
-
-  const setMaxDocs = createFormSetValueAction('hot-selectedMaxDocuments');
-
-  const setMaxAge = async (value: string, units?: string) => {
-    await act(async () => {
-      find('hot-selectedMaxAge').simulate('change', { target: { value } });
-      if (units) {
-        find('hot-selectedMaxAgeUnits.select').simulate('change', { target: { value: units } });
-      }
-    });
-    component.update();
-  };
-
-  const createForceMergeActions = (phase: Phases) => {
-    const toggleSelector = `${phase}-forceMergeSwitch`;
-    return {
-      forceMergeFieldExists: () => exists(toggleSelector),
-      toggleForceMerge: createFormToggleAction(toggleSelector),
-      setForcemergeSegmentsCount: createFormSetValueAction(`${phase}-selectedForceMergeSegments`),
-      setBestCompression: createFormCheckboxAction(`${phase}-bestCompression`),
-    };
-  };
-
-  const createIndexPriorityActions = (phase: Phases) => {
-    const toggleSelector = `${phase}-indexPrioritySwitch`;
-    return {
-      indexPriorityExists: () => exists(toggleSelector),
-      toggleIndexPriority: createFormToggleAction(toggleSelector),
-      setIndexPriority: createFormSetValueAction(`${phase}-indexPriority`),
-    };
-  };
-
-  const enable = (phase: Phases) => createFormToggleAction(`enablePhaseSwitch-${phase}`);
-
-  const setMinAgeValue = (phase: Phases) => createFormSetValueAction(`${phase}-selectedMinimumAge`);
-
-  const setMinAgeUnits = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-selectedMinimumAgeUnits`);
-
-  const setDataAllocation = (phase: Phases) => async (value: DataTierAllocationType) => {
-    act(() => {
-      find(`${phase}-dataTierAllocationControls.dataTierSelect`).simulate('click');
-    });
-    component.update();
-    await act(async () => {
-      switch (value) {
-        case 'node_roles':
-          find(`${phase}-dataTierAllocationControls.defaultDataAllocationOption`).simulate('click');
-          break;
-        case 'node_attrs':
-          find(`${phase}-dataTierAllocationControls.customDataAllocationOption`).simulate('click');
-          break;
-        default:
-          find(`${phase}-dataTierAllocationControls.noneDataAllocationOption`).simulate('click');
-      }
-    });
-    component.update();
-  };
-
-  const setSelectedNodeAttribute = (phase: Phases) =>
-    createFormSetValueAction(`${phase}-selectedNodeAttrs`);
-
-  const setReplicas = (phase: Phases) => async (value: string) => {
-    if (!exists(`${phase}-selectedReplicaCount`)) {
-      await createFormToggleAction(`${phase}-setReplicasSwitch`)(true);
-    }
-    await createFormSetValueAction(`${phase}-selectedReplicaCount`)(value);
-  };
-
-  const createShrinkActions = (phase: Phases) => {
-    const toggleSelector = `${phase}-shrinkSwitch`;
-    return {
-      shrinkExists: () => exists(toggleSelector),
-      toggleShrink: createFormToggleAction(toggleSelector),
-      setShrink: createFormSetValueAction(`${phase}-primaryShardCount`),
-    };
-  };
-
-  const setFreeze = createFormToggleAction('freezeSwitch');
-  const freezeExists = () => exists('freezeSwitch');
-
-  const setReadonly = (phase: Phases) => async (value: boolean) => {
-    await createFormToggleAction(`${phase}-readonlySwitch`)(value);
-  };
-
-  const createSearchableSnapshotActions = (phase: Phases) => {
-    const fieldSelector = `searchableSnapshotField-${phase}`;
-    const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
-    const rolloverCalloutSelector = `${fieldSelector}.searchableSnapshotFieldsNoRolloverCallout`;
-    const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
-
-    const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
-    return {
-      searchableSnapshotDisabledDueToRollover: () => exists(rolloverCalloutSelector),
-      searchableSnapshotDisabled: () =>
-        exists(licenseCalloutSelector) && find(licenseCalloutSelector).props().disabled === true,
-      searchableSnapshotsExists: () => exists(fieldSelector),
-      findSearchableSnapshotToggle: () => find(toggleSelector),
-      searchableSnapshotDisabledDueToLicense: () =>
-        exists(`${fieldSelector}.searchableSnapshotDisabledDueToLicense`),
-      toggleSearchableSnapshot,
-      setSearchableSnapshot: async (value: string) => {
-        if (!exists(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`)) {
-          await toggleSearchableSnapshot(true);
-        }
-        act(() => {
-          find(`searchableSnapshotField-${phase}.searchableSnapshotCombobox`).simulate('change', [
-            { label: value },
-          ]);
-        });
-        component.update();
-      },
-    };
-  };
-
-  const createToggleDeletePhaseActions = () => {
-    const enablePhase = async () => {
-      await act(async () => {
-        find('enableDeletePhaseButton').simulate('click');
-      });
-      component.update();
-    };
-
-    const disablePhase = async () => {
-      await act(async () => {
-        find('disableDeletePhaseButton').simulate('click');
-      });
-      component.update();
-    };
-
-    return {
-      enablePhase,
-      disablePhase,
-    };
-  };
+  const { exists } = testBed;
 
   return {
     ...testBed,
     actions: {
-      saveAsNewPolicy: createFormToggleAction('saveAsNewSwitch'),
-      setPolicyName: createFormSetValueAction('policyNameField'),
-      setWaitForSnapshotPolicy,
-      savePolicy,
-      hasGlobalErrorCallout: () => exists('policyFormErrorsCallout'),
+      togglePhase: createTogglePhaseAction(testBed),
+      savePolicy: createSavePolicyAction(testBed),
+      toggleSaveAsNewPolicy: createFormToggleAction(testBed, 'saveAsNewSwitch'),
+      setPolicyName: createFormSetValueAction(testBed, 'policyNameField'),
+      errors: {
+        ...createErrorsActions(testBed),
+      },
       timeline: {
-        hasHotPhase: () => exists('ilmTimelineHotPhase'),
-        hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
-        hasColdPhase: () => exists('ilmTimelineColdPhase'),
-        hasDeletePhase: () => exists('ilmTimelineDeletePhase'),
+        hasPhase: (phase: Phase) => exists(`ilmTimelinePhase-${phase}`),
+      },
+      rollover: {
+        ...createRolloverActions(testBed),
       },
       hot: {
-        setMaxSize,
-        setMaxDocs,
-        setMaxAge,
-        toggleRollover,
-        toggleDefaultRollover,
-        hasErrorIndicator: () => exists('phaseErrorIndicator-hot'),
-        ...createForceMergeActions('hot'),
-        ...createIndexPriorityActions('hot'),
-        ...createShrinkActions('hot'),
-        setReadonly: setReadonly('hot'),
-        ...createSearchableSnapshotActions('hot'),
+        ...createForceMergeActions(testBed, 'hot'),
+        ...createIndexPriorityActions(testBed, 'hot'),
+        ...createShrinkActions(testBed, 'hot'),
+        ...createReadonlyActions(testBed, 'hot'),
+        ...createSearchableSnapshotActions(testBed, 'hot'),
       },
       warm: {
-        enable: enable('warm'),
-        setMinAgeValue: setMinAgeValue('warm'),
-        setMinAgeUnits: setMinAgeUnits('warm'),
-        setDataAllocation: setDataAllocation('warm'),
-        setSelectedNodeAttribute: setSelectedNodeAttribute('warm'),
-        setReplicas: setReplicas('warm'),
-        hasErrorIndicator: () => exists('phaseErrorIndicator-warm'),
-        ...createShrinkActions('warm'),
-        ...createForceMergeActions('warm'),
-        setReadonly: setReadonly('warm'),
-        ...createIndexPriorityActions('warm'),
+        ...createMinAgeActions(testBed, 'warm'),
+        setReplicas: (value: string) => setReplicas(testBed, 'warm', value),
+        ...createShrinkActions(testBed, 'warm'),
+        ...createForceMergeActions(testBed, 'warm'),
+        ...createReadonlyActions(testBed, 'warm'),
+        ...createIndexPriorityActions(testBed, 'warm'),
+        ...createNodeAllocationActions(testBed, 'warm'),
       },
       cold: {
-        enable: enable('cold'),
-        setMinAgeValue: setMinAgeValue('cold'),
-        setMinAgeUnits: setMinAgeUnits('cold'),
-        setDataAllocation: setDataAllocation('cold'),
-        setSelectedNodeAttribute: setSelectedNodeAttribute('cold'),
-        setReplicas: setReplicas('cold'),
-        setFreeze,
-        freezeExists,
-        hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
-        ...createIndexPriorityActions('cold'),
-        ...createSearchableSnapshotActions('cold'),
+        ...createMinAgeActions(testBed, 'cold'),
+        setReplicas: (value: string) => setReplicas(testBed, 'cold', value),
+        ...createFreezeActions(testBed, 'cold'),
+        ...createReadonlyActions(testBed, 'cold'),
+        ...createIndexPriorityActions(testBed, 'cold'),
+        ...createSearchableSnapshotActions(testBed, 'cold'),
+        ...createNodeAllocationActions(testBed, 'cold'),
+      },
+      frozen: {
+        ...createMinAgeActions(testBed, 'frozen'),
+        ...createSearchableSnapshotActions(testBed, 'frozen'),
       },
       delete: {
-        ...createToggleDeletePhaseActions(),
-        setMinAgeValue: setMinAgeValue('delete'),
-        setMinAgeUnits: setMinAgeUnits('delete'),
+        isShown: () => exists('delete-phase'),
+        ...createMinAgeActions(testBed, 'delete'),
+        setWaitForSnapshotPolicy: createSetWaitForSnapshotAction(testBed),
       },
     },
   };

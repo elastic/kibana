@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { IScopedClusterClient } from 'kibana/server';
+import { JsonObject } from '@kbn/common-utils';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { PaginationBuilder } from '../utils/pagination';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 interface TimeRange {
   from: string;
@@ -90,9 +88,10 @@ export class EventsQuery {
     filter: string | undefined
   ): Promise<SafeResolverEvent[]> {
     const parsedFilters = EventsQuery.buildFilters(filter);
-    const response: ApiResponse<
-      SearchResponse<SafeResolverEvent>
-    > = await client.asCurrentUser.search(this.buildSearch(parsedFilters));
+    const response = await client.asCurrentUser.search<SafeResolverEvent>(
+      this.buildSearch(parsedFilters)
+    );
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     return response.body.hits.hits.map((hit) => hit._source);
   }
 }

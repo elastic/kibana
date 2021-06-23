@@ -22,19 +22,16 @@
 
 import moment from 'moment';
 
-import { splitSizeAndUnits } from '../../../lib/policies';
+import { Phase, PhaseWithTiming } from '../../../../../common/types';
 
+import { splitSizeAndUnits } from '../../../lib/policies';
 import { FormInternal } from '../types';
 
 /* -===- Private functions and types -===- */
 
-type MinAgePhase = 'warm' | 'cold' | 'delete';
+const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'frozen', 'delete'];
 
-type Phase = 'hot' | MinAgePhase;
-
-const phaseOrder: Phase[] = ['hot', 'warm', 'cold', 'delete'];
-
-const getMinAge = (phase: MinAgePhase, formData: FormInternal) => ({
+const getMinAge = (phase: PhaseWithTiming, formData: FormInternal) => ({
   min_age: formData.phases?.[phase]?.min_age
     ? formData.phases[phase]!.min_age! + formData._meta[phase].minAgeUnit
     : '0ms',
@@ -44,9 +41,9 @@ const getMinAge = (phase: MinAgePhase, formData: FormInternal) => ({
  * See https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math
  * for all date math values. ILM policies also support "micros" and "nanos".
  */
-const getPhaseMinAgeInMilliseconds = (phase: { min_age: string }): number => {
+export const getPhaseMinAgeInMilliseconds = (size: string, units: string): number => {
   let milliseconds: number;
-  const { units, size } = splitSizeAndUnits(phase.min_age);
+
   if (units === 'micros') {
     milliseconds = parseInt(size, 10) / 1e3;
   } else if (units === 'nanos') {
@@ -69,6 +66,9 @@ export interface AbsoluteTimings {
   cold?: {
     min_age: string;
   };
+  frozen?: {
+    min_age: string;
+  };
   delete?: {
     min_age: string;
   };
@@ -80,6 +80,7 @@ export interface PhaseAgeInMilliseconds {
     hot: number;
     warm?: number;
     cold?: number;
+    frozen?: number;
   };
 }
 
@@ -92,6 +93,7 @@ export const formDataToAbsoluteTimings = (formData: FormInternal): AbsoluteTimin
     hot: { min_age: undefined },
     warm: _meta.warm.enabled ? getMinAge('warm', formData) : undefined,
     cold: _meta.cold.enabled ? getMinAge('cold', formData) : undefined,
+    frozen: _meta.frozen?.enabled ? getMinAge('frozen', formData) : undefined,
     delete: _meta.delete.enabled ? getMinAge('delete', formData) : undefined,
   };
 };
@@ -121,7 +123,10 @@ export const calculateRelativeFromAbsoluteMilliseconds = (
 
       // If we have a next phase, calculate the timing between this phase and the next
       if (nextPhase && inputs[nextPhase]?.min_age) {
-        nextPhaseMinAge = getPhaseMinAgeInMilliseconds(inputs[nextPhase] as { min_age: string });
+        const { units, size } = splitSizeAndUnits(
+          (inputs[nextPhase] as { min_age: string }).min_age
+        );
+        nextPhaseMinAge = getPhaseMinAgeInMilliseconds(size, units);
       }
 
       return {
@@ -139,6 +144,7 @@ export const calculateRelativeFromAbsoluteMilliseconds = (
         hot: 0,
         warm: inputs.warm ? 0 : undefined,
         cold: inputs.cold ? 0 : undefined,
+        frozen: inputs.frozen ? 0 : undefined,
       },
     }
   );

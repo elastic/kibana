@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import type { CoreSetup } from 'src/core/server';
 import { coreMock } from 'src/core/server/mocks';
+import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
+
 import { featuresPluginMock } from '../../features/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
-import { SpacesPlugin, PluginsStart } from './plugin';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
+import type { PluginsStart } from './plugin';
+import { SpacesPlugin } from './plugin';
 
-describe('Spaces Plugin', () => {
+describe('Spaces plugin', () => {
   describe('#setup', () => {
     it('can setup with all optional plugins disabled, exposing the expected contract', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});

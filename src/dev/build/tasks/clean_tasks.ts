@@ -45,7 +45,7 @@ export const CleanTypescript: Task = {
       'Deleted %d files',
       await scanDelete({
         directory: build.resolvePath(),
-        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.json$/],
+        regularExpressions: [/\.(ts|tsx|d\.ts)$/, /tsconfig.*\.(json|tsbuildinfo)$/],
       })
     );
   },
@@ -62,6 +62,7 @@ export const CleanExtraFilesFromModules: Task = {
       // tests
       '**/test',
       '**/tests',
+      '**/jest.config.js',
       '**/__tests__',
       '**/*.test.js',
       '**/*.snap',

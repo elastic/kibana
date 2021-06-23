@@ -7,7 +7,8 @@
  */
 
 import { SchemaConfig } from 'src/plugins/visualizations/public';
-import { VectorLayer, FileLayerField, WMSOptions } from '../../maps_legacy/public/index';
+import { VectorLayer, FileLayerField } from '../../maps_ems/public';
+import { WMSOptions } from '../../maps_legacy/public';
 
 export interface RegionMapVisParams {
   readonly addTooltip: true;

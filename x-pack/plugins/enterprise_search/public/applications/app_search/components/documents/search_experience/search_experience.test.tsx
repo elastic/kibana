@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/enterprise_search_url.mock';
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -22,7 +22,7 @@ import { useLocalStorage } from '../../../../shared/use_local_storage';
 
 import { CustomizationCallout } from './customization_callout';
 import { CustomizationModal } from './customization_modal';
-
+import { SearchExperienceContent } from './search_experience_content';
 import { Fields } from './types';
 
 import { SearchExperience } from './';
@@ -32,6 +32,7 @@ describe('SearchExperience', () => {
     engine: {
       name: 'some-engine',
       apiKey: '1234',
+      document_count: 50,
     },
   };
   const mockSetFields = jest.fn();
@@ -50,7 +51,9 @@ describe('SearchExperience', () => {
 
   it('renders', () => {
     const wrapper = shallow(<SearchExperience />);
-    expect(wrapper.find(SearchProvider).length).toBe(1);
+
+    expect(wrapper.find(SearchProvider)).toHaveLength(1);
+    expect(wrapper.find(SearchExperienceContent)).toHaveLength(1);
   });
 
   describe('when there are no selected filter fields', () => {

@@ -34,6 +34,7 @@ export interface ManifestTaskStartContract {
 export class ManifestTask {
   private endpointAppContext: EndpointAppContext;
   private logger: Logger;
+  private wasStarted: boolean = false;
 
   constructor(setupContract: ManifestTaskSetupContract) {
     this.endpointAppContext = setupContract.endpointAppContext;
@@ -72,6 +73,8 @@ export class ManifestTask {
   }
 
   public start = async (startContract: ManifestTaskStartContract) => {
+    this.wasStarted = true;
+
     try {
       await startContract.taskManager.ensureScheduled({
         id: this.getTaskId(),
@@ -93,6 +96,12 @@ export class ManifestTask {
   };
 
   public runTask = async (taskId: string) => {
+    // if task was not `.start()`'d yet, then exit
+    if (!this.wasStarted) {
+      this.logger.debug('[runTask()] Aborted. ManifestTask not started yet');
+      return;
+    }
+
     // Check that this task is current
     if (taskId !== this.getTaskId()) {
       // old task, return
@@ -121,7 +130,8 @@ export class ManifestTask {
       const diff = newManifest.diff(oldManifest);
 
       const persistErrors = await manifestManager.pushArtifacts(
-        diff.additions as InternalArtifactCompleteSchema[]
+        diff.additions as InternalArtifactCompleteSchema[],
+        newManifest
       );
       if (persistErrors.length) {
         reportErrors(this.logger, persistErrors);

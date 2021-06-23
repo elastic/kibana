@@ -25,7 +25,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.scrollSize.description"
-          defaultMessage="The maximum number of documents requested for a search."
+          defaultMessage="The maximum number of documents to return in each search request."
         />
       }
     >

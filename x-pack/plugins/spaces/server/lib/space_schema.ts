@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { MAX_SPACE_INITIALS } from '../../common';
 
 export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;

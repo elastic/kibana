@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { BeatsClusterMetric } from '../metrics';
 import { createBeatsQuery } from './create_beats_query';
@@ -39,7 +40,7 @@ export function getBeatsForClusters(req, beatsIndexPattern, clusters) {
 
   return Promise.all(
     clusters.map(async (cluster) => {
-      const clusterUuid = cluster.cluster_uuid;
+      const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
       const params = {
         index: beatsIndexPattern,
         size: 0,

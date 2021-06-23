@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
@@ -23,7 +22,7 @@ import { createStore, State } from '../../../../../common/store';
 import { useUserData } from '../../../../components/user_info';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
-import { mockHistory, Router } from '../../../../../cases/components/__mock__/router';
+import { mockHistory, Router } from '../../../../../common/mock/router';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -60,13 +59,7 @@ const state: State = {
   ...mockGlobalState,
 };
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  state,
-  SUB_PLUGINS_REDUCER,
-  apolloClientObservable,
-  kibanaObservable,
-  storage
-);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {

@@ -14,11 +14,21 @@ import { EsQuerySortValue, SortDirection } from '../../../../../kibana_services'
  * @param timeField
  * @param tieBreakerField
  * @param sortDir
+ * @param nanos
  */
 export function getEsQuerySort(
   timeField: string,
   tieBreakerField: string,
-  sortDir: SortDirection
+  sortDir: SortDirection,
+  nanos?: string
 ): [EsQuerySortValue, EsQuerySortValue] {
-  return [{ [timeField]: sortDir }, { [tieBreakerField]: sortDir }];
+  return [
+    {
+      [timeField]: {
+        order: sortDir,
+        format: nanos ? 'strict_date_optional_time_nanos' : 'strict_date_optional_time',
+      },
+    },
+    { [tieBreakerField]: sortDir },
+  ];
 }

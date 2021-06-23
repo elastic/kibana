@@ -8,7 +8,7 @@
 
 import { PluginServiceFactory } from '../create';
 import { StorybookParams } from '.';
-import { PresentationCapabilitiesService } from '..';
+import { PresentationCapabilitiesService } from '../capabilities';
 
 type CapabilitiesServiceFactory = PluginServiceFactory<
   PresentationCapabilitiesService,
@@ -18,12 +18,14 @@ type CapabilitiesServiceFactory = PluginServiceFactory<
 export const capabilitiesServiceFactory: CapabilitiesServiceFactory = ({
   canAccessDashboards,
   canCreateNewDashboards,
-  canEditDashboards,
+  canSaveVisualizations,
+  canSetAdvancedSettings,
 }) => {
   const check = (value: boolean = true) => value;
   return {
     canAccessDashboards: () => check(canAccessDashboards),
     canCreateNewDashboards: () => check(canCreateNewDashboards),
-    canEditDashboards: () => check(canEditDashboards),
+    canSaveVisualizations: () => check(canSaveVisualizations),
+    canSetAdvancedSettings: () => check(canSetAdvancedSettings),
   };
 };

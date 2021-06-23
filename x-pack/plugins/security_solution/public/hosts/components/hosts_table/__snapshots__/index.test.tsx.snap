@@ -6,73 +6,38 @@ exports[`Hosts Table rendering it renders the default Hosts table 1`] = `
     Array [
       Object {
         "cursor": Object {
-          "value": "98966fa2013c396155c460d35c0902be",
+          "tiebreaker": null,
+          "value": "beats-ci-immutable-ubuntu-1804-1615475026535098510",
         },
         "node": Object {
-          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "_id": "beats-ci-immutable-ubuntu-1804-1615475026535098510",
           "host": Object {
             "name": Array [
-              "elrond.elstc.co",
+              "beats-ci-immutable-ubuntu-1804-1615475026535098510",
             ],
             "os": Object {
               "name": Array [
                 "Ubuntu",
               ],
               "version": Array [
-                "18.04.1 LTS (Bionic Beaver)",
+                "18.04.5 LTS (Bionic Beaver)",
               ],
             },
           },
-        },
-      },
-      Object {
-        "cursor": Object {
-          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
-        },
-        "node": Object {
-          "_id": "KwQDiWcB0WOhS6qyXmrW",
-          "cloud": Object {
-            "instance": Object {
-              "id": Array [
-                "423232333829362673777",
-              ],
-            },
-            "machine": Object {
-              "type": Array [
-                "custom-4-16384",
-              ],
-            },
-            "provider": Array [
-              "gce",
-            ],
-            "region": Array [
-              "us-east-1",
-            ],
-          },
-          "host": Object {
-            "name": Array [
-              "siem-kibana",
-            ],
-            "os": Object {
-              "name": Array [
-                "Debian GNU/Linux",
-              ],
-              "version": Array [
-                "9 (stretch)",
-              ],
-            },
-          },
+          "lastSeen": Array [
+            "2021-03-11T15:05:36.783Z",
+          ],
         },
       },
     ]
   }
-  fakeTotalCount={50}
+  fakeTotalCount={0}
   id="hostsQuery"
   isInspect={false}
   loadPage={[MockFunction]}
   loading={false}
-  showMorePagesIndicator={true}
-  totalCount={4}
+  showMorePagesIndicator={false}
+  totalCount={-1}
   type="page"
 />
 `;

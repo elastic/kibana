@@ -154,10 +154,33 @@ export interface ConfusionMatrix {
   other_predicted_class_doc_count: number;
 }
 
+export interface RocCurveItem {
+  fpr: number;
+  threshold: number;
+  tpr: number;
+}
+
+interface EvalClass {
+  class_name: string;
+  value: number;
+}
+
 export interface ClassificationEvaluateResponse {
   classification: {
-    multiclass_confusion_matrix: {
+    multiclass_confusion_matrix?: {
       confusion_matrix: ConfusionMatrix[];
+    };
+    recall?: {
+      classes: EvalClass[];
+      avg_recall: number;
+    };
+    accuracy?: {
+      classes: EvalClass[];
+      overall_accuracy: number;
+    };
+    auc_roc?: {
+      curve?: RocCurveItem[];
+      value: number;
     };
   };
 }
@@ -172,7 +195,8 @@ export const getTrainingPercent = (
   analysis: AnalysisConfig
 ):
   | RegressionAnalysis['regression']['training_percent']
-  | ClassificationAnalysis['classification']['training_percent'] => {
+  | ClassificationAnalysis['classification']['training_percent']
+  | undefined => {
   let trainingPercent;
 
   if (isRegressionAnalysis(analysis)) {
@@ -244,7 +268,8 @@ export const isClassificationEvaluateResponse = (
   return (
     keys.length === 1 &&
     keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-    arg?.classification?.multiclass_confusion_matrix !== undefined
+    (arg?.classification?.multiclass_confusion_matrix !== undefined ||
+      arg?.classification?.auc_roc !== undefined)
   );
 };
 
@@ -341,7 +366,7 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
       if (response.regression.hasOwnProperty(statType)) {
         let currentStatValue =
           response.regression[statType as keyof RegressionEvaluateResponse['regression']]?.value;
-        if (currentStatValue && !isNaN(currentStatValue)) {
+        if (currentStatValue && Number.isFinite(currentStatValue)) {
           currentStatValue = Number(currentStatValue.toPrecision(DEFAULT_SIG_FIGS));
         }
         results[statType as keyof RegressionEvaluateExtractedResponse] = currentStatValue;
@@ -422,7 +447,10 @@ export enum REGRESSION_STATS {
 
 interface EvaluateMetrics {
   classification: {
-    multiclass_confusion_matrix: object;
+    accuracy?: object;
+    recall?: object;
+    multiclass_confusion_matrix?: object;
+    auc_roc?: { include_curve: boolean; class_name: string };
   };
   regression: {
     r_squared: object;
@@ -442,6 +470,8 @@ interface LoadEvalDataConfig {
   ignoreDefaultQuery?: boolean;
   jobType: DataFrameAnalysisConfigType;
   requiresKeyword?: boolean;
+  rocCurveClassName?: string;
+  includeMulticlassConfusionMatrix?: boolean;
 }
 
 export const loadEvalData = async ({
@@ -454,6 +484,8 @@ export const loadEvalData = async ({
   ignoreDefaultQuery,
   jobType,
   requiresKeyword,
+  rocCurveClassName,
+  includeMulticlassConfusionMatrix = true,
 }: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
@@ -469,7 +501,12 @@ export const loadEvalData = async ({
 
   const metrics: EvaluateMetrics = {
     classification: {
-      multiclass_confusion_matrix: {},
+      accuracy: {},
+      recall: {},
+      ...(includeMulticlassConfusionMatrix ? { multiclass_confusion_matrix: {} } : {}),
+      ...(rocCurveClassName !== undefined
+        ? { auc_roc: { include_curve: true, class_name: rocCurveClassName } }
+        : {}),
     },
     regression: {
       r_squared: {},
@@ -486,6 +523,9 @@ export const loadEvalData = async ({
       [jobType]: {
         actual_field: dependentVariable,
         predicted_field: predictedField,
+        ...(jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+          ? { top_classes_field: `${resultsField}.top_classes` }
+          : {}),
         metrics: metrics[jobType as keyof EvaluateMetrics],
       },
     },

@@ -8,8 +8,9 @@
 
 import { defaultsDeep } from 'lodash';
 
-import { VisParams } from '../types';
-import { VisTypeDefinition, VisTypeOptions, VisGroups } from './types';
+import type { VisParams } from '../types';
+import type { VisTypeDefinition, VisTypeOptions } from './types';
+import { VisGroups } from './vis_groups_enum';
 import { Schemas } from './schemas';
 
 const defaultOptions: VisTypeOptions = {

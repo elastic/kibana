@@ -41,13 +41,15 @@ def trackBuild(commit, context, Closure closure) {
 }
 
 // state: error|failure|pending|success
-def create(sha, state, description, context) {
+def create(sha, state, description, context, targetUrl = null) {
+  targetUrl = targetUrl ?: env.BUILD_URL
+
   withGithubCredentials {
     return githubApi.post("repos/elastic/kibana/statuses/${sha}", [
       state: state,
       description: description,
       context: context,
-      target_url: env.BUILD_URL
+      target_url: targetUrl.toString()
     ])
   }
 }

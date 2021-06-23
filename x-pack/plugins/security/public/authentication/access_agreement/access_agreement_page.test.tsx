@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactMarkdown from 'react-markdown';
 import { EuiLoadingContent } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { findTestSubject } from '@kbn/test/jest';
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
+
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
 import { AccessAgreementPage } from './access_agreement_page';
 
 describe('AccessAgreementPage', () => {

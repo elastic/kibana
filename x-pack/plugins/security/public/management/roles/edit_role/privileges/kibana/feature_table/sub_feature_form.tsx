@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import { EuiButtonGroup, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiCheckbox, EuiButtonGroup } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { NO_PRIVILEGE_VALUE } from '../constants';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import {
+
+import type {
   SecuredSubFeature,
-  SubFeaturePrivilegeGroup,
   SubFeaturePrivilege,
+  SubFeaturePrivilegeGroup,
 } from '../../../../model';
+import { NO_PRIVILEGE_VALUE } from '../constants';
+import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {
   featureId: string;

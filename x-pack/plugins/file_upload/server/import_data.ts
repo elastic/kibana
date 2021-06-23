@@ -10,12 +10,11 @@ import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
 import {
   ImportResponse,
   ImportFailure,
+  InputData,
   Settings,
   Mappings,
   IngestPipelineWrapper,
 } from '../common';
-
-export type InputData = any[];
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(

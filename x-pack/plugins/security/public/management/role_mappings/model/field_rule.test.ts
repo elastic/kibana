@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldRule } from '.';
+import { FieldRule } from './field_rule';
 
 describe('FieldRule', () => {
   ['*', 1, null, true, false].forEach((value) => {

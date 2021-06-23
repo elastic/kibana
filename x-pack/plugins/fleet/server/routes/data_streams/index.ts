@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { IRouter } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
+
 import { PLUGIN_ID, DATA_STREAM_API_ROUTES } from '../../constants';
+
 import { getListHandler } from './handlers';
 
 export const registerRoutes = (router: IRouter) => {

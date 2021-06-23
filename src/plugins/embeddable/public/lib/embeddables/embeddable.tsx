@@ -9,7 +9,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, mapTo, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
@@ -111,10 +111,9 @@ export abstract class Embeddable<
    * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
    * which allows to skip any state handling in case `reload` already handled it.
    */
-  public getUpdated$(): Readonly<Rx.Observable<void>> {
+  public getUpdated$(): Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>> {
     return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
-      debounceTime(0),
-      mapTo(undefined)
+      debounceTime(0)
     );
   }
 

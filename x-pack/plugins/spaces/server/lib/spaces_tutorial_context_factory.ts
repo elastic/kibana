@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { SpacesServiceStart } from '../spaces_service/spaces_service';
+import type { KibanaRequest } from 'src/core/server';
+
+import type { SpacesServiceStart } from '../spaces_service/spaces_service';
 
 export function createSpacesTutorialContextFactory(getSpacesService: () => SpacesServiceStart) {
   return function spacesTutorialContextFactory(request: KibanaRequest) {

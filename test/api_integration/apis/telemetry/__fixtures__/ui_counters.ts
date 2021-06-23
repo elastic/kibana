@@ -10,6 +10,14 @@ export const basicUiCounters = {
   dailyEvents: [
     {
       appName: 'myApp',
+      eventName: 'some_app_event',
+      lastUpdatedAt: '2021-11-20T11:43:00.961Z',
+      fromTimestamp: '2021-11-20T00:00:00Z',
+      counterType: 'count',
+      total: 2,
+    },
+    {
+      appName: 'myApp',
       eventName: 'my_event_885082425109579',
       lastUpdatedAt: '2020-11-30T11:43:00.961Z',
       fromTimestamp: '2020-11-30T00:00:00Z',

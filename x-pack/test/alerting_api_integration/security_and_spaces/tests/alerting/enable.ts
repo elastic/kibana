@@ -44,18 +44,18 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       describe(scenario.id, () => {
         it('should handle enable alert request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'MY action',
-              actionTypeId: 'test.noop',
+              connector_type_id: 'test.noop',
               config: {},
               secrets: {},
             })
             .expect(200);
 
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
@@ -70,7 +70,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 
@@ -114,12 +114,14 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(typeof updatedAlert.scheduledTaskId).to.eql('string');
-              const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduledTaskId);
+              expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
+              const { _source: taskRecord } = await getScheduledTask(
+                updatedAlert.scheduled_task_id
+              );
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
@@ -141,17 +143,17 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
         it('should handle enable alert request appropriately when consumer is the same as producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.restricted-noop',
+                rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
                 enabled: false,
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 
@@ -177,7 +179,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
                 expect(e.status).to.eql(404);
@@ -190,17 +192,17 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
         it('should handle enable alert request appropriately when consumer is not the producer', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.unrestricted-noop',
+                rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
                 enabled: false,
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 
@@ -244,17 +246,17 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
         it('should handle enable alert request appropriately when consumer is "alerts"', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.noop',
+                rule_type_id: 'test.noop',
                 consumer: 'alerts',
                 enabled: false,
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 
@@ -287,7 +289,7 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               try {
-                await getScheduledTask(createdAlert.scheduledTaskId);
+                await getScheduledTask(createdAlert.scheduled_task_id);
                 throw new Error('Should have removed scheduled task');
               } catch (e) {
                 expect(e.status).to.eql(404);
@@ -300,11 +302,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
         it('should still be able to enable alert when AAD is broken', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await retry.try(async () => {
             await supertest
@@ -344,12 +346,14 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(typeof updatedAlert.scheduledTaskId).to.eql('string');
-              const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduledTaskId);
+              expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
+              const { _source: taskRecord } = await getScheduledTask(
+                updatedAlert.scheduled_task_id
+              );
               expect(taskRecord.type).to.eql('task');
               expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
@@ -371,11 +375,11 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
 
         it(`shouldn't enable alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix('other')}/api/alerts/alert`)
+            .post(`${getUrlPrefix('other')}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add('other', createdAlert.id, 'alert', 'alerts');
+          objectRemover.add('other', createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getEnableRequest(createdAlert.id);
 

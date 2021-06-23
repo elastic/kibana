@@ -6,7 +6,7 @@
  */
 
 import { mockNamespaceIdToString, mockNamespaceStringToId } from './__mocks__';
-import { spaceIdToNamespace, namespaceToSpaceId } from './namespace';
+import { namespaceToSpaceId, spaceIdToNamespace } from './namespace';
 
 beforeEach(() => {
   jest.clearAllMocks();

@@ -7,11 +7,12 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { ChartOptions, ChartOptionsParams } from './chart_options';
-import { SeriesParam, ChartMode } from '../../../../types';
+import { SeriesParam, ChartMode, AxisMode } from '../../../../types';
 import { LineOptions } from './line_options';
+import { PointOptions } from './point_options';
 import { valueAxis, seriesParam } from './mocks';
 import { ChartType } from '../../../../../common';
 
@@ -41,11 +42,24 @@ describe('ChartOptions component', () => {
     expect(comp).toMatchSnapshot();
   });
 
+  it('should hide the PointOptions when type is bar', () => {
+    const comp = shallow(<ChartOptions {...defaultProps} />);
+
+    expect(comp.find(PointOptions).exists()).toBeFalsy();
+  });
+
   it('should show LineOptions when type is line', () => {
     chart.type = ChartType.Line;
     const comp = shallow(<ChartOptions {...defaultProps} />);
 
     expect(comp.find(LineOptions).exists()).toBeTruthy();
+  });
+
+  it('should show PointOptions when type is area', () => {
+    chart.type = ChartType.Area;
+    const comp = shallow(<ChartOptions {...defaultProps} />);
+
+    expect(comp.find(PointOptions).exists()).toBeTruthy();
   });
 
   it('should show line mode when type is area', () => {
@@ -70,5 +84,15 @@ describe('ChartOptions component', () => {
     comp.find({ paramName }).prop('setValue')(paramName, ChartMode.Normal);
 
     expect(setParamByIndex).toBeCalledWith('seriesParams', 0, paramName, ChartMode.Normal);
+  });
+
+  it('should set "stacked" mode and disabled control if the referenced axis is "percentage"', () => {
+    defaultProps.valueAxes[0].scale.mode = AxisMode.Percentage;
+    defaultProps.chart.mode = ChartMode.Normal;
+    const paramName = 'mode';
+    const comp = mount(<ChartOptions {...defaultProps} />);
+
+    expect(setParamByIndex).toBeCalledWith('seriesParams', 0, paramName, ChartMode.Stacked);
+    expect(comp.find({ paramName }).prop('disabled')).toBeTruthy();
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from '../../../licensing/server';
+import type { FeatureUsageServiceSetup, FeatureUsageServiceStart } from '../../../licensing/server';
 
 interface SetupDeps {
   featureUsage: FeatureUsageServiceSetup;

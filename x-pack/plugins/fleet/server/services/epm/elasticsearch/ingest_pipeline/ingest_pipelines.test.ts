@@ -7,8 +7,10 @@
 
 import { readFileSync } from 'fs';
 import path from 'path';
+
+import type { RegistryDataStream } from '../../../../types';
+
 import { rewriteIngestPipeline, getPipelineNameForInstallation } from './install';
-import { RegistryDataStream } from '../../../../types';
 
 test('a json-format pipeline with pipeline references is correctly rewritten', () => {
   const inputStandard = readFileSync(
@@ -119,7 +121,7 @@ test('getPipelineNameForInstallation gets correct name', () => {
   const packageVersion = '1.0.1';
   const pipelineRefName = 'pipeline-json';
   const pipelineEntryNameForInstallation = getPipelineNameForInstallation({
-    pipelineName: dataStream.ingest_pipeline,
+    pipelineName: dataStream.ingest_pipeline!,
     dataStream,
     packageVersion,
   });

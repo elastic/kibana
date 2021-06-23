@@ -8,16 +8,18 @@
 import { createActionRoute } from './create';
 import { httpServiceMock } from 'src/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess, ActionTypeDisabledError } from '../lib';
-import { mockHandlerArguments } from './_mock_handler_arguments';
+import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { actionsClientMock } from '../actions_client.mock';
+import { verifyAccessAndContext } from './verify_access_and_context';
+import { omit } from 'lodash';
 
-jest.mock('../lib/verify_api_access.ts', () => ({
-  verifyApiAccess: jest.fn(),
+jest.mock('./verify_access_and_context.ts', () => ({
+  verifyAccessAndContext: jest.fn(),
 }));
 
 beforeEach(() => {
   jest.resetAllMocks();
+  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
 describe('createActionRoute', () => {
@@ -29,7 +31,7 @@ describe('createActionRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/action"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector"`);
 
     const createResult = {
       id: '1',
@@ -37,6 +39,14 @@ describe('createActionRoute', () => {
       actionTypeId: 'abc',
       config: { foo: true },
       isPreconfigured: false,
+      isMissingSecrets: false,
+    };
+
+    const createApiResult = {
+      ...omit(createResult, ['actionTypeId', 'isPreconfigured', 'isMissingSecrets']),
+      connector_type_id: createResult.actionTypeId,
+      is_preconfigured: createResult.isPreconfigured,
+      is_missing_secrets: createResult.isMissingSecrets,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -47,7 +57,7 @@ describe('createActionRoute', () => {
       {
         body: {
           name: 'My name',
-          actionTypeId: 'abc',
+          connector_type_id: 'abc',
           config: { foo: true },
           secrets: {},
         },
@@ -55,7 +65,7 @@ describe('createActionRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: createResult });
+    expect(await handler(context, req, res)).toEqual({ body: createApiResult });
 
     expect(actionsClient.create).toHaveBeenCalledTimes(1);
     expect(actionsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
@@ -74,7 +84,7 @@ describe('createActionRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: createResult,
+      body: createApiResult,
     });
   });
 
@@ -91,22 +101,33 @@ describe('createActionRoute', () => {
       id: '1',
       name: 'My name',
       actionTypeId: 'abc',
+      isMissingSecrets: false,
       config: { foo: true },
       isPreconfigured: false,
     });
 
-    const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'My name',
+          connector_type_id: 'abc',
+          config: { foo: true },
+          secrets: {},
+        },
+      }
+    );
 
     await handler(context, req, res);
 
-    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+    expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 
   it('ensures the license check prevents creating actions', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    (verifyApiAccess as jest.Mock).mockImplementation(() => {
+    (verifyAccessAndContext as jest.Mock).mockImplementation(() => async () => {
       throw new Error('OMG');
     });
 
@@ -120,31 +141,22 @@ describe('createActionRoute', () => {
       name: 'My name',
       actionTypeId: 'abc',
       config: { foo: true },
+      isMissingSecrets: false,
       isPreconfigured: false,
     });
 
-    const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        body: {
+          name: 'My name',
+          connector_type_id: 'abc',
+          config: { foo: true },
+          secrets: {},
+        },
+      }
+    );
 
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
-
-    expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
-  });
-
-  it('ensures the action type gets validated for the license', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    createActionRoute(router, licenseState);
-
-    const [, handler] = router.post.mock.calls[0];
-
-    const actionsClient = actionsClientMock.create();
-    actionsClient.create.mockRejectedValue(new ActionTypeDisabledError('Fail', 'license_invalid'));
-
-    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok', 'forbidden']);
-
-    await handler(context, req, res);
-
-    expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
   });
 });

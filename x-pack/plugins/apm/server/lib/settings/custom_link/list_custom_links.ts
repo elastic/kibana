@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   CustomLink,
   CustomLinkES,
@@ -29,7 +30,7 @@ export async function listCustomLinks({
         should: [
           { term: { [key]: value } },
           { bool: { must_not: [{ exists: { field: key } }] } },
-        ],
+        ] as QueryDslQueryContainer[],
       },
     };
   });
@@ -46,13 +47,16 @@ export async function listCustomLinks({
       sort: [
         {
           'label.keyword': {
-            order: 'asc',
+            order: 'asc' as const,
           },
         },
       ],
     },
   };
-  const resp = await internalClient.search<CustomLinkES>(params);
+  const resp = await internalClient.search<CustomLinkES>(
+    'list_custom_links',
+    params
+  );
   const customLinks = resp.hits.hits.map((item) =>
     fromESFormat({
       id: item._id,

@@ -14,7 +14,6 @@ import '../../../common/mock/match_media';
 import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-  apolloClientObservable,
   TestProviders,
   defaultHeaders,
   createSecuritySolutionStorageMock,
@@ -30,18 +29,19 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-
+import { DefaultCellRenderer } from '../../components/timeline/cell_rendering/default_cell_renderer';
 import {
   QueryTabContentComponent,
   Props as QueryTabContentComponentProps,
 } from '../../components/timeline/query_tab_content';
+import { defaultRowRenderers } from '../../components/timeline/body/renderers';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import { Sort } from '../../components/timeline/body/sort';
-import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import { Direction } from '../../../../common/search_strategy';
 
 jest.mock('../../containers/local_storage');
 
@@ -50,13 +50,7 @@ const addTimelineInStorageMock = addTimelineInStorage as jest.Mock;
 describe('epicLocalStorage', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   let props = {} as QueryTabContentComponentProps;
   const sort: Sort[] = [
@@ -70,13 +64,7 @@ describe('epicLocalStorage', () => {
   const endDate = '2018-03-24T03:33:52.253Z';
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     props = {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
@@ -90,6 +78,8 @@ describe('epicLocalStorage', () => {
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
       onEventClosed: jest.fn(),
+      renderCellValue: DefaultCellRenderer,
+      rowRenderers: defaultRowRenderers,
       showCallOutUnauthorizedMsg: false,
       showExpandedDetails: false,
       start: startDate,

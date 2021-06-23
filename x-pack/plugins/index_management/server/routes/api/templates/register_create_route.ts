@@ -15,10 +15,10 @@ import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 
-export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
+export function registerCreateRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.dataManagement!.client;
       const template = req.body as TemplateDeserialized;
       const {
@@ -62,8 +62,8 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

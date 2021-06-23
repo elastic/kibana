@@ -21,7 +21,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const url = `/api/apm/services/opbeans-java/transactions/charts/distribution?${qs.stringify({
     start: metadata.start,
     end: metadata.end,
-    uiFilters: encodeURIComponent('{}'),
     transactionName: 'APIRestController#stats',
     transactionType: 'request',
   })}`;

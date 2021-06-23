@@ -1,0 +1,9 @@
+{
+  "id": "mapsEms",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["map"],
+  "ui": true,
+  "server": true,
+  "extraPublicDirs": ["common"]
+}

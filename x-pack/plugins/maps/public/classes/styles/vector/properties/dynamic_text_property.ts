@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { LabelDynamicOptions } from '../../../../../common/descriptor_types';
 import { RawValue } from '../../../../../common/constants';
@@ -20,7 +20,9 @@ export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOption
         '',
       ]);
     } else {
-      mbMap.setLayoutProperty(mbLayerId, 'text-field', null);
+      if (typeof mbMap.getLayoutProperty(mbLayerId, 'text-field') !== 'undefined') {
+        mbMap.setLayoutProperty(mbLayerId, 'text-field', undefined);
+      }
     }
   }
 

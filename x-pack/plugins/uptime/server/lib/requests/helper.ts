@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SearchResponse } from '@elastic/elasticsearch/api/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ElasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import {
@@ -49,7 +50,7 @@ export const setupMockEsCompositeQuery = <K, C, I>(
       },
     };
     esMock.search.mockResolvedValueOnce({
-      body: mockResponse,
+      body: (mockResponse as unknown) as SearchResponse,
       statusCode: 200,
       headers: {},
       warnings: [],

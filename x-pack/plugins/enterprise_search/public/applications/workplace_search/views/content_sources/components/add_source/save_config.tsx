@@ -224,6 +224,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   return (
     <>
       {header}
+      <EuiSpacer size="l" />
       <form onSubmit={handleFormSubmission}>
         <EuiSteps steps={configSteps} className="adding-a-source__config-steps" />
       </form>

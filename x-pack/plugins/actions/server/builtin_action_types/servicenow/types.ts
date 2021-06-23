@@ -171,3 +171,12 @@ export interface ExternalServiceCommentResponse {
   pushedDate: string;
   externalCommentId?: string;
 }
+
+type TypeNullOrUndefined<T> = T | null | undefined;
+export interface ResponseError {
+  error: TypeNullOrUndefined<{
+    message: TypeNullOrUndefined<string>;
+    detail: TypeNullOrUndefined<string>;
+  }>;
+  status: TypeNullOrUndefined<string>;
+}

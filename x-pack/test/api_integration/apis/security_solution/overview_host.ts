@@ -16,8 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Overview Host', () => {
     describe('With auditbeat', () => {
-      before(() => esArchiver.load('auditbeat/overview'));
-      after(() => esArchiver.unload('auditbeat/overview'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -47,15 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
-            defaultIndex: [
-              'apm-*-transaction*',
-              'auditbeat-*',
-              'endgame-*',
-              'filebeat-*',
-              'logs-*',
-              'packetbeat-*',
-              'winlogbeat-*',
-            ],
+            defaultIndex: ['auditbeat-*'],
             factoryQueryType: HostsQueries.overview,
             timerange: {
               interval: '12h',
@@ -64,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(overviewHost).to.eql(expectedResult);

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
+import type { CoreSetup, Logger } from 'src/core/server';
+
+import type { PluginsStart } from '../plugin';
+import type { SpacesServiceStart } from '../spaces_service';
 import { capabilitiesProvider } from './capabilities_provider';
 import { setupCapabilitiesSwitcher } from './capabilities_switcher';
-import { PluginsStart } from '../plugin';
-import { SpacesServiceStart } from '../spaces_service';
 
 export const setupCapabilities = (
   core: CoreSetup<PluginsStart>,

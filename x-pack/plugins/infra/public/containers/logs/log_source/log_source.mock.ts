@@ -18,21 +18,27 @@ export const createUninitializedUseLogSourceMock: CreateUseLogSource = ({
     fields: [],
     title: 'unknown',
   },
+  hasFailedLoading: false,
   hasFailedLoadingSource: false,
   hasFailedLoadingSourceStatus: false,
+  hasFailedResolvingSource: false,
   initialize: jest.fn(),
   isLoading: false,
   isLoadingSourceConfiguration: false,
   isLoadingSourceStatus: false,
+  isResolvingSourceConfiguration: false,
   isUninitialized: true,
   loadSource: jest.fn(),
   loadSourceConfiguration: jest.fn(),
-  loadSourceFailureMessage: undefined,
+  latestLoadSourceFailures: [],
+  resolveSourceFailureMessage: undefined,
   loadSourceStatus: jest.fn(),
   sourceConfiguration: undefined,
   sourceId,
   sourceStatus: undefined,
-  updateSourceConfiguration: jest.fn(),
+  updateSource: jest.fn(),
+  resolvedSourceConfiguration: undefined,
+  loadResolveLogSourceConfiguration: jest.fn(),
 });
 
 export const createLoadingUseLogSourceMock: CreateUseLogSource = ({
@@ -42,6 +48,7 @@ export const createLoadingUseLogSourceMock: CreateUseLogSource = ({
   isLoading: true,
   isLoadingSourceConfiguration: true,
   isLoadingSourceStatus: true,
+  isResolvingSourceConfiguration: true,
 });
 
 export const createLoadedUseLogSourceMock: CreateUseLogSource = ({
@@ -60,7 +67,10 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
   origin: 'stored',
   configuration: {
     description: `description for ${sourceId}`,
-    logAlias: 'LOG_INDICES',
+    logIndices: {
+      type: 'index_pattern',
+      indexPatternId: 'some-id',
+    },
     logColumns: [],
     fields: {
       container: 'CONTAINER_FIELD',
@@ -68,12 +78,12 @@ export const createBasicSourceConfiguration = (sourceId: string): LogSourceConfi
       pod: 'POD_FIELD',
       tiebreaker: 'TIEBREAKER_FIELD',
       timestamp: 'TIMESTAMP_FIELD',
+      message: ['MESSAGE_FIELD'],
     },
     name: sourceId,
   },
 });
 
-export const createAvailableSourceStatus = (logIndexFields = []): LogSourceStatus => ({
-  logIndexFields,
+export const createAvailableSourceStatus = (): LogSourceStatus => ({
   logIndexStatus: 'available',
 });

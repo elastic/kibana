@@ -48,7 +48,7 @@ import {
   getFilterParams,
 } from '../../../../common';
 
-interface Props {
+export interface Props {
   filter: Filter;
   indexPatterns: IIndexPattern[];
   onSubmit: (filter: Filter) => void;
@@ -85,7 +85,7 @@ class FilterEditorUI extends Component<Props, State> {
   public render() {
     return (
       <div>
-        <EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="m">
           <EuiFlexGroup alignItems="baseline" responsive={false}>
             <EuiFlexItem>
               <FormattedMessage
@@ -333,6 +333,7 @@ class FilterEditorUI extends Component<Props, State> {
           mode="json"
           width="100%"
           height="250px"
+          data-test-subj="customEditorInput"
         />
       </EuiFormRow>
     );
@@ -415,7 +416,8 @@ class FilterEditorUI extends Component<Props, State> {
 
     if (isCustomEditorOpen) {
       try {
-        return Boolean(JSON.parse(queryDsl));
+        const queryDslJson = JSON.parse(queryDsl);
+        return Object.keys(queryDslJson).length > 0;
       } catch (e) {
         return false;
       }

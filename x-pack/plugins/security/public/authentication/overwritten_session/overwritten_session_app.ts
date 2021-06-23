@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { StartServicesAccessor, ApplicationSetup, AppMountParameters } from 'src/core/public';
-import { AuthenticationServiceSetup } from '../authentication_service';
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
+
+import type { AuthenticationServiceSetup } from '../authentication_service';
 
 interface CreateDeps {
   application: ApplicationSetup;

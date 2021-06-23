@@ -14,7 +14,6 @@ const options: InfraWaffleMapOptions = {
     container: 'container.id',
     pod: 'kubernetes.pod.uid',
     host: 'host.name',
-    message: ['@message'],
     timestamp: '@timestanp',
     tiebreaker: '@timestamp',
   },

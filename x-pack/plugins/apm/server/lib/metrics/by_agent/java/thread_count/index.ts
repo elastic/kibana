@@ -14,6 +14,7 @@ import {
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
+import { JAVA_AGENT_NAMES } from '../../../../../../common/agent_name';
 
 const series = {
   threadCount: {
@@ -41,15 +42,21 @@ const chartBase: ChartBase = {
 };
 
 export async function getThreadCountChart({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
   return fetchAndTransformMetrics({
+    environment,
+    kuery,
     setup,
     serviceName,
     serviceNodeName,
@@ -58,6 +65,7 @@ export async function getThreadCountChart({
       threadCount: { avg: { field: METRIC_JAVA_THREAD_COUNT } },
       threadCountMax: { max: { field: METRIC_JAVA_THREAD_COUNT } },
     },
-    additionalFilters: [{ term: { [AGENT_NAME]: 'java' } }],
+    additionalFilters: [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }],
+    operationName: 'get_thread_count_charts',
   });
 }

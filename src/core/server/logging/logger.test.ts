@@ -45,6 +45,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
     });
   }
 
+  // @ts-expect-error ECS custom meta
   logger.trace('message-2', { trace: true });
   for (const appenderMock of appenderMocks) {
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
@@ -75,6 +76,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
     });
   }
 
+  // @ts-expect-error ECS custom meta
   logger.debug('message-2', { debug: true });
   for (const appenderMock of appenderMocks) {
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
@@ -105,6 +107,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
     });
   }
 
+  // @ts-expect-error ECS custom meta
   logger.info('message-2', { info: true });
   for (const appenderMock of appenderMocks) {
     expect(appenderMock.append).toHaveBeenCalledTimes(2);
@@ -150,6 +153,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
     });
   }
 
+  // @ts-expect-error ECS custom meta
   logger.warn('message-3', { warn: true });
   for (const appenderMock of appenderMocks) {
     expect(appenderMock.append).toHaveBeenCalledTimes(3);
@@ -195,6 +199,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
     });
   }
 
+  // @ts-expect-error ECS custom meta
   logger.error('message-3', { error: true });
   for (const appenderMock of appenderMocks) {
     expect(appenderMock.append).toHaveBeenCalledTimes(3);
@@ -240,6 +245,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
     });
   }
 
+  // @ts-expect-error ECS custom meta
   logger.fatal('message-3', { fatal: true });
   for (const appenderMock of appenderMocks) {
     expect(appenderMock.append).toHaveBeenCalledTimes(3);

@@ -7,7 +7,7 @@
 
 import { URL } from 'url';
 
-import { KbnClient, KbnClientOptions } from '@kbn/dev-utils';
+import { KbnClient, KbnClientOptions } from '@kbn/test';
 import fetch, { RequestInit } from 'node-fetch';
 
 export class KbnClientWithApiKeySupport extends KbnClient {

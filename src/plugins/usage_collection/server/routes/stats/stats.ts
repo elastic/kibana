@@ -15,7 +15,6 @@ import { first } from 'rxjs/operators';
 import {
   ElasticsearchClient,
   IRouter,
-  ISavedObjectsRepository,
   KibanaRequest,
   MetricsServiceSetup,
   SavedObjectsClientContract,
@@ -29,6 +28,12 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('usageCollection.stats.notReadyMe
 });
 
 const SNAPSHOT_REGEX = /-snapshot/i;
+
+interface UsageObject {
+  kibana?: UsageObject;
+  xpack?: UsageObject;
+  [key: string]: unknown | UsageObject;
+}
 
 export function registerStatsRoute({
   router,
@@ -55,9 +60,9 @@ export function registerStatsRoute({
 }) {
   const getUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
+    savedObjectsClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest
-  ): Promise<any> => {
+  ): Promise<UsageObject> => {
     const usage = await collectorSet.bulkFetchUsage(esClient, savedObjectsClient, kibanaRequest);
     return collectorSet.toObject(usage);
   };
@@ -104,7 +109,7 @@ export function registerStatsRoute({
 
         const usagePromise = shouldGetUsage
           ? getUsage(asCurrentUser, savedObjectsClient, req)
-          : Promise.resolve({});
+          : Promise.resolve<UsageObject>({});
         const [usage, clusterUuid] = await Promise.all([
           usagePromise,
           getClusterUuid(asCurrentUser),
@@ -138,7 +143,7 @@ export function registerStatsRoute({
             }
 
             return accum;
-          }, {} as any);
+          }, {} as UsageObject);
 
           extended = {
             usage: modifiedUsage,

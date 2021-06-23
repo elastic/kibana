@@ -7,14 +7,15 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { ScopeableRequest } from 'src/core/server';
+import { elasticsearchServiceMock, httpServerMock } from 'src/core/server/mocks';
+
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
-import { MockAuthenticationProviderOptions, mockAuthenticationProviderOptions } from './base.mock';
-
-import { ScopeableRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
 import { HTTPAuthenticationProvider } from './http';
 
 function expectAuthenticateCall(

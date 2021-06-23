@@ -63,7 +63,8 @@ export const FilterView: FC<Props> = ({
       }}
       iconOnClick={iconOnClick}
       iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeIconAriaLabel', {
-        defaultMessage: 'Delete',
+        defaultMessage: 'Delete {filter}',
+        values: { filter: innerText },
       })}
       onClick={onClick}
       onClickAriaLabel={i18n.translate('data.filter.filterBar.filterItemBadgeAriaLabel', {

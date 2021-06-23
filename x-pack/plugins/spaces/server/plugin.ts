@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import {
+import type { Observable } from 'rxjs';
+
+import type {
   CoreSetup,
   CoreStart,
   Logger,
-  PluginInitializerContext,
   Plugin,
-} from '../../../../src/core/server';
-import {
+  PluginInitializerContext,
+} from 'src/core/server';
+import type { HomeServerPluginSetup } from 'src/plugins/home/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { registerSpacesUsageCollector } from './usage_collection';
-import { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-import { UsageStatsService } from './usage_stats';
-import { ConfigType } from './config';
+import type { LicensingPluginSetup } from '../../licensing/server';
+import { SpacesLicenseService } from '../common/licensing';
+import { setupCapabilities } from './capabilities';
+import type { ConfigType } from './config';
+import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
+import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
-import { setupCapabilities } from './capabilities';
 import { SpacesSavedObjectsService } from './saved_objects';
-import { DefaultSpaceService } from './default_space';
-import { SpacesLicenseService } from '../common/licensing';
-import {
-  SpacesClientRepositoryFactory,
-  SpacesClientService,
-  SpacesClientWrapper,
-} from './spaces_client';
+import type { SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
+import { SpacesClientService } from './spaces_client';
+import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+import { SpacesService } from './spaces_service';
 import type { SpacesRequestHandlerContext } from './types';
+import { registerSpacesUsageCollector } from './usage_collection';
+import { UsageStatsService } from './usage_stats';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
@@ -51,15 +51,41 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
 }
 
+/**
+ * Setup contract for the Spaces plugin.
+ */
 export interface SpacesPluginSetup {
+  /**
+   * Service for interacting with spaces.
+   *
+   * @deprecated Please use the `spacesService` available on this plugin's start contract.
+   * @removeBy 7.16
+   */
   spacesService: SpacesServiceSetup;
+
+  /**
+   * Registries exposed for the security plugin to transparently provide authorization and audit logging.
+   * @private
+   */
   spacesClient: {
+    /**
+     * Sets the client repository factory.
+     * @private
+     */
     setClientRepositoryFactory: (factory: SpacesClientRepositoryFactory) => void;
+    /**
+     * Registers a client wrapper.
+     * @private
+     */
     registerClientWrapper: (wrapper: SpacesClientWrapper) => void;
   };
 }
 
+/**
+ * Start contract for the Spaces plugin.
+ */
 export interface SpacesPluginStart {
+  /** Service for interacting with spaces. */
   spacesService: SpacesServiceStart;
 }
 

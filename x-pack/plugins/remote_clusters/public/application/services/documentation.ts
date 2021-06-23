@@ -13,13 +13,10 @@ export let transportPortUrl: string;
 export let proxyModeUrl: string;
 export let proxySettingsUrl: string;
 
-export function init(docLinks: DocLinksStart): void {
-  const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
-  const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
-
-  skippingDisconnectedClustersUrl = `${esDocBasePath}/modules-cross-cluster-search.html#_skipping_disconnected_clusters`;
-  remoteClustersUrl = `${esDocBasePath}/modules-remote-clusters.html`;
-  transportPortUrl = `${esDocBasePath}/modules-transport.html`;
-  proxyModeUrl = `${esDocBasePath}/modules-remote-clusters.html#proxy-mode`;
-  proxySettingsUrl = `${esDocBasePath}/modules-remote-clusters.html#remote-cluster-proxy-settings`;
+export function init({ links }: DocLinksStart): void {
+  skippingDisconnectedClustersUrl = links.ccs.skippingDisconnectedClusters;
+  remoteClustersUrl = links.elasticsearch.remoteClusters;
+  transportPortUrl = links.elasticsearch.transportSettings;
+  proxyModeUrl = links.elasticsearch.remoteClustersProxy;
+  proxySettingsUrl = links.elasticsearch.remoteClusersProxySettings;
 }

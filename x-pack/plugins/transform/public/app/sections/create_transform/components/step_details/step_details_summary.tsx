@@ -11,13 +11,16 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiAccordion, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import { StepDetailsExposedState } from './step_details_form';
+import { StepDetailsExposedState } from './common';
 
 export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
   const {
     continuousModeDateField,
     createIndexPattern,
     isContinuousModeEnabled,
+    isRetentionPolicyEnabled,
+    retentionPolicyDateField,
+    retentionPolicyMaxAge,
     transformId,
     transformDescription,
     transformFrequency,
@@ -83,6 +86,28 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
         >
           <span>{continuousModeDateField}</span>
         </EuiFormRow>
+      )}
+
+      {isRetentionPolicyEnabled && (
+        <>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.transform.stepDetailsSummary.retentionPolicyDateFieldLabel',
+              {
+                defaultMessage: 'Retention policy date field',
+              }
+            )}
+          >
+            <span>{retentionPolicyDateField}</span>
+          </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('xpack.transform.stepDetailsSummary.retentionPolicyMaxAgeLabel', {
+              defaultMessage: 'Retention policy max age',
+            })}
+          >
+            <span>{retentionPolicyMaxAge}</span>
+          </EuiFormRow>
+        </>
       )}
 
       <EuiSpacer size="l" />

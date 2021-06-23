@@ -7,7 +7,7 @@
 
 import { XYBrushArea } from '@elastic/charts';
 import { History } from 'history';
-import { TimeSeries } from '../../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 export const onBrushEnd = ({
@@ -36,15 +36,12 @@ export const onBrushEnd = ({
   }
 };
 
-export function isTimeseriesEmpty(timeseries?: TimeSeries[]) {
+export function isTimeseriesEmpty(timeseries?: Array<TimeSeries<Coordinate>>) {
   return (
     !timeseries ||
     timeseries
       .map((serie) => serie.data)
       .flat()
-      .every(
-        ({ y }: { x?: number | null; y?: number | null }) =>
-          y === null || y === undefined
-      )
+      .every(({ y }: Coordinate) => y === null || y === undefined)
   );
 }

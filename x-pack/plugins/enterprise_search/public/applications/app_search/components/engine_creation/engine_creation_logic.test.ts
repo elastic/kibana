@@ -10,7 +10,7 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -23,6 +23,7 @@ describe('EngineCreationLogic', () => {
   const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
+    isLoading: false,
     name: '',
     rawName: '',
     language: 'Universal',
@@ -61,6 +62,28 @@ describe('EngineCreationLogic', () => {
 
       it('should set name to a sanitized value', () => {
         expect(EngineCreationLogic.values.name).toEqual('name-with-special-characters');
+      });
+    });
+
+    describe('submitEngine', () => {
+      it('sets isLoading to true', () => {
+        mount({ isLoading: false });
+        EngineCreationLogic.actions.submitEngine();
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: true,
+        });
+      });
+    });
+
+    describe('onSubmitError', () => {
+      it('resets isLoading to false', () => {
+        mount({ isLoading: true });
+        EngineCreationLogic.actions.onSubmitError();
+        expect(EngineCreationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isLoading: false,
+        });
       });
     });
   });

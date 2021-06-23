@@ -9,7 +9,6 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, StartServicesAccessor } from 'src/core/server';
-import { Adapters } from 'src/plugins/inspector/common';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
@@ -61,13 +60,14 @@ export function getFunctionDefinition({
         args.aggs!.map((agg) => agg.value)
       );
 
+      aggConfigs.hierarchical = args.metricsAtAllLevels;
+
       return await handleEsaggsRequest({
-        abortSignal: (abortSignal as unknown) as AbortSignal,
+        abortSignal,
         aggs: aggConfigs,
         filters: get(input, 'filters', undefined),
         indexPattern,
-        inspectorAdapters: inspectorAdapters as Adapters,
-        metricsAtAllLevels: args.metricsAtAllLevels,
+        inspectorAdapters,
         partialRows: args.partialRows,
         query: get(input, 'query', undefined) as any,
         searchSessionId: getSearchSessionId(),

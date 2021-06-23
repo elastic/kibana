@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],
-  "requiredPlugins": ["taskManager", "features", "actions", "alerts"],
+  "requiredPlugins": ["taskManager", "features", "actions", "alerting"],
   "optionalPlugins": ["spaces"],
   "server": true,
   "ui": false

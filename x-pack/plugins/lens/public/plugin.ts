@@ -6,6 +6,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
+import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -21,6 +22,7 @@ import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/ch
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import { EditorFrameService } from './editor_frame_service';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
 import {
   IndexPatternDatasource,
   IndexPatternDatasourceSetupPlugins,
@@ -41,7 +43,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
-import { EditorFrameStart } from './types';
+import type { EditorFrameStart, VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { getSearchProvider } from './search_provider';
@@ -52,6 +54,9 @@ import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
+import { HeatmapVisualization } from './heatmap_visualization';
+import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
+import { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -61,6 +66,7 @@ export interface LensPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -74,6 +80,8 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface LensPublicStart {
@@ -87,6 +95,15 @@ export interface LensPublicStart {
    */
   EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
   /**
+   * React component which can be used to embed a Lens Visualization Save Modal Component.
+   * See `x-pack/examples/embedded_lens_example` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
+  /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
    *
@@ -94,11 +111,16 @@ export interface LensPublicStart {
    *
    * @experimental
    */
-  navigateToPrefilledEditor: (input: LensEmbeddableInput) => void;
+  navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => void;
   /**
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
   canUseEditor: () => boolean;
+
+  /**
+   * Method which returns xy VisualizationTypes array keeping this async as to not impact page load bundle
+   */
+  getXyVisTypes: () => Promise<VisualizationType[]>;
 }
 
 export class LensPlugin {
@@ -110,6 +132,7 @@ export class LensPlugin {
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
+  private heatmapVisualization: HeatmapVisualization;
 
   private stopReportManager?: () => void;
 
@@ -120,6 +143,7 @@ export class LensPlugin {
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
+    this.heatmapVisualization = new HeatmapVisualization();
   }
 
   setup(
@@ -132,6 +156,7 @@ export class LensPlugin {
       visualizations,
       charts,
       globalSearch,
+      usageCollection,
     }: LensPluginSetupDependencies
   ) {
     this.attributeService = async () => {
@@ -146,6 +171,7 @@ export class LensPlugin {
         embeddable,
         charts,
         expressions,
+        usageCollection,
       },
       this.attributeService
     );
@@ -167,18 +193,21 @@ export class LensPlugin {
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
+    this.heatmapVisualization.setup(core, dependencies);
 
     visualizations.registerAlias(getLensAliasConfig());
-
-    const getByValueFeatureFlag = async () => {
-      const [, deps] = await core.getStartServices();
-      return deps.dashboard.dashboardFeatureFlagConfig;
-    };
 
     const getPresentationUtilContext = async () => {
       const [, deps] = await core.getStartServices();
       const { ContextProvider } = deps.presentationUtil;
       return ContextProvider;
+    };
+
+    const ensureDefaultIndexPattern = async () => {
+      const [, deps] = await core.getStartServices();
+      // make sure a default index pattern exists
+      // if not, the page will be redirected to management and visualize won't be rendered
+      await deps.data.indexPatterns.ensureDefaultIndexPattern();
     };
 
     core.application.register({
@@ -188,10 +217,10 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { mountApp, stopReportManager } = await import('./async_services');
         this.stopReportManager = stopReportManager;
+        await ensureDefaultIndexPattern();
         return mountApp(core, params, {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,
-          getByValueFeatureFlag,
           getPresentationUtilContext,
         });
       },
@@ -228,8 +257,10 @@ export class LensPlugin {
 
     return {
       EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
-      navigateToPrefilledEditor: (input: LensEmbeddableInput) => {
-        if (input.timeRange) {
+      SaveModalComponent: getSaveModalComponent(core, startDependencies, this.attributeService!),
+      navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
+        // for openInNewTab, we set the time range in url via getEditPath below
+        if (input.timeRange && !openInNewTab) {
           startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
         }
         const transfer = new EmbeddableStateTransfer(
@@ -237,7 +268,8 @@ export class LensPlugin {
           core.application.currentAppId$
         );
         transfer.navigateToEditor('lens', {
-          path: getEditPath(undefined),
+          openInNewTab,
+          path: getEditPath(undefined, openInNewTab ? input.timeRange : undefined),
           state: {
             originatingApp: '',
             valueInput: input,
@@ -246,6 +278,10 @@ export class LensPlugin {
       },
       canUseEditor: () => {
         return Boolean(core.application.capabilities.visualize?.show);
+      },
+      getXyVisTypes: async () => {
+        const { visualizationTypes } = await import('./xy_visualization/types');
+        return visualizationTypes;
       },
     };
   }

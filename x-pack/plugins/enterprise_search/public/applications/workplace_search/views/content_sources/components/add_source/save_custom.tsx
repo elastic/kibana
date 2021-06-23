@@ -60,11 +60,12 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
   isOrganization,
   header,
 }) => (
-  <div className="custom-api-step-2">
+  <>
     {header}
+    <EuiSpacer />
     <EuiFlexGroup direction="row">
       <EuiFlexItem grow={2}>
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" hasShadow={false} color="subdued">
           <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiIcon type="checkInCircleFilled" color="#42CC89" size="xxl" />
@@ -102,7 +103,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
               <EuiTitle size="xs">
                 <h4>{SAVE_CUSTOM_API_KEYS_TITLE}</h4>
               </EuiTitle>
-              <EuiText grow={false} size="s" color="secondary">
+              <EuiText grow={false} size="s" color="subdued">
                 <p>{SAVE_CUSTOM_API_KEYS_BODY}</p>
               </EuiText>
               <EuiSpacer />
@@ -126,7 +127,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <h4>{SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE}</h4>
               </EuiTitle>
               <EuiSpacer size="xs" />
-              <EuiText color="secondary" size="s">
+              <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentation.text"
@@ -148,7 +149,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <h4>{SAVE_CUSTOM_STYLING_RESULTS_TITLE}</h4>
               </EuiTitle>
               <EuiSpacer size="xs" />
-              <EuiText color="secondary" size="s">
+              <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.displaySettings.text"
@@ -179,7 +180,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <h4>{SAVE_CUSTOM_DOC_PERMISSIONS_TITLE}</h4>
               </EuiTitle>
               <EuiSpacer size="xs" />
-              <EuiText color="secondary" size="s">
+              <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.permissions.text"
@@ -205,5 +206,5 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </div>
+  </>
 );

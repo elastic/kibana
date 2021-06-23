@@ -7,7 +7,10 @@
 
 import React from 'react';
 import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
-import { uiSettingsServiceMock } from '../../../../../../../../../../src/core/public/mocks';
+import {
+  docLinksServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../../../../../../../src/core/public/mocks';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
 
@@ -80,10 +83,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
 });
 
 const defaultProps = {
-  docLinks: {
-    DOC_LINK_VERSION: 'master',
-    ELASTIC_WEBSITE_URL: 'https://jest.elastic.co',
-  },
+  docLinks: docLinksServiceMock.createStartContract(),
 };
 
 export const WithAppDependencies = (Comp: any) => (props: any) => (

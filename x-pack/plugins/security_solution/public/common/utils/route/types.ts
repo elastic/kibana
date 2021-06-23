@@ -14,7 +14,7 @@ import { TimelineType } from '../../../../common/types/timeline';
 import { HostsTableType } from '../../../hosts/store/model';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { AdministrationSubTab as AdministrationType } from '../../../management/types';
-import { FlowTarget } from '../../../graphql/types';
+import { FlowTarget } from '../../../../common/search_strategy';
 
 export type SiemRouteType = HostsTableType | NetworkRouteType | TimelineType | AdministrationType;
 export interface RouteSpyState {

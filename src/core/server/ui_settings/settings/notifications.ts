@@ -45,15 +45,11 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       value: 3000000,
       description: i18n.translate('core.ui_settings.params.notifications.bannerLifetimeText', {
         defaultMessage:
-          'The time in milliseconds which a banner notification will be displayed on-screen for. ' +
-          'Setting to {infinityValue} will disable the countdown.',
-        values: {
-          infinityValue: 'Infinity',
-        },
+          'The time in milliseconds which a banner notification will be displayed on-screen for. ',
       }),
       type: 'number',
       category: ['notifications'],
-      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]),
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]), // Setting to 'Infinity' will disable the countdown.
     },
     'notifications:lifetime:error': {
       name: i18n.translate('core.ui_settings.params.notifications.errorLifetimeTitle', {
@@ -62,15 +58,11 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       value: 300000,
       description: i18n.translate('core.ui_settings.params.notifications.errorLifetimeText', {
         defaultMessage:
-          'The time in milliseconds which an error notification will be displayed on-screen for. ' +
-          'Setting to {infinityValue} will disable.',
-        values: {
-          infinityValue: 'Infinity',
-        },
+          'The time in milliseconds which an error notification will be displayed on-screen for. ',
       }),
       type: 'number',
       category: ['notifications'],
-      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]),
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]), // Setting to 'Infinity' will disable
     },
     'notifications:lifetime:warning': {
       name: i18n.translate('core.ui_settings.params.notifications.warningLifetimeTitle', {
@@ -79,15 +71,11 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       value: 10000,
       description: i18n.translate('core.ui_settings.params.notifications.warningLifetimeText', {
         defaultMessage:
-          'The time in milliseconds which a warning notification will be displayed on-screen for. ' +
-          'Setting to {infinityValue} will disable.',
-        values: {
-          infinityValue: 'Infinity',
-        },
+          'The time in milliseconds which a warning notification will be displayed on-screen for. ',
       }),
       type: 'number',
       category: ['notifications'],
-      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]),
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]), // Setting to 'Infinity' will disable
     },
     'notifications:lifetime:info': {
       name: i18n.translate('core.ui_settings.params.notifications.infoLifetimeTitle', {
@@ -96,15 +84,11 @@ export const getNotificationsSettings = (): Record<string, UiSettingsParams> => 
       value: 5000,
       description: i18n.translate('core.ui_settings.params.notifications.infoLifetimeText', {
         defaultMessage:
-          'The time in milliseconds which an information notification will be displayed on-screen for. ' +
-          'Setting to {infinityValue} will disable.',
-        values: {
-          infinityValue: 'Infinity',
-        },
+          'The time in milliseconds which an information notification will be displayed on-screen for. ',
       }),
       type: 'number',
       category: ['notifications'],
-      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]),
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]), // Setting to 'Infinity' will disable
     },
   };
 };

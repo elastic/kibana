@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import stringify from 'json-stable-stringify';
-import { JsonValue } from '../../../../../src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/common-utils';
 import { jsonValueRT } from '../../common/typed_json';
 import { SearchStrategyError } from '../../common/search_strategies/common/errors';
 import { ShardFailure } from './elasticsearch_runtime_types';
@@ -51,9 +51,9 @@ export const createAsyncRequestRTs = <StateCodec extends rt.Mixed, ParamsCodec e
 export const createErrorFromShardFailure = (failure: ShardFailure): SearchStrategyError => ({
   type: 'shardFailure' as const,
   shardInfo: {
-    index: failure.index,
-    node: failure.node,
-    shard: failure.shard,
+    index: failure.index ?? null,
+    node: failure.node ?? null,
+    shard: failure.shard ?? null,
   },
-  message: failure.reason.reason,
+  message: failure.reason?.reason ?? null,
 });

@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import equal from 'fast-deep-equal';
 import { JobSummary } from './api/ml_get_jobs_summary_api';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
@@ -30,11 +31,16 @@ export const isJobConfigurationOutdated = <JobType extends string>(
   { bucketSpan }: ModuleDescriptor<JobType>,
   currentSourceConfiguration: ModuleSourceConfiguration
 ) => (jobSummary: JobSummary): boolean => {
-  if (!jobSummary.fullJob || !jobSummary.fullJob.custom_settings) {
+  if (
+    !jobSummary.fullJob ||
+    !jobSummary.fullJob.custom_settings ||
+    !jobSummary.fullJob.datafeed_config
+  ) {
     return false;
   }
 
   const jobConfiguration = jobSummary.fullJob.custom_settings.logs_source_config;
+  const datafeedRuntimeMappings = jobSummary.fullJob.datafeed_config.runtime_mappings ?? {};
 
   return !(
     jobConfiguration &&
@@ -44,7 +50,8 @@ export const isJobConfigurationOutdated = <JobType extends string>(
       new Set(jobConfiguration.indexPattern.split(',')),
       new Set(currentSourceConfiguration.indices)
     ) &&
-    jobConfiguration.timestampField === currentSourceConfiguration.timestampField
+    jobConfiguration.timestampField === currentSourceConfiguration.timestampField &&
+    equal(datafeedRuntimeMappings, currentSourceConfiguration.runtimeMappings)
   );
 };
 

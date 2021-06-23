@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-// @ts-ignore
 import minimist from 'minimist';
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import bluebird from 'bluebird';
 import { basename } from 'path';
 import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
@@ -97,10 +97,13 @@ const generateTrustedAppEntry: (options?: GenerateTrustedAppEntryOptions) => obj
   os = randomOperatingSystem(),
   name = randomName(),
 } = {}): NewTrustedApp => {
-  return {
+  const newTrustedApp: NewTrustedApp = {
     description: `Generator says we trust ${name}`,
     name,
     os,
+    effectScope: {
+      type: 'global',
+    },
     entries: [
       {
         // @ts-ignore
@@ -118,6 +121,8 @@ const generateTrustedAppEntry: (options?: GenerateTrustedAppEntryOptions) => obj
       },
     ],
   };
+
+  return newTrustedApp;
 };
 
 const randomN = (max: number): number => Math.floor(Math.random() * max);

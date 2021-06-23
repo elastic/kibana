@@ -2,7 +2,13 @@
   "id": "coreProviderPlugin",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "optionalPlugins": ["corePluginA", "corePluginB", "licensing", "globalSearchTest"],
+  "optionalPlugins": [
+    "corePluginA",
+    "corePluginB",
+    "coreHttp",
+    "licensing",
+    "globalSearchTest"
+  ],
   "server": false,
   "ui": true
 }

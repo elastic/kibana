@@ -17,6 +17,6 @@ curl -s -k \
   -H "Content-Type: application/json" \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X POST "${KIBANA_URL}${SPACE_URL}/api/solutions/security/graphql" \
-  -d '{"operationName":"DeleteTimelineMutation","variables":{"id":["'$1'"]},"query":"mutation DeleteTimelineMutation($id: [ID!]!) {\n  deleteTimeline(id: $id)\n}\n"}'
+  -X DELETE "${KIBANA_URL}${SPACE_URL}/api/timeline" \
+  -d '{"savedObjectIds": ["'$1'"]}'
 

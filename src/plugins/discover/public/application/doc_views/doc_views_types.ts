@@ -8,17 +8,17 @@
 
 import { ComponentType } from 'react';
 import { IScope } from 'angular';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { IndexPattern } from '../../../../data/public';
 
 export interface AngularDirective {
-  controller: (...injectedServices: any[]) => void;
+  controller: (...injectedServices: unknown[]) => void;
   template: string;
 }
 
 export type AngularScope = IScope;
 
-export type ElasticSearchHit<T = unknown> = SearchResponse<T>['hits']['hits'][number];
+export type ElasticSearchHit<T = unknown> = estypes.SearchResponse<T>['hits']['hits'][number];
 
 export interface FieldMapping {
   filterable?: boolean;
@@ -49,17 +49,34 @@ export type DocViewRenderFn = (
   renderProps: DocViewRenderProps
 ) => () => void;
 
-export interface DocViewInput {
-  component?: DocViewerComponent;
-  directive?: AngularDirective;
+export interface BaseDocViewInput {
   order: number;
-  render?: DocViewRenderFn;
   shouldShow?: (hit: ElasticSearchHit) => boolean;
   title: string;
 }
 
-export interface DocView extends DocViewInput {
-  shouldShow: (hit: ElasticSearchHit) => boolean;
+export interface RenderDocViewInput extends BaseDocViewInput {
+  render: DocViewRenderFn;
+  component?: undefined;
+  directive?: undefined;
 }
+
+interface ComponentDocViewInput extends BaseDocViewInput {
+  component: DocViewerComponent;
+  render?: undefined;
+  directive?: undefined;
+}
+
+interface DirectiveDocViewInput extends BaseDocViewInput {
+  component?: undefined;
+  render?: undefined;
+  directive: ng.IDirective;
+}
+
+export type DocViewInput = ComponentDocViewInput | RenderDocViewInput | DirectiveDocViewInput;
+
+export type DocView = DocViewInput & {
+  shouldShow: NonNullable<DocViewInput['shouldShow']>;
+};
 
 export type DocViewInputFn = () => DocViewInput;

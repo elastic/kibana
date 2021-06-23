@@ -6,11 +6,19 @@
  */
 
 import './space_card.scss';
-import { EuiCard } from '@elastic/eui';
-import React from 'react';
+
+import { EuiCard, EuiLoadingSpinner } from '@elastic/eui';
+import React, { lazy, Suspense } from 'react';
+
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
-import { SpaceAvatar } from '../../space_avatar';
-import { Space } from '../..';
+import { getSpaceAvatarComponent } from '../../space_avatar';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   space: Space;
@@ -34,7 +42,11 @@ export const SpaceCard = (props: Props) => {
 function renderSpaceAvatar(space: Space) {
   // not announcing space name here because the title of the EuiCard that the SpaceAvatar lives in is already
   // announcing it. See https://github.com/elastic/kibana/issues/27748
-  return <SpaceAvatar space={space} size={'l'} announceSpaceName={false} />;
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <LazySpaceAvatar space={space} size={'l'} announceSpaceName={false} />
+    </Suspense>
+  );
 }
 
 function renderSpaceDescription(space: Space) {

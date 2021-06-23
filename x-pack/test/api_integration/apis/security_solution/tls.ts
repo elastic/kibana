@@ -86,8 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
-      before(() => esArchiver.load('packetbeat/tls'));
-      after(() => esArchiver.unload('packetbeat/tls'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls'));
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
         const { body: tls } = await supertest
@@ -109,9 +109,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.edges.length).to.be(1);
@@ -139,9 +140,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.edges.length).to.be(1);
@@ -151,8 +153,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Tls Overview Test', () => {
-      before(() => esArchiver.load('packetbeat/tls'));
-      after(() => esArchiver.unload('packetbeat/tls'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/tls'));
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
         const { body: tls } = await supertest
@@ -174,9 +176,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.pageInfo).to.eql(expectedOverviewSourceResult.pageInfo);
@@ -203,9 +206,10 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 30,
               querySize: 10,
             },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['packetbeat-*'],
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(tls.pageInfo).to.eql(expectedOverviewDestinationResult.pageInfo);

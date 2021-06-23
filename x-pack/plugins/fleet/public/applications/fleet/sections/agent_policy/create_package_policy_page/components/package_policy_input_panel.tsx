@@ -18,17 +18,16 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
 } from '@elastic/eui';
-import {
+
+import type {
   NewPackagePolicyInput,
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
 } from '../../../../types';
-import {
-  PackagePolicyInputValidationResults,
-  hasInvalidButRequiredVar,
-  countValidationErrors,
-} from '../services';
+import type { PackagePolicyInputValidationResults } from '../services';
+import { hasInvalidButRequiredVar, countValidationErrors } from '../services';
+
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 
@@ -121,6 +120,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               checked={packagePolicyInput.enabled}
+              disabled={packagePolicyInput.keep_enabled}
               onChange={(e) => {
                 const enabled = e.target.checked;
                 updatePackagePolicyInput({

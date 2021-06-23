@@ -38,8 +38,8 @@ import {
   ALERT_CCR_READ_EXCEPTIONS,
   ALERT_LARGE_SHARD_SIZE,
 } from '../../common/constants';
-import { AlertsClient } from '../../../alerts/server';
-import { Alert } from '../../../alerts/common';
+import { AlertsClient } from '../../../alerting/server';
+import { Alert } from '../../../alerting/common';
 
 const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,

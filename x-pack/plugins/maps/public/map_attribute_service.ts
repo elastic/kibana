@@ -12,7 +12,6 @@ import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
-// @ts-expect-error
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 

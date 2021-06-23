@@ -6,18 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
-import {
-  Space,
-  ISpacesClient,
+
+import type { KibanaRequest } from 'src/core/server';
+
+import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
   GetSpaceResult,
+  ISpacesClient,
+  Space,
 } from '../../../spaces/server';
-import { LegacySpacesAuditLogger } from './legacy_audit_logger';
-import { AuthorizationServiceSetup } from '../authorization';
-import { AuditLogger, EventOutcome, SpaceAuditAction, spaceAuditEvent } from '../audit';
-import { SecurityPluginSetup } from '..';
+import type { AuditLogger } from '../audit';
+import { SpaceAuditAction, spaceAuditEvent } from '../audit';
+import type { AuthorizationServiceSetup } from '../authorization';
+import type { SecurityPluginSetup } from '../plugin';
+import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetAllSpacesPurpose,
@@ -204,7 +207,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     this.auditLogger.log(
       spaceAuditEvent({
         action: SpaceAuditAction.CREATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'space', id: space.id },
       })
     );
@@ -235,7 +238,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     this.auditLogger.log(
       spaceAuditEvent({
         action: SpaceAuditAction.UPDATE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'space', id },
       })
     );
@@ -266,7 +269,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     this.auditLogger.log(
       spaceAuditEvent({
         action: SpaceAuditAction.DELETE,
-        outcome: EventOutcome.UNKNOWN,
+        outcome: 'unknown',
         savedObject: { type: 'space', id },
       })
     );

@@ -6,7 +6,9 @@
   "configPath": ["xpack", "securitySolution"],
   "requiredPlugins": [
     "actions",
-    "alerts",
+    "alerting",
+    "cases",
+    "ruleRegistry",
     "data",
     "dataEnhanced",
     "embeddable",
@@ -15,6 +17,7 @@
     "inspector",
     "licensing",
     "maps",
+    "timelines",
     "triggersActionsUi",
     "uiActions"
   ],

@@ -13,8 +13,6 @@
     "server/**/*",
     "config.ts",
     "../../../typings/**/*",
-    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
-    "public/autocomplete/providers/kql_query_suggestion/__fixtures__/*.json",
     "common/search/test_data/*.json"
   ],
   "references": [
@@ -25,6 +23,7 @@
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
+    { "path": "../security/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
 
     { "path": "../features/tsconfig.json" },

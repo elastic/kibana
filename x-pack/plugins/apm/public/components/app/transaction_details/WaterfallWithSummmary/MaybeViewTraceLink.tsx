@@ -45,7 +45,7 @@ export const MaybeViewTraceLink = ({
             }
           )}
         >
-          <EuiButton iconType="apmTrace" disabled={true}>
+          <EuiButton fill iconType="apmTrace" disabled={true}>
             {viewFullTraceButtonLabel}
           </EuiButton>
         </EuiToolTip>
@@ -67,7 +67,7 @@ export const MaybeViewTraceLink = ({
             }
           )}
         >
-          <EuiButton iconType="apmTrace" disabled={true}>
+          <EuiButton fill iconType="apmTrace" disabled={true}>
             {viewFullTraceButtonLabel}
           </EuiButton>
         </EuiToolTip>
@@ -92,7 +92,9 @@ export const MaybeViewTraceLink = ({
           environment={nextEnvironment}
           latencyAggregationType={latencyAggregationType}
         >
-          <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
+          <EuiButton fill iconType="apmTrace">
+            {viewFullTraceButtonLabel}
+          </EuiButton>
         </TransactionDetailLink>
       </EuiFlexItem>
     );

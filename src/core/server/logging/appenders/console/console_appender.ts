@@ -13,7 +13,7 @@ import { Layouts, LayoutConfigType } from '../../layouts/layouts';
 const { literal, object } = schema;
 
 export interface ConsoleAppenderConfig {
-  kind: 'console';
+  type: 'console';
   layout: LayoutConfigType;
 }
 
@@ -24,7 +24,7 @@ export interface ConsoleAppenderConfig {
  */
 export class ConsoleAppender implements DisposableAppender {
   public static configSchema = object({
-    kind: literal('console'),
+    type: literal('console'),
     layout: Layouts.configSchema,
   });
 

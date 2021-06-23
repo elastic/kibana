@@ -6,18 +6,13 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-  RouteConfig,
-} from '../../../../../src/core/server';
-import { defineKeyRotationRoutes } from './key_rotation';
+import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from 'src/core/server';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import type { EncryptionKeyRotationService } from '../crypto';
 import { routeDefinitionParamsMock } from './index.mock';
-import { EncryptionKeyRotationService } from '../crypto';
+import { defineKeyRotationRoutes } from './key_rotation';
 
 describe('Key rotation routes', () => {
   let router: jest.Mocked<IRouter>;

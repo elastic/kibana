@@ -33,75 +33,69 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
       validate: { body: escapeHatch },
     },
     async (requestContext, request, response) => {
-      try {
-        const payload = pipe(
-          logEntriesHighlightsRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
+      const payload = pipe(
+        logEntriesHighlightsRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
+
+      const { startTimestamp, endTimestamp, sourceId, query, size, highlightTerms } = payload;
+
+      let entriesPerHighlightTerm;
+
+      if ('center' in payload) {
+        entriesPerHighlightTerm = await Promise.all(
+          highlightTerms.map((highlightTerm) =>
+            logEntries.getLogEntriesAround(requestContext, sourceId, {
+              startTimestamp,
+              endTimestamp,
+              query: parseFilterQuery(query),
+              center: payload.center,
+              size,
+              highlightTerm,
+            })
+          )
         );
-
-        const { startTimestamp, endTimestamp, sourceId, query, size, highlightTerms } = payload;
-
-        let entriesPerHighlightTerm;
-
-        if ('center' in payload) {
-          entriesPerHighlightTerm = await Promise.all(
-            highlightTerms.map((highlightTerm) =>
-              logEntries.getLogEntriesAround(requestContext, sourceId, {
-                startTimestamp,
-                endTimestamp,
-                query: parseFilterQuery(query),
-                center: payload.center,
-                size,
-                highlightTerm,
-              })
-            )
-          );
-        } else {
-          let cursor: LogEntriesParams['cursor'];
-          if ('before' in payload) {
-            cursor = { before: payload.before };
-          } else if ('after' in payload) {
-            cursor = { after: payload.after };
-          }
-
-          entriesPerHighlightTerm = await Promise.all(
-            highlightTerms.map((highlightTerm) =>
-              logEntries.getLogEntries(requestContext, sourceId, {
-                startTimestamp,
-                endTimestamp,
-                query: parseFilterQuery(query),
-                cursor,
-                size,
-                highlightTerm,
-              })
-            )
-          );
+      } else {
+        let cursor: LogEntriesParams['cursor'];
+        if ('before' in payload) {
+          cursor = { before: payload.before };
+        } else if ('after' in payload) {
+          cursor = { after: payload.after };
         }
 
-        return response.ok({
-          body: logEntriesHighlightsResponseRT.encode({
-            data: entriesPerHighlightTerm.map(({ entries }) => {
-              if (entries.length > 0) {
-                return {
-                  entries,
-                  topCursor: entries[0].cursor,
-                  bottomCursor: entries[entries.length - 1].cursor,
-                };
-              } else {
-                return {
-                  entries,
-                  topCursor: null,
-                  bottomCursor: null,
-                };
-              }
-            }),
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
+        entriesPerHighlightTerm = await Promise.all(
+          highlightTerms.map((highlightTerm) =>
+            logEntries.getLogEntries(requestContext, sourceId, {
+              startTimestamp,
+              endTimestamp,
+              query: parseFilterQuery(query),
+              cursor,
+              size,
+              highlightTerm,
+            })
+          )
+        );
       }
+
+      return response.ok({
+        body: logEntriesHighlightsResponseRT.encode({
+          data: entriesPerHighlightTerm.map(({ entries }) => {
+            if (entries.length > 0) {
+              return {
+                entries,
+                topCursor: entries[0].cursor,
+                bottomCursor: entries[entries.length - 1].cursor,
+              };
+            } else {
+              return {
+                entries,
+                topCursor: null,
+                bottomCursor: null,
+              };
+            }
+          }),
+        }),
+      });
     }
   );
 };

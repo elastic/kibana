@@ -16,6 +16,6 @@
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" },
+    { "path": "../data/tsconfig.json" }
   ]
 }

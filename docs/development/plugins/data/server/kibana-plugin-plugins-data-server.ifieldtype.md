@@ -4,6 +4,11 @@
 
 ## IFieldType interface
 
+> Warning: This API is now obsolete.
+> 
+> Use IndexPatternField or FieldSpec instead
+> 
+
 <b>Signature:</b>
 
 ```typescript
@@ -21,7 +26,7 @@ export interface IFieldType
 |  [esTypes](./kibana-plugin-plugins-data-server.ifieldtype.estypes.md) | <code>string[]</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-server.ifieldtype.filterable.md) | <code>boolean</code> |  |
 |  [format](./kibana-plugin-plugins-data-server.ifieldtype.format.md) | <code>any</code> |  |
-|  [lang](./kibana-plugin-plugins-data-server.ifieldtype.lang.md) | <code>string</code> |  |
+|  [lang](./kibana-plugin-plugins-data-server.ifieldtype.lang.md) | <code>estypes.ScriptLanguage</code> |  |
 |  [name](./kibana-plugin-plugins-data-server.ifieldtype.name.md) | <code>string</code> |  |
 |  [readFromDocValues](./kibana-plugin-plugins-data-server.ifieldtype.readfromdocvalues.md) | <code>boolean</code> |  |
 |  [script](./kibana-plugin-plugins-data-server.ifieldtype.script.md) | <code>string</code> |  |

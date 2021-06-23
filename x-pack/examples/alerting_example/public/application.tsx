@@ -43,10 +43,10 @@ const AlertingExampleApp = ({
           )}
         />
         <Route
-          path={`/alert/:id`}
+          path={`/rule/:id`}
           render={(props: RouteComponentProps<{ id: string }>) => {
             return (
-              <Page title={`View Alert`} crumb={`View Alert ${props.match.params.id}`}>
+              <Page title={`View Rule`} crumb={`View Rule ${props.match.params.id}`}>
                 <ViewAlertPage http={http} id={props.match.params.id} />
               </Page>
             );
@@ -56,7 +56,7 @@ const AlertingExampleApp = ({
           path={`/astros/:id`}
           render={(props: RouteComponentProps<{ id: string }>) => {
             return (
-              <Page title={`View People In Space Alert`} crumb={`Astros ${props.match.params.id}`}>
+              <Page title={`View People In Space Rule`} crumb={`Astros ${props.match.params.id}`}>
                 <ViewPeopleInSpaceAlertPage http={http} id={props.match.params.id} />
               </Page>
             );

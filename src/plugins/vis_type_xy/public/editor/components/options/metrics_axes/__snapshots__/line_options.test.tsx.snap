@@ -54,14 +54,5 @@ exports[`LineOptions component should init with the default set of props 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="m"
-  />
-  <SwitchOption
-    label="Show dots"
-    paramName="showCircles"
-    setValue={[MockFunction]}
-    value={true}
-  />
 </Fragment>
 `;

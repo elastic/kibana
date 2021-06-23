@@ -1,11 +1,11 @@
 [role="xpack"]
 [[kibana-privileges]]
-=== Kibana privileges
+=== {kib} privileges
 
 {kib} privileges grant users access to features within {kib}. Roles have privileges to determine whether users have write or read access.
 
 ==== Base privileges
-Assigning a base privilege grants access to all available features in Kibana (Discover, Visualize, Dashboard, and so on).
+Assigning a base privilege grants access to all {kib} features, such as *Discover*, *Dashboard*, *Visualize Library*, and *Canvas*.
 [[kibana-privileges-all]]
 `all`:: Grants full read-write access.
 `read`:: Grants read-only access.

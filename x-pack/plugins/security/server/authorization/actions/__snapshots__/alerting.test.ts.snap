@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#get alertType of "" throws error 1`] = `"alertTypeId is required and must be a string"`;
+exports[`#get alertingType of "" throws error 1`] = `"alertingEntity is required and must be a string"`;
 
-exports[`#get alertType of {} throws error 1`] = `"alertTypeId is required and must be a string"`;
+exports[`#get alertingType of {} throws error 1`] = `"alertingEntity is required and must be a string"`;
 
-exports[`#get alertType of 1 throws error 1`] = `"alertTypeId is required and must be a string"`;
+exports[`#get alertingType of 1 throws error 1`] = `"alertingEntity is required and must be a string"`;
 
-exports[`#get alertType of null throws error 1`] = `"alertTypeId is required and must be a string"`;
+exports[`#get alertingType of null throws error 1`] = `"alertingEntity is required and must be a string"`;
 
-exports[`#get alertType of true throws error 1`] = `"alertTypeId is required and must be a string"`;
+exports[`#get alertingType of true throws error 1`] = `"alertingEntity is required and must be a string"`;
 
-exports[`#get alertType of undefined throws error 1`] = `"alertTypeId is required and must be a string"`;
+exports[`#get alertingType of undefined throws error 1`] = `"alertingEntity is required and must be a string"`;
 
 exports[`#get consumer of "" throws error 1`] = `"consumer is required and must be a string"`;
 
@@ -35,3 +35,15 @@ exports[`#get operation of null throws error 1`] = `"operation is required and m
 exports[`#get operation of true throws error 1`] = `"operation is required and must be a string"`;
 
 exports[`#get operation of undefined throws error 1`] = `"operation is required and must be a string"`;
+
+exports[`#get ruleType of "" throws error 1`] = `"ruleTypeId is required and must be a string"`;
+
+exports[`#get ruleType of {} throws error 1`] = `"ruleTypeId is required and must be a string"`;
+
+exports[`#get ruleType of 1 throws error 1`] = `"ruleTypeId is required and must be a string"`;
+
+exports[`#get ruleType of null throws error 1`] = `"ruleTypeId is required and must be a string"`;
+
+exports[`#get ruleType of true throws error 1`] = `"ruleTypeId is required and must be a string"`;
+
+exports[`#get ruleType of undefined throws error 1`] = `"ruleTypeId is required and must be a string"`;

@@ -10,7 +10,7 @@
     "apm-*-transaction*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Web Application Suspicious Activity: POST Request Declined",
   "query": "http.response.status_code:403 and http.request.method:post",
   "references": [
@@ -23,6 +23,7 @@
     "Elastic",
     "APM"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 6
 }

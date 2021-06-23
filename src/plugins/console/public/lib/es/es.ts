@@ -9,24 +9,34 @@
 import $ from 'jquery';
 import { stringify } from 'query-string';
 
+interface SendOptions {
+  asSystemRequest?: boolean;
+}
+
 const esVersion: string[] = [];
 
 export function getVersion() {
   return esVersion;
 }
 
-export function getContentType(body: any) {
+export function getContentType(body: unknown) {
   if (!body) return;
   return 'application/json';
 }
 
-export function send(method: string, path: string, data: any) {
+export function send(
+  method: string,
+  path: string,
+  data: string | object,
+  { asSystemRequest }: SendOptions = {}
+) {
   const wrappedDfd = $.Deferred();
 
   const options: JQuery.AjaxSettings = {
     url: '../api/console/proxy?' + stringify({ path, method }, { sort: false }),
     headers: {
       'kbn-xsrf': 'kibana',
+      ...(asSystemRequest && { 'kbn-system-request': 'true' }),
     },
     data,
     contentType: getContentType(data),
@@ -37,10 +47,10 @@ export function send(method: string, path: string, data: any) {
   };
 
   $.ajax(options).then(
-    (responseData: any, textStatus: string, jqXHR: any) => {
+    (responseData, textStatus: string, jqXHR: unknown) => {
       wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);
     },
-    ((jqXHR: any, textStatus: string, errorThrown: Error) => {
+    ((jqXHR: { status: number; responseText: string }, textStatus: string, errorThrown: Error) => {
       if (jqXHR.status === 0) {
         jqXHR.responseText =
           "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";

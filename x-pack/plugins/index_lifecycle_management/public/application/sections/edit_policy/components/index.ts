@@ -13,4 +13,5 @@ export { FieldLoadingError } from './field_loading_error';
 export { Timeline } from './timeline';
 export { FormErrorsCallout } from './form_errors_callout';
 export { PhaseFooter } from './phase_footer';
+export { InfinityIcon } from './infinity_icon';
 export * from './phases';

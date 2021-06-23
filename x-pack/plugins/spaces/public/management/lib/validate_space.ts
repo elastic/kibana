@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { isReservedSpace } from '../../../common/is_reserved_space';
 import { isValidSpaceIdentifier } from './space_identifier_utils';
 

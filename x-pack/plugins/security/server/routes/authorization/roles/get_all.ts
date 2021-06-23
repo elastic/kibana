@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '../..';
-import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import { ElasticsearchRole, transformElasticsearchRoleToRole } from './model';
+import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import type { ElasticsearchRole } from './model';
+import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetAllRolesRoutes({ router, authz }: RouteDefinitionParams) {
   router.get(
@@ -25,7 +26,12 @@ export function defineGetAllRolesRoutes({ router, authz }: RouteDefinitionParams
         return response.ok({
           body: Object.entries(elasticsearchRoles)
             .map(([roleName, elasticsearchRole]) =>
-              transformElasticsearchRoleToRole(elasticsearchRole, roleName, authz.applicationName)
+              transformElasticsearchRoleToRole(
+                // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
+                elasticsearchRole,
+                roleName,
+                authz.applicationName
+              )
             )
             .sort((roleA, roleB) => {
               if (roleA.name < roleB.name) {

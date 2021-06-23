@@ -14,15 +14,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'canvas', 'error', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const testSubjects = getService('testSubjects');
 
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
     before(async () => {
-      await esArchiver.load('canvas/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
     });
 
     after(async () => {
-      await esArchiver.unload('canvas/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/canvas/default');
     });
 
     describe('global canvas all privileges', () => {
@@ -34,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                canvas: ['all'],
+                canvas: ['minimal_all'],
               },
               spaces: ['*'],
             },
@@ -84,10 +85,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a workpad to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', 'workpad/create', {
-          ensureCurrentUrl: true,
-          shouldLoginIfPrompted: false,
-        });
+        await PageObjects.common.navigateToActualUrl('canvas');
+
+        await testSubjects.click('create-workpad-button');
 
         await PageObjects.canvas.expectAddElementButton();
       });

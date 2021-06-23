@@ -8,9 +8,9 @@
 import deepmerge from 'deepmerge';
 
 import { MlSummaryJob } from '../../../../../../ml/public';
+import { FlowTarget } from '../../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';
-import { FlowTarget } from '../../../../graphql/types';
 
 export const getAnomaliesFilterQuery = (
   filterQuery: string | ESTermQuery | undefined,

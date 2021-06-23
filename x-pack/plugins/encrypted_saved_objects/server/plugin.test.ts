@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectsPlugin } from './plugin';
-import { ConfigSchema } from './config';
-
 import { coreMock } from 'src/core/server/mocks';
+
 import { securityMock } from '../../security/server/mocks';
+import { ConfigSchema } from './config';
+import { EncryptedSavedObjectsPlugin } from './plugin';
 
 describe('EncryptedSavedObjects Plugin', () => {
   describe('setup()', () => {

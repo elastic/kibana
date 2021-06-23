@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useContext } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -24,10 +24,11 @@ export interface MetricExplorerViewState {
   chartOptions: MetricsExplorerChartOptions;
   currentTimerange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
+  id?: string;
 }
 
 export const useMetricsExplorerState = (
-  source: InfraSourceConfiguration,
+  source: MetricsSourceConfigurationProperties,
   derivedIndexPattern: IIndexPattern,
   shouldLoadImmediately = true
 ) => {
@@ -42,6 +43,7 @@ export const useMetricsExplorerState = (
     setTimeRange,
     setOptions,
   } = useContext(MetricsExplorerOptionsContainer.Context);
+
   const { loading, error, data, loadData } = useMetricsExplorerData(
     options,
     source,
@@ -121,7 +123,11 @@ export const useMetricsExplorerState = (
         setChartOptions(vs.chartOptions);
       }
       if (vs.currentTimerange) {
-        setTimeRange(vs.currentTimerange);
+        // if this is the "Default View" view, don't update the time range to the view's time range,
+        // this way it will use the global Kibana time or the default time already set
+        if (vs.id !== '0') {
+          setTimeRange(vs.currentTimerange);
+        }
       }
       if (vs.options) {
         setOptions(vs.options);

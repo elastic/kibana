@@ -7,7 +7,7 @@
 
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
-import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../alerts/server';
+import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../alerting/server';
 
 export type UptimeAlertTypeParam = Record<string, any>;
 export type UptimeAlertTypeState = Record<string, any>;

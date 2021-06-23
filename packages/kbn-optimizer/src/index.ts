@@ -11,3 +11,5 @@ export * from './run_optimizer';
 export * from './log_optimizer_state';
 export * from './node';
 export * from './limits';
+export * from './cli';
+export * from './report_optimizer_timings';

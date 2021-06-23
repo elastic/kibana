@@ -103,7 +103,7 @@ export async function getWebCoreVitals({
 
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search(params);
+  const response = await apmEventClient.search('get_web_core_vitals', params);
   const {
     lcp,
     cls,
@@ -117,7 +117,7 @@ export async function getWebCoreVitals({
   } = response.aggregations ?? {};
 
   const getRanksPercentages = (
-    ranks?: Array<{ key: number; value: number }>
+    ranks?: Array<{ key: number; value: number | null }>
   ) => {
     const ranksVal = ranks?.map(({ value }) => value?.toFixed(0) ?? 0) ?? [];
     return [

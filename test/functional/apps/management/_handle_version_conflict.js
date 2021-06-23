@@ -18,9 +18,10 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const scriptedFiledName = 'versionConflictScript';
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);
@@ -29,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
   describe('index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
     });
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {
@@ -48,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
         },
       });
       log.debug(JSON.stringify(response));
-      expect(response.result).to.be('updated');
+      expect(response.body.result).to.be('updated');
       await PageObjects.settings.setFieldFormat('url');
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async function () {
@@ -65,6 +66,11 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Starting openControlsByName (' + fieldName + ')');
       await PageObjects.settings.openControlsByName(fieldName);
       log.debug('controls are open');
+      await (
+        await (await testSubjects.find('formatRow')).findAllByCssSelector(
+          '[data-test-subj="toggle"]'
+        )
+      )[0].click();
       await PageObjects.settings.setFieldFormat('url');
       const response = await es.update({
         index: '.kibana',
@@ -74,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
         },
       });
       log.debug(JSON.stringify(response));
-      expect(response.result).to.be('updated');
+      expect(response.body.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();
       await retry.try(async function () {
         //await PageObjects.common.sleep(2000);

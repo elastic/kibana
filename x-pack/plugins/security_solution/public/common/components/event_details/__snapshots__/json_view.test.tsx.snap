@@ -15,8 +15,8 @@ exports[`JSON View rendering should match snapshot 1`] = `
     value="{
   \\"_id\\": \\"pEMaMmkBUV60JmNWmWVi\\",
   \\"_index\\": \\"filebeat-8.0.0-2019.02.19-000001\\",
-  \\"_type\\": \\"_doc\\",
   \\"_score\\": 1,
+  \\"_type\\": \\"_doc\\",
   \\"@timestamp\\": \\"2019-02-28T16:50:54.621Z\\",
   \\"agent\\": {
     \\"ephemeral_id\\": \\"9d391ef2-a734-4787-8891-67031178c641\\",

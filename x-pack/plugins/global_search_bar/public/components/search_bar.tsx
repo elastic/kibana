@@ -398,8 +398,7 @@ export function SearchBar({
         </EuiHeaderSectionItemButton>
       }
       searchProps={{
-        onKeyUpCapture: (e: React.KeyboardEvent<HTMLInputElement>) =>
-          setSearchValue(e.currentTarget.value),
+        onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
         'data-test-subj': 'nav-search-input',
         inputRef: setSearchRef,
         compressed: true,

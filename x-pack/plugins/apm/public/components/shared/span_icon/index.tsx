@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useTheme } from '../../../hooks/use_theme';
+import { EuiIcon } from '@elastic/eui';
 import { getSpanIcon } from './get_span_icon';
 
 interface Props {
@@ -15,9 +15,7 @@ interface Props {
 }
 
 export function SpanIcon({ type, subType }: Props) {
-  const theme = useTheme();
-  const size = theme.eui.euiIconSizes.large;
   const icon = getSpanIcon(type, subType);
 
-  return <img src={icon} height={size} width={size} alt={type || subType} />;
+  return <EuiIcon type={icon} size="l" title={type || subType} />;
 }

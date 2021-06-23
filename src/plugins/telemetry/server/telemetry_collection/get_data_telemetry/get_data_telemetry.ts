@@ -14,25 +14,45 @@ import {
   DataTelemetryType,
 } from './constants';
 
+/**
+ * Common counters for the {@link DataTelemetryDocument}s
+ */
 export interface DataTelemetryBasePayload {
+  /** How many indices match the declared pattern **/
   index_count: number;
+  /** How many indices match the declared pattern follow ECS conventions **/
   ecs_index_count?: number;
+  /** How many documents are among all the identified indices **/
   doc_count?: number;
+  /** Total size in bytes among all the identified indices **/
   size_in_bytes?: number;
 }
 
+/**
+ * Depending on the type of index, we'll populate different keys as we identify them.
+ */
 export interface DataTelemetryDocument extends DataTelemetryBasePayload {
+  /** For data-stream indices. Reporting their details **/
   data_stream?: {
+    /** Name of the dataset in the data-stream **/
     dataset?: string;
+    /** Type of the data-stream: "logs", "metrics", "traces" **/
     type?: DataTelemetryType | string; // The union of types is to help autocompletion with some known `data_stream.type`s
   };
+  /** When available, reporting the package details **/
   package?: {
+    /** The package's name. Typically populated in the indices' _meta.package.name by Fleet. **/
     name: string;
   };
+  /** What's the process indexing the data? (i.e.: "beats", "logstash") **/
   shipper?: string;
+  /** When the data comes from a matching index-pattern, the name of the pattern **/
   pattern_name?: DataPatternName;
 }
 
+/**
+ * The Data Telemetry is reported as an array of {@link DataTelemetryDocument}
+ */
 export type DataTelemetryPayload = DataTelemetryDocument[];
 
 export interface DataTelemetryIndex {
@@ -261,14 +281,16 @@ export async function getDataTelemetry(esClient: ElasticsearchClient) {
     const indices = indexNames.map((name) => {
       const baseIndexInfo = {
         name,
-        isECS: !!indexMappings[name]?.mappings?.properties.ecs?.properties.version?.type,
+        isECS: !!indexMappings[name]?.mappings?.properties?.ecs?.properties?.version?.type,
         shipper: indexMappings[name]?.mappings?._meta?.beat,
         packageName: indexMappings[name]?.mappings?._meta?.package?.name,
         managedBy: indexMappings[name]?.mappings?._meta?.managed_by,
         dataStreamDataset:
-          indexMappings[name]?.mappings?.properties.data_stream?.properties.dataset?.value,
+          // @ts-expect-error @elastic/elasticsearch PropertyBase doesn't decalre value
+          indexMappings[name]?.mappings?.properties?.data_stream?.properties?.dataset?.value,
         dataStreamType:
-          indexMappings[name]?.mappings?.properties.data_stream?.properties.type?.value,
+          // @ts-expect-error @elastic/elasticsearch PropertyBase doesn't decalre value
+          indexMappings[name]?.mappings?.properties?.data_stream?.properties?.type?.value,
       };
 
       const stats = (indexStats?.indices || {})[name];

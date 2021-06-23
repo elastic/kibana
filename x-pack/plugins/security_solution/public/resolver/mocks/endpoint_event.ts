@@ -51,7 +51,7 @@ export function mockEndpointEvent({
     process: {
       entity_id: entityID,
       executable: 'executable',
-      args: 'args',
+      args: ['args0', 'args1', 'args2'],
       name: processName,
       pid,
       hash: {

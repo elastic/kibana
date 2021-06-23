@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TopNodesResponse } from '../../common/http_api/overview_api';
+
 export const FAKE_SNAPSHOT_RESPONSE = {
   nodes: [
     {
@@ -309,10 +311,6 @@ export const FAKE_SNAPSHOT_RESPONSE = {
   interval: '300s',
 };
 
-export const FAKE_OVERVIEW_RESPONSE = {
-  stats: {
-    hosts: { type: 'number', value: 1 },
-    cpu: { type: 'percent', value: 0.10691011235955057 },
-    memory: { type: 'percent', value: 0.5389775280898876 },
-  },
+export const FAKE_OVERVIEW_RESPONSE: TopNodesResponse = {
+  series: [],
 };

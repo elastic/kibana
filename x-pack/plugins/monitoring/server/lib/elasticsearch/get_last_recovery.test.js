@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { handleLastRecoveries, filterOldShardActivity } from './get_last_recovery';
+import { handleLegacyLastRecoveries, filterOldShardActivity } from './get_last_recovery';
 
 describe('get_last_recovery', () => {
   // Note: times are from the epoch!
@@ -47,24 +47,24 @@ describe('get_last_recovery', () => {
 
   it('No hits results in an empty array', () => {
     // Note: we don't expect it to touch hits without total === 1
-    expect(handleLastRecoveries({ hits: { hits: [] } }, new Date(0))).toHaveLength(0);
+    expect(handleLegacyLastRecoveries({ hits: { hits: [] } }, new Date(0))).toHaveLength(0);
   });
 
   it('Filters on stop time', () => {
-    expect(handleLastRecoveries(resp, new Date(0))).toHaveLength(5);
-    expect(handleLastRecoveries(resp, new Date(99))).toHaveLength(5);
-    expect(handleLastRecoveries(resp, new Date(100))).toHaveLength(5);
-    expect(handleLastRecoveries(resp, new Date(101))).toHaveLength(3);
-    expect(handleLastRecoveries(resp, new Date(501))).toHaveLength(0);
+    expect(handleLegacyLastRecoveries(resp, new Date(0))).toHaveLength(5);
+    expect(handleLegacyLastRecoveries(resp, new Date(99))).toHaveLength(5);
+    expect(handleLegacyLastRecoveries(resp, new Date(100))).toHaveLength(5);
+    expect(handleLegacyLastRecoveries(resp, new Date(101))).toHaveLength(3);
+    expect(handleLegacyLastRecoveries(resp, new Date(501))).toHaveLength(0);
 
-    const filteredActivities = handleLastRecoveries(resp, new Date(301));
+    const filteredActivities = handleLegacyLastRecoveries(resp, new Date(301));
 
     expect(filteredActivities).toHaveLength(1);
     expect(filteredActivities[0].stop_time_in_millis).toEqual(500);
   });
 
   it('Sorts based on start time (descending)', () => {
-    const sortedActivities = handleLastRecoveries(resp, new Date(0));
+    const sortedActivities = handleLegacyLastRecoveries(resp, new Date(0));
 
     expect(sortedActivities[0].start_time_in_millis).toEqual(100);
     expect(sortedActivities[4].start_time_in_millis).toEqual(0);

@@ -1,0 +1,43 @@
+[[save-open-search]]
+== Save a search for reuse
+
+A saved search is a convenient way to reuse a search
+that you've created in *Discover*.
+Saved searches are good for adding search results to a dashboard,
+and can also serve as a foundation for building visualizations.
+
+[role="screenshot"]
+image::discover/images/saved-search.png[Example of Discover's save search option]
+
+
+A saved search stores the query text, filters, and
+current view of *Discover*&mdash;the columns selected in the document table,
+the sort order, and the index pattern.
+Saved searches are different from <<save-load-delete-query,saved queries>>, which
+are primarily used for storing query text and are available in any app with a query bar.
+
+[role="xpack"]
+[[discover-read-only-access]]
+[float]
+=== Read-only access
+If you don't have sufficient privileges to save searches, the following indicator is
+displayed and the *Save* button is not visible. For more information, refer to <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::discover/images/read-only-badge.png[Example of Discover's read only access indicator in Kibana's header]
+[float]
+=== Save a search
+
+. Once you've created a search worth saving, click *Save* in the toolbar.
+. Enter a name for the search and click *Save*.
+. To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
++
+If the saved search is associated with a different index pattern than is currently
+selected, opening the saved search changes the selected index pattern. The query language
+used for the saved search is also automatically selected.
+. To add your search results to a dashboard:
+.. Open the main menu, then click *Dashboard*.
+.. Open or create the dashboard, then click *Edit*.
+.. Click *Add from library*.
+.. From the *Types* dropdown, select *Saved search*.
+.. Select the saved search that you want to visualize, then click *X* to close the list.

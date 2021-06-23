@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { InstallablePackage } from '../../../types';
-import { ArchiveEntry, getArchiveFilelist, getAsset } from '../archive';
+import type { InstallablePackage } from '../../../types';
+import { getArchiveFilelist, getAsset } from '../archive';
+import type { ArchiveEntry } from '../archive';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`

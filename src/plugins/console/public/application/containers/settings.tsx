@@ -15,14 +15,20 @@ import { retrieveAutoCompleteInfo } from '../../lib/mappings/mappings';
 import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
 
-const getAutocompleteDiff = (newSettings: DevToolsSettings, prevSettings: DevToolsSettings) => {
+const getAutocompleteDiff = (
+  newSettings: DevToolsSettings,
+  prevSettings: DevToolsSettings
+): AutocompleteOptions[] => {
   return Object.keys(newSettings.autocomplete).filter((key) => {
     // @ts-ignore
     return prevSettings.autocomplete[key] !== newSettings.autocomplete[key];
-  });
+  }) as AutocompleteOptions[];
 };
 
-const refreshAutocompleteSettings = (settings: SettingsService, selectedSettings: any) => {
+const refreshAutocompleteSettings = (
+  settings: SettingsService,
+  selectedSettings: DevToolsSettings['autocomplete']
+) => {
   retrieveAutoCompleteInfo(settings, selectedSettings);
 };
 
@@ -44,12 +50,12 @@ const fetchAutocompleteSettingsIfNeeded = (
     if (isSettingsChanged) {
       // If the user has changed one of the autocomplete settings, then we'll fetch just the
       // ones which have changed.
-      const changedSettings: any = autocompleteDiff.reduce(
-        (changedSettingsAccum: any, setting: string): any => {
-          changedSettingsAccum[setting] = newSettings.autocomplete[setting as AutocompleteOptions];
+      const changedSettings: DevToolsSettings['autocomplete'] = autocompleteDiff.reduce(
+        (changedSettingsAccum, setting) => {
+          changedSettingsAccum[setting] = newSettings.autocomplete[setting];
           return changedSettingsAccum;
         },
-        {}
+        {} as DevToolsSettings['autocomplete']
       );
       retrieveAutoCompleteInfo(settings, changedSettings);
     } else if (isPollingChanged && newSettings.polling) {
@@ -89,7 +95,7 @@ export function Settings({ onClose }: Props) {
     <DevToolsSettingsModal
       onClose={onClose}
       onSaveSettings={onSaveSettings}
-      refreshAutocompleteSettings={(selectedSettings: any) =>
+      refreshAutocompleteSettings={(selectedSettings) =>
         refreshAutocompleteSettings(settings, selectedSettings)
       }
       settings={settings.toJSON()}

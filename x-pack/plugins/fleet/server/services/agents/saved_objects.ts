@@ -6,8 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObject } from 'src/core/server';
-import {
+import type { SavedObject } from 'src/core/server';
+
+import type {
   Agent,
   AgentSOAttributes,
   AgentAction,
@@ -25,9 +26,6 @@ export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
   return {
     id: so.id,
     ...so.attributes,
-    current_error_events: so.attributes.current_error_events
-      ? JSON.parse(so.attributes.current_error_events)
-      : [],
     local_metadata: so.attributes.local_metadata,
     user_provided_metadata: so.attributes.user_provided_metadata,
     access_api_key: undefined,

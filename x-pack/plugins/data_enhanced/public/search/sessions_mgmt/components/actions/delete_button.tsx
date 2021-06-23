@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
@@ -44,24 +44,22 @@ const DeleteConfirm = ({
   });
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={title}
-        onCancel={onConfirmCancel}
-        onConfirm={async () => {
-          setIsLoading(true);
-          await api.sendCancel(id);
-          onActionComplete();
-        }}
-        confirmButtonText={confirm}
-        confirmButtonDisabled={isLoading}
-        cancelButtonText={cancel}
-        defaultFocusedButton="confirm"
-        buttonColor="danger"
-      >
-        {message}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={title}
+      onCancel={onConfirmCancel}
+      onConfirm={async () => {
+        setIsLoading(true);
+        await api.sendCancel(id);
+        onActionComplete();
+      }}
+      confirmButtonText={confirm}
+      confirmButtonDisabled={isLoading}
+      cancelButtonText={cancel}
+      defaultFocusedButton="confirm"
+      buttonColor="danger"
+    >
+      {message}
+    </EuiConfirmModal>
   );
 };
 

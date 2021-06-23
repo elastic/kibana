@@ -13,6 +13,7 @@ import {
   HostResultList,
   HostStatus,
   MetadataQueryStrategyVersions,
+  PendingActionsResponse,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import {
@@ -28,6 +29,8 @@ import {
   GetAgentsResponse,
 } from '../../../../../../fleet/common/types/rest_spec';
 import { GetPolicyListResponse } from '../../policy/types';
+import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
+import { ACTION_STATUS_ROUTE } from '../../../../../common/endpoint/constants';
 
 const generator = new EndpointDocGenerator('seed');
 
@@ -54,7 +57,7 @@ export const mockEndpointResultList: (options?: {
   for (let index = 0; index < actualCountToReturn; index++) {
     hosts.push({
       metadata: generator.generateHostMetadata(),
-      host_status: HostStatus.ERROR,
+      host_status: HostStatus.UNHEALTHY,
       query_strategy_version: queryStrategyVersion,
     });
   }
@@ -74,7 +77,7 @@ export const mockEndpointResultList: (options?: {
 export const mockEndpointDetailsApiResult = (): HostInfo => {
   return {
     metadata: generator.generateHostMetadata(),
-    host_status: HostStatus.ERROR,
+    host_status: HostStatus.UNHEALTHY,
     query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
   };
 };
@@ -158,6 +161,11 @@ const endpointListApiPathHandlerMocks = ({
         page: 1,
         perPage: 10,
       };
+    },
+
+    // Pending Actions
+    [ACTION_STATUS_ROUTE]: (): PendingActionsResponse => {
+      return pendingActionsResponseMock();
     },
   };
 

@@ -10,7 +10,6 @@ import thunk from 'redux-thunk';
 import { ui, DEFAULT_MAP_UI_STATE } from './ui';
 import { map, DEFAULT_MAP_STATE } from './map'; // eslint-disable-line import/named
 import { nonSerializableInstances } from './non_serializable_instances';
-import { MAP_DESTROYED } from '../actions';
 
 export const DEFAULT_MAP_STORE_STATE = {
   ui: { ...DEFAULT_MAP_UI_STATE },
@@ -26,16 +25,7 @@ export function createMapStore() {
     nonSerializableInstances,
   });
 
-  const rootReducer = (state, action) => {
-    // Reset store on map destroyed
-    if (action.type === MAP_DESTROYED) {
-      state = undefined;
-    }
-
-    return combinedReducers(state, action);
-  };
-
   const storeConfig = {};
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-  return createStore(rootReducer, storeConfig, composeEnhancers(...enhancers));
+  return createStore(combinedReducers, storeConfig, composeEnhancers(...enhancers));
 }

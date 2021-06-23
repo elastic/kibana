@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { MigrationResult } from './core';
-export { KibanaMigrator, IKibanaMigrator } from './kibana';
-export {
+export type { MigrationResult } from './core';
+export { KibanaMigrator } from './kibana';
+export type { IKibanaMigrator } from './kibana';
+export type {
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,

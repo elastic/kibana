@@ -37,7 +37,11 @@ export const allAgents: OsqueryFactory<OsqueryQueries.agents> = {
     return {
       ...response,
       inspect,
-      edges: response.rawResponse.hits.hits.map((hit) => ({ _id: hit._id, ...hit._source })),
+      edges: response.rawResponse.hits.hits.map((hit) => ({
+        _id: hit._id,
+        ...hit._source,
+      })) as Agent[],
+      // @ts-expect-error doesn't handle case when total TotalHits
       totalCount: response.rawResponse.hits.total,
       pageInfo: {
         activePage: activePage ?? 0,

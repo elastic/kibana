@@ -3,13 +3,14 @@
     "Elastic"
   ],
   "description": "This rule detects network events that may indicate the use of RPC traffic from the Internet. RPC is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector.",
+  "from": "now-9m",
   "index": [
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "RPC (Remote Procedure Call) from the Internet",
   "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:135 or event.dataset:zeek.dce_rpc) and not source.ip:( 10.0.0.0/8 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.0/4 or \"::1\" or \"FE80::/10\" or \"FF00::/8\" ) and destination.ip:( 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 )",
   "risk_score": 73,
@@ -39,6 +40,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

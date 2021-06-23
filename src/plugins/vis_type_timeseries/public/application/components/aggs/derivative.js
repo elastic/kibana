@@ -14,7 +14,7 @@ import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
-import { METRIC_TYPES } from '../../../../common/metric_types';
+import { METRIC_TYPES } from '../../../../common/enums';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -110,7 +110,7 @@ export const DerivativeAgg = (props) => {
 DerivativeAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
-  indexPattern: PropTypes.string,
+  indexPattern: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

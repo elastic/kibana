@@ -19,7 +19,7 @@ import { setScopedHistory, setServices, setDocViewsRegistry } from '../../../../
 import { coreMock } from '../../../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
-import { getInnerAngularModule } from '../../../../get_inner_angular';
+import { getInnerAngularModule } from '../../get_inner_angular';
 import { createBrowserHistory } from 'history';
 
 const fakeRowVals = {
@@ -58,6 +58,7 @@ describe('Doc Table', () => {
     setServices({
       uiSettings: core.uiSettings,
       filterManager: dataMock.query.filterManager,
+      addBasePath: (path) => path,
     });
 
     setDocViewsRegistry({

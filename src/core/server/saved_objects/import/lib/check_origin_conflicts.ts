@@ -95,7 +95,7 @@ const checkOriginConflict = async (
     perPage: 10,
     fields: ['title'],
     sortField: 'updated_at',
-    sortOrder: 'desc',
+    sortOrder: 'desc' as const,
     ...(namespace && { namespaces: [namespace] }),
   };
   const findResult = await savedObjectsClient.find<{ title?: string }>(findOptions);

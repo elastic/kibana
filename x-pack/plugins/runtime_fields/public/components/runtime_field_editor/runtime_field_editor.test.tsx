@@ -24,7 +24,10 @@ const setup = (props?: Props) =>
 const docLinks: DocLinksStart = {
   ELASTIC_WEBSITE_URL: 'https://jestTest.elastic.co',
   DOC_LINK_VERSION: 'jest',
-  links: {} as any,
+  links: {
+    runtimeFields: { mapping: 'https://jestTest.elastic.co/to-be-defined.html' },
+    scriptedFields: {} as any,
+  } as any,
 };
 
 describe('Runtime field editor', () => {

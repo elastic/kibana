@@ -24,13 +24,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('visualize_source-filters');
+      await esArchiver.load('test/functional/fixtures/es_archiver/visualize_source-filters');
 
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
 
       await kibanaServer.uiSettings.update({
-        'discover:searchFieldsFromSource': true,
+        'discover:searchFieldsFromSource': false,
       });
 
       log.debug('discover');

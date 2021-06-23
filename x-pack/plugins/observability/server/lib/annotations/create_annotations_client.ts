@@ -23,27 +23,6 @@ type CreateParams = t.TypeOf<typeof createAnnotationRt>;
 type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;
 type GetByIdParams = t.TypeOf<typeof getAnnotationByIdRt>;
 
-interface IndexDocumentResponse {
-  _shards: {
-    total: number;
-    failed: number;
-    successful: number;
-  };
-  _index: string;
-  _type: string;
-  _id: string;
-  _version: number;
-  _seq_no: number;
-  _primary_term: number;
-  result: string;
-}
-
-export interface GetResponse {
-  _id: string;
-  _index: string;
-  _source: Annotation;
-}
-
 export function createAnnotationsClient(params: {
   index: string;
   esClient: ElasticsearchClient;
@@ -95,7 +74,7 @@ export function createAnnotationsClient(params: {
         };
 
         const body = await unwrapEsResponse(
-          esClient.index<IndexDocumentResponse>({
+          esClient.index({
             index,
             body: annotation,
             refresh: 'wait_for',
@@ -103,18 +82,18 @@ export function createAnnotationsClient(params: {
         );
 
         return (
-          await esClient.get<GetResponse>({
+          await esClient.get<Annotation>({
             index,
             id: body._id,
           })
-        ).body;
+        ).body as { _id: string; _index: string; _source: Annotation };
       }
     ),
     getById: ensureGoldLicense(async (getByIdParams: GetByIdParams) => {
       const { id } = getByIdParams;
 
       return unwrapEsResponse(
-        esClient.get<GetResponse>({
+        esClient.get({
           id,
           index,
         })

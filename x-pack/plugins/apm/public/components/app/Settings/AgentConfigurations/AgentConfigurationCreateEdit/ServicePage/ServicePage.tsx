@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiTitle,
-  EuiSpacer,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
@@ -33,7 +26,7 @@ interface Props {
 }
 
 export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
-  const { data: serviceNames = [], status: serviceNamesStatus } = useFetcher(
+  const { data: serviceNamesData, status: serviceNamesStatus } = useFetcher(
     (callApmApi) => {
       return callApmApi({
         endpoint: 'GET /api/apm/settings/agent-configuration/services',
@@ -43,8 +36,9 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     [],
     { preservePreviousData: false }
   );
+  const serviceNames = serviceNamesData?.serviceNames ?? [];
 
-  const { data: environments = [], status: environmentStatus } = useFetcher(
+  const { data: environmentsData, status: environmentsStatus } = useFetcher(
     (callApmApi) => {
       if (newConfig.service.name) {
         return callApmApi({
@@ -58,6 +52,8 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     [newConfig.service.name],
     { preservePreviousData: false }
   );
+
+  const environments = environmentsData?.environments ?? [];
 
   const { status: agentNameStatus } = useFetcher(
     async (callApmApi) => {
@@ -97,17 +93,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   );
 
   return (
-    <EuiPanel paddingSize="m">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.apm.agentConfig.servicePage.title', {
-            defaultMessage: 'Choose service',
-          })}
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="m" />
-
+    <>
       {/* Service name options */}
       <FormRowSelect
         title={i18n.translate(
@@ -153,11 +139,11 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           'xpack.apm.agentConfig.servicePage.environment.fieldLabel',
           { defaultMessage: 'Service environment' }
         )}
-        isLoading={environmentStatus === FETCH_STATUS.LOADING}
+        isLoading={environmentsStatus === FETCH_STATUS.LOADING}
         options={environmentOptions}
         value={newConfig.service.environment}
         disabled={
-          !newConfig.service.name || environmentStatus === FETCH_STATUS.LOADING
+          !newConfig.service.name || environmentsStatus === FETCH_STATUS.LOADING
         }
         onChange={(e) => {
           e.preventDefault();
@@ -204,6 +190,6 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </>
   );
 }

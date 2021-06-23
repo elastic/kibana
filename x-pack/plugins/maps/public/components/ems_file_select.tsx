@@ -10,7 +10,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiSelect } from '@el
 
 import { i18n } from '@kbn/i18n';
 import { FileLayer } from '@elastic/ems-client';
-import { getEmsFileLayers } from '../meta';
+import { getEmsFileLayers } from '../util';
 import { getEmsUnavailableMessage } from './ems_unavailable_message';
 
 interface Props {

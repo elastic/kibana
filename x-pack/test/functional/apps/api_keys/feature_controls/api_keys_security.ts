@@ -17,12 +17,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('global all privileges (aka kibana_admin)', () => {
@@ -45,9 +45,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('global dashboard all with manage_security', () => {
+    describe('global dashboard read with manage_security', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_all', 'manage_security'], true);
+        await security.testUser.setRoles(['global_dashboard_read', 'manage_security'], true);
       });
       after(async () => {
         await security.testUser.restoreDefaults();

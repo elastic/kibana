@@ -29,16 +29,16 @@ function createRoot(legacyLoggingConfig: LegacyLoggingConfig = {}) {
       // platform config
       appenders: {
         'test-console': {
-          kind: 'console',
+          type: 'console',
           layout: {
             highlight: false,
-            kind: 'pattern',
+            type: 'pattern',
           },
         },
       },
       loggers: [
         {
-          context: 'test-file',
+          name: 'test-file',
           appenders: ['test-console'],
           level: 'info',
         },

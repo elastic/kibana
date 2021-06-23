@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { createFeature } from '../../../../__fixtures__/kibana_features';
-import { mountWithIntl } from '@kbn/test/jest';
-import { FeatureTableCell } from '.';
-import { SecuredFeature } from '../../../../model';
 import { EuiIconTip } from '@elastic/eui';
+import React from 'react';
+
+import { mountWithIntl } from '@kbn/test/jest';
+
+import { createFeature } from '../../../../__fixtures__/kibana_features';
+import { SecuredFeature } from '../../../../model';
+import { FeatureTableCell } from './feature_table_cell';
 
 describe('FeatureTableCell', () => {
   it('renders the feature name', () => {

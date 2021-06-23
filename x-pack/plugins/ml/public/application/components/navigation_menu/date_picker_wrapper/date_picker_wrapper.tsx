@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
 import { TimeHistoryContract, TimeRange } from 'src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 
 import { mlTimefilterRefresh$ } from '../../../services/timefilter_refresh_service';
 import { useUrlState } from '../../../util/url_state';
 import { useMlKibana } from '../../../contexts/kibana';
+
+interface TimePickerQuickRange {
+  from: string;
+  to: string;
+  display: string;
+}
 
 interface Duration {
   start: string;
@@ -71,6 +78,19 @@ export const DatePickerWrapper: FC = () => {
   );
 
   const dateFormat = config.get('dateFormat');
+  const timePickerQuickRanges = config.get<TimePickerQuickRange[]>(
+    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+  );
+
+  const commonlyUsedRanges = useMemo(
+    () =>
+      timePickerQuickRanges.map(({ from, to, display }) => ({
+        start: from,
+        end: to,
+        label: display,
+      })),
+    [timePickerQuickRanges]
+  );
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -141,6 +161,7 @@ export const DatePickerWrapper: FC = () => {
         onRefreshChange={updateInterval}
         recentlyUsedRanges={recentlyUsedRanges}
         dateFormat={dateFormat}
+        commonlyUsedRanges={commonlyUsedRanges}
       />
     </div>
   ) : null;

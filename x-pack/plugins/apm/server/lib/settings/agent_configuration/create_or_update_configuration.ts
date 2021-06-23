@@ -13,7 +13,7 @@ import {
 } from '../../../../common/agent_configuration/configuration_types';
 import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
 
-export async function createOrUpdateConfiguration({
+export function createOrUpdateConfiguration({
   configurationId,
   configurationIntake,
   setup,
@@ -45,5 +45,5 @@ export async function createOrUpdateConfiguration({
     params.id = configurationId;
   }
 
-  return internalClient.index(params);
+  return internalClient.index('create_or_update_agent_configuration', params);
 }

@@ -7,7 +7,7 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { executePolicy as executePolicyRequest } from '../services/http';
@@ -81,32 +81,30 @@ export const PolicyExecuteProvider: React.FunctionComponent<Props> = ({ children
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.snapshotRestore.executePolicy.confirmModal.executePolicyTitle"
-              defaultMessage="Run '{name}' now?"
-              values={{ name: policyName }}
-            />
-          }
-          onCancel={closeModal}
-          onConfirm={executePolicy}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.snapshotRestore.executePolicy.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.snapshotRestore.executePolicy.confirmModal.confirmButtonLabel"
-              defaultMessage="Run policy"
-            />
-          }
-          data-test-subj="srExecutePolicyConfirmationModal"
-        />
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.executePolicy.confirmModal.executePolicyTitle"
+            defaultMessage="Run '{name}' now?"
+            values={{ name: policyName }}
+          />
+        }
+        onCancel={closeModal}
+        onConfirm={executePolicy}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.executePolicy.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.executePolicy.confirmModal.confirmButtonLabel"
+            defaultMessage="Run policy"
+          />
+        }
+        data-test-subj="srExecutePolicyConfirmationModal"
+      />
     );
   };
 

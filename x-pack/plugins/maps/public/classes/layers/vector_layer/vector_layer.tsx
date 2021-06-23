@@ -6,8 +6,12 @@
  */
 
 import React from 'react';
-import { Map as MbMap, Layer as MbLayer, GeoJSONSource as MbGeoJSONSource } from 'mapbox-gl';
-import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
+import type {
+  Map as MbMap,
+  AnyLayer as MbLayer,
+  GeoJSONSource as MbGeoJSONSource,
+} from '@kbn/mapbox-gl';
+import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,7 +21,6 @@ import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
-  SOURCE_BOUNDS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
   KBN_TOO_MANY_FEATURES_PROPERTY,
@@ -25,6 +28,7 @@ import {
   FIELD_ORIGIN,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
+  SUPPORTS_FEATURE_EDITING_REQUEST_ID,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -40,7 +44,6 @@ import {
   getLineFilterExpression,
   getPointFilterExpression,
 } from '../../util/mb_filter_expressions';
-
 import {
   DynamicStylePropertyOptions,
   MapFilters,
@@ -60,7 +63,7 @@ import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_st
 import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../../sources/term_join_source';
-import { addGeoJsonMbSource, syncVectorSource } from './utils';
+import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
 
 interface SourceResult {
   refreshed: boolean;
@@ -89,11 +92,14 @@ export interface IVectorLayer extends ILayer {
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
+  canShowTooltip(): boolean;
+  supportsFeatureEditing(): boolean;
+  getLeftJoinFields(): Promise<IField[]>;
+  addFeature(geometry: Geometry | Position[]): Promise<void>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
-
   protected readonly _style: IVectorStyle;
   private readonly _joins: InnerJoin[];
 
@@ -170,11 +176,18 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     });
   }
 
+  supportsFeatureEditing(): boolean {
+    const dataRequest = this.getDataRequest(SUPPORTS_FEATURE_EDITING_REQUEST_ID);
+    const data = dataRequest?.getData() as { supportsFeatureEditing: boolean } | undefined;
+
+    return data ? data.supportsFeatureEditing : false;
+  }
+
   hasJoins() {
     return this.getValidJoins().length > 0;
   }
 
-  isDataLoaded() {
+  isInitialDataLoadComplete() {
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest || !sourceDataRequest.hasData()) {
       return false;
@@ -241,47 +254,16 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getCurrentStyle().renderLegendDetails();
   }
 
-  async getBounds({
-    startLoading,
-    stopLoading,
-    registerCancelCallback,
-    dataFilters,
-  }: DataRequestContext) {
+  async getBounds(syncContext: DataRequestContext) {
     const isStaticLayer = !this.getSource().isBoundsAware();
-    if (isStaticLayer || this.hasJoins()) {
-      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins());
-    }
-
-    const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
-    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
-      dataFilters,
-      this.getSource(),
-      this.getCurrentStyle()
-    );
-    // Do not pass all searchFilters to source.getBoundsForFilters().
-    // For example, do not want to filter bounds request by extent and buffer.
-    const boundsFilters = {
-      sourceQuery: searchFilters.sourceQuery,
-      query: searchFilters.query,
-      timeFilters: searchFilters.timeFilters,
-      filters: searchFilters.filters,
-      applyGlobalQuery: searchFilters.applyGlobalQuery,
-      applyGlobalTime: searchFilters.applyGlobalTime,
-    };
-
-    let bounds = null;
-    try {
-      startLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, boundsFilters);
-      bounds = await this.getSource().getBoundsForFilters(
-        boundsFilters,
-        registerCancelCallback.bind(null, requestToken)
-      );
-    } finally {
-      // Use stopLoading callback instead of onLoadError callback.
-      // Function is loading bounds and not feature data.
-      stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds ? bounds : {}, boundsFilters);
-    }
-    return bounds;
+    return isStaticLayer || this.hasJoins()
+      ? getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins())
+      : getVectorSourceBounds({
+          layerId: this.getId(),
+          syncContext,
+          source: this.getSource(),
+          sourceQuery: this.getQuery() as MapQuery,
+        });
   }
 
   async getLeftJoinFields() {
@@ -364,6 +346,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       source: joinSource,
       prevDataRequest,
       nextMeta: searchFilters,
+      extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
     });
     if (canSkipFetch) {
       return {
@@ -695,6 +678,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         syncContext,
         source,
       });
+      await this._syncSupportsFeatureEditing({ syncContext, source });
       if (
         !sourceResult.featureCollection ||
         !sourceResult.featureCollection.features.length ||
@@ -709,6 +693,33 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       if (!(error instanceof DataRequestAbortError)) {
         throw error;
       }
+    }
+  }
+
+  async _syncSupportsFeatureEditing({
+    syncContext,
+    source,
+  }: {
+    syncContext: DataRequestContext;
+    source: IVectorSource;
+  }) {
+    if (syncContext.dataFilters.isReadOnly) {
+      return;
+    }
+    const { startLoading, stopLoading, onLoadError } = syncContext;
+    const dataRequestId = SUPPORTS_FEATURE_EDITING_REQUEST_ID;
+    const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
+    const prevDataRequest = this.getDataRequest(dataRequestId);
+    if (prevDataRequest) {
+      return;
+    }
+    try {
+      startLoading(dataRequestId, requestToken);
+      const supportsFeatureEditing = await source.supportsFeatureEditing();
+      stopLoading(dataRequestId, requestToken, { supportsFeatureEditing });
+    } catch (error) {
+      onLoadError(dataRequestId, requestToken, error.message);
+      throw error;
     }
   }
 
@@ -812,7 +823,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const filterExpr = getPointFilterExpression(this.hasJoins());
-    if (filterExpr !== mbMap.getFilter(pointLayerId)) {
+    if (!_.isEqual(filterExpr, mbMap.getFilter(pointLayerId))) {
       mbMap.setFilter(pointLayerId, filterExpr);
       mbMap.setFilter(textLayerId, filterExpr);
     }
@@ -848,7 +859,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const filterExpr = getPointFilterExpression(this.hasJoins());
-    if (filterExpr !== mbMap.getFilter(symbolLayerId)) {
+    if (!_.isEqual(filterExpr, mbMap.getFilter(symbolLayerId))) {
       mbMap.setFilter(symbolLayerId, filterExpr);
     }
 
@@ -930,14 +941,14 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     this.syncVisibilityWithMb(mbMap, fillLayerId);
     mbMap.setLayerZoomRange(fillLayerId, this.getMinZoom(), this.getMaxZoom());
     const fillFilterExpr = getFillFilterExpression(hasJoins);
-    if (fillFilterExpr !== mbMap.getFilter(fillLayerId)) {
+    if (!_.isEqual(fillFilterExpr, mbMap.getFilter(fillLayerId))) {
       mbMap.setFilter(fillLayerId, fillFilterExpr);
     }
 
     this.syncVisibilityWithMb(mbMap, lineLayerId);
     mbMap.setLayerZoomRange(lineLayerId, this.getMinZoom(), this.getMaxZoom());
     const lineFilterExpr = getLineFilterExpression(hasJoins);
-    if (lineFilterExpr !== mbMap.getFilter(lineLayerId)) {
+    if (!_.isEqual(lineFilterExpr, mbMap.getFilter(lineLayerId))) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
 
@@ -961,7 +972,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const filterExpr = getCentroidFilterExpression(this.hasJoins());
-    if (filterExpr !== mbMap.getFilter(centroidLayerId)) {
+    if (!_.isEqual(filterExpr, mbMap.getFilter(centroidLayerId))) {
       mbMap.setFilter(centroidLayerId, filterExpr);
     }
 
@@ -1064,10 +1075,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   canShowTooltip() {
-    return (
-      this.isVisible() &&
-      (this.getSource().canFormatFeatureProperties() || this.getJoins().length > 0)
-    );
+    return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
   }
 
   getFeatureById(id: string | number) {
@@ -1084,5 +1092,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   async getLicensedFeatures() {
     return await this._source.getLicensedFeatures();
+  }
+
+  async addFeature(geometry: Geometry | Position[]) {
+    const layerSource = this.getSource();
+    await layerSource.addFeature(geometry);
   }
 }

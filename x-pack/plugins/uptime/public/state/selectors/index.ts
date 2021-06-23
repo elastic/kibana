@@ -35,24 +35,22 @@ export const selectPingHistogram = ({ ping }: AppState) => ping;
 
 export const selectPingList = ({ pingList }: AppState) => pingList;
 
-export const snapshotDataSelector = ({ snapshot }: AppState) => snapshot;
-
-const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
+export const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities;
 
 export const hasMLFeatureSelector = createSelector(
   mlCapabilitiesSelector,
   (mlCapabilities) =>
-    mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
+    mlCapabilities?.data?.isPlatinumOrTrialLicense && mlCapabilities?.data?.mlFeatureEnabledInSpace
 );
 
 export const canCreateMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  (mlCapabilities) => mlCapabilities?.capabilities.canCreateJob
+  (mlCapabilities) => mlCapabilities?.data?.capabilities?.canCreateJob
 );
 
 export const canDeleteMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  (mlCapabilities) => mlCapabilities?.capabilities.canDeleteJob
+  (mlCapabilities) => mlCapabilities?.data?.capabilities?.canDeleteJob
 );
 
 export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;

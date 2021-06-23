@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import Boom, { isBoom } from '@hapi/boom';
-import {
-  RequestHandlerContext,
-  KibanaRequest,
+import type Boom from '@hapi/boom';
+import { isBoom } from '@hapi/boom';
+import { errors as LegacyESErrors } from 'elasticsearch';
+
+import type {
   IKibanaResponse,
   KibanaResponseFactory,
+  RequestHandlerContext,
 } from 'src/core/server';
-import { errors as LegacyESErrors } from 'elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { KibanaRequest } from 'src/core/server';
+
 import { appContextService } from '../services';
+
 import {
-  IngestManagerError,
-  RegistryError,
-  PackageNotFoundError,
+  AgentNotFoundError,
   AgentPolicyNameExistsError,
-  PackageUnsupportedMediaTypeError,
   ConcurrentInstallOperationError,
+  IngestManagerError,
+  PackageNotFoundError,
+  PackageUnsupportedMediaTypeError,
+  RegistryError,
 } from './index';
 
 type IngestErrorHandler = (
@@ -56,10 +60,6 @@ export const isLegacyESClientError = (error: any): error is LegacyESClientError 
   return error instanceof LegacyESErrors._Abstract;
 };
 
-export function isESClientError(error: unknown): error is ResponseError {
-  return error instanceof ResponseError;
-}
-
 const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof RegistryError) {
     return 502; // Bad Gateway
@@ -75,6 +75,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   }
   if (error instanceof ConcurrentInstallOperationError) {
     return 409; // Conflict
+  }
+  if (error instanceof AgentNotFoundError) {
+    return 404;
   }
   return 400; // Bad Request
 };

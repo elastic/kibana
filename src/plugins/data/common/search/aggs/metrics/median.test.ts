@@ -100,4 +100,41 @@ describe('AggTypeMetricMedianProvider class', () => {
       }
     `);
   });
+
+  it('supports scripted fields', () => {
+    const typesRegistry = mockAggTypesRegistry();
+    const field = {
+      name: 'bytes',
+      scripted: true,
+      language: 'painless',
+      script: 'return 456',
+    };
+    const indexPattern = {
+      id: '1234',
+      title: 'logstash-*',
+      fields: {
+        getByName: () => field,
+        filter: () => [field],
+      },
+    } as any;
+
+    aggConfigs = new AggConfigs(
+      indexPattern,
+      [
+        {
+          id: METRIC_TYPES.MEDIAN,
+          type: METRIC_TYPES.MEDIAN,
+          schema: 'metric',
+          params: {
+            field: 'bytes',
+          },
+        },
+      ],
+      {
+        typesRegistry,
+      }
+    );
+
+    expect(aggConfigs.toDsl()).toMatchSnapshot();
+  });
 });

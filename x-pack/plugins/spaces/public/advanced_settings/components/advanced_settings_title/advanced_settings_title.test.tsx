@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
-import { AdvancedSettingsTitle } from './advanced_settings_title';
-import { SpaceAvatar } from '../../../space_avatar';
 import { act } from '@testing-library/react';
+import React from 'react';
+
+import { mountWithIntl } from '@kbn/test/jest';
+
+import { SpaceAvatarInternal } from '../../../space_avatar/space_avatar_internal';
+import { AdvancedSettingsTitle } from './advanced_settings_title';
 
 describe('AdvancedSettingsTitle', () => {
   it('renders without crashing', async () => {
@@ -23,11 +25,12 @@ describe('AdvancedSettingsTitle', () => {
       <AdvancedSettingsTitle getActiveSpace={() => Promise.resolve(space)} />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    await act(async () => {});
 
-    expect(wrapper.find(SpaceAvatar)).toHaveLength(1);
+    // wait for SpaceAvatar to lazy-load
+    await act(async () => {});
+    wrapper.update();
+
+    expect(wrapper.find(SpaceAvatarInternal)).toHaveLength(1);
   });
 });

@@ -43,7 +43,10 @@ export async function getExistingEnvironmentsForService({
     },
   };
 
-  const resp = await internalClient.search(params);
+  const resp = await internalClient.search(
+    'get_existing_environments_for_service',
+    params
+  );
   const existingEnvironments =
     resp.aggregations?.environments.buckets.map(
       (bucket) => bucket.key as string
