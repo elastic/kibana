@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { Section } from '../../sections';
