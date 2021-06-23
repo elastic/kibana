@@ -25,14 +25,59 @@ import {
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { sortBy } from 'lodash';
-import { ComponentStrings } from '../../../i18n';
 import { CustomElement } from '../../../types';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
 import { CustomElementModal } from '../custom_element_modal';
 import { ElementGrid } from './element_grid';
 
-const { SavedElementsModal: strings } = ComponentStrings;
+const strings = {
+  getAddNewElementDescription: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.addNewElementDescription', {
+      defaultMessage: 'Group and save workpad elements to create new elements',
+    }),
+  getAddNewElementTitle: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.addNewElementTitle', {
+      defaultMessage: 'Add new elements',
+    }),
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getDeleteButtonLabel: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.deleteButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
+  getDeleteElementDescription: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.deleteElementDescription', {
+      defaultMessage: 'Are you sure you want to delete this element?',
+    }),
+  getDeleteElementTitle: (elementName: string) =>
+    i18n.translate('xpack.canvas.savedElementsModal.deleteElementTitle', {
+      defaultMessage: `Delete element '{elementName}'?`,
+      values: {
+        elementName,
+      },
+    }),
+  getEditElementTitle: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.editElementTitle', {
+      defaultMessage: 'Edit element',
+    }),
+  getFindElementPlaceholder: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.findElementPlaceholder', {
+      defaultMessage: 'Find element',
+    }),
+  getModalTitle: () =>
+    i18n.translate('xpack.canvas.savedElementsModal.modalTitle', {
+      defaultMessage: 'My elements',
+    }),
+  getSavedElementsModalCloseButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeader.addElementModalCloseButtonLabel', {
+      defaultMessage: 'Close',
+    }),
+};
 
 export interface Props {
   /**
