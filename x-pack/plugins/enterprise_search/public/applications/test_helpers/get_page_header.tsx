@@ -41,3 +41,9 @@ export const getPageHeaderActions = (wrapper: ShallowWrapper) => {
     </div>
   );
 };
+
+export const getPageHeaderChildren = (wrapper: ShallowWrapper) => {
+  const children = getPageHeader(wrapper).children || null;
+
+  return shallow(<div>{children}</div>);
+};
