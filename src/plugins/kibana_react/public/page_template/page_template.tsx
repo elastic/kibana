@@ -40,20 +40,10 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   children,
   isEmptyState,
   restrictWidth = true,
-  bottomBar,
-  bottomBarProps,
   pageSideBar,
   solutionNav,
   ...rest
 }) => {
-  // Needed for differentiating between union types
-  let localBottomBarProps = {};
-  if (template === 'default') {
-    localBottomBarProps = {
-      bottomBar,
-      bottomBarProps,
-    };
-  }
 
   /**
    * Create the solution nav component
@@ -95,7 +85,6 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
         ...rest.pageSideBarProps,
         className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
       }}
-      {...localBottomBarProps}
       {...rest}
     >
       {children}
