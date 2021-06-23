@@ -9,9 +9,10 @@ import React, { MouseEventHandler, FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-// @ts-expect-error untyped local
-import { Popover, PopoverChildrenProps } from '../popover';
+import {
+  withSuspense,
+  LazyPopoverComponent,
+} from '../../../../../../src/plugins/presentation_util/public';
 import { ArgAdd } from '../arg_add';
 // @ts-expect-error untyped local
 import { Arg } from '../../expression_types/arg';
@@ -22,6 +23,8 @@ const strings = {
       defaultMessage: 'Add argument',
     }),
 };
+
+const Popover = withSuspense(LazyPopoverComponent);
 
 interface ArgOptions {
   arg: Arg;
@@ -49,7 +52,7 @@ export const ArgAddPopover: FC<Props> = ({ options }) => {
       panelPaddingSize="none"
       button={button}
     >
-      {({ closePopover }: PopoverChildrenProps) =>
+      {({ closePopover }) =>
         options.map((opt) => (
           <ArgAdd
             key={`${opt.arg.name}-add`}

@@ -7,9 +7,14 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { Debug } from '../../public/components/debug';
+import {
+  withSuspense,
+  LazyDebugComponent,
+} from '../../../../../src/plugins/presentation_util/public';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory } from '../../types';
+
+const Debug = withSuspense(LazyDebugComponent);
 
 const { debug: strings } = RendererStrings;
 

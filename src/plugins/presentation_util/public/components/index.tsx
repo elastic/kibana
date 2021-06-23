@@ -40,3 +40,5 @@ export const LazyErrorComponent = React.lazy(() => import('./error'));
 export const LazyDebugComponent = React.lazy(() => import('./debug'));
 
 export const LazyPopoverComponent = React.lazy(() => import('./popover'));
+
+export { ClosePopoverFn } from './popover';

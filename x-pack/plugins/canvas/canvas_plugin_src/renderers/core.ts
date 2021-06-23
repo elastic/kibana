@@ -6,7 +6,6 @@
  */
 
 import { debug } from './debug';
-import { error } from './error';
 import { image } from './image';
 import { markdown } from './markdown';
 import { metric } from './metric';
@@ -20,7 +19,6 @@ import { text } from './text';
 
 export const renderFunctions = [
   debug,
-  error,
   image,
   markdown,
   metric,

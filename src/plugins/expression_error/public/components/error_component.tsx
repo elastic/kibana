@@ -15,7 +15,7 @@ import {
   LazyErrorComponent,
   LazyPopoverComponent,
 } from '../../../presentation_util/public';
-import './reveal_image.scss';
+import './error.scss';
 
 const Error = withSuspense(LazyErrorComponent);
 const Popover = withSuspense(LazyPopoverComponent);

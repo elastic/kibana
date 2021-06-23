@@ -20,8 +20,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import {
+  withSuspense,
+  LazyErrorComponent,
+} from '../../../../../../../src/plugins/presentation_util/public';
 import { Datatable } from '../../datatable';
-import { Error } from '../../error';
+
+const Error = withSuspense(LazyErrorComponent);
 
 const strings = {
   getEmptyFirstLineDescription: () =>

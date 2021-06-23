@@ -9,10 +9,13 @@ import React, { Fragment, FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import {
+  withSuspense,
+  LazyPopoverComponent,
+  ClosePopoverFn,
+} from '../../../../../../../src/plugins/presentation_util/public';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
 import { PositionedElement } from '../../../../types';
@@ -106,6 +109,8 @@ const strings = {
       defaultMessage: 'Vertical',
     }),
 };
+
+const Popover = withSuspense(LazyPopoverComponent);
 
 export interface Props {
   /**
