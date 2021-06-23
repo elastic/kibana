@@ -16,9 +16,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { USERS_DOCS_URL } from '../../enterprise_search/routes';
+import { docLinks } from '../doc_links';
 
 import { NO_USERS_TITLE, NO_USERS_DESCRIPTION, ENABLE_USERS_LINK } from './constants';
+
+const USERS_DOCS_URL = `${docLinks.enterpriseSearchBase}/users-access.html`;
 
 export const UsersEmptyPrompt: React.FC = () => (
   <EuiFlexGroup alignItems="center" justifyContent="center">
