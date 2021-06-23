@@ -157,7 +157,7 @@ export function EditorFrame(props: EditorFrameProps) {
         }
         suggestionsPanel={
           allLoaded &&
-          !state.isFullscreenDatasource && (
+          !isFullscreenDatasource && (
             <SuggestionPanel
               visualizationMap={props.visualizationMap}
               datasourceMap={props.datasourceMap}

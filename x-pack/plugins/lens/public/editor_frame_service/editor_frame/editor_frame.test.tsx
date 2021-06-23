@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 
 // Tests are executed in a jsdom environment who does not have sizing methods,
@@ -45,7 +45,8 @@ import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/pu
 import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 import { mockDataPlugin, mountWithProvider } from '../../mocks';
-import { setState } from '../../state_management';
+import { setState, setToggleFullscreen } from '../../state_management';
+import { FrameLayout } from './frame_layout';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -1118,32 +1119,21 @@ describe('editor_frame', () => {
         ExpressionRenderer: expressionRendererMock,
       };
 
-      const { instance: el } = await mountWithProvider(
-        <EditorFrame {...props} />,
-        props.plugins.data
-      );
+      const { instance: el, lensStore } = await mountWithProvider(<EditorFrame {...props} />, {
+        data: props.plugins.data,
+      });
       instance = el;
 
       expect(
         instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
       ).not.toBeUndefined();
 
-      await act(async () => {
-        (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
-          type: 'TOGGLE_FULLSCREEN',
-        });
-      });
-
+      lensStore.dispatch(setToggleFullscreen());
       instance.update();
 
       expect(instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement).toBe(false);
 
-      await act(async () => {
-        (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
-          type: 'TOGGLE_FULLSCREEN',
-        });
-      });
-
+      lensStore.dispatch(setToggleFullscreen());
       instance.update();
 
       expect(
