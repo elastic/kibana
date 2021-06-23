@@ -97,9 +97,13 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
             throw new Error('No data while fetching enrollment API keys');
           }
 
-          setEnrollmentAPIKeys(
-            res.data.list.filter((key) => key.policy_id === agentPolicyId && key.active === true)
+          const enrollmentAPIKeysResponse = res.data.list.filter(
+            (key) => key.policy_id === agentPolicyId && key.active === true
           );
+
+          setEnrollmentAPIKeys(enrollmentAPIKeysResponse);
+          // Default to the first the first enrollment key if there is one.
+          setSelectedEnrollmentApiKey(enrollmentAPIKeysResponse[0]?.id);
         } catch (error) {
           notifications.toasts.addError(error, {
             title: 'Error',
@@ -108,7 +112,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
       }
       fetchEnrollmentAPIKeys();
     },
-    [agentPolicyId, notifications.toasts]
+    [onKeyChange, agentPolicyId, notifications.toasts]
   );
 
   useEffect(

@@ -31,9 +31,9 @@ type Props = {
 
 const resolveAgentId = (
   agentPolicies?: AgentPolicy[],
-  selectedAgentId?: string
+  selectedAgentPolicyId?: string
 ): undefined | string => {
-  if (agentPolicies && agentPolicies.length && !selectedAgentId) {
+  if (agentPolicies && agentPolicies.length && !selectedAgentPolicyId) {
     if (agentPolicies.length === 1) {
       return agentPolicies[0].id;
     }
@@ -44,33 +44,33 @@ const resolveAgentId = (
     }
   }
 
-  return selectedAgentId;
+  return selectedAgentPolicyId;
 };
 
 export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
   const { withKeySelection, agentPolicies, onAgentPolicyChange, excludeFleetServer } = props;
   const onKeyChange = props.withKeySelection && props.onKeyChange;
-  const [selectedAgentId, setSelectedAgentId] = useState<undefined | string>(
+  const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<undefined | string>(
     () => resolveAgentId(agentPolicies, undefined) // no agent id selected yet
   );
 
   useEffect(
     function triggerOnAgentPolicyChangeEffect() {
       if (onAgentPolicyChange) {
-        onAgentPolicyChange(selectedAgentId);
+        onAgentPolicyChange(selectedAgentPolicyId);
       }
     },
-    [selectedAgentId, onAgentPolicyChange]
+    [selectedAgentPolicyId, onAgentPolicyChange]
   );
 
   useEffect(
     function useDefaultAgentPolicyEffect() {
-      const resolvedId = resolveAgentId(agentPolicies, selectedAgentId);
-      if (resolvedId !== selectedAgentId) {
-        setSelectedAgentId(resolvedId);
+      const resolvedId = resolveAgentId(agentPolicies, selectedAgentPolicyId);
+      if (resolvedId !== selectedAgentPolicyId) {
+        setSelectedAgentPolicyId(resolvedId);
       }
     },
-    [agentPolicies, selectedAgentId]
+    [agentPolicies, selectedAgentPolicyId]
   );
 
   return (
@@ -90,16 +90,16 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           value: agentPolicy.id,
           text: agentPolicy.name,
         }))}
-        value={selectedAgentId || undefined}
-        onChange={(e) => setSelectedAgentId(e.target.value)}
+        value={selectedAgentPolicyId || undefined}
+        onChange={(e) => setSelectedAgentPolicyId(e.target.value)}
         aria-label={i18n.translate('xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel', {
           defaultMessage: 'Agent policy',
         })}
       />
       <EuiSpacer size="m" />
-      {selectedAgentId && (
+      {selectedAgentPolicyId && (
         <AgentPolicyPackageBadges
-          agentPolicyId={selectedAgentId}
+          agentPolicyId={selectedAgentPolicyId}
           excludeFleetServer={excludeFleetServer}
         />
       )}
@@ -108,7 +108,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           <EuiSpacer />
           <AdvancedAgentAuthenticationSettings
             onKeyChange={onKeyChange}
-            agentPolicyId={selectedAgentId}
+            agentPolicyId={selectedAgentPolicyId}
           />
         </>
       )}
