@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ApmBase } from '@elastic/apm-rum';
+import type { ApmBase, AgentConfigOptions } from '@elastic/apm-rum';
 import { modifyUrl } from '@kbn/std';
 import type { InternalApplicationStart } from './application';
 
@@ -18,9 +18,8 @@ const HTTP_REQUEST_TRANSACTION_NAME_REGEX = /^(GET|POST|PUT|HEAD|PATCH|DELETE|OP
  * that lives in the Kibana Platform.
  */
 
-interface ApmConfig {
-  // AgentConfigOptions is not exported from @elastic/apm-rum
-  active?: boolean;
+interface ApmConfig extends AgentConfigOptions {
+  // Kibana-specific config settings:
   globalLabels?: Record<string, string>;
 }
 
