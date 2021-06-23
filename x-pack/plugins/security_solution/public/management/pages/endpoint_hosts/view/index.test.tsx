@@ -1044,6 +1044,17 @@ describe('when on the endpoint list page', () => {
               isolation: false,
             },
           },
+          host: {
+            ...hosts[0].metadata.host,
+            os: {
+              ...hosts[0].metadata.host.os,
+              name: 'Windows',
+            },
+          },
+          agent: {
+            ...hosts[0].metadata.agent,
+            version: '7.14.0',
+          },
         },
         query_strategy_version: queryStrategyVersion,
       };

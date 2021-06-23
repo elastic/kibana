@@ -37,15 +37,10 @@ export const isOsSupported = ({
   return supportedOss.some((os) => currentOs === os);
 };
 
-export const isIsolationSupported = ({
-  osFamily,
-  version,
-}: {
-  osFamily: string;
-  version: string;
-}) => {
+export const isIsolationSupported = ({ osName, version }: { osName: string; version: string }) => {
+  const normalizedOs = osName.toLowerCase();
   return (
-    isOsSupported({ currentOs: osFamily, supportedOss: ['macos', 'windows'] }) &&
+    isOsSupported({ currentOs: normalizedOs, supportedOss: ['macos', 'windows'] }) &&
     isVersionSupported({ currentVersion: version, minVersionRequired: '7.14.0' })
   );
 };

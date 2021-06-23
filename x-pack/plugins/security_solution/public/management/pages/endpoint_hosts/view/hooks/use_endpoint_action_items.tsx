@@ -46,7 +46,7 @@ export const useEndpointActionItems = (
       const endpointHostName = endpointMetadata.host.hostname;
       const fleetAgentId = endpointMetadata.elastic.agent.id;
       const isolationSupported = isIsolationSupported({
-        osFamily: endpointMetadata.host.os.family,
+        osName: endpointMetadata.host.os.name,
         version: endpointMetadata.agent.version,
       });
       const {

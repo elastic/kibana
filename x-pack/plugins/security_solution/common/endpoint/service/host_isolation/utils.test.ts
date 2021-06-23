@@ -105,7 +105,7 @@ describe('Host Isolation utils isIsolationSupported', () => {
   it('should be supported with a compatible os and version', () => {
     expect(
       isIsolationSupported({
-        osFamily: 'windows',
+        osName: 'windows',
         version: '7.14.0',
       })
     ).toEqual(true);
@@ -114,7 +114,7 @@ describe('Host Isolation utils isIsolationSupported', () => {
   it('should not be supported with a incompatible os and version', () => {
     expect(
       isIsolationSupported({
-        osFamily: 'linux',
+        osName: 'linux',
         version: '7.13.0',
       })
     ).toEqual(false);
@@ -123,7 +123,7 @@ describe('Host Isolation utils isIsolationSupported', () => {
   it('should not be supported with a incompatible os and compatible version', () => {
     expect(
       isIsolationSupported({
-        osFamily: 'linux',
+        osName: 'linux',
         version: '7.14.0',
       })
     ).toEqual(false);
@@ -132,7 +132,7 @@ describe('Host Isolation utils isIsolationSupported', () => {
   it('should not be supported with a compatible os and incompatible version', () => {
     expect(
       isIsolationSupported({
-        osFamily: 'macos',
+        osName: 'macos',
         version: '7.13.0',
       })
     ).toEqual(false);

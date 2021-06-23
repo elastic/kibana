@@ -103,8 +103,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   }, [detailsData]);
 
   const hostOsFamily = useMemo(() => {
-    const findOsFamily = find({ category: 'host', field: 'host.os.family' }, detailsData)?.values;
-    return findOsFamily ? findOsFamily[0] : '';
+    const findOsName = find({ category: 'host', field: 'host.os.name' }, detailsData)?.values;
+    return findOsName ? findOsName[0] : '';
   }, [detailsData]);
 
   const agentVersion = useMemo(() => {
@@ -114,7 +114,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   }, [detailsData]);
 
   const isolationSupported = isIsolationSupported({
-    osFamily: hostOsFamily,
+    osName: hostOsFamily,
     version: agentVersion,
   });
 
