@@ -344,3 +344,20 @@ export const isOptimizedGroupedSearchQueryResponse = (
   const result = response[0];
   return result && !result.hasOwnProperty('filtered_results');
 };
+
+export const isOptimizableGroupedThreshold = (
+  selectedComparator: AlertParams['count']['comparator'],
+  selectedValue?: AlertParams['count']['value']
+) => {
+  if (selectedComparator === Comparator.GT) {
+    return true;
+  } else if (
+    typeof selectedValue === 'number' &&
+    selectedComparator === Comparator.GT_OR_EQ &&
+    selectedValue > 0
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};

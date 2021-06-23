@@ -37,6 +37,7 @@ import {
   CountAlertParams,
   RatioAlertParams,
   isOptimizedGroupedSearchQueryResponse,
+  isOptimizableGroupedThreshold,
 } from '../../../../common/alerting/logs/log_threshold/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
@@ -471,7 +472,7 @@ export const getGroupedESQuery = (
 
   const {
     groupBy,
-    count: { comparator },
+    count: { comparator, value },
   } = params;
 
   if (!groupBy || !groupBy.length) {
@@ -483,24 +484,7 @@ export const getGroupedESQuery = (
     timestampField
   );
 
-  const isOptimizableComparator = (
-    selectedComparator: AlertParams['count']['comparator'],
-    selectedValue?: AlertParams['count']['value']
-  ) => {
-    if (selectedComparator === Comparator.GT) {
-      return true;
-    } else if (
-      typeof selectedValue === 'number' &&
-      selectedComparator === Comparator.GT_OR_EQ &&
-      selectedValue > 0
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  if (isOptimizableComparator(comparator)) {
+  if (isOptimizableGroupedThreshold(comparator, value)) {
     const aggregations = {
       groups: {
         composite: {

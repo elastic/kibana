@@ -23,6 +23,7 @@ import {
   PartialRatioAlertParams,
   ThresholdType,
   timeUnitRT,
+  isOptimizableGroupedThreshold,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { ObjectEntries } from '../../../../../common/utility_types';
@@ -257,9 +258,11 @@ export const Editor: React.FC<
 
   const shouldShowGroupByOptimizationWarning = useMemo(() => {
     const hasSetGroupBy = alertParams.groupBy && alertParams.groupBy.length > 0;
-    const hasSetOptimizableThresholdComparator =
-      alertParams.count && alertParams.count.comparator === Comparator.GT;
-    return hasSetGroupBy && !hasSetOptimizableThresholdComparator;
+    return (
+      hasSetGroupBy &&
+      alertParams.count &&
+      !isOptimizableGroupedThreshold(alertParams.count.comparator, alertParams.count.value)
+    );
   }, [alertParams]);
 
   // Wait until the alert param defaults have been set
