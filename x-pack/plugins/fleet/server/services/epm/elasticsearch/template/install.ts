@@ -293,11 +293,11 @@ export async function ensureDefaultComponentTemplate(esClient: ElasticsearchClie
 
   const existingTemplate = getTemplateRes?.component_templates?.[0];
   if (!existingTemplate) {
-    await putComponentTemplate(
-      FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
-      FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
-      esClient
-    );
+    await putComponentTemplate(esClient, {
+      name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
+      body: FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
+      create: true,
+    });
   }
 
   return { isCreated: !existingTemplate };
@@ -404,12 +404,13 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
         type: ElasticsearchAssetType.indexTemplate,
       },
     ];
-    const componentTemplates = installedTemplate.indexTemplate.composed_of.map(
-      (componentTemplateId) => ({
+    const componentTemplates = installedTemplate.indexTemplate.composed_of
+      // Filter global component template shared between integrations
+      .filter((componentTemplateId) => componentTemplateId !== FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME)
+      .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,
-      })
-    );
+      }));
     return indexTemplates.concat(componentTemplates);
   });
 }
