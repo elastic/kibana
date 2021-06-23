@@ -8,9 +8,9 @@
 import { EuiImage, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
+import { ScreenshotRefImageData } from '../../../../../../common/runtime_types/ping/synthetics';
 import { fullSizeImageAlt } from './translations';
-import { useCompositeImage } from '../../../../../hooks';
+import { useCompositeImage } from '../../../../../hooks/use_composite_image';
 
 const POPOVER_IMG_HEIGHT = 360;
 const POPOVER_IMG_WIDTH = 640;

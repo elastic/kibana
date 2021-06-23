@@ -7,7 +7,18 @@
 
 import React from 'react';
 import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
-import { ScreenshotRefImageData } from '../../common/runtime_types';
+import { ScreenshotRefImageData } from '../../common/runtime_types/ping/synthetics';
+
+/**
+ * Checks if two refs are the same. If the ref is unchanged, there's no need
+ * to run the expensive draw procedure.
+ */
+function isNewRef(a?: ScreenshotRefImageData, b?: ScreenshotRefImageData): boolean {
+  if (typeof a === 'undefined' || typeof b === 'undefined') return false;
+  const stepA = a.ref.screenshotRef.synthetics.step;
+  const stepB = b.ref.screenshotRef.synthetics.step;
+  return stepA.index !== stepB.index || stepA.name !== stepB.name;
+}
 
 /**
  * Assembles the data for a composite image and returns the composite to a callback.
@@ -19,7 +30,13 @@ export const useCompositeImage = (
   imgRef: ScreenshotRefImageData,
   callback: React.Dispatch<string | undefined>,
   url?: string
-): void =>
+): void => {
+  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData | undefined>(undefined);
+
+  if (curRef === null) {
+    setCurRef(imgRef);
+  }
+
   React.useEffect(() => {
     const canvas = document.createElement('canvas');
 
@@ -31,10 +48,12 @@ export const useCompositeImage = (
 
     // if the URL is truthy it means it's already been composed, so there
     // is no need to call the function
-    if (typeof url === 'undefined') {
+    if (typeof url === 'undefined' || isNewRef(imgRef, curRef)) {
       compose();
+      setCurRef(imgRef);
     }
     return () => {
       canvas.parentElement?.removeChild(canvas);
     };
-  }, [imgRef, callback, url]);
+  }, [imgRef, callback, curRef, url]);
+};
