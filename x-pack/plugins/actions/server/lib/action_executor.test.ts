@@ -114,6 +114,25 @@ test('successfully executes', async () => {
       Array [
         Object {
           "event": Object {
+            "action": "execute-start",
+          },
+          "kibana": Object {
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+          },
+          "message": "action started: test:1: 1",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
             "action": "execute",
             "outcome": "success",
           },
