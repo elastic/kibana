@@ -117,5 +117,5 @@ export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
 
 // Policy preconfig API routes
 export const PRECONFIGURATION_API_ROUTES = {
-  PUT_PRECONFIG: `${API_ROOT}/setup/preconfiguration`,
+  UPDATE_PATTERN: `${API_ROOT}/setup/preconfiguration`,
 };

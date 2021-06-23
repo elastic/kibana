@@ -80,7 +80,7 @@ export const HiddenDocuments: React.FC = () => {
             <h3>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.emptyTitle',
-                { defaultMessage: 'No documents are being hidden for this query' }
+                { defaultMessage: "You haven't hidden any documents yet" }
               )}
             </h3>
           }

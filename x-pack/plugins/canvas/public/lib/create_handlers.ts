@@ -44,6 +44,10 @@ export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHan
     this.done = fn;
   },
 
+  onDestroy(fn: () => void) {
+    this.destroy = fn;
+  },
+
   // TODO: these functions do not match the `onXYZ` and `xyz` pattern elsewhere.
   onEmbeddableDestroyed() {},
   onEmbeddableInputChange() {},
@@ -105,7 +109,7 @@ export const createDispatchedHandlerFactory = (
       },
 
       getFilter() {
-        return element.filter;
+        return element.filter || '';
       },
 
       onComplete(fn: () => void) {

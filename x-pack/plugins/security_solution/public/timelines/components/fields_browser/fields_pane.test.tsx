@@ -15,6 +15,8 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { FieldsPane } from './fields_pane';
 
+jest.mock('../../../common/lib/kibana');
+
 const timelineId = 'test';
 
 describe('FieldsPane', () => {
