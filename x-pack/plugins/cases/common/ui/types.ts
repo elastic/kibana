@@ -23,6 +23,20 @@ export type StatusAllType = typeof StatusAll;
 
 export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
 
+/**
+ * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
+ *
+ * @example
+ * const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+ * return <CaseComponent refreshRef={refreshRef} ...otherProps>
+ */
+export type CaseViewRefreshPropInterface = null | {
+  /** Refreshes the all of the user actions/comments in the view's timeline */
+  refreshUserActions: () => Promise<void>;
+  /** Refreshes the Case information */
+  refreshCase: () => Promise<void>;
+};
+
 export type Comment = CommentRequest & {
   associationType: AssociationType;
   id: string;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { SearchResponse } from 'elasticsearch';
 import { isEmpty } from 'lodash';
@@ -19,7 +19,7 @@ import {
   useFormatUrl,
 } from '../../../common/components/link_to';
 import { Ecs } from '../../../../common/ecs';
-import { Case } from '../../../../../cases/common';
+import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { KibanaServices, useKibana } from '../../../common/lib/kibana';
@@ -176,9 +176,13 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       })
     );
   }, [dispatch]);
+
+  const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+
   return (
     <>
       {casesUi.getCaseView({
+        refreshRef,
         allCasesNavigation: {
           href: formattedAllCasesLink,
           onClick: async (e) => {
