@@ -28,50 +28,48 @@ export function DiscoverFieldDetails({
 }: DiscoverFieldDetailsProps) {
   return (
     <>
-      <div className="">
-        {details.error && <EuiText size="xs">{details.error}</EuiText>}
-        {!details.error && (
-          <>
-            <div style={{ marginTop: '4px' }}>
-              {details.buckets.map((bucket: Bucket, idx: number) => (
-                <DiscoverFieldBucket
-                  key={`bucket${idx}`}
-                  bucket={bucket}
-                  field={field}
-                  onAddFilter={onAddFilter}
-                />
-              ))}
-            </div>
-            <EuiSpacer size="xs" />
-            <EuiText size="xs">
-              {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
-                <EuiLink
-                  onClick={() => onAddFilter('_exists_', field.name, '+')}
-                  data-test-subj="onAddFilterButton"
-                >
-                  <FormattedMessage
-                    id="discover.fieldChooser.detailViews.existsInRecordsText"
-                    defaultMessage="Exists in {value} / {totalValue} records"
-                    values={{
-                      value: details.exists,
-                      totalValue: details.total,
-                    }}
-                  />
-                </EuiLink>
-              ) : (
+      {details.error && <EuiText size="xs">{details.error}</EuiText>}
+      {!details.error && (
+        <>
+          <div style={{ marginTop: '4px' }}>
+            {details.buckets.map((bucket: Bucket, idx: number) => (
+              <DiscoverFieldBucket
+                key={`bucket${idx}`}
+                bucket={bucket}
+                field={field}
+                onAddFilter={onAddFilter}
+              />
+            ))}
+          </div>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs">
+            {!indexPattern.metaFields.includes(field.name) && !field.scripted ? (
+              <EuiLink
+                onClick={() => onAddFilter('_exists_', field.name, '+')}
+                data-test-subj="onAddFilterButton"
+              >
                 <FormattedMessage
-                  id="discover.fieldChooser.detailViews.valueOfRecordsText"
-                  defaultMessage="{value} / {totalValue} records"
+                  id="discover.fieldChooser.detailViews.existsInRecordsText"
+                  defaultMessage="Exists in {value} / {totalValue} records"
                   values={{
                     value: details.exists,
                     totalValue: details.total,
                   }}
                 />
-              )}
-            </EuiText>
-          </>
-        )}
-      </div>
+              </EuiLink>
+            ) : (
+              <FormattedMessage
+                id="discover.fieldChooser.detailViews.valueOfRecordsText"
+                defaultMessage="{value} / {totalValue} records"
+                values={{
+                  value: details.exists,
+                  totalValue: details.total,
+                }}
+              />
+            )}
+          </EuiText>
+        </>
+      )}
     </>
   );
 }
