@@ -120,6 +120,7 @@ jest.mock('./epm/packages/get', () => ({
 }));
 
 jest.mock('./package_policy', () => ({
+  ...jest.requireActual('./package_policy'),
   packagePolicyService: {
     create(soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) {
       return {
