@@ -13,6 +13,32 @@ If your problem isn’t described here, please review open issues in the followi
 Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 
 [float]
+[[rule-cannot-decrypt-api-key]]
+=== Rule cannot decrypt apiKey
+
+*Problem*:
+
+The rule fails to execute and has an `Unable to decrypt attribute "apiKey"` error.
+
+*Solution*:
+
+This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value used to create the rule does not match the value used during rule execution. Depending on the scenario, there are different ways to solve this problem:
+
+[cols="2*<"]
+|===
+
+| If the value in `xpack.encryptedSavedObjects.encryptionKey` was manually changed, and the previous encryption key is still known.
+| Ensure any previous encryption key is included in the keys used for <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption only>>.
+
+| If another {kib} instance with a different encryption key connects to the cluster.
+| The other {kib} instance might be trying to run the rule using a different encryption key than what the rule was created with. Ensure the encryption keys among all the {kib} instances are the same, and setting <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption only keys>> for previously used encryption keys.
+
+| If other scenarios don't apply.
+| Generate a new API key for the rule by disabling then enabling the rule.
+
+|===
+
+[float]
 [[rules-small-check-interval-run-late]]
 === Rules with small check intervals run late
 
@@ -28,7 +54,6 @@ When a Rule *check interval* is smaller than the Task Manager <<task-manager-set
 Either tweak the <<task-manager-settings,{kib} Task Manager settings>> or increase the *check interval* of the rules in question.
 
 For more details, see <<task-manager-health-scheduled-tasks-small-schedule-interval-run-late>>.
-
 
 [float]
 [[scheduled-rules-run-late]]

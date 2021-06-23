@@ -525,15 +525,22 @@ describe('SavedObjectsRepository', () => {
           const ns2 = 'bar-namespace';
           const ns3 = 'baz-namespace';
           const objects = [
-            { ...obj1, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [ns2] },
-            { ...obj2, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [ns3] },
+            { ...obj1, type: 'dashboard', initialNamespaces: [ns2] },
+            { ...obj1, type: MULTI_NAMESPACE_ISOLATED_TYPE, initialNamespaces: [ns2] },
+            { ...obj1, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [ns2, ns3] },
           ];
           await bulkCreateSuccess(objects, { namespace, overwrite: true });
           const body = [
-            expect.any(Object),
+            { index: expect.objectContaining({ _id: `${ns2}:dashboard:${obj1.id}` }) },
+            expect.objectContaining({ namespace: ns2 }),
+            {
+              index: expect.objectContaining({
+                _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj1.id}`,
+              }),
+            },
             expect.objectContaining({ namespaces: [ns2] }),
-            expect.any(Object),
-            expect.objectContaining({ namespaces: [ns3] }),
+            { index: expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj1.id}` }) },
+            expect.objectContaining({ namespaces: [ns2, ns3] }),
           ];
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({ body }),
@@ -649,24 +656,19 @@ describe('SavedObjectsRepository', () => {
         ).rejects.toThrowError(createBadRequestError('"options.namespace" cannot be "*"'));
       });
 
-      it(`returns error when initialNamespaces is used with a non-shareable object`, async () => {
-        const test = async (objType) => {
-          const obj = { ...obj3, type: objType, initialNamespaces: [] };
-          await bulkCreateError(
+      it(`returns error when initialNamespaces is used with a space-agnostic object`, async () => {
+        const obj = { ...obj3, type: NAMESPACE_AGNOSTIC_TYPE, initialNamespaces: [] };
+        await bulkCreateError(
+          obj,
+          undefined,
+          expectErrorResult(
             obj,
-            undefined,
-            expectErrorResult(
-              obj,
-              createBadRequestError('"initialNamespaces" can only be used on multi-namespace types')
-            )
-          );
-        };
-        await test('dashboard');
-        await test(NAMESPACE_AGNOSTIC_TYPE);
-        await test(MULTI_NAMESPACE_ISOLATED_TYPE);
+            createBadRequestError('"initialNamespaces" cannot be used on space-agnostic types')
+          )
+        );
       });
 
-      it(`throws when options.initialNamespaces is used with a shareable type and is empty`, async () => {
+      it(`returns error when initialNamespaces is empty`, async () => {
         const obj = { ...obj3, type: MULTI_NAMESPACE_TYPE, initialNamespaces: [] };
         await bulkCreateError(
           obj,
@@ -676,6 +678,26 @@ describe('SavedObjectsRepository', () => {
             createBadRequestError('"initialNamespaces" must be a non-empty array of strings')
           )
         );
+      });
+
+      it(`returns error when initialNamespaces is used with a space-isolated object and does not specify a single space`, async () => {
+        const doTest = async (objType, initialNamespaces) => {
+          const obj = { ...obj3, type: objType, initialNamespaces };
+          await bulkCreateError(
+            obj,
+            undefined,
+            expectErrorResult(
+              obj,
+              createBadRequestError(
+                '"initialNamespaces" can only specify a single space when used with space-isolated types'
+              )
+            )
+          );
+        };
+        await doTest('dashboard', ['spacex', 'spacey']);
+        await doTest('dashboard', ['*']);
+        await doTest(MULTI_NAMESPACE_ISOLATED_TYPE, ['spacex', 'spacey']);
+        await doTest(MULTI_NAMESPACE_ISOLATED_TYPE, ['*']);
       });
 
       it(`returns error when type is invalid`, async () => {
@@ -1865,12 +1887,46 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`adds initialNamespaces instead of namespace`, async () => {
-        const options = { id, namespace, initialNamespaces: ['bar-namespace', 'baz-namespace'] };
-        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, options);
-        expect(client.create).toHaveBeenCalledWith(
+        const ns2 = 'bar-namespace';
+        const ns3 = 'baz-namespace';
+        await savedObjectsRepository.create('dashboard', attributes, {
+          id,
+          namespace,
+          initialNamespaces: [ns2],
+        });
+        await savedObjectsRepository.create(MULTI_NAMESPACE_ISOLATED_TYPE, attributes, {
+          id,
+          namespace,
+          initialNamespaces: [ns2],
+        });
+        await savedObjectsRepository.create(MULTI_NAMESPACE_TYPE, attributes, {
+          id,
+          namespace,
+          initialNamespaces: [ns2, ns3],
+        });
+
+        expect(client.create).toHaveBeenCalledTimes(3);
+        expect(client.create).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: `${ns2}:dashboard:${id}`,
+            body: expect.objectContaining({ namespace: ns2 }),
+          }),
+          expect.anything()
+        );
+        expect(client.create).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${id}`,
+            body: expect.objectContaining({ namespaces: [ns2] }),
+          }),
+          expect.anything()
+        );
+        expect(client.create).toHaveBeenNthCalledWith(
+          3,
           expect.objectContaining({
             id: `${MULTI_NAMESPACE_TYPE}:${id}`,
-            body: expect.objectContaining({ namespaces: options.initialNamespaces }),
+            body: expect.objectContaining({ namespaces: [ns2, ns3] }),
           }),
           expect.anything()
         );
@@ -1892,27 +1948,38 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      it(`throws when options.initialNamespaces is used with a non-shareable object`, async () => {
-        const test = async (objType) => {
-          await expect(
-            savedObjectsRepository.create(objType, attributes, { initialNamespaces: [namespace] })
-          ).rejects.toThrowError(
-            createBadRequestError(
-              '"options.initialNamespaces" can only be used on multi-namespace types'
-            )
-          );
-        };
-        await test('dashboard');
-        await test(MULTI_NAMESPACE_ISOLATED_TYPE);
-        await test(NAMESPACE_AGNOSTIC_TYPE);
+      it(`throws when options.initialNamespaces is used with a space-agnostic object`, async () => {
+        await expect(
+          savedObjectsRepository.create(NAMESPACE_AGNOSTIC_TYPE, attributes, {
+            initialNamespaces: [namespace],
+          })
+        ).rejects.toThrowError(
+          createBadRequestError('"initialNamespaces" cannot be used on space-agnostic types')
+        );
       });
 
-      it(`throws when options.initialNamespaces is used with a shareable type and is empty`, async () => {
+      it(`throws when options.initialNamespaces is empty`, async () => {
         await expect(
           savedObjectsRepository.create(MULTI_NAMESPACE_TYPE, attributes, { initialNamespaces: [] })
         ).rejects.toThrowError(
-          createBadRequestError('"options.initialNamespaces" must be a non-empty array of strings')
+          createBadRequestError('"initialNamespaces" must be a non-empty array of strings')
         );
+      });
+
+      it(`throws when options.initialNamespaces is used with a space-isolated object and does not specify a single space`, async () => {
+        const doTest = async (objType, initialNamespaces) => {
+          await expect(
+            savedObjectsRepository.create(objType, attributes, { initialNamespaces })
+          ).rejects.toThrowError(
+            createBadRequestError(
+              '"initialNamespaces" can only specify a single space when used with space-isolated types'
+            )
+          );
+        };
+        await doTest('dashboard', ['spacex', 'spacey']);
+        await doTest('dashboard', ['*']);
+        await doTest(MULTI_NAMESPACE_ISOLATED_TYPE, ['spacex', 'spacey']);
+        await doTest(MULTI_NAMESPACE_ISOLATED_TYPE, ['*']);
       });
 
       it(`throws when options.namespace is '*'`, async () => {

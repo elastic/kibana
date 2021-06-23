@@ -6,7 +6,7 @@
  */
 
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import {
   SERVICE_NAME,
