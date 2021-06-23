@@ -9,7 +9,7 @@ import { engines } from '../../../app_search/__mocks__/engines.mock';
 
 import { AttributeName } from '../../types';
 
-import { elasticsearchUsers } from './elasticsearchUsers';
+import { elasticsearchUsers } from './elasticsearch_users';
 
 export const asRoleMapping = {
   id: 'sdgfasdgadf123',
