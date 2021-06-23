@@ -27,6 +27,14 @@ describe('csp collector', () => {
       style_src: [],
       worker_src: [],
       script_src: [],
+      connect_src: [],
+      default_src: [],
+      font_src: [],
+      frame_src: [],
+      img_src: [],
+      frame_ancestors: [],
+      report_uri: [],
+      report_to: [],
       ...config,
     });
   }
