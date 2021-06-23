@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, HttpStart } from 'src/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+  HttpStart,
+  IBasePath,
+} from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -21,6 +32,10 @@ export interface CloudConfigType {
   profile_url?: string;
   deployment_url?: string;
   organization_url?: string;
+  full_story: {
+    enabled: boolean;
+    org_id?: string;
+  };
 }
 
 interface CloudSetupDependencies {
@@ -31,6 +46,8 @@ interface CloudSetupDependencies {
 interface CloudStartDependencies {
   security?: SecurityPluginStart;
 }
+
+const ELASTIC_CLOUD_PRINCIPAL_ATTR_NAME = `saml(http://saml.elastic-cloud.com/attributes/principal)`;
 
 export interface CloudSetup {
   cloudId?: string;
@@ -43,15 +60,20 @@ export interface CloudSetup {
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
-  private config!: CloudConfigType;
+  private config!: CloudConfigTypePublic;
   private isCloudEnabled: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<CloudConfigType>();
+    this.config = this.initializerContext.config.get<CloudConfigTypePublic>();
     this.isCloudEnabled = false;
   }
 
-  public setup(core: CoreSetup, { home }: CloudSetupDependencies) {
+  public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
+    this.setupFullstory({ basePath: core.http.basePath, security }).catch((e) =>
+      // eslint-disable-next-line no-console
+      console.debug(`Error setting up FullStory: ${e.toString()}`)
+    );
+
     const {
       id,
       cname,
@@ -135,4 +157,68 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const user = await security.authc.getCurrentUser().catch(() => null);
     return user?.roles.includes('superuser') ?? true;
   }
+
+  private async setupFullstory({
+    basePath,
+    security,
+  }: CloudSetupDependencies & { basePath: IBasePath }) {
+    const { enabled, org_id: orgId } = this.config.full_story;
+    if (!enabled || !orgId) {
+      return;
+    }
+
+    // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
+    const { initializeFullStory } = await import('./fullstory');
+    const userIdPromise: Promise<string | undefined> = security
+      ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
+      : Promise.resolve(undefined);
+
+    initializeFullStory({
+      basePath,
+      orgId,
+      packageInfo: this.initializerContext.env.packageInfo,
+      userIdPromise,
+    });
+  }
 }
+
+/** @internal exported for testing */
+export const loadFullStoryUserId = async ({
+  getCurrentUser,
+}: {
+  getCurrentUser: () => Promise<AuthenticatedUser>;
+}) => {
+  try {
+    const currentUser = await getCurrentUser().catch(() => undefined);
+    if (!currentUser) {
+      return undefined;
+    }
+
+    const metadata: any = currentUser.metadata ?? {};
+    const cloudUserIdArray = metadata[ELASTIC_CLOUD_PRINCIPAL_ATTR_NAME];
+
+    // Log very defensively here so we can debug this easily if it breaks
+    if (
+      // Only proceed if the key is specified
+      !cloudUserIdArray ||
+      // Only accept this value if it's an array
+      !Array.isArray(cloudUserIdArray) ||
+      // Only accept the first array value if it's a string or a number
+      (typeof cloudUserIdArray[0] !== 'number' && typeof cloudUserIdArray[0] !== 'string')
+    ) {
+      // eslint-disable-next-line no-console
+      console.debug(
+        `[cloud.full_story] "${ELASTIC_CLOUD_PRINCIPAL_ATTR_NAME}" not specified correctly in user metadata: ${JSON.stringify(
+          currentUser.metadata
+        )}`
+      );
+      return undefined;
+    }
+
+    return (cloudUserIdArray[0] as string | number).toString();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);
+    return undefined;
+  }
+};
