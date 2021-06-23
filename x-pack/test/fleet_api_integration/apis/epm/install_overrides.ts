@@ -49,6 +49,7 @@ export default function (providerContext: FtrProviderContext) {
         `${templateName}@mappings`,
         `${templateName}@settings`,
         `${templateName}@custom`,
+        '.fleet_component_template-1',
       ]);
 
       ({ body } = await es.transport.request({
