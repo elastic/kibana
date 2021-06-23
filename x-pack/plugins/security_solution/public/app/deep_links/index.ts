@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../types';
-import { App, AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
+import { AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   DETECTION_ENGINE,

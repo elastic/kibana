@@ -65,7 +65,6 @@ import { initUiSettings } from './ui_settings';
 import {
   APP_ID,
   SERVER_APP_ID,
-  SecurityPageName,
   SIGNALS_ID,
   NOTIFICATIONS_ID,
   REFERENCE_RULE_ALERT_TYPE_ID,
