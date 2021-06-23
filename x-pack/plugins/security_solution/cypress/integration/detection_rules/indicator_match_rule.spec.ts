@@ -155,7 +155,7 @@ describe('indicator match', () => {
           getIndicatorIndex().should('have.text', indexPatterns.join(''));
         });
 
-        it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
+        it.skip('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
           getIndicatorIndicatorIndex().type(
             `${newThreatIndicatorRule.indicatorIndexPattern}{enter}`
           );
