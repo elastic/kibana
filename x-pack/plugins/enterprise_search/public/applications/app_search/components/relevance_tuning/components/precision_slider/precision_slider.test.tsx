@@ -80,4 +80,7 @@ describe('PrecisionSlider', () => {
       expect(wrapper.find('[data-test-subj="StepDescription"]')).toHaveLength(0);
     });
   });
+
+  // TODO: Add documentation link
+  // it('contains a documentation link', () => {});
 });
