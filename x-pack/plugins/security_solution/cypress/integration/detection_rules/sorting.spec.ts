@@ -89,7 +89,7 @@ describe('Alerts detection rules', () => {
       });
   });
 
-  it.skip('Pagination updates page number and results', () => {
+  it('Pagination updates page number and results', () => {
     createCustomRule({ ...newRule, name: 'Test a rule' }, '5');
     createCustomRule({ ...newRule, name: 'Not same as first rule' }, '6');
 

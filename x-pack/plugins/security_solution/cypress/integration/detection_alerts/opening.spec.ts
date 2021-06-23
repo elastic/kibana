@@ -31,7 +31,7 @@ import { refreshPage } from '../../tasks/security_header';
 
 import { DETECTIONS_URL } from '../../urls/navigation';
 
-describe.skip('Opening alerts', () => {
+describe('Opening alerts', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(DETECTIONS_URL);
