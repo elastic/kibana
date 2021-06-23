@@ -48,25 +48,18 @@ export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
 
 const getFullyManagedColumnIds = memoizeOne((layer: IndexPatternLayer) => {
   const managedColumnIds = new Set<string>();
-  const queueToCheck: string[] = [];
   Object.entries(layer.columns).forEach(([id, column]) => {
     if (
       'references' in column &&
       operationDefinitionMap[column.operationType].input === 'managedReference'
     ) {
       managedColumnIds.add(id);
-      queueToCheck.push(...column.references);
+      const managedColumns = getManagedColumnsFrom(id, layer.columns);
+      managedColumns.map(([managedId]) => {
+        managedColumnIds.add(managedId);
+      });
     }
   });
-  while (queueToCheck.length) {
-    const idToCheck = queueToCheck.pop()!;
-    const columnToCheck = layer.columns[idToCheck];
-    managedColumnIds.add(idToCheck);
-    if ('references' in columnToCheck) {
-      queueToCheck.push(...columnToCheck.references);
-    }
-  }
-
   return managedColumnIds;
 });
 
