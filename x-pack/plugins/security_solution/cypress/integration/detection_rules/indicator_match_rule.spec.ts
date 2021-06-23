@@ -532,7 +532,7 @@ describe('indicator match', () => {
       });
     });
 
-    describe.skip('Enrichment', () => {
+    describe('Enrichment', () => {
       const fieldSearch = 'threat.indicator.matched';
       const fields = [
         'threat.indicator.matched.atomic',
@@ -701,14 +701,14 @@ describe('indicator match', () => {
         checkDuplicatedRule();
       });
 
-      it.skip("Allows the rule to be duplicated from the table's bulk actions", () => {
+      it("Allows the rule to be duplicated from the table's bulk actions", () => {
         waitForKibana();
         selectNumberOfRules(1);
         duplicateSelectedRules();
         checkDuplicatedRule();
       });
 
-      it.skip('Allows the rule to be duplicated from the edit screen', () => {
+      it('Allows the rule to be duplicated from the edit screen', () => {
         waitForKibana();
         goToRuleDetails();
         duplicateRuleFromMenu();

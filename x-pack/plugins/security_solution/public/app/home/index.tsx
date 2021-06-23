@@ -38,7 +38,10 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   const { pathname } = useLocation();
 
   application.currentAppId$.subscribe((appId) => {
-    subPluginId.current = pathname === ALERTS_PATH ? DETECTIONS_SUB_PLUGIN_ID : appId ?? '';
+    subPluginId.current =
+      pathname === ALERTS_PATH || pathname.match(/rules\/id/)
+        ? DETECTIONS_SUB_PLUGIN_ID
+        : appId ?? '';
   });
 
   useInitSourcerer(
