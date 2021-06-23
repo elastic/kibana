@@ -16,12 +16,9 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiRange } from '@elastic/eui';
-
 import { rerender } from '../../../../../test_helpers';
 
 import { PrecisionSlider } from './precision_slider';
-
 import { getStepDescription } from './utils';
 
 const MOCK_VALUES = {
