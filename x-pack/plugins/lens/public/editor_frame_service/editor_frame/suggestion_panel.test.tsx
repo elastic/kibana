@@ -209,27 +209,6 @@ describe('suggestion_panel', () => {
     );
   });
 
-  it('should return no suggestion if visualization has missing index-patterns', async () => {
-    // create a layer that is referencing an indexPatterns not retrieved by the datasource
-    const missingIndexPatternsState = {
-      layers: { indexPatternId: 'a' },
-      indexPatterns: {},
-    };
-    mockDatasource.checkIntegrity.mockReturnValue(['a']);
-    const newProps = {
-      ...defaultProps,
-      datasourceStates: {
-        mock: {
-          ...defaultProps.datasourceStates.mock,
-          state: missingIndexPatternsState,
-        },
-      },
-    };
-
-    const { instance } = await mountWithProvider(<SuggestionPanel {...newProps} />);
-    expect(instance.html()).toEqual(null);
-  });
-
   it('should render render icon if there is no preview expression', async () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
     getSuggestionsMock.mockReturnValue([
@@ -264,6 +243,27 @@ describe('suggestion_panel', () => {
 
     expect(instance.find(EuiIcon)).toHaveLength(1);
     expect(instance.find(EuiIcon).prop('type')).toEqual(LensIconChartDatatable);
+  });
+
+  it('should return no suggestion if visualization has missing index-patterns', async () => {
+    // create a layer that is referencing an indexPatterns not retrieved by the datasource
+    const missingIndexPatternsState = {
+      layers: { indexPatternId: 'a' },
+      indexPatterns: {},
+    };
+    mockDatasource.checkIntegrity.mockReturnValue(['a']);
+    const newProps = {
+      ...defaultProps,
+      datasourceStates: {
+        mock: {
+          ...defaultProps.datasourceStates.mock,
+          state: missingIndexPatternsState,
+        },
+      },
+    };
+
+    const { instance } = await mountWithProvider(<SuggestionPanel {...newProps} />);
+    expect(instance.html()).toEqual(null);
   });
 
   it('should render preview expression if there is one', () => {

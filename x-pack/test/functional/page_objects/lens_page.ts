@@ -491,6 +491,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
+    async expectSaveAndReturnButtonDisabled() {
+      const button = await testSubjects.find('lnsApp_saveAndReturnButton', 10000);
+      const disabledAttr = await button.getAttribute('disabled');
+      expect(disabledAttr).to.be('true');
+    },
+
     async editDimensionLabel(label: string) {
       await testSubjects.setValue('indexPattern-label-edit', label, { clearWithKeyboard: true });
     },

@@ -130,6 +130,7 @@ describe('Mounter', () => {
   // it('should pass the public frame api into visualization initialize', async () => {})
   // it('should fetch suggestions of currently active datasource when initializes from visualization trigger', async () => {})
   // it.skip('should pass the datasource api for each layer to the visualization', async () => {})
+  // it('displays errors from the frame in a toast', async () => {
 
   describe('loadInitialStore', () => {
     it('does not load a document if there is no initial input', async () => {
