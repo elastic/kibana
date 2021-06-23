@@ -7857,7 +7857,6 @@
     "xpack.enterpriseSearch.appSearch.multiInputRows.removeValueButtonLabel": "値を削除",
     "xpack.enterpriseSearch.appSearch.ownerRoleTypeDescription": "所有者はすべての操作を実行できます。アカウントには複数の所有者がいる場合がありますが、一度に少なくとも1人の所有者が必要です。",
     "xpack.enterpriseSearch.appSearch.productCardDescription": "Elastic App Search には、強力な検索を設計し、Web サイトや Web/モバイルアプリケーションにデプロイするための使いやすいツールがあります。",
-    "xpack.enterpriseSearch.appSearch.productCta": "App Searchの起動",
     "xpack.enterpriseSearch.appSearch.productDescription": "ダッシュボード、分析、APIを活用し、高度なアプリケーション検索をシンプルにします。",
     "xpack.enterpriseSearch.appSearch.productName": "App Search",
     "xpack.enterpriseSearch.appSearch.result.documentDetailLink": "ドキュメントの詳細を表示",
