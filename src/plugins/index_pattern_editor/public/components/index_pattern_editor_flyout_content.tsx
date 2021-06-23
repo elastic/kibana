@@ -384,7 +384,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   return (
     <>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-        <FlyoutPanels.Item>
+        <FlyoutPanels.Item border="right">
           {/*
           possibly break out into own component
         */}
@@ -444,7 +444,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           </Form>
           {/* </EuiFlyoutBody> */}
           {/* modal */}
-          <EuiFlyoutFooter>
+          <EuiFlyoutFooter className="indexPatternEditor__footer">
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
