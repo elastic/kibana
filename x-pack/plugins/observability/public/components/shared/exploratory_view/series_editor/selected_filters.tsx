@@ -39,7 +39,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
 
   const { removeFilter } = useSeriesFilters({ seriesId });
 
-  const { indexPattern } = useAppIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
   return (filters.length > 0 || definitionFilters.length > 0) && indexPattern ? (
     <EuiFlexItem>
@@ -55,6 +55,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
                   value={val}
                   removeFilter={() => removeFilter({ field, value: val, negate: false })}
                   negate={false}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             ))}
@@ -67,6 +68,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
                   value={val}
                   negate={true}
                   removeFilter={() => removeFilter({ field, value: val, negate: true })}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             ))}
@@ -87,6 +89,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
                   }}
                   negate={false}
                   definitionFilter={true}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             ))}

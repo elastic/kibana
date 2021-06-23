@@ -29,7 +29,7 @@ import { ParamEditorProps } from '../../index';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {
-  LensMathSuggestion,
+  LensMathSuggestions,
   SUGGESTION_TYPE,
   suggest,
   getSuggestion,
@@ -329,7 +329,7 @@ export function FormulaEditor({
       context: monaco.languages.CompletionContext
     ) => {
       const innerText = model.getValue();
-      let aSuggestions: { list: LensMathSuggestion[]; type: SUGGESTION_TYPE } = {
+      let aSuggestions: LensMathSuggestions = {
         list: [],
         type: SUGGESTION_TYPE.FIELD,
       };
@@ -367,7 +367,13 @@ export function FormulaEditor({
 
       return {
         suggestions: aSuggestions.list.map((s) =>
-          getSuggestion(s, aSuggestions.type, visibleOperationsMap, context.triggerCharacter)
+          getSuggestion(
+            s,
+            aSuggestions.type,
+            visibleOperationsMap,
+            context.triggerCharacter,
+            aSuggestions.range
+          )
         ),
       };
     },
