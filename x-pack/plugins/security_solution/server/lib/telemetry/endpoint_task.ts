@@ -140,13 +140,24 @@ export class TelemetryEndpointTask {
         // agent no longer available
         return null;
       }
+
       const policyInformation = agentCache.get(agentId);
       const policyConfig = endpointPolicyCache.get(policyInformation?.policy_id!);
 
       return {
         endpoint_id: hit._source?.agent.id,
         fleet_agent_id: hit._source?.elastic.agent.id,
-        policy_response_failure: hit._source?.Endpoint.policy.applied,
+        policy_response_failure: {
+          applied: {
+            policy_name: hit._source?.Endpoint.policy.applied.name,
+            policy_id: hit._source?.Endpoint.policy.applied.id,
+            revision: hit._source?.Endpoint.policy.applied.endpoint_policy_version,
+            version: hit._source?.Endpoint.policy.applied.version,
+            status: hit._source?.Endpoint.policy.applied.status,
+            artifacts: hit._source?.Endpoint.policy.applied.artifacts,
+            actions: hit._source?.Endpoint.policy.applied.actions,
+          },
+        },
         policy_config: policyConfig,
       };
     });

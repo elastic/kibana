@@ -6,11 +6,11 @@
  */
 
 export interface EndpointMetricsPolicyResponse {
-  agent: EndpointAgent;
+  agent: EndpointAgent; // endpoint agent
+  elastic: EndpointPolicyAgent; // fleet agent
   Endpoint: EndpointPolicyResponse;
-  elastic: EndpointPolicyAgent;
-  host: EndpointPolicyHost;
   event: EndpointPolicyEvent;
+  host: EndpointPolicyHost;
 }
 
 interface EndpointAgent {
@@ -20,7 +20,6 @@ interface EndpointAgent {
 interface EndpointPolicyResponse {
   policy: {
     applied: {
-      response: EndpointPolicyResponseDetail;
       artifacts: EndpointPolicyResponseArtifacts;
       actions: EndpointPolicyResponseAction[];
       name: string;
@@ -30,11 +29,6 @@ interface EndpointPolicyResponse {
       status: string;
     };
   };
-}
-
-interface EndpointPolicyResponseDetail {
-  configurations: {};
-  diagnostic: {};
 }
 
 interface EndpointPolicyResponseArtifacts {
