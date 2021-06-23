@@ -16,6 +16,8 @@ export const ABOUT_DETAILS =
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
+export const ALERTS_TAB = '[data-test-subj="alertsTab"]';
+
 export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
@@ -28,6 +30,8 @@ export const DELETE_RULE = '[data-test-subj=rules-details-delete-rule]';
 export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
+
+export const EXCEPTIONS_TAB = '[data-test-subj="exceptionsTab"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 

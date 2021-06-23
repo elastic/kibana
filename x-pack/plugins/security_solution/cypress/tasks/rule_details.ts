@@ -17,15 +17,15 @@ import {
   VALUES_INPUT,
 } from '../screens/exceptions';
 import {
+  ALERTS_TAB,
   BACK_TO_RULES,
+  EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
   RULE_SWITCH,
 } from '../screens/rule_details';
-import { DETECTIONS_URL, EXCEPTIONS_URL } from '../urls/navigation';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
-import { waitForPageWithoutDateRange } from './login';
 
 export const activatesRule = () => {
   cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
@@ -82,12 +82,12 @@ export const addsExceptionFromRuleSettings = (exception: Exception) => {
   cy.get(CONFIRM_BTN).should('not.exist');
 };
 
-export const goToAlertsPage = () => {
-  waitForPageWithoutDateRange(DETECTIONS_URL);
+export const goToAlertsTab = () => {
+  cy.get(ALERTS_TAB).click();
 };
 
-export const goToExceptionsPage = () => {
-  waitForPageWithoutDateRange(EXCEPTIONS_URL);
+export const goToExceptionsTab = () => {
+  cy.get(EXCEPTIONS_TAB).click();
 };
 
 export const removeException = () => {

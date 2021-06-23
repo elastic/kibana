@@ -14,21 +14,23 @@ import { goToManageAlertsDetectionRules, waitForAlertsIndexToBeCreated } from '.
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import {
+  loginAndWaitForPageWithoutDateRange,
+  waitForPageWithoutDateRange,
+} from '../../tasks/login';
 import {
   addsExceptionFromRuleSettings,
   goBackToAllRulesTable,
-  goToExceptionsPage,
+  goToExceptionsTab,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/rule_details';
 
-import { EXCEPTIONS_URL } from '../../urls/navigation';
+import { DETECTIONS_URL, EXCEPTIONS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
 import {
   deleteExceptionListWithRuleReference,
   deleteExceptionListWithoutRuleReference,
   exportExceptionList,
-  goToExceptionsTable,
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
   clearSearchSelection,
@@ -42,7 +44,7 @@ import { createExceptionList } from '../../tasks/api_calls/exceptions';
 describe('Exceptions Table', () => {
   before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(EXCEPTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
     createCustomRule(newRule);
     goToManageAlertsDetectionRules();
@@ -53,7 +55,7 @@ describe('Exceptions Table', () => {
     esArchiverLoad('auditbeat_for_exceptions');
 
     // Add a detections exception list
-    goToExceptionsPage();
+    goToExceptionsTab();
     addsExceptionFromRuleSettings(exception);
     waitForTheRuleToBeExecuted();
 
@@ -69,7 +71,7 @@ describe('Exceptions Table', () => {
   });
 
   it('Filters exception lists on search', () => {
-    goToExceptionsTable();
+    waitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
@@ -110,7 +112,7 @@ describe('Exceptions Table', () => {
   it('Exports exception list', async function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-    goToExceptionsTable();
+    waitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     exportExceptionList();
@@ -123,8 +125,8 @@ describe('Exceptions Table', () => {
     });
   });
 
-  it('Deletes exception list without rule reference', () => {
-    goToExceptionsTable();
+  it.skip('Deletes exception list without rule reference', () => {
+    waitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 3 lists`);
@@ -134,8 +136,8 @@ describe('Exceptions Table', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 2 lists`);
   });
 
-  it('Deletes exception list with rule reference', () => {
-    goToExceptionsTable();
+  it.skip('Deletes exception list with rule reference', () => {
+    waitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 2 lists`);
