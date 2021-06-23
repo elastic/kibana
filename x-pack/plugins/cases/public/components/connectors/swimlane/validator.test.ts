@@ -29,7 +29,7 @@ describe('Swimlane validator', () => {
           mappings: {},
         },
       };
-      expect(connectorValidator(invalidConnector)).toEqual({ message: '' });
+      expect(connectorValidator(invalidConnector)).toEqual({ message: 'Invalid connector' });
     });
 
     test('it returns an error message if the connector is of type alerts', () => {
@@ -40,7 +40,7 @@ describe('Swimlane validator', () => {
           connectorType: SwimlaneConnectorType.Alerts,
         },
       };
-      expect(connectorValidator(invalidConnector)).toEqual({ message: '' });
+      expect(connectorValidator(invalidConnector)).toEqual({ message: 'Invalid connector' });
     });
 
     test.each([SwimlaneConnectorType.Cases, SwimlaneConnectorType.All])(

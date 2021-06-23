@@ -33,7 +33,7 @@ export const connectorValidator = (
   } = connector;
   if (connectorType === SwimlaneConnectorType.Alerts || isAnyRequiredFieldNotSet(mappings)) {
     return {
-      message: '',
+      message: 'Invalid connector',
     };
   }
 };
