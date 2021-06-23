@@ -1,0 +1,14 @@
+.sourceViewer__loading {
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  flex: 1 0 100%;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+  margin-top: $euiSizeS;
+}
+
+.sourceViewer__loadingSpinner {
+  margin-right: $euiSizeS;
+}

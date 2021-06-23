@@ -7,14 +7,21 @@
 
 import React from 'react';
 
-import { EuiPanel, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { useValues, useActions } from 'kea';
+
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SchemaAddFieldModal } from '../../../../shared/schema';
 import { DOCS_PREFIX } from '../../../routes';
+import { SchemaLogic } from '../schema_logic';
 
 export const EmptyState: React.FC = () => {
+  const { isModalOpen } = useValues(SchemaLogic);
+  const { addSchemaField, closeModal } = useActions(SchemaLogic);
+
   return (
-    <EuiPanel color="subdued">
+    <>
       <EuiEmptyPrompt
         iconType="database"
         title={
@@ -45,6 +52,9 @@ export const EmptyState: React.FC = () => {
           </EuiButton>
         }
       />
-    </EuiPanel>
+      {isModalOpen && (
+        <SchemaAddFieldModal addNewField={addSchemaField} closeAddFieldModal={closeModal} />
+      )}
+    </>
   );
 };

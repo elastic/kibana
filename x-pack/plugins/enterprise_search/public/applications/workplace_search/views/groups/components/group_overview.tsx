@@ -23,14 +23,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { Loading } from '../../../../shared/loading';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { AppLogic } from '../../../app_logic';
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
+import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { CANCEL_BUTTON } from '../../../constants';
+import { NAV, CANCEL_BUTTON } from '../../../constants';
 import { GroupLogic, MAX_NAME_LENGTH } from '../group_logic';
 
 import { GroupUsersTable } from './group_users_table';
@@ -127,9 +126,7 @@ export const GroupOverview: React.FC = () => {
 
   const { isFederatedAuth } = useValues(AppLogic);
 
-  if (dataLoading) return <Loading />;
-
-  const truncatedName = (
+  const truncatedName = name && (
     <TruncatedContent tooltipType="title" content={name} length={MAX_NAME_LENGTH} />
   );
 
@@ -162,8 +159,8 @@ export const GroupOverview: React.FC = () => {
     }
   );
 
-  const hasContentSources = contentSources.length > 0;
-  const hasUsers = users.length > 0;
+  const hasContentSources = contentSources?.length > 0;
+  const hasUsers = users?.length > 0;
 
   const manageSourcesButton = (
     <EuiButton color="primary" onClick={showSharedSourcesModal}>
@@ -272,13 +269,16 @@ export const GroupOverview: React.FC = () => {
   );
 
   return (
-    <>
-      <ViewContentHeader title={truncatedName} />
-      <EuiSpacer />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.GROUPS, name || '...']}
+      pageViewTelemetry="group_overview"
+      pageHeader={{ pageTitle: truncatedName }}
+      isLoading={dataLoading}
+    >
       {hasContentSources ? sourcesSection : sourcesEmptyState}
       {usersSection}
       {nameSection}
       {canDeleteGroup && deleteSection}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

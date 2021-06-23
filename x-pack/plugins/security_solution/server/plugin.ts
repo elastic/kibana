@@ -83,8 +83,6 @@ import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
-import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
-import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import {
   TelemetryPluginStart,
@@ -92,7 +90,6 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
-import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import { securityComponentTemplate } from './lib/detection_engine/assets/security_component_template';
@@ -130,16 +127,22 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-const securitySubPlugins = [
+const casesSubPlugin = `${APP_ID}:${SecurityPageName.case}`;
+
+/**
+ * Don't include cases here so that the sub feature can govern whether Cases is enabled in the navigation
+ */
+const securitySubPluginsNoCases = [
   APP_ID,
   `${APP_ID}:${SecurityPageName.overview}`,
   `${APP_ID}:${SecurityPageName.detections}`,
   `${APP_ID}:${SecurityPageName.hosts}`,
   `${APP_ID}:${SecurityPageName.network}`,
   `${APP_ID}:${SecurityPageName.timelines}`,
-  `${APP_ID}:${SecurityPageName.case}`,
   `${APP_ID}:${SecurityPageName.administration}`,
 ];
+
+const allSecuritySubPlugins = [...securitySubPluginsNoCases, casesSubPlugin];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
@@ -209,8 +212,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     // TODO: Once we are past experimental phase this check can be removed along with legacy registration of rules
+    const isRuleRegistryEnabled = experimentalFeatures.ruleRegistryEnabled;
+
     let ruleDataClient: RuleDataClient | null = null;
-    if (experimentalFeatures.ruleRegistryEnabled) {
+    if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
       const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
@@ -287,7 +292,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const ruleTypes = [
       SIGNALS_ID,
       NOTIFICATIONS_ID,
-      ...(experimentalFeatures.ruleRegistryEnabled ? referenceRuleTypes : []),
+      ...(isRuleRegistryEnabled ? referenceRuleTypes : []),
     ];
 
     plugins.features.registerKibanaFeature({
@@ -297,7 +302,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.security,
-      app: [...securitySubPlugins, 'kibana'],
+      app: [...allSecuritySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
         insightsAndAlerting: ['triggersActions'],
@@ -312,6 +317,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               groupType: 'mutually_exclusive',
               privileges: [
                 {
+                  // if the user is granted access to the cases feature than the global nav will show the cases
+                  // sub plugin within the security solution navigation
+                  app: [casesSubPlugin],
                   id: 'cases_all',
                   includeIn: 'all',
                   name: 'All',
@@ -327,6 +335,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
                   },
                 },
                 {
+                  app: [casesSubPlugin],
                   id: 'cases_read',
                   includeIn: 'read',
                   name: 'Read',
@@ -348,7 +357,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ],
       privileges: {
         all: {
-          app: [...securitySubPlugins, 'kibana'],
+          app: [...securitySubPluginsNoCases, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
           savedObject: {
@@ -369,7 +378,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ui: ['show', 'crud'],
         },
         read: {
-          app: [...securitySubPlugins, 'kibana'],
+          app: [...securitySubPluginsNoCases, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
@@ -433,29 +442,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         depsStart.data,
         endpointContext
       );
-      const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
-        depsStart.data
-      );
-      const securitySolutionTimelineEqlSearchStrategy = securitySolutionTimelineEqlSearchStrategyProvider(
-        depsStart.data
-      );
-      const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
-
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
-      );
-      plugins.data.search.registerSearchStrategy(
-        'securitySolutionIndexFields',
-        securitySolutionIndexFields
-      );
-      plugins.data.search.registerSearchStrategy(
-        'securitySolutionTimelineSearchStrategy',
-        securitySolutionTimelineSearchStrategy
-      );
-      plugins.data.search.registerSearchStrategy(
-        'securitySolutionTimelineEqlSearchStrategy',
-        securitySolutionTimelineEqlSearchStrategy
       );
     });
 

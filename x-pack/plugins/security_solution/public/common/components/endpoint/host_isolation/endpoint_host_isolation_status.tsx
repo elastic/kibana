@@ -74,7 +74,7 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
                     <EuiFlexItem grow>
                       <FormattedMessage
                         id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingUnIsolate"
-                        defaultMessage="Unisolate"
+                        defaultMessage="Release"
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>{pendingUnIsolate}</EuiFlexItem>
@@ -101,12 +101,12 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
             {pendingIsolate ? (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostIsolationStatus.isIsolating"
-                defaultMessage="Isolating pending"
+                defaultMessage="Isolating"
               />
             ) : (
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.hostIsolationStatus.isUnIsolating"
-                defaultMessage="Unisolating pending"
+                defaultMessage="Releasing"
               />
             )}
           </EuiTextColor>

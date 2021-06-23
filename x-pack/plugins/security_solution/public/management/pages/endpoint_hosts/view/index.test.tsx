@@ -17,6 +17,7 @@ import {
 } from '../store/mock_endpoint_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import {
+  ActivityLog,
   HostInfo,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
@@ -32,11 +33,15 @@ import { KibanaServices, useKibana, useToasts } from '../../../../common/lib/kib
 import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
 import { fireEvent } from '@testing-library/dom';
 import {
+  createFailedResourceState,
+  createLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isUninitialisedResourceState,
 } from '../../../state';
 import { getCurrentIsolationRequestState } from '../store/selectors';
+import { licenseService } from '../../../../common/hooks/use_license';
+import { FleetActionGenerator } from '../../../../../common/endpoint/data_generators/fleet_action_generator';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough it needs to be inline in this one file
@@ -59,6 +64,7 @@ jest.mock('../../policy/store/services/ingest', () => {
 });
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/hooks/use_license');
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
@@ -70,6 +76,9 @@ describe('when on the endpoint list page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
   let abortSpy: jest.SpyInstance;
+
+  (licenseService as jest.Mocked<typeof licenseService>).isPlatinumPlus.mockReturnValue(true);
+
   beforeAll(() => {
     const mockAbort = new AbortController();
     mockAbort.abort();
@@ -79,6 +88,7 @@ describe('when on the endpoint list page', () => {
   afterAll(() => {
     abortSpy.mockRestore();
   });
+
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
@@ -619,6 +629,30 @@ describe('when on the endpoint list page', () => {
       });
     };
 
+    const dispatchEndpointDetailsActivityLogChanged = (
+      dataState: 'failed' | 'success',
+      data: ActivityLog
+    ) => {
+      reactTestingLibrary.act(() => {
+        const getPayload = () => {
+          switch (dataState) {
+            case 'failed':
+              return createFailedResourceState({
+                statusCode: 500,
+                error: 'Internal Server Error',
+                message: 'An internal server error occurred.',
+              });
+            case 'success':
+              return createLoadedResourceState(data);
+          }
+        };
+        store.dispatch({
+          type: 'endpointDetailsActivityLogChanged',
+          payload: getPayload(),
+        });
+      });
+    };
+
     beforeEach(async () => {
       mockEndpointListApi();
 
@@ -738,6 +772,120 @@ describe('when on the endpoint list page', () => {
     it('should show the Take Action button', async () => {
       const renderResult = await renderAndWaitForData();
       expect(renderResult.getByTestId('endpointDetailsActionsButton')).not.toBeNull();
+    });
+
+    describe('when showing Activity Log panel', () => {
+      let renderResult: ReturnType<typeof render>;
+      const agentId = 'some_agent_id';
+
+      let getMockData: () => ActivityLog;
+      beforeEach(async () => {
+        window.IntersectionObserver = jest.fn(() => ({
+          root: null,
+          rootMargin: '',
+          thresholds: [],
+          takeRecords: jest.fn(),
+          observe: jest.fn(),
+          unobserve: jest.fn(),
+          disconnect: jest.fn(),
+        }));
+
+        const fleetActionGenerator = new FleetActionGenerator('seed');
+        const responseData = fleetActionGenerator.generateResponse({
+          agent_id: agentId,
+        });
+        const actionData = fleetActionGenerator.generate({
+          agents: [agentId],
+        });
+        getMockData = () => ({
+          page: 1,
+          pageSize: 50,
+          data: [
+            {
+              type: 'response',
+              item: {
+                id: 'some_id_0',
+                data: responseData,
+              },
+            },
+            {
+              type: 'action',
+              item: {
+                id: 'some_id_1',
+                data: actionData,
+              },
+            },
+          ],
+        });
+
+        renderResult = render();
+        await reactTestingLibrary.act(async () => {
+          await middlewareSpy.waitForAction('serverReturnedEndpointList');
+        });
+        const hostNameLinks = await renderResult.getAllByTestId('hostnameCellLink');
+        reactTestingLibrary.fireEvent.click(hostNameLinks[0]);
+      });
+
+      afterEach(reactTestingLibrary.cleanup);
+
+      it('should show the endpoint details flyout', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const endpointDetailsFlyout = await renderResult.queryByTestId('endpointDetailsFlyoutBody');
+        expect(endpointDetailsFlyout).not.toBeNull();
+      });
+
+      it('should display log accurately', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', getMockData());
+        });
+        const logEntries = await renderResult.queryAllByTestId('timelineEntry');
+        expect(logEntries.length).toEqual(2);
+        expect(`${logEntries[0]} .euiCommentTimeline__icon--update`).not.toBe(null);
+        expect(`${logEntries[1]} .euiCommentTimeline__icon--regular`).not.toBe(null);
+      });
+
+      it('should display empty state when API call has failed', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('failed', getMockData());
+        });
+        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
+        expect(emptyState).not.toBe(null);
+      });
+
+      it('should display empty state when no log data', async () => {
+        const activityLogTab = await renderResult.findByTestId('activity_log');
+        reactTestingLibrary.act(() => {
+          reactTestingLibrary.fireEvent.click(activityLogTab);
+        });
+        await middlewareSpy.waitForAction('endpointDetailsActivityLogChanged');
+        reactTestingLibrary.act(() => {
+          dispatchEndpointDetailsActivityLogChanged('success', {
+            page: 1,
+            pageSize: 50,
+            data: [],
+          });
+        });
+
+        const emptyState = await renderResult.queryByTestId('activityLogEmpty');
+        expect(emptyState).not.toBe(null);
+      });
     });
 
     describe('when showing host Policy Response panel', () => {
@@ -910,7 +1058,10 @@ describe('when on the endpoint list page', () => {
           history.push('/endpoints?selected_endpoint=1&show=isolate');
         });
         renderResult = await renderAndWaitForData();
+        // Need to reset `http.post` and adjust it so that the mock for http host
+        // isolation api does not output error noise to the console
         coreStart.http.post.mockReset();
+        coreStart.http.post.mockImplementation(async () => null);
         isolateApiMock = hostIsolationHttpMocks(coreStart.http);
       });
 
