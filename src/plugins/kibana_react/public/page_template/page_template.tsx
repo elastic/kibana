@@ -82,6 +82,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       pageHeader={pageHeader}
       pageSideBar={pageSideBar}
       pageSideBarProps={{
+        paddingSize: 'none',
         ...rest.pageSideBarProps,
         className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
       }}

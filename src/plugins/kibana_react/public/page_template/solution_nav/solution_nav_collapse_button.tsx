@@ -20,7 +20,7 @@ export type KibanaPageTemplateSolutionNavCollapseButtonProps = Partial<EuiButton
 };
 
 /**
- * Applies extra styling to a typical EuiAvatar
+ * Creates the styled icon button for showing/hiding solution nav
  */
 export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<KibanaPageTemplateSolutionNavCollapseButtonProps> = ({
   className,

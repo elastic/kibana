@@ -10,12 +10,13 @@ import './solution_nav.scss';
 import React, { FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiSideNav, EuiSideNavProps } from '@elastic/eui';
+import { EuiFlyout, EuiSideNav, EuiSideNavProps, useIsWithinBreakpoints } from '@elastic/eui';
 
 import {
   KibanaPageTemplateSolutionNavAvatar,
   KibanaPageTemplateSolutionNavAvatarProps,
 } from './solution_nav_avatar';
+import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
 export type KibanaPageTemplateSolutionNavProps = Partial<EuiSideNavProps> & {
   /**
@@ -37,9 +38,19 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   items,
   ...rest
 }) => {
+  // The EuiShowFor and EuiHideFor components are not in sync with the euiBreakpoint() function :(
+  const isSmallerBreakpoint = useIsWithinBreakpoints(['xs', 's']);
+  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
+  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+
+  // Keep each method of open/closed separate since they have different defaults
   const [isSideNavOpenOnMobile, setisSideNavOpenOnMobile] = useState(false);
   const toggleOpenOnMobile = () => {
     setisSideNavOpenOnMobile(!isSideNavOpenOnMobile);
+  };
+  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(false);
+  const toggleOpenOnDesktop = () => {
+    setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
   };
 
   /**
@@ -72,6 +83,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
 
     sideNav = (
       <EuiSideNav
+        className="kbnPageTemplateSolutionNav"
         heading={solutionNavTitle}
         mobileTitle={
           <>
@@ -87,5 +99,38 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
     );
   }
 
-  return <div className="kbnPageTemplateSolutionNav">{sideNav}</div>;
+  return (
+    <>
+      {isSmallerBreakpoint && sideNav}
+      {isMediumBreakpoint && (
+        <>
+          {isSideNavOpenOnMobile && (
+            <EuiFlyout
+              ownFocus={false}
+              outsideClickCloses
+              onClose={() => setisSideNavOpenOnMobile(false)}
+              side="left"
+              size={240}
+              closeButtonPosition="outside"
+            >
+              {sideNav}
+            </EuiFlyout>
+          )}
+          <KibanaPageTemplateSolutionNavCollapseButton
+            isCollapsed={true}
+            onClick={toggleOpenOnMobile}
+          />
+        </>
+      )}
+      {isLargerBreakpoint && (
+        <>
+          {sideNav}
+          <KibanaPageTemplateSolutionNavCollapseButton
+            isCollapsed={isSideNavOpenOnDesktop}
+            onClick={toggleOpenOnDesktop}
+          />
+        </>
+      )}
+    </>
+  );
 };
