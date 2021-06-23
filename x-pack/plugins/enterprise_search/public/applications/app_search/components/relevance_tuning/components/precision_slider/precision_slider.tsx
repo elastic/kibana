@@ -54,7 +54,8 @@ export const PrecisionSlider: React.FC = () => {
             {
               defaultMessage: 'Fine tune the precision vs. recall settings on your engine.',
             }
-          )}{' '}
+          )}
+          {/* {' '}
           <EuiLink>
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.learnMore.link',
@@ -62,7 +63,7 @@ export const PrecisionSlider: React.FC = () => {
                 defaultMessage: 'Learn more.',
               }
             )}
-          </EuiLink>
+          </EuiLink> */}
         </EuiText>
         <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceBetween">
