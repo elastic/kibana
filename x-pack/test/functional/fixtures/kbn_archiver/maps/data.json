@@ -1,3 +1,49 @@
+
+{
+  "attributes": {
+    "fields": "[]",
+    "title": "delete_me"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "idThatDoesNotExitForESGeoGridSource",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzM3LDJd"
+}
+
+{
+  "attributes": {
+    "fields": "[]",
+    "title": "delete_me"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "idThatDoesNotExitForESSearchSource",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzM3LDJd"
+}
+
+{
+  "attributes": {
+    "fields": "[]",
+    "title": "delete_me"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "idThatDoesNotExitForESJoinSource",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzM3LDJd"
+}
+
 {
   "attributes": {
     "fields": "[]",
