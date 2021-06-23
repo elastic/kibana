@@ -142,7 +142,7 @@ export interface ProxySettings {
   proxyBypassHosts: Set<string> | undefined;
   proxyOnlyHosts: Set<string> | undefined;
   proxyHeaders?: Record<string, string>;
-  proxyTLSSettings: TLSSettings;
+  proxySSLSettings: SSLSettings;
 }
 
 export interface ResponseSettings {
@@ -150,6 +150,6 @@ export interface ResponseSettings {
   timeout: number;
 }
 
-export interface TLSSettings {
+export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
 }
