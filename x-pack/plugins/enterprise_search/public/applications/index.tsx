@@ -57,6 +57,7 @@ export const renderApp = (
   });
   const unmountLicensingLogic = mountLicensingLogic({
     license$: plugins.licensing.license$,
+    canManageLicense: core.application.capabilities.management?.stack?.license_management,
   });
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,

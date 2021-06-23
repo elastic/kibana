@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/shallow_useeffect.mock';
-
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { fullContentSources } from '../../../__mocks__/content_sources.mock';
 
@@ -16,7 +14,6 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiPanel, EuiTable } from '@elastic/eui';
 
-import { Loading } from '../../../../shared/loading';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 
 import { Overview } from './overview';
@@ -42,13 +39,6 @@ describe('Overview', () => {
 
     expect(documentSummary).toHaveLength(1);
     expect(documentSummary.find('[data-test-subj="DocumentSummaryRow"]')).toHaveLength(1);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<Overview />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders ComponentLoader when loading', () => {
