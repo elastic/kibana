@@ -17,7 +17,7 @@ import {
   AlertInstanceState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
+import { LifecycleRuleExecutor } from '../../../../../rule_registry/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
@@ -40,10 +40,9 @@ interface InventoryMetricThresholdParams {
   alertOnNoData?: boolean;
 }
 
-export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) => async ({
-  services,
-  params,
-}: AlertExecutorOptions<
+export const createInventoryMetricThresholdExecutor = (
+  libs: InfraBackendLibs
+): LifecycleRuleExecutor<
   /**
    * TODO: Remove this use of `any` by utilizing a proper type
    */
@@ -52,7 +51,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   AlertInstanceState,
   AlertInstanceContext,
   InventoryMetricThresholdAllowedActionGroups
->) => {
+> => async ({ services, params }) => {
   const {
     criteria,
     filterQuery,
@@ -157,25 +156,29 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           : nextState === AlertStates.WARNING
           ? WARNING_ACTIONS.id
           : FIRED_ACTIONS.id;
-      const alertInstance = services.alertInstanceFactory(`${item}`);
-      alertInstance.scheduleActions(
-        /**
-         * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
-         * the RecoveredActionGroup isn't allowed
-         */
-        (actionGroupId as unknown) as InventoryMetricThresholdAllowedActionGroups,
-        {
-          group: item,
-          alertState: stateToAlertMessage[nextState],
-          reason,
-          timestamp: moment().toISOString(),
-          value: mapToConditionsLookup(results, (result) =>
-            formatMetric(result[item].metric, result[item].currentValue)
-          ),
-          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
-          metric: mapToConditionsLookup(criteria, (c) => c.metric),
-        }
-      );
+      services
+        .alertWithLifecycle({
+          id: `${item}`,
+          fields: {},
+        })
+        .scheduleActions(
+          /**
+           * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
+           * the RecoveredActionGroup isn't allowed
+           */
+          (actionGroupId as unknown) as InventoryMetricThresholdAllowedActionGroups,
+          {
+            group: item,
+            alertState: stateToAlertMessage[nextState],
+            reason,
+            timestamp: moment().toISOString(),
+            value: mapToConditionsLookup(results, (result) =>
+              formatMetric(result[item].metric, result[item].currentValue)
+            ),
+            threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+            metric: mapToConditionsLookup(criteria, (c) => c.metric),
+          }
+        );
     }
   }
 };
