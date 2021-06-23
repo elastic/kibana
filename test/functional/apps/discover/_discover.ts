@@ -192,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show "no results"', async () => {
-        await retry.waitFor('No results screen is displayed', async function () {
+        await retry.waitFor('no results screen is displayed', async function () {
           const isVisible = await PageObjects.discover.hasNoResults();
           return isVisible === true;
         });
