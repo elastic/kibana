@@ -8,7 +8,6 @@
 
 import Path from 'path';
 import Fs from 'fs';
-import { promisify } from 'util';
 
 import Chalk from 'chalk';
 import execa from 'execa';
@@ -23,8 +22,7 @@ import { getMtimes } from './get_mtimes';
 import { getChanges } from './get_changes';
 import { OptimizerConfig } from './optimizer_config';
 
-const OPTIMIZER_DIR = Path.dirname(require.resolve('../../package.json'));
-const RELATIVE_DIR = Path.relative(REPO_ROOT, OPTIMIZER_DIR);
+const RELATIVE_DIR = 'packages/kbn-optimizer';
 
 export function diffCacheKey(expected?: unknown, actual?: unknown) {
   const expectedJson = jsonStable(expected, {
@@ -114,7 +112,6 @@ export function reformatJestDiff(diff: string | null) {
 
 export interface OptimizerCacheKey {
   readonly lastCommit: string | undefined;
-  readonly bootstrap: string | undefined;
   readonly workerConfig: CacheableWorkerConfig;
   readonly deletedPaths: string[];
   readonly modifiedTimes: Record<string, number>;
@@ -136,25 +133,10 @@ async function getLastCommit() {
   return stdout.trim() || undefined;
 }
 
-async function getBootstrapCacheKey() {
-  try {
-    return await promisify(Fs.readFile)(
-      Path.resolve(OPTIMIZER_DIR, 'target/.bootstrap-cache'),
-      'utf8'
-    );
-  } catch (error) {
-    if (error?.code !== 'ENOENT') {
-      throw error;
-    }
-    return undefined;
-  }
-}
-
 export async function getOptimizerCacheKey(config: OptimizerConfig) {
-  const [changes, lastCommit, bootstrap] = await Promise.all([
-    getChanges(OPTIMIZER_DIR),
+  const [changes, lastCommit] = await Promise.all([
+    getChanges(RELATIVE_DIR),
     getLastCommit(),
-    getBootstrapCacheKey(),
   ] as const);
 
   const deletedPaths: string[] = [];
@@ -165,7 +147,6 @@ export async function getOptimizerCacheKey(config: OptimizerConfig) {
 
   const cacheKeys: OptimizerCacheKey = {
     lastCommit,
-    bootstrap,
     deletedPaths,
     modifiedTimes: {} as Record<string, number>,
     workerConfig: config.getCacheableWorkerConfig(),
