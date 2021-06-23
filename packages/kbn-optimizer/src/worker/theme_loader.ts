@@ -202,7 +202,16 @@ const asyncLoader = async (ctx: webpack.loader.LoaderContext, css: string) => {
     }
 
     // css is unique, store it in the map
-    resultMap[result.tag] = result.css;
+    if (!result.map) {
+      resultMap[result.tag] = result.css;
+    } else {
+      const base64Map = Buffer.from(
+        unescape(encodeURIComponent(JSON.stringify(result.map))),
+        'utf8'
+      ).toString('base64');
+      const cssWithMap = `${result.css}\n/*# sourceMappingURL=data:application/json;base64,${base64Map} */`;
+      resultMap[result.tag] = cssWithMap;
+    }
   }
 
   const runtimeImport = stringifyRequest(ctx, require.resolve('./runtime/inject_style'));
