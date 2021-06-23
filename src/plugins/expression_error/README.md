@@ -1,6 +1,6 @@
 # expressionRevealImage
 
-Expression Reveal Image plugin adds a `revealImage` function to the expression plugin and an associated renderer. The renderer will display the given percentage of a given image.
+Expression Error plugin adds an `error` renderer to the expression plugin. The renderer will display the error image.
 
 ---
 
