@@ -16,7 +16,7 @@ import {
   getCreateRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { DetectionEngineHeaderPage } from '../../../components/detection_engine_header_page';
-import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
 import { useUserData } from '../../../components/user_info';
@@ -28,7 +28,7 @@ import {
   getPrePackagedRuleStatus,
   getPrePackagedTimelineStatus,
   redirectToDetections,
-  userHasNoPermissions,
+  userHasPermissions,
 } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
@@ -131,7 +131,7 @@ const RulesPageComponent: React.FC = () => {
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading,
         onClick: handleCreatePrePackagedRules,
       }),
     [canUserCRUD, getLoadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
@@ -140,7 +140,7 @@ const RulesPageComponent: React.FC = () => {
   const reloadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getReloadPrebuiltRulesAndTemplatesButton({
-        isDisabled: userHasNoPermissions(canUserCRUD) || loading,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading,
         onClick: handleCreatePrePackagedRules,
       }),
     [canUserCRUD, getReloadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
@@ -182,7 +182,7 @@ const RulesPageComponent: React.FC = () => {
         subtitle={i18n.INITIAL_PROMPT_TEXT}
         title={i18n.IMPORT_RULE}
       />
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage
           backOptions={{
             href: getDetectionEngineUrl(),
@@ -213,7 +213,7 @@ const RulesPageComponent: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 iconType="importAction"
-                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                isDisabled={!userHasPermissions(canUserCRUD) || loading}
                 onClick={() => {
                   setShowImportModal(true);
                 }}
@@ -228,7 +228,7 @@ const RulesPageComponent: React.FC = () => {
                 onClick={goToNewRule}
                 href={formatUrl(getCreateRuleUrl())}
                 iconType="plusInCircle"
-                isDisabled={userHasNoPermissions(canUserCRUD) || loading}
+                isDisabled={!userHasPermissions(canUserCRUD) || loading}
               >
                 {i18n.ADD_NEW_RULE}
               </LinkButton>
@@ -250,7 +250,7 @@ const RulesPageComponent: React.FC = () => {
           data-test-subj="all-rules"
           loading={loading || prePackagedRuleLoading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
-          hasNoPermissions={userHasNoPermissions(canUserCRUD)}
+          hasPermissions={userHasPermissions(canUserCRUD)}
           refetchPrePackagedRulesStatus={handleRefetchPrePackagedRulesStatus}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}
@@ -258,7 +258,7 @@ const RulesPageComponent: React.FC = () => {
           rulesNotUpdated={rulesNotUpdated}
           setRefreshRulesData={handleSetRefreshRulesData}
         />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.detections} />
     </>

@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History, Location } from 'history';
+import { History } from 'history';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
@@ -40,14 +40,12 @@ const TIMELINE_MARGINS = {
 const toggleFlyout = ({
   history,
   item,
-  location,
 }: {
   history: History;
   item?: IWaterfallItem;
-  location: Location;
 }) => {
   history.replace({
-    ...location,
+    ...history.location,
     search: fromQuery({
       ...toQuery(location.search),
       flyoutDetailTab: undefined,
@@ -63,15 +61,9 @@ const WaterfallItemsContainer = euiStyled.div`
 interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
-  location: Location;
   exceedsMax: boolean;
 }
-export function Waterfall({
-  waterfall,
-  exceedsMax,
-  waterfallItemId,
-  location,
-}: Props) {
+export function Waterfall({ waterfall, exceedsMax, waterfallItemId }: Props) {
   const history = useHistory();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
@@ -97,13 +89,12 @@ export function Waterfall({
         item={entryWaterfallTransaction}
         level={0}
         waterfallItemId={waterfallItemId}
-        location={location}
         errorsPerTransaction={waterfall.errorsPerTransaction}
         duration={duration}
         childrenByParentId={childrenByParentId}
         timelineMargins={TIMELINE_MARGINS}
         onClickWaterfallItem={(item: IWaterfallItem) =>
-          toggleFlyout({ history, item, location })
+          toggleFlyout({ history, item })
         }
         onToggleEntryTransaction={() => setIsAccordionOpen((isOpen) => !isOpen)}
       />
@@ -148,7 +139,6 @@ export function Waterfall({
         <WaterfallFlyout
           waterfallItemId={waterfallItemId}
           waterfall={waterfall}
-          location={location}
           toggleFlyout={toggleFlyout}
         />
       </Container>

@@ -8,24 +8,20 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiText,
   EuiBadgeGroup,
-  EuiPageContent,
-  EuiTitle,
+  EuiButtonEmpty,
+  EuiInMemoryTable,
+  EuiPageHeader,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
-import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
+import { IndexPatternCreationOption, IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { EmptyState } from './empty_state';
@@ -54,10 +50,6 @@ const search = {
   },
 };
 
-const ariaRegion = i18n.translate('indexPatternManagement.editIndexPatternLiveRegionAriaLabel', {
-  defaultMessage: 'Index patterns',
-});
-
 const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
   defaultMessage: 'Index patterns',
 });
@@ -76,7 +68,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     application,
     http,
     data,
-    getMlCardState,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
@@ -182,7 +173,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           onRefresh={loadSources}
           docLinks={docLinks}
           navigateToApp={application.navigateToApp}
-          getMlCardState={getMlCardState}
           canSave={canSave}
         />
       );
@@ -199,25 +189,21 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   }
 
   return (
-    <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>{title}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-                defaultMessage="Create and manage the index patterns that help you retrieve your data from Elasticsearch."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
+    <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
+      <EuiPageHeader
+        pageTitle={title}
+        description={
+          <FormattedMessage
+            id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
+            defaultMessage="Create and manage the index patterns that help you retrieve your data from Elasticsearch."
+          />
+        }
+        bottomBorder
+        rightSideItems={[createButton]}
+      />
+
+      <EuiSpacer size="l" />
+
       <EuiInMemoryTable
         allowNeutralSort={false}
         itemId="id"
@@ -228,7 +214,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         sorting={sorting}
         search={search}
       />
-    </EuiPageContent>
+    </div>
   );
 };
 

@@ -15,7 +15,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('node detail mb', () => {
-    const archive = 'monitoring/logstash_pipelines_mb';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/logstash_pipelines_mb';
     const timeRange = {
       min: '2018-01-22T09:33:13.000Z',
       max: '2018-01-22T09:41:04.000Z',

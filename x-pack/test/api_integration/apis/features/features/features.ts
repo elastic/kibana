@@ -114,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
             'infrastructure',
             'logs',
             'maps',
+            'observabilityCases',
             'uptime',
             'siem',
             'fleet',

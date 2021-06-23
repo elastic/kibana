@@ -364,7 +364,6 @@ export class IndexPattern implements IIndexPattern {
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-
   addRuntimeField(name: string, runtimeField: RuntimeField) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
@@ -384,11 +383,41 @@ export class IndexPattern implements IIndexPattern {
   }
 
   /**
-   * Remove a runtime field - removed from mapped field or removed unmapped
-   * field as appropriate
-   * @param name Field name
+   * Checks if runtime field exists
+   * @param name
    */
+  hasRuntimeField(name: string): boolean {
+    return !!this.runtimeFieldMap[name];
+  }
 
+  /**
+   * Returns runtime field if exists
+   * @param name
+   */
+  getRuntimeField(name: string): RuntimeField | null {
+    return this.runtimeFieldMap[name] ?? null;
+  }
+
+  /**
+   * Replaces all existing runtime fields with new fields
+   * @param newFields
+   */
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
+    oldRuntimeFieldNames.forEach((name) => {
+      this.removeRuntimeField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.addRuntimeField(name, field);
+    });
+  }
+
+  /**
+   * Remove a runtime field - removed from mapped field or removed unmapped
+   * field as appropriate. Doesn't clear associated field attributes.
+   * @param name - Field name to remove
+   */
   removeRuntimeField(name: string) {
     const existingField = this.getFieldByName(name);
     if (existingField) {
@@ -396,9 +425,6 @@ export class IndexPattern implements IIndexPattern {
         // mapped field, remove runtimeField def
         existingField.runtimeField = undefined;
       } else {
-        // runtimeField only
-        this.setFieldCustomLabel(name, null);
-        this.deleteFieldFormat(name);
         this.fields.remove(existingField);
       }
     }

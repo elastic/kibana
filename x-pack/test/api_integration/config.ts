@@ -18,7 +18,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
     services,
     servers: xPackFunctionalTestsConfig.get('servers'),
     security: xPackFunctionalTestsConfig.get('security'),
-    esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack API Integration Tests',
     },

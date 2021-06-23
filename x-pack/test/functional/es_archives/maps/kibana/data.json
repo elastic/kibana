@@ -1202,6 +1202,34 @@
 {
   "type": "doc",
   "value": {
+    "id": "dashboard:4beb0d80-c2ef-11eb-b0cb-bd162d969e6b",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "title" : "by value map",
+        "hits" : 0,
+        "description" : "",
+        "panelsJSON" : "[{\"version\":\"7.12.1-SNAPSHOT\",\"type\":\"map\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"cb82a9e3-2eb0-487f-9ade-0ffb921eb536\"},\"panelIndex\":\"cb82a9e3-2eb0-487f-9ade-0ffb921eb536\",\"embeddableConfig\":{\"attributes\":{\"title\":\"\",\"description\":\"\",\"layerListJSON\":\"[]\",\"mapStateJSON\":\"{\\\"zoom\\\":1.75,\\\"center\\\":{\\\"lon\\\":0,\\\"lat\\\":19.94277},\\\"timeFilters\\\":{\\\"from\\\":\\\"now-15m\\\",\\\"to\\\":\\\"now\\\"},\\\"refreshConfig\\\":{\\\"isPaused\\\":true,\\\"interval\\\":0},\\\"query\\\":{\\\"query\\\":\\\"\\\",\\\"language\\\":\\\"kuery\\\"},\\\"filters\\\":[],\\\"settings\\\":{\\\"autoFitToDataBounds\\\":false,\\\"backgroundColor\\\":\\\"#ffffff\\\",\\\"disableInteractive\\\":false,\\\"disableTooltipControl\\\":false,\\\"hideToolbarOverlay\\\":false,\\\"hideLayerControl\\\":false,\\\"hideViewControl\\\":false,\\\"initialLocation\\\":\\\"LAST_SAVED_LOCATION\\\",\\\"fixedLocation\\\":{\\\"lat\\\":0,\\\"lon\\\":0,\\\"zoom\\\":2},\\\"browserLocation\\\":{\\\"zoom\\\":2},\\\"maxZoom\\\":24,\\\"minZoom\\\":0,\\\"showScaleControl\\\":false,\\\"showSpatialFilters\\\":true,\\\"spatialFiltersAlpa\\\":0.3,\\\"spatialFiltersFillColor\\\":\\\"#DA8B45\\\",\\\"spatialFiltersLineColor\\\":\\\"#DA8B45\\\"}}\",\"uiStateJSON\":\"{\\\"isLayerTOCOpen\\\":true,\\\"openTOCDetails\\\":[]}\"},\"mapCenter\":{\"lat\":19.94277,\"lon\":0,\"zoom\":1.75},\"mapBuffer\":{\"minLon\":-211.13072,\"minLat\":-55.27145,\"maxLon\":211.13072,\"maxLat\":87.44135},\"isLayerTOCOpen\":true,\"openTOCDetails\":[],\"hiddenLayers\":[],\"enhancements\":{}}}]",
+        "optionsJSON" : "{\"hidePanelTitles\":false,\"useMargins\":true}",
+        "version" : 1,
+        "timeRestore" : false,
+        "kibanaSavedObjectMeta" : {
+          "searchSourceJSON" : "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+        }
+      },
+      "type" : "dashboard",
+      "references" : [ ],
+      "migrationVersion" : {
+        "dashboard" : "7.11.0"
+      },
+      "updated_at" : "2021-06-01T15:37:39.198Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "index": ".kibana",
     "id": "query:OKJpgs",
     "source": {

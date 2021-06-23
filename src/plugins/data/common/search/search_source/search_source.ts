@@ -699,7 +699,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
-    const metaFields = getConfig(UI_SETTINGS.META_FIELDS);
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, storedFields, runtimeFields } = index

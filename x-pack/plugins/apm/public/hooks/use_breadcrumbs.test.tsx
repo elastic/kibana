@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import produce from 'immer';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { routes } from '../components/app/Main/route_config';
+import { apmRouteConfig } from '../components/routing/apm_route_config';
 import { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
@@ -36,7 +36,9 @@ function createWrapper(path: string) {
 }
 
 function mountBreadcrumb(path: string) {
-  renderHook(() => useBreadcrumbs(routes), { wrapper: createWrapper(path) });
+  renderHook(() => useBreadcrumbs(apmRouteConfig), {
+    wrapper: createWrapper(path),
+  });
 }
 
 const changeTitle = jest.fn();

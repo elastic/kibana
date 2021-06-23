@@ -27,6 +27,16 @@ interface LensPanel extends SavedDashboardPanel730ToLatest {
         visualization?: {
           preferredSeriesType?: string;
         };
+        datasourceStates?: {
+          indexpattern?: {
+            layers: Record<
+              string,
+              {
+                columns: Record<string, { operationType: string }>;
+              }
+            >;
+          };
+        };
       };
     };
   };
@@ -109,6 +119,19 @@ export const collectByValueLensInfo: DashboardCollectorFunction = (panels, colle
       }
 
       collectorData.lensByValue[type] = collectorData.lensByValue[type] + 1;
+
+      const hasFormula = Object.values(
+        lensPanel.embeddableConfig.attributes.state?.datasourceStates?.indexpattern?.layers || {}
+      ).some((layer) =>
+        Object.values(layer.columns).some((column) => column.operationType === 'formula')
+      );
+
+      if (hasFormula && !collectorData.lensByValue.formula) {
+        collectorData.lensByValue.formula = 0;
+      }
+      if (hasFormula) {
+        collectorData.lensByValue.formula++;
+      }
     }
   }
 };

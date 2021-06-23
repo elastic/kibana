@@ -44,7 +44,7 @@ const DATA_FRAME_ANALYTICS_DEEP_LINK: AppDeepLink = {
 };
 
 const DATA_VISUALIZER_DEEP_LINK: AppDeepLink = {
-  id: 'mlDataVisualizerDeepLink',
+  id: 'dataVisualizerDeepLink',
   title: i18n.translate('xpack.ml.deepLink.dataVisualizer', {
     defaultMessage: 'Data Visualizer',
   }),

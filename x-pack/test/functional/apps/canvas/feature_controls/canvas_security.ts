@@ -19,11 +19,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('security feature controls', function () {
     this.tags(['skipFirefox']);
     before(async () => {
-      await esArchiver.load('canvas/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
     });
 
     after(async () => {
-      await esArchiver.unload('canvas/default');
+      await esArchiver.unload('x-pack/test/functional/es_archives/canvas/default');
     });
 
     describe('global canvas all privileges', () => {

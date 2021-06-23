@@ -774,7 +774,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+                  class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder"
                   data-test-subj="trustedAppCard"
                 >
                   <div
@@ -862,7 +862,13 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                         <dd
                           class="euiDescriptionList__description c2 eui-textBreakWord"
                         >
-                          someone
+                          <span
+                            class="euiToolTipAnchor eui-textTruncate"
+                          >
+                            <span>
+                              someone
+                            </span>
+                          </span>
                         </dd>
                         <dt
                           class="euiDescriptionList__title c1"

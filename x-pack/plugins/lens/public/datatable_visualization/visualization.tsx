@@ -23,6 +23,7 @@ import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
 import { CustomPaletteParams } from '../shared_components/coloring/types';
 import { getStopsForFixedMode } from '../shared_components';
+import { getDefaultSummaryLabel } from './summary';
 
 export interface ColumnState {
   columnId: string;
@@ -38,6 +39,8 @@ export interface ColumnState {
   alignment?: 'left' | 'right' | 'center';
   palette?: PaletteOutput<CustomPaletteParams>;
   colorMode?: 'none' | 'cell' | 'text';
+  summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
+  summaryLabel?: string;
 }
 
 export interface SortingState {
@@ -358,6 +361,8 @@ export const getDatatableVisualization = ({
                 reverse: false, // managed at UI level
               };
 
+              const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
+
               return {
                 type: 'expression',
                 chain: [
@@ -376,6 +381,10 @@ export const getDatatableVisualization = ({
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                       colorMode: [column.colorMode ?? 'none'],
                       palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
+                      summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
+                      summaryLabel: hasNoSummaryRow
+                        ? []
+                        : [column.summaryLabel ?? getDefaultSummaryLabel(column.summaryRow!)],
                     },
                   },
                 ],

@@ -68,7 +68,9 @@ const getExcessProps = (props: rt.Props, r: Record<string, unknown>): string[] =
   return ex;
 };
 
-export function excess<C extends rt.InterfaceType<rt.Props>>(codec: C): C {
+export function excess<C extends rt.InterfaceType<rt.Props> | rt.PartialType<rt.Props>>(
+  codec: C
+): C {
   const r = new rt.InterfaceType(
     codec.name,
     codec.is,

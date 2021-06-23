@@ -30,10 +30,10 @@ export default function (providerContext: FtrProviderContext) {
   describe('package installation error handling and rollback', async () => {
     skipIfNoDockerRegistry(providerContext);
     beforeEach(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
     afterEach(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     it('on a fresh install, it should uninstall a broken package during rollback', async function () {

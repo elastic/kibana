@@ -15,7 +15,10 @@ import { spacesClientMock } from '../../../spaces/server/mocks';
 import type { AuditEvent, AuditLogger } from '../audit';
 import { SpaceAuditAction } from '../audit';
 import { auditServiceMock } from '../audit/index.mock';
-import type { AuthorizationServiceSetup } from '../authorization';
+import type {
+  AuthorizationServiceSetup,
+  AuthorizationServiceSetupInternal,
+} from '../authorization';
 import { authorizationMock } from '../authorization/index.mock';
 import type { CheckPrivilegesResponse } from '../authorization/types';
 import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
@@ -85,7 +88,9 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
   };
 };
 
-const expectNoAuthorizationCheck = (authorization: jest.Mocked<AuthorizationServiceSetup>) => {
+const expectNoAuthorizationCheck = (
+  authorization: jest.Mocked<AuthorizationServiceSetupInternal>
+) => {
   expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkSavedObjectsPrivilegesWithRequest).not.toHaveBeenCalled();

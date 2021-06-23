@@ -9,13 +9,13 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import styled from 'styled-components';
-
 import {
   arrayIndexToAriaIndex,
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../common/components/accessibility/helpers';
+} from '../../../../../timelines/public';
+
 import { BrowserFields } from '../../../common/containers/source';
 import { OnUpdateColumns } from '../timeline/events';
 

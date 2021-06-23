@@ -7,92 +7,94 @@
  */
 
 import { METRIC_TYPE } from '@kbn/analytics';
+import { Required } from '@kbn/utility-types';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import angular from 'angular';
+import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import UseUnmount from 'react-use/lib/useUnmount';
-import { UI_SETTINGS } from '../../../common';
-import { BaseVisType, VisTypeAlias } from '../../../../visualizations/public';
-import {
-  AddFromLibraryButton,
-  PrimaryActionButton,
-  QuickButtonGroup,
-  SolutionToolbar,
-  QuickButtonProps,
-} from '../../../../presentation_util/public';
-import { useKibana } from '../../services/kibana_react';
-import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
-import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
-import {
-  getSavedObjectFinder,
-  SavedObjectSaveOpts,
-  SaveResult,
-  showSaveModal,
-} from '../../services/saved_objects';
-import { LazyLabsFlyout, withSuspense } from '../../../../presentation_util/public';
-
-import { NavAction } from '../../types';
-import { DashboardSavedObject } from '../..';
-import { DashboardStateManager } from '../dashboard_state_manager';
 import { saveDashboard } from '../lib';
-import {
-  DashboardAppServices,
-  DashboardEmbedSettings,
-  DashboardRedirect,
-  DashboardSaveOptions,
-} from '../types';
-import { getTopNavConfig } from './get_top_nav_config';
+import { TopNavIds } from './top_nav_ids';
+import { EditorMenu } from './editor_menu';
+import { UI_SETTINGS } from '../../../common';
+import { SavedQuery } from '../../services/data';
 import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
-import { showOptionsPopover } from './show_options_popover';
-import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
-import { confirmDiscardOrKeepUnsavedChanges } from '../listing/confirm_overlays';
+import { getTopNavConfig } from './get_top_nav_config';
 import { OverlayRef } from '../../../../../core/public';
+import { useKibana } from '../../services/kibana_react';
+import { showOptionsPopover } from './show_options_popover';
 import { DashboardConstants } from '../../dashboard_constants';
-import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
-import { DashboardContainer } from '..';
-import { EditorMenu } from './editor_menu';
+import { TopNavMenuProps } from '../../../../navigation/public';
+import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
+import { BaseVisType, VisTypeAlias } from '../../../../visualizations/public';
+import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
+import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
+import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
+import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
+import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
+import {
+  setFullScreenMode,
+  setHidePanelTitles,
+  setSavedQueryId,
+  setStateFromSaveModal,
+  setSyncColors,
+  setUseMargins,
+  setViewMode,
+  useDashboardDispatch,
+  useDashboardSelector,
+} from '../state';
+
+import {
+  AddFromLibraryButton,
+  LazyLabsFlyout,
+  PrimaryActionButton,
+  QuickButtonGroup,
+  QuickButtonProps,
+  SolutionToolbar,
+  withSuspense,
+} from '../../../../presentation_util/public';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
   addPanelOverlay?: OverlayRef;
   savedQuery?: SavedQuery;
+  isSaveInProgress?: boolean;
 }
+
+type CompleteDashboardAppState = Required<
+  DashboardAppState,
+  | 'getLatestDashboardState'
+  | 'dashboardContainer'
+  | 'savedDashboard'
+  | 'indexPatterns'
+  | 'applyFilters'
+>;
+
+export const isCompleteDashboardAppState = (
+  state: DashboardAppState
+): state is CompleteDashboardAppState => {
+  return (
+    Boolean(state.getLatestDashboardState) &&
+    Boolean(state.dashboardContainer) &&
+    Boolean(state.savedDashboard) &&
+    Boolean(state.indexPatterns) &&
+    Boolean(state.applyFilters)
+  );
+};
 
 export interface DashboardTopNavProps {
-  onQuerySubmit: (_payload: unknown, isUpdate: boolean | undefined) => void;
-  dashboardStateManager: DashboardStateManager;
-  dashboardContainer: DashboardContainer;
+  dashboardAppState: CompleteDashboardAppState;
   embedSettings?: DashboardEmbedSettings;
-  savedDashboard: DashboardSavedObject;
-  timefilter: TimefilterContract;
-  indexPatterns: IndexPattern[];
   redirectTo: DashboardRedirect;
-  unsavedChanges: boolean;
-  clearUnsavedChanges: () => void;
-  lastDashboardId?: string;
-  viewMode: ViewMode;
 }
 
-const Flyout = withSuspense(LazyLabsFlyout, null);
+const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
 export function DashboardTopNav({
-  dashboardStateManager,
-  clearUnsavedChanges,
-  dashboardContainer,
-  lastDashboardId,
-  unsavedChanges,
-  savedDashboard,
-  onQuerySubmit,
+  dashboardAppState,
   embedSettings,
-  indexPatterns,
   redirectTo,
-  timefilter,
-  viewMode,
 }: DashboardTopNavProps) {
   const {
     core,
@@ -102,17 +104,24 @@ export function DashboardTopNav({
     embeddable,
     navigation,
     uiSettings,
-    setHeaderActionMenu,
-    savedObjectsTagging,
-    dashboardCapabilities,
-    dashboardPanelStorage,
-    allowByValueEmbeddables,
     visualizations,
     usageCollection,
+    initializerContext,
+    savedObjectsTagging,
+    setHeaderActionMenu,
+    dashboardCapabilities,
+    dashboardSessionStorage,
+    allowByValueEmbeddables,
   } = useKibana<DashboardAppServices>().services;
+  const { version: kibanaVersion } = initializerContext.env.packageInfo;
+  const timefilter = data.query.timefilter.timefilter;
+  const toasts = core.notifications.toasts;
 
+  const dispatchDashboardStateChange = useDashboardDispatch();
+  const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
+
+  const [mounted, setMounted] = useState(true);
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
-  const [isSaveInProgress, setIsSaveInProgress] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
 
   const lensAlias = visualizations.getAliases().find(({ name }) => name === 'lens');
@@ -123,48 +132,50 @@ export function DashboardTopNav({
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
-    DashboardConstants.DASHBOARDS_ID
+    DashboardConstants.DASHBOARD_ID
   );
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
     });
-    const { id, title, getFullEditPath } = savedDashboard;
-    if (id || allowByValueEmbeddables) {
+    const { id, title, getFullEditPath } = dashboardAppState.savedDashboard;
+    if (id && title) {
       chrome.recentlyAccessed.add(
-        getFullEditPath(dashboardStateManager.getIsEditMode()),
-        title || getNewDashboardTitle(),
-        id || DASHBOARD_PANELS_UNSAVED_ID
+        getFullEditPath(dashboardState.viewMode === ViewMode.EDIT),
+        title,
+        id
       );
     }
     return () => {
       visibleSubscription.unsubscribe();
     };
-  }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard]);
+  }, [chrome, allowByValueEmbeddables, dashboardState.viewMode, dashboardAppState.savedDashboard]);
 
   const addFromLibrary = useCallback(() => {
-    if (!isErrorEmbeddable(dashboardContainer)) {
+    if (!isErrorEmbeddable(dashboardAppState.dashboardContainer)) {
       setState((s) => ({
         ...s,
         addPanelOverlay: openAddPanelFlyout({
-          embeddable: dashboardContainer,
+          embeddable: dashboardAppState.dashboardContainer,
           getAllFactories: embeddable.getEmbeddableFactories,
           getFactory: embeddable.getEmbeddableFactory,
           notifications: core.notifications,
           overlays: core.overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
+          reportUiCounter: usageCollection?.reportUiCounter,
         }),
       }));
     }
   }, [
+    dashboardAppState.dashboardContainer,
     embeddable.getEmbeddableFactories,
     embeddable.getEmbeddableFactory,
-    dashboardContainer,
     core.notifications,
     core.savedObjects,
     core.overlays,
     uiSettings,
+    usageCollection,
   ]);
 
   const createNewVisType = useCallback(
@@ -174,7 +185,7 @@ export function DashboardTopNav({
 
       if (visType) {
         if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, visType.name);
+          trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
 
         if ('aliasPath' in visType) {
@@ -209,291 +220,220 @@ export function DashboardTopNav({
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
       clearAddPanel();
-      const isPageRefresh = newMode === dashboardStateManager.getViewMode();
-      const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
-      const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
-
-      function switchViewMode() {
-        dashboardStateManager.switchViewMode(newMode);
-
-        if (savedDashboard?.id && allowByValueEmbeddables) {
-          const { getFullEditPath, title, id } = savedDashboard;
-          chrome.recentlyAccessed.add(getFullEditPath(newMode === ViewMode.EDIT), title, id);
-        }
-      }
+      const willLoseChanges = newMode === ViewMode.VIEW && dashboardAppState.hasUnsavedChanges;
 
       if (!willLoseChanges) {
-        switchViewMode();
+        dispatchDashboardStateChange(setViewMode(newMode));
         return;
       }
 
-      function discardChanges() {
-        dashboardStateManager.resetState();
-        dashboardStateManager.clearUnsavedPanels();
-
-        // We need to do a hard reset of the timepicker. appState will not reload like
-        // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
-        // reload will cause it not to sync.
-        if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-          dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
-          dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
-        }
-        dashboardStateManager.switchViewMode(ViewMode.VIEW);
-      }
-      confirmDiscardOrKeepUnsavedChanges(core.overlays).then((selection) => {
-        if (selection === 'discard') {
-          discardChanges();
-        }
-        if (selection !== 'cancel') {
-          switchViewMode();
-        }
-      });
+      confirmDiscardUnsavedChanges(core.overlays, () =>
+        dashboardAppState.resetToLastSavedState?.()
+      );
     },
-    [
-      timefilter,
-      core.overlays,
-      clearAddPanel,
-      savedDashboard,
-      dashboardStateManager,
-      allowByValueEmbeddables,
-      chrome.recentlyAccessed,
-    ]
+    [clearAddPanel, core.overlays, dashboardAppState, dispatchDashboardStateChange]
   );
 
-  /**
-   * Saves the dashboard.
-   *
-   * @param {object} [saveOptions={}]
-   * @property {boolean} [saveOptions.confirmOverwrite=false] - If true, attempts to create the source so it
-   * can confirm an overwrite if a document with the id already exists.
-   * @property {boolean} [saveOptions.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
-   * @property {func} [saveOptions.onTitleDuplicate] - function called if duplicate title exists.
-   * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
-   * @return {Promise}
-   * @resolved {String} - The id of the doc
-   */
-  const save = useCallback(
-    async (saveOptions: SavedObjectSaveOpts) => {
-      setIsSaveInProgress(true);
-      return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
-        .then(function (id) {
-          if (id) {
-            core.notifications.toasts.addSuccess({
-              title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-                defaultMessage: `Dashboard '{dashTitle}' was saved`,
-                values: { dashTitle: dashboardStateManager.savedDashboard.title },
-              }),
-              'data-test-subj': 'saveDashboardSuccess',
-            });
-
-            dashboardPanelStorage.clearPanels(lastDashboardId);
-            if (id !== lastDashboardId) {
-              redirectTo({
-                id,
-                // editMode: true,
-                destination: 'dashboard',
-                useReplace: true,
-              });
-            } else {
-              dashboardStateManager.resetState();
-              chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
-            }
-          }
-          setIsSaveInProgress(false);
-          return { id };
-        })
-        .catch((error) => {
-          core.notifications?.toasts.addDanger({
-            title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-              defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
-              values: {
-                dashTitle: dashboardStateManager.savedDashboard.title,
-                errorMessage: error.message,
-              },
-            }),
-            'data-test-subj': 'saveDashboardFailure',
-          });
-          return { error };
-        });
-    },
-    [
-      core.notifications.toasts,
-      dashboardStateManager,
-      dashboardPanelStorage,
-      lastDashboardId,
-      chrome.docTitle,
-      redirectTo,
-      timefilter,
-    ]
-  );
-
-  const runSave = useCallback(async () => {
-    const currentTitle = dashboardStateManager.getTitle();
-    const currentDescription = dashboardStateManager.getDescription();
-    const currentTimeRestore = dashboardStateManager.getTimeRestore();
-
-    let currentTags: string[] = [];
-    if (savedObjectsTagging) {
-      const dashboard = dashboardStateManager.savedDashboard;
-      if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
-        currentTags = dashboard.getTags();
-      }
-    }
-
-    const onSave = ({
+  const runSaveAs = useCallback(async () => {
+    const currentState = dashboardAppState.getLatestDashboardState();
+    const onSave = async ({
+      newTags,
       newTitle,
       newDescription,
       newCopyOnSave,
       newTimeRestore,
       onTitleDuplicate,
       isTitleDuplicateConfirmed,
-      newTags,
     }: DashboardSaveOptions): Promise<SaveResult> => {
-      dashboardStateManager.setTitle(newTitle);
-      dashboardStateManager.setDescription(newDescription);
-      dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
-      dashboardStateManager.setTimeRestore(newTimeRestore);
-      if (savedObjectsTagging && newTags) {
-        dashboardStateManager.setTags(newTags);
-      }
-
       const saveOptions = {
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       };
+      const stateFromSaveModal = {
+        title: newTitle,
+        description: newDescription,
+        timeRestore: newTimeRestore,
+        tags: [] as string[],
+      };
+      if (savedObjectsTagging && newTags) {
+        stateFromSaveModal.tags = newTags;
+      }
 
-      return save(saveOptions).then((response: SaveResult) => {
-        // If the save wasn't successful, put the original values back.
-        if (!(response as { id: string }).id) {
-          dashboardStateManager.setTitle(currentTitle);
-          dashboardStateManager.setDescription(currentDescription);
-          dashboardStateManager.setTimeRestore(currentTimeRestore);
-          if (savedObjectsTagging) {
-            dashboardStateManager.setTags(currentTags);
-          }
-        }
-        return response;
+      dashboardAppState.savedDashboard.copyOnSave = newCopyOnSave;
+      const saveResult = await saveDashboard({
+        toasts,
+        timefilter,
+        redirectTo,
+        saveOptions,
+        savedObjectsTagging,
+        version: kibanaVersion,
+        dashboardSessionStorage,
+        savedDashboard: dashboardAppState.savedDashboard,
+        currentState: { ...currentState, ...stateFromSaveModal },
       });
+      if (saveResult.id && !saveResult.redirected) {
+        dispatchDashboardStateChange(setStateFromSaveModal(stateFromSaveModal));
+        dashboardAppState.updateLastSavedState?.();
+        chrome.docTitle.change(stateFromSaveModal.title);
+      }
+      return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
 
+    const lastDashboardId = dashboardAppState.savedDashboard.id;
+    const currentTags = savedObjectsTagging?.ui.hasTagDecoration(dashboardAppState.savedDashboard)
+      ? dashboardAppState.savedDashboard.getTags()
+      : [];
     const dashboardSaveModal = (
       <DashboardSaveModal
         onSave={onSave}
         onClose={() => {}}
-        title={currentTitle}
-        description={currentDescription}
         tags={currentTags}
+        title={currentState.title}
+        timeRestore={currentState.timeRestore}
+        description={currentState.description}
         savedObjectsTagging={savedObjectsTagging}
-        timeRestore={currentTimeRestore}
         showCopyOnSave={lastDashboardId ? true : false}
       />
     );
     clearAddPanel();
     showSaveModal(dashboardSaveModal, core.i18n.Context);
   }, [
-    save,
-    clearAddPanel,
-    lastDashboardId,
-    core.i18n.Context,
+    dispatchDashboardStateChange,
+    dashboardSessionStorage,
     savedObjectsTagging,
-    dashboardStateManager,
+    dashboardAppState,
+    core.i18n.Context,
+    chrome.docTitle,
+    clearAddPanel,
+    kibanaVersion,
+    timefilter,
+    redirectTo,
+    toasts,
   ]);
 
   const runQuickSave = useCallback(async () => {
-    const currentTitle = dashboardStateManager.getTitle();
-    const currentDescription = dashboardStateManager.getDescription();
-    const currentTimeRestore = dashboardStateManager.getTimeRestore();
-
-    let currentTags: string[] = [];
-    if (savedObjectsTagging) {
-      const dashboard = dashboardStateManager.savedDashboard;
-      if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
-        currentTags = dashboard.getTags();
-      }
-    }
-
-    setIsSaveInProgress(true);
-    save({}).then((response: SaveResult) => {
-      // If the save wasn't successful, put the original values back.
-      if (!(response as { id: string }).id) {
-        dashboardStateManager.setTitle(currentTitle);
-        dashboardStateManager.setDescription(currentDescription);
-        dashboardStateManager.setTimeRestore(currentTimeRestore);
-        if (savedObjectsTagging) {
-          dashboardStateManager.setTags(currentTags);
-        }
-      } else {
-        clearUnsavedChanges();
-      }
-      setIsSaveInProgress(false);
-      return response;
+    setState((s) => ({ ...s, isSaveInProgress: true }));
+    const currentState = dashboardAppState.getLatestDashboardState();
+    const saveResult = await saveDashboard({
+      toasts,
+      timefilter,
+      redirectTo,
+      currentState,
+      saveOptions: {},
+      savedObjectsTagging,
+      version: kibanaVersion,
+      dashboardSessionStorage,
+      savedDashboard: dashboardAppState.savedDashboard,
     });
-  }, [save, savedObjectsTagging, dashboardStateManager, clearUnsavedChanges]);
+    if (saveResult.id && !saveResult.redirected) {
+      dashboardAppState.updateLastSavedState?.();
+    }
+    // turn off save in progress after the next change check. This prevents the save button from flashing
+    setTimeout(() => {
+      if (!mounted) return;
+      setState((s) => ({ ...s, isSaveInProgress: false }));
+    }, DashboardConstants.CHANGE_CHECK_DEBOUNCE);
+  }, [
+    dashboardSessionStorage,
+    savedObjectsTagging,
+    dashboardAppState,
+    kibanaVersion,
+    timefilter,
+    redirectTo,
+    mounted,
+    toasts,
+  ]);
 
   const runClone = useCallback(() => {
-    const currentTitle = dashboardStateManager.getTitle();
+    const currentState = dashboardAppState.getLatestDashboardState();
     const onClone = async (
       newTitle: string,
       isTitleDuplicateConfirmed: boolean,
       onTitleDuplicate: () => void
     ) => {
-      dashboardStateManager.savedDashboard.copyOnSave = true;
-      dashboardStateManager.setTitle(newTitle);
+      dashboardAppState.savedDashboard.copyOnSave = true;
       const saveOptions = {
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       };
-      return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
-        // If the save wasn't successful, put the original title back.
-        if ((response as { error: Error }).error) {
-          dashboardStateManager.setTitle(currentTitle);
-        }
-        return response;
+      const saveResult = await saveDashboard({
+        toasts,
+        timefilter,
+        redirectTo,
+        saveOptions,
+        savedObjectsTagging,
+        version: kibanaVersion,
+        dashboardSessionStorage,
+        savedDashboard: dashboardAppState.savedDashboard,
+        currentState: { ...currentState, title: newTitle },
       });
+      return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
+    showCloneModal(onClone, currentState.title);
+  }, [
+    dashboardSessionStorage,
+    savedObjectsTagging,
+    dashboardAppState,
+    kibanaVersion,
+    redirectTo,
+    timefilter,
+    toasts,
+  ]);
 
-    showCloneModal(onClone, currentTitle);
-  }, [dashboardStateManager, save]);
+  const showOptions = useCallback(
+    (anchorElement: HTMLElement) => {
+      const currentState = dashboardAppState.getLatestDashboardState();
+      showOptionsPopover({
+        anchorElement,
+        useMargins: currentState.options.useMargins,
+        onUseMarginsChange: (isChecked: boolean) => {
+          dispatchDashboardStateChange(setUseMargins(isChecked));
+        },
+        syncColors: Boolean(currentState.options.syncColors),
+        onSyncColorsChange: (isChecked: boolean) => {
+          dispatchDashboardStateChange(setSyncColors(isChecked));
+        },
+        hidePanelTitles: currentState.options.hidePanelTitles,
+        onHidePanelTitlesChange: (isChecked: boolean) => {
+          dispatchDashboardStateChange(setHidePanelTitles(isChecked));
+        },
+      });
+    },
+    [dashboardAppState, dispatchDashboardStateChange]
+  );
+
+  const showShare = useCallback(
+    (anchorElement: HTMLElement) => {
+      if (!share) return;
+      const currentState = dashboardAppState.getLatestDashboardState();
+      ShowShareModal({
+        share,
+        kibanaVersion,
+        anchorElement,
+        dashboardCapabilities,
+        currentDashboardState: currentState,
+        savedDashboard: dashboardAppState.savedDashboard,
+        isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
+      });
+    },
+    [dashboardAppState, dashboardCapabilities, share, kibanaVersion]
+  );
 
   const dashboardTopNavActions = useMemo(() => {
     const actions = {
-      [TopNavIds.FULL_SCREEN]: () => {
-        dashboardStateManager.setFullScreenMode(true);
-      },
+      [TopNavIds.FULL_SCREEN]: () => dispatchDashboardStateChange(setFullScreenMode(true)),
       [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
       [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
-      [TopNavIds.SAVE]: runSave,
       [TopNavIds.QUICK_SAVE]: runQuickSave,
+      [TopNavIds.OPTIONS]: showOptions,
+      [TopNavIds.SAVE]: runSaveAs,
       [TopNavIds.CLONE]: runClone,
-      [TopNavIds.OPTIONS]: (anchorElement) => {
-        showOptionsPopover({
-          anchorElement,
-          useMargins: dashboardStateManager.getUseMargins(),
-          onUseMarginsChange: (isChecked: boolean) => {
-            dashboardStateManager.setUseMargins(isChecked);
-          },
-          syncColors: dashboardStateManager.getSyncColors(),
-          onSyncColorsChange: (isChecked: boolean) => {
-            dashboardStateManager.setSyncColors(isChecked);
-          },
-          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
-          onHidePanelTitlesChange: (isChecked: boolean) => {
-            dashboardStateManager.setHidePanelTitles(isChecked);
-          },
-        });
-      },
     } as { [key: string]: NavAction };
+
     if (share) {
-      actions[TopNavIds.SHARE] = (anchorElement) =>
-        ShowShareModal({
-          share,
-          anchorElement,
-          savedDashboard,
-          dashboardStateManager,
-          dashboardCapabilities,
-        });
+      actions[TopNavIds.SHARE] = showShare;
     }
 
     if (isLabsEnabled) {
@@ -503,13 +443,13 @@ export function DashboardTopNav({
     }
     return actions;
   }, [
-    dashboardCapabilities,
-    dashboardStateManager,
+    dispatchDashboardStateChange,
     onChangeViewMode,
-    savedDashboard,
-    runClone,
-    runSave,
     runQuickSave,
+    showOptions,
+    runSaveAs,
+    showShare,
+    runClone,
     share,
     isLabsEnabled,
     isLabsShown,
@@ -517,43 +457,49 @@ export function DashboardTopNav({
 
   UseUnmount(() => {
     clearAddPanel();
+    setMounted(false);
   });
 
-  const getNavBarProps = () => {
+  const getNavBarProps = (): TopNavMenuProps => {
+    const { hasUnsavedChanges, savedDashboard } = dashboardAppState;
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
-      (forceShow || state.chromeIsVisible) && !dashboardStateManager.getFullScreenMode();
+      (forceShow || state.chromeIsVisible) && !dashboardState.fullScreenMode;
 
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide &&
-      (data.query.filterManager.getFilters().length > 0 ||
-        !dashboardStateManager.getFullScreenMode());
+      (data.query.filterManager.getFilters().length > 0 || !dashboardState.fullScreenMode);
 
-    const isFullScreenMode = dashboardStateManager.getFullScreenMode();
-    const screenTitle = dashboardStateManager.getTitle();
+    const isFullScreenMode = dashboardState.fullScreenMode;
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
     const showQueryInput = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowQueryInput));
     const showDatePicker = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
-    const showQueryBar = showQueryInput || showDatePicker;
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
+    const showQueryBar = showQueryInput || showDatePicker;
     const showSearchBar = showQueryBar || showFilterBar;
+    const screenTitle = dashboardState.title;
 
-    const topNav = getTopNavConfig(viewMode, dashboardTopNavActions, {
-      hideWriteControls: dashboardCapabilities.hideWriteControls,
-      isNewDashboard: !savedDashboard.id,
-      isDirty: dashboardStateManager.getIsDirty(timefilter),
-      isSaveInProgress,
-      isLabsEnabled,
-    });
+    const topNav = getTopNavConfig(
+      dashboardAppState.getLatestDashboardState().viewMode,
+      dashboardTopNavActions,
+      {
+        hideWriteControls: dashboardCapabilities.hideWriteControls,
+        isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
+        isSaveInProgress: state.isSaveInProgress,
+        isNewDashboard: !savedDashboard.id,
+        isLabsEnabled,
+      }
+    );
 
-    const badges = unsavedChanges
-      ? [
-          {
-            'data-test-subj': 'dashboardUnsavedChangesBadge',
-            badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
-            color: 'secondary',
-          },
-        ]
-      : undefined;
+    const badges =
+      hasUnsavedChanges && dashboardState.viewMode === ViewMode.EDIT
+        ? [
+            {
+              'data-test-subj': 'dashboardUnsavedChangesBadge',
+              badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
+              color: 'secondary',
+            },
+          ]
+        : undefined;
 
     return {
       badges,
@@ -561,36 +507,25 @@ export function DashboardTopNav({
       config: showTopNavMenu ? topNav : undefined,
       className: isFullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined,
       screenTitle,
-      showTopNavMenu,
       showSearchBar,
       showQueryBar,
       showQueryInput,
       showDatePicker,
       showFilterBar,
       setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
-      indexPatterns,
+      indexPatterns: dashboardAppState.indexPatterns,
       showSaveQuery: dashboardCapabilities.saveQuery,
       useDefaultBehaviors: true,
-      onQuerySubmit,
-      onSavedQueryUpdated: (savedQuery: SavedQuery) => {
-        const allFilters = data.query.filterManager.getFilters();
-        data.query.filterManager.setFilters(allFilters);
-        dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
-        if (savedQuery.attributes.timefilter) {
-          timefilter.setTime({
-            from: savedQuery.attributes.timefilter.from,
-            to: savedQuery.attributes.timefilter.to,
-          });
-          if (savedQuery.attributes.timefilter.refreshInterval) {
-            timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
-          }
-        }
-        setState((s) => ({ ...s, savedQuery }));
-      },
       savedQuery: state.savedQuery,
-      savedQueryId: dashboardStateManager.getSavedQueryId(),
-      onSavedQueryIdChange: (newId: string | undefined) =>
-        dashboardStateManager.setSavedQueryId(newId),
+      savedQueryId: dashboardState.savedQuery,
+      onQuerySubmit: (_payload, isUpdate) => {
+        if (isUpdate === false) {
+          dashboardAppState.$triggerDashboardRefresh.next({ force: true });
+        }
+      },
+      onSavedQueryIdChange: (newId: string | undefined) => {
+        dispatchDashboardStateChange(setSavedQueryId(newId));
+      },
     };
   };
 
@@ -636,9 +571,9 @@ export function DashboardTopNav({
     <>
       <TopNavMenu {...getNavBarProps()} />
       {isLabsEnabled && isLabsShown ? (
-        <Flyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
+        <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {viewMode !== ViewMode.VIEW ? (
+      {dashboardState.viewMode !== ViewMode.VIEW ? (
         <>
           <EuiHorizontalRule margin="none" />
           <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
@@ -646,9 +581,7 @@ export function DashboardTopNav({
               primaryActionButton: (
                 <PrimaryActionButton
                   isDarkModeEnabled={IS_DARK_THEME}
-                  label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-                    defaultMessage: 'Create visualization',
-                  })}
+                  label={getCreateVisualizationButtonTitle()}
                   onClick={createNewVisType(lensAlias)}
                   iconType="lensApp"
                   data-test-subj="dashboardAddNewPanelButton"
@@ -664,7 +597,7 @@ export function DashboardTopNav({
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}
-                  dashboardContainer={dashboardContainer}
+                  dashboardContainer={dashboardAppState.dashboardContainer}
                 />,
               ],
             }}

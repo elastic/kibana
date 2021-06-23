@@ -129,7 +129,7 @@ describe('DatatableComponent', () => {
     ).toMatchSnapshot();
   });
 
-  test('it should not render actions on header when it is in read only mode', () => {
+  test('it should render hide and reset actions on header even when it is in read only mode', () => {
     const { data, args } = sampleArgs();
 
     expect(
@@ -538,5 +538,107 @@ describe('DatatableComponent', () => {
     expect(wrapper.find(DataContext.Provider).prop('value').minMaxByColumnId).toEqual({
       c: { min: 3, max: 3 },
     });
+  });
+
+  test('it does render a summary footer if at least one column has it configured', () => {
+    const { data, args } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <DatatableComponent
+        data={data}
+        args={{
+          ...args,
+          columns: [
+            ...args.columns.slice(0, 2),
+            {
+              columnId: 'c',
+              type: 'lens_datatable_column',
+              summaryRow: 'sum',
+              summaryLabel: 'Sum',
+              summaryRowValue: 3,
+            },
+          ],
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
+        }}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn()}
+        renderMode="display"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="lnsDataTable-footer-a"]').exists()).toEqual(false);
+    expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').first().text()).toEqual(
+      'Sum: 3'
+    );
+  });
+
+  test('it does render a summary footer with just the raw value for empty label', () => {
+    const { data, args } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <DatatableComponent
+        data={data}
+        args={{
+          ...args,
+          columns: [
+            ...args.columns.slice(0, 2),
+            {
+              columnId: 'c',
+              type: 'lens_datatable_column',
+              summaryRow: 'sum',
+              summaryLabel: '',
+              summaryRowValue: 3,
+            },
+          ],
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
+        }}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn()}
+        renderMode="display"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').first().text()).toEqual('3');
+  });
+
+  test('it does not render the summary row if the only column with summary is hidden', () => {
+    const { data, args } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <DatatableComponent
+        data={data}
+        args={{
+          ...args,
+          columns: [
+            ...args.columns.slice(0, 2),
+            {
+              columnId: 'c',
+              type: 'lens_datatable_column',
+              summaryRow: 'sum',
+              summaryLabel: '',
+              summaryRowValue: 3,
+              hidden: true,
+            },
+          ],
+          sortingColumnId: 'b',
+          sortingDirection: 'desc',
+        }}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn()}
+        renderMode="display"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="lnsDataTable-footer-c"]').exists()).toBe(false);
   });
 });
