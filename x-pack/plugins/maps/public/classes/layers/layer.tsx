@@ -102,7 +102,6 @@ export interface ILayer {
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
-  queryForTileMeta(mbMap: MbMap): Feature[] | null;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
   getStyleMetaDescriptor(): Promise<StyleMetaDescriptor | null>;
@@ -167,10 +166,6 @@ export class AbstractLayer implements ILayer {
 
   getDescriptor(): LayerDescriptor {
     return this._descriptor;
-  }
-
-  queryForTileMeta(mbMap: MbMap): Feature[] | null {
-    return null;
   }
 
   async cloneDescriptor(): Promise<LayerDescriptor> {

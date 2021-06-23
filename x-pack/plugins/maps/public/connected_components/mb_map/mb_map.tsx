@@ -7,18 +7,17 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
-
 // @ts-expect-error
 import { spritesheet } from '@elastic/maki';
 import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
 import { Feature } from 'geojson';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
+import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
@@ -31,6 +30,7 @@ import { Goto, MapCenterAndZoom } from '../../../common/descriptor_types';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
+  LAYER_TYPE,
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
@@ -40,13 +40,13 @@ import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
   removeOrphanedSourcesAndLayers,
-  // @ts-expect-error
 } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
+import { TiledVectorLayer } from '../../classes/layers/tiled_vector_layer/tiled_vector_layer';
 
 export interface Props {
   isMapReady: boolean;
@@ -70,7 +70,7 @@ export interface Props {
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
-  updateCounts: (layerId: string, features: Feature[]) => void;
+  updateMetaFromTiles: (layerId: string, features: Feature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
 }
@@ -144,10 +144,10 @@ export class MbMap extends Component<Props, State> {
     const updateAllLayers = () => {
       callMap.forEach((layer: ILayer, layerId: string) => {
         if (this.state.mbMap) {
-          if (layer.isVisible()) {
-            const mbFeatures = layer.queryForTileMeta(this.state.mbMap);
+          if (layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
+            const mbFeatures = (layer as TiledVectorLayer).queryForTileMeta(this.state.mbMap);
             if (mbFeatures !== null) {
-              this.props.updateCounts(layerId, mbFeatures);
+              this.props.updateMetaFromTiles(layerId, mbFeatures);
             }
           }
         }

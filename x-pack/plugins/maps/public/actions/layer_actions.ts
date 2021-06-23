@@ -586,7 +586,7 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
   };
 }
 
-export function updateCounts(layerId: string, mbMetaFeatures: Feature[]) {
+export function updateMetaFromTiles(layerId: string, mbMetaFeatures: Feature[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState

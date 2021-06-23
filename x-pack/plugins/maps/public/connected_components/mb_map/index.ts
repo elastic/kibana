@@ -20,7 +20,7 @@ import {
   setAreTilesLoaded,
   setMapInitError,
   setMouseCoordinates,
-  updateCounts,
+  updateMetaFromTiles,
 } from '../../actions';
 import {
   getGoto,
@@ -79,8 +79,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
       dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
     },
-    updateCounts(layerId: string, features: Feature[]) {
-      dispatch(updateCounts(layerId, features));
+    updateMetaFromTiles(layerId: string, features: Feature[]) {
+      dispatch(updateMetaFromTiles(layerId, features));
     },
   };
 }
