@@ -241,7 +241,7 @@ export const UserActionTree = React.memo(
       () => (
         <AddComment
           caseId={caseId}
-          disabled={!userCanCrud}
+          userCanCrud={userCanCrud}
           ref={addCommentRef}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
@@ -288,10 +288,10 @@ export const UserActionTree = React.memo(
             id={DESCRIPTION_ID}
             editLabel={i18n.EDIT_DESCRIPTION}
             quoteLabel={i18n.QUOTE}
-            disabled={!userCanCrud}
             isLoading={isLoadingDescription}
             onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
             onQuote={handleManageQuote.bind(null, caseData.description)}
+            userCanCrud={userCanCrud}
           />
         ),
       }),
@@ -363,10 +363,10 @@ export const UserActionTree = React.memo(
                         id={comment.id}
                         editLabel={i18n.EDIT_COMMENT}
                         quoteLabel={i18n.QUOTE}
-                        disabled={!userCanCrud}
                         isLoading={isLoadingIds.includes(comment.id)}
                         onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
                         onQuote={handleManageQuote.bind(null, comment.comment)}
+                        userCanCrud={userCanCrud}
                       />
                     ),
                   },
@@ -571,19 +571,24 @@ export const UserActionTree = React.memo(
       ]
     );
 
-    const bottomActions = [
-      {
-        username: (
-          <UserActionUsername username={currentUser?.username} fullName={currentUser?.fullName} />
-        ),
-        'data-test-subj': 'add-comment',
-        timelineIcon: (
-          <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
-        ),
-        className: 'isEdit',
-        children: MarkdownNewComment,
-      },
-    ];
+    const bottomActions = userCanCrud
+      ? [
+          {
+            username: (
+              <UserActionUsername
+                username={currentUser?.username}
+                fullName={currentUser?.fullName}
+              />
+            ),
+            'data-test-subj': 'add-comment',
+            timelineIcon: (
+              <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
+            ),
+            className: 'isEdit',
+            children: MarkdownNewComment,
+          },
+        ]
+      : [];
 
     const comments = [...userActions, ...bottomActions];
 

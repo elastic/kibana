@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
+import { AnyAction, Reducer } from 'redux';
 import {
   PluginSetup,
   PluginStart,
@@ -59,7 +61,7 @@ import {
   DETECTION_ENGINE,
   CASE,
   ADMINISTRATION,
-} from './app/home/translations';
+} from './app/translations';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -72,6 +74,7 @@ import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/vi
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { TimelineState } from '../../timelines/public';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -471,7 +474,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
             { indices: defaultIndicesName, onlyCheckIfIndicesExist: true },
             {
-              strategy: 'securitySolutionIndexFields',
+              strategy: 'indexFields',
             }
           )
           .toPromise(),
@@ -500,7 +503,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const networkStart = networkSubPlugin.start(this.storage);
       const timelinesStart = timelinesSubPlugin.start();
       const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
-
       const timelineInitialState = {
         timeline: {
           ...timelinesStart.store.initialState.timeline!,
@@ -512,6 +514,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           },
         },
       };
+
+      const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
+      const timelineReducer = (reduceReducers(
+        timelineInitialState.timeline,
+        tGridReducer,
+        timelinesStart.store.reducer.timeline
+      ) as unknown) as Reducer<TimelineState, AnyAction>;
 
       this._store = createStore(
         createInitialState(
@@ -531,13 +540,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...hostsStart.store.reducer,
           ...networkStart.store.reducer,
-          ...timelinesStart.store.reducer,
+          timeline: timelineReducer,
           ...managementSubPluginStart.store.reducer,
+          ...tGridReducer,
         },
         libs$.pipe(pluck('kibana')),
         this.storage,
         [...(managementSubPluginStart.store.middleware ?? [])]
       );
+      if (startPlugins.timelines) {
+        startPlugins.timelines.setTGridEmbeddedStore(this._store);
+      }
     }
     return this._store;
   }

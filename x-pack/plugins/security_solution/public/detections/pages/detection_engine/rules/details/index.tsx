@@ -27,11 +27,12 @@ import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-
 import {
   ExceptionListTypeEnum,
   ExceptionListIdentifiers,
 } from '@kbn/securitysolution-io-ts-list-types';
+
+import { isTab } from '../../../../../../../timelines/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
@@ -48,7 +49,7 @@ import {
   getDetectionEngineUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
-import { WrapperPage } from '../../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import { Rule, useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
@@ -110,7 +111,6 @@ import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import * as statusI18n from '../../../../components/rules/rule_status/translations';
 import * as i18n from './translations';
-import { isTab } from '../../../../../common/components/accessibility/helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -563,7 +563,7 @@ const RuleDetailsPageComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <DetectionEngineHeaderPage
                 backOptions={{
@@ -728,14 +728,14 @@ const RuleDetailsPageComponent = () => {
               />
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
 
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />

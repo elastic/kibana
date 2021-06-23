@@ -21,7 +21,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
-import { WrapperPage } from '../../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import {
   getRuleDetailsUrl,
   getDetectionEngineUrl,
@@ -335,7 +335,7 @@ const EditRulePageComponent: FC = () => {
 
   return (
     <>
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <EuiFlexGroup direction="row" justifyContent="spaceAround">
           <MaxWidthEuiFlexItem>
             <DetectionEngineHeaderPage
@@ -410,7 +410,7 @@ const EditRulePageComponent: FC = () => {
             </EuiFlexGroup>
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />
     </>
