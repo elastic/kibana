@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import {Map as MbMap, Point as MbPoint} from 'mapbox-gl';
+import { Map as MbMap, Point as MbPoint } from 'mapbox-gl';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Position } from 'geojson';
@@ -18,7 +18,10 @@ import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../';
 import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common';
 import { ILayer } from '../../../../classes/layers/layer';
-import {EXCLUDE_TOO_MANY_FEATURES_BOX} from "../../../../classes/util/mb_filter_expressions";
+import {
+  EXCLUDE_CENTROID_FEATURES,
+  EXCLUDE_TOO_MANY_FEATURES_BOX,
+} from '../../../../classes/util/mb_filter_expressions';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 
@@ -101,7 +104,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     ] as [MbPoint, MbPoint];
     const selectedFeatures = this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbEditLayerIds,
-      filter: EXCLUDE_TOO_MANY_FEATURES_BOX,
+      filter: [EXCLUDE_TOO_MANY_FEATURES_BOX, EXCLUDE_CENTROID_FEATURES],
     });
     if (!selectedFeatures.length) {
       return;

@@ -132,7 +132,7 @@ export function initIndexingRoutes({
         logger.error(error);
         return response.custom({
           body: error.message,
-          statusCode: 500,
+          statusCode: 404,
         });
       }
     }

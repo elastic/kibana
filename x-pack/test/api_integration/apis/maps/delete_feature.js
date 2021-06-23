@@ -19,6 +19,16 @@ export default function ({ getService }) {
         .expect(200);
     });
 
+    it('previously deleted document no longer exists in index', async () => {
+      await supertest
+        .delete(`/api/maps/feature/999`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          index: 'geo_shapes',
+        })
+        .expect(404);
+    });
+
     it('should fail if not a valid document', async () => {
       await supertest
         .delete(`/api/maps/feature/998`)
@@ -26,7 +36,7 @@ export default function ({ getService }) {
         .send({
           index: 'geo_shapes',
         })
-        .expect(500);
+        .expect(404);
     });
   });
 }

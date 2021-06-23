@@ -22,7 +22,7 @@ import { getDrawMode } from '../../../../selectors/ui_selectors';
 
 function mapStateToProps(state: MapStoreState): ReduxStateProps {
   const editState = getEditState(state);
-  const editLayer = getLayerById(editState ? editState.layerId : null, state);
+  const editLayer = editState ? getLayerById(editState.layerId, state) : undefined;
   return {
     drawShape: editState ? editState.drawShape : undefined,
     drawMode: getDrawMode(state),

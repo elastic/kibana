@@ -142,7 +142,9 @@ export class DrawControl extends Component<Props> {
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.modechange', this._onModeChange);
       this.props.mbMap.on('draw.create', this._onDraw);
-      this.props.mbMap.on('click', this._onClick);
+      if (this.props.onClick) {
+        this.props.mbMap.on('click', this._onClick);
+      }
     }
 
     const { DRAW_LINE_STRING, DRAW_POLYGON, DRAW_POINT, SIMPLE_SELECT } = this._mbDrawControl.modes;
