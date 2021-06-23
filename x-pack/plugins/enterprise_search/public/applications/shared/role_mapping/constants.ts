@@ -136,7 +136,7 @@ export const FILTER_ROLE_MAPPINGS_PLACEHOLDER = i18n.translate(
 export const ROLE_MAPPINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.roleMappingsTitle',
   {
-    defaultMessage: 'Users & roles',
+    defaultMessage: 'Users and roles',
   }
 );
 
