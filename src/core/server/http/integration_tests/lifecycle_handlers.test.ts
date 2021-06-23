@@ -11,7 +11,6 @@ import moment from 'moment';
 import { BehaviorSubject } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import type { CspConfigType } from '../../csp';
 import { createHttpServer } from '../test_utils';
 import { HttpService } from '../http_service';
 import { HttpServerSetup } from '../http_server';
@@ -81,13 +80,10 @@ describe('core lifecycle handlers', () => {
       }
       if (path === 'csp') {
         return new BehaviorSubject({
-          script_src: [],
-          worker_src: [],
-          style_src: [],
           strict: false,
           disableEmbedding: false,
           warnLegacyBrowsers: true,
-        } as CspConfigType);
+        });
       }
       throw new Error(`Unexpected config path: ${path}`);
     });
