@@ -19,6 +19,8 @@ import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
 jest.mock('../../../common/containers/source', () => ({

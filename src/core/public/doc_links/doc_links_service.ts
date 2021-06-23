@@ -137,6 +137,7 @@ export class DocLinksService {
         addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
         kibana: `${KIBANA_DOCS}index.html`,
         upgradeAssistant: `${KIBANA_DOCS}upgrade-assistant.html`,
+        rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
         elasticsearch: {
           docsBase: `${ELASTICSEARCH_DOCS}`,
           asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
@@ -532,6 +533,7 @@ export interface DocLinksStart {
     readonly addData: string;
     readonly kibana: string;
     readonly upgradeAssistant: string;
+    readonly rollupJobs: string;
     readonly elasticsearch: Record<string, string>;
     readonly siem: {
       readonly guide: string;

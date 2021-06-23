@@ -452,7 +452,8 @@ export function EditorFrame(props: EditorFrameProps) {
           )
         }
         suggestionsPanel={
-          allLoaded && (
+          allLoaded &&
+          !state.isFullscreenDatasource && (
             <SuggestionPanel
               frame={framePublicAPI}
               activeDatasourceId={state.activeDatasourceId}
