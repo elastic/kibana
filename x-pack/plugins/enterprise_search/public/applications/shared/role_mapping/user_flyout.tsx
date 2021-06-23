@@ -92,10 +92,10 @@ export const UserFlyout: React.FC<Props> = ({
   );
 
   return (
-    <EuiFlyout ownFocus onClose={closeUserFlyout} size="s" aria-labelledby="flyoutLargeTitle">
+    <EuiFlyout ownFocus onClose={closeUserFlyout} size="s" aria-labelledby="userFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutLargeTitle">{isComplete ? IS_COMPLETE_HEADING : IS_EDITING_HEADING}</h2>
+          <h2 id="userFlyoutTitle">{isComplete ? IS_COMPLETE_HEADING : IS_EDITING_HEADING}</h2>
         </EuiTitle>
         {!isComplete && (
           <EuiText size="xs">
