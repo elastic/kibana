@@ -93,7 +93,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
     this.config = context.config.get<InfraConfig>();
 
     this.logsRules = new RulesService('observability.logs', this.logger.get('logsRules'));
-    this.metricsRules = new RulesService('observability.logs', this.logger.get('logsRules'));
+    this.metricsRules = new RulesService('observability.metrics', this.logger.get('metricsRules'));
   }
 
   setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
