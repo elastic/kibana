@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
     // Basic health check for the API; functionality is covered by the unit tests
     it('should succeed with an empty payload', async () => {
       const { body } = await supertest
-        .put(PRECONFIGURATION_API_ROUTES.PUT_PRECONFIG)
+        .put(PRECONFIGURATION_API_ROUTES.UPDATE_PATTERN)
         .set('kbn-xsrf', 'xxxx')
         .send({})
         .expect(200);

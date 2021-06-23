@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
@@ -17,10 +18,37 @@ import { EmptyView } from './components/empty_view';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 import { useAppIndexPatternContext } from './hooks/use_app_index_pattern';
 import { SeriesBuilder } from './series_builder/series_builder';
+import { SeriesUrl } from './types';
+
+export const combineTimeRanges = (
+  allSeries: Record<string, SeriesUrl>,
+  firstSeries?: SeriesUrl
+) => {
+  let to: string = '';
+  let from: string = '';
+  if (firstSeries?.reportType === 'kpi-over-time') {
+    return firstSeries.time;
+  }
+  Object.values(allSeries ?? {}).forEach((series) => {
+    if (series.dataType && series.reportType && !isEmpty(series.reportDefinitions)) {
+      const seriesTo = new Date(series.time.to);
+      const seriesFrom = new Date(series.time.from);
+      if (!to || seriesTo > new Date(to)) {
+        to = series.time.to;
+      }
+      if (!from || seriesFrom < new Date(from)) {
+        from = series.time.from;
+      }
+    }
+  });
+  return { to, from };
+};
 
 export function ExploratoryView({
   saveAttributes,
+  multiSeries,
 }: {
+  multiSeries?: boolean;
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   const {
@@ -32,6 +60,8 @@ export function ExploratoryView({
 
   const [height, setHeight] = useState<string>('100vh');
   const [seriesId, setSeriesId] = useState<string>('');
+
+  const [lastUpdated, setLastUpdated] = useState<number | undefined>();
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
@@ -47,9 +77,7 @@ export function ExploratoryView({
     setSeriesId(firstSeriesId);
   }, [allSeries, firstSeriesId]);
 
-  const lensAttributesT = useLensAttributes({
-    seriesId,
-  });
+  const lensAttributesT = useLensAttributes();
 
   const setHeightOffset = () => {
     if (seriesBuilderRef?.current && wrapperRef.current) {
@@ -60,10 +88,12 @@ export function ExploratoryView({
   };
 
   useEffect(() => {
-    if (series?.dataType) {
-      loadIndexPattern({ dataType: series?.dataType });
-    }
-  }, [series?.dataType, loadIndexPattern]);
+    Object.values(allSeries).forEach((seriesT) => {
+      loadIndexPattern({
+        dataType: seriesT.dataType,
+      });
+    });
+  }, [allSeries, loadIndexPattern]);
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
@@ -72,11 +102,38 @@ export function ExploratoryView({
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
+  }, [JSON.stringify(lensAttributesT ?? {})]);
 
   useEffect(() => {
     setHeightOffset();
   });
+
+  const timeRange = combineTimeRanges(allSeries, series);
+
+  const onLensLoad = useCallback(() => {
+    setLastUpdated(Date.now());
+  }, []);
+
+  const onBrushEnd = useCallback(
+    ({ range }: { range: number[] }) => {
+      if (series?.reportType !== 'data-distribution') {
+        setSeries(seriesId, {
+          ...series,
+          time: {
+            from: new Date(range[0]).toISOString(),
+            to: new Date(range[1]).toISOString(),
+          },
+        });
+      } else {
+        notifications?.toasts.add(
+          i18n.translate('xpack.observability.exploratoryView.noBrusing', {
+            defaultMessage: 'Zoom by brush selection is only available on time series charts.',
+          })
+        );
+      }
+    },
+    [notifications?.toasts, series, seriesId, setSeries]
+  );
 
   return (
     <Wrapper>
@@ -84,35 +141,23 @@ export function ExploratoryView({
         <>
           <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
           <LensWrapper ref={wrapperRef} height={height}>
-            {lensAttributes && seriesId && series?.reportType && series?.time ? (
+            {lensAttributes && timeRange.to && timeRange.from ? (
               <LensComponent
                 id="exploratoryView"
-                timeRange={series?.time}
+                timeRange={timeRange}
                 attributes={lensAttributes}
-                onBrushEnd={({ range }) => {
-                  if (series?.reportType !== 'dist') {
-                    setSeries(seriesId, {
-                      ...series,
-                      time: {
-                        from: new Date(range[0]).toISOString(),
-                        to: new Date(range[1]).toISOString(),
-                      },
-                    });
-                  } else {
-                    notifications?.toasts.add(
-                      i18n.translate('xpack.observability.exploratoryView.noBrusing', {
-                        defaultMessage:
-                          'Zoom by brush selection is only available on time series charts.',
-                      })
-                    );
-                  }
-                }}
+                onLoad={onLensLoad}
+                onBrushEnd={onBrushEnd}
               />
             ) : (
               <EmptyView series={series} loading={loading} height={height} />
             )}
           </LensWrapper>
-          <SeriesBuilder seriesId={seriesId} seriesBuilderRef={seriesBuilderRef} />
+          <SeriesBuilder
+            seriesBuilderRef={seriesBuilderRef}
+            lastUpdated={lastUpdated}
+            multiSeries={multiSeries}
+          />
         </>
       ) : (
         <EuiTitle>

@@ -22,6 +22,7 @@ import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../timelines/public/components';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -56,6 +57,10 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         savedObjects: {
           client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
       },
     }),
