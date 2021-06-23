@@ -12,6 +12,8 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { FooterComponent, PagingControlComponent } from './index';
 
+jest.mock('../../../../common/lib/kibana');
+
 describe('Footer Timeline Component', () => {
   const loadMore = jest.fn();
   const updatedAt = 1546878704036;

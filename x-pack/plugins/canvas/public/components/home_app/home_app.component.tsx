@@ -6,9 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
-// @ts-expect-error untyped local
-import { WorkpadManager } from '../workpad_manager';
+import { Home } from '../home';
 // @ts-expect-error untyped local
 import { setDocTitle } from '../../lib/doc_title';
 
@@ -19,17 +17,5 @@ export interface Props {
 export const HomeApp: FC<Props> = ({ onLoad = () => {} }) => {
   onLoad();
   setDocTitle('Canvas');
-  return (
-    <EuiPage className="canvasHomeApp" restrictWidth>
-      <EuiPageBody>
-        <EuiPageContent
-          className="canvasHomeApp__content"
-          panelPaddingSize="none"
-          horizontalPosition="center"
-        >
-          <WorkpadManager onClose={() => {}} />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
-  );
+  return <Home />;
 };

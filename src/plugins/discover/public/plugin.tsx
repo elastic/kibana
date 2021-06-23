@@ -37,7 +37,7 @@ import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
-import { JsonCodeEditor } from './application/components/json_code_editor/json_code_editor';
+
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -64,6 +64,7 @@ import { SearchEmbeddableFactory } from './application/embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
+import { SourceViewer } from './application/components/source_viewer/source_viewer';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -258,8 +259,14 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      component: ({ hit }) => <JsonCodeEditor json={hit as any} hasLineNumbers />,
+      component: ({ hit, indexPattern }) => (
+        <SourceViewer
+          index={hit._index}
+          id={hit._id}
+          indexPatternId={indexPattern?.id || ''}
+          hasLineNumbers
+        />
+      ),
     });
 
     const {
@@ -338,6 +345,7 @@ export class DiscoverPlugin
 
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
+
         const { renderApp } = await import('./application/application');
         params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
