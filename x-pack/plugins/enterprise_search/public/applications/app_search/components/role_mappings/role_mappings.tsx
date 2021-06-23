@@ -10,16 +10,25 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
+import {
+  RoleMappingsTable,
+  RoleMappingsHeading,
+  RolesEmptyPrompt,
+} from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
+
+import { DOCS_PREFIX } from '../../routes';
 import { AppSearchPageTemplate } from '../layout';
 
 import { ROLE_MAPPINGS_ENGINE_ACCESS_HEADING } from './constants';
 import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
+const ROLES_DOCS_LINK = `${DOCS_PREFIX}/security-and-users.html`;
+
 export const RoleMappings: React.FC = () => {
   const {
+    enableRoleBasedAccess,
     initializeRoleMappings,
     initializeRoleMapping,
     handleDeleteMapping,
@@ -37,10 +46,19 @@ export const RoleMappings: React.FC = () => {
     return resetState;
   }, []);
 
+  const rolesEmptyState = (
+    <RolesEmptyPrompt
+      productName={APP_SEARCH_PLUGIN.NAME}
+      docsLink={ROLES_DOCS_LINK}
+      onEnable={enableRoleBasedAccess}
+    />
+  );
+
   const roleMappingsSection = (
     <section>
       <RoleMappingsHeading
         productName={APP_SEARCH_PLUGIN.NAME}
+        docsLink={ROLES_DOCS_LINK}
         onClick={() => initializeRoleMapping()}
       />
       <RoleMappingsTable
@@ -59,6 +77,8 @@ export const RoleMappings: React.FC = () => {
       pageChrome={[ROLE_MAPPINGS_TITLE]}
       pageHeader={{ pageTitle: ROLE_MAPPINGS_TITLE }}
       isLoading={dataLoading}
+      isEmptyState={roleMappings.length < 1}
+      emptyState={rolesEmptyState}
     >
       {roleMappingFlyoutOpen && <RoleMapping />}
       {roleMappingsSection}

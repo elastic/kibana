@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -98,6 +97,7 @@ export class CoreSystem {
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
+    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
@@ -109,14 +109,16 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-    this.chrome = new ChromeService({ browserSupportsCsp });
+    this.chrome = new ChromeService({
+      browserSupportsCsp,
+      kibanaVersion: injectedMetadata.version,
+    });
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
 
-    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
   }

@@ -27,13 +27,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
-  describe('Dashboard Reporting Screenshots', () => {
+  // https://github.com/elastic/kibana/issues/102911
+  describe.skip('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.loadIfNeeded(
-        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana'
-      );
+      await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
 
       await security.role.create('test_reporting_user', {
@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+      await kibanaServer.importExport.unload(ecommerceSOPath);
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
