@@ -15,30 +15,26 @@ import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
 const Wrapper = styled.div`
-  padding: ${(props) => `${props.theme.eui.paddingSizes.l}`};
-
-  &.siemWrapperPage--fullHeight {
+  &.securitySolutionWrapper--fullHeight {
     height: 100%;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
   }
-
-  &.siemWrapperPage--noPadding {
+  &.securitySolutionWrapper--noPadding {
     padding: 0;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
   }
-
-  &.siemWrapperPage--withTimeline {
+  &.securitySolutionWrapper--withTimeline {
     padding-bottom: ${gutterTimeline};
   }
 `;
 
 Wrapper.displayName = 'Wrapper';
 
-interface WrapperPageProps {
+interface SecuritySolutionPageWrapperProps {
   children: React.ReactNode;
   restrictWidth?: boolean | number | string;
   style?: Record<string, string>;
@@ -46,24 +42,19 @@ interface WrapperPageProps {
   noTimeline?: boolean;
 }
 
-const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
-  children,
-  className,
-  style,
-  noPadding,
-  noTimeline,
-  ...otherProps
-}) => {
+const SecuritySolutionPageWrapperComponent: React.FC<
+  SecuritySolutionPageWrapperProps & CommonProps
+> = ({ children, className, style, noPadding, noTimeline, ...otherProps }) => {
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   useEffect(() => {
     setGlobalFullScreen(false); // exit full screen mode on page load
   }, [setGlobalFullScreen]);
 
   const classes = classNames(className, {
-    siemWrapperPage: true,
-    'siemWrapperPage--noPadding': noPadding,
-    'siemWrapperPage--withTimeline': !noTimeline,
-    'siemWrapperPage--fullHeight': globalFullScreen,
+    securitySolutionWrapper: true,
+    'securitySolutionWrapper--noPadding': noPadding,
+    'securitySolutionWrapper--withTimeline': !noTimeline,
+    'securitySolutionWrapper--fullHeight': globalFullScreen,
   });
 
   return (
@@ -74,4 +65,4 @@ const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
   );
 };
 
-export const WrapperPage = React.memo(WrapperPageComponent);
+export const SecuritySolutionPageWrapper = React.memo(SecuritySolutionPageWrapperComponent);
