@@ -224,7 +224,7 @@ export class APIKeys {
     try {
       result = (
         await this.clusterClient.asInternalUser.security.grantApiKey({
-          // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors
+          // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors  doesn't support `Record<string, any>`
           body: params,
         })
       ).body;

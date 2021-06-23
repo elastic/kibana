@@ -1099,6 +1099,152 @@ describe('xy_expression', () => {
       });
     });
 
+    test('onElementClick returns correct context data for date histogram', () => {
+      const geometry: GeometryValue = {
+        x: 1585758120000,
+        y: 1,
+        accessor: 'y1',
+        mark: null,
+        datum: {},
+      };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'yAccessorId',
+        splitAccessors: {},
+        seriesKeys: ['yAccessorId'],
+      };
+
+      const { args } = sampleArgs();
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={dateHistogramData}
+          args={{
+            ...args,
+            layers: [dateHistogramLayer],
+          }}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: dateHistogramData.tables.timeLayer,
+            value: 1585758120000,
+          },
+        ],
+        timeFieldName: 'order_date',
+      });
+    });
+
+    test('onElementClick returns correct context data for numeric histogram', () => {
+      const { args } = sampleArgs();
+
+      const numberLayer: LayerArgs = {
+        layerId: 'numberLayer',
+        hide: false,
+        xAccessor: 'xAccessorId',
+        yScaleType: 'linear',
+        xScaleType: 'linear',
+        isHistogram: true,
+        seriesType: 'bar_stacked',
+        accessors: ['yAccessorId'],
+        palette: mockPaletteOutput,
+      };
+
+      const numberHistogramData: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          numberLayer: {
+            type: 'datatable',
+            rows: [
+              {
+                xAccessorId: 5,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 7,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 8,
+                yAccessorId: 1,
+              },
+              {
+                xAccessorId: 10,
+                yAccessorId: 1,
+              },
+            ],
+            columns: [
+              {
+                id: 'xAccessorId',
+                name: 'bytes',
+                meta: { type: 'number' },
+              },
+              {
+                id: 'yAccessorId',
+                name: 'Count of records',
+                meta: { type: 'number' },
+              },
+            ],
+          },
+        },
+        dateRange: {
+          fromDate: new Date('2020-04-01T16:14:16.246Z'),
+          toDate: new Date('2020-04-01T17:15:41.263Z'),
+        },
+      };
+      const geometry: GeometryValue = {
+        x: 5,
+        y: 1,
+        accessor: 'y1',
+        mark: null,
+        datum: {},
+      };
+      const series = {
+        key: 'spec{d}yAccessor{d}splitAccessors{b-2}',
+        specId: 'd',
+        yAccessor: 'yAccessorId',
+        splitAccessors: {},
+        seriesKeys: ['yAccessorId'],
+      };
+
+      const wrapper = mountWithIntl(
+        <XYChart
+          {...defaultProps}
+          data={numberHistogramData}
+          args={{
+            ...args,
+            layers: [numberLayer],
+          }}
+        />
+      );
+
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
+
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: numberHistogramData.tables.numberLayer,
+            value: 5,
+          },
+        ],
+        timeFieldName: undefined,
+      });
+    });
+
     test('returns correct original data for ordinal x axis with special formatter', () => {
       const geometry: GeometryValue = { x: 'BAR', y: 1, accessor: 'y1', mark: null, datum: {} };
       const series = {

@@ -42,6 +42,7 @@ export declare class AggConfigs
 |  [getAll()](./kibana-plugin-plugins-data-public.aggconfigs.getall.md) |  |  |
 |  [getRequestAggById(id)](./kibana-plugin-plugins-data-public.aggconfigs.getrequestaggbyid.md) |  |  |
 |  [getRequestAggs()](./kibana-plugin-plugins-data-public.aggconfigs.getrequestaggs.md) |  |  |
+|  [getResolvedTimeRange()](./kibana-plugin-plugins-data-public.aggconfigs.getresolvedtimerange.md) |  | Returns the current time range as moment instance (date math will get resolved using the current "now" value or system time if not set) |
 |  [getResponseAggById(id)](./kibana-plugin-plugins-data-public.aggconfigs.getresponseaggbyid.md) |  | Find a response agg by it's id. This may be an agg in the aggConfigs, or one created specifically for a response value |
 |  [getResponseAggs()](./kibana-plugin-plugins-data-public.aggconfigs.getresponseaggs.md) |  | Gets the AggConfigs (and possibly ResponseAggConfigs) that represent the values that will be produced when all aggs are run.<!-- -->With multi-value metric aggs it is possible for a single agg request to result in multiple agg values, which is why the length of a vis' responseValuesAggs may be different than the vis' aggs {<!-- -->array\[AggConfig\]<!-- -->} |
 |  [getSearchSourceTimeFilter(forceNow)](./kibana-plugin-plugins-data-public.aggconfigs.getsearchsourcetimefilter.md) |  |  |

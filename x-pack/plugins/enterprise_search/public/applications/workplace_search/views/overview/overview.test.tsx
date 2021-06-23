@@ -25,6 +25,13 @@ describe('Overview', () => {
     expect(mockActions.initializeOverview).toHaveBeenCalled();
   });
 
+  it('does not render a page header when data is loading (to prevent a jump between non/onboarding headers)', () => {
+    setMockValues({ dataLoading: true });
+    const wrapper = shallow(<Overview />);
+
+    expect(wrapper.prop('pageHeader')).toBeUndefined();
+  });
+
   it('renders onboarding state', () => {
     setMockValues({ dataLoading: false });
     const wrapper = shallow(<Overview />);

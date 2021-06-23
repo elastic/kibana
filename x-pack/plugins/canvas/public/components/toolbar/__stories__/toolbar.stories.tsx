@@ -18,7 +18,6 @@ storiesOf('components/Toolbar', module)
       isWriteable={true}
       selectedPageNumber={1}
       totalPages={1}
-      workpadId={'abc'}
       workpadName={'My Canvas Workpad'}
     />
   ))
@@ -28,7 +27,6 @@ storiesOf('components/Toolbar', module)
       selectedElement={getDefaultElement()}
       selectedPageNumber={1}
       totalPages={1}
-      workpadId={'abc'}
       workpadName={'My Canvas Workpad'}
     />
   ));
