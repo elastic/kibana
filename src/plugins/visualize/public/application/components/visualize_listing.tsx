@@ -9,7 +9,7 @@
 import './visualize_listing.scss';
 
 import React, { useCallback, useRef, useMemo, useEffect, MouseEvent } from 'react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -174,12 +174,6 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
-        dashboardCapabilities.createNew && (
-          <div className="visListingCallout">
-            <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-          </div>
-        )}
       <TableListView
         headingId="visualizeListingHeading"
         // we allow users to create visualizations even if they can't save them
@@ -208,7 +202,15 @@ export const VisualizeListing = () => {
         })}
         toastNotifications={toastNotifications}
         searchFilters={searchFilters}
-      />
+      >
+        {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
+          dashboardCapabilities.createNew && (
+            <>
+              <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+              <EuiSpacer size="m" />
+            </>
+          )}
+      </TableListView>
     </>
   );
 };
