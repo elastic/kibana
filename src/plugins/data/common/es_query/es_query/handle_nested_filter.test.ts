@@ -9,8 +9,7 @@
 import { handleNestedFilter } from './handle_nested_filter';
 import { fields } from '../../index_patterns/mocks';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { IndexPatternBase } from './types';
-import { IFieldType } from '../../index_patterns';
+import { IndexPatternBase, FieldBase } from './types';
 
 describe('handleNestedFilter', function () {
   const indexPattern: IndexPatternBase = {
@@ -46,7 +45,7 @@ describe('handleNestedFilter', function () {
 
   it('should return filter untouched if it does not target a field from the given index pattern', () => {
     const field = { ...getField('extension'), name: 'notarealfield' };
-    const filter = buildPhraseFilter(field as IFieldType, 'jpg', indexPattern);
+    const filter = buildPhraseFilter(field, 'jpg', indexPattern);
     const result = handleNestedFilter(filter, indexPattern);
     expect(result).toBe(filter);
   });

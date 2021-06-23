@@ -7,7 +7,7 @@
  */
 
 import { getFields } from './get_fields';
-import { IndexPatternBase, IFieldType, KueryNode } from '../../../..';
+import { IndexPatternBase, FieldBase, KueryNode } from '../../../..';
 
 export function getFullFieldNameNode(
   rootNameNode: any,
@@ -27,7 +27,7 @@ export function getFullFieldNameNode(
   }
   const fields = getFields(fullFieldNameNode, indexPattern);
 
-  const errors = fields!.reduce((acc: any, field: IFieldType) => {
+  const errors = fields!.reduce((acc: any, field: FieldBase) => {
     const nestedPathFromField =
       field.subType && field.subType.nested ? field.subType.nested.path : undefined;
 

@@ -6,9 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType } from '../../index_patterns';
+import type { estypes } from '@elastic/elasticsearch';
+
+export interface IFieldSubType {
+  multi?: { parent: string };
+  nested?: { path: string };
+}
+export interface FieldBase {
+  name: string;
+  type: string;
+  subType?: IFieldSubType;
+  /**
+   * Scripted field painless script
+   */
+  script?: string;
+  /**
+   * Scripted field langauge
+   * Painless is the only valid scripted field language
+   */
+  lang?: estypes.ScriptLanguage;
+  scripted?: boolean;
+}
 
 export interface IndexPatternBase {
-  fields: IFieldType[];
+  fields: FieldBase[];
   id?: string;
 }

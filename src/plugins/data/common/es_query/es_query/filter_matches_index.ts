@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType } from '../../index_patterns';
 import { Filter } from '../filters';
-import { IndexPatternBase } from './types';
+import { FieldBase, IndexPatternBase } from './types';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
@@ -26,5 +25,5 @@ export function filterMatchesIndex(filter: Filter, indexPattern?: IndexPatternBa
     return filter.meta.index === indexPattern.id;
   }
 
-  return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
+  return indexPattern.fields.some((field) => field.name === filter.meta.key);
 }
