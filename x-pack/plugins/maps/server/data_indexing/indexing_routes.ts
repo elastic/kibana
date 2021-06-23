@@ -104,6 +104,40 @@ export function initIndexingRoutes({
     }
   );
 
+  router.delete(
+    {
+      path: `${INDEX_FEATURE_PATH}/{featureId}`,
+      validate: {
+        params: schema.object({
+          featureId: schema.string(),
+        }),
+        body: schema.object({
+          index: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { body: resp } = await context.core.elasticsearch.client.asCurrentUser.delete({
+          index: request.body.index,
+          id: request.params.featureId,
+          refresh: true,
+        });
+        if (resp.result === 'Error') {
+          throw resp;
+        } else {
+          return response.ok({ body: { success: true } });
+        }
+      } catch (error) {
+        logger.error(error);
+        return response.custom({
+          body: error.message,
+          statusCode: 500,
+        });
+      }
+    }
+  );
+
   router.get(
     {
       path: `${GET_MATCHING_INDEXES_PATH}/{indexPattern}`,

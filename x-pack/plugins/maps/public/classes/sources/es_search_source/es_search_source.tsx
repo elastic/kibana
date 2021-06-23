@@ -57,7 +57,7 @@ import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
 import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
-import { addFeatureToIndex, getMatchingIndexes } from './util/feature_edit';
+import { addFeatureToIndex, deleteFeatureFromIndex, getMatchingIndexes } from './util/feature_edit';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -687,6 +687,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async addFeature(geometry: Geometry | Position[]) {
     const indexPattern = await this.getIndexPattern();
     await addFeatureToIndex(indexPattern.title, geometry, this.getGeoFieldName());
+  }
+
+  async deleteFeature(featureId: string) {
+    const indexPattern = await this.getIndexPattern();
+    await deleteFeatureFromIndex(indexPattern.title, featureId);
   }
 
   async getUrlTemplateWithMeta(

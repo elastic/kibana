@@ -170,6 +170,7 @@ export enum DRAW_SHAPE {
   POINT = 'POINT',
   LINE = 'LINE',
   SIMPLE_SELECT = 'SIMPLE_SELECT',
+  DELETE = 'DELETE',
 }
 
 export const AGG_DELIMITER = '_of_';
