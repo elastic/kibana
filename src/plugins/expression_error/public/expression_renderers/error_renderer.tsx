@@ -25,7 +25,7 @@ const errorStrings = {
 };
 
 const LazyErrorComponent = lazy(() => import('../components/error_component'));
-const ErrorComponent = withSuspense(LazyErrorComponent, null);
+const ErrorComponent = withSuspense(LazyErrorComponent);
 
 export const errorRenderer = (): ExpressionRenderDefinition<ErrorRendererConfig> => ({
   name: 'error',

@@ -26,10 +26,12 @@ interface ErrorComponentProps extends ErrorRendererConfig {
 }
 
 function ErrorComponent({ handlers, parentNode, error }: ErrorComponentProps) {
-  const [buttonSize, setButtonSize] = useState<number>(0);
+  const getButtonSize = (node: HTMLElement) => Math.min(node.clientHeight, node.clientWidth);
+
+  const [buttonSize, setButtonSize] = useState<number>(getButtonSize(parentNode));
 
   const updateErrorView = useCallback(() => {
-    setButtonSize(Math.min(parentNode.clientHeight, parentNode.clientWidth));
+    setButtonSize(getButtonSize(parentNode));
   }, [parentNode]);
 
   useEffect(() => {

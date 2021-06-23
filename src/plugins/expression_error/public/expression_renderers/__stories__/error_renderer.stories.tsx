@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { errorRenderer } from '../';
+import { errorRenderer } from '../error_renderer';
 import { Render } from '../../../../presentation_util/public/__stories__';
 
 storiesOf('renderers/error', module).add('default', () => {
