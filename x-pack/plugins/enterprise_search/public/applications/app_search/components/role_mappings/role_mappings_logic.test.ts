@@ -15,7 +15,7 @@ import { engines } from '../../__mocks__/engines.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { elasticsearchUsers } from '../../../shared/role_mapping/__mocks__/elasticsearchUsers';
+import { elasticsearchUsers } from '../../../shared/role_mapping/__mocks__/elasticsearch_users';
 
 import {
   asRoleMapping,
