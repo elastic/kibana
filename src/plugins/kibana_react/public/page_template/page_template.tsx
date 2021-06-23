@@ -60,9 +60,13 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   /**
    * Create the solution nav component
    */
-  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(true);
+  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(
+    JSON.parse(String(localStorage.getItem('solutionNavIsCollapsed'))) ? false : true
+  );
   const toggleOpenOnDesktop = () => {
     setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
+    // Have to store it as the opposite of the default we want
+    localStorage.setItem('solutionNavIsCollapsed', JSON.stringify(isSideNavOpenOnDesktop));
   };
   let sideBarClasses = 'kbnPageTemplate__pageSideBar';
   if (solutionNav) {
