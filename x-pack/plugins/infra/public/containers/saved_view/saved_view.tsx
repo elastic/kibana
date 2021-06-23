@@ -245,6 +245,7 @@ export const useSavedView = (props: Props) => {
     if (loadingDefaultView || currentView || !shouldLoadDefault) {
       return;
     }
+
     loadDefaultViewIfSet();
   }, [loadDefaultViewIfSet, loadingDefaultView, currentView, shouldLoadDefault]);
 
