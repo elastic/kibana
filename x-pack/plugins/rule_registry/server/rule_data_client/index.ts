@@ -73,7 +73,7 @@ export class RuleDataClient implements IRuleDataClient {
   async getWriter(options: { namespace?: string } = {}): Promise<RuleDataWriter> {
     const { namespace } = options;
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
-    await this.rolloverAliasIfNeeded({ namespace });
+    await this.rolloverAliasIfNeeded(alias);
     return {
       bulk: async (request) => {
         const clusterClient = await this.getClusterClient();
@@ -103,9 +103,8 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
-  async rolloverAliasIfNeeded({ namespace }: { namespace?: string }) {
+  async rolloverAliasIfNeeded(alias: string) {
     const clusterClient = await this.getClusterClient();
-    const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
     let simulatedRollover: IndicesRolloverResponse;
     try {
       ({ body: simulatedRollover } = await clusterClient.indices.rollover({
@@ -141,18 +140,7 @@ export class RuleDataClient implements IRuleDataClient {
       '_meta',
       'versions',
     ]);
-    const componentTemplateRemoved =
-      Object.keys(currentVersions).length > Object.keys(targetVersions).length;
-    const componentTemplateUpdated = Object.entries(targetVersions).reduce(
-      (acc, [templateName, targetTemplateVersion]) => {
-        const currentTemplateVersion = get(currentVersions, templateName);
-        const templateUpdated =
-          currentTemplateVersion == null || currentTemplateVersion < Number(targetTemplateVersion);
-        return acc || templateUpdated;
-      },
-      false
-    );
-    const needRollover = componentTemplateRemoved || componentTemplateUpdated;
+    const needRollover = this.indexNeedsRollover(currentVersions, targetVersions);
     if (needRollover) {
       try {
         await clusterClient.indices.rollover({
@@ -165,6 +153,31 @@ export class RuleDataClient implements IRuleDataClient {
         }
       }
     }
+  }
+
+  indexNeedsRollover(
+    currentVersions: object | undefined,
+    targetVersions: object | undefined
+  ): boolean {
+    if (targetVersions == null) {
+      return false;
+    }
+    // At this point targetVersions can't be undefined, so if currentVersions is undefined then we should definitely rollover
+    if (currentVersions == null) {
+      return true;
+    }
+    const componentTemplateRemoved =
+      Object.keys(currentVersions).length > Object.keys(targetVersions).length;
+    const componentTemplateUpdatedOrAdded = Object.entries(targetVersions).reduce(
+      (acc, [templateName, targetTemplateVersion]) => {
+        const currentTemplateVersion = get(currentVersions, templateName);
+        const templateUpdated =
+          currentTemplateVersion == null || currentTemplateVersion < Number(targetTemplateVersion);
+        return acc || templateUpdated;
+      },
+      false
+    );
+    return componentTemplateRemoved || componentTemplateUpdatedOrAdded;
   }
 
   async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {

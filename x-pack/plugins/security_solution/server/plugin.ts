@@ -214,9 +214,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
       const ready = once(async () => {
-        const componentTemplateName = ruleDataService.getFullAssetName(
-          'security-solution-mappings'
-        );
+        const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
         if (!ruleDataService.isWriteEnabled()) {
           return;
@@ -239,9 +237,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         await ruleDataService.createOrUpdateIndexTemplate({
           template: {
-            name: ruleDataService.getFullAssetName('security-solution-index-template'),
+            name: ruleDataService.getFullAssetName('security.alerts-index-template'),
             body: {
-              index_patterns: [ruleDataService.getFullAssetName('security-solution*')],
+              index_patterns: [ruleDataService.getFullAssetName('security.alerts*')],
               composed_of: [
                 ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
                 ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
@@ -258,7 +256,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       ruleDataClient = new RuleDataClient({
-        alias: plugins.ruleRegistry.ruleDataService.getFullAssetName('security-solution'),
+        alias: plugins.ruleRegistry.ruleDataService.getFullAssetName('security.alerts'),
         getClusterClient: async () => {
           const coreStart = await start();
           return coreStart.elasticsearch.client.asInternalUser;
