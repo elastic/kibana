@@ -33,14 +33,14 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
   const forceRefresh = state.forceRefresh;
   return (
     Boolean(state.active) &&
-    isOutdatedResourceState(currentPage, (data) => {
-      return (
-        forceRefresh ||
-        (data.pageIndex === location.page_index &&
+    (forceRefresh ||
+      isOutdatedResourceState(currentPage, (data) => {
+        return (
+          data.pageIndex === location.page_index &&
           data.pageSize === location.page_size &&
-          data.timestamp >= freshDataTimestamp)
-      );
-    })
+          data.timestamp >= freshDataTimestamp
+        );
+      }))
   );
 };
 
