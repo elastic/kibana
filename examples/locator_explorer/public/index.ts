@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { LocatorExamplesPlugin } from './plugin';
+import { LocatorExplorerPlugin } from './plugin';
 
-export {
-  HelloLocator,
-  HelloLocatorV1Params,
-  HelloLocatorV2Params,
-  HelloLocatorParams,
-  HELLO_LOCATOR,
-} from './locator';
-
-export const plugin = () => new LocatorExamplesPlugin();
+export const plugin = () => new LocatorExplorerPlugin();
