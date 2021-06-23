@@ -59,11 +59,13 @@ describe('RoleMappingsTable', () => {
   });
 
   it('renders auth provider display names', () => {
-    const wrapper = mount(<RoleMappingsTable {...props} />);
+    const roleMappingWithAuths = {
+      ...wsRoleMapping,
+      authProvider: ['saml', 'native'],
+    };
+    const wrapper = mount(<RoleMappingsTable {...props} roleMappings={[roleMappingWithAuths]} />);
 
-    expect(wrapper.find('[data-test-subj="AuthProviderDisplayValue"]').prop('children')).toEqual(
-      `${ANY_AUTH_PROVIDER_OPTION_LABEL}, other_auth`
-    );
+    expect(wrapper.find('[data-test-subj="ProviderSpecificList"]')).toHaveLength(1);
   });
 
   it('handles manage click', () => {

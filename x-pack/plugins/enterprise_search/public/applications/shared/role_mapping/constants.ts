@@ -414,3 +414,11 @@ export const EXTERNAL_ATTRIBUTE_TOOLTIP = i18n.translate(
       'External attributes are defined by the identity provider, and varies from service to service.',
   }
 );
+
+export const AUTH_PROVIDER_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.authProviderTooltip',
+  {
+    defaultMessage:
+      'Provider-specific role mapping is still applied, but configuration is now deprecated.',
+  }
+);
