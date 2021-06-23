@@ -8,7 +8,9 @@
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DragDropContext, Droppable, Draggable, DragDropContextProps } from 'react-beautiful-dnd';
+
 // @ts-expect-error untyped dependency
 import Style from 'style-it';
 import { ConfirmModal } from '../confirm_modal';
@@ -16,11 +18,26 @@ import { RoutingLink } from '../routing';
 import { WorkpadRoutingContext } from '../../routes/workpad';
 import { PagePreview } from '../page_preview';
 
-import { ComponentStrings } from '../../../i18n';
 import { CanvasPage } from '../../../types';
 
-const { PageManager: strings } = ComponentStrings;
-
+const strings = {
+  getAddPageTooltip: () =>
+    i18n.translate('xpack.canvas.pageManager.addPageTooltip', {
+      defaultMessage: 'Add a new page to this workpad',
+    }),
+  getConfirmRemoveTitle: () =>
+    i18n.translate('xpack.canvas.pageManager.confirmRemoveTitle', {
+      defaultMessage: 'Remove Page',
+    }),
+  getConfirmRemoveDescription: () =>
+    i18n.translate('xpack.canvas.pageManager.confirmRemoveDescription', {
+      defaultMessage: 'Are you sure you want to remove this page?',
+    }),
+  getConfirmRemoveButtonLabel: () =>
+    i18n.translate('xpack.canvas.pageManager.removeButtonLabel', {
+      defaultMessage: 'Remove',
+    }),
+};
 export interface Props {
   isWriteable: boolean;
   onAddPage: () => void;
