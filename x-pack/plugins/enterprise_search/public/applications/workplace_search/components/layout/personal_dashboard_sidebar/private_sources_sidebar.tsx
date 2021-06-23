@@ -9,6 +9,8 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
+import { EuiSideNav } from '@elastic/eui';
+
 import { AppLogic } from '../../../app_logic';
 import {
   PRIVATE_CAN_CREATE_PAGE_TITLE,
@@ -16,7 +18,8 @@ import {
   PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION,
   PRIVATE_CAN_CREATE_PAGE_DESCRIPTION,
 } from '../../../constants';
-import { SourceSubNav } from '../../../views/content_sources/components/source_sub_nav';
+import { useSourceSubNav } from '../../../views/content_sources/components/source_sub_nav';
+import { SourceLogic } from '../../../views/content_sources/source_logic';
 import { ViewContentHeader } from '../../shared/view_content_header';
 
 export const PrivateSourcesSidebar = () => {
@@ -31,10 +34,17 @@ export const PrivateSourcesSidebar = () => {
     ? PRIVATE_CAN_CREATE_PAGE_DESCRIPTION
     : PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION;
 
+  const {
+    contentSource: { id = '', name = '' },
+  } = useValues(SourceLogic);
+
+  const navItems = [{ id, name, items: useSourceSubNav() }];
+
   return (
     <>
       <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
-      <SourceSubNav />
+      {/* @ts-expect-error: TODO, uncomment this once EUI 34.x lands in Kibana & `mobileBreakpoints` is a valid prop */}
+      {id && <EuiSideNav items={navItems} mobileBreakpoints={[]} />}
     </>
   );
 };

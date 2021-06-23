@@ -233,7 +233,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   <EuiText color="subdued">
                     <FormattedMessage
                       id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
-                      defaultMessage="{strongNote} The {title} integration is installed by default and cannot be removed."
+                      defaultMessage="{strongNote} The {title} integration is a system integration and cannot be removed."
                       values={{
                         title,
                         strongNote: <NoteLabel />,

@@ -48479,7 +48479,7 @@ async function runBazelCommandWithRunner(bazelCommandRunner, bazelArgs, offline 
     stdio: 'pipe'
   });
 
-  if (offline || !offline) {
+  if (offline) {
     bazelArgs = [...bazelArgs, '--config=offline'];
   }
 
@@ -63827,6 +63827,7 @@ function getProjectPaths({
 
   projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'test/plugin_functional/plugins/*'));
   projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'test/interpreter_functional/plugins/*'));
+  projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'test/server_integration/__fixtures__/plugins/*'));
   projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'examples/*'));
 
   if (!ossOnly) {
