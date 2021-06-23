@@ -10,14 +10,14 @@ import './solution_nav.scss';
 import React, { FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiTitle, EuiSideNav, EuiSideNavProps, htmlIdGenerator } from '@elastic/eui';
+import { EuiSideNav, EuiSideNavProps } from '@elastic/eui';
 
 import {
   KibanaPageTemplateSolutionNavAvatar,
   KibanaPageTemplateSolutionNavAvatarProps,
 } from './solution_nav_avatar';
 
-export type KibanaPageTemplateSolutionNavProps = Partial<EuiSideNavProps<{}>> & {
+export type KibanaPageTemplateSolutionNavProps = Partial<EuiSideNavProps> & {
   /**
    * Name of the solution, i.e. "Observability"
    */
@@ -51,24 +51,17 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   }
 
   /**
-   * Create the required title.
-   * a11y: Since the heading can't be nested inside `<nav>`, we have to hook them up via `aria-labelledby`
-   */
-  const titleID = htmlIdGenerator('kbnPageTemplateSolutionNav__title')();
-  const solutionNavTitle = (
-    <EuiTitle size="xs" id={titleID} className="kbnPageTemplateSolutionNav__title">
-      <h2>
-        {solutionAvatar}
-        <strong>{name}</strong>
-      </h2>
-    </EuiTitle>
-  );
-
-  /**
    * Create the side nav component
    */
   let sideNav;
   if (items) {
+    const solutionNavTitle = (
+      <>
+        {solutionAvatar}
+        <strong>{name}</strong>
+      </>
+    );
+
     const mobileTitleText = (
       <FormattedMessage
         id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
@@ -79,12 +72,12 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
 
     sideNav = (
       <EuiSideNav
-        aria-labelledby={titleID}
+        heading={solutionNavTitle}
         mobileTitle={
-          <h2>
+          <>
             {solutionAvatar}
             {mobileTitleText}
-          </h2>
+          </>
         }
         toggleOpenOnMobile={toggleOpenOnMobile}
         isOpenOnMobile={isSideNavOpenOnMobile}
@@ -94,10 +87,5 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
     );
   }
 
-  return (
-    <div className="kbnPageTemplateSolutionNav">
-      {solutionNavTitle}
-      {sideNav}
-    </div>
-  );
+  return <div className="kbnPageTemplateSolutionNav">{sideNav}</div>;
 };
