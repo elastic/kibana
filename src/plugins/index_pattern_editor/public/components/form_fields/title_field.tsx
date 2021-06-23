@@ -13,7 +13,11 @@ import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports'
 import { IndexPatternConfig } from '../index_pattern_editor_flyout_content';
 import { canAppendWildcard } from '../../lib';
 
-export const TitleField = () => {
+interface TitleFieldProps {
+  existingIndexPatterns: string[];
+}
+
+export const TitleField = ({ existingIndexPatterns }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
 
   return (
@@ -57,6 +61,22 @@ export const TitleField = () => {
                   }
                   field.setValue(query);
                 }
+                /*
+                if (query.length > 1) {
+                  if (existingIndexPatterns.includes(query)) {
+                    console.log('setting error');
+                    field.setErrors([
+                      {
+                        message: 'Index pattern exists already!',
+                        // __isBlocking__: true,
+                        code: 'INDEX_PATTERN_ALREADY_EXISTS',
+                      },
+                    ]);
+                  }
+                } else {
+                  field.clearErrors();
+                }
+                */
                 // todo
                 // setLastTitle(query);
               }}

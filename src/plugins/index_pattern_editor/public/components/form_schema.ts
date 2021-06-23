@@ -19,12 +19,14 @@ export const schema = {
       defaultMessage: 'Name',
     }),
     defaultValue: '',
-    helpText:
-      'Use an asterisk (*) to match multiple indices. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+    helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
+      defaultMessage:
+        'Use an asterisk (*) to match multiple indices. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+    }),
     validations: [
       {
         validator: fieldValidators.emptyField(
-          i18n.translate('indexPatternEditor.editor.form.validations.titleIsRequiredErrorMessage', {
+          i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
             defaultMessage: 'A name is required.',
           })
         ),
@@ -41,7 +43,7 @@ export const schema = {
       {
         validator: fieldValidators.emptyField(
           i18n.translate(
-            'indexPatternEditor.editor.form.validations.timeFieldSelectionIsRequiredErrorMessage',
+            'indexPatternEditor.validations.timeFieldSelectionIsRequiredErrorMessage',
             {
               defaultMessage: 'A time field selection is required.',
             }

@@ -67,7 +67,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       statusMessage = (
         <span>
           <FormattedMessage
-            id="indexPatternManagement.createIndexPattern.step.status.noSystemIndicesLabel"
+            id="indexPatternEditor.status.noSystemIndicesLabel"
             defaultMessage="No Elasticsearch indices match your pattern."
           />
         </span>
@@ -80,7 +80,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
       <span>
         &nbsp;
         <FormattedMessage
-          id="indexPatternManagement.createIndexPattern.step.status.successLabel.successDetail"
+          id="indexPatternEditor.status.successLabel.successDetail"
           defaultMessage="Your index pattern matches {sourceCount} {sourceCount, plural,
             one {source}
             other {sources}
@@ -97,7 +97,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     statusMessage = (
       <span>
         <FormattedMessage
-          id="indexPatternManagement.createIndexPattern.step.status.partialMatchLabel.partialMatchDetail"
+          id="indexPatternEditor.status.partialMatchLabel.partialMatchDetail"
           defaultMessage="Your index pattern doesn't match any indices, but you have {strongIndices} which
           {matchedIndicesLength, plural,
             one {looks}
@@ -108,7 +108,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
             strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.step.status.partialMatchLabel.strongIndicesLabel"
+                  id="indexPatternEditor.status.partialMatchLabel.strongIndicesLabel"
                   defaultMessage="{matchedIndicesLength, plural,
                     one {index}
                     other {# indices}
@@ -127,7 +127,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     statusMessage = (
       <span>
         <FormattedMessage
-          id="indexPatternManagement.createIndexPattern.step.status.notMatchLabel.notMatchDetail"
+          id="indexPatternEditor.status.notMatchLabel.notMatchDetail"
           defaultMessage="The index pattern you've entered doesn't match any indices.
           You can match {indicesLength, plural,
             one {your}
@@ -137,7 +137,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
             strongIndices: (
               <strong>
                 <FormattedMessage
-                  id="indexPatternManagement.createIndexPattern.step.status.notMatchLabel.allIndicesLabel"
+                  id="indexPatternEditor.status.notMatchLabel.allIndicesLabel"
                   defaultMessage="{indicesLength, plural,
                     one {# index}
                     other {# indices}

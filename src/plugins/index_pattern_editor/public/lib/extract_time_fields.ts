@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType } from '../../../../plugins/data/public';
 import { TimestampOption } from '../components/index_pattern_editor_flyout_content';
 
-export function extractTimeFields(fields: IFieldType[]): TimestampOption[] {
+export function extractTimeFields(
+  fields: IFieldType[],
+  requireTimestampField: boolean = false
+): TimestampOption[] {
   const dateFields = fields.filter((field) => field.type === 'date');
 
   // todo - display somewhere
@@ -35,11 +38,14 @@ export function extractTimeFields(fields: IFieldType[]): TimestampOption[] {
     fieldName: '',
   };
 
-  return [
-    ...dateFields.map((field) => ({
-      display: field.name,
-      fieldName: field.name,
-    })),
-    noTimeFieldOption,
-  ];
+  const timeFields = dateFields.map((field) => ({
+    display: field.name,
+    fieldName: field.name,
+  }));
+
+  if (!requireTimestampField) {
+    timeFields.push(noTimeFieldOption);
+  }
+
+  return timeFields;
 }

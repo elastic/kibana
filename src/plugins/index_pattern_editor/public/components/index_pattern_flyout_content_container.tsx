@@ -23,6 +23,7 @@ export interface Props {
    */
   onCancel: () => void;
   defaultTypeIsRollup?: boolean;
+  requireTimestampField?: boolean;
 }
 
 /**
@@ -36,6 +37,7 @@ export const IndexPatternFlyoutContentContainer = ({
   onSave,
   onCancel,
   defaultTypeIsRollup,
+  requireTimestampField = false,
 }: Props) => {
   const {
     services: { indexPatternService, notifications },
@@ -73,6 +75,7 @@ export const IndexPatternFlyoutContentContainer = ({
       onCancel={onCancel}
       existingIndexPatterns={existingIndexPatterns}
       defaultTypeIsRollup={defaultTypeIsRollup}
+      requireTimestampField={requireTimestampField}
     />
   );
 };

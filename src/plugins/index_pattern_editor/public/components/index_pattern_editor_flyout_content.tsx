@@ -66,6 +66,7 @@ export interface Props {
   onCancel: () => void;
   existingIndexPatterns: string[];
   defaultTypeIsRollup?: boolean;
+  requireTimestampField?: boolean;
 }
 
 export interface IndexPatternConfig {
@@ -88,6 +89,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   onSave,
   onCancel,
   defaultTypeIsRollup,
+  requireTimestampField = false,
 }: Props) => {
   const {
     services: { http, indexPatternService, uiSettings, indexPatternCreateService },
@@ -99,6 +101,20 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     defaultValue: { type: defaultTypeIsRollup ? 'rollup' : 'default' },
     schema,
+    // todo use isValid?
+    onSubmit: async (formData, isValid) => {
+      if (!isValid) {
+        return;
+      }
+      // todo show errors
+      indexPatternCreationType.checkIndicesForErrors(matchedIndices.exactMatchedIndices);
+      await onSave({
+        title: formData.title,
+        timeFieldName: formData.timestampField,
+        id: formData.id,
+        ...indexPatternCreationType.getIndexPatternMappings(),
+      });
+    },
   });
 
   const [{ title, allowHidden, type, timestampField }] = useFormData<FormInternal>({ form });
@@ -240,7 +256,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             ...indexPatternCreationType.getFetchForWildcardOptions(),
           })
         );
-        const timeFields = extractTimeFields(fields);
+        const timeFields = extractTimeFields(fields, requireTimestampField);
         setIsLoadingTimestampFields(false);
         setTimestampFieldOptions(timeFields);
       } else {
@@ -259,21 +275,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
     lastTitle,
     indexPatternCreationType,
     allSources,
-    form,
+    requireTimestampField,
   ]);
 
   const { isValid } = formState;
-  const onClickSave = async () => {
-    // todo display result
-    indexPatternCreationType.checkIndicesForErrors(matchedIndices.exactMatchedIndices);
-    const formData = form.getFormData();
-    await onSave({
-      title: formData.title,
-      timeFieldName: formData.timestampField,
-      id: formData.id,
-      ...indexPatternCreationType.getIndexPatternMappings(),
-    });
-  };
 
   // todo
   if (isLoadingSources || isLoadingIndexPatterns) {
@@ -353,6 +358,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     );
   };
 
+  // move into render fn
   const disableSubmit =
     !isValid ||
     !matchedIndices.exactMatchedIndices.length ||
@@ -372,14 +378,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
     </>
   );
 
-  const noFieldsMsg =
-    title?.length &&
+  // todo try to move within component
+  const selectTimestampHelp = timestampFieldOptions.length ? i18nTexts.timestampFieldHelp : '';
+
+  const timestampNoFieldsHelp =
     timestampFieldOptions.length === 0 &&
     !existingIndexPatterns.includes(title || '') &&
     !isLoadingMatchedIndices &&
-    !isLoadingTimestampFields
+    !isLoadingTimestampFields &&
+    matchedIndices.exactMatchedIndices.length
       ? i18nTexts.noTimestampOptionText
       : '';
+  //
 
   return (
     <>
@@ -398,7 +408,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiFlexGroup>
               {/* Name */}
               <EuiFlexItem>
-                <TitleField />
+                <TitleField existingIndexPatterns={existingIndexPatterns} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup>
@@ -406,7 +416,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 <TimestampField
                   options={timestampFieldOptions}
                   isLoadingOptions={isLoadingTimestampFields}
-                  helpText={noFieldsMsg}
+                  helpText={timestampNoFieldsHelp || selectTimestampHelp}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -460,7 +470,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
-                  onClick={onClickSave}
+                  // onClick={onClickSave}
+                  onClick={() => form.submit()}
                   data-test-subj="saveIndexPatternButton"
                   fill
                   disabled={disableSubmit}

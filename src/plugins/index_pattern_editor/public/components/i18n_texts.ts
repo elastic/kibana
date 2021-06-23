@@ -28,5 +28,8 @@ export const geti18nTexts = () => {
     customIndexPatternIdLabel: i18n.translate('indexPatternEditor.form.customIndexPatternIdLabel', {
       defaultMessage: 'Custom index pattern ID',
     }),
+    timestampFieldHelp: i18n.translate('indexPatternEditor.editor.form.timeFieldHelp', {
+      defaultMessage: 'Select a primary time field for use with the global time filter.',
+    }),
   };
 };
