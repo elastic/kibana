@@ -236,7 +236,14 @@ export const enrichExceptionItemsWithOS = (
 export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
   const osDefaults: OsTypeArray = ['windows', 'macos'];
   if (alertData != null) {
-    const os = alertData.host && alertData.host.os && alertData.host.os.family;
+    const osTypeBasedOnAgentType = (data: AlertData) => {
+      if (data.agent && data.agent.type === 'endpoint') {
+        return data.host?.os?.name?.toLowerCase();
+      } else {
+        return data.host?.os?.family;
+      }
+    };
+    const os = osTypeBasedOnAgentType(alertData);
     if (os != null) {
       return osType.is(os) ? [os] : osDefaults;
     }
@@ -361,8 +368,9 @@ export const getPrepopulatedEndpointException = ({
   const { file, host } = alertEcsData;
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
-  const filePathDefault = host?.os?.family === 'linux' ? 'file.path' : 'file.path.caseless';
+  const filePathDefault = host?.os?.name === 'Linux' ? 'file.path' : 'file.path.caseless';
 
+  // TODO: Fix this
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: addIdToEntries([
