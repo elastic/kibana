@@ -28,7 +28,7 @@ import {
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
-import { useGetCase } from '../../containers/use_get_case';
+import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
@@ -77,6 +77,7 @@ export interface CaseViewProps extends CaseViewComponentProps {
   onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
 }
+
 export interface OnUpdateFields {
   key: keyof Case;
   value: Case[keyof Case];
@@ -95,13 +96,14 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
 
 const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
   margin-left: 48px;
+
   &.euiHorizontalRule--full {
     width: calc(100% - 48px);
   }
 `;
 
 export interface CaseComponentProps extends CaseViewComponentProps {
-  fetchCase: () => void;
+  fetchCase: UseGetCase['fetchCase'];
   caseData: Case;
   updateCase: (newCase: Case) => void;
 }
@@ -155,14 +157,15 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             }
             fetchCase();
           },
-          refreshUserActions: async () => {
+          refreshUserActionsAndComments: async () => {
             // Do nothing if component (or instance of this render cycle) is stale
             // OR
             // it is already loading
             if (isStale || isLoadingUserActions) {
               return;
             }
-            fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
+            fetchCase(true);
+            await fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
           },
         };
 
@@ -179,6 +182,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       isLoadingUserActions,
       refreshRef,
       subCaseId,
+      updateCase,
     ]);
 
     // Update Fields
