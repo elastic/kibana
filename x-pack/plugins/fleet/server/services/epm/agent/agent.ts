@@ -111,11 +111,12 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
   return { vars, yamlValues };
 }
 
-function containsHelper(this: any, item: string, list: string[], options: any) {
-  if (Array.isArray(list) && list.includes(item)) {
+function containsHelper(this: any, item: string, check: string | string[], options: any) {
+  if ((Array.isArray(check) || typeof check === 'string') && check.includes(item)) {
     if (options && options.fn) {
       return options.fn(this);
     }
+    return true;
   }
   return '';
 }
