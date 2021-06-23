@@ -7,17 +7,8 @@
 
 import React, { FC, useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiModal,
-  EuiModalFooter,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-// @ts-expect-error untyped local
-import { WorkpadManager } from '../workpad_manager';
 import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
@@ -37,7 +28,6 @@ export interface Props {
   selectedElement?: CanvasElement;
   selectedPageNumber: number;
   totalPages: number;
-  workpadId: string;
   workpadName: string;
 }
 
@@ -46,11 +36,9 @@ export const Toolbar: FC<Props> = ({
   selectedElement,
   selectedPageNumber,
   totalPages,
-  workpadId,
   workpadName,
 }) => {
   const [activeTray, setActiveTray] = useState<TrayType | null>(null);
-  const [showWorkpadManager, setShowWorkpadManager] = useState(false);
   const { getUrl, previousPage } = useContext(WorkpadRoutingContext);
 
   // While the tray doesn't get activated if the workpad isn't writeable,
@@ -75,20 +63,6 @@ export const Toolbar: FC<Props> = ({
     }
   };
 
-  const closeWorkpadManager = () => setShowWorkpadManager(false);
-  const openWorkpadManager = () => setShowWorkpadManager(true);
-
-  const workpadManager = (
-    <EuiModal onClose={closeWorkpadManager} className="canvasModal--fixedSize" maxWidth="1000px">
-      <WorkpadManager onClose={closeWorkpadManager} />
-      <EuiModalFooter>
-        <EuiButton size="s" onClick={closeWorkpadManager}>
-          {strings.getWorkpadManagerCloseButtonLabel()}
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-  );
-
   const trays = {
     pageManager: <PageManager onPreviousPage={previousPage} />,
     expression: !elementIsSelected ? null : <Expression done={() => setActiveTray(null)} />,
@@ -99,12 +73,6 @@ export const Toolbar: FC<Props> = ({
       {activeTray !== null && <Tray done={() => setActiveTray(null)}>{trays[activeTray]}</Tray>}
       <div className="canvasToolbar__container">
         <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="text" iconType="grid" onClick={() => openWorkpadManager()}>
-              {workpadName}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} />
           <EuiFlexItem grow={false}>
             <RoutingButtonIcon
               color="text"
@@ -143,7 +111,6 @@ export const Toolbar: FC<Props> = ({
           )}
         </EuiFlexGroup>
       </div>
-      {showWorkpadManager && workpadManager}
     </div>
   );
 };
@@ -153,6 +120,5 @@ Toolbar.propTypes = {
   selectedElement: PropTypes.object,
   selectedPageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
-  workpadId: PropTypes.string.isRequired,
   workpadName: PropTypes.string.isRequired,
 };

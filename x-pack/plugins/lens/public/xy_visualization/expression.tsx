@@ -561,9 +561,9 @@ export function XYChart({
         value: pointValue,
       });
     }
-
-    const xAxisFieldName = table.columns.find((el) => el.id === layer.xAccessor)?.meta?.field;
-    const timeFieldName = xDomain && xAxisFieldName;
+    const currentColumnMeta = table.columns.find((el) => el.id === layer.xAccessor)?.meta;
+    const xAxisFieldName = currentColumnMeta?.field;
+    const isDateField = currentColumnMeta?.type === 'date';
 
     const context: LensFilterEvent['data'] = {
       data: points.map((point) => ({
@@ -572,7 +572,7 @@ export function XYChart({
         value: point.value,
         table,
       })),
-      timeFieldName,
+      timeFieldName: xDomain && isDateField ? xAxisFieldName : undefined,
     };
     onClickValue(context);
   };

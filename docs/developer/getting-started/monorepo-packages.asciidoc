@@ -80,6 +80,7 @@ yarn kbn watch-bazel
 - @kbn/eslint-plugin-eslint
 - @kbn/expect
 - @kbn/i18n
+- @kbn/interpreter
 - @kbn/io-ts-utils
 - @kbn/legacy-logging
 - @kbn/logging
@@ -103,6 +104,7 @@ yarn kbn watch-bazel
 - @kbn/storybook
 - @kbn/telemetry-utils
 - @kbn/tinymath
+- @kbn/ui-framework
 - @kbn/ui-shared-deps
 - @kbn/utility-types
 - @kbn/utils

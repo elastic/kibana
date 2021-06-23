@@ -21,7 +21,8 @@ import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
-}> = ({ agentPolicy, packagePolicy }) => {
+  viewDataStepContent?: JSX.Element;
+}> = ({ agentPolicy, packagePolicy, viewDataStepContent }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
@@ -103,7 +104,11 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     <>
       {isEnrollmentFlyoutOpen && (
         <EuiPortal>
-          <AgentEnrollmentFlyout agentPolicies={[agentPolicy]} onClose={onEnrollmentFlyoutClose} />
+          <AgentEnrollmentFlyout
+            agentPolicy={agentPolicy}
+            viewDataStepContent={viewDataStepContent}
+            onClose={onEnrollmentFlyoutClose}
+          />
         </EuiPortal>
       )}
       <ContextMenuActions items={menuItems} />
