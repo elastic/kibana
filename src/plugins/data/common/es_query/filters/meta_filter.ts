@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ConvertFn } from './types';
+
 export enum FilterStateStore {
   APP_STATE = 'appState',
   GLOBAL_STATE = 'globalState',
@@ -35,7 +37,7 @@ export type FilterMeta = {
   type?: string;
   key?: string;
   params?: any;
-  value?: string;
+  value?: string | ConvertFn;
 };
 
 // eslint-disable-next-line

@@ -28,11 +28,12 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
 }
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexPattern[]): string {
-  if (typeof filter.meta.value === 'function') {
+  const { key, value } = filter.meta;
+  if (typeof value === 'function') {
     const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-    const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
-    return (filter.meta.value as any)(valueFormatter);
+    const valueFormatter = getValueFormatter(indexPattern, key);
+    return value(valueFormatter);
   } else {
-    return filter.meta.value || '';
+    return value || '';
   }
 }
