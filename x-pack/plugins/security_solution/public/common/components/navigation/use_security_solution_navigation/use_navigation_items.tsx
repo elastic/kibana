@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { APP_ID } from '../../../../../common/constants';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
@@ -24,43 +24,61 @@ export const usePrimaryNavigationItems = ({
 }: PrimaryNavigationItemsProps) => {
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
 
-  const navItems = Object.values(navTabs).map((tab) => {
-    const { id, name, disabled } = tab;
-    const isSelected = selectedTabId === id;
-    const urlSearch = getSearch(tab, {
+  const navItems = useMemo(
+    () =>
+      Object.values(navTabs).map((tab) => {
+        const { id, name, disabled } = tab;
+        const isSelected = selectedTabId === id;
+        const urlSearch = getSearch(tab, {
+          filters,
+          query,
+          savedQuery,
+          sourcerer,
+          timeline,
+          timerange,
+        });
+
+        const handleClick = (ev: React.MouseEvent) => {
+          ev.preventDefault();
+          navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
+          track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
+        };
+
+        const appHref = getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
+
+        return {
+          'data-href': appHref,
+          'data-test-subj': `navigation-${id}`,
+          disabled,
+          href: appHref,
+          id,
+          isSelected,
+          name,
+          onClick: handleClick,
+        };
+      }),
+    [
       filters,
+      getUrlForApp,
+      navTabs,
+      navigateToApp,
       query,
       savedQuery,
+      selectedTabId,
       sourcerer,
       timeline,
       timerange,
-    });
+    ]
+  );
 
-    const handleClick = (ev: React.MouseEvent) => {
-      ev.preventDefault();
-      navigateToApp(`${APP_ID}:${id}`, { path: urlSearch });
-      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
-    };
-
-    const appHref = getUrlForApp(`${APP_ID}:${id}`, { path: urlSearch });
-
-    return {
-      'data-href': appHref,
-      'data-test-subj': `navigation-${id}`,
-      disabled,
-      href: appHref,
-      id,
-      isSelected,
-      name,
-      onClick: handleClick,
-    };
-  });
-
-  return [
-    {
-      id: APP_ID, // TODO: When separating into sub-sections (detect, explore, investigate). Those names can also serve as the section id
-      items: navItems,
-      name: '',
-    },
-  ];
+  return useMemo(
+    () => [
+      {
+        id: APP_ID, // TODO: When separating into sub-sections (detect, explore, investigate). Those names can also serve as the section id
+        items: navItems,
+        name: '',
+      },
+    ],
+    [navItems]
+  );
 };

@@ -6,7 +6,7 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { PrimaryNavigationProps } from './types';
@@ -60,9 +60,12 @@ export const usePrimaryNavigation = ({
     timerange,
   });
 
-  return {
-    name: translatedNavTitle,
-    icon: 'logoSecurity',
-    items: navItems,
-  };
+  return useMemo(
+    () => ({
+      name: translatedNavTitle,
+      icon: 'logoSecurity',
+      items: navItems,
+    }),
+    [navItems]
+  );
 };
