@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiFlyout, EuiSideNav, EuiSideNavProps, useIsWithinBreakpoints } from '@elastic/eui';
 
+import classNames from 'classnames';
 import {
   KibanaPageTemplateSolutionNavAvatar,
   KibanaPageTemplateSolutionNavAvatarProps,
@@ -27,6 +28,11 @@ export type KibanaPageTemplateSolutionNavProps = Partial<EuiSideNavProps> & {
    * Solution logo, i.e. "logoObservability"
    */
   icon?: KibanaPageTemplateSolutionNavAvatarProps['iconType'];
+  /**
+   * Control the collapsed state
+   */
+  isOpenOnDesktop?: boolean;
+  onCollapse?: () => void;
 };
 
 /**
@@ -36,6 +42,8 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   name,
   icon,
   items,
+  isOpenOnDesktop = false,
+  onCollapse,
   ...rest
 }) => {
   // The EuiShowFor and EuiHideFor components are not in sync with the euiBreakpoint() function :(
@@ -48,13 +56,9 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   const toggleOpenOnMobile = () => {
     setisSideNavOpenOnMobile(!isSideNavOpenOnMobile);
   };
-  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(false);
-  const toggleOpenOnDesktop = () => {
-    setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
-  };
 
   /**
-   * Create the avatar.
+   * Create the avatar
    */
   let solutionAvatar;
   if (icon) {
@@ -62,29 +66,35 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   }
 
   /**
+   * Create the titles
+   */
+  const titleText = (
+    <>
+      {solutionAvatar}
+      <strong>{name}</strong>
+    </>
+  );
+  const mobileTitleText = (
+    <FormattedMessage
+      id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
+      defaultMessage="{solutionName} Menu"
+      values={{ solutionName: name || 'Navigation' }}
+    />
+  );
+
+  /**
    * Create the side nav component
    */
   let sideNav;
   if (items) {
-    const solutionNavTitle = (
-      <>
-        {solutionAvatar}
-        <strong>{name}</strong>
-      </>
-    );
-
-    const mobileTitleText = (
-      <FormattedMessage
-        id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
-        defaultMessage="{solutionName} Menu"
-        values={{ solutionName: name || 'Navigation' }}
-      />
-    );
+    const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
+      'kbnPageTemplateSolutionNav--hidden': isLargerBreakpoint && !isOpenOnDesktop,
+    });
 
     sideNav = (
       <EuiSideNav
-        className="kbnPageTemplateSolutionNav"
-        heading={solutionNavTitle}
+        className={sideNavClasses}
+        heading={titleText}
         mobileTitle={
           <>
             {solutionAvatar}
@@ -126,8 +136,8 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
         <>
           {sideNav}
           <KibanaPageTemplateSolutionNavCollapseButton
-            isCollapsed={isSideNavOpenOnDesktop}
-            onClick={toggleOpenOnDesktop}
+            isCollapsed={!isOpenOnDesktop}
+            onClick={onCollapse}
           />
         </>
       )}

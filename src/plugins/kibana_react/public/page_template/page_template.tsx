@@ -5,12 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+/* eslint-disable @typescript-eslint/naming-convention */
 import './page_template.scss';
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import classNames from 'classnames';
 
-import { EuiEmptyPrompt, EuiPageTemplate, EuiPageTemplateProps } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPageTemplate,
+  EuiPageTemplateProps,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 
 import {
   KibanaPageTemplateSolutionNav,
@@ -44,12 +51,34 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   solutionNav,
   ...rest
 }) => {
+  /**
+   * Only default to open in large+ breakpoints
+   */
+  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
+  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
 
   /**
    * Create the solution nav component
    */
+  const [isSideNavOpenOnDesktop, setisSideNavOpenOnDesktop] = useState(true);
+  const toggleOpenOnDesktop = () => {
+    setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
+  };
+  let sideBarClasses = 'kbnPageTemplate__pageSideBar';
   if (solutionNav) {
-    pageSideBar = <KibanaPageTemplateSolutionNav {...solutionNav} />;
+    // Only apply shrinking classes if collapsibility is available through `solutionNav`
+    sideBarClasses = classNames(sideBarClasses, {
+      'kbnPageTemplate__pageSideBar--shrink':
+        isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop),
+    });
+
+    pageSideBar = (
+      <KibanaPageTemplateSolutionNav
+        isOpenOnDesktop={isSideNavOpenOnDesktop}
+        onCollapse={toggleOpenOnDesktop}
+        {...solutionNav}
+      />
+    );
   }
 
   /**
@@ -82,9 +111,9 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
       pageHeader={pageHeader}
       pageSideBar={pageSideBar}
       pageSideBarProps={{
-        paddingSize: 'none',
+        paddingSize: solutionNav ? 'none' : 'l',
         ...rest.pageSideBarProps,
-        className: classNames('kbnPageTemplate__pageSideBar', rest.pageSideBarProps?.className),
+        className: classNames(sideBarClasses, rest.pageSideBarProps?.className),
       }}
       {...rest}
     >
