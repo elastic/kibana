@@ -58,6 +58,74 @@ const negativeCriteria: Criterion[] = [
   { ...textField, comparator: Comparator.NOT_MATCH_PHRASE },
 ];
 
+const expectedPositiveFilterClauses = [
+  {
+    range: {
+      numericField: {
+        gt: 10,
+      },
+    },
+  },
+  {
+    range: {
+      numericField: {
+        gte: 10,
+      },
+    },
+  },
+  {
+    range: {
+      numericField: {
+        lt: 10,
+      },
+    },
+  },
+  {
+    range: {
+      numericField: {
+        lte: 10,
+      },
+    },
+  },
+  {
+    term: {
+      keywordField: {
+        value: 'error',
+      },
+    },
+  },
+  {
+    match: {
+      textField: 'Something went wrong',
+    },
+  },
+  {
+    match_phrase: {
+      textField: 'Something went wrong',
+    },
+  },
+];
+
+const expectedNegativeFilterClauses = [
+  {
+    term: {
+      keywordField: {
+        value: 'error',
+      },
+    },
+  },
+  {
+    match: {
+      textField: 'Something went wrong',
+    },
+  },
+  {
+    match_phrase: {
+      textField: 'Something went wrong',
+    },
+  },
+];
+
 const baseAlertParams: Pick<AlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
   count: {
     comparator: Comparator.GT,
@@ -102,53 +170,7 @@ describe('Log threshold executor', () => {
         criteria: positiveCriteria,
       };
       const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
-      expect(filters.mustFilters).toEqual([
-        {
-          range: {
-            numericField: {
-              gt: 10,
-            },
-          },
-        },
-        {
-          range: {
-            numericField: {
-              gte: 10,
-            },
-          },
-        },
-        {
-          range: {
-            numericField: {
-              lt: 10,
-            },
-          },
-        },
-        {
-          range: {
-            numericField: {
-              lte: 10,
-            },
-          },
-        },
-        {
-          term: {
-            keywordField: {
-              value: 'error',
-            },
-          },
-        },
-        {
-          match: {
-            textField: 'Something went wrong',
-          },
-        },
-        {
-          match_phrase: {
-            textField: 'Something went wrong',
-          },
-        },
-      ]);
+      expect(filters.mustFilters).toEqual(expectedPositiveFilterClauses);
     });
 
     test('Handles negative criteria', () => {
@@ -158,25 +180,7 @@ describe('Log threshold executor', () => {
       };
       const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
 
-      expect(filters.mustNotFilters).toEqual([
-        {
-          term: {
-            keywordField: {
-              value: 'error',
-            },
-          },
-        },
-        {
-          match: {
-            textField: 'Something went wrong',
-          },
-        },
-        {
-          match_phrase: {
-            textField: 'Something went wrong',
-          },
-        },
-      ]);
+      expect(filters.mustNotFilters).toEqual(expectedNegativeFilterClauses);
     });
 
     test('Handles time range', () => {
@@ -223,71 +227,9 @@ describe('Log threshold executor', () => {
                       },
                     },
                   },
-                  {
-                    range: {
-                      numericField: {
-                        gt: 10,
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      numericField: {
-                        gte: 10,
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      numericField: {
-                        lt: 10,
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      numericField: {
-                        lte: 10,
-                      },
-                    },
-                  },
-                  {
-                    term: {
-                      keywordField: {
-                        value: 'error',
-                      },
-                    },
-                  },
-                  {
-                    match: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                  {
-                    match_phrase: {
-                      textField: 'Something went wrong',
-                    },
-                  },
+                  ...expectedPositiveFilterClauses,
                 ],
-                must_not: [
-                  {
-                    term: {
-                      keywordField: {
-                        value: 'error',
-                      },
-                    },
-                  },
-                  {
-                    match: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                  {
-                    match_phrase: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                ],
+                must_not: [...expectedNegativeFilterClauses],
               },
             },
             runtime_mappings: {
@@ -335,71 +277,9 @@ describe('Log threshold executor', () => {
                         },
                       },
                     },
-                    {
-                      range: {
-                        numericField: {
-                          gt: 10,
-                        },
-                      },
-                    },
-                    {
-                      range: {
-                        numericField: {
-                          gte: 10,
-                        },
-                      },
-                    },
-                    {
-                      range: {
-                        numericField: {
-                          lt: 10,
-                        },
-                      },
-                    },
-                    {
-                      range: {
-                        numericField: {
-                          lte: 10,
-                        },
-                      },
-                    },
-                    {
-                      term: {
-                        keywordField: {
-                          value: 'error',
-                        },
-                      },
-                    },
-                    {
-                      match: {
-                        textField: 'Something went wrong',
-                      },
-                    },
-                    {
-                      match_phrase: {
-                        textField: 'Something went wrong',
-                      },
-                    },
+                    ...expectedPositiveFilterClauses,
                   ],
-                  must_not: [
-                    {
-                      term: {
-                        keywordField: {
-                          value: 'error',
-                        },
-                      },
-                    },
-                    {
-                      match: {
-                        textField: 'Something went wrong',
-                      },
-                    },
-                    {
-                      match_phrase: {
-                        textField: 'Something went wrong',
-                      },
-                    },
-                  ],
+                  must_not: [...expectedNegativeFilterClauses],
                 },
               },
               aggregations: {
@@ -498,71 +378,9 @@ describe('Log threshold executor', () => {
                                 },
                               },
                             },
-                            {
-                              range: {
-                                numericField: {
-                                  gt: 10,
-                                },
-                              },
-                            },
-                            {
-                              range: {
-                                numericField: {
-                                  gte: 10,
-                                },
-                              },
-                            },
-                            {
-                              range: {
-                                numericField: {
-                                  lt: 10,
-                                },
-                              },
-                            },
-                            {
-                              range: {
-                                numericField: {
-                                  lte: 10,
-                                },
-                              },
-                            },
-                            {
-                              term: {
-                                keywordField: {
-                                  value: 'error',
-                                },
-                              },
-                            },
-                            {
-                              match: {
-                                textField: 'Something went wrong',
-                              },
-                            },
-                            {
-                              match_phrase: {
-                                textField: 'Something went wrong',
-                              },
-                            },
+                            ...expectedPositiveFilterClauses,
                           ],
-                          must_not: [
-                            {
-                              term: {
-                                keywordField: {
-                                  value: 'error',
-                                },
-                              },
-                            },
-                            {
-                              match: {
-                                textField: 'Something went wrong',
-                              },
-                            },
-                            {
-                              match_phrase: {
-                                textField: 'Something went wrong',
-                              },
-                            },
-                          ],
+                          must_not: [...expectedNegativeFilterClauses],
                         },
                       },
                     },
