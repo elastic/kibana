@@ -16,7 +16,7 @@ describe('SelectedFilters', function () {
   mockAppIndexPattern();
 
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'dist',
+    reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
     dataType: 'ux',
   });
