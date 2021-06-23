@@ -240,24 +240,36 @@ const chartPreviewHistogramBucket = rt.type({
   doc_count: rt.number,
 });
 
+const ChartPreviewBucketsRT = rt.partial({
+  histogramBuckets: rt.type({
+    buckets: rt.array(chartPreviewHistogramBucket),
+  }),
+});
+
 // ES query responses //
+const hitsRT = rt.type({
+  total: rt.type({
+    value: rt.number,
+  }),
+});
+
+const bucketFieldsRT = rt.type({
+  key: rt.record(rt.string, rt.string),
+  doc_count: rt.number,
+});
+
+const afterKeyRT = rt.partial({
+  after_key: rt.record(rt.string, rt.string),
+});
+
 export const UngroupedSearchQueryResponseRT = rt.intersection([
   commonSearchSuccessResponseFieldsRT,
   rt.intersection([
     rt.type({
-      hits: rt.type({
-        total: rt.type({
-          value: rt.number,
-        }),
-      }),
+      hits: hitsRT,
     }),
-    // Chart preview buckets
     rt.partial({
-      aggregations: rt.type({
-        histogramBuckets: rt.type({
-          buckets: rt.array(chartPreviewHistogramBucket),
-        }),
-      }),
+      aggregations: ChartPreviewBucketsRT,
     }),
   ]),
 ]);
@@ -272,32 +284,20 @@ export const UnoptimizedGroupedSearchQueryResponseRT = rt.intersection([
         rt.type({
           buckets: rt.array(
             rt.type({
-              key: rt.record(rt.string, rt.string),
-              doc_count: rt.number,
+              ...bucketFieldsRT.props,
               filtered_results: rt.intersection([
                 rt.type({
                   doc_count: rt.number,
                 }),
-                // Chart preview buckets
-                rt.partial({
-                  histogramBuckets: rt.type({
-                    buckets: rt.array(chartPreviewHistogramBucket),
-                  }),
-                }),
+                ChartPreviewBucketsRT,
               ]),
             })
           ),
         }),
-        rt.partial({
-          after_key: rt.record(rt.string, rt.string),
-        }),
+        afterKeyRT,
       ]),
     }),
-    hits: rt.type({
-      total: rt.type({
-        value: rt.number,
-      }),
-    }),
+    hits: hitsRT,
   }),
 ]);
 
@@ -314,28 +314,16 @@ export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
           buckets: rt.array(
             rt.intersection([
               rt.type({
-                key: rt.record(rt.string, rt.string),
-                doc_count: rt.number,
+                ...bucketFieldsRT.props,
               }),
-              // Chart preview buckets
-              rt.partial({
-                histogramBuckets: rt.type({
-                  buckets: rt.array(chartPreviewHistogramBucket),
-                }),
-              }),
+              ChartPreviewBucketsRT,
             ])
           ),
         }),
-        rt.partial({
-          after_key: rt.record(rt.string, rt.string),
-        }),
+        afterKeyRT,
       ]),
     }),
-    hits: rt.type({
-      total: rt.type({
-        value: rt.number,
-      }),
-    }),
+    hits: hitsRT,
   }),
 ]);
 
