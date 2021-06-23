@@ -11,9 +11,9 @@ import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { RowRendererId } from '../../../../../../../common/types/timeline';
+import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
 
-import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { RowRendererContainer } from '../row_renderer';
 import { AuditdGenericDetails } from './generic_details';
 import { AuditdGenericFileDetails } from './generic_file_details';
 import * as i18n from './translations';

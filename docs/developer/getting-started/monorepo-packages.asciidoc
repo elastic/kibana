@@ -80,11 +80,13 @@ yarn kbn watch-bazel
 - @kbn/eslint-plugin-eslint
 - @kbn/expect
 - @kbn/i18n
+- @kbn/interpreter
 - @kbn/io-ts-utils
 - @kbn/legacy-logging
 - @kbn/logging
 - @kbn/mapbox-gl
 - @kbn/monaco
+- @kbn/optimizer
 - @kbn/rule-data-utils
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-hook-utils
@@ -100,8 +102,10 @@ yarn kbn watch-bazel
 - @kbn/server-http-tools
 - @kbn/server-route-repository
 - @kbn/std
+- @kbn/storybook
 - @kbn/telemetry-utils
 - @kbn/tinymath
+- @kbn/ui-framework
 - @kbn/ui-shared-deps
 - @kbn/utility-types
 - @kbn/utils
