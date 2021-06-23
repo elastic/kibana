@@ -21,6 +21,11 @@ import {
   ClosePopoverFn,
 } from '../../../../../../../src/plugins/presentation_util/public';
 import {
+  withSuspense,
+  LazyPopoverComponent,
+  ClosePopoverFn,
+} from '../../../../../../../src/plugins/presentation_util/public';
+import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
   CONTEXT_MENU_TOP_BORDER_CLASSNAME,
