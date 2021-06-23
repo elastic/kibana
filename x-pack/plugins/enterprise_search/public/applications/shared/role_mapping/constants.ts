@@ -50,8 +50,24 @@ export const ROLE_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.rol
   defaultMessage: 'Role',
 });
 
+export const USERNAME_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.usernameLabel', {
+  defaultMessage: 'Username',
+});
+
+export const EMAIL_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.emailLabel', {
+  defaultMessage: 'Email',
+});
+
 export const ALL_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.allLabel', {
   defaultMessage: 'All',
+});
+
+export const GROUPS_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.groupsLabel', {
+  defaultMessage: 'Groups',
+});
+
+export const ENGINES_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.enginesLabel', {
+  defaultMessage: 'Engines',
 });
 
 export const AUTH_PROVIDER_LABEL = i18n.translate(
@@ -82,10 +98,10 @@ export const ATTRIBUTE_VALUE_ERROR = i18n.translate(
   }
 );
 
-export const DELETE_ROLE_MAPPING_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.deleteRoleMappingTitle',
+export const REMOVE_ROLE_MAPPING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.removeRoleMappingTitle',
   {
-    defaultMessage: 'Remove this role mapping',
+    defaultMessage: 'Remove role mapping',
   }
 );
 
@@ -96,10 +112,17 @@ export const DELETE_ROLE_MAPPING_DESCRIPTION = i18n.translate(
   }
 );
 
-export const DELETE_ROLE_MAPPING_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.deleteRoleMappingButton',
+export const REMOVE_ROLE_MAPPING_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.removeRoleMappingButton',
   {
-    defaultMessage: 'Delete mapping',
+    defaultMessage: 'Remove mapping',
+  }
+);
+
+export const REMOVE_USER_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.removeUserButton',
+  {
+    defaultMessage: 'Remove user',
   }
 );
 
@@ -205,3 +228,181 @@ export const ROLE_MAPPINGS_NO_RESULTS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.noResults.message',
   { defaultMessage: 'Create a new role mapping' }
 );
+
+export const ROLES_DISABLED_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.rolesDisabledTitle',
+  { defaultMessage: 'Role-based access is disabled' }
+);
+
+export const ROLES_DISABLED_DESCRIPTION = (productName: ProductName) =>
+  i18n.translate('xpack.enterpriseSearch.roleMapping.rolesDisabledDescription', {
+    defaultMessage:
+      'All users set for this deployment currently have full access to {productName}. To restrict access and manage permissions, you must enable role-based access for Enterprise Search.',
+    values: { productName },
+  });
+
+export const ROLES_DISABLED_NOTE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.rolesDisabledNote',
+  {
+    defaultMessage:
+      'Note: enabling role-based access restricts access for both App Search and Workplace Search. Once enabled, review access management for both products, if applicable.',
+  }
+);
+
+export const ENABLE_ROLES_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.enableRolesButton',
+  { defaultMessage: 'Enable role-based access' }
+);
+
+export const ENABLE_ROLES_LINK = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.enableRolesLink',
+  { defaultMessage: 'Learn more about role-based access' }
+);
+
+export const INVITATION_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.invitationDescription',
+  {
+    defaultMessage:
+      'This URL can be shared with the user, allowing them to accept the Enterprise Search invitation and set a new password',
+  }
+);
+
+export const NEW_INVITATION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.newInvitationLabel',
+  { defaultMessage: 'Invitation URL' }
+);
+
+export const EXISTING_INVITATION_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.existingInvitationLabel',
+  { defaultMessage: 'The user has not yet accepted the invitation.' }
+);
+
+export const INVITATION_LINK = i18n.translate('xpack.enterpriseSearch.roleMapping.invitationLink', {
+  defaultMessage: 'Enterprise Search Invitation Link',
+});
+
+export const NO_USERS_TITLE = i18n.translate('xpack.enterpriseSearch.roleMapping.noUsersTitle', {
+  defaultMessage: 'No user added',
+});
+
+export const NO_USERS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.noUsersDescription',
+  {
+    defaultMessage:
+      'Users can be added individually, for flexibility. Role mappings provide a broader interface for adding large number of users using user attributes.',
+  }
+);
+
+export const ENABLE_USERS_LINK = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.enableUsersLink',
+  { defaultMessage: 'Learn more about user management' }
+);
+
+export const NEW_USER_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.newUserLabel', {
+  defaultMessage: 'Create new user',
+});
+
+export const EXISTING_USER_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.existingUserLabel',
+  { defaultMessage: 'Add existing user' }
+);
+
+export const USERNAME_NO_USERS_TEXT = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usernameNoUsersText',
+  { defaultMessage: 'No existing user eligible for addition.' }
+);
+
+export const REQUIRED_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.requiredLabel', {
+  defaultMessage: 'Required',
+});
+
+export const USERS_HEADING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usersHeadingTitle',
+  { defaultMessage: 'Users' }
+);
+
+export const USERS_HEADING_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usersHeadingDescription',
+  {
+    defaultMessage:
+      'User management provides granular access for individual or special permission needs. Users from federated sources such as SAML are managed by role mappings, and excluded from this list.',
+  }
+);
+
+export const USERS_HEADING_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.usersHeadingLabel',
+  { defaultMessage: 'Add a new user' }
+);
+
+export const UPDATE_USER_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.updateUserLabel',
+  {
+    defaultMessage: 'Update user',
+  }
+);
+
+export const ADD_USER_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.addUserLabel', {
+  defaultMessage: 'Add user',
+});
+
+export const USER_ADDED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.userAddedLabel',
+  {
+    defaultMessage: 'User added',
+  }
+);
+
+export const USER_UPDATED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.userUpdatedLabel',
+  {
+    defaultMessage: 'User updated',
+  }
+);
+
+export const NEW_USER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.newUserDescription',
+  {
+    defaultMessage: 'Provide granular access and permissions',
+  }
+);
+
+export const UPDATE_USER_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.updateUserDescription',
+  {
+    defaultMessage: 'Manage granular access and permissions',
+  }
+);
+
+export const INVITATION_PENDING_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.invitationPendingLabel',
+  {
+    defaultMessage: 'Invitation pending',
+  }
+);
+
+export const ROLE_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMapping.roleModalText', {
+  defaultMessage:
+    'Removing a role mapping revokes access to any user corresponding to the mapping attributes, but may not take effect immediately for SAML-governed roles. Users with an active SAML session will retain access until it expires.',
+});
+
+export const USER_MODAL_TITLE = (username: string) =>
+  i18n.translate('xpack.enterpriseSearch.roleMapping.userModalTitle', {
+    defaultMessage: 'Remove {username}',
+    values: { username },
+  });
+
+export const USER_MODAL_TEXT = i18n.translate('xpack.enterpriseSearch.roleMapping.userModalText', {
+  defaultMessage:
+    'Removing a user immediately revokes access to the experience, unless this user’s attributes also corresponds to a role mapping for native and SAML-governed authentication, in which case associated role mappings should also be reviewed and adjusted, as needed.',
+});
+
+export const FILTER_USERS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.filterUsersLabel',
+  {
+    defaultMessage: 'Filter users',
+  }
+);
+
+export const NO_USERS_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.noUsersLabel', {
+  defaultMessage: 'No matching users found',
+});
