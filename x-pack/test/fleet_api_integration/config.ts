@@ -51,17 +51,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         waitForLogLine: 'package manifests loaded',
       },
     }),
-    services: {
-      ...xPackAPITestsConfig.get('services'),
-    },
+    services: xPackAPITestsConfig.get('services'),
     junit: {
       reportName: 'X-Pack EPM API Integration Tests',
     },
-
-    esTestCluster: {
-      ...xPackAPITestsConfig.get('esTestCluster'),
-    },
-
+    esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [

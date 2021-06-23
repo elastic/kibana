@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const COMMON_EMS_LAYER_IDS = [
-  'world_countries',
-  'administrative_regions_lvl2',
-  'usa_zip_codes',
-  'usa_states',
-];
+import { ActionConnector } from '../../common';
+
+export type CaseActionConnector = ActionConnector;
