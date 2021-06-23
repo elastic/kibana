@@ -157,7 +157,9 @@ export function CorrelationsChart({
             { defaultMessage: '# transactions' }
           )}
           position={Position.Left}
-          tickFormat={(d) => (d === 0 || d === 10 || d % 100 === 0 ? d : '')}
+          tickFormat={(d) =>
+            d === 0 || Number.isInteger(Math.log10(d)) ? d : ''
+          }
         />
         <AreaSeries
           id={i18n.translate(
