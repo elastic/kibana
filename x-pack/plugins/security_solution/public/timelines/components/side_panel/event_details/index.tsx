@@ -32,6 +32,7 @@ import {
 } from '../../../../detections/components/host_isolation/translations';
 import { ALERT_DETAILS } from './translations';
 import { useIsolationPrivileges } from '../../../../common/hooks/endpoint/use_isolate_privileges';
+import { isIsolationSupported } from '../../../../../common/endpoint/service/host_isolation/utils';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -101,6 +102,22 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     return findAgentId ? findAgentId[0] : '';
   }, [detailsData]);
 
+  const hostOsFamily = useMemo(() => {
+    const findOsFamily = find({ category: 'host', field: 'host.os.family' }, detailsData)?.values;
+    return findOsFamily ? findOsFamily[0] : '';
+  }, [detailsData]);
+
+  const agentVersion = useMemo(() => {
+    const findAgentVersion = find({ category: 'agent', field: 'agent.version' }, detailsData)
+      ?.values;
+    return findAgentVersion ? findAgentVersion[0] : '';
+  }, [detailsData]);
+
+  const isolationSupported = isIsolationSupported({
+    osFamily: hostOsFamily,
+    version: agentVersion,
+  });
+
   const backToAlertDetailsLink = useMemo(() => {
     return (
       <>
@@ -153,17 +170,20 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           />
         )}
       </StyledEuiFlyoutBody>
-      {isIsolationAllowed && isEndpointAlert && isHostIsolationPanelOpen === false && (
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiSpacer size="l" />
-        </EuiFlyoutFooter>
-      )}
+      {isIsolationAllowed &&
+        isEndpointAlert &&
+        isolationSupported &&
+        isHostIsolationPanelOpen === false && (
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiSpacer size="l" />
+          </EuiFlyoutFooter>
+        )}
     </>
   ) : (
     <>

@@ -19,6 +19,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
+import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
 
 /**
  * Returns a list (array) of actions for an individual endpoint
@@ -44,6 +45,10 @@ export const useEndpointActionItems = (
       const endpointPolicyId = endpointMetadata.Endpoint.policy.applied.id;
       const endpointHostName = endpointMetadata.host.hostname;
       const fleetAgentId = endpointMetadata.elastic.agent.id;
+      const isolationSupported = isIsolationSupported({
+        osFamily: endpointMetadata.host.os.family,
+        version: endpointMetadata.agent.version,
+      });
       const {
         show,
         selected_endpoint: _selectedEndpoint,
@@ -62,7 +67,7 @@ export const useEndpointActionItems = (
 
       const isolationActions = [];
 
-      if (isIsolated) {
+      if (isIsolated && isolationSupported) {
         // Un-isolate is always available to users regardless of license level
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',
@@ -80,7 +85,7 @@ export const useEndpointActionItems = (
             />
           ),
         });
-      } else if (isPlatinumPlus) {
+      } else if (isPlatinumPlus && isolationSupported) {
         // For Platinum++ licenses, users also have ability to isolate
         isolationActions.push({
           'data-test-subj': 'isolateLink',
