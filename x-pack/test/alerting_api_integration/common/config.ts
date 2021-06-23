@@ -31,6 +31,7 @@ const enabledActionTypes = [
   '.email',
   '.index',
   '.pagerduty',
+  '.swimlane',
   '.server-log',
   '.servicenow',
   '.jira',
