@@ -34,6 +34,30 @@ describe('mathColumn', () => {
     });
   });
 
+  it('extracts a single array value, but not a multi-value array', () => {
+    const arrayTable = {
+      ...testTable,
+      rows: [
+        {
+          name: 'product1',
+          time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+          price: [605, 500],
+          quantity: [100],
+          in_stock: true,
+        },
+      ],
+    };
+    const args = {
+      id: 'output',
+      name: 'output',
+      expression: 'quantity',
+    };
+    expect(fn(arrayTable, args).rows[0].output).toEqual(100);
+    expect(() => fn(arrayTable, { ...args, expression: 'price' })).toThrowError(
+      `Cannot perform math on array values`
+    );
+  });
+
   it('handles onError', () => {
     const args = {
       id: 'output',

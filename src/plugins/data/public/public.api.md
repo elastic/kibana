@@ -259,6 +259,7 @@ export class AggConfigs {
     getRequestAggById(id: string): AggConfig | undefined;
     // (undocumented)
     getRequestAggs(): AggConfig[];
+    getResolvedTimeRange(): import("../..").TimeRangeBounds | undefined;
     getResponseAggById(id: string): AggConfig | undefined;
     getResponseAggs(): AggConfig[];
     // (undocumented)
@@ -1350,6 +1351,7 @@ export interface IKibanaSearchRequest<Params = any> {
 export interface IKibanaSearchResponse<RawResponse = any> {
     id?: string;
     isPartial?: boolean;
+    isRestored?: boolean;
     isRunning?: boolean;
     loaded?: number;
     rawResponse: RawResponse;

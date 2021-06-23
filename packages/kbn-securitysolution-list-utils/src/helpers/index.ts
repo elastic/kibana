@@ -95,6 +95,10 @@ export const filterExceptionItems = (
         }
       }, []);
 
+      if (entries.length === 0) {
+        return acc;
+      }
+
       const item = { ...exception, entries };
 
       if (exceptionListItemSchema.is(item)) {
