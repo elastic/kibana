@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
-import { navTabGroups } from '../../../../app/home/home_navigations';
+import { primaryNavigationItems } from '../../../../app/home/home_navigations';
 import { APP_ID } from '../../../../../common/constants';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
@@ -50,40 +50,12 @@ export const usePrimaryNavigationItems = ({
     [getUrlForApp, navigateToApp, selectedTabId, urlStateProps]
   );
 
-  const primaryNavigationItems = useMemo(
-    () => [
-      {
-        id: APP_ID,
-        name: '',
-        items: [getSideNav(navTabs.overview)],
-      },
-      {
-        ...navTabGroups.detect,
-        items: [
-          getSideNav(navTabs.alerts),
-          getSideNav(navTabs.rules),
-          getSideNav(navTabs.exceptions),
-        ],
-      },
-      {
-        ...navTabGroups.explore,
-        items: [getSideNav(navTabs.hosts), getSideNav(navTabs.network)],
-      },
-      {
-        ...navTabGroups.investigate,
-        items: [getSideNav(navTabs.timelines), getSideNav(navTabs.case)],
-      },
-      {
-        ...navTabGroups.manage,
-        items: [
-          getSideNav(navTabs.endpoints),
-          getSideNav(navTabs.trusted_apps),
-          getSideNav(navTabs.event_filters),
-        ],
-      },
-    ],
-    [getSideNav, navTabs]
+  return useMemo(
+    () =>
+      primaryNavigationItems.map((item) => ({
+        ...item,
+        items: item.items.map((t: NavTab) => getSideNav(t)),
+      })),
+    [getSideNav]
   );
-
-  return primaryNavigationItems;
 };

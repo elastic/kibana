@@ -9,6 +9,7 @@ import * as i18n from '../translations';
 import { SecurityPageName, SecurityPageGroupName } from '../types';
 import { SiemNavTab, NavTabGroups } from '../../common/components/navigation/types';
 import {
+  APP_ID,
   APP_OVERVIEW_PATH,
   APP_RULES_PATH,
   APP_ALERTS_PATH,
@@ -128,3 +129,27 @@ export const navTabGroups: NavTabGroups = {
     name: i18n.MANAGE,
   },
 };
+
+export const primaryNavigationItems = [
+  {
+    id: APP_ID,
+    name: '',
+    items: [navTabs.overview],
+  },
+  {
+    ...navTabGroups.detect,
+    items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
+  },
+  {
+    ...navTabGroups.explore,
+    items: [navTabs.hosts, navTabs.network],
+  },
+  {
+    ...navTabGroups.investigate,
+    items: [navTabs.timelines, navTabs.case],
+  },
+  {
+    ...navTabGroups.manage,
+    items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
+  },
+];
