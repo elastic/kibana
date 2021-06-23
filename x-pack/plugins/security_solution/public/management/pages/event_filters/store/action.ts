@@ -66,8 +66,10 @@ export type EventFiltersFormStateChanged = Action<'eventFiltersFormStateChanged'
   payload: AsyncResourceState<ExceptionListItemSchema>;
 };
 
-export type EventFiltersRefreshList = Action<'eventFiltersRefreshList'> & {
-  payload: { query?: string };
+export type EventFiltersForceRefresh = Action<'eventFiltersForceRefresh'> & {
+  payload: {
+    forceRefresh: boolean;
+  };
 };
 
 export type EventFiltersPageAction =
@@ -86,4 +88,4 @@ export type EventFiltersPageAction =
   | EventFilterDeletionReset
   | EventFilterDeleteSubmit
   | EventFilterDeleteStatusChanged
-  | EventFiltersRefreshList;
+  | EventFiltersForceRefresh;

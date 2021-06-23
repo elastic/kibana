@@ -179,8 +179,8 @@ export const EventFiltersListPage = memo(() => {
 
   const handleOnSearch = useCallback(
     (query: string) => {
+      dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
       navigateCallback({ filter: query });
-      dispatch({ type: 'eventFiltersRefreshList', payload: { query } });
     },
     [navigateCallback, dispatch]
   );

@@ -63,8 +63,8 @@ export const TrustedAppsPage = memo(() => {
   }));
   const handleOnSearch = useCallback(
     (query: string) => {
+      dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: true } });
       navigationCallback(query);
-      dispatch({ type: 'trustedAppRefreshList', payload: { query } });
     },
     [dispatch, navigationCallback]
   );

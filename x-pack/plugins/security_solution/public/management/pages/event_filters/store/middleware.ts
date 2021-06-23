@@ -223,74 +223,63 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
   }
 };
 
-const refreshList = async (
-  store: ImmutableMiddlewareAPI<EventFiltersListPageState, AppAction>,
-  eventFiltersService: EventFiltersService,
-  queryForced?: string
-) => {
-  const { dispatch, getState } = store;
-  const state = getState();
-
-  dispatch({
-    type: 'eventFiltersListPageDataChanged',
-    payload: {
-      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      type: 'LoadingResourceState',
-      previousState: getCurrentListPageDataState(state),
-    },
-  });
-
-  const { page_size: pageSize, page_index: pageIndex, filter } = getCurrentLocation(state);
-  const query: EventFiltersServiceGetListOptions = {
-    page: pageIndex + 1,
-    perPage: pageSize,
-    sortField: 'created_at',
-    sortOrder: 'desc',
-    filter:
-      parseQueryFilterToKQL(queryForced !== undefined ? queryForced : filter, SEARCHABLE_FIELDS) ||
-      undefined,
-  };
-
-  try {
-    const results = await eventFiltersService.getList(query);
-
-    dispatch({
-      type: 'eventFiltersListPageDataChanged',
-      payload: createLoadedResourceState({
-        query: { ...query, filter },
-        content: results,
-      }),
-    });
-
-    // If no results were returned, then just check to make sure data actually exists for
-    // event filters. This is used to drive the UI between showing "empty state" and "no items found"
-    // messages to the user
-    if (results.total === 0) {
-      await checkIfEventFilterDataExist(store, eventFiltersService);
-    } else {
-      dispatch({
-        type: 'eventFiltersListPageDataExistsChanged',
-        payload: {
-          type: 'LoadedResourceState',
-          data: Boolean(results.total),
-        },
-      });
-    }
-  } catch (error) {
-    dispatch({
-      type: 'eventFiltersListPageDataChanged',
-      payload: createFailedResourceState<EventFiltersListPageData>(error.body ?? error),
-    });
-  }
-};
-
 const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFiltersService) => {
-  const { getState } = store;
+  const { getState, dispatch } = store;
   const state = getState();
   const isLoading = getListIsLoading(state);
 
-  if (!isLoading && listDataNeedsRefresh(state)) await refreshList(store, eventFiltersService);
+  if (!isLoading && listDataNeedsRefresh(state)) {
+    dispatch({
+      type: 'eventFiltersListPageDataChanged',
+      payload: {
+        type: 'LoadingResourceState',
+        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
+        // @ts-ignore
+        previousState: getCurrentListPageDataState(state),
+      },
+    });
+
+    const { page_size: pageSize, page_index: pageIndex, filter } = getCurrentLocation(state);
+    const query: EventFiltersServiceGetListOptions = {
+      page: pageIndex + 1,
+      perPage: pageSize,
+      sortField: 'created_at',
+      sortOrder: 'desc',
+      filter: parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined,
+    };
+
+    try {
+      const results = await eventFiltersService.getList(query);
+
+      dispatch({
+        type: 'eventFiltersListPageDataChanged',
+        payload: createLoadedResourceState({
+          query: { ...query, filter },
+          content: results,
+        }),
+      });
+
+      // If no results were returned, then just check to make sure data actually exists for
+      // event filters. This is used to drive the UI between showing "empty state" and "no items found"
+      // messages to the user
+      if (results.total === 0) {
+        await checkIfEventFilterDataExist(store, eventFiltersService);
+      } else {
+        dispatch({
+          type: 'eventFiltersListPageDataExistsChanged',
+          payload: {
+            type: 'LoadedResourceState',
+            data: Boolean(results.total),
+          },
+        });
+      }
+    } catch (error) {
+      dispatch({
+        type: 'eventFiltersListPageDataChanged',
+        payload: createFailedResourceState<EventFiltersListPageData>(error.body ?? error),
+      });
+    }
+  }
 };
 
 const eventFilterDeleteEntry: MiddlewareActionHandler = async (
@@ -342,8 +331,6 @@ export const createEventFiltersPageMiddleware = (
       await eventFiltersLoadById(store, eventFiltersService, action.payload.id);
     } else if (action.type === 'eventFiltersUpdateStart') {
       await eventFiltersUpdate(store, eventFiltersService);
-    } else if (action.type === 'eventFiltersRefreshList') {
-      await refreshList(store, eventFiltersService, action.payload.query);
     }
 
     // Middleware that only applies to the List Page for Event Filters
