@@ -15,7 +15,7 @@ import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fiel
 describe('Series Builder ReportBreakdowns', function () {
   const seriesId = 'test-series-id';
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'dist',
+    reportType: 'data-distribution',
     dataType: 'ux',
     indexPattern: mockIndexPattern,
   });
@@ -45,7 +45,7 @@ describe('Series Builder ReportBreakdowns', function () {
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: USER_AGENT_OS,
       dataType: 'ux',
-      reportType: 'dist',
+      reportType: 'data-distribution',
       time: { from: 'now-15m', to: 'now' },
     });
   });
@@ -67,7 +67,7 @@ describe('Series Builder ReportBreakdowns', function () {
     expect(setSeries).toHaveBeenCalledWith(seriesId, {
       breakdown: undefined,
       dataType: 'ux',
-      reportType: 'dist',
+      reportType: 'data-distribution',
       time: { from: 'now-15m', to: 'now' },
     });
   });

@@ -29,7 +29,14 @@ describe('DataTypesCol', function () {
     fireEvent.click(screen.getByText(/user experience \(rum\)/i));
 
     expect(setSeries).toHaveBeenCalledTimes(1);
-    expect(setSeries).toHaveBeenCalledWith(seriesId, { dataType: 'ux' });
+    expect(setSeries).toHaveBeenCalledWith(seriesId, {
+      dataType: 'ux',
+      isNew: true,
+      time: {
+        from: 'now-15m',
+        to: 'now',
+      },
+    });
   });
 
   it('should set series on change on already selected', function () {
@@ -37,7 +44,7 @@ describe('DataTypesCol', function () {
       data: {
         [seriesId]: {
           dataType: 'synthetics' as const,
-          reportType: 'kpi' as const,
+          reportType: 'kpi-over-time' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },
