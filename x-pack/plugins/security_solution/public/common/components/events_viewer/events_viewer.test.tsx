@@ -21,15 +21,16 @@ import { mockBrowserFields, mockDocValueFields } from '../../containers/source/m
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { inputsModel } from '../../store/inputs';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, SortDirection } from '../../../../common/types/timeline';
 import { KqlMode } from '../../../timelines/store/timeline/model';
-import { SortDirection } from '../../../timelines/components/timeline/body/sort';
 import { AlertsTableFilterGroup } from '../../../detections/components/alerts_table/alerts_filter_group';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+
+jest.mock('../../lib/kibana');
 
 jest.mock('../../hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -144,18 +145,18 @@ describe('EventsViewer', () => {
       mockUseTimelineEvents.mockReturnValue([false, mockEventViewerResponseWithEvents]);
     });
 
-    test('call the right reduce action to show event details', async () => {
+    test('call the right reduce action to show event details', () => {
       const wrapper = mount(
         <TestProviders>
           <StatefulEventsViewer {...testProps} />
         </TestProviders>
       );
 
-      await act(async () => {
+      act(() => {
         wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       });
 
-      await waitFor(() => {
+      waitFor(() => {
         expect(mockDispatch).toBeCalledTimes(2);
         expect(mockDispatch.mock.calls[1][0]).toEqual({
           payload: {
@@ -197,7 +198,7 @@ describe('EventsViewer', () => {
       );
       expect(wrapper.find(`[data-test-subj="show-field-browser"]`).first().exists()).toBe(true);
     });
-    // TO DO sourcerer @X
+
     test('it renders the footer containing the pagination', () => {
       const wrapper = mount(
         <TestProviders>
