@@ -27,13 +27,8 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { CorrelationsChart } from './correlations_chart';
 import {
-  FILTER_ACTION_LABEL,
   CorrelationsTable,
   SelectedSignificantTerm,
-  EXCLUDE_ACTION_LABEL,
-  EXCLUDE_ACTION_DESCRIPTION,
-  FILTER_LABEL,
-  FILTER_DESCRIPTION,
 } from './correlations_table';
 import { useCorrelations } from './use_correlations';
 import { createHref, push } from '../../shared/Links/url_helpers';
@@ -283,8 +278,14 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         width: '100px',
         actions: [
           {
-            name: FILTER_LABEL,
-            description: FILTER_DESCRIPTION,
+            name: i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel',
+              { defaultMessage: 'Filter' }
+            ),
+            description: i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
+              { defaultMessage: 'Filter by value' }
+            ),
             icon: 'plusInCircle',
             type: 'icon',
             onClick: (term: MlCorrelationsTerms) => {
@@ -300,8 +301,14 @@ export function MlLatencyCorrelations({ onClose }: Props) {
             },
           },
           {
-            name: EXCLUDE_ACTION_LABEL,
-            description: EXCLUDE_ACTION_DESCRIPTION,
+            name: i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeLabel',
+              { defaultMessage: 'Exclude' }
+            ),
+            description: i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
+              { defaultMessage: 'Filter out value' }
+            ),
             icon: 'minusInCircle',
             type: 'icon',
             onClick: (term: MlCorrelationsTerms) => {
@@ -317,7 +324,10 @@ export function MlLatencyCorrelations({ onClose }: Props) {
             },
           },
         ],
-        name: FILTER_ACTION_LABEL,
+        name: i18n.translate(
+          'xpack.apm.correlations.latencyCorrelations.correlationsTable.actionsLabel',
+          { defaultMessage: 'Filter' }
+        ),
         render: (_: any, term: MlCorrelationsTerms) => {
           return (
             <>

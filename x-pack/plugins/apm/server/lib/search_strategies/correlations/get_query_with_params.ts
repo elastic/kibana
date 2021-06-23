@@ -13,7 +13,10 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
-import { environmentQuery as getEnvironmentQuery } from '../../../utils/queries';
+import {
+  environmentQuery as getEnvironmentQuery,
+  rangeQuery as getRangeQuery,
+} from '../../../utils/queries';
 
 export enum ProcessorEvent {
   transaction = 'transaction',
@@ -22,22 +25,6 @@ export enum ProcessorEvent {
   span = 'span',
   profile = 'profile',
 }
-
-const getRangeQuery = (
-  start?: string,
-  end?: string
-): estypes.QueryDslQueryContainer[] => {
-  return [
-    {
-      range: {
-        '@timestamp': {
-          ...(start !== undefined ? { gte: start } : {}),
-          ...(end !== undefined ? { lte: end } : {}),
-        },
-      },
-    },
-  ];
-};
 
 const getPercentileThresholdValueQuery = (
   percentileThresholdValue: number | undefined
