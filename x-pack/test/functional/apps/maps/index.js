@@ -16,10 +16,9 @@ export default function ({ loadTestFile, getService }) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/test/functional/fixtures/kbn_archiver/maps/data.json'
       );
       await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
-      //await esArchiver.load('x-pack/test/functional/es_archives/maps/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
@@ -29,7 +28,7 @@ export default function ({ loadTestFile, getService }) {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/test/functional/fixtures/kbn_archiver/maps/data.json'
       );
     });
 
