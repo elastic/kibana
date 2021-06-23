@@ -40,7 +40,7 @@ export class HelloLocatorDefinition implements LocatorDefinition<HelloLocatorPar
 
   public readonly getLocation = async ({ firstName, lastName }: HelloLocatorParams) => {
     return {
-      app: 'example',
+      app: 'locatorExamples',
       path: `/hello?firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(
         lastName
       )}`,

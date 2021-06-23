@@ -8,4 +8,6 @@
 
 import { LocatorExamplesPlugin } from './plugin';
 
+export { HelloLocator } from './locator';
+
 export const plugin = () => new LocatorExamplesPlugin();

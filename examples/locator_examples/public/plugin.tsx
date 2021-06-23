@@ -7,7 +7,7 @@
  */
 
 import { SharePluginStart, SharePluginSetup } from '../../../src/plugins/share/public';
-import { Plugin, CoreSetup } from '../../../src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import { HelloLocator, HelloLocatorDefinition } from './locator';
 
 interface SetupDeps {
@@ -26,6 +26,21 @@ export class LocatorExamplesPlugin
   implements Plugin<LocatorExamplesSetup, void, SetupDeps, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     const locator = plugins.share.url.locators.create(new HelloLocatorDefinition());
+
+    core.application.register({
+      id: 'locatorExamples',
+      title: 'Access links examples',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderApp } = await import('./app');
+        return renderApp(
+          {
+            appBasePath: params.appBasePath,
+          },
+          params
+        );
+      },
+    });
 
     return {
       locator,
