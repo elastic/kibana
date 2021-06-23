@@ -244,5 +244,4 @@ export interface MlOperation extends SavedObjectAttributes {
   nodeId: string;
   snapshotId: string;
   jobId: string;
-  status: 'complete' | 'in_progress' | 'error';
 }

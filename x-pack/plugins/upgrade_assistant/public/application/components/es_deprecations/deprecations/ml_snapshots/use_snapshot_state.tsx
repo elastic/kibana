@@ -16,7 +16,6 @@ export interface SnapshotStatus {
   jobId: string;
   status: 'complete' | 'in_progress' | 'error' | 'idle';
   action?: 'upgrade' | 'delete';
-  nodeId?: string;
 }
 
 export const useSnapshotStatus = ({
@@ -54,6 +53,12 @@ export const useSnapshotStatus = ({
     });
 
     if (updateStatusError) {
+      setSnapshotState({
+        snapshotId,
+        jobId,
+        action: 'upgrade',
+        status: 'error',
+      });
       setRequestError(updateStatusError);
       return;
     }
@@ -68,7 +73,8 @@ export const useSnapshotStatus = ({
 
   const upgradeSnapshot = useCallback(async () => {
     setSnapshotState({
-      ...snapshotState,
+      snapshotId,
+      jobId,
       action: 'upgrade',
       status: 'in_progress',
     });
@@ -78,7 +84,8 @@ export const useSnapshotStatus = ({
     if (upgradeError) {
       setRequestError(upgradeError);
       setSnapshotState({
-        ...snapshotState,
+        snapshotId,
+        jobId,
         action: 'upgrade',
         status: 'error',
       });
@@ -87,11 +94,12 @@ export const useSnapshotStatus = ({
 
     setSnapshotState(data);
     updateSnapshotStatus();
-  }, [api, jobId, snapshotId, snapshotState, updateSnapshotStatus]);
+  }, [api, jobId, snapshotId, updateSnapshotStatus]);
 
   const deleteSnapshot = useCallback(async () => {
     setSnapshotState({
-      ...snapshotState,
+      snapshotId,
+      jobId,
       action: 'delete',
       status: 'in_progress',
     });
@@ -104,7 +112,8 @@ export const useSnapshotStatus = ({
     if (deleteError) {
       setRequestError(deleteError);
       setSnapshotState({
-        ...snapshotState,
+        snapshotId,
+        jobId,
         action: 'delete',
         status: 'error',
       });
@@ -112,11 +121,12 @@ export const useSnapshotStatus = ({
     }
 
     setSnapshotState({
-      ...snapshotState,
+      snapshotId,
+      jobId,
       action: 'delete',
       status: 'complete',
     });
-  }, [api, jobId, snapshotId, snapshotState]);
+  }, [api, jobId, snapshotId]);
 
   useEffect(() => {
     isMounted.current = true;

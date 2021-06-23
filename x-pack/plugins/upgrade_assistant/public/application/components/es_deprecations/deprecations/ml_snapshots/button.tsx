@@ -27,6 +27,12 @@ const i18nTexts = {
       defaultMessage: 'Upgrading…',
     }
   ),
+  deletingButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.mlSnapshots.deletingButtonLabel',
+    {
+      defaultMessage: 'Deleting…',
+    }
+  ),
   doneButtonLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.mlSnapshots.doneButtonLabel',
     {
@@ -75,13 +81,16 @@ export const FixMlSnapshotsButton: React.FunctionComponent<Props> = ({
     onClick: () => setShowFlyout(true),
     'data-test-subj': 'fixMlSnapshotsButton',
   };
+
   let button = <EuiButton {...commonButtonProps}>{i18nTexts.fixButtonLabel}</EuiButton>;
 
   switch (snapshotState.status) {
     case 'in_progress':
       button = (
         <EuiButton color="secondary" {...commonButtonProps} isLoading>
-          {i18nTexts.upgradingButtonLabel}
+          {snapshotState.action === 'delete'
+            ? i18nTexts.deletingButtonLabel
+            : i18nTexts.upgradingButtonLabel}
         </EuiButton>
       );
       break;
