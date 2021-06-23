@@ -56,7 +56,7 @@ Table of Contents
       - [`subActionParams (severity)`](#subactionparams-severity)
   - [Swimlane](#swimlane)
     - [`params`](#params-3)
-  - [| severity    | The severity of the incident.     | string _(optional)_ |](#-severity-----the-severity-of-the-incident------string-optional-)
+  - [| severity    | The severity of the incident.    | string _(optional)_ |](#-severity-----the-severity-of-the-incident-----string-optional-)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
   - [licensing](#licensing)
@@ -419,14 +419,14 @@ No parameters for the `severity` subaction. Provide an empty object `{}`.
 
 The following table describes the properties of the `incident` object.
 
-| Property    | Description                       | Type                |
-| ----------- | --------------------------------- | ------------------- |
-| alertName   | The alert name of the incident.   | string _(optional)_ |
-| alertSource | The alert source of the incident. | string _(optional)_ |
-| caseId      | The case id of the incident.      | string _(optional)_ |
-| caseName    | The case name of the incident.    | string _(optional)_ |
-| description | The description of the incident.  | string _(optional)_ |
-| severity    | The severity of the incident.     | string _(optional)_ |
+| Property    | Description                      | Type                |
+| ----------- | -------------------------------- | ------------------- |
+| alertId     | The alert id.                    | string _(optional)_ |
+| caseId      | The case id of the incident.     | string _(optional)_ |
+| caseName    | The case name of the incident.   | string _(optional)_ |
+| description | The description of the incident. | string _(optional)_ |
+| ruleName    | The rule name.                   | string _(optional)_ |
+| severity    | The severity of the incident.    | string _(optional)_ |
 ---
 # Command Line Utility
 
