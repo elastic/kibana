@@ -28,7 +28,6 @@ import {
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
-import { ISource } from '../../sources/source';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -86,7 +85,10 @@ export class TiledVectorLayer extends VectorLayer {
           source: this.getSource(),
           prevDataRequest,
           nextMeta: searchFilters,
-          getUpdateDueToTimeslice: this._getUpdateDueToTimesliceFromTileMeta,
+          getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+            // TODO use meta features to determine if tiles already contain features for timeslice.
+            return true;
+          },
         });
         const canSkip = noChangesInSourceState && noChangesInSearchState;
         if (canSkip) {
@@ -249,10 +251,5 @@ export class TiledVectorLayer extends VectorLayer {
 
   getFeatureById(id: string | number): Feature | null {
     return null;
-  }
-
-  _getUpdateDueToTimesliceFromTileMeta(source: ISource, timeslice?: Timeslice): boolean {
-    // TODO use meta features to determine if tiles already contain features for timeslice.
-    return true;
   }
 }

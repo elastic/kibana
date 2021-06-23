@@ -62,7 +62,7 @@ export async function canSkipSourceUpdate({
   prevDataRequest: DataRequest | undefined;
   nextMeta: DataMeta;
   extentAware: boolean;
-  getUpdateDueToTimeslice: (source: ISource, timeslice?: Timeslice) => boolean;
+  getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<boolean> {
   const timeAware = await source.isTimeAware();
   const refreshTimerAware = await source.isRefreshTimerAware();
@@ -97,7 +97,7 @@ export async function canSkipSourceUpdate({
     if (nextMeta.applyGlobalTime) {
       updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
       if (!_.isEqual(prevMeta.timeslice, nextMeta.timeslice)) {
-        updateDueToTimeslice = getUpdateDueToTimeslice(source, nextMeta.timeslice);
+        updateDueToTimeslice = getUpdateDueToTimeslice(nextMeta.timeslice);
       }
     }
   }

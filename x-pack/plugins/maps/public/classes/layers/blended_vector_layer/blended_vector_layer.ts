@@ -34,6 +34,7 @@ import {
   DynamicStylePropertyOptions,
   StylePropertyOptions,
   LayerDescriptor,
+  Timeslice,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStylePropertiesDescriptor,
@@ -300,7 +301,9 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
       extentAware: source.isFilterByMapBounds(),
-      getUpdateDueToTimeslice: this._getUpdateDueToTimesliceFromSourceRequestMeta,
+      getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+        return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
+      },
     });
 
     let activeSource;

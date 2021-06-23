@@ -688,7 +688,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         requestMeta: await this._getSearchFilters(syncContext.dataFilters, source, style),
         syncContext,
         source,
-        getUpdateDueToTimeslice: this._getUpdateDueToTimesliceFromSourceRequestMeta,
+        getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
+          return this._getUpdateDueToTimesliceFromSourceRequestMeta(source, timeslice);
+        },
       });
       await this._syncSupportsFeatureEditing({ syncContext, source });
       if (
@@ -1141,14 +1143,14 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return await this._source.getLicensedFeatures();
   }
 
-  _getUpdateDueToTimesliceFromSourceRequestMeta = (source: ISource, timeslice?: Timeslice) => {
+  _getUpdateDueToTimesliceFromSourceRequestMeta(source: ISource, timeslice?: Timeslice) {
     const prevDataRequest = this.getSourceDataRequest();
     const prevMeta = prevDataRequest?.getMeta();
     if (!prevMeta) {
       return true;
     }
     return source.getUpdateDueToTimeslice(prevMeta, timeslice);
-  };
+  }
 
   async addFeature(geometry: Geometry | Position[]) {
     const layerSource = this.getSource();
