@@ -119,6 +119,11 @@ export const EngineRouter: React.FC = () => {
           <RelevanceTuning />
         </Route>
       )}
+      {canManageEngineCurations && (
+        <Route path={ENGINE_CURATIONS_PATH}>
+          <CurationsRouter />
+        </Route>
+      )}
       {canManageEngineResultSettings && (
         <Route path={ENGINE_RESULT_SETTINGS_PATH}>
           <ResultSettings />
@@ -136,11 +141,6 @@ export const EngineRouter: React.FC = () => {
       )}
       {/* TODO: Remove layout once page template migration is over */}
       <Layout navigation={<AppSearchNav />}>
-        {canManageEngineCurations && (
-          <Route path={ENGINE_CURATIONS_PATH}>
-            <CurationsRouter />
-          </Route>
-        )}
         {canManageEngineSynonyms && (
           <Route path={ENGINE_SYNONYMS_PATH}>
             <Synonyms />
