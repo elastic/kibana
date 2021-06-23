@@ -13,7 +13,7 @@ import { VisParams } from '../../../common';
 const REF_NAME_POSTFIX = '_ref_name';
 
 /** @internal **/
-const INDEX_PATTERN_REF_TYPE = 'index_pattern';
+const INDEX_PATTERN_REF_TYPE = 'index-pattern';
 
 /** @internal **/
 type Action = (object: Record<string, any>, key: string) => void;

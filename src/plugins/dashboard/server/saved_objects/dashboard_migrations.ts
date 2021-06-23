@@ -7,7 +7,7 @@
  */
 
 import semver from 'semver';
-import { get, flow } from 'lodash';
+import { get, flow, identity } from 'lodash';
 import {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
@@ -26,6 +26,7 @@ import {
 } from '../../common/embeddable/embeddable_saved_object_converters';
 import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
 import { SerializableValue } from '../../../kibana_utils/common';
+import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -214,12 +215,14 @@ export interface DashboardSavedObjectTypeMigrationsDeps {
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = deps.embeddable
-    .getMigrationVersions()
-    .filter((version) => semver.gt(version, '7.12.0'))
-    .map((version): [string, SavedObjectMigrationFn] => {
-      return [version, migrateByValuePanels(deps, version)];
-    });
+  const embeddableMigrations = Object.fromEntries(
+    deps.embeddable
+      .getMigrationVersions()
+      .filter((version) => semver.gt(version, '7.12.0'))
+      .map((version): [string, SavedObjectMigrationFn] => {
+        return [version, migrateByValuePanels(deps, version)];
+      })
+  );
 
   return {
     /**
@@ -237,12 +240,15 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
-    ...Object.fromEntries(embeddableMigrations),
+
+    ...embeddableMigrations,
 
     /**
      * Any dashboard saved object migrations that come after this point will have to be wary of
      * potentially overwriting embeddable migrations. An example of how to mitigate this follows:
      */
-    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'])
+    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'] ?? identity),
+
+    '7.14.0': flow(replaceIndexPatternReference, embeddableMigrations['7.14.0'] ?? identity),
   };
 };
