@@ -53,8 +53,21 @@ function defaultStartDeps(availableApps?: App[]) {
   return deps;
 }
 
+function defaultStartTestOptions({
+  browserSupportsCsp = true,
+  kibanaVersion = 'version',
+}: {
+  browserSupportsCsp?: boolean;
+  kibanaVersion?: string;
+}): any {
+  return {
+    browserSupportsCsp,
+    kibanaVersion,
+  };
+}
+
 async function start({
-  options = { browserSupportsCsp: true },
+  options = defaultStartTestOptions({}),
   cspConfigMock = { warnLegacyBrowsers: true },
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
@@ -82,7 +95,9 @@ afterAll(() => {
 
 describe('start', () => {
   it('adds legacy browser warning if browserSupportsCsp is disabled and warnLegacyBrowsers is enabled', async () => {
-    const { startDeps } = await start({ options: { browserSupportsCsp: false } });
+    const { startDeps } = await start({
+      options: { browserSupportsCsp: false, kibanaVersion: '7.0.0' },
+    });
 
     expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
       Array [
@@ -93,6 +108,41 @@ describe('start', () => {
         ],
       ]
     `);
+  });
+
+  it('adds the kibana versioned class to the document body', async () => {
+    const { chrome, service } = await start({
+      options: { browserSupportsCsp: false, kibanaVersion: '1.2.3' },
+    });
+    const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
+    service.stop();
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+            Array [
+              Array [
+                "kbnBody",
+                "kbnBody--noHeaderBanner",
+                "kbnBody--chromeHidden",
+                "kbnVersion-1-2-3",
+              ],
+            ]
+          `);
+  });
+  it('strips off "snapshot" from the kibana version if present', async () => {
+    const { chrome, service } = await start({
+      options: { browserSupportsCsp: false, kibanaVersion: '8.0.0-SnAPshot' },
+    });
+    const promise = chrome.getBodyClasses$().pipe(toArray()).toPromise();
+    service.stop();
+    await expect(promise).resolves.toMatchInlineSnapshot(`
+            Array [
+              Array [
+                "kbnBody",
+                "kbnBody--noHeaderBanner",
+                "kbnBody--chromeHidden",
+                "kbnVersion-8-0-0",
+              ],
+            ]
+          `);
   });
 
   it('does not add legacy browser warning if browser supports CSP', async () => {

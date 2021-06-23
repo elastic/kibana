@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../../components/app/cases/translations';
@@ -25,24 +25,27 @@ export const CreateCasePage = React.memo(() => {
   const userPermissions = useGetUserCasesPermissions();
   const { ObservabilityPageTemplate } = usePluginContext();
   const {
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
 
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   const goTo = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(CASES_APP_ID);
+      return navigateToUrl(casesUrl);
     },
-    [navigateToApp]
+    [casesUrl, navigateToUrl]
   );
 
   const { formatUrl } = useFormatUrl(CASES_APP_ID);
   const href = formatUrl(getCaseUrl());
   useBreadcrumbs([{ ...casesBreadcrumbs.cases, href }, casesBreadcrumbs.create]);
-  if (userPermissions != null && !userPermissions.crud) {
-    navigateToApp(`${CASES_APP_ID}`);
-    return null;
-  }
+
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.crud) {
+      navigateToUrl(casesUrl);
+    }
+  }, [casesUrl, navigateToUrl, userPermissions]);
 
   return (
     <ObservabilityPageTemplate
