@@ -202,7 +202,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       internalShortMessage,
       internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
       state: AlertingDefaults.ALERT_STATE.firing,
-      /* continue to send "node" and "count" values for users before https://github.com/elastic/kibana/pull/102544 
+      /* continue to send "nodes" and "count" values for users before https://github.com/elastic/kibana/pull/102544 
           see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
           */
       nodes: `node: ${firingNode.nodeName}`,
