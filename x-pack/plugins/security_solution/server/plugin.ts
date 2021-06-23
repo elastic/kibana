@@ -83,8 +83,6 @@ import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
-import { securitySolutionIndexFieldsProvider } from './search_strategy/index_fields';
-import { securitySolutionTimelineSearchStrategyProvider } from './search_strategy/timeline';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import {
   TelemetryPluginStart,
@@ -92,7 +90,6 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
-import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 
@@ -451,29 +448,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         depsStart.data,
         endpointContext
       );
-      const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
-        depsStart.data
-      );
-      const securitySolutionTimelineEqlSearchStrategy = securitySolutionTimelineEqlSearchStrategyProvider(
-        depsStart.data
-      );
-      const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
-
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
-      );
-      plugins.data.search.registerSearchStrategy(
-        'securitySolutionIndexFields',
-        securitySolutionIndexFields
-      );
-      plugins.data.search.registerSearchStrategy(
-        'securitySolutionTimelineSearchStrategy',
-        securitySolutionTimelineSearchStrategy
-      );
-      plugins.data.search.registerSearchStrategy(
-        'securitySolutionTimelineEqlSearchStrategy',
-        securitySolutionTimelineEqlSearchStrategy
       );
     });
 
