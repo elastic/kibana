@@ -12,7 +12,6 @@ import { revealImageRenderer } from '../';
 import { elasticOutline, elasticLogo } from '../../../../presentation_util/public';
 
 // This is required only for stories, no need to put it to a bundle
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Render } from '../../../../presentation_util/public/__stories__';
 
 import { Origin } from '../../../common/types/expression_functions';
