@@ -101,7 +101,7 @@ DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab
 
 . Restart {kib}.
 
-Please be aware the Dashboard having ID `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` belonging to the space `marketing_space` **will no longer be available**.
+Please be aware the Dashboard with ID `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` that belongs to the space `marketing_space` **will no longer be available**.
 
 [float]
 ===== User defined index templates that causes new `.kibana*` indices to have incompatible settings or mappings
