@@ -14,5 +14,4 @@ export function plugin() {
   return new ExpressionErrorPlugin();
 }
 
-export * from './expression_functions';
 export * from './expression_renderers';
