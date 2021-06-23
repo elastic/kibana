@@ -6,20 +6,30 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import handlebars from 'handlebars/dist/handlebars';
-import { emptyLabel } from '../../../../common/empty_label';
+import handlebars from 'handlebars';
 import { i18n } from '@kbn/i18n';
+import { emptyLabel } from '../../../../common/empty_label';
 
-export function replaceVars(str, args = {}, vars = {}) {
+type CompileOptions = Parameters<typeof handlebars.compile>[1];
+
+export function replaceVars(
+  str: string,
+  args: Record<string, unknown> = {},
+  vars: Record<string, unknown> = {},
+  compileOptions: Partial<CompileOptions> = {}
+) {
   try {
-    // we need add '[]' for emptyLabel because this value contains special characters. (https://handlebarsjs.com/guide/expressions.html#literal-segments)
+    /** we need add '[]' for emptyLabel because this value contains special characters.
+     * @see (https://handlebarsjs.com/guide/expressions.html#literal-segments) **/
     const template = handlebars.compile(str.split(emptyLabel).join(`[${emptyLabel}]`), {
       strict: true,
       knownHelpersOnly: true,
+      ...compileOptions,
     });
-
-    const string = template(_.assign({}, vars, { args }));
+    const string = template({
+      ...vars,
+      args,
+    });
 
     return string;
   } catch (e) {
