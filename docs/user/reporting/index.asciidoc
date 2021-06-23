@@ -127,7 +127,7 @@ NOTE: Shareable workpads encode the current state of the workpad in a JSON file.
 . To change the settings, click the settings icon, then choose the settings you want to use.
 
 [float]
-[[embedding]]
+[[embed-code]]
 == Embed code
 
 Display your dashboard or visualization on an internal company website or personal web page with an iframe. Embedding other {kib} objects is generally supported, but you might need to manually craft the proper HTML code.

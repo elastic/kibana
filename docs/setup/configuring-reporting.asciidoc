@@ -230,6 +230,6 @@ xpack.http.ssl.certificate_authorities: ["/path/to/your/cacert1.pem", "/path/to/
 For more information, see {ref}/notification-settings.html#ssl-notification-settings[the {watcher} HTTP TLS/SSL Settings].
 --
 
-. Add one or more users who have the permissions necessary to use {kib} and {report-features}. For more information, see <<reporting-roles-management-ui>>.
+. Add one or more users who have access to the {report-features}.
 +
 Once you've enabled SSL for {kib}, all requests to the reporting endpoints must include valid credentials.
