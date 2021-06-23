@@ -34,7 +34,7 @@ import { requireUIRoutes } from './routes';
 import { initBulkUploader } from './kibana_monitoring';
 import { initInfraSource } from './lib/logs/init_infra_source';
 import { mbSafeQuery } from './lib/mb_safe_query';
-import { instantiateClient } from './es_client/instantiate_client';
+import { instantiateClient, instantiateLegacyClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import { LicenseService } from './license_service';
@@ -71,7 +71,7 @@ export class MonitoringPlugin
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ILegacyCustomClusterClient;
+  private legacyCluster = {} as ILegacyCustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
@@ -99,13 +99,13 @@ export class MonitoringPlugin
 
     // Monitoring creates and maintains a connection to a potentially
     // separate ES cluster - create this first
-    const cluster = (this.cluster = instantiateClient(
+    const legacyCluster = (this.legacyCluster = instantiateLegacyClient(
       config.ui.elasticsearch,
       this.log,
       core.elasticsearch.legacy.createClient
     ));
 
-    Globals.init(core, plugins.cloud, cluster, config, this.getLogger);
+    Globals.init(core, plugins.cloud, legacyCluster, config, this.getLogger);
     const serverInfo = core.http.getServerInfo();
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
@@ -127,10 +127,10 @@ export class MonitoringPlugin
         },
       });
 
-      registerCollectors(plugins.usageCollection, config, cluster);
+      registerCollectors(plugins.usageCollection, config, legacyCluster);
       registerMonitoringTelemetryCollection(
         plugins.usageCollection,
-        cluster,
+        legacyCluster,
         config.ui.max_bucket_size
       );
     }
@@ -163,13 +163,13 @@ export class MonitoringPlugin
         config,
         legacyConfig,
         core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
-        this.cluster,
+        this.legacyCluster,
         plugins
       );
 
       this.registerPluginInUI(plugins);
       requireUIRoutes(this.monitoringCore, {
-        cluster,
+        cluster: legacyCluster,
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
@@ -189,9 +189,14 @@ export class MonitoringPlugin
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
     // Start our license service which will ensure
     // the appropriate licenses are present
+    const cluster = instantiateClient(
+      config.ui.elasticsearch,
+      this.log,
+      core.elasticsearch.createClient
+    );
     this.licenseService = new LicenseService().setup({
       licensing,
-      monitoringClient: this.cluster,
+      monitoringClient: cluster,
       config,
       log: this.log,
     });
@@ -227,8 +232,8 @@ export class MonitoringPlugin
   }
 
   stop() {
-    if (this.cluster) {
-      this.cluster.close();
+    if (this.legacyCluster) {
+      this.legacyCluster.close();
     }
     if (this.licenseService && this.licenseService.stop) {
       this.licenseService.stop();

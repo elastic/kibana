@@ -6,7 +6,7 @@
  */
 
 import { ConfigOptions } from 'elasticsearch';
-import { Logger, ILegacyCustomClusterClient } from 'kibana/server';
+import { Logger, ILegacyCustomClusterClient, ICustomClusterClient } from 'kibana/server';
 // @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
 import { monitoringEndpointDisableWatches } from './monitoring_endpoint_disable_watches';
@@ -20,7 +20,7 @@ import { MonitoringElasticsearchConfig } from '../config';
 
 type ESClusterConfig = MonitoringElasticsearchConfig & Pick<ConfigOptions, 'plugins'>;
 
-export function instantiateClient(
+export function instantiateLegacyClient(
   elasticsearchConfig: MonitoringElasticsearchConfig,
   log: Logger,
   createClient: (
@@ -33,6 +33,21 @@ export function instantiateClient(
     ...(isMonitoringCluster ? elasticsearchConfig : {}),
     plugins: [monitoringBulk, monitoringEndpointDisableWatches],
   } as ESClusterConfig);
+
+  const configSource = isMonitoringCluster ? 'monitoring' : 'production';
+  log.info(`config sourced from: ${configSource} cluster`);
+  return cluster;
+}
+
+export function instantiateClient(
+  elasticsearchConfig: MonitoringElasticsearchConfig,
+  log: Logger,
+  createClient: (type: string, clientConfig?: Partial<ESClusterConfig>) => ICustomClusterClient
+) {
+  const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
+  const cluster = createClient('monitoring', {
+    ...(isMonitoringCluster ? elasticsearchConfig : {}),
+  });
 
   const configSource = isMonitoringCluster ? 'monitoring' : 'production';
   log.info(`config sourced from: ${configSource} cluster`);
