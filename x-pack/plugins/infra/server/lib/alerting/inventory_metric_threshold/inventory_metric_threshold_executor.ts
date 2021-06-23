@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { first, get, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { first, get, last } from 'lodash';
 import moment from 'moment';
-import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
-import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { AlertStates, InventoryMetricConditions } from './types';
 import {
   ActionGroup,
+  ActionGroupIdsOf,
   AlertInstanceContext,
   AlertInstanceState,
+  AlertTypeState,
   RecoveredActionGroup,
 } from '../../../../../alerting/common';
 import { LifecycleRuleExecutor } from '../../../../../rule_registry/server';
-import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraBackendLibs } from '../../infra_types';
-import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
 import { createFormatter } from '../../../../common/formatters';
+import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
+import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
+import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
+import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
   buildFiredAlertReason,
@@ -30,35 +31,23 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
-import { InventoryMetricThresholdAllowedActionGroups } from './register_inventory_metric_threshold_alert_type';
+import { InventoryMetricThresholdAlertTypeParams } from './schema';
+import { AlertStates } from './types';
 
-interface InventoryMetricThresholdParams {
-  criteria: InventoryMetricConditions[];
-  filterQuery: string | undefined;
-  nodeType: InventoryItemType;
-  sourceId?: string;
-  alertOnNoData?: boolean;
-}
+type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
+  typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
+>;
 
 export const createInventoryMetricThresholdExecutor = (
   libs: InfraBackendLibs
 ): LifecycleRuleExecutor<
-  /**
-   * TODO: Remove this use of `any` by utilizing a proper type
-   */
-  Record<string, any>,
-  Record<string, any>,
+  InventoryMetricThresholdAlertTypeParams,
+  AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   InventoryMetricThresholdAllowedActionGroups
 > => async ({ services, params }) => {
-  const {
-    criteria,
-    filterQuery,
-    sourceId,
-    nodeType,
-    alertOnNoData,
-  } = params as InventoryMetricThresholdParams;
+  const { criteria, filterQuery, sourceId, nodeType, alertOnNoData } = params;
 
   if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
