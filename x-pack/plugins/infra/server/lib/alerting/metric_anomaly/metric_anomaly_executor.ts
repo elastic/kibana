@@ -8,37 +8,36 @@
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import moment from 'moment';
-import { stateToAlertMessage } from '../common/messages';
-import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
-import { MappedAnomalyHit } from '../../infra_ml';
-import { AlertStates } from '../common/types';
+import { KibanaRequest } from '../../../../../../../src/core/server';
 import {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
+  AlertTypeState,
 } from '../../../../../alerting/common';
-import { AlertExecutorOptions } from '../../../../../alerting/server';
-import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
-import { MetricAnomalyAllowedActionGroups } from './register_metric_anomaly_alert_type';
 import { MlPluginSetup } from '../../../../../ml/server';
-import { KibanaRequest } from '../../../../../../../src/core/server';
+import { LifecycleRuleExecutor } from '../../../../../rule_registry/server';
+import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
+import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
+import { MappedAnomalyHit } from '../../infra_ml';
 import { InfraBackendLibs } from '../../infra_types';
+import { stateToAlertMessage } from '../common/messages';
+import { AlertStates } from '../common/types';
 import { evaluateCondition } from './evaluate_condition';
+import { MetricAnomalyAlertTypeParams } from './schema';
 
-export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPluginSetup) => async ({
-  services,
-  params,
-  startedAt,
-}: AlertExecutorOptions<
-  /**
-   * TODO: Remove this use of `any` by utilizing a proper type
-   */
-  Record<string, any>,
-  Record<string, any>,
+type MetricAnomalyAllowedActionGroups = typeof FIRED_ACTIONS_ID;
+
+export const createMetricAnomalyExecutor = (
+  libs: InfraBackendLibs,
+  ml?: MlPluginSetup
+): LifecycleRuleExecutor<
+  MetricAnomalyAlertTypeParams,
+  AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
   MetricAnomalyAllowedActionGroups
->) => {
+> => async ({ services, params, startedAt }) => {
   if (!ml) {
     return;
   }
@@ -54,7 +53,7 @@ export const createMetricAnomalyExecutor = (libs: InfraBackendLibs, ml?: MlPlugi
     spaceId,
     nodeType,
     threshold,
-  } = params as MetricAnomalyParams;
+  } = params as MetricAnomalyParams; // TODO: remove need to cast by amendig validator
 
   const bucketInterval = getIntervalInSeconds('15m') * 1000;
   const alertIntervalInMs = getIntervalInSeconds(alertInterval ?? '1m') * 1000;
