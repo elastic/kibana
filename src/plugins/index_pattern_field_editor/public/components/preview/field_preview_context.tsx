@@ -48,7 +48,7 @@ interface Params {
   document: EsDocument | null;
 }
 
-interface FieldPreview {
+export interface FieldPreview {
   key: string;
   value: string;
   formattedValue?: string;

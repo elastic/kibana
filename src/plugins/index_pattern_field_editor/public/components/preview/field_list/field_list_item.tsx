@@ -10,20 +10,16 @@ import React from 'react';
 import classnames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import type { DocumentField } from './field_list';
 
 interface Props {
-  field: {
-    key: string;
-    value: string;
-    formattedValue?: string;
-    isPinned?: boolean;
-  };
+  field: DocumentField;
   toggleIsPinned?: (name: string) => void;
   highlighted?: boolean;
 }
 
 export const PreviewListItem: React.FC<Props> = ({
-  field: { key, value, formattedValue, isPinned },
+  field: { key, value, formattedValue, isPinned = false },
   highlighted,
   toggleIsPinned,
 }) => {

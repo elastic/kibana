@@ -47,7 +47,7 @@ export const FieldPreview = () => {
     setFieldListHeight(height);
   }, []);
 
-  const renderPinnedFields = () => {
+  const renderFieldsToPreview = () => {
     if (fields.length === 0) {
       return null;
     }
@@ -91,8 +91,8 @@ export const FieldPreview = () => {
 
           {error === null ? (
             <>
-              {/* The current field(s) the user is creating and fields he has pinned to the top */}
-              {renderPinnedFields()}
+              {/* The current field(s) the user is creating */}
+              {renderFieldsToPreview()}
 
               {/* List of other fields in the document */}
               <EuiResizeObserver onResize={onFieldListResize}>

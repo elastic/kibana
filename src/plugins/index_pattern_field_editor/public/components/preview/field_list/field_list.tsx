@@ -12,7 +12,7 @@ import { get } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { useFieldEditorContext } from '../../field_editor_context';
-import { useFieldPreviewContext } from '../field_preview_context';
+import { useFieldPreviewContext, FieldPreview } from '../field_preview_context';
 import { PreviewListItem } from './field_list_item';
 
 import './field_list.scss';
@@ -21,11 +21,9 @@ const ITEM_HEIGHT = 40;
 const SHOW_MORE_HEIGHT = 40;
 const INITIAL_MAX_NUMBER_OF_FIELDS = 7;
 
-export interface Field {
-  key: string;
-  value: string;
-  isPinned: boolean;
-}
+export type DocumentField = FieldPreview & {
+  isPinned?: boolean;
+};
 
 interface Props {
   height: number;
@@ -62,7 +60,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) 
     return getAllFields();
   }, [getAllFields]);
 
-  const fieldList: Field[] = useMemo(
+  const fieldList: DocumentField[] = useMemo(
     () =>
       indexPatternFields
         .map((field) => ({
@@ -74,9 +72,9 @@ export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) 
     [indexPatternFields, currentDocument?._source]
   );
 
-  const fieldListWithPinnedFields: Field[] = useMemo(() => {
-    const pinned: Field[] = [];
-    const notPinned: Field[] = [];
+  const fieldListWithPinnedFields: DocumentField[] = useMemo(() => {
+    const pinned: DocumentField[] = [];
+    const notPinned: DocumentField[] = [];
 
     fieldList.forEach((field) => {
       if (pinnedFields[field.key]) {
