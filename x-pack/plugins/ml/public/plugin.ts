@@ -24,14 +24,12 @@ import type {
 } from 'src/plugins/share/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { IndexPatternManagementSetup } from 'src/plugins/index_pattern_management/public';
 import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 
 import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import type { KibanaLegacyStart } from '../../../../src/plugins/kibana_legacy/public';
-import { MlCardState } from '../../../../src/plugins/index_pattern_management/public';
 
 import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
@@ -51,9 +49,10 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { FileDataVisualizerPluginStart } from '../../file_data_visualizer/public';
+import { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -65,7 +64,7 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   lens?: LensPublicStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
-  fileDataVisualizer: FileDataVisualizerPluginStart;
+  dataVisualizer: DataVisualizerPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -78,9 +77,9 @@ export interface MlSetupDependencies {
   uiActions: UiActionsSetup;
   kibanaVersion: string;
   share: SharePluginSetup;
-  indexPatternManagement: IndexPatternManagementSetup;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   alerting?: AlertingSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -123,7 +122,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             lens: pluginsStart.lens,
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
-            fileDataVisualizer: pluginsStart.fileDataVisualizer,
+            dataVisualizer: pluginsStart.dataVisualizer,
+            usageCollection: pluginsSetup.usageCollection,
           },
           params
         );
@@ -148,12 +148,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (pluginsSetup.home) {
           registerFeature(pluginsSetup.home);
         }
-
-        // register ML for the index pattern management no data screen.
-        pluginsSetup.indexPatternManagement.environment.update({
-          ml: () =>
-            capabilities.ml.canFindFileStructure ? MlCardState.ENABLED : MlCardState.HIDDEN,
-        });
       } else {
         // if ml is disabled in elasticsearch, disable ML in kibana
         this.appUpdater$.next(() => ({

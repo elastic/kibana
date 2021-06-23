@@ -108,7 +108,10 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
     ],
   },
   selectors: {
-    hasSchema: [(selectors) => [selectors.schema], (schema) => Object.keys(schema).length > 0],
+    hasSchema: [
+      (selectors) => [selectors.cachedSchema],
+      (cachedSchema) => Object.keys(cachedSchema).length > 0,
+    ],
     hasSchemaChanged: [
       (selectors) => [selectors.schema, selectors.cachedSchema],
       (schema, cachedSchema) => !isEqual(schema, cachedSchema),

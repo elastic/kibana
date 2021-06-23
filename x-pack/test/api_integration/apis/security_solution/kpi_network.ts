@@ -15,8 +15,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Kpi Network', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('filebeat/default'));
-      after(() => esArchiver.unload('filebeat/default'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/filebeat/default'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';
@@ -202,8 +202,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('With packetbeat', () => {
-      before(() => esArchiver.load('packetbeat/default'));
-      after(() => esArchiver.unload('packetbeat/default'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/packetbeat/default'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/packetbeat/default'));
 
       const FROM = '2000-01-01T00:00:00.000Z';
       const TO = '3000-01-01T00:00:00.000Z';

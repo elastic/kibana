@@ -4,9 +4,11 @@ exports[`EmptyState should render normally 1`] = `
 <Fragment>
   <EuiPageContent
     className="inpEmptyState"
+    color="subdued"
     data-test-subj="indexPatternEmptyState"
     grow={false}
     horizontalPosition="center"
+    verticalPosition="center"
   >
     <EuiPageContentHeader>
       <EuiPageContentHeaderSection>
@@ -59,7 +61,6 @@ exports[`EmptyState should render normally 1`] = `
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
-            betaBadgeTooltipContent="This feature requires a Basic license."
             className="inpEmptyState__card"
             description={
               <FormattedMessage
@@ -75,7 +76,6 @@ exports[`EmptyState should render normally 1`] = `
                 type="document"
               />
             }
-            isDisabled={false}
             onClick={[Function]}
             title={
               <FormattedMessage

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../src/core/types/elasticsearch';
 import { SERVICE_ENVIRONMENT } from '../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
@@ -13,9 +13,11 @@ import {
 } from '../../common/environment_filter_values';
 export { kqlQuery, rangeQuery } from '../../../observability/server';
 
-type QueryContainer = ESFilter;
+type QueryDslQueryContainer = ESFilter;
 
-export function environmentQuery(environment?: string): QueryContainer[] {
+export function environmentQuery(
+  environment?: string
+): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
   }

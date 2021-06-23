@@ -7,11 +7,11 @@
  */
 
 import { getBucketsPath } from './get_buckets_path';
-import { parseInterval } from './parse_interval';
 import { set } from '@elastic/safer-lodash-set';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';
+import { convertIntervalToUnit } from './unit_to_seconds';
 
 function checkMetric(metric, fields) {
   fields.forEach((field) => {
@@ -161,19 +161,24 @@ export const bucketTransform = {
     };
   },
 
-  derivative: (bucket, metrics, bucketSize) => {
+  derivative: (bucket, metrics, intervalString) => {
     checkMetric(bucket, ['type', 'field']);
+
     const body = {
       derivative: {
         buckets_path: getBucketsPath(bucket.field, metrics),
         gap_policy: 'skip', // seems sane
-        unit: bucketSize,
+        unit: intervalString,
       },
     };
+
     if (bucket.gap_policy) body.derivative.gap_policy = bucket.gap_policy;
     if (bucket.unit) {
-      body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit) ? bucket.unit : bucketSize;
+      body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit)
+        ? bucket.unit
+        : intervalString;
     }
+
     return body;
   },
 
@@ -214,8 +219,10 @@ export const bucketTransform = {
     };
   },
 
-  calculation: (bucket, metrics, bucketSize) => {
+  calculation: (bucket, metrics, intervalString) => {
     checkMetric(bucket, ['variables', 'script']);
+    const inMsInterval = convertIntervalToUnit(intervalString, 'ms');
+
     const body = {
       bucket_script: {
         buckets_path: bucket.variables.reduce((acc, row) => {
@@ -226,7 +233,7 @@ export const bucketTransform = {
           source: bucket.script,
           lang: 'painless',
           params: {
-            _interval: parseInterval(bucketSize).asMilliseconds(),
+            _interval: inMsInterval?.value,
           },
         },
         gap_policy: 'skip', // seems sane

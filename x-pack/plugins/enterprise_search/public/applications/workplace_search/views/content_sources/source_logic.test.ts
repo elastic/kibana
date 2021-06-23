@@ -10,12 +10,12 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-  expectedAsyncError,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { fullContentSources, contentItems } from '../../__mocks__/content_sources.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
 import { DEFAULT_META } from '../../../shared/constants';
+import { expectedAsyncError } from '../../../test_helpers';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },

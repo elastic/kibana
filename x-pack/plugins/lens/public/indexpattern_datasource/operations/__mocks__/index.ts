@@ -17,6 +17,7 @@ jest.spyOn(actualHelpers, 'insertOrReplaceColumn');
 jest.spyOn(actualHelpers, 'insertNewColumn');
 jest.spyOn(actualHelpers, 'replaceColumn');
 jest.spyOn(actualHelpers, 'getErrorMessages');
+jest.spyOn(actualHelpers, 'getColumnOrder');
 
 export const {
   getAvailableOperationsByMetadata,
@@ -48,6 +49,8 @@ export const {
   resetIncomplete,
   isOperationAllowedAsReference,
   canTransition,
+  isColumnValidAsReference,
+  getManagedColumnsFrom,
 } = actualHelpers;
 
 export const { adjustTimeScaleLabelSuffix, DEFAULT_TIME_SCALE } = actualTimeScaleUtils;

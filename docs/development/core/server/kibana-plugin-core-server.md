@@ -159,14 +159,13 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCollectMultiNamespaceReferencesObject](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesobject.md) | An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the <code>namespaceType: 'multiple'</code> or <code>namespaceType: 'multiple-isolated'</code> option).<!-- -->Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with the <code>namespaceType: 'multiple'</code>). |
 |  [SavedObjectsCollectMultiNamespaceReferencesOptions](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesoptions.md) | Options for collecting references. |
 |  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-server.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |
-|  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
-|  [SavedObjectsCoreFieldMapping](./kibana-plugin-core-server.savedobjectscorefieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsCreatePointInTimeFinderDependencies](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-core-server.savedobjectsdeleteoptions.md) |  |
 |  [SavedObjectsExportByObjectOptions](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) | Options for the [export by objects API](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md) |
 |  [SavedObjectsExportByTypeOptions](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) | Options for the [export by type API](./kibana-plugin-core-server.savedobjectsexporter.exportbytypes.md) |
+|  [SavedObjectsExportExcludedObject](./kibana-plugin-core-server.savedobjectsexportexcludedobject.md) |  |
 |  [SavedObjectsExportResultDetails](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
 |  [SavedObjectsExportTransformContext](./kibana-plugin-core-server.savedobjectsexporttransformcontext.md) | Context passed down to a [export transform function](./kibana-plugin-core-server.savedobjectsexporttransform.md) |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-server.savedobjectsfindoptions.md) |  |

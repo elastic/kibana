@@ -97,8 +97,10 @@ export default function ({ getService }: FtrProviderContext) {
       await validateEventLog({
         spaceId: Spaces.space1.id,
         actionId: createdAction.id,
+        actionTypeId: 'test.index-record',
         outcome: 'success',
         message: `action executed: test.index-record:${createdAction.id}: My action`,
+        startMessage: `action started: test.index-record:${createdAction.id}: My action`,
       });
     });
 
@@ -138,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
       await validateEventLog({
         spaceId: Spaces.space1.id,
         actionId: createdAction.id,
+        actionTypeId: 'test.failing',
         outcome: 'failure',
         message: `action execution failure: test.failing:${createdAction.id}: failing action`,
         errorMessage: `an error occurred while running the action executor: expected failure for .kibana-alerting-test-data actions-failure-1:space1`,
@@ -330,13 +333,23 @@ export default function ({ getService }: FtrProviderContext) {
   interface ValidateEventLogParams {
     spaceId: string;
     actionId: string;
+    actionTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
+    startMessage?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, actionId, outcome, message, errorMessage } = params;
+    const {
+      spaceId,
+      actionId,
+      actionTypeId,
+      outcome,
+      message,
+      startMessage,
+      errorMessage,
+    } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -345,45 +358,56 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'action',
         id: actionId,
         provider: 'actions',
-        actions: new Map([['execute', { equal: 1 }]]),
+        actions: new Map([
+          ['execute-start', { equal: 1 }],
+          ['execute', { equal: 1 }],
+        ]),
       });
     });
 
-    const event = events[0];
+    const startExecuteEvent = events[0];
+    const executeEvent = events[1];
 
-    const duration = event?.event?.duration;
-    const eventStart = Date.parse(event?.event?.start || 'undefined');
-    const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    const duration = executeEvent?.event?.duration;
+    const executeEventStart = Date.parse(executeEvent?.event?.start || 'undefined');
+    const startExecuteEventStart = Date.parse(startExecuteEvent?.event?.start || 'undefined');
+    const executeEventEnd = Date.parse(executeEvent?.event?.end || 'undefined');
     const dateNow = Date.now();
 
     expect(typeof duration).to.be('number');
-    expect(eventStart).to.be.ok();
-    expect(eventEnd).to.be.ok();
+    expect(executeEventStart).to.be.ok();
+    expect(startExecuteEventStart).to.equal(executeEventStart);
+    expect(executeEventEnd).to.be.ok();
 
     const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+      Math.round(duration! / NANOS_IN_MILLIS) - (executeEventEnd - executeEventStart)
     );
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);
-    expect(eventStart <= eventEnd).to.equal(true);
-    expect(eventEnd <= dateNow).to.equal(true);
+    expect(executeEventStart <= executeEventEnd).to.equal(true);
+    expect(executeEventEnd <= dateNow).to.equal(true);
 
-    expect(event?.event?.outcome).to.equal(outcome);
+    expect(executeEvent?.event?.outcome).to.equal(outcome);
 
-    expect(event?.kibana?.saved_objects).to.eql([
+    expect(executeEvent?.kibana?.saved_objects).to.eql([
       {
         rel: 'primary',
         type: 'action',
         id: actionId,
         namespace: 'space1',
+        type_id: actionTypeId,
       },
     ]);
+    expect(startExecuteEvent?.kibana?.saved_objects).to.eql(executeEvent?.kibana?.saved_objects);
 
-    expect(event?.message).to.eql(message);
+    expect(executeEvent?.message).to.eql(message);
+    if (startMessage) {
+      expect(startExecuteEvent?.message).to.eql(startMessage);
+    }
 
     if (errorMessage) {
-      expect(event?.error?.message).to.eql(errorMessage);
+      expect(executeEvent?.error?.message).to.eql(errorMessage);
     }
   }
 }

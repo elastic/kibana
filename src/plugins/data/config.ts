@@ -15,6 +15,8 @@ export const configSchema = schema.object({
     }),
     valueSuggestions: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      terminateAfter: schema.duration({ defaultValue: 100000 }),
+      timeout: schema.duration({ defaultValue: 1000 }),
     }),
   }),
   search: schema.object({

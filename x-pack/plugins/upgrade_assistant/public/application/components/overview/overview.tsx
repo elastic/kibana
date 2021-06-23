@@ -8,11 +8,9 @@
 import React, { FunctionComponent, useEffect } from 'react';
 
 import {
-  EuiPageContent,
   EuiPageContentBody,
   EuiText,
   EuiPageHeader,
-  EuiPageBody,
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
@@ -91,72 +89,68 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
   }, [breadcrumbs]);
 
   return (
-    <EuiPageBody>
-      <EuiPageContent data-test-subj="overviewPageContent">
-        <EuiPageHeader
-          pageTitle={i18nTexts.pageTitle}
-          rightSideItems={[
-            <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant}
-              target="_blank"
-              iconType="help"
-              data-test-subj="documentationLink"
-            >
-              {i18nTexts.docLink}
-            </EuiButtonEmpty>,
-          ]}
-        />
+    <div data-test-subj="overviewPageContent">
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={i18nTexts.pageTitle}
+        description={i18nTexts.pageDescription}
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={docLinks.links.upgradeAssistant}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            {i18nTexts.docLink}
+          </EuiButtonEmpty>,
+        ]}
+      />
 
-        <EuiPageContentBody>
-          <>
-            <EuiText data-test-subj="overviewDetail" grow={false}>
-              <p>{i18nTexts.pageDescription}</p>
-            </EuiText>
+      <EuiSpacer size="l" />
 
-            <EuiSpacer />
+      <EuiPageContentBody>
+        <>
+          {/* Remove this in last minor of the current major (e.g., 7.15) */}
+          <LatestMinorBanner />
 
-            {/* Remove this in last minor of the current major (e.g., 7.15) */}
-            <LatestMinorBanner />
+          <EuiSpacer size="xl" />
 
-            <EuiSpacer size="xl" />
+          {/* Deprecation stats */}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <ESDeprecationStats history={history} />
+            </EuiFlexItem>
 
-            {/* Deprecation stats */}
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <ESDeprecationStats history={history} />
-              </EuiFlexItem>
+            <EuiFlexItem>
+              <KibanaDeprecationStats history={history} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-              <EuiFlexItem>
-                <KibanaDeprecationStats history={history} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiSpacer />
 
-            <EuiSpacer />
+          {/* Deprecation logging */}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h2>{i18nTexts.deprecationLoggingTitle}</h2>
+              </EuiTitle>
 
-            {/* Deprecation logging */}
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiTitle size="s">
-                  <h2>{i18nTexts.deprecationLoggingTitle}</h2>
-                </EuiTitle>
+              <EuiText>
+                <p>
+                  {i18nTexts.getDeprecationLoggingDescription(
+                    `${nextMajor}.x`,
+                    docLinks.links.elasticsearch.deprecationLogging
+                  )}
+                </p>
+              </EuiText>
 
-                <EuiText>
-                  <p>
-                    {i18nTexts.getDeprecationLoggingDescription(
-                      `${nextMajor}.x`,
-                      docLinks.links.elasticsearch.deprecationLogging
-                    )}
-                  </p>
-                </EuiText>
+              <EuiSpacer size="m" />
 
-                <EuiSpacer size="m" />
-
-                <DeprecationLoggingToggle />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+              <DeprecationLoggingToggle />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      </EuiPageContentBody>
+    </div>
   );
 };

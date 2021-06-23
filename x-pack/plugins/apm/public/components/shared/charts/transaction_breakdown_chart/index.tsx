@@ -22,7 +22,7 @@ export function TransactionBreakdownChart({
   const { timeseries } = data;
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">

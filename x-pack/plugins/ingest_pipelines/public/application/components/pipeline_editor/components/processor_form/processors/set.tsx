@@ -10,7 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
 
-import { FIELD_TYPES, ToggleField, UseField, Field } from '../../../../../../shared_imports';
+import {
+  FIELD_TYPES,
+  useFormData,
+  SelectField,
+  ToggleField,
+  UseField,
+  Field,
+} from '../../../../../../shared_imports';
+import { hasTemplateSnippet } from '../../../utils';
 
 import { FieldsConfig, to, from } from './shared';
 
@@ -32,6 +40,20 @@ const fieldsConfig: FieldsConfig = {
         values={{
           emptyString: <EuiCode>{'""'}</EuiCode>,
         }}
+      />
+    ),
+  },
+  mediaType: {
+    type: FIELD_TYPES.SELECT,
+    defaultValue: 'application/json',
+    serializer: from.undefinedIfValue('application/json'),
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.mediaTypeFieldLabel', {
+      defaultMessage: 'Media Type',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.mediaTypeHelpText"
+        defaultMessage="Media type for encoding value."
       />
     ),
   },
@@ -83,6 +105,8 @@ const fieldsConfig: FieldsConfig = {
  * Disambiguate name from the Set data structure
  */
 export const SetProcessor: FunctionComponent = () => {
+  const [{ fields }] = useFormData({ watch: 'fields.value' });
+
   return (
     <>
       <FieldNameField
@@ -102,12 +126,45 @@ export const SetProcessor: FunctionComponent = () => {
         path="fields.value"
       />
 
-      <UseField config={fieldsConfig.override} component={ToggleField} path="fields.override" />
+      {hasTemplateSnippet(fields?.value) && (
+        <UseField
+          componentProps={{
+            euiFieldProps: {
+              'data-test-subj': 'mediaTypeSelectorField',
+              options: [
+                {
+                  value: 'application/json',
+                  text: 'application/json',
+                },
+                {
+                  value: 'text/plain',
+                  text: 'text/plain',
+                },
+                {
+                  value: 'application/x-www-form-urlencoded',
+                  text: 'application/x-www-form-urlencoded',
+                },
+              ],
+            },
+          }}
+          config={fieldsConfig.mediaType}
+          component={SelectField}
+          path="fields.media_type"
+        />
+      )}
+
+      <UseField
+        config={fieldsConfig.override}
+        component={ToggleField}
+        path="fields.override"
+        data-test-subj="overrideField"
+      />
 
       <UseField
         config={fieldsConfig.ignore_empty_value}
         component={ToggleField}
         path="fields.ignore_empty_value"
+        data-test-subj="ignoreEmptyField"
       />
     </>
   );

@@ -269,6 +269,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
           dockLinks={this.props.dockLinks}
           toasts={this.props.toasts}
           trackUiMetric={this.props.trackUiMetric}
+          queryText={query.text}
         />
         <PageFooter
           toasts={this.props.toasts}

@@ -29,5 +29,5 @@ export async function buildUp(getService: FtrProviderContext['getService']) {
 
 export async function tearDown(getService: FtrProviderContext['getService']) {
   const esArchiver = getService('esArchiver');
-  await esArchiver.unload('empty_kibana');
+  await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
 }

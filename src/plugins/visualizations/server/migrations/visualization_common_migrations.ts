@@ -91,3 +91,48 @@ export const commonAddEmptyValueColorRule = (visState: any) => {
 
   return visState;
 };
+
+export const commonMigrateVislibPie = (visState: any) => {
+  if (visState && visState.type === 'pie') {
+    const { params } = visState;
+    const hasPalette = params?.palette;
+
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        ...(!hasPalette && {
+          palette: {
+            type: 'palette',
+            name: 'kibana_palette',
+          },
+        }),
+        distinctColors: true,
+      },
+    };
+  }
+
+  return visState;
+};
+
+export const commonMigrateTagCloud = (visState: any) => {
+  if (visState && visState.type === 'tagcloud') {
+    const { params } = visState;
+    const hasPalette = params?.palette;
+
+    return {
+      ...visState,
+      params: {
+        ...visState.params,
+        ...(!hasPalette && {
+          palette: {
+            type: 'palette',
+            name: 'kibana_palette',
+          },
+        }),
+      },
+    };
+  }
+
+  return visState;
+};

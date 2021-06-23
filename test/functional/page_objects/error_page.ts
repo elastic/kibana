@@ -6,29 +6,25 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect/expect.js';
-import { FtrProviderContext } from '../ftr_provider_context';
+import expect from '@kbn/expect';
+import { FtrService } from '../ftr_provider_context';
 
-export function ErrorPageProvider({ getPageObjects }: FtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+export class ErrorPageObject extends FtrService {
+  private readonly common = this.ctx.getPageObject('common');
 
-  class ErrorPage {
-    public async expectForbidden() {
-      const messageText = await common.getBodyText();
-      expect(messageText).to.contain('You do not have permission to access the requested page');
-    }
-
-    public async expectNotFound() {
-      const messageText = await common.getJsonBodyText();
-      expect(messageText).to.eql(
-        JSON.stringify({
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Not Found',
-        })
-      );
-    }
+  public async expectForbidden() {
+    const messageText = await this.common.getBodyText();
+    expect(messageText).to.contain('You do not have permission to access the requested page');
   }
 
-  return new ErrorPage();
+  public async expectNotFound() {
+    const messageText = await this.common.getJsonBodyText();
+    expect(messageText).to.eql(
+      JSON.stringify({
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'Not Found',
+      })
+    );
+  }
 }

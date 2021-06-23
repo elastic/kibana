@@ -24,8 +24,12 @@ export default function ({ getService }: FtrProviderContext) {
     const getBaseUrl = (from: string, to: string) =>
       `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&pageSize=10`;
 
-    before('load heartbeat data', () => getService('esArchiver').load('uptime/blank'));
-    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
+    before('load heartbeat data', () =>
+      getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank')
+    );
+    after('unload heartbeat index', () =>
+      getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank')
+    );
 
     // In this case we don't actually have any monitors to display
     // but the query should still return successfully. This has
@@ -139,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
       const downMonitorId = 'down-test-id';
       const mixMonitorId = 'mix-test-id';
       before('generate three monitors with up, down, mix state', async () => {
-        await getService('esArchiver').load('uptime/blank');
+        await getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank');
 
         const es = getService('es');
 
@@ -169,7 +173,9 @@ export default function ({ getService }: FtrProviderContext) {
         dateRangeEnd = new Date().toISOString();
       });
 
-      after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
+      after('unload heartbeat index', () =>
+        getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank')
+      );
 
       it('should return all monitor when no status filter', async () => {
         const apiResponse = await supertest.get(getBaseUrl(dateRangeStart, dateRangeEnd));

@@ -71,12 +71,12 @@ export default ({ getService }: FtrProviderContext) => {
         beforeEach(async () => {
           await deleteAllAlerts(supertest);
           await createSignalsIndex(supertest);
-          await esArchiver.load('auditbeat/hosts');
+          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
         afterEach(async () => {
           await deleteSignalsIndex(supertest);
           await deleteAllAlerts(supertest);
-          await esArchiver.unload('auditbeat/hosts');
+          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('should be able to execute and get 10 signals', async () => {

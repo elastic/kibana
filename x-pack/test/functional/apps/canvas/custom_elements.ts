@@ -24,7 +24,7 @@ export default function canvasCustomElementTest({
     this.tags('skipFirefox');
 
     before(async () => {
-      await esArchiver.load('canvas/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
       // load test workpad

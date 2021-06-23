@@ -404,7 +404,7 @@ async function fetchTopLogEntryCategoryHistograms(
 async function fetchLogEntryCategoryExamples(
   requestContext: { core: { elasticsearch: { client: { asCurrentUser: ElasticsearchClient } } } },
   indices: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
