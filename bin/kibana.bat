@@ -23,7 +23,7 @@ If Not Exist "%NODE%" (
   )
 )
 
-"%NODE%" --no-warnings --max-http-header-size=65536 %NODE_OPTIONS% "%DIR%\src\cli" %*
+"%NODE%" --no-warnings --max-http-header-size=65536 --tls-min-v1.0 %NODE_OPTIONS% "%DIR%\src\cli" %*
 
 :finally
 
