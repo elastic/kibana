@@ -60,7 +60,9 @@ export function startAppStateSyncing(appStateManager: AppStateManager) {
   stateContainer.set(initialAppState);
 
   // set current url to whatever is in app state container
-  kbnUrlStateStorage.set('_a', initialAppState);
+  kbnUrlStateStorage.set('_a', initialAppState, {
+    replace: true,
+  });
 
   // finally start syncing state containers with url
   startSyncingAppStateWithUrl();
