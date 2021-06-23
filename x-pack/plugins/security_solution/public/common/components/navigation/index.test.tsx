@@ -105,12 +105,12 @@ describe('SIEM Navigation', () => {
       {
         detailName: undefined,
         navTabs: {
-          detections: {
+          alerts: {
             disabled: false,
-            href: '/app/security/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
+            href: '/app/security/alerts',
+            id: 'alerts',
+            name: 'Alerts',
+            urlKey: 'alerts',
           },
           case: {
             disabled: false,
@@ -118,6 +118,13 @@ describe('SIEM Navigation', () => {
             id: 'case',
             name: 'Cases',
             urlKey: 'case',
+          },
+          exceptions: {
+            disabled: false,
+            href: '/app/security/exceptions',
+            id: 'exceptions',
+            name: 'Exceptions',
+            urlKey: 'exceptions',
           },
           administration: {
             disabled: false,
@@ -132,6 +139,13 @@ describe('SIEM Navigation', () => {
             id: 'hosts',
             name: 'Hosts',
             urlKey: 'host',
+          },
+          rules: {
+            disabled: false,
+            href: '/app/security/rules',
+            id: 'rules',
+            name: 'Rules',
+            urlKey: 'rules',
           },
           network: {
             disabled: false,
@@ -212,12 +226,12 @@ describe('SIEM Navigation', () => {
         filters: [],
         flowTarget: undefined,
         navTabs: {
-          detections: {
+          alerts: {
             disabled: false,
-            href: '/app/security/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
+            href: '/app/security/alerts',
+            id: 'alerts',
+            name: 'Alerts',
+            urlKey: 'alerts',
           },
           case: {
             disabled: false,
@@ -226,12 +240,26 @@ describe('SIEM Navigation', () => {
             name: 'Cases',
             urlKey: 'case',
           },
+          exceptions: {
+            disabled: false,
+            href: '/app/security/exceptions',
+            id: 'exceptions',
+            name: 'Exceptions',
+            urlKey: 'exceptions',
+          },
           hosts: {
             disabled: false,
             href: '/app/security/hosts',
             id: 'hosts',
             name: 'Hosts',
             urlKey: 'host',
+          },
+          rules: {
+            disabled: false,
+            href: '/app/security/rules',
+            id: 'rules',
+            name: 'Rules',
+            urlKey: 'rules',
           },
           administration: {
             disabled: false,

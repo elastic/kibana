@@ -55,6 +55,8 @@ import { RuleStep, RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../../common/constants';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -74,6 +76,8 @@ const EditRulePageComponent: FC = () => {
     loading: listsConfigLoading,
     needsConfiguration: needsListsConfiguration,
   } = useListsConfig();
+  const { navigateToApp } = useKibana().services.application;
+
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
   const [ruleLoading, rule] = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
@@ -314,7 +318,10 @@ const EditRulePageComponent: FC = () => {
 
   if (isSaved) {
     displaySuccessToast(i18n.SUCCESSFULLY_SAVED_RULE(rule?.name ?? ''), dispatchToaster);
-    history.replace(getRuleDetailsUrl(ruleId ?? ''));
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRuleDetailsUrl(ruleId ?? ''),
+    });
     return null;
   }
 
@@ -326,10 +333,16 @@ const EditRulePageComponent: FC = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
     return null;
   } else if (!userHasPermissions(canUserCRUD)) {
-    history.replace(getRuleDetailsUrl(ruleId ?? ''));
+    navigateToApp(APP_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRuleDetailsUrl(ruleId ?? ''),
+    });
     return null;
   }
 
@@ -342,7 +355,7 @@ const EditRulePageComponent: FC = () => {
               backOptions={{
                 href: getRuleDetailsUrl(ruleId ?? ''),
                 text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
-                pageId: SecurityPageName.detections,
+                pageId: SecurityPageName.rules,
                 dataTestSubj: 'ruleEditBackToRuleDetails',
               }}
               isLoading={isLoading}
@@ -412,7 +425,7 @@ const EditRulePageComponent: FC = () => {
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />
+      <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>
   );
 };

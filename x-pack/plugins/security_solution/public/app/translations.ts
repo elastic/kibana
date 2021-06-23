@@ -26,6 +26,14 @@ export const DETECTION_ENGINE = i18n.translate(
   }
 );
 
+export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
+  defaultMessage: 'Rules',
+});
+
+export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
+  defaultMessage: 'Exceptions',
+});
+
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {
   defaultMessage: 'Alerts',
 });

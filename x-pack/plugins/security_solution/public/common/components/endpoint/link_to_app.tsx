@@ -12,6 +12,8 @@ import { useNavigateToAppEventHandler } from '../../hooks/endpoint/use_navigate_
 export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
   appId: string;
+
+  deepLinkId?: string;
   /** Any app specific path (route) */
   appPath?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,8 +28,17 @@ export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
  * a given app without causing a full browser refresh
  */
 export const LinkToApp = memo<LinkToAppProps>(
-  ({ appId, appPath: path, appState: state, onClick, asButton, children, ...otherProps }) => {
-    const handleOnClick = useNavigateToAppEventHandler(appId, { path, state, onClick });
+  ({
+    appId,
+    appPath: path,
+    appState: state,
+    deepLinkId,
+    onClick,
+    asButton,
+    children,
+    ...otherProps
+  }) => {
+    const handleOnClick = useNavigateToAppEventHandler(appId, { path, state, onClick, deepLinkId });
 
     return (
       <>

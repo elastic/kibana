@@ -39,7 +39,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   const handlePreBuiltCreation = useCallback(() => {
     createPrePackagedRules();
   }, [createPrePackagedRules]);
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 
   const goToCreateRule = useCallback(
     (ev) => {

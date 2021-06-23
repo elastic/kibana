@@ -10,12 +10,14 @@ import { SecurityPageName, SecurityPageGroupName } from '../types';
 import { SiemNavTab, NavTabGroups } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
-  APP_DETECTIONS_PATH,
   APP_HOSTS_PATH,
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
   APP_MANAGEMENT_PATH,
+  APP_RULES_PATH,
+  APP_ALERTS_PATH,
+  APP_EXCEPTIONS_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SiemNavTab = {
@@ -26,12 +28,26 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: 'overview',
   },
-  [SecurityPageName.detections]: {
-    id: SecurityPageName.detections,
-    name: i18n.DETECTION_ENGINE,
-    href: APP_DETECTIONS_PATH,
+  [SecurityPageName.alerts]: {
+    id: SecurityPageName.alerts,
+    name: i18n.ALERTS,
+    href: APP_ALERTS_PATH,
     disabled: false,
-    urlKey: 'detections',
+    urlKey: SecurityPageName.alerts,
+  },
+  [SecurityPageName.rules]: {
+    id: SecurityPageName.rules,
+    name: i18n.RULES,
+    href: APP_RULES_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.rules,
+  },
+  [SecurityPageName.exceptions]: {
+    id: SecurityPageName.exceptions,
+    name: i18n.EXCEPTIONS,
+    href: APP_EXCEPTIONS_PATH,
+    disabled: false,
+    urlKey: SecurityPageName.exceptions,
   },
   [SecurityPageName.hosts]: {
     id: SecurityPageName.hosts,

@@ -97,7 +97,7 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
-  it('navigates to the Detections page', () => {
+  it('navigates to the Alerts page', () => {
     navigateFromKibanaCollapsibleTo(DETECTIONS_PAGE);
     cy.url().should('include', DETECTIONS_URL);
   });
