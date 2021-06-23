@@ -4,6 +4,8 @@
 ++++
 <titleabbrev>Reporting settings</titleabbrev>
 ++++
+:keywords: administrator, reference, setup, reporting
+:description: A reference of the reporting settings administrators configure in kibana.yml.
 
 You can configure `xpack.reporting` settings in your `kibana.yml` to:
 

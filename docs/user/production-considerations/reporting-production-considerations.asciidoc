@@ -5,6 +5,8 @@
 ++++
 <titleabbrev>Reporting</titleabbrev>
 ++++
+:keywords: administrator, analyst, concept, setup, reporting
+:description: Consider the production components that are used to generate reports.
 
 To generate reports, {kib} uses a custom build of the Chromium web browser, which runs on the {kib} server in headless mode to load {kib} and capture the rendered {kib} visualizations as images. Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to make sure it works with minimal setup. The operating system that the {kib} server uses can require additional dependencies for Chromium.
 

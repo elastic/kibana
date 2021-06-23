@@ -4,6 +4,8 @@
 ++++
 <titleabbrev>Authentication</titleabbrev>
 ++++
+:keywords: administrator, concept, security, authentication
+:description: A list of the supported authentication mechanisms in {kib}. 
 
 {kib} supports the following authentication mechanisms:
 
