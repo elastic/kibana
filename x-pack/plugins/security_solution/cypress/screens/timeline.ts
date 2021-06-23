@@ -177,9 +177,11 @@ export const TIMELINE_EVENTS_COUNT_PER_PAGE_BTN = '[data-test-subj="local-events
 export const TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION = (itemsPerPage: number) =>
   `[data-test-subj="items-per-page-option-${itemsPerPage}"]`;
 
-export const TIMELINE_EVENTS_COUNT_NEXT_PAGE = '[data-test-subj="pagination-button-next"]';
+export const TIMELINE_EVENTS_COUNT_NEXT_PAGE =
+  '[data-test-subj="timeline"] [data-test-subj="pagination-button-next"]';
 
-export const TIMELINE_EVENTS_COUNT_PREV_PAGE = '[data-test-subj="pagination-button-previous"]';
+export const TIMELINE_EVENTS_COUNT_PREV_PAGE =
+  '[data-test-subj="timeline"] [data-test-subj="pagination-button-previous"]';
 
 export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
@@ -236,7 +238,7 @@ export const TIMELINE_EDIT_MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
-export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane-wrapper"]';
+export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 

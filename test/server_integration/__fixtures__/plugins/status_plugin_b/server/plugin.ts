@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Filter } from '../filters';
-import { IIndexPattern } from '../..';
+import { Plugin } from 'kibana/server';
 
-export function getIndexPatternFromFilter(
-  filter: Filter,
-  indexPatterns: IIndexPattern[]
-): IIndexPattern | undefined {
-  return indexPatterns.find((indexPattern) => indexPattern.id === filter.meta.index);
+export class StatusPluginBPlugin implements Plugin {
+  public setup() {}
+  public start() {}
+  public stop() {}
 }

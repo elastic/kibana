@@ -64,7 +64,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           className="euiFormRow__fieldWrapper"
         >
           <EuiSwitch
-            aria-describedby="generated-id-help"
+            aria-describedby="generated-id-help-0"
             checked={false}
             data-test-subj="reportModeToggle"
             id="generated-id"
@@ -84,7 +84,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             >
               <button
                 aria-checked={false}
-                aria-describedby="generated-id-help"
+                aria-describedby="generated-id-help-0"
                 aria-labelledby="generated-id"
                 className="euiSwitch__button"
                 data-test-subj="reportModeToggle"
@@ -148,11 +148,12 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
           </EuiSwitch>
           <EuiFormHelpText
             className="euiFormRow__text"
-            id="generated-id-help"
+            id="generated-id-help-0"
+            key="0"
           >
             <div
               className="euiFormHelpText euiFormRow__text"
-              id="generated-id-help"
+              id="generated-id-help-0"
             >
               <FormattedMessage
                 defaultMessage="Remove borders and footer logo"
@@ -503,7 +504,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           className="euiFormRow__fieldWrapper"
         >
           <EuiSwitch
-            aria-describedby="generated-id-help"
+            aria-describedby="generated-id-help-0"
             checked={false}
             data-test-subj="usePrintLayout"
             id="generated-id"
@@ -523,7 +524,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             >
               <button
                 aria-checked={false}
-                aria-describedby="generated-id-help"
+                aria-describedby="generated-id-help-0"
                 aria-labelledby="generated-id"
                 className="euiSwitch__button"
                 data-test-subj="usePrintLayout"
@@ -587,11 +588,12 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
           </EuiSwitch>
           <EuiFormHelpText
             className="euiFormRow__text"
-            id="generated-id-help"
+            id="generated-id-help-0"
+            key="0"
           >
             <div
               className="euiFormHelpText euiFormRow__text"
-              id="generated-id-help"
+              id="generated-id-help-0"
             >
               <FormattedMessage
                 defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"

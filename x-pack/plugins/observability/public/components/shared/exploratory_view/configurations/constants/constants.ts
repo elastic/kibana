@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { ReportViewTypeId } from '../../types';
-import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './elasticsearch_fieldnames';
+import { ReportViewType } from '../../types';
+import {
+  CLS_FIELD,
+  FCP_FIELD,
+  FID_FIELD,
+  LCP_FIELD,
+  TBT_FIELD,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+} from './elasticsearch_fieldnames';
 import {
   AGENT_HOST_LABEL,
   BROWSER_FAMILY_LABEL,
@@ -58,6 +65,7 @@ export const FieldLabels: Record<string, string> = {
   [TBT_FIELD]: TBT_LABEL,
   [FID_FIELD]: FID_LABEL,
   [CLS_FIELD]: CLS_LABEL,
+  [TRANSACTION_TIME_TO_FIRST_BYTE]: 'Page load time',
 
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
@@ -77,11 +85,11 @@ export const FieldLabels: Record<string, string> = {
   'http.request.method': REQUEST_METHOD,
 };
 
-export const DataViewLabels: Record<ReportViewTypeId, string> = {
-  dist: PERF_DIST_LABEL,
-  kpi: KPI_OVER_TIME_LABEL,
-  cwv: CORE_WEB_VITALS_LABEL,
-  mdd: DEVICE_DISTRIBUTION_LABEL,
+export const DataViewLabels: Record<ReportViewType, string> = {
+  'data-distribution': PERF_DIST_LABEL,
+  'kpi-over-time': KPI_OVER_TIME_LABEL,
+  'core-web-vitals': CORE_WEB_VITALS_LABEL,
+  'device-data-distribution': DEVICE_DISTRIBUTION_LABEL,
 };
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
