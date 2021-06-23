@@ -59,8 +59,9 @@ export function DiscoverChart({
   }, [state.hideChart]);
 
   const toggleHideChart = useCallback(() => {
-    stateContainer.setAppState({ hideChart: !state.hideChart });
-    chartRef.current.moveFocus = true;
+    const newHideChart = !state.hideChart;
+    stateContainer.setAppState({ hideChart: newHideChart });
+    chartRef.current.moveFocus = !newHideChart;
   }, [state, stateContainer]);
 
   const onChangeInterval = useCallback(
