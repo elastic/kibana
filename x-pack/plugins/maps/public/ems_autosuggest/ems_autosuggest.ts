@@ -19,7 +19,7 @@ export interface EMSTermJoinConfig {
 }
 
 interface UniqueMatch {
-  config: { layerId: string; field: string };
+  config: EMSTermJoinConfig;
   count: number;
 }
 interface FileLayerFieldShim {
@@ -28,8 +28,6 @@ interface FileLayerFieldShim {
   regex?: string;
   alias?: string[];
 }
-
-type SampleValues = Array<string | number>;
 
 export async function suggestEMSTermJoinConfig(
   sampleValuesConfig: SampleValuesConfig
@@ -76,7 +74,7 @@ export async function suggestEMSTermJoinConfig(
 
 async function suggestByName(
   columnName: string,
-  sampleValues?: SampleValues
+  sampleValues?: Array<string | number>
 ): Promise<EMSTermJoinConfig[]> {
   const fileLayers = await getEmsFileLayers();
 
@@ -119,26 +117,19 @@ async function suggestByName(
   return matches;
 }
 
-function allSamplesMatch(sampleValues: SampleValues, ids: string[]) {
+function allSamplesMatch(sampleValues: Array<string | number>, ids: string[]) {
   for (let j = 0; j < sampleValues.length; j++) {
     const sampleValue = sampleValues[j].toString();
-    if (!existInIds(sampleValue, ids)) {
+    if (!ids.includes(sampleValue)) {
       return false;
     }
   }
   return true;
 }
 
-function existInIds(sampleValue: string, ids: string[]): boolean {
-  for (let i = 0; i < ids.length; i++) {
-    if (ids[i] === sampleValue) {
-      return true;
-    }
-  }
-  return false;
-}
-
-async function suggestByIdValues(sampleValues: SampleValues): Promise<EMSTermJoinConfig[]> {
+async function suggestByIdValues(
+  sampleValues: Array<string | number>
+): Promise<EMSTermJoinConfig[]> {
   const matches: EMSTermJoinConfig[] = [];
   const fileLayers: FileLayer[] = await getEmsFileLayers();
   fileLayers.forEach((fileLayer) => {
