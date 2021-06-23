@@ -227,7 +227,9 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [updateCase, fetchCaseUserActions, caseId, subCaseId]
     );
 
-    const { loading: isLoadingConnectors, connectors } = useConnectors();
+    const { loading: isLoadingConnectors, connectors, permissionsError } = useConnectors({
+      toastPermissionsErrors: false,
+    });
 
     const [connectorName, isValidConnector] = useMemo(() => {
       const connector = connectors.find((c) => c.id === caseData.connector.id);
@@ -360,7 +362,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
               allCasesNavigation={allCasesNavigation}
               caseData={caseData}
               currentExternalIncident={currentExternalIncident}
-              disabled={!userCanCrud}
+              userCanCrud={userCanCrud}
               disableAlerting={ruleDetailsNavigation == null}
               isLoading={isLoading && (updateKey === 'status' || updateKey === 'settings')}
               onRefresh={handleRefresh}
@@ -403,7 +405,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
                     />
-                    {(caseData.type !== CaseType.collection || hasDataToPush) && (
+                    {(caseData.type !== CaseType.collection || hasDataToPush) && userCanCrud && (
                       <>
                         <MyEuiHorizontalRule
                           margin="s"
@@ -415,7 +417,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                               <StatusActionButton
                                 status={caseData.status}
                                 onStatusChanged={changeStatus}
-                                disabled={!userCanCrud}
                                 isLoading={isLoading && updateKey === 'status'}
                               />
                             </EuiFlexItem>
@@ -447,16 +448,15 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 />
                 <TagList
                   data-test-subj="case-view-tag-list"
-                  disabled={!userCanCrud}
+                  userCanCrud={userCanCrud}
                   tags={caseData.tags}
                   onSubmit={onSubmitTags}
                   isLoading={isLoading && updateKey === 'tags'}
-                  owner={[caseData.owner]}
                 />
                 <EditConnector
                   caseFields={caseData.connector.fields}
                   connectors={connectors}
-                  disabled={!userCanCrud}
+                  userCanCrud={userCanCrud}
                   hideConnectorServiceNowSir={
                     subCaseId != null || caseData.type === CaseType.collection
                   }
@@ -464,6 +464,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   onSubmit={onSubmitConnector}
                   selectedConnector={caseData.connector.id}
                   userActions={caseUserActions}
+                  permissionsError={permissionsError}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
