@@ -69,7 +69,7 @@ export const useTimelineEventsDetails = ({
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
             request,
             {
-              strategy: 'securitySolutionTimelineSearchStrategy',
+              strategy: 'timelineSearchStrategy',
               abortSignal: abortCtrl.current.signal,
             }
           )

@@ -147,6 +147,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector]);
+
   useEffect(() => {
     if (!actionParams.subAction) {
       editAction('subAction', 'pushToService', index);
