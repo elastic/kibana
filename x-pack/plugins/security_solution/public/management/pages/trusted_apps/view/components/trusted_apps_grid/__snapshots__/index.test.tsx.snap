@@ -427,7 +427,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -722,7 +722,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1017,7 +1017,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1312,7 +1312,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1607,7 +1607,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1902,7 +1902,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2197,7 +2197,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2492,7 +2492,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2787,7 +2787,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3082,7 +3082,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3685,7 +3685,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3980,7 +3980,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4275,7 +4275,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4570,7 +4570,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4865,7 +4865,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5160,7 +5160,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5455,7 +5455,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5750,7 +5750,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6045,7 +6045,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6340,7 +6340,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6900,7 +6900,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7195,7 +7195,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7490,7 +7490,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7785,7 +7785,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8080,7 +8080,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8375,7 +8375,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8670,7 +8670,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8965,7 +8965,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -9260,7 +9260,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -9555,7 +9555,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"

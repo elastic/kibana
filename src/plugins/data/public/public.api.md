@@ -1351,6 +1351,7 @@ export interface IKibanaSearchRequest<Params = any> {
 export interface IKibanaSearchResponse<RawResponse = any> {
     id?: string;
     isPartial?: boolean;
+    isRestored?: boolean;
     isRunning?: boolean;
     loaded?: number;
     rawResponse: RawResponse;
