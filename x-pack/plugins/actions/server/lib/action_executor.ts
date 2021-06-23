@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
+import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
@@ -187,6 +188,17 @@ export class ActionExecutor {
         }
 
         eventLogger.startTiming(event);
+
+        const startEvent = cloneDeep({
+          ...event,
+          event: {
+            ...event.event,
+            action: EVENT_LOG_ACTIONS.executeStart,
+          },
+          message: `action started: ${actionLabel}`,
+        });
+        eventLogger.logEvent(startEvent);
+
         let rawResult: ActionTypeExecutorResult<unknown>;
         try {
           rawResult = await actionType.executor({
