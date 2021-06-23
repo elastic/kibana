@@ -33,6 +33,7 @@ import {
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
+import { validatedRelatedSavedObjects } from './related_saved_objects';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -80,7 +81,7 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, params, apiKey },
+          attributes: { actionId, params, apiKey, relatedSavedObjects },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -121,6 +122,7 @@ export class TaskRunnerFactory {
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request: fakeRequest,
             ...getSourceFromReferences(references),
+            relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
           if (e instanceof ActionTypeDisabledError) {

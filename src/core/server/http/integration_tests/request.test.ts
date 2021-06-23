@@ -163,24 +163,24 @@ describe('KibanaRequest', () => {
 
   describe('events', () => {
     describe('aborted$', () => {
-      it('emits once and completes when request aborted', async (done) => {
+      it('emits once and completes when request aborted', async () => {
         expect.assertions(1);
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
-        router.get({ path: '/', validate: false }, async (context, request, res) => {
-          request.events.aborted$.subscribe({
-            next: nextSpy,
-            complete: () => {
-              expect(nextSpy).toHaveBeenCalledTimes(1);
-              done();
-            },
-          });
 
-          // prevents the server to respond
-          await delay(30000);
-          return res.ok({ body: 'ok' });
+        const done = new Promise<void>((resolve) => {
+          router.get({ path: '/', validate: false }, async (context, request, res) => {
+            request.events.aborted$.subscribe({
+              next: nextSpy,
+              complete: resolve,
+            });
+
+            // prevents the server to respond
+            await delay(30000);
+            return res.ok({ body: 'ok' });
+          });
         });
 
         await server.start();
@@ -191,6 +191,8 @@ describe('KibanaRequest', () => {
           .end();
 
         setTimeout(() => incomingRequest.abort(), 50);
+        await done;
+        expect(nextSpy).toHaveBeenCalledTimes(1);
       });
 
       it('completes & does not emit when request handled', async () => {
@@ -299,25 +301,24 @@ describe('KibanaRequest', () => {
         expect(completeSpy).toHaveBeenCalledTimes(1);
       });
 
-      it('emits once and completes when response is aborted', async (done) => {
+      it('emits once and completes when response is aborted', async () => {
         expect.assertions(2);
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         const nextSpy = jest.fn();
 
-        router.get({ path: '/', validate: false }, async (context, req, res) => {
-          req.events.completed$.subscribe({
-            next: nextSpy,
-            complete: () => {
-              expect(nextSpy).toHaveBeenCalledTimes(1);
-              done();
-            },
-          });
+        const done = new Promise<void>((resolve) => {
+          router.get({ path: '/', validate: false }, async (context, req, res) => {
+            req.events.completed$.subscribe({
+              next: nextSpy,
+              complete: resolve,
+            });
 
-          expect(nextSpy).not.toHaveBeenCalled();
-          await delay(30000);
-          return res.ok({ body: 'ok' });
+            expect(nextSpy).not.toHaveBeenCalled();
+            await delay(30000);
+            return res.ok({ body: 'ok' });
+          });
         });
 
         await server.start();
@@ -327,6 +328,8 @@ describe('KibanaRequest', () => {
           // end required to send request
           .end();
         setTimeout(() => incomingRequest.abort(), 50);
+        await done;
+        expect(nextSpy).toHaveBeenCalledTimes(1);
       });
     });
   });

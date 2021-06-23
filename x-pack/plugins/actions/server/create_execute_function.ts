@@ -16,6 +16,7 @@ import {
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { isSavedObjectExecutionSource } from './lib';
+import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -28,6 +29,7 @@ export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | '
   id: string;
   spaceId: string;
   apiKey: string | null;
+  relatedSavedObjects?: RelatedSavedObjects;
 }
 
 export type ExecutionEnqueuer<T> = (
@@ -43,8 +45,8 @@ export function createExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions): ExecutionEnqueuer<void> {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey }: ExecuteOptions
-  ): Promise<void> {
+    { id, params, spaceId, source, apiKey, relatedSavedObjects }: ExecuteOptions
+  ) {
     if (!isESOCanEncrypt) {
       throw new Error(
         `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
@@ -65,6 +67,7 @@ export function createExecutionEnqueuerFunction({
         actionId: id,
         params,
         apiKey,
+        relatedSavedObjects,
       },
       executionSourceAsSavedObjectReferences(source)
     );

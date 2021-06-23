@@ -2,18 +2,24 @@
 # yarn lockfile v1
 
 
+<<<<<<< HEAD
 "@kbn/i18n@link:../packages/kbn-i18n":
   version "0.0.0"
   uid ""
 
+=======
+>>>>>>> elastic/master
 "@kbn/interpreter@link:../packages/kbn-interpreter":
   version "0.0.0"
   uid ""
 
+<<<<<<< HEAD
 "@kbn/monaco@link:../packages/kbn-monaco":
   version "0.0.0"
   uid ""
 
+=======
+>>>>>>> elastic/master
 "@kbn/optimizer@link:../packages/kbn-optimizer":
   version "0.0.0"
   uid ""
