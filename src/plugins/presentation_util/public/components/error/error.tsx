@@ -21,11 +21,11 @@ export interface Props {
 
 const strings = {
   getDescription: () =>
-    i18n.translate('xpack.canvas.errorComponent.description', {
+    i18n.translate('presentationUtil.errorComponent.description', {
       defaultMessage: 'Expression failed with the message:',
     }),
   getTitle: () =>
-    i18n.translate('xpack.canvas.errorComponent.title', {
+    i18n.translate('presentationUtil.errorComponent.title', {
       defaultMessage: 'Whoops! Expression failed',
     }),
 };
