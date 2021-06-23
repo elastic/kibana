@@ -289,6 +289,7 @@ test('uses relatedSavedObjects when provided', async () => {
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
+    isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [
       {
