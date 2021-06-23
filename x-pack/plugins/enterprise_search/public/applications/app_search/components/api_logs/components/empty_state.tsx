@@ -18,14 +18,14 @@ export const EmptyState: React.FC = () => (
     title={
       <h2>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.emptyTitle', {
-          defaultMessage: 'Perform your first API call',
+          defaultMessage: 'No API events in the last 24 hours',
         })}
       </h2>
     }
     body={
       <p>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.emptyDescription', {
-          defaultMessage: "Check back after you've performed some API calls.",
+          defaultMessage: 'Logs will update in real-time when an API request occurs.',
         })}
       </p>
     }
