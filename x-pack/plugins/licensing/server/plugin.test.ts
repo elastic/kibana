@@ -6,9 +6,10 @@
  */
 
 import { take, toArray } from 'rxjs/operators';
+import { estypes } from '@elastic/elasticsearch';
 import moment from 'moment';
 import { LicenseType } from '../common/types';
-import { ElasticsearchError, RawLicense } from './types';
+import { ElasticsearchError } from './types';
 import { LicensingPlugin } from './plugin';
 import {
   coreMock,
@@ -17,7 +18,9 @@ import {
 } from '../../../../src/core/server/mocks';
 import { IClusterClient } from '../../../../src/core/server';
 
-function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
+function buildRawLicense(
+  options: Partial<estypes.XpackInfoMinimalLicenseInformation> = {}
+): estypes.XpackInfoMinimalLicenseInformation {
   return {
     uid: 'uid-000000001234',
     status: 'active',

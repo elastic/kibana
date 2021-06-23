@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 import type { IClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
-import { ILicense, LicenseStatus, LicenseType } from '../common/types';
+import { ILicense } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 export interface ElasticsearchError extends Error {
@@ -21,26 +21,6 @@ export interface ElasticsearchError extends Error {
 export interface RawFeature {
   available: boolean;
   enabled: boolean;
-}
-
-/**
- * Results from remote request fetching raw feature sets.
- * @internal
- */
-export interface RawFeatures {
-  [key: string]: RawFeature;
-}
-
-/**
- * Results from remote request fetching a raw license.
- * @internal
- */
-export interface RawLicense {
-  uid: string;
-  status: LicenseStatus;
-  expiry_date_in_millis: number;
-  type: LicenseType;
-  mode: LicenseType;
 }
 
 /**

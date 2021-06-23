@@ -10,6 +10,7 @@ import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
+import { estypes } from '@elastic/elasticsearch';
 import { MaybePromise } from '@kbn/utility-types';
 import { isPromise } from '@kbn/std';
 import {
@@ -20,12 +21,18 @@ import {
   IClusterClient,
 } from 'src/core/server';
 
-import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
+import {
+  ILicense,
+  PublicLicense,
+  PublicFeatures,
+  LicenseType,
+  LicenseStatus,
+} from '../common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
-import { ElasticsearchError, RawLicense, RawFeatures } from './types';
+import { ElasticsearchError } from './types';
 import { registerRoutes } from './routes';
 import { FeatureUsageService } from './services';
 
@@ -34,17 +41,22 @@ import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { getPluginStatus$ } from './plugin_status';
 
-function normalizeServerLicense(license: RawLicense): PublicLicense {
+function normalizeServerLicense(
+  license: estypes.XpackInfoMinimalLicenseInformation
+): PublicLicense {
   return {
     uid: license.uid,
-    type: license.type,
-    mode: license.mode,
-    expiryDateInMillis: license.expiry_date_in_millis,
-    status: license.status,
+    type: license.type as LicenseType,
+    mode: license.mode as LicenseType,
+    expiryDateInMillis:
+      typeof license.expiry_date_in_millis === 'string'
+        ? parseInt(license.expiry_date_in_millis, 10)
+        : license.expiry_date_in_millis,
+    status: license.status as LicenseStatus,
   };
 }
 
-function normalizeFeatures(rawFeatures: RawFeatures) {
+function normalizeFeatures(rawFeatures: estypes.XpackInfoFeatures) {
   const features: PublicFeatures = {};
   for (const [name, feature] of Object.entries(rawFeatures)) {
     features[name] = {
@@ -167,11 +179,13 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
     try {
       const { body: response } = await client.asInternalUser.xpack.info({
+        // @ts-expect-error `accept_enterprise` is not present in the client definition
         accept_enterprise: true,
       });
-      const normalizedLicense = response.license
-        ? normalizeServerLicense(response.license)
-        : undefined;
+      const normalizedLicense =
+        response.license && response.license.type !== 'missing'
+          ? normalizeServerLicense(response.license)
+          : undefined;
       const normalizedFeatures = response.features
         ? normalizeFeatures(response.features)
         : undefined;
