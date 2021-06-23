@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+
 export {
   SendRequestConfig,
   SendRequestResponse,
@@ -16,6 +18,10 @@ export {
   extractQueryParams,
   GlobalFlyout,
   attemptToURIDecode,
+  PageLoading,
+  PageError,
+  Error,
+  SectionLoading,
 } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
