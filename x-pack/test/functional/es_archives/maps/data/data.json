@@ -136,6 +136,41 @@
   }
 }
 
+{
+  "type": "doc",
+  "value": {
+    "id": "999",
+    "index": "geo_shapes",
+    "source": {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              100,
+              5
+            ],
+            [
+              95,
+              -5
+            ],
+            [
+              105,
+              -5
+            ],
+            [
+              100,
+              5
+            ]
+          ]
+        ],
+        "type": "polygon"
+      },
+      "name": "feature-to-delete",
+      "prop1": 9
+    }
+  }
+}
+
 
 {
   "type": "doc",
