@@ -78,9 +78,9 @@ For example, given the following error message:
 Unable to migrate the corrupt saved object document with _id: 'marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275'. To allow migrations to proceed, please delete this document from the [.kibana_7.12.0_001] index.
 --------------------------------------------
 
-The following steps must be followed to allow the upgrade migration to succeed:
+The following steps must be followed to delete the document that is causing the migration to fail:
 
-. Remove the write block which the migration system has placed on the index:
+. Remove the write block which the migration system has placed on the previous index:
 +
 [source,sh]
 --------------------------------------------
@@ -101,7 +101,9 @@ DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab
 
 . Restart {kib}.
 
-Please be aware the Dashboard with ID `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` that belongs to the space `marketing_space` **will no longer be available**.
+In this example, the Dashboard with ID `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` that belongs to the space `marketing_space` **will no longer be available**.
+
+Be sure you have a snapshot before you delete the corrupt document. If restoring from a snapshot is not an option, it is recommended to also delete the `temp` and `target` indices the migration created before restarting {kib} and retrying.
 
 [float]
 ===== User defined index templates that causes new `.kibana*` indices to have incompatible settings or mappings
