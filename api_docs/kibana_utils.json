@@ -6123,71 +6123,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonArray",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonArray",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonValue",
-            "text": "JsonValue"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 16
-        },
-        "deprecated": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonObject",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonObject",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.JsonObject.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/typed_json.ts",
-              "lineNumber": 12
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-public.KibanaServerError",
         "type": "Interface",
         "tags": [],
@@ -6955,39 +6890,6 @@
         ],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-public.JsonValue",
-        "type": "Type",
-        "tags": [],
-        "label": "JsonValue",
-        "description": [],
-        "signature": [
-          "string | number | boolean | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonObject",
-            "text": "JsonObject"
-          },
-          " | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " | null"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
           "lineNumber": 9
         },
         "deprecated": false,
@@ -10364,71 +10266,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonArray",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonArray",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " extends ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonValue",
-            "text": "JsonValue"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 16
-        },
-        "deprecated": false,
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonObject",
-        "type": "Interface",
-        "tags": [],
-        "label": "JsonObject",
-        "description": [],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
-          "lineNumber": 11
-        },
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-common.JsonObject.Unnamed",
-            "type": "Any",
-            "tags": [],
-            "label": "Unnamed",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "source": {
-              "path": "src/plugins/kibana_utils/common/typed_json.ts",
-              "lineNumber": 12
-            },
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-common.KibanaServerError",
         "type": "Interface",
         "tags": [],
@@ -11611,39 +11448,6 @@
         ],
         "source": {
           "path": "src/plugins/kibana_utils/common/create_getter_setter.ts",
-          "lineNumber": 9
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
-        "id": "def-common.JsonValue",
-        "type": "Type",
-        "tags": [],
-        "label": "JsonValue",
-        "description": [],
-        "signature": [
-          "string | number | boolean | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonObject",
-            "text": "JsonObject"
-          },
-          " | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonArray",
-            "text": "JsonArray"
-          },
-          " | null"
-        ],
-        "source": {
-          "path": "src/plugins/kibana_utils/common/typed_json.ts",
           "lineNumber": 9
         },
         "deprecated": false,

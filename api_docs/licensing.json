@@ -966,14 +966,14 @@
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/public/plugin.ts",
-                "lineNumber": 116
+                "lineNumber": 121
               }
             },
             {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/public/components/report_listing.tsx",
-                "lineNumber": 61
+                "lineNumber": 60
               }
             },
             {
@@ -987,7 +987,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 84
+                "lineNumber": 86
               }
             },
             {
@@ -1001,7 +1001,7 @@
               "plugin": "ml",
               "link": {
                 "path": "x-pack/plugins/ml/public/plugin.ts",
-                "lineNumber": 141
+                "lineNumber": 138
               }
             },
             {
@@ -1022,7 +1022,7 @@
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/public/plugin.ts",
-                "lineNumber": 94
+                "lineNumber": 100
               }
             },
             {
@@ -3074,7 +3074,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 229
+                "lineNumber": 228
               }
             },
             {
@@ -3102,7 +3102,7 @@
               "plugin": "alerting",
               "link": {
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
-                "lineNumber": 168
+                "lineNumber": 170
               }
             },
             {
@@ -3120,17 +3120,17 @@
               }
             },
             {
-              "plugin": "remoteClusters",
-              "link": {
-                "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-                "lineNumber": 73
-              }
-            },
-            {
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/server/plugin.ts",
                 "lineNumber": 214
+              }
+            },
+            {
+              "plugin": "remoteClusters",
+              "link": {
+                "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
+                "lineNumber": 73
               }
             },
             {

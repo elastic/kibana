@@ -972,17 +972,10 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/register_feature.ts",
-                "lineNumber": 18
-              }
-            },
-            {
               "plugin": "apm",
               "link": {
                 "path": "x-pack/plugins/apm/public/plugin.ts",
-                "lineNumber": 85
+                "lineNumber": 86
               }
             },
             {

@@ -1770,7 +1770,7 @@
         "description": [],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 409
+          "lineNumber": 425
         },
         "deprecated": false,
         "children": [
@@ -1783,7 +1783,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 410
+              "lineNumber": 426
             },
             "deprecated": false
           },
@@ -1796,7 +1796,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 411
+              "lineNumber": 427
             },
             "deprecated": false
           },
@@ -1808,11 +1808,11 @@
             "label": "links",
             "description": [],
             "signature": [
-              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
+              "{ readonly canvas: { readonly guide: string; }; readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly overview: string; readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly search: { readonly sessions: string; readonly sessionLimits: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; readonly runtimeFields: string; }; readonly addData: string; readonly kibana: string; readonly upgradeAssistant: string; readonly rollupJobs: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ bulkIndexAlias: string; byteSizeUnits: string; createAutoFollowPattern: string; createFollower: string; createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createRollupJobsRequest: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putIndexTemplateV1: string; putWatch: string; simulatePipeline: string; timeUnits: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; readonly fleet: Readonly<{ guide: string; fleetServer: string; fleetServerAddFleetServer: string; settings: string; settingsFleetServerHostSettings: string; troubleshooting: string; elasticAgent: string; datastreams: string; datastreamsNamingScheme: string; upgradeElasticAgent: string; upgradeElasticAgent712lower: string; }>; }"
             ],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 412
+              "lineNumber": 428
             },
             "deprecated": false
           }
@@ -6789,7 +6789,7 @@
               "defines a type of UI element {@link UiSettingsType}"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined"
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
@@ -7279,7 +7279,7 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
           "UiCounterMetricType",
           "; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
@@ -7870,7 +7870,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\""
         ],
         "source": {
           "path": "src/core/types/ui_settings.ts",
@@ -8527,21 +8527,21 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 106
+                  "lineNumber": 107
                 }
               },
               {
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 110
+                  "lineNumber": 111
                 }
               },
               {
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 182
+                  "lineNumber": 185
                 }
               },
               {
@@ -9236,13 +9236,6 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 102
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
                   "lineNumber": 103
                 }
               },
@@ -9250,7 +9243,14 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 120
+                  "lineNumber": 104
+                }
+              },
+              {
+                "plugin": "licensing",
+                "link": {
+                  "path": "x-pack/plugins/licensing/server/plugin.ts",
+                  "lineNumber": 121
                 }
               }
             ],
@@ -9355,13 +9355,6 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 113
-                }
-              },
-              {
-                "plugin": "licensing",
-                "link": {
-                  "path": "x-pack/plugins/licensing/server/plugin.ts",
                   "lineNumber": 114
                 }
               },
@@ -9376,7 +9369,14 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 118
+                  "lineNumber": 116
+                }
+              },
+              {
+                "plugin": "licensing",
+                "link": {
+                  "path": "x-pack/plugins/licensing/server/plugin.ts",
+                  "lineNumber": 119
                 }
               },
               {
@@ -9495,7 +9495,7 @@
                 "plugin": "indexManagement",
                 "link": {
                   "path": "x-pack/plugins/index_management/server/routes/api/templates/register_get_routes.ts",
-                  "lineNumber": 62
+                  "lineNumber": 74
                 }
               },
               {
@@ -10113,7 +10113,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 301
+          "lineNumber": 322
         },
         "deprecated": true,
         "references": [
@@ -10167,7 +10167,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 307
+              "lineNumber": 328
             },
             "deprecated": false,
             "children": [
@@ -10190,7 +10190,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 307
+                  "lineNumber": 328
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10207,7 +10207,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 307
+                  "lineNumber": 328
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10235,7 +10235,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 309
+              "lineNumber": 330
             },
             "deprecated": false,
             "children": [
@@ -10257,7 +10257,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 309
+                  "lineNumber": 330
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10274,7 +10274,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 309
+                  "lineNumber": 330
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -10294,7 +10294,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 311
+              "lineNumber": 332
             },
             "deprecated": false,
             "children": [],
@@ -10981,7 +10981,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 470
+          "lineNumber": 471
         },
         "deprecated": false,
         "children": [
@@ -11005,7 +11005,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 472
+              "lineNumber": 473
             },
             "deprecated": false
           },
@@ -11029,7 +11029,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 474
+              "lineNumber": 475
             },
             "deprecated": false
           },
@@ -11053,7 +11053,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 476
+              "lineNumber": 477
             },
             "deprecated": false
           },
@@ -11086,7 +11086,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 478
+              "lineNumber": 479
             },
             "deprecated": false
           },
@@ -11110,7 +11110,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 483
+              "lineNumber": 484
             },
             "deprecated": false
           },
@@ -11134,7 +11134,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 485
+              "lineNumber": 486
             },
             "deprecated": false
           },
@@ -11158,7 +11158,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 487
+              "lineNumber": 488
             },
             "deprecated": false
           },
@@ -11182,7 +11182,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 489
+              "lineNumber": 490
             },
             "deprecated": false
           },
@@ -11206,7 +11206,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 491
+              "lineNumber": 492
             },
             "deprecated": false
           },
@@ -11230,7 +11230,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 493
+              "lineNumber": 494
             },
             "deprecated": false
           },
@@ -11254,7 +11254,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 495
+              "lineNumber": 496
             },
             "deprecated": false
           },
@@ -11280,7 +11280,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 497
+              "lineNumber": 498
             },
             "deprecated": false,
             "returnComment": [],
@@ -11300,7 +11300,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 518
+          "lineNumber": 519
         },
         "deprecated": false,
         "children": [
@@ -11324,7 +11324,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 520
+              "lineNumber": 521
             },
             "deprecated": false
           },
@@ -11348,7 +11348,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 522
+              "lineNumber": 523
             },
             "deprecated": false
           },
@@ -11372,7 +11372,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 524
+              "lineNumber": 525
             },
             "deprecated": false
           },
@@ -11396,7 +11396,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 526
+              "lineNumber": 527
             },
             "deprecated": false
           },
@@ -11420,7 +11420,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 528
+              "lineNumber": 529
             },
             "deprecated": false
           },
@@ -11444,7 +11444,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 530
+              "lineNumber": 531
             },
             "deprecated": false
           }
@@ -12175,7 +12175,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 218
+          "lineNumber": 239
         },
         "deprecated": false,
         "children": [
@@ -12190,7 +12190,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 222
+              "lineNumber": 243
             },
             "deprecated": false
           },
@@ -12208,7 +12208,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 227
+              "lineNumber": 248
             },
             "deprecated": false
           },
@@ -12226,7 +12226,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 233
+              "lineNumber": 254
             },
             "deprecated": false
           },
@@ -12244,7 +12244,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 240
+              "lineNumber": 261
             },
             "deprecated": false
           },
@@ -12262,7 +12262,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 252
+              "lineNumber": 273
             },
             "deprecated": false
           }
@@ -12537,14 +12537,14 @@
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 105
+                  "lineNumber": 106
                 }
               },
               {
                 "plugin": "licensing",
                 "link": {
                   "path": "x-pack/plugins/licensing/server/plugin.ts",
-                  "lineNumber": 117
+                  "lineNumber": 118
                 }
               },
               {
@@ -15304,7 +15304,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/rendering/types.ts",
-          "lineNumber": 68
+          "lineNumber": 69
         },
         "deprecated": false,
         "children": [
@@ -15322,7 +15322,7 @@
             ],
             "source": {
               "path": "src/core/server/rendering/types.ts",
-              "lineNumber": 73
+              "lineNumber": 74
             },
             "deprecated": false
           }
@@ -16059,14 +16059,14 @@
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 457
+              "lineNumber": 460
             }
           },
           {
             "plugin": "securitySolution",
             "link": {
               "path": "x-pack/plugins/security_solution/server/lib/telemetry/sender.ts",
-              "lineNumber": 476
+              "lineNumber": 479
             }
           },
           {
@@ -19790,7 +19790,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 282
+          "lineNumber": 303
         },
         "deprecated": false,
         "children": [
@@ -19814,7 +19814,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 288
+              "lineNumber": 309
             },
             "deprecated": false,
             "children": [
@@ -19837,7 +19837,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 288
+                  "lineNumber": 309
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19854,7 +19854,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 288
+                  "lineNumber": 309
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19882,7 +19882,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 290
+              "lineNumber": 311
             },
             "deprecated": false,
             "children": [
@@ -19904,7 +19904,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 290
+                  "lineNumber": 311
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19921,7 +19921,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 290
+                  "lineNumber": 311
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -19941,7 +19941,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 292
+              "lineNumber": 313
             },
             "deprecated": false,
             "children": [],
@@ -20080,7 +20080,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 337
+          "lineNumber": 358
         },
         "deprecated": false,
         "children": [
@@ -20096,7 +20096,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 338
+              "lineNumber": 359
             },
             "deprecated": false
           },
@@ -20116,7 +20116,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 339
+              "lineNumber": 360
             },
             "deprecated": false
           },
@@ -20134,7 +20134,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 362
+              "lineNumber": 383
             },
             "deprecated": false
           },
@@ -20168,7 +20168,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 366
+              "lineNumber": 387
             },
             "deprecated": false
           }
@@ -20375,6 +20375,42 @@
               "lineNumber": 210
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PluginManifest.owner",
+            "type": "Object",
+            "tags": [],
+            "label": "owner",
+            "description": [
+              "\nTODO: make required once all internal plugins have this specified."
+            ],
+            "signature": [
+              "{ readonly name: string; readonly githubTeam?: string | undefined; } | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 215
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.PluginManifest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nTODO: make required once all plugins specify this.\nA brief description of what this plugin does and any capabilities it provides."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/core/server/plugins/types.ts",
+              "lineNumber": 231
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -20463,7 +20499,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 437
+          "lineNumber": 438
         },
         "deprecated": false,
         "children": [
@@ -20567,7 +20603,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 438
+              "lineNumber": 439
             },
             "deprecated": false
           }
@@ -21431,7 +21467,7 @@
             ],
             "source": {
               "path": "src/core/server/status/types.ts",
-              "lineNumber": 202
+              "lineNumber": 205
             },
             "deprecated": false,
             "children": [
@@ -21456,7 +21492,7 @@
                 ],
                 "source": {
                   "path": "src/core/server/status/types.ts",
-                  "lineNumber": 202
+                  "lineNumber": 205
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -21487,7 +21523,7 @@
             ],
             "source": {
               "path": "src/core/server/status/types.ts",
-              "lineNumber": 208
+              "lineNumber": 211
             },
             "deprecated": false
           },
@@ -21514,7 +21550,7 @@
             ],
             "source": {
               "path": "src/core/server/status/types.ts",
-              "lineNumber": 220
+              "lineNumber": 223
             },
             "deprecated": false
           },
@@ -21532,7 +21568,7 @@
             ],
             "source": {
               "path": "src/core/server/status/types.ts",
-              "lineNumber": 226
+              "lineNumber": 229
             },
             "deprecated": false,
             "returnComment": [],
@@ -21732,7 +21768,7 @@
               "defines a type of UI element {@link UiSettingsType}"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined"
             ],
             "source": {
               "path": "src/core/types/ui_settings.ts",
@@ -22271,7 +22307,7 @@
         "label": "EcsEventCategory",
         "description": [],
         "signature": [
-          "\"host\" | \"database\" | \"package\" | \"session\" | \"registry\" | \"network\" | \"web\" | \"file\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
+          "\"host\" | \"database\" | \"package\" | \"session\" | \"file\" | \"registry\" | \"network\" | \"web\" | \"process\" | \"authentication\" | \"configuration\" | \"driver\" | \"iam\" | \"intrusion_detection\" | \"malware\""
         ],
         "source": {
           "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",
@@ -22288,7 +22324,7 @@
         "label": "EcsEventKind",
         "description": [],
         "signature": [
-          "\"alert\" | \"event\" | \"state\" | \"metric\" | \"signal\" | \"pipeline_error\""
+          "\"alert\" | \"metric\" | \"event\" | \"state\" | \"signal\" | \"pipeline_error\""
         ],
         "source": {
           "path": "node_modules/@kbn/logging/target/ecs/event.d.ts",
@@ -22998,21 +23034,21 @@
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 109
+              "lineNumber": 110
             }
           },
           {
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 151
+              "lineNumber": 154
             }
           },
           {
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 180
+              "lineNumber": 183
             }
           },
           {
@@ -23452,13 +23488,6 @@
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 102
-            }
-          },
-          {
-            "plugin": "licensing",
-            "link": {
-              "path": "x-pack/plugins/licensing/server/plugin.ts",
               "lineNumber": 103
             }
           },
@@ -23466,14 +23495,14 @@
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 111
+              "lineNumber": 104
             }
           },
           {
             "plugin": "licensing",
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
-              "lineNumber": 114
+              "lineNumber": 112
             }
           },
           {
@@ -23481,6 +23510,13 @@
             "link": {
               "path": "x-pack/plugins/licensing/server/plugin.ts",
               "lineNumber": 115
+            }
+          },
+          {
+            "plugin": "licensing",
+            "link": {
+              "path": "x-pack/plugins/licensing/server/plugin.ts",
+              "lineNumber": 116
             }
           },
           {
@@ -23843,7 +23879,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 444
+          "lineNumber": 465
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -23894,7 +23930,7 @@
           "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
         ],
         "signature": [
-          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
+          "{ type?: \"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\" | undefined; options?: string[] | undefined; description?: string | undefined; name?: string | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; metric?: { type: ",
           "UiCounterMetricType",
           "; name: string; } | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
@@ -24029,7 +24065,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 325
+          "lineNumber": 346
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24056,7 +24092,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 508
+          "lineNumber": 509
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -24071,7 +24107,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"select\" | \"array\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"json\" | \"image\" | \"markdown\" | \"select\" | \"array\""
         ],
         "source": {
           "path": "src/core/types/ui_settings.ts",

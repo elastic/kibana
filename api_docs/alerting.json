@@ -25,13 +25,7 @@
             "text": "Alert"
           },
           "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "common",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-common.JsonObject",
-            "text": "JsonObject"
-          }
+          "JsonObject"
         ],
         "source": {
           "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
@@ -64,7 +58,7 @@
           ],
           "label": "registerNavigation",
           "description": [
-            "\nRegister a customized view of the particular rule type. Stack Management provides a generic overview, but a developer can register a\ncustom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do\nanything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently\nthe trigger_actions_ui plugin uses it to expose the link from the generic rule view in Stack Management.\n"
+            "\nRegister a customized view of the particular rule type. Stack Management provides a generic overview, but a developer can register a\ncustom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do\nanything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently\nthe trigger_actions_ui plugin uses it to expose the link from the generic rule details view in Stack Management.\n"
           ],
           "signature": [
             "(applicationId: string, ruleType: string, handler: ",
@@ -133,13 +127,7 @@
                   "text": "Alert"
                 },
                 "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
-                {
-                  "pluginId": "kibanaUtils",
-                  "scope": "common",
-                  "docId": "kibKibanaUtilsPluginApi",
-                  "section": "def-common.JsonObject",
-                  "text": "JsonObject"
-                }
+                "JsonObject"
               ],
               "source": {
                 "path": "x-pack/plugins/alerting/public/plugin.ts",
@@ -156,7 +144,7 @@
           "tags": [],
           "label": "registerDefaultNavigation",
           "description": [
-            "\nRegister a customized view for all rule types. Stack Management provides a generic overview, but a developer can register a\ncustom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do\nanything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently\nthe trigger_actions_ui plugin uses it to expose the link from the generic rule view in Stack Management.\n"
+            "\nRegister a customized view for all rule types with this application id. Stack Management provides a generic overview, but a developer can register a\ncustom navigation to provide the user an extra link to a more curated view. The alerting plugin doesn't actually do\nanything with this information, but it can be used by other plugins via the `getNavigation` functionality. Currently\nthe trigger_actions_ui plugin uses it to expose the link from the generic rule details view in Stack Management.\n"
           ],
           "signature": [
             "(applicationId: string, handler: ",
@@ -210,13 +198,7 @@
                   "text": "Alert"
                 },
                 "<never>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">) => string | ",
-                {
-                  "pluginId": "kibanaUtils",
-                  "scope": "common",
-                  "docId": "kibKibanaUtilsPluginApi",
-                  "section": "def-common.JsonObject",
-                  "text": "JsonObject"
-                }
+                "JsonObject"
               ],
               "source": {
                 "path": "x-pack/plugins/alerting/public/plugin.ts",
@@ -1255,7 +1237,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 85
+          "lineNumber": 87
         },
         "deprecated": false,
         "children": [
@@ -1279,7 +1261,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 86
+              "lineNumber": 88
             },
             "deprecated": false,
             "children": [
@@ -1302,7 +1284,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 94
+                  "lineNumber": 96
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1322,7 +1304,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 105
+          "lineNumber": 107
         },
         "deprecated": false,
         "children": [
@@ -1340,7 +1322,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 106
+              "lineNumber": 108
             },
             "deprecated": false,
             "returnComment": [],
@@ -1374,7 +1356,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 107
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [
@@ -1397,7 +1379,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 107
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1427,7 +1409,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 108
+              "lineNumber": 110
             },
             "deprecated": false,
             "children": [
@@ -1450,7 +1432,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 109
+                  "lineNumber": 111
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1478,7 +1460,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 111
+              "lineNumber": 113
             },
             "deprecated": false,
             "returnComment": [],
@@ -3199,7 +3181,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "deprecated": false,
         "children": [
@@ -3211,17 +3193,11 @@
             "label": "state",
             "description": [],
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.JsonObject",
-                "text": "JsonObject"
-              }
+              "JsonObject"
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-              "lineNumber": 14
+              "lineNumber": 13
             },
             "deprecated": false
           }
@@ -3396,7 +3372,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-          "lineNumber": 10
+          "lineNumber": 9
         },
         "deprecated": false,
         "children": [
@@ -3409,7 +3385,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-              "lineNumber": 11
+              "lineNumber": 10
             },
             "deprecated": false
           }
@@ -3670,7 +3646,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
-          "lineNumber": 16
+          "lineNumber": 15
         },
         "deprecated": false,
         "initialIsOpen": false
