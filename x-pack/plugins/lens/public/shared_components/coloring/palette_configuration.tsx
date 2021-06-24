@@ -343,7 +343,7 @@ export function CustomizablePalette({
                 activePalette,
                 {
                   colorStops,
-                  steps: activePalette.params!.steps || DEFAULT_COLOR_STEPS,
+                  steps: activePalette.params?.steps || DEFAULT_COLOR_STEPS,
                   rangeMin: colorStops[0]?.stop,
                   rangeMax: colorStops[colorStops.length - 1]?.stop,
                 },
