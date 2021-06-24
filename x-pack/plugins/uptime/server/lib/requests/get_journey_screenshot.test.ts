@@ -32,19 +32,17 @@ describe('getJourneyScreenshot', () => {
         checkGroup: 'checkGroup',
         stepIndex: 0,
       })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "synthetics": Object {
-          "blob": "image data",
-          "blob_mime": "image/jpeg",
-          "step": Object {
-            "name": "load homepage",
-          },
-          "type": "step/screenshot",
+    ).toEqual({
+      synthetics: {
+        blob: 'image data',
+        blob_mime: 'image/jpeg',
+        step: {
+          name: 'load homepage',
         },
-        "totalSteps": 0,
-      }
-    `);
+        type: 'step/screenshot',
+      },
+      totalSteps: 0,
+    });
   });
 
   it('returns ref data', async () => {
