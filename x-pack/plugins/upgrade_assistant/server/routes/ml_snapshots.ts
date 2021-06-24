@@ -31,7 +31,7 @@ const createMlOperation = async (
 ) => {
   const foundSnapshots = await findMlOperation(savedObjectsClient, attributes.snapshotId);
 
-  if (foundSnapshots.total !== 0) {
+  if (foundSnapshots?.total > 0) {
     throw new Error(`A ML operation is already in progress for snapshot: ${attributes.snapshotId}`);
   }
 
@@ -181,7 +181,7 @@ export function registerMlSnapshotRoutes({ router }: RouteDependencies) {
           const foundSnapshots = await findMlOperation(savedObjectsClient, snapshotId);
 
           // If snapshot is *not* found in SO, assume there has not been an upgrade operation started
-          if (foundSnapshots.total === 0) {
+          if (typeof foundSnapshots === 'undefined' || foundSnapshots.total === 0) {
             return response.ok({
               body: {
                 snapshotId,

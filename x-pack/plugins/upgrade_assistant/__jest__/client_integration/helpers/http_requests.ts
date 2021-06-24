@@ -62,19 +62,25 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
-  const setUpgradeMlSnapshotResponse = (response?: object) => {
+  const setUpgradeMlSnapshotResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
     server.respondWith('POST', `${API_BASE_PATH}/ml_snapshots`, [
-      200,
+      status,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
+      JSON.stringify(body),
     ]);
   };
 
-  const setDeleteMlSnapshotResponse = (response?: object) => {
+  const setDeleteMlSnapshotResponse = (response?: object, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
     server.respondWith('DELETE', `${API_BASE_PATH}/ml_snapshots/:jobId/:snapshotId`, [
-      200,
+      status,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
+      JSON.stringify(body),
     ]);
   };
 

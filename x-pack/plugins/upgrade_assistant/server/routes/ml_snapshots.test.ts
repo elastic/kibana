@@ -8,12 +8,15 @@
 import { kibanaResponseFactory } from 'src/core/server';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
+import { registerMlSnapshotRoutes } from './ml_snapshots';
 
 jest.mock('../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
 
-import { registerMlSnapshotRoutes } from './ml_snapshots';
+const JOB_ID = 'job_id';
+const SNAPSHOT_ID = 'snapshot_id';
+const NODE_ID = 'node_id';
 
 describe('ML snapshots APIs', () => {
   let mockRouter: MockRouter;
@@ -32,13 +35,15 @@ describe('ML snapshots APIs', () => {
   });
 
   describe('POST /api/upgrade_assistant/ml_snapshots', () => {
-    it('returns 200 status', async () => {
+    it('returns 200 status and in_progress status', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .updateModelSnapshot as jest.Mock).mockResolvedValue({
+        .upgradeJobSnapshot as jest.Mock).mockResolvedValue({
         body: {
-          acknowledged: true,
+          node: NODE_ID,
+          completed: false,
         },
       });
+
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
         pathPattern: '/api/upgrade_assistant/ml_snapshots',
@@ -46,8 +51,8 @@ describe('ML snapshots APIs', () => {
         routeHandlerContextMock,
         createRequestMock({
           body: {
-            snapshotId: 'snapshot_id1',
-            jobId: 'job_id1',
+            snapshotId: SNAPSHOT_ID,
+            jobId: JOB_ID,
           },
         }),
         kibanaResponseFactory
@@ -55,13 +60,48 @@ describe('ML snapshots APIs', () => {
 
       expect(resp.status).toEqual(200);
       expect(resp.payload).toEqual({
-        acknowledged: true,
+        jobId: JOB_ID,
+        nodeId: NODE_ID,
+        snapshotId: SNAPSHOT_ID,
+        status: 'in_progress',
+      });
+    });
+
+    it('returns 200 status and complete status', async () => {
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+        .upgradeJobSnapshot as jest.Mock).mockResolvedValue({
+        body: {
+          node: NODE_ID,
+          completed: true,
+        },
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'post',
+        pathPattern: '/api/upgrade_assistant/ml_snapshots',
+      })(
+        routeHandlerContextMock,
+        createRequestMock({
+          body: {
+            snapshotId: SNAPSHOT_ID,
+            jobId: JOB_ID,
+          },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        jobId: JOB_ID,
+        nodeId: NODE_ID,
+        snapshotId: SNAPSHOT_ID,
+        status: 'complete',
       });
     });
 
     it('returns an error if it throws', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-        .updateModelSnapshot as jest.Mock).mockRejectedValue(new Error('scary error!'));
+        .upgradeJobSnapshot as jest.Mock).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
           method: 'post',
@@ -70,8 +110,8 @@ describe('ML snapshots APIs', () => {
           routeHandlerContextMock,
           createRequestMock({
             body: {
-              snapshotId: 'snapshot_id1',
-              jobId: 'job_id1',
+              snapshotId: SNAPSHOT_ID,
+              jobId: JOB_ID,
             },
           }),
           kibanaResponseFactory
@@ -119,6 +159,53 @@ describe('ML snapshots APIs', () => {
           kibanaResponseFactory
         )
       ).rejects.toThrow('scary error!');
+    });
+  });
+
+  describe('GET /api/upgrade_assistant/ml_snapshots/:jobId/:snapshotId', () => {
+    it('returns idle status if saved object does not exist', async () => {
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+        .getModelSnapshots as jest.Mock).mockResolvedValue({
+        body: {
+          count: 1,
+          model_snapshots: [
+            {
+              job_id: JOB_ID,
+              min_version: '6.4.0',
+              timestamp: 1575402237000,
+              description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
+              snapshot_id: SNAPSHOT_ID,
+              snapshot_doc_count: 1,
+              model_size_stats: {},
+              latest_record_time_stamp: 1576971072000,
+              latest_result_time_stamp: 1576965600000,
+              retain: false,
+            },
+          ],
+        },
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_snapshots/{jobId}/{snapshotId}',
+      })(
+        routeHandlerContextMock,
+        createRequestMock({
+          params: {
+            snapshotId: SNAPSHOT_ID,
+            jobId: JOB_ID,
+          },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        jobId: JOB_ID,
+        nodeId: undefined,
+        snapshotId: SNAPSHOT_ID,
+        status: 'idle',
+      });
     });
   });
 });

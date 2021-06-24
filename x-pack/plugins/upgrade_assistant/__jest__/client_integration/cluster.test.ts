@@ -19,6 +19,8 @@ describe('Cluster tab', () => {
   });
 
   describe('with deprecations', () => {
+    const snapshotId = '1';
+    const jobId = 'deprecation_check_job';
     const upgradeStatusMockResponse: UpgradeAssistantStatus = {
       readyForUpgrade: false,
       cluster: [
@@ -31,8 +33,8 @@ describe('Cluster tab', () => {
           url: 'doc_url',
           correctiveAction: {
             type: 'mlSnapshot',
-            snapshotId: '1',
-            jobId: 'deprecation_check_job',
+            snapshotId,
+            jobId,
           },
         },
       ],
@@ -103,7 +105,10 @@ describe('Cluster tab', () => {
         );
 
         httpRequestsMockHelpers.setUpgradeMlSnapshotResponse({
-          acknowledged: true,
+          nodeId: 'my_node',
+          snapshotId,
+          jobId,
+          status: 'in_progress',
         });
 
         await act(async () => {
@@ -112,11 +117,52 @@ describe('Cluster tab', () => {
 
         component.update();
 
-        const request = server.requests[server.requests.length - 1];
+        // First, we expect a POST request to upgrade the snapshot
+        const upgradeRequest = server.requests[server.requests.length - 2];
+        expect(upgradeRequest.method).toBe('POST');
+        expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
+        expect(upgradeRequest.status).toEqual(200);
 
-        expect(request.method).toBe('POST');
-        expect(request.url).toBe('/api/upgrade_assistant/ml_snapshots');
-        expect(request.status).toEqual(200);
+        // Next, we expect a GET request to check the status of the upgrade
+        const statusRequest = server.requests[server.requests.length - 1];
+        expect(statusRequest.method).toBe('GET');
+        expect(statusRequest.url).toBe(
+          `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`
+        );
+        expect(statusRequest.status).toEqual(200);
+      });
+
+      test('handles upgrade failure', async () => {
+        const { component, find } = testBed;
+
+        const upgradeButton: HTMLButtonElement | null = flyout!.querySelector(
+          '[data-test-subj="upgradeSnapshotButton"]'
+        );
+
+        const error = {
+          statusCode: 500,
+          error: 'Upgrade snapshot error',
+          message: 'Upgrade snapshot error',
+        };
+
+        httpRequestsMockHelpers.setUpgradeMlSnapshotResponse(undefined, error);
+
+        await act(async () => {
+          upgradeButton!.click();
+        });
+
+        component.update();
+
+        const upgradeRequest = server.requests[server.requests.length - 1];
+        expect(upgradeRequest.method).toBe('POST');
+        expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
+        expect(upgradeRequest.status).toEqual(500);
+
+        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
+          .split(' ')
+          .join('_')}`;
+
+        expect(find(`${accordionTestSubj}.fixMlSnapshotsButton`).text()).toEqual('Failed');
       });
 
       test('deletes snapshots', async () => {
@@ -146,6 +192,45 @@ describe('Cluster tab', () => {
           }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
         );
         expect(request.status).toEqual(200);
+      });
+
+      test('handles delete failure', async () => {
+        const { component, find } = testBed;
+
+        const deleteButton: HTMLButtonElement | null = flyout!.querySelector(
+          '[data-test-subj="deleteSnapshotButton"]'
+        );
+
+        const error = {
+          statusCode: 500,
+          error: 'Upgrade snapshot error',
+          message: 'Upgrade snapshot error',
+        };
+
+        httpRequestsMockHelpers.setDeleteMlSnapshotResponse(undefined, error);
+
+        await act(async () => {
+          deleteButton!.click();
+        });
+
+        component.update();
+
+        const request = server.requests[server.requests.length - 1];
+        const mlDeprecation = upgradeStatusMockResponse.cluster[0];
+
+        expect(request.method).toBe('DELETE');
+        expect(request.url).toBe(
+          `/api/upgrade_assistant/ml_snapshots/${
+            (mlDeprecation.correctiveAction! as MlAction).jobId
+          }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
+        );
+        expect(request.status).toEqual(500);
+
+        const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
+          .split(' ')
+          .join('_')}`;
+
+        expect(find(`${accordionTestSubj}.fixMlSnapshotsButton`).text()).toEqual('Failed');
       });
     });
   });
