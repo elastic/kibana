@@ -5,13 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { VisTypePieServerPlugin } from './plugin';
 
-import { Filter } from '../filters';
-import { IIndexPattern } from '../..';
-
-export function getIndexPatternFromFilter(
-  filter: Filter,
-  indexPatterns: IIndexPattern[]
-): IIndexPattern | undefined {
-  return indexPatterns.find((indexPattern) => indexPattern.id === filter.meta.index);
-}
+export const plugin = () => new VisTypePieServerPlugin();
