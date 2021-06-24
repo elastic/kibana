@@ -17,10 +17,15 @@ import type { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
 
 import { registerRoutes } from './index';
 
+type PackagePolicyServicePublicInterface = Omit<
+  PackagePolicyServiceInterface,
+  'getUpgradePackagePolicyInfo'
+>;
+
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
 
 jest.mock('../../services/package_policy', (): {
-  packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+  packagePolicyService: jest.Mocked<PackagePolicyServicePublicInterface>;
 } => {
   return {
     packagePolicyService: {
@@ -56,6 +61,8 @@ jest.mock('../../services/package_policy', (): {
       runExternalCallbacks: jest.fn((callbackType, newPackagePolicy, context, request) =>
         Promise.resolve(newPackagePolicy)
       ),
+      upgrade: jest.fn(),
+      getUpgradeDryRunDiff: jest.fn(),
     },
   };
 });
