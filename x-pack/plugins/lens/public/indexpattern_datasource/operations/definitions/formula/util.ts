@@ -16,6 +16,8 @@ import type {
 import type { OperationDefinition, IndexPatternColumn, GenericOperationDefinition } from '../index';
 import type { GroupedNodes } from './types';
 
+export const unquotedStringRegex = /[^0-9A-Za-z._@\[\]/]/;
+
 export function groupArgsByType(args: TinymathAST[]) {
   const { namedArgument, variable, function: functions } = groupBy<TinymathAST>(
     args,
@@ -60,6 +62,9 @@ export function getOperationParams(
       args[name] = value;
     }
     if (operation.filterable && (name === 'kql' || name === 'lucene')) {
+      args[name] = value;
+    }
+    if (operation.shiftable && name === 'shift') {
       args[name] = value;
     }
     return args;
@@ -170,7 +175,7 @@ ${'`multiply(sum(price), 1.2)`'}
 Divides the first number by the second number.
 Also works with ${'`/`'} symbol
 
-Example: Calculate profit margin 
+Example: Calculate profit margin
 ${'`sum(profit) / sum(revenue)`'}
 
 Example: ${'`divide(sum(bytes), 2)`'}
@@ -214,7 +219,7 @@ ${'`cbrt(last_value(volume))`'}
     help: `
 Ceiling of value, rounds up.
 
-Example: Round up price to the next dollar 
+Example: Round up price to the next dollar
 ${'`ceil(sum(price))`'}
     `,
   },
@@ -437,6 +442,7 @@ export function findMathNodes(root: TinymathAST | string): TinymathFunction[] {
     }
     return [node, ...node.args.flatMap(flattenMathNodes)].filter(Boolean);
   }
+
   return flattenMathNodes(root);
 }
 

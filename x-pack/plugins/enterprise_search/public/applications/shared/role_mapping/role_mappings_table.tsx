@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
-import { EuiTextColor, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
@@ -46,8 +46,6 @@ interface Props {
   handleDeleteMapping(roleMappingId: string): void;
 }
 
-const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
-
 const getAuthProviderDisplayValue = (authProvider: string) =>
   authProvider === ANY_AUTH_PROVIDER ? ANY_AUTH_PROVIDER_OPTION_LABEL : authProvider;
 
@@ -84,30 +82,24 @@ export const RoleMappingsTable: React.FC<Props> = ({
   const roleCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'roleType',
     name: ROLE_LABEL,
-    render: (_, { rules }: SharedRoleMapping) => getFirstAttributeValue(rules),
+    render: (_, { roleType }: SharedRoleMapping) => roleType,
   };
 
   const accessItemsCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'accessItems',
     name: accessHeader,
-    render: (_, { accessAllEngines, accessItems }: SharedRoleMapping) => (
-      <span data-test-subj="AccessItemsList">
-        {accessAllEngines ? (
-          ALL_LABEL
-        ) : (
-          <>
-            {accessItems.length === 0
-              ? noItemsPlaceholder
-              : accessItems.map(({ name }) => (
-                  <Fragment key={name}>
-                    {name}
-                    <br />
-                  </Fragment>
-                ))}
-          </>
-        )}
-      </span>
-    ),
+    render: (_, { accessAllEngines, accessItems }: SharedRoleMapping) => {
+      // Design calls for showing the first 2 items followed by a +x after those 2.
+      // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
+      const numItems = accessItems.length;
+      if (accessAllEngines || numItems === 0)
+        return <span data-test-subj="AllItems">{ALL_LABEL}</span>;
+      const additionalItems = numItems > 2 ? ` + ${numItems - 2}` : '';
+      const names = accessItems.map((item) => item.name);
+      return (
+        <span data-test-subj="AccessItems">{names.slice(0, 2).join(', ') + additionalItems}</span>
+      );
+    },
   };
 
   const authProviderCol: EuiBasicTableColumn<SharedRoleMapping> = {
@@ -124,11 +116,16 @@ export const RoleMappingsTable: React.FC<Props> = ({
     field: 'id',
     name: '',
     align: 'right',
-    render: (_, { id }: SharedRoleMapping) => (
-      <UsersAndRolesRowActions
-        onManageClick={() => initializeRoleMapping(id)}
-        onDeleteClick={() => handleDeleteMapping(id)}
-      />
+    render: (_, { id, toolTip }: SharedRoleMapping) => (
+      <>
+        {id && (
+          <UsersAndRolesRowActions
+            onManageClick={() => initializeRoleMapping(id)}
+            onDeleteClick={() => handleDeleteMapping(id)}
+          />
+        )}
+        {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
+      </>
     ),
   };
 
@@ -138,6 +135,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
 
   const pagination = {
     hidePerPageOptions: true,
+    pageSize: 10,
   };
 
   const search = {

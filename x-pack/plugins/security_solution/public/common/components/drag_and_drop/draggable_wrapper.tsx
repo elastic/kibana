@@ -6,6 +6,7 @@
  */
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
+import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   Draggable,
@@ -24,12 +25,12 @@ import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/com
 
 import { TruncatableText } from '../truncatable_text';
 import { WithHoverActions } from '../with_hover_actions';
-import { useDraggableKeyboardWrapper } from './draggable_keyboard_wrapper_hook';
 import { DraggableWrapperHoverContent, useGetTimelineId } from './draggable_wrapper_hover_content';
-import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME, getDraggableId, getDroppableId } from './helpers';
+import { getDraggableId, getDroppableId } from './helpers';
 import { ProviderContainer } from './provider_container';
 
 import * as i18n from './translations';
+import { useKibana } from '../../lib/kibana';
 
 // As right now, we do not know what we want there, we will keep it as a placeholder
 export const DragEffects = styled.div``;
@@ -142,6 +143,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
   const dispatch = useDispatch();
+  const { timelines } = useKibana().services;
 
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -297,7 +299,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     setHoverActionsOwnFocus(true);
   }, []);
 
-  const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
+  const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
     closePopover: handleClosePopOverTrigger,
     draggableId: getDraggableId(dataProvider.id),
     fieldName: dataProvider.queryMatch.field,

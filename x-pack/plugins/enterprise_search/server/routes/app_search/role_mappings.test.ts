@@ -8,9 +8,9 @@
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
 import {
+  registerEnableRoleMappingsRoute,
   registerRoleMappingsRoute,
   registerRoleMappingRoute,
-  registerNewRoleMappingRoute,
 } from './role_mappings';
 
 const roleMappingBaseSchema = {
@@ -22,6 +22,29 @@ const roleMappingBaseSchema = {
 };
 
 describe('role mappings routes', () => {
+  describe('POST /api/app_search/role_mappings/enable_role_based_access', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/role_mappings/enable_role_based_access',
+      });
+
+      registerEnableRoleMappingsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/role_mappings/enable_role_based_access',
+      });
+    });
+  });
+
   describe('GET /api/app_search/role_mappings', () => {
     let mockRouter: MockRouter;
 
@@ -40,7 +63,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings',
+        path: '/as/role_mappings',
       });
     });
   });
@@ -63,7 +86,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings',
+        path: '/as/role_mappings',
       });
     });
 
@@ -76,29 +99,6 @@ describe('role mappings routes', () => {
       it('missing required fields', () => {
         const request = { body: {} };
         mockRouter.shouldThrow(request);
-      });
-    });
-  });
-
-  describe('GET /api/app_search/role_mappings/{id}', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/app_search/role_mappings/{id}',
-      });
-
-      registerRoleMappingRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/:id',
       });
     });
   });
@@ -121,7 +121,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/:id',
+        path: '/as/role_mappings/:id',
       });
     });
 
@@ -156,30 +156,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/:id',
-      });
-    });
-  });
-
-  describe('GET /api/app_search/role_mappings/new', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/app_search/role_mappings/new',
-      });
-
-      registerNewRoleMappingRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/new',
+        path: '/as/role_mappings/:id',
       });
     });
   });

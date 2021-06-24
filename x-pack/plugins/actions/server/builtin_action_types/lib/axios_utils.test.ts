@@ -75,7 +75,7 @@ describe('request', () => {
 
   test('it have been called with proper proxy agent for a valid url', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'full',
       },
       proxyUrl: 'https://localhost:1212',
@@ -110,7 +110,7 @@ describe('request', () => {
   test('it have been called with proper proxy agent for an invalid url', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: ':nope:',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -141,7 +141,7 @@ describe('request', () => {
 
   test('it bypasses with proxyBypassHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'full',
       },
       proxyUrl: 'https://elastic.proxy.co',
@@ -164,7 +164,7 @@ describe('request', () => {
 
   test('it does not bypass with proxyBypassHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'full',
       },
       proxyUrl: 'https://elastic.proxy.co',
@@ -187,7 +187,7 @@ describe('request', () => {
 
   test('it proxies with proxyOnlyHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'full',
       },
       proxyUrl: 'https://elastic.proxy.co',
@@ -210,7 +210,7 @@ describe('request', () => {
 
   test('it does not proxy with proxyOnlyHosts when expected', async () => {
     configurationUtilities.getProxySettings.mockReturnValue({
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'full',
       },
       proxyUrl: 'https://elastic.proxy.co',

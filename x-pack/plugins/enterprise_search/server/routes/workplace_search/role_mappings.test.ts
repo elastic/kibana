@@ -8,12 +8,35 @@
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
 import {
+  registerOrgEnableRoleMappingsRoute,
   registerOrgRoleMappingsRoute,
   registerOrgRoleMappingRoute,
-  registerOrgNewRoleMappingRoute,
 } from './role_mappings';
 
 describe('role mappings routes', () => {
+  describe('POST /api/workplace_search/org/role_mappings/enable_role_based_access', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/role_mappings/enable_role_based_access',
+      });
+
+      registerOrgEnableRoleMappingsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/role_mappings/enable_role_based_access',
+      });
+    });
+  });
+
   describe('GET /api/workplace_search/org/role_mappings', () => {
     let mockRouter: MockRouter;
 
@@ -60,29 +83,6 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/role_mappings/{id}', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/workplace_search/org/role_mappings/{id}',
-      });
-
-      registerOrgRoleMappingRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/role_mappings/:id',
-      });
-    });
-  });
-
   describe('PUT /api/workplace_search/org/role_mappings/{id}', () => {
     let mockRouter: MockRouter;
 
@@ -125,29 +125,6 @@ describe('role mappings routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/org/role_mappings/:id',
-      });
-    });
-  });
-
-  describe('GET /api/workplace_search/org/role_mappings/new', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/workplace_search/org/role_mappings/new',
-      });
-
-      registerOrgNewRoleMappingRoute({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request handler', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/ws/org/role_mappings/new',
       });
     });
   });

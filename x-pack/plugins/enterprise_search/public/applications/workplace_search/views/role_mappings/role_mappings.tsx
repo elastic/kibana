@@ -9,11 +9,15 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
-import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
+import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
+import {
+  RoleMappingsTable,
+  RoleMappingsHeading,
+  RolesEmptyPrompt,
+} from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
+import { WorkplaceSearchPageTemplate } from '../../components/layout';
+import { SECURITY_DOCS_URL } from '../../routes';
 
 import { ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
@@ -21,9 +25,12 @@ import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const RoleMappings: React.FC = () => {
-  const { initializeRoleMappings, initializeRoleMapping, handleDeleteMapping } = useActions(
-    RoleMappingsLogic
-  );
+  const {
+    enableRoleBasedAccess,
+    initializeRoleMappings,
+    initializeRoleMapping,
+    handleDeleteMapping,
+  } = useActions(RoleMappingsLogic);
 
   const {
     roleMappings,
@@ -36,11 +43,21 @@ export const RoleMappings: React.FC = () => {
     initializeRoleMappings();
   }, []);
 
-  if (dataLoading) return <Loading />;
+  const rolesEmptyState = (
+    <RolesEmptyPrompt
+      productName={WORKPLACE_SEARCH_PLUGIN.NAME}
+      docsLink={SECURITY_DOCS_URL}
+      onEnable={enableRoleBasedAccess}
+    />
+  );
 
   const roleMappingsSection = (
-    <>
-      <RoleMappingsHeading productName="Workplace Search" onClick={() => initializeRoleMapping()} />
+    <section>
+      <RoleMappingsHeading
+        productName={WORKPLACE_SEARCH_PLUGIN.NAME}
+        docsLink={SECURITY_DOCS_URL}
+        onClick={() => initializeRoleMapping()}
+      />
       <RoleMappingsTable
         roleMappings={roleMappings}
         accessItemKey="groups"
@@ -49,15 +66,19 @@ export const RoleMappings: React.FC = () => {
         initializeRoleMapping={initializeRoleMapping}
         handleDeleteMapping={handleDeleteMapping}
       />
-    </>
+    </section>
   );
 
   return (
-    <>
-      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE]} />
+    <WorkplaceSearchPageTemplate
+      pageChrome={[ROLE_MAPPINGS_TITLE]}
+      pageHeader={{ pageTitle: ROLE_MAPPINGS_TITLE }}
+      isLoading={dataLoading}
+      isEmptyState={roleMappings.length < 1}
+      emptyState={rolesEmptyState}
+    >
       {roleMappingFlyoutOpen && <RoleMapping />}
-      <FlashMessages />
       {roleMappingsSection}
-    </>
+    </WorkplaceSearchPageTemplate>
   );
 };

@@ -5,5 +5,10 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "visualizations", "charts", "expressions"],
-  "requiredBundles": ["kibanaUtils", "visDefaultEditor"]
+  "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
+  "description": "Registers the Metric aggregation-based visualization."
 }

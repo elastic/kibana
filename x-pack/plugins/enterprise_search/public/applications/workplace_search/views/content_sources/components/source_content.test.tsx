@@ -25,7 +25,6 @@ import {
 } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../../shared/constants';
-import { Loading } from '../../../../shared/loading';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 
@@ -59,13 +58,6 @@ describe('SourceContent', () => {
     const wrapper = shallow(<SourceContent />);
 
     expect(wrapper.find(EuiTable)).toHaveLength(1);
-  });
-
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<SourceContent />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('returns ComponentLoader when section loading', () => {

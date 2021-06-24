@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
+import { JsonValue } from '@kbn/common-utils';
 
 export interface LogMessageFormattingRule {
   when: LogMessageFormattingCondition;

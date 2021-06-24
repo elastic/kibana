@@ -17,6 +17,21 @@ const roleMappingBaseSchema = {
   authProvider: schema.arrayOf(schema.string()),
 };
 
+export function registerOrgEnableRoleMappingsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/workplace_search/org/role_mappings/enable_role_based_access',
+      validate: false,
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/role_mappings/enable_role_based_access',
+    })
+  );
+}
+
 export function registerOrgRoleMappingsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -48,20 +63,6 @@ export function registerOrgRoleMappingRoute({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/workplace_search/org/role_mappings/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/role_mappings/:id',
-    })
-  );
-
   router.put(
     {
       path: '/api/workplace_search/org/role_mappings/{id}',
@@ -92,23 +93,8 @@ export function registerOrgRoleMappingRoute({
   );
 }
 
-export function registerOrgNewRoleMappingRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: RouteDependencies) {
-  router.get(
-    {
-      path: '/api/workplace_search/org/role_mappings/new',
-      validate: false,
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/org/role_mappings/new',
-    })
-  );
-}
-
 export const registerRoleMappingsRoutes = (dependencies: RouteDependencies) => {
+  registerOrgEnableRoleMappingsRoute(dependencies);
   registerOrgRoleMappingsRoute(dependencies);
   registerOrgRoleMappingRoute(dependencies);
-  registerOrgNewRoleMappingRoute(dependencies);
 };

@@ -13,17 +13,15 @@ import {
   clearFlashMessages,
   flashAPIErrors,
   setSuccessMessage,
-  setErrorMessage,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { ANY_AUTH_PROVIDER, ROLE_MAPPING_NOT_FOUND } from '../../../shared/role_mapping/constants';
+import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { AttributeName } from '../../../shared/types';
 import { ASRoleMapping, RoleTypes } from '../../types';
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
 
 import {
-  DELETE_ROLE_MAPPING_MESSAGE,
   ROLE_MAPPING_DELETED_MESSAGE,
   ROLE_MAPPING_CREATED_MESSAGE,
   ROLE_MAPPING_UPDATED_MESSAGE,
@@ -31,17 +29,12 @@ import {
 
 interface RoleMappingsServerDetails {
   roleMappings: ASRoleMapping[];
-  multipleAuthProvidersConfig: boolean;
-}
-
-interface RoleMappingServerDetails {
   attributes: string[];
   authProviders: string[];
   availableEngines: Engine[];
   elasticsearchRoles: string[];
   hasAdvancedRoles: boolean;
   multipleAuthProvidersConfig: boolean;
-  roleMapping?: ASRoleMapping;
 }
 
 const getFirstAttributeName = (roleMapping: ASRoleMapping) =>
@@ -64,11 +57,17 @@ interface RoleMappingsActions {
   initializeRoleMapping(roleMappingId?: string): { roleMappingId?: string };
   initializeRoleMappings(): void;
   resetState(): void;
-  setRoleMappingData(data: RoleMappingServerDetails): RoleMappingServerDetails;
+  setRoleMapping(roleMapping: ASRoleMapping): { roleMapping: ASRoleMapping };
+  setRoleMappings({
+    roleMappings,
+  }: {
+    roleMappings: ASRoleMapping[];
+  }): { roleMappings: ASRoleMapping[] };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   openRoleMappingFlyout(): void;
   closeRoleMappingFlyout(): void;
   setRoleMappingErrors(errors: string[]): { errors: string[] };
+  enableRoleBasedAccess(): void;
 }
 
 interface RoleMappingsValues {
@@ -96,7 +95,8 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
   path: ['enterprise_search', 'app_search', 'role_mappings'],
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
-    setRoleMappingData: (data: RoleMappingServerDetails) => data,
+    setRoleMapping: (roleMapping: ASRoleMapping) => ({ roleMapping }),
+    setRoleMappings: ({ roleMappings }: { roleMappings: ASRoleMapping[] }) => ({ roleMappings }),
     setRoleMappingErrors: (errors: string[]) => ({ errors }),
     handleAuthProviderChange: (value: string) => ({ value }),
     handleRoleChange: (roleType: RoleTypes) => ({ roleType }),
@@ -107,6 +107,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     }),
     handleAttributeValueChange: (value: string) => ({ value }),
     handleAccessAllEnginesChange: (selected: boolean) => ({ selected }),
+    enableRoleBasedAccess: true,
     resetState: true,
     initializeRoleMappings: true,
     initializeRoleMapping: (roleMappingId) => ({ roleMappingId }),
@@ -120,14 +121,16 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       true,
       {
         setRoleMappingsData: () => false,
-        setRoleMappingData: () => false,
+        setRoleMappings: () => false,
         resetState: () => true,
+        enableRoleBasedAccess: () => true,
       },
     ],
     roleMappings: [
       [],
       {
         setRoleMappingsData: (_, { roleMappings }) => roleMappings,
+        setRoleMappings: (_, { roleMappings }) => roleMappings,
         resetState: () => [],
       },
     ],
@@ -135,40 +138,39 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       false,
       {
         setRoleMappingsData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
-        setRoleMappingData: (_, { multipleAuthProvidersConfig }) => multipleAuthProvidersConfig,
         resetState: () => false,
       },
     ],
     hasAdvancedRoles: [
       false,
       {
-        setRoleMappingData: (_, { hasAdvancedRoles }) => hasAdvancedRoles,
+        setRoleMappingsData: (_, { hasAdvancedRoles }) => hasAdvancedRoles,
       },
     ],
     availableEngines: [
       [],
       {
-        setRoleMappingData: (_, { availableEngines }) => availableEngines,
+        setRoleMappingsData: (_, { availableEngines }) => availableEngines,
         resetState: () => [],
       },
     ],
     attributes: [
       [],
       {
-        setRoleMappingData: (_, { attributes }) => attributes,
+        setRoleMappingsData: (_, { attributes }) => attributes,
         resetState: () => [],
       },
     ],
     elasticsearchRoles: [
       [],
       {
-        setRoleMappingData: (_, { elasticsearchRoles }) => elasticsearchRoles,
+        setRoleMappingsData: (_, { elasticsearchRoles }) => elasticsearchRoles,
       },
     ],
     roleMapping: [
       null,
       {
-        setRoleMappingData: (_, { roleMapping }) => roleMapping || null,
+        setRoleMapping: (_, { roleMapping }) => roleMapping,
         resetState: () => null,
         closeRoleMappingFlyout: () => null,
       },
@@ -176,16 +178,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     roleType: [
       'owner',
       {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? (roleMapping.roleType as RoleTypes) : 'owner',
+        setRoleMapping: (_, { roleMapping }) => roleMapping.roleType as RoleTypes,
         handleRoleChange: (_, { roleType }) => roleType,
       },
     ],
     accessAllEngines: [
       true,
       {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? roleMapping.accessAllEngines : true,
+        setRoleMapping: (_, { roleMapping }) => roleMapping.accessAllEngines,
         handleRoleChange: (_, { roleType }) => !roleHasScopedEngines(roleType),
         handleAccessAllEnginesChange: (_, { selected }) => selected,
       },
@@ -193,8 +193,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     attributeValue: [
       '',
       {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? getFirstAttributeValue(roleMapping) : '',
+        setRoleMapping: (_, { roleMapping }) => getFirstAttributeValue(roleMapping),
         handleAttributeSelectorChange: (_, { value, firstElasticsearchRole }) =>
           value === 'role' ? firstElasticsearchRole : '',
         handleAttributeValueChange: (_, { value }) => value,
@@ -205,8 +204,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     attributeName: [
       'username',
       {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? getFirstAttributeName(roleMapping) : 'username',
+        setRoleMapping: (_, { roleMapping }) => getFirstAttributeName(roleMapping),
         handleAttributeSelectorChange: (_, { value }) => value,
         resetState: () => 'username',
         closeRoleMappingFlyout: () => 'username',
@@ -215,8 +213,8 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     selectedEngines: [
       new Set(),
       {
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? new Set(roleMapping.engines.map((engine) => engine.name)) : new Set(),
+        setRoleMapping: (_, { roleMapping }) =>
+          new Set(roleMapping.engines.map((engine: Engine) => engine.name)),
         handleAccessAllEnginesChange: () => new Set(),
         handleEngineSelectionChange: (_, { engineNames }) => {
           const newSelectedEngineNames = new Set() as Set<string>;
@@ -229,7 +227,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     availableAuthProviders: [
       [],
       {
-        setRoleMappingData: (_, { authProviders }) => authProviders,
+        setRoleMappingsData: (_, { authProviders }) => authProviders,
       },
     ],
     selectedAuthProviders: [
@@ -246,8 +244,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
             return value.filter((v) => v !== ANY_AUTH_PROVIDER);
           return [ANY_AUTH_PROVIDER];
         },
-        setRoleMappingData: (_, { roleMapping }) =>
-          roleMapping ? roleMapping.authProvider : [ANY_AUTH_PROVIDER],
+        setRoleMapping: (_, { roleMapping }) => roleMapping.authProvider,
       },
     ],
     roleMappingFlyoutOpen: [
@@ -280,6 +277,17 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     ],
   }),
   listeners: ({ actions, values }) => ({
+    enableRoleBasedAccess: async () => {
+      const { http } = HttpLogic.values;
+      const route = '/api/app_search/role_mappings/enable_role_based_access';
+
+      try {
+        const response = await http.post(route);
+        actions.setRoleMappings(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     initializeRoleMappings: async () => {
       const { http } = HttpLogic.values;
       const route = '/api/app_search/role_mappings';
@@ -292,34 +300,19 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       }
     },
     initializeRoleMapping: async ({ roleMappingId }) => {
-      const { http } = HttpLogic.values;
-      const route = roleMappingId
-        ? `/api/app_search/role_mappings/${roleMappingId}`
-        : '/api/app_search/role_mappings/new';
-
-      try {
-        const response = await http.get(route);
-        actions.setRoleMappingData(response);
-      } catch (e) {
-        if (e.status === 404) {
-          setErrorMessage(ROLE_MAPPING_NOT_FOUND);
-        } else {
-          flashAPIErrors(e);
-        }
-      }
+      const roleMapping = values.roleMappings.find(({ id }) => id === roleMappingId);
+      if (roleMapping) actions.setRoleMapping(roleMapping);
     },
     handleDeleteMapping: async ({ roleMappingId }) => {
       const { http } = HttpLogic.values;
       const route = `/api/app_search/role_mappings/${roleMappingId}`;
 
-      if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
-        try {
-          await http.delete(route);
-          actions.initializeRoleMappings();
-          setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
-        } catch (e) {
-          flashAPIErrors(e);
-        }
+      try {
+        await http.delete(route);
+        actions.initializeRoleMappings();
+        setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
+      } catch (e) {
+        flashAPIErrors(e);
       }
     },
     handleSaveMapping: async () => {
