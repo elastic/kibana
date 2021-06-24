@@ -79,7 +79,7 @@ export const RoleMappingFlyout: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={disabled || formLoading}
+              disabled={disabled}
               isLoading={formLoading}
               onClick={handleSaveMapping}
               fill
