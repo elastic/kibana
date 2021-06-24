@@ -62,6 +62,7 @@ export const fetchTransactionDurationFieldValuePairs = async (
 
     try {
       const resp = await esClient.search(getTermsAggRequest(params, fieldName));
+
       if (resp.body.aggregations === undefined) {
         fieldValuePairsProgress++;
         continue;
@@ -70,7 +71,7 @@ export const fetchTransactionDurationFieldValuePairs = async (
         .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
         key: string;
       }>)?.buckets;
-      if (buckets.length > 1) {
+      if (buckets.length >= 1) {
         fieldValuePairs.push(
           ...buckets.map((d) => ({
             field: fieldName,

@@ -59,6 +59,7 @@ export const FIELDS_TO_ADD_AS_CANDIDATE = new Set([
   'host.ip',
   'service.environment',
   'process.args',
+  'http.response.status_code',
 ]);
 export const FIELD_PREFIX_TO_ADD_AS_CANDIDATE = [
   'cloud.',

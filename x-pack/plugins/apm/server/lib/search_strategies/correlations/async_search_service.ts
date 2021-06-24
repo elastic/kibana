@@ -169,6 +169,7 @@ export const asyncSearchServiceProvider = (
               item.field,
               item.value
             );
+
             if (isCancelled) {
               isRunning = false;
               return;
