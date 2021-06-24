@@ -22,13 +22,13 @@ import {
 } from './webpack_helpers';
 
 /**
- * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
- * so this constant is used to indicate to assignBundlesToWorkers() that there is
- * extra work done in a bundle that has a lot of scss imports. The value is
- * arbitrary and just intended to weigh the bundles so that they are distributed
- * across mulitple workers on machines with lots of cores.
+ * sass transpilation creates about a 40% overhead on the overall optimizer
+ * runtime, and so this constant is used to indicate to assignBundlesToWorkers()
+ * that there is extra work done in a bundle that has a lot of scss imports. The
+ * value is arbitrary and just intended to weigh the bundles so that they are
+ * distributed across mulitple workers on machines with lots of cores.
  */
-const EXTRA_SCSS_WORK_UNITS = 100;
+const EXTRA_SCSS_WORK_UNITS = 400;
 
 export class PopulateBundleCachePlugin {
   constructor(private readonly workerConfig: WorkerConfig, private readonly bundle: Bundle) {}
