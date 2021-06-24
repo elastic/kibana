@@ -65,7 +65,7 @@ export default function ({ getService }) {
       expect(feature.type).to.be(3);
       expect(feature.extent).to.be(4096);
       expect(feature.id).to.be(undefined);
-      expect(feature.properties).to.eql({ __kbn_too_many_features__: true });
+      expect(feature.properties).to.eql({ __kbn_metadata_feature__: true });
       expect(feature.loadGeometry()).to.eql([
         [
           { x: 44, y: 2382 },
