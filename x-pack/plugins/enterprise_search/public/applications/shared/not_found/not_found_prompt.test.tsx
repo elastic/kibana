@@ -30,7 +30,7 @@ describe('NotFoundPrompt', () => {
 
     expect(wrapper.find('h1').text()).toEqual('404 error');
     expect(wrapper.find(EuiButtonTo).prop('to')).toEqual('/');
-    expect(wrapper.find(EuiButton).prop('href')).toEqual(expect.stringContaining('//discuss'));
+    expect(wrapper.find(EuiButton).prop('href')).toContain('https://discuss.elastic.co');
   });
 
   it('renders with a custom "Back to dashboard" link if passed', () => {
