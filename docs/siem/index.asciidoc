@@ -5,7 +5,7 @@
 [partintro]
 --
 
-Elastic Security combines SIEM threat detection features with endpoint
+https://www.elastic.co/security[Elastic Security] combines SIEM threat detection features with endpoint
 prevention and response capabilities in one solution. These analytical and
 protection capabilities, leveraged by the speed and extensibility of
 Elasticsearch, enable analysts to defend their organization from threats before
@@ -89,7 +89,7 @@ and maps.
 [discrete]
 === Compatibility with cold tier nodes
 
-Cold tier is a {ref}/data-tiers.html[data tier] that holds time series data that is accessed only occasionally. In {stack} version >=7.11.0, {elastic-sec} supports cold tier data for the following {es} indices:
+Cold tier is a {ref}/data-tiers.html[data tier] that holds time-series data that is accessed only occasionally. In {stack} version >=7.11.0, {elastic-sec} supports cold tier data for the following {es} indices:
 
 * Index patterns specified in `securitySolution:defaultIndex`
 * Index patterns specified in the definitions of detection rules, except for indicator match rules
@@ -154,7 +154,7 @@ index patterns in the `securitySolution:defaultIndex` setting ({kib} -> Stack Ma
 [[ecs-compliant-reqs]]
 === ECS compliance data requirements
 
-The {ecs-ref}[Elastic Common Schema (ECS)] defines a common set of fields to be used for
+The {ecs-ref}[Elastic Common Schema (ECS)] defines a common set of fields used for
 storing event data in Elasticsearch. ECS helps users normalize their event data
 to better analyze, visualize, and correlate the data represented in their
 events. {elastic-sec} supports events and indicator index data from any ECS-compliant data source.
