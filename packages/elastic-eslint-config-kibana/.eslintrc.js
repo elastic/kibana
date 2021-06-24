@@ -75,6 +75,11 @@ module.exports = {
           to: '@kbn/test',
           disallowedMessage: `import from the root of @kbn/test instead`
         },
+        {
+          from: 'react-intl',
+          to: '@kbn/i18n/react',
+          disallowedMessage: `import from @kbn/i18n/react instead`
+        }
       ],
     ],
   },
