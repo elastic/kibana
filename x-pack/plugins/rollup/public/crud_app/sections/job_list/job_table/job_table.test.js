@@ -20,6 +20,14 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
+jest.mock('../../../services', () => {
+  const services = jest.requireActual('../../../services');
+  return {
+    ...services,
+    getRouterLinkProps: (link) => ({ href: link }),
+  };
+});
+
 const defaultProps = {
   jobs: [],
   pager: new Pager(20, 10, 1),

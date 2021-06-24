@@ -296,6 +296,14 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('kbnDocViewer');
   }
 
+  public async clickDocViewerTab(index: number) {
+    return await this.find.clickByCssSelector(`#kbn_doc_viewer_tab_${index}`);
+  }
+
+  public async expectSourceViewerToExist() {
+    return await this.find.byClassName('monaco-editor');
+  }
+
   public async getMarks() {
     const table = await this.docTable.getTable();
     const marks = await table.findAllByTagName('mark');
@@ -447,7 +455,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async closeSidebarFieldFilter() {
     await this.testSubjects.click('toggleFieldFilterButton');
-    await this.testSubjects.missingOrFail('filterSelectionPanel');
+
+    await this.retry.waitFor('sidebar filter closed', async () => {
+      return !(await this.testSubjects.exists('filterSelectionPanel'));
+    });
   }
 
   public async waitForChartLoadingComplete(renderCount: number) {

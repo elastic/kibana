@@ -116,20 +116,13 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
                 size="xxl"
               />
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--m"
               />
-              <span
-                className="euiTextColor euiTextColor--subdued"
+              <h2
+                className="euiTitle euiTitle--xsmall"
               >
-                <h2
-                  className="euiTitle euiTitle--xsmall"
-                >
-                  Import your assets to get started
-                </h2>
-                <div
-                  className="euiSpacer euiSpacer--m"
-                />
-              </span>
+                Import your assets to get started
+              </h2>
             </div>
           </div>
         </div>
