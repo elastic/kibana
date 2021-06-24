@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  checkRunningSessions as checkRunningSessions$,
-  CheckRunningSessionsDeps,
-} from './check_running_sessions';
+import { checkNonPersistedSessions as checkNonPersistedSessions$ } from './check_non_persiseted_sessions';
 import {
   SearchSessionStatus,
   SearchSessionSavedObjectAttributes,
@@ -16,22 +13,20 @@ import {
   EQL_SEARCH_STRATEGY,
 } from '../../../../../../src/plugins/data/common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { SearchSessionsConfig, SearchStatus } from './types';
+import { SearchSessionsConfig, CheckSearchSessionsDeps, SearchStatus } from './types';
 import moment from 'moment';
 import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsDeleteOptions,
   SavedObjectsClientContract,
 } from '../../../../../../src/core/server';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 jest.useFakeTimers();
 
-const checkRunningSessions = (deps: CheckRunningSessionsDeps, config: SearchSessionsConfig) =>
-  checkRunningSessions$(deps, config).toPromise();
+const checkNonPersistedSessions = (deps: CheckSearchSessionsDeps, config: SearchSessionsConfig) =>
+  checkNonPersistedSessions$(deps, config).toPromise();
 
-describe('getSearchStatus', () => {
+describe('checkNonPersistedSessions', () => {
   let mockClient: any;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   const config: SearchSessionsConfig = {
@@ -42,23 +37,15 @@ describe('getSearchStatus', () => {
     maxUpdateRetries: 3,
     defaultExpiration: moment.duration(7, 'd'),
     trackingInterval: moment.duration(10, 's'),
+    expireInterval: moment.duration(10, 'm'),
     monitoringTaskTimeout: moment.duration(5, 'm'),
+    cleanupInterval: moment.duration(10, 's'),
     management: {} as any,
   };
   const mockLogger: any = {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  };
-
-  const emptySO = {
-    attributes: {
-      persisted: false,
-      status: SearchSessionStatus.IN_PROGRESS,
-      created: moment().subtract(moment.duration(3, 'm')),
-      touched: moment().subtract(moment.duration(10, 's')),
-      idMapping: {},
-    },
   };
 
   beforeEach(() => {
@@ -81,7 +68,7 @@ describe('getSearchStatus', () => {
       total: 0,
     } as any);
 
-    await checkRunningSessions(
+    await checkNonPersistedSessions(
       {
         savedObjectsClient,
         client: mockClient,
@@ -94,240 +81,7 @@ describe('getSearchStatus', () => {
     expect(savedObjectsClient.delete).not.toBeCalled();
   });
 
-  describe('pagination', () => {
-    test('fetches one page if not objects exist', async () => {
-      savedObjectsClient.find.mockResolvedValueOnce({
-        saved_objects: [],
-        total: 0,
-      } as any);
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    });
-
-    test('fetches one page if less than page size object are returned', async () => {
-      savedObjectsClient.find.mockResolvedValueOnce({
-        saved_objects: [emptySO, emptySO],
-        total: 5,
-      } as any);
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    });
-
-    test('fetches two pages if exactly page size objects are returned', async () => {
-      let i = 0;
-      savedObjectsClient.find.mockImplementation(() => {
-        return new Promise((resolve) => {
-          resolve({
-            saved_objects: i++ === 0 ? [emptySO, emptySO, emptySO, emptySO, emptySO] : [],
-            total: 5,
-            page: i,
-          } as any);
-        });
-      });
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
-
-      // validate that page number increases
-      const { page: page1 } = savedObjectsClient.find.mock.calls[0][0];
-      const { page: page2 } = savedObjectsClient.find.mock.calls[1][0];
-      expect(page1).toBe(1);
-      expect(page2).toBe(2);
-    });
-
-    test('fetches two pages if page size +1 objects are returned', async () => {
-      let i = 0;
-      savedObjectsClient.find.mockImplementation(() => {
-        return new Promise((resolve) => {
-          resolve({
-            saved_objects: i++ === 0 ? [emptySO, emptySO, emptySO, emptySO, emptySO] : [emptySO],
-            total: 5,
-            page: i,
-          } as any);
-        });
-      });
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
-    });
-
-    test('fetching is abortable', async () => {
-      let i = 0;
-      const abort$ = new Subject();
-      savedObjectsClient.find.mockImplementation(() => {
-        return new Promise((resolve) => {
-          if (++i === 2) {
-            abort$.next();
-          }
-          resolve({
-            saved_objects: i <= 5 ? [emptySO, emptySO, emptySO, emptySO, emptySO] : [],
-            total: 25,
-            page: i,
-          } as any);
-        });
-      });
-
-      await checkRunningSessions$(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      )
-        .pipe(takeUntil(abort$))
-        .toPromise();
-
-      jest.runAllTimers();
-
-      // if not for `abort$` then this would be called 6 times!
-      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
-    });
-
-    test('sorting is by "touched"', async () => {
-      savedObjectsClient.find.mockResolvedValueOnce({
-        saved_objects: [],
-        total: 0,
-      } as any);
-
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'touched', sortOrder: 'asc' })
-      );
-    });
-
-    test('sessions fetched in the beginning are processed even if sessions in the end fail', async () => {
-      let i = 0;
-      savedObjectsClient.find.mockImplementation(() => {
-        return new Promise((resolve, reject) => {
-          if (++i === 2) {
-            reject(new Error('Fake find error...'));
-          }
-          resolve({
-            saved_objects:
-              i <= 5
-                ? [
-                    i === 1
-                      ? {
-                          id: '123',
-                          attributes: {
-                            persisted: false,
-                            status: SearchSessionStatus.IN_PROGRESS,
-                            created: moment().subtract(moment.duration(3, 'm')),
-                            touched: moment().subtract(moment.duration(2, 'm')),
-                            idMapping: {
-                              'map-key': {
-                                strategy: ENHANCED_ES_SEARCH_STRATEGY,
-                                id: 'async-id',
-                              },
-                            },
-                          },
-                        }
-                      : emptySO,
-                    emptySO,
-                    emptySO,
-                    emptySO,
-                    emptySO,
-                  ]
-                : [],
-            total: 25,
-            page: i,
-          } as any);
-        });
-      });
-
-      await checkRunningSessions$(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      ).toPromise();
-
-      jest.runAllTimers();
-
-      expect(savedObjectsClient.find).toHaveBeenCalledTimes(2);
-
-      // by checking that delete was called we validate that sessions from session that were successfully fetched were processed
-      expect(mockClient.asyncSearch.delete).toBeCalled();
-      const { id } = mockClient.asyncSearch.delete.mock.calls[0][0];
-      expect(id).toBe('async-id');
-    });
-  });
-
   describe('delete', () => {
-    test('doesnt delete a persisted session', async () => {
-      savedObjectsClient.find.mockResolvedValue({
-        saved_objects: [
-          {
-            id: '123',
-            attributes: {
-              persisted: true,
-              status: SearchSessionStatus.IN_PROGRESS,
-              created: moment().subtract(moment.duration(30, 'm')),
-              touched: moment().subtract(moment.duration(10, 'm')),
-              idMapping: {},
-            },
-          },
-        ],
-        total: 1,
-      } as any);
-      await checkRunningSessions(
-        {
-          savedObjectsClient,
-          client: mockClient,
-          logger: mockLogger,
-        },
-        config
-      );
-
-      expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
-      expect(savedObjectsClient.delete).not.toBeCalled();
-    });
-
     test('doesnt delete a non persisted, recently touched session', async () => {
       savedObjectsClient.find.mockResolvedValue({
         saved_objects: [
@@ -336,6 +90,7 @@ describe('getSearchStatus', () => {
             attributes: {
               persisted: false,
               status: SearchSessionStatus.IN_PROGRESS,
+              expires: moment().add(moment.duration(3, 'm')),
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(10, 's')),
               idMapping: {},
@@ -344,7 +99,7 @@ describe('getSearchStatus', () => {
         ],
         total: 1,
       } as any);
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -367,6 +122,7 @@ describe('getSearchStatus', () => {
               status: SearchSessionStatus.COMPLETE,
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(1, 'm')),
+              expires: moment().add(moment.duration(3, 'm')),
               idMapping: {
                 'search-hash': {
                   id: 'search-id',
@@ -379,7 +135,7 @@ describe('getSearchStatus', () => {
         ],
         total: 1,
       } as any);
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -401,6 +157,7 @@ describe('getSearchStatus', () => {
             attributes: {
               persisted: false,
               status: SearchSessionStatus.IN_PROGRESS,
+              expires: moment().add(moment.duration(3, 'm')),
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(2, 'm')),
               idMapping: {
@@ -415,7 +172,7 @@ describe('getSearchStatus', () => {
         total: 1,
       } as any);
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -441,6 +198,7 @@ describe('getSearchStatus', () => {
               status: SearchSessionStatus.IN_PROGRESS,
               created: moment().subtract(moment.duration(3, 'm')),
               touched: moment().subtract(moment.duration(2, 'm')),
+              expires: moment().add(moment.duration(3, 'm')),
               idMapping: {
                 'map-key': {
                   strategy: ENHANCED_ES_SEARCH_STRATEGY,
@@ -453,7 +211,7 @@ describe('getSearchStatus', () => {
         total: 1,
       } as any);
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -481,6 +239,7 @@ describe('getSearchStatus', () => {
             attributes: {
               persisted: false,
               status: SearchSessionStatus.COMPLETE,
+              expires: moment().add(moment.duration(3, 'm')),
               created: moment().subtract(moment.duration(30, 'm')),
               touched: moment().subtract(moment.duration(6, 'm')),
               idMapping: {
@@ -501,7 +260,7 @@ describe('getSearchStatus', () => {
         total: 1,
       } as any);
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -530,6 +289,7 @@ describe('getSearchStatus', () => {
             attributes: {
               persisted: false,
               status: SearchSessionStatus.COMPLETE,
+              expires: moment().add(moment.duration(3, 'm')),
               created: moment().subtract(moment.duration(30, 'm')),
               touched: moment().subtract(moment.duration(6, 'm')),
               idMapping: {
@@ -545,7 +305,7 @@ describe('getSearchStatus', () => {
         total: 1,
       } as any);
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -573,6 +333,7 @@ describe('getSearchStatus', () => {
           status: SearchSessionStatus.IN_PROGRESS,
           created: moment().subtract(moment.duration(3, 'm')),
           touched: moment().subtract(moment.duration(10, 's')),
+          expires: moment().add(moment.duration(3, 'm')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
@@ -594,7 +355,7 @@ describe('getSearchStatus', () => {
         },
       });
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -614,6 +375,7 @@ describe('getSearchStatus', () => {
         id: '123',
         attributes: {
           status: SearchSessionStatus.ERROR,
+          expires: moment().add(moment.duration(3, 'm')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
@@ -633,7 +395,7 @@ describe('getSearchStatus', () => {
         total: 1,
       } as any);
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -653,6 +415,7 @@ describe('getSearchStatus', () => {
         namespaces: ['awesome'],
         attributes: {
           status: SearchSessionStatus.IN_PROGRESS,
+          expires: moment().add(moment.duration(3, 'm')),
           touched: '123',
           idMapping: {
             'search-hash': {
@@ -676,7 +439,7 @@ describe('getSearchStatus', () => {
         },
       });
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -696,6 +459,7 @@ describe('getSearchStatus', () => {
       const so = {
         attributes: {
           status: SearchSessionStatus.IN_PROGRESS,
+          expires: moment().add(moment.duration(3, 'm')),
           touched: '123',
           idMapping: {
             'search-hash': {
@@ -719,7 +483,7 @@ describe('getSearchStatus', () => {
         },
       });
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
@@ -744,6 +508,7 @@ describe('getSearchStatus', () => {
       savedObjectsClient.bulkUpdate = jest.fn();
       const so = {
         attributes: {
+          expires: moment().add(moment.duration(3, 'm')),
           idMapping: {
             'search-hash': {
               id: 'search-id',
@@ -766,7 +531,7 @@ describe('getSearchStatus', () => {
         },
       });
 
-      await checkRunningSessions(
+      await checkNonPersistedSessions(
         {
           savedObjectsClient,
           client: mockClient,
