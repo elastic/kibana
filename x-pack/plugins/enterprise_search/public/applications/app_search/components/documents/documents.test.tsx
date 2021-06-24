@@ -22,7 +22,6 @@ import { Documents } from '.';
 describe('Documents', () => {
   const values = {
     isMetaEngine: false,
-    engine: { document_count: 1 },
     myRole: { canManageEngineDocuments: true },
   };
 
