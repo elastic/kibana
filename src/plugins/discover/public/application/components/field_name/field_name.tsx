@@ -43,7 +43,7 @@ export function FieldName({
         <FieldIcon type={fieldType} label={typeName} scripted={scripted} {...fieldIconProps} />
       </EuiFlexItem>
 
-      <EuiFlexGroup wrap={true} responsive={false} gutterSize="xs">
+      <EuiFlexGroup wrap={true} gutterSize="none" responsive={false} alignItems="flexStart">
         <EuiFlexItem className="kbnDocViewer__fieldName eui-textBreakAll" grow={false}>
           <EuiToolTip
             position="top"
