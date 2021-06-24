@@ -58,9 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`${superUser.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&indexName=${apmIndex}`
-          )
+          .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`)
           .auth(superUser.username, superUser.password)
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -68,9 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`${globalRead.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&indexName=${apmIndex}`
-          )
+          .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`)
           .auth(globalRead.username, globalRead.password)
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -78,9 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`${obsOnlySpacesAll.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&indexName=${apmIndex}`
-          )
+          .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`)
           .auth(obsOnlySpacesAll.username, obsOnlySpacesAll.password)
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -88,9 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`${obsOnlyReadSpacesAll.username} should be able to access the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&indexName=${apmIndex}`
-          )
+          .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`)
           .auth(obsOnlyReadSpacesAll.username, obsOnlyReadSpacesAll.password)
           .set('kbn-xsrf', 'true')
           .expect(200);
@@ -111,9 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           const apmIndex = await getAPMIndexName(superUser);
           await supertestWithoutAuth
             .get(
-              `${getSpaceUrlPrefix(
-                SPACE1
-              )}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&indexName=${apmIndex}`
+              `${getSpaceUrlPrefix(SPACE1)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`
             )
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'true')
@@ -131,9 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
           const apmIndex = await getAPMIndexName(superUser);
           await supertestWithoutAuth
             .get(
-              `${getSpaceUrlPrefix(
-                SPACE2
-              )}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&indexName=${apmIndex}`
+              `${getSpaceUrlPrefix(SPACE2)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`
             )
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'true')
@@ -160,9 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
           const apmIndex = await getAPMIndexName(superUser);
           await supertestWithoutAuth
             .get(
-              `${getSpaceUrlPrefix(
-                SPACE2
-              )}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&indexName=${apmIndex}`
+              `${getSpaceUrlPrefix(SPACE2)}${TEST_URL}?id=NoxgpHkBqbdrfX07MqXV&index=${apmIndex}`
             )
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'true')

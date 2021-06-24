@@ -176,7 +176,7 @@ export class AlertsClient {
         })
       );
 
-      return res.body.get?._source;
+      return res.body;
     } catch (error) {
       this.auditLogger?.log(
         alertAuditEvent({

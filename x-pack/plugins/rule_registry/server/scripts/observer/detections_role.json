@@ -29,7 +29,7 @@
       "feature": {
         "ml": ["read"],
         "monitoring": ["all"],
-        "apm": ["all"],
+        "apm": ["minimal_read", "alerts_all"],
         "ruleRegistry": ["all"],
         "actions": ["read"],
         "builtInAlerts": ["all"],
