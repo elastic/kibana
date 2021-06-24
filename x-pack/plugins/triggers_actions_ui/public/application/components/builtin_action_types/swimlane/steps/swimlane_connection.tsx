@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as i18n from '../translations';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetApplication } from '../use_get_application';
