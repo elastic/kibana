@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import {
+  KueryFilterQueryKind,
   TimelineId,
   TimelineResult,
   TimelineStatus,
@@ -44,7 +45,6 @@ import {
   replaceTemplateFieldFromMatchFilters,
   replaceTemplateFieldFromDataProviders,
 } from './helpers';
-import { KueryFilterQueryKind } from '../../../common/store';
 import {
   DataProvider,
   QueryOperator,
@@ -399,7 +399,7 @@ export const sendAlertToTimelineAction = async ({
               factoryQueryType: TimelineEventsQueries.details,
             },
             {
-              strategy: 'securitySolutionTimelineSearchStrategy',
+              strategy: 'timelineSearchStrategy',
             }
           )
           .toPromise(),

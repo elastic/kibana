@@ -21,7 +21,7 @@ import { FleetStatusProvider, ConfigContext } from '../../hooks';
 
 import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
-import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep } from './steps';
+import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep, ViewDataStep } from './steps';
 
 import type { Props } from '.';
 import { AgentEnrollmentFlyout } from '.';
@@ -126,6 +126,46 @@ describe('<AgentEnrollmentFlyout />', () => {
         expect(exists('agentEnrollmentFlyout')).toBe(true);
         expect(AgentPolicySelectionStep).not.toHaveBeenCalled();
         expect(AgentEnrollmentKeySelectionStep).toHaveBeenCalled();
+      });
+    });
+
+    describe('"View data" extension point', () => {
+      it('calls the "View data" step when UI extension is provided', async () => {
+        jest.clearAllMocks();
+        await act(async () => {
+          testBed = await setup({
+            agentPolicies: [],
+            onClose: jest.fn(),
+            viewDataStepContent: <div />,
+          });
+          testBed.component.update();
+        });
+        const { exists, actions } = testBed;
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
+        expect(ViewDataStep).toHaveBeenCalled();
+
+        jest.clearAllMocks();
+        actions.goToStandaloneTab();
+        expect(ViewDataStep).not.toHaveBeenCalled();
+      });
+
+      it('does not call the "View data" step when UI extension is not provided', async () => {
+        jest.clearAllMocks();
+        await act(async () => {
+          testBed = await setup({
+            agentPolicies: [],
+            onClose: jest.fn(),
+            viewDataStepContent: undefined,
+          });
+          testBed.component.update();
+        });
+        const { exists, actions } = testBed;
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
+        expect(ViewDataStep).not.toHaveBeenCalled();
+
+        jest.clearAllMocks();
+        actions.goToStandaloneTab();
+        expect(ViewDataStep).not.toHaveBeenCalled();
       });
     });
   });

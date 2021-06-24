@@ -19,6 +19,7 @@ import {
   GROUPS_PATH,
   ORG_SETTINGS_PATH,
 } from '../../routes';
+import { useSourceSubNav } from '../../views/content_sources/components/source_sub_nav';
 import { useGroupSubNav } from '../../views/groups/components/group_sub_nav';
 import { useSettingsSubNav } from '../../views/settings/components/settings_sub_nav';
 
@@ -32,8 +33,11 @@ export const useWorkplaceSearchNav = () => {
     {
       id: 'sources',
       name: NAV.SOURCES,
-      ...generateNavLink({ to: SOURCES_PATH }),
-      items: [], // TODO: Source subnav
+      ...generateNavLink({
+        to: SOURCES_PATH,
+        shouldShowActiveForSubroutes: true,
+        items: useSourceSubNav(),
+      }),
     },
     {
       id: 'groups',
