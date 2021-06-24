@@ -292,6 +292,21 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        'test-index-unmapped-fields': {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['test-index-unmapped-fields'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         animals: {
           elasticsearch: {
             cluster: [],
