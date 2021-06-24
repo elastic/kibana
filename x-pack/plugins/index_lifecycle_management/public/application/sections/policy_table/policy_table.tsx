@@ -85,9 +85,11 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       );
     }
 
+    // Wrapping the actual contents inside a div, otherwise the table layout will get messed up
+    // if the table size changes (ie: applying a filter) due to the flex props of the page wrapper.
     content = (
-      <Fragment>
-        <EuiFlexGroup gutterSize="l" alignItems="center">
+      <div>
+        <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
@@ -100,20 +102,20 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
                 {
                   defaultMessage: 'Search',
-                }
+              }
               )}
               aria-label={i18n.translate(
                 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputAriaLabel',
                 {
                   defaultMessage: 'Search policies',
-                }
+              }
               )}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         {tableContent}
-      </Fragment>
+      </div>
     );
   } else {
     return (
