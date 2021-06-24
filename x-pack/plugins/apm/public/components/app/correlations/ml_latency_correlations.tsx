@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -229,9 +230,26 @@ export function MlLatencyCorrelations({ onClose }: Props) {
       {
         width: '116px',
         field: 'correlation',
-        name: i18n.translate(
-          'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
-          { defaultMessage: 'Correlation' }
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
+              {
+                defaultMessage:
+                  'The impact of a field on the latency of the service, ranging from 0 to 1.',
+              }
+            )}
+          >
+            <>
+              {i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
+                {
+                  defaultMessage: 'Correlation',
+                }
+              )}
+              <EuiIcon size="s" color="subdued" type="questionInCircle" />
+            </>
+          </EuiToolTip>
         ),
         render: (_: any, term: MlCorrelationsTerms) => {
           return <div>{asPreciseDecimal(term.correlation, 2)}</div>;
