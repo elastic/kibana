@@ -69,6 +69,18 @@ that ship with {kib}.
 | `csp.frame_ancestors:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors[Content Security Policy `frame-ancestors` directive].
 
+|===
+
+[NOTE]
+============
+The `frame-ancestors` directive can also be configured by using <<server-securityResponseHeaders-disableEmbedding,
+`server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors` 
+are ignored.
+============
+
+[cols="2*<"]
+|===
+
 | `csp.report_uri:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
 

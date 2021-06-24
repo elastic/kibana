@@ -157,6 +157,19 @@ describe('CspConfig', () => {
         expect(config.rules).toEqual(rules);
         expect(config.header).toMatchInlineSnapshot(`"foo 'self'; bar 'self'"`);
       });
+
+      test('and overrides `frame-ancestors` if set', () => {
+        const config = new CspConfig({
+          ...defaultConfig,
+          disableEmbedding: true,
+          frame_ancestors: ['foo.com'],
+        });
+        expect(config.disableEmbedding).toEqual(disableEmbedding);
+        expect(config.disableEmbedding).not.toEqual(CspConfig.DEFAULT.disableEmbedding);
+        expect(config.header).toMatchInlineSnapshot(
+          `"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
+        );
+      });
     });
   });
 });

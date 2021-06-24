@@ -54,27 +54,27 @@ const configSchema = schema.object(
     }),
     connect_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
     default_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
     font_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
     frame_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
     img_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
     frame_ancestors: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
+      validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
     }),
     report_uri: schema.arrayOf(schema.string(), {
       defaultValue: [],

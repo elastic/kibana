@@ -39,6 +39,8 @@ export const additionalRules: Partial<Record<CspDirectiveName, string[]>> = {
   'default-src': [`'self'`],
   'font-src': [`'self'`],
   'img-src': [`'self'`],
+  'frame-ancestors': [`'self'`],
+  'frame-src': [`'self'`],
 };
 
 export class CspDirectives {
@@ -49,6 +51,10 @@ export class CspDirectives {
       this.directives.set(directiveName, new Set());
     }
     this.directives.get(directiveName)!.add(normalizeDirectiveValue(directiveValue));
+  }
+
+  clearDirectiveValues(directiveName: CspDirectiveName) {
+    this.directives.delete(directiveName);
   }
 
   getCspHeader() {

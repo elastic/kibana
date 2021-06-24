@@ -236,9 +236,9 @@ describe('CspDirectives', () => {
           "connect-src 'self' connect-src",
           "default-src 'self' default-src",
           "font-src 'self' font-src",
-          "frame-src frame-src",
+          "frame-src 'self' frame-src",
           "img-src 'self' img-src",
-          "frame-ancestors frame-ancestors",
+          "frame-ancestors 'self' frame-ancestors",
           "report-uri report-uri",
           "report-to report-to",
         ]

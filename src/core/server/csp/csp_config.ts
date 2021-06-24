@@ -67,6 +67,7 @@ export class CspConfig implements ICspConfig {
   constructor(rawCspConfig: CspConfigType) {
     this.#directives = CspDirectives.fromConfig(rawCspConfig);
     if (!rawCspConfig.rules?.length && rawCspConfig.disableEmbedding) {
+      this.#directives.clearDirectiveValues('frame-ancestors');
       this.#directives.addDirectiveValue('frame-ancestors', `'self'`);
     }
 
