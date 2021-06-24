@@ -92,7 +92,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
           );
 
           setEnrollmentAPIKeys(enrollmentAPIKeysResponse);
-          // Default to the first the first enrollment key if there is one.
+          // Default to the first enrollment key if there is one.
           onKeyChange(enrollmentAPIKeysResponse[0]?.id);
         } catch (error) {
           notifications.toasts.addError(error, {
