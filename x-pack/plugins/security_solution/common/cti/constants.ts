@@ -37,14 +37,6 @@ export const CTI_ROW_RENDERER_FIELDS = [
   INDICATOR_PROVIDER,
 ];
 
-export const SORTED_THREAT_SUMMARY_FIELDS = [
-  INDICATOR_MATCHED_FIELD,
-  INDICATOR_MATCHED_TYPE,
-  INDICATOR_PROVIDER,
-  INDICATOR_FIRSTSEEN,
-  INDICATOR_LASTSEEN,
-];
-
 export enum ENRICHMENT_TYPES {
   InvestigationTime = 'investigation_time',
   IndicatorMatchRule = 'indicator_match_rule',
