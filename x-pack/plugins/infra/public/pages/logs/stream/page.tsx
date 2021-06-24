@@ -12,7 +12,7 @@ import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { StreamPageContent } from './page_content';
 import { StreamPageHeader } from './page_header';
 import { LogsPageProviders } from './page_providers';
-import { streamTitle } from '../page_titles';
+import { streamTitle } from '../../../../public/translations';
 import { LOGS_APP } from '../../../../common/constants';
 
 export const StreamPage = () => {

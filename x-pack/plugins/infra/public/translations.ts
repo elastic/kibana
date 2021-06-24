@@ -30,8 +30,10 @@ export const settingsTitle = i18n.translate('xpack.infra.logs.index.settingsTabT
   defaultMessage: 'Settings',
 });
 
-export const streamTab = {
-  app: 'logs',
-  title: streamTitle,
-  pathname: '/stream',
-};
+export const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageTitle', {
+  defaultMessage: 'Inventory',
+});
+
+export const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {
+  defaultMessage: 'Metrics Explorer',
+});

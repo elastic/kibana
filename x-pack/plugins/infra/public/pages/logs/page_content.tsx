@@ -14,7 +14,6 @@ import useMount from 'react-use/lib/useMount';
 import { AlertDropdown } from '../../alerting/log_threshold';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DocumentTitle } from '../../components/document_title';
-import { Header } from '../../components/header';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useLogSourceContext } from '../../containers/logs/log_source';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
@@ -22,10 +21,10 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
-import { HeaderMenuPortal, useBreadcrumbs } from '../../../../observability/public';
+import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { useLinkProps } from '../../hooks/use_link_props';
-import { logsTitle, streamTitle } from './page_titles';
+import { useReadOnlyBadge } from '../../hooks/use_readOnly_badge';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -35,12 +34,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   const kibana = useKibana();
 
-  // useBreadcrumbs([
-  //   {
-  //     text: logsTitle,
-  //     href: `logs/stream`,
-  //   },
-  // ]);
+  useReadOnlyBadge(!uiCapabilities?.logs?.save);
 
   useMount(() => {
     initialize();
@@ -109,21 +103,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
         </HeaderMenuPortal>
       )}
 
-      <Header
-        breadcrumbs={[
-          {
-            text: i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
-              defaultMessage: 'Observability',
-            }),
-            //href: appPath + '/overview',
-          },
-          {
-            text: logsTitle,
-            href: `logs/stream`,
-          },
-        ]}
-        readOnlyBadge={!uiCapabilities?.logs?.save}
-      />
       <Switch>
         <Route path={streamTab.pathname} component={StreamPage} />
         <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />

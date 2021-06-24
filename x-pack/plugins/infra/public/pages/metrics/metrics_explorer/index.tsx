@@ -21,15 +21,12 @@ import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
 import { METRICS_APP } from '../../../../common/constants';
+import { metricsExplorerTitle } from '../../../translations';
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
   derivedIndexPattern: IIndexPattern;
 }
-
-const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {
-  defaultMessage: 'Metrics Explorer',
-});
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
   const {

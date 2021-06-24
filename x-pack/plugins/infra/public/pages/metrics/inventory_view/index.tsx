@@ -30,10 +30,7 @@ import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 import { MetricsPageTemplate } from '../page_template';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
-
-const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageTitle', {
-  defaultMessage: 'Inventory',
-});
+import { inventoryTitle } from '../../../translations';
 
 const metricsTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Metrics',

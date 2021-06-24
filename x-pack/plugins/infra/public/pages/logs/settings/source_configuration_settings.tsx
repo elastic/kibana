@@ -28,7 +28,8 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogSourceConfigurationFormErrors } from './source_configuration_form_errors';
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
 import { LogsPageTemplate } from '../page_template';
-import { settingsTitle } from '../page_titles';
+import { settingsTitle } from '../../../../public/translations';
+import { LOGS_APP } from '../../../../common/constants';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -41,11 +42,14 @@ export const LogsSettingsPage = () => {
     delay: 15000,
   });
 
-  useBreadcrumbs([
-    {
-      text: settingsTitle,
-    },
-  ]);
+  useBreadcrumbs(
+    [
+      {
+        text: settingsTitle,
+      },
+    ],
+    LOGS_APP
+  );
 
   const {
     sourceConfiguration: source,

@@ -10,9 +10,8 @@ import React from 'react';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
-import { logCategoriesTitle } from '../page_titles';
+import { logCategoriesTitle } from '../../../../public/translations';
 import { LOGS_APP } from '../../../../common/constants';
-
 
 export const LogEntryCategoriesPage = () => {
   useBreadcrumbs(
