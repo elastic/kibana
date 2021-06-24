@@ -41,7 +41,7 @@ export function FilterValueButton({
 
   const series = getSeries(seriesId);
 
-  const { indexPattern } = useAppIndexPatternContext();
+  const { indexPatterns } = useAppIndexPatternContext(series.dataType);
 
   const { setFilter, removeFilter } = useSeriesFilters({ seriesId });
 
@@ -96,7 +96,6 @@ export function FilterValueButton({
     <FieldValueSuggestions
       button={button}
       label={'Version'}
-      indexPatternTitle={indexPattern?.title}
       sourceField={nestedField}
       onChange={onNestedChange}
       filters={filters}
@@ -104,6 +103,7 @@ export function FilterValueButton({
       anchorPosition="rightCenter"
       time={series.time}
       asCombobox={false}
+      indexPatternTitle={indexPatterns[series.dataType]?.title}
     />
   ) : (
     button

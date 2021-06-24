@@ -196,6 +196,6 @@ describe('AppSearchNav', () => {
     setMockValues({ myRole: { canViewRoleMappings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/role_mappings');
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/users_and_roles');
   });
 });
