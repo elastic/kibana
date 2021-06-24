@@ -44,7 +44,7 @@ interface Node {
   stop: () => Promise<void>;
 }
 
-interface Cluster {
+export interface Cluster {
   ports: number[];
   nodes: Node[];
   getStartTimeout: () => number;
@@ -182,7 +182,7 @@ export function createTestEsCluster<
     esArgs,
   };
 
-  return new (class TestCluster implements EsTestCluster {
+  return new (class TestCluster {
     ports: number[] = [];
     nodes: Node[] = [];
 
@@ -310,7 +310,7 @@ export function createTestEsCluster<
     getHostUrls(): string[] {
       return this.ports.map((p) => format({ ...esTestConfig.getUrlParts(), port: p }));
     }
-  })();
+  })() as EsTestCluster<Options>;
 }
 
 /**
