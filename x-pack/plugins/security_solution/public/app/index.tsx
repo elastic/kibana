@@ -12,7 +12,7 @@ import { OVERVIEW_PATH } from '../../common/constants';
 
 import { NotFoundPage } from '../app/404';
 import { SecurityApp } from './app';
-import { RenderAppProps, RenderAppPropsOld } from './types';
+import { RenderAppProps } from './types';
 
 export const renderApp = ({
   element,

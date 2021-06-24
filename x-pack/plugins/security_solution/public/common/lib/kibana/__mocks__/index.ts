@@ -6,7 +6,7 @@
  */
 
 import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
-import { createGetAppUrl, createNavigateTo } from '../hooks';
+// import { createGetAppUrl, createNavigateTo } from '../hooks';
 import {
   createKibanaContextProviderMock,
   createUseUiSettingMock,
