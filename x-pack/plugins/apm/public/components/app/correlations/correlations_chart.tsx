@@ -102,10 +102,34 @@ const annotationsStyle = {
   },
 };
 
+const CHART_PLACEHOLDER_VALUE = 0.0001;
+
+// Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
+// as a circular marker instead of a bar
+// This provides a workaround by making the next bin not empty
+export const replaceHistogramDotsWithBars = (
+  originalHistogram: HistogramItem[] | undefined
+) => {
+  if (originalHistogram === undefined) return;
+  const histogram = [...originalHistogram];
+  {
+    for (let i = 0; i < histogram.length - 1; i++) {
+      if (
+        histogram[i].doc_count > 0 &&
+        histogram[i].doc_count !== CHART_PLACEHOLDER_VALUE &&
+        histogram[i + 1].doc_count === 0
+      ) {
+        histogram[i + 1].doc_count = CHART_PLACEHOLDER_VALUE;
+      }
+    }
+    return histogram;
+  }
+};
+
 export function CorrelationsChart({
   field,
   value,
-  histogram,
+  histogram: originalHistogram,
   markerValue,
   markerPercentile,
   overallHistogram,
@@ -119,6 +143,8 @@ export function CorrelationsChart({
 
   const xMax = max(overallHistogram.map((d) => d.key)) ?? 0;
   const durationFormatter = getDurationFormatter(xMax);
+
+  const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
   return (
     <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -134,7 +160,6 @@ export function CorrelationsChart({
           legendPosition={Position.Bottom}
           xDomain={xAxisDomain}
         />
-
         <LineAnnotation
           id="annotation_1"
           domainType={AnnotationDomainType.XDomain}
@@ -143,7 +168,6 @@ export function CorrelationsChart({
           marker={`${markerPercentile}p`}
           markerPosition={'top'}
         />
-
         <Axis
           id="x-axis"
           title=""
@@ -173,6 +197,7 @@ export function CorrelationsChart({
           xAccessor="key"
           yAccessors={['doc_count']}
           color={euiTheme.eui.euiColorVis1}
+          fit="lookahead"
         />
         {Array.isArray(histogram) &&
           field !== undefined &&

@@ -25,7 +25,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { CorrelationsChart } from './correlations_chart';
+import {
+  CorrelationsChart,
+  replaceHistogramDotsWithBars,
+} from './correlations_chart';
 import {
   CorrelationsTable,
   SelectedSignificantTerm,
@@ -78,7 +81,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     progress,
     startFetch,
     cancelFetch,
-    overallHistogram,
+    overallHistogram: originalOverallHistogram,
   } = useCorrelations({
     index: 'apm-*',
     ...{
@@ -86,6 +89,11 @@ export function MlLatencyCorrelations({ onClose }: Props) {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     },
   });
+
+  const overallHistogram = useMemo(
+    () => replaceHistogramDotsWithBars(originalOverallHistogram),
+    [originalOverallHistogram]
+  );
 
   // cancel any running async partial request when unmounting the component
   // we want this effect to execute exactly once after the component mounts
