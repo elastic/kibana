@@ -10,7 +10,6 @@ import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCallOut } from '@elastic/eui';
 import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { ShowDebugging } from './show_debugging';
 
 export interface Props {
