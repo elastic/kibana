@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { INDICATOR_DESTINATION_PATH } from '../../../../../common/constants';
-import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import {
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  INDICATOR_DESTINATION_PATH,
+} from '../../../../../common/constants';
+import { ENRICHMENT_TYPES, PROVIDER } from '../../../../../common/cti/constants';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
@@ -62,3 +65,13 @@ export const getFirstElement: <T = unknown>(array: T[] | undefined) => T | undef
 
 export const getEnrichmentValue = (enrichment: CtiEnrichment, field: string) =>
   getFirstElement(enrichment[field]) as string | undefined;
+
+/**
+ * This value may be in one of two locations depending on whether it's an
+ * old indicator alert or a new enrichment. Once enrichment has been
+ * normalized and we support the new ECS fields, this value should always be
+ * 'indicator.provider';
+ */
+export const getEnrichmentProvider = (enrichment: CtiEnrichment) =>
+  getEnrichmentValue(enrichment, PROVIDER) ||
+  getEnrichmentValue(enrichment, `${DEFAULT_INDICATOR_SOURCE_PATH}.${PROVIDER}`);

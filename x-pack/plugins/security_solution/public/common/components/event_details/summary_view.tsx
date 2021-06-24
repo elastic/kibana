@@ -20,6 +20,7 @@ export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     border: none;
   }
 
+  /* TODO is this needed? */
   .euiTableCellContent {
     display: flex;
     flex-direction: column;

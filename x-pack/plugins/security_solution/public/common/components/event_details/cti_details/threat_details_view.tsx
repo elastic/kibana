@@ -13,6 +13,8 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiLink,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
@@ -24,16 +26,53 @@ import {
   EVENT_URL,
   EVENT_REFERENCE,
   MATCHED_ID,
+  MATCHED_FIELD,
+  MATCHED_ATOMIC,
+  MATCHED_TYPE,
 } from '../../../../../common/cti/constants';
-import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { getEnrichmentValue, getFirstElement } from './helpers';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import { getEnrichmentProvider, getEnrichmentValue, getFirstElement } from './helpers';
+import * as i18n from './translations';
+import { EnrichmentIcon } from './enrichment_icon';
 
 const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenValue = getEnrichmentValue(enrichment, FIRSTSEEN);
   const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
   return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
 };
+
+const ThreatDetailsHeader: React.FC<{
+  field: string | undefined;
+  value: string | undefined;
+  provider: string | undefined;
+  type: string | undefined;
+}> = ({ field, value, provider, type }) => (
+  <EuiTextColor color="subdued">
+    <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EnrichmentIcon type={type} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          {field} {value}
+        </EuiText>
+      </EuiFlexItem>
+      {provider && (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              {i18n.PROVIDER_PREPOSITION} {provider}
+            </EuiText>
+          </EuiFlexItem>
+        </>
+      )}
+      <EuiFlexItem>
+        <EuiHorizontalRule />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiTextColor>
+);
 
 const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   fieldName,
@@ -95,14 +134,20 @@ const ThreatDetailsViewComponent: React.FC<{
       <EuiSpacer size="l" />
       {sortedEnrichments.map((enrichment, index) => {
         const key = getEnrichmentValue(enrichment, MATCHED_ID);
+        const field = getEnrichmentValue(enrichment, MATCHED_FIELD);
+        const value = getEnrichmentValue(enrichment, MATCHED_ATOMIC);
+        const type = getEnrichmentValue(enrichment, MATCHED_TYPE);
+        const provider = getEnrichmentProvider(enrichment);
+
         return (
           <Fragment key={key}>
+            <ThreatDetailsHeader field={field} provider={provider} value={value} type={type} />
             <StyledEuiInMemoryTable
               columns={columns}
-              items={buildThreatDetailsItems(enrichment)}
+              compressed
               dataTestSubj={`threat-details-view-${index}`}
+              items={buildThreatDetailsItems(enrichment)}
             />
-            {index < enrichments.length - 1 && <EuiHorizontalRule />}
           </Fragment>
         );
       })}

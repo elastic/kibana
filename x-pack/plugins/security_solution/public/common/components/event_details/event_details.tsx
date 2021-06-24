@@ -112,8 +112,6 @@ const EventDetailsComponent: React.FC<Props> = ({
     result: enrichmentsResponse,
     start: getEnrichments,
   } = useEventEnrichment();
-  // console.log('enrichments', enrichmentsLoading, enrichmentsResponse);
-  // console.log('data', data);
 
   useEffect(() => {
     if (enrichmentError) {

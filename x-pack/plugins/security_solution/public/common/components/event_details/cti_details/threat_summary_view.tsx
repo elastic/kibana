@@ -7,20 +7,15 @@
 
 import styled from 'styled-components';
 import React from 'react';
-import { EuiBasicTableColumn, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import {
-  MATCHED_ATOMIC,
-  MATCHED_FIELD,
-  MATCHED_TYPE,
-  PROVIDER,
-} from '../../../../../common/cti/constants';
+import { MATCHED_ATOMIC, MATCHED_FIELD, MATCHED_TYPE } from '../../../../../common/cti/constants';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
-import { getTooltipTitle, getTooltipContent, getEnrichmentValue } from './helpers';
+import { getEnrichmentProvider, getEnrichmentValue } from './helpers';
+import { EnrichmentIcon } from './enrichment_icon';
 
 export interface ThreatSummaryItem {
   title: {
@@ -57,14 +52,6 @@ const EnrichmentTitle: React.FC<ThreatSummaryItem['title']> = ({ title, type }) 
     </EuiTitle>
   </FlexContainer>
 );
-
-const EnrichmentIcon: React.FC<{ type: string | undefined }> = ({ type }) => {
-  return (
-    <EuiToolTip title={getTooltipTitle(type)} content={getTooltipContent(type)}>
-      <EuiIcon type="logoSecurity" size="s" />
-    </EuiToolTip>
-  );
-};
 
 const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
   timelineId,
@@ -109,13 +96,7 @@ const buildThreatSummaryItems = (
     const field = getEnrichmentValue(enrichment, MATCHED_FIELD);
     const value = getEnrichmentValue(enrichment, MATCHED_ATOMIC);
     const type = getEnrichmentValue(enrichment, MATCHED_TYPE);
-    // This value may be in one of two locations depending on whether it's an
-    // old indicator alert or a new enrichment. Once enrichment has been
-    // normalized and we support the new ECS fields, this value should always be
-    // 'indicator.provider'
-    const provider =
-      getEnrichmentValue(enrichment, PROVIDER) ||
-      getEnrichmentValue(enrichment, `${DEFAULT_INDICATOR_SOURCE_PATH}.${PROVIDER}`);
+    const provider = getEnrichmentProvider(enrichment);
 
     return {
       title: {
