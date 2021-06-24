@@ -98,12 +98,12 @@ describe('Session service', () => {
       expect(nowProvider.reset).toHaveBeenCalled();
     });
 
-    it("Can clear other apps' session", async () => {
+    it("Can't clear other apps' session", async () => {
       sessionService.start();
       expect(sessionService.getSessionId()).not.toBeUndefined();
       currentAppId$.next('change');
       sessionService.clear();
-      expect(sessionService.getSessionId()).toBeUndefined();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
     });
 
     it("Can start a new session in case there is other apps' stale session", async () => {
@@ -159,14 +159,6 @@ describe('Session service', () => {
 
       expect(abort).toBeCalledTimes(3);
     });
-  });
-
-  it("Can't clear other apps' session", async () => {
-    sessionService.start();
-    expect(sessionService.getSessionId()).not.toBeUndefined();
-    currentAppId$.next('change');
-    sessionService.clear();
-    expect(sessionService.getSessionId()).not.toBeUndefined();
   });
 
   it('Can continue previous session from another app', async () => {
