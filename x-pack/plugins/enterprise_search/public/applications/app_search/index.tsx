@@ -14,8 +14,7 @@ import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { InitialAppData } from '../../../common/types';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
-import { Layout, SideNav, SideNavLink } from '../shared/layout';
-import { NotFound } from '../shared/not_found';
+import { SideNav, SideNavLink } from '../shared/layout';
 
 import { ROLE_MAPPINGS_TITLE } from '../shared/role_mapping/constants';
 
@@ -28,6 +27,7 @@ import { ErrorConnecting } from './components/error_connecting';
 import { KibanaHeaderActions } from './components/layout';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
+import { NotFound } from './components/not_found';
 import { RoleMappings } from './components/role_mappings';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
@@ -85,7 +85,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
     },
   } = useValues(AppLogic(props));
   const { renderHeaderActions } = useValues(KibanaLogic);
-  const { readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
     renderHeaderActions(KibanaHeaderActions);
@@ -133,13 +132,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
         </Route>
       )}
       <Route>
-        <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
-          <Switch>
-            <Route>
-              <NotFound product={APP_SEARCH_PLUGIN} />
-            </Route>
-          </Switch>
-        </Layout>
+        <NotFound />
       </Route>
     </Switch>
   );
