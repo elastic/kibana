@@ -15,14 +15,9 @@ import { Ping } from '../../../common/runtime_types/ping';
 import {
   ALERT_SEVERITY_LEVEL,
   ALERT_SEVERITY_VALUE,
+  ALERT_EVALUATION_VALUE,
+  ALERT_EVALUATION_THRESHOLD,
 } from '@kbn/rule-data-utils/target/technical_field_names';
-
-/**
- * This function aims to provide an easy way to give mock props that will
- * reduce boilerplate for tests.
- * @param params the params received at alert creation time
- * @param state the state the alert maintains
- */
 
 interface MockAnomaly {
   severity: AnomaliesTableRecord['severity'];
@@ -39,6 +34,13 @@ interface MockAnomalyResult {
 const monitorId = 'uptime-monitor';
 const mockUrl = 'https://elastic.co';
 
+/**
+ * This function aims to provide an easy way to give mock props that will
+ * reduce boilerplate for tests.
+ * @param dynamic the expiration and aging thresholds received at alert creation time
+ * @param params the params received at alert creation time
+ * @param state the state the alert maintains
+ */
 const mockOptions = (
   dynamicCertSettings?: {
     certExpirationThreshold: DynamicSettings['certExpirationThreshold'];
@@ -162,12 +164,10 @@ describe('duration anomaly alert', () => {
           fields: {
             'monitor.id': options.params.monitorId,
             'url.full': mockPing.url?.full,
-            'anomaly.severity': getSeverityType(anomaly.severity),
-            'anomaly.severity_score': anomaly.severity,
             'anomaly.start': mockDate,
-            'anomaly.slowest_response': slowestResponse,
-            'anomaly.expected_response': typicalResponse,
-            'anomaly.observer_location': anomaly.entityValue,
+            'observer.geo.name': anomaly.entityValue,
+            [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
+            [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_SEVERITY_LEVEL]: getSeverityType(anomaly.severity),
             [ALERT_SEVERITY_VALUE]: anomaly.severity,
             reason: `Abnormal (${getSeverityType(

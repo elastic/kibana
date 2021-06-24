@@ -11,7 +11,10 @@ import { schema } from '@kbn/config-schema';
 import {
   ALERT_SEVERITY_LEVEL,
   ALERT_SEVERITY_VALUE,
+  ALERT_EVALUATION_VALUE,
+  ALERT_EVALUATION_THRESHOLD,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import { ActionGroupIdsOf } from '../../../../alerting/common';
 import { updateState, generateAlertMessage } from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
@@ -23,6 +26,8 @@ import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
 
 import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../common/translations';
+
+export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
 export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
   return {
@@ -64,7 +69,11 @@ const getAnomalies = async (
   );
 };
 
-export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, libs, plugins) => ({
+export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
+  _server,
+  libs,
+  plugins
+) => ({
   id: 'xpack.uptime.alerts.durationAnomaly',
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
@@ -112,12 +121,10 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, lib
           fields: {
             'monitor.id': params.monitorId,
             'url.full': summary.monitorUrl,
-            'anomaly.severity': summary.severity,
-            'anomaly.severity_score': summary.severityScore,
+            'observer.geo.name': summary.observerLocation,
             'anomaly.start': summary.anomalyStartTimestamp,
-            'anomaly.slowest_response': Math.round(anomaly.actualSort / 1000),
-            'anomaly.expected_response': Math.round(anomaly.typicalSort / 1000),
-            'anomaly.observer_location': summary.observerLocation,
+            [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
+            [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_SEVERITY_LEVEL]: summary.severity,
             [ALERT_SEVERITY_VALUE]: summary.severityScore,
             reason: generateAlertMessage(
