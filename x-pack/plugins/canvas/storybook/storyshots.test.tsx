@@ -13,7 +13,6 @@ import 'moment-timezone';
 import ReactDOM from 'react-dom';
 import { shallow } from 'enzyme';
 import { create, act } from 'react-test-renderer';
-import wait from 'waait';
 
 import initStoryshots, { Stories2SnapsConverter } from '@storybook/addon-storyshots';
 // @ts-expect-error untyped library
@@ -127,12 +126,11 @@ initStoryshots({
   asyncJest: true,
   test: async ({ story, context, done }) => {
     const renderer = create(createElement(story.render));
-
+    // wait until the element will perform all renders and resolve all promises (lazy loading, especially)
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
     // save each snapshot to a different file (similar to "multiSnapshotWithOptions")
     const snapshotFileName = converter.getSnapshotFileName(context);
-    await act(() => wait(0));
     expect(renderer).toMatchSpecificSnapshot(snapshotFileName);
-    // expect(renderer).toMatchSnapshot();
     done?.();
   },
   // Don't snapshot tests that start with 'redux'
