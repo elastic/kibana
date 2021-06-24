@@ -24,6 +24,7 @@ import { DataRequest } from '../../util/data_request';
 export interface SourceTooltipConfig {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;
+  isDeprecated?: boolean;
 }
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
