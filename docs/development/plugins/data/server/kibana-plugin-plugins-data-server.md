@@ -13,6 +13,7 @@
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [IndexPatternsServiceProvider](./kibana-plugin-plugins-data-server.indexpatternsserviceprovider.md) |  |
+|  [NoSearchIdInSessionError](./kibana-plugin-plugins-data-server.nosearchidinsessionerror.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
 
