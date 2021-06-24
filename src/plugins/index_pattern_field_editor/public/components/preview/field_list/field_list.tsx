@@ -35,6 +35,7 @@ interface Props {
 }
 
 /**
+ * Escape regex special characters (e.g /, ^, $...) with a "\"
  * Copied from https://stackoverflow.com/a/9310752
  */
 function escapeRegExp(text: string) {
