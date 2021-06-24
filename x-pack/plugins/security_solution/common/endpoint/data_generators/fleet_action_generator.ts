@@ -12,24 +12,78 @@ import { EndpointAction, EndpointActionResponse, ISOLATION_ACTIONS } from '../ty
 
 const ISOLATION_COMMANDS: ISOLATION_ACTIONS[] = ['isolate', 'unisolate'];
 
+type FleetAction = Omit<EndpointAction, 'input_type' | 'type' | 'user_id' | 'data'> & {
+  data: { log_level: string };
+  type: string;
+};
+
+type OSQueryAction = Omit<EndpointAction, 'input_type' | 'data'> & {
+  input_type: 'osquery';
+  data: { id: string; query: string };
+};
+
 export class FleetActionGenerator extends BaseDataGenerator {
-  /** Generate a random endpoint Action (isolate or unisolate) */
-  generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
+  _getBaseActionDoc() {
     const timeStamp = new Date(this.randomPastDate());
 
+    return {
+      action_id: this.randomUUID(),
+      '@timestamp': timeStamp.toISOString(),
+      expiration: this.randomFutureDate(timeStamp),
+      agents: [this.randomUUID()],
+      type: 'INPUT_ACTION',
+      input_type: 'endpoint',
+      user_id: 'elastic',
+    };
+  }
+
+  /** Generate a random endpoint Action (isolate or unisolate) */
+  generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
+    const baseActionDoc = this._getBaseActionDoc();
     return merge(
       {
-        action_id: this.randomUUID(),
-        '@timestamp': timeStamp.toISOString(),
-        expiration: this.randomFutureDate(timeStamp),
-        type: 'INPUT_ACTION',
-        input_type: 'endpoint',
-        agents: [this.randomUUID()],
-        user_id: 'elastic',
+        ...baseActionDoc,
         data: {
           command: this.randomIsolateCommand(),
           comment: this.randomString(15),
         },
+      },
+      overrides
+    );
+  }
+
+  generateOSQueryAction(overrides: DeepPartial<OSQueryAction> = {}): OSQueryAction {
+    const baseActionDoc = this._getBaseActionDoc();
+
+    return merge(
+      {
+        ...baseActionDoc,
+        data: {
+          id: this.randomUUID(),
+          query: '',
+        },
+      },
+      overrides
+    );
+  }
+
+  generateFleetAction(overrides: DeepPartial<FleetAction> = {}): FleetAction {
+    const baseActionDoc = this._getBaseActionDoc();
+
+    const fleetActionDoc = {
+      ...baseActionDoc,
+      user_id: undefined,
+      input_type: undefined,
+      type: undefined,
+    };
+
+    return merge(
+      {
+        ...fleetActionDoc,
+        data: {
+          log_level: 'debug',
+        },
+        type: 'SETTINGS',
       },
       overrides
     );

@@ -419,12 +419,27 @@ const indexFleetActionsForHost = async (
       data: { comment: 'data generator: this host is bad' },
     });
 
-    action.agents = [agentId];
+    // create an osquery action
+    const OSQueryAction = fleetActionGenerator.generateOSQueryAction({
+      input_type: 'osquery',
+      data: {
+        query: 'SELECT name, path, pid FROM processes WHERE on_disk = 0;',
+      },
+    });
 
-    await esClient.index(
+    // create a fleet action
+    const fleetAction = fleetActionGenerator.generateFleetAction({
+      data: { log_level: 'debug' },
+      type: 'SETTINGS',
+    });
+
+    action.agents = [agentId];
+    fleetAction.agents = [agentId];
+
+    await esClient.bulk(
       {
         index: AGENT_ACTIONS_INDEX,
-        body: action,
+        body: [action, OSQueryAction, fleetAction],
       },
       ES_INDEX_OPTIONS
     );
