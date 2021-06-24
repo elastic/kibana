@@ -14,9 +14,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('ciGroup1');
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
+    const retry = getService('retry');
 
     it('keys in the schema match the registered application IDs', async () => {
       await common.navigateToApp('home'); // Navigate to Home to make sure all the appIds are loaded
+      await retry.waitFor('chrome visible', () => common.isChromeVisible());
       const appIds = await browser.execute(() => window.__applicationIds__);
       try {
         expect(Object.keys(applicationUsageSchema).sort()).to.eql(appIds.sort());
