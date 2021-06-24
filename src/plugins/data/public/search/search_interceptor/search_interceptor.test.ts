@@ -29,6 +29,12 @@ jest.mock('./utils', () => ({
   }),
 }));
 
+jest.mock('../errors/search_session_incomplete_warning', () => ({
+  SearchSessionIncompleteWarning: jest.fn(),
+}));
+
+import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
+
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let bfetchSetup: jest.Mocked<BfetchPublicSetup>;
@@ -508,6 +514,7 @@ describe('SearchInterceptor', () => {
               }
             : null
         );
+        sessionServiceMock.isRestore.mockReturnValue(!!opts?.isRestore);
         fetchMock.mockResolvedValue({ result: 200 });
       };
 
@@ -561,6 +568,92 @@ describe('SearchInterceptor', () => {
         expect(
           (sessionService as jest.Mocked<ISessionService>).getSearchOptions
         ).toHaveBeenCalledWith(sessionId);
+      });
+
+      test('should not show warning if a search is available during restore', async () => {
+        setup({
+          isRestore: true,
+          isStored: true,
+          sessionId: '123',
+        });
+
+        const responses = [
+          {
+            time: 10,
+            value: {
+              isPartial: false,
+              isRunning: false,
+              isRestored: true,
+              id: 1,
+              rawResponse: {
+                took: 1,
+              },
+            },
+          },
+        ];
+        mockFetchImplementation(responses);
+
+        const response = searchInterceptor.search(
+          {},
+          {
+            sessionId: '123',
+          }
+        );
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(SearchSessionIncompleteWarning).toBeCalledTimes(0);
+      });
+
+      test('should show warning once if a search is not available during restore', async () => {
+        setup({
+          isRestore: true,
+          isStored: true,
+          sessionId: '123',
+        });
+
+        const responses = [
+          {
+            time: 10,
+            value: {
+              isPartial: false,
+              isRunning: false,
+              isRestored: false,
+              id: 1,
+              rawResponse: {
+                took: 1,
+              },
+            },
+          },
+        ];
+        mockFetchImplementation(responses);
+
+        searchInterceptor
+          .search(
+            {},
+            {
+              sessionId: '123',
+            }
+          )
+          .subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(SearchSessionIncompleteWarning).toBeCalledTimes(1);
+
+        searchInterceptor
+          .search(
+            {},
+            {
+              sessionId: '123',
+            }
+          )
+          .subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(SearchSessionIncompleteWarning).toBeCalledTimes(1);
       });
     });
 
