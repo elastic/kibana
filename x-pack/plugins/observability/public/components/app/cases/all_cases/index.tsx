@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { observabilityAppId } from '../../../../../common/const';
+import { observabilityAppId } from '../../../../../common';
 
 import {
   getCaseDetailsUrl,

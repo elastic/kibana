@@ -13,7 +13,7 @@ import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permi
 import { useKibana } from '../../utils/kibana_react';
 import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { observabilityAppId } from '../../../common/const';
+import { observabilityAppId } from '../../../common';
 
 export const CaseDetailsPage = React.memo(() => {
   const {

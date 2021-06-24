@@ -24,7 +24,7 @@ import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { casesFeatureId, observabilityFeatureId } from '../common/const';
+import { casesFeatureId, observabilityFeatureId } from '../common';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 

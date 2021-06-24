@@ -12,7 +12,7 @@ import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
 import { useMessagesStorage } from '../../../../hooks/use_messages_storage';
-import { observabilityAppId } from '../../../../../common/const';
+import { observabilityAppId } from '../../../../../common';
 
 export * from './helpers';
 

@@ -16,7 +16,7 @@ import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permi
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { casesBreadcrumbs, getCaseUrl, useFormatUrl } from './links';
-import { observabilityAppId } from '../../../common/const';
+import { observabilityAppId } from '../../../common';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;

@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '../../../../src/core/types';
-import { observabilityFeatureId } from '../../observability/common/const';
+import { observabilityFeatureId } from '../../observability/common';
 import { enableServiceOverview } from '../common/ui_settings_keys';
 
 /**

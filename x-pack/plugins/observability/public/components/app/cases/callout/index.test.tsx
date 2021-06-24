@@ -12,7 +12,7 @@ import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_rea
 import { useMessagesStorage } from '../../../../hooks/use_messages_storage';
 import { createCalloutId } from './helpers';
 import { CaseCallOut, CaseCallOutProps } from '.';
-import { observabilityAppId } from '../../../../../common/const';
+import { observabilityAppId } from '../../../../../common';
 
 jest.mock('../../../../hooks/use_messages_storage');
 const useSecurityLocalStorageMock = useMessagesStorage as jest.Mock;

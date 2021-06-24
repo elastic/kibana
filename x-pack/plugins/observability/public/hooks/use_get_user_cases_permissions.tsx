@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useKibana } from '../utils/kibana_react';
-import { casesFeatureId } from '../../common/const';
+import { casesFeatureId } from '../../common';
 
 export interface UseGetUserCasesPermissions {
   crud: boolean;

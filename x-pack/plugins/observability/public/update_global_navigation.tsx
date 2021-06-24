@@ -13,7 +13,7 @@ import {
   ApplicationStart,
   AppDeepLink,
 } from '../../../../src/core/public';
-import { casesFeatureId } from '../common/const';
+import { casesFeatureId } from '../common';
 
 export function updateGlobalNavigation({
   capabilities,

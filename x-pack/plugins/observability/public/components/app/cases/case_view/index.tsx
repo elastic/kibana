@@ -18,7 +18,7 @@ import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { observabilityAppId } from '../../../../../common/const';
+import { observabilityAppId } from '../../../../../common';
 
 interface Props {
   caseId: string;

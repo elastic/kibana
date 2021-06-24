@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
-import { observabilityAppId } from '../../../common/const';
+import { observabilityAppId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 
 export const casesBreadcrumbs = {

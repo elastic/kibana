@@ -34,7 +34,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
-import { observabilityAppId, observabilityFeatureId } from '../common/const';
+import { observabilityAppId, observabilityFeatureId } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -128,7 +128,7 @@ export class Plugin
       });
     };
 
-    const updater$ = this.appUpdater$;
+    const appUpdater$ = this.appUpdater$;
     const app = {
       appRoute: '/app/observability',
       category,
@@ -140,7 +140,7 @@ export class Plugin
       title: i18n.translate('xpack.observability.overviewLinkTitle', {
         defaultMessage: 'Overview',
       }),
-      updater$,
+      updater$: appUpdater$,
     };
 
     coreSetup.application.register(app);
@@ -176,7 +176,7 @@ export class Plugin
     }
 
     this.navigationRegistry.registerSections(
-      from(updater$).pipe(
+      from(appUpdater$).pipe(
         map((value) => {
           const deepLinks = value(app)?.deepLinks ?? [];
 
@@ -190,6 +190,14 @@ export class Plugin
 
           // Reformat the visible links to be NavigationEntry objects instead of
           // AppDeepLink objects.
+          //
+          // In our case the deep links and sections being registered are the
+          // same, and the logic to hide them based on flags or capabilities is
+          // the same, so we just want to make a new list with the properties
+          // needed by `registerSections`, which are different than the
+          // properties used by the deepLinks.
+          //
+          // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
             .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
             .map((link) => ({
@@ -198,13 +206,15 @@ export class Plugin
               path: link.path ?? '',
             }));
 
-          return [
+          const sections = [
             {
               label: '',
               sortKey: 100,
               entries: [overviewLink, ...otherLinks],
             },
           ];
+
+          return sections;
         })
       )
     );

@@ -14,7 +14,7 @@ import {
   AppNavLinkStatus,
   AppUpdater,
 } from '../../../../src/core/public';
-import { casesFeatureId } from '../common/const';
+import { casesFeatureId } from '../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback

@@ -11,7 +11,7 @@ import { EuiPanel } from '@elastic/eui';
 import { useKibana } from '../../../../utils/kibana_react';
 import { getCaseDetailsUrl } from '../../../../pages/cases/links';
 import { CASES_OWNER } from '../constants';
-import { observabilityAppId } from '../../../../../common/const';
+import { observabilityAppId } from '../../../../../common';
 
 export const Create = React.memo(() => {
   const {
