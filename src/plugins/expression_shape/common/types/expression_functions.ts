@@ -7,36 +7,40 @@
  */
 import { ExpressionFunctionDefinition, ExpressionValueRender } from 'src/plugins/expressions';
 
-export enum Origin {
-  TOP = 'top',
-  LEFT = 'left',
-  BOTTOM = 'bottom',
-  RIGHT = 'right',
+export enum Shape {
+  ARROW = 'arrow',
+  ARROW_MULTI = 'arrowMulti',
+  BOOKMARK = 'bookmark',
+  CIRCLE = 'circle',
+  CROSS = 'cross',
+  HEXAGON = 'hexagon',
+  KITE = 'kite',
+  PENTAGON = 'pentagon',
+  RHOMBUS = 'rhombus',
+  SEMICIRCLE = 'semicircle',
+  SPEECH_BUBBLE = 'speechBubble',
+  SQUARE = 'square',
+  STAR = 'star',
+  TAG = 'tag',
+  TRIANGLE = 'triangle',
+  TRIANGLE_RIGHT = 'triangleRight',
 }
 
 interface Arguments {
-  image: string | null;
-  emptyImage: string | null;
-  origin: Origin;
+  border: string;
+  borderWidth: number;
+  shape: Shape;
+  fill: string;
+  maintainAspect: boolean;
 }
 
-export interface Output {
-  image: string;
-  emptyImage: string;
-  origin: Origin;
-  percent: number;
+export interface Output extends Arguments {
+  type: 'shape';
 }
 
 export type ExpressionShapeFunction = () => ExpressionFunctionDefinition<
   'shape',
-  number,
+  number | null,
   Arguments,
-  ExpressionValueRender<Output>
+  Output
 >;
-
-export enum Position {
-  TOP = 'top',
-  BOTTOM = 'bottom',
-  LEFT = 'left',
-  RIGHT = 'right',
-}

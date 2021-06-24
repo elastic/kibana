@@ -6,53 +6,81 @@
  * Side Public License, v 1.
  */
 
-import { resolveWithMissingImage, elasticOutline } from '../../../presentation_util/public';
-import { getFunctionHelp, getFunctionErrors } from '../../common/i18n';
-import { ExpressionShapeFunction, Origin } from '../../common/types';
+import { i18n } from '@kbn/i18n';
+import { ExpressionShapeFunction, Shape } from '../../common/types';
+import { SVG } from '../../common';
+
+export const strings = {
+  help: i18n.translate('expressionShape.functions.shapeHelpText', {
+    defaultMessage: 'Creates a shape.',
+  }),
+  args: {
+    shape: i18n.translate('expressionShape.functions.shape.args.shapeHelpText', {
+      defaultMessage: 'Pick a shape.',
+    }),
+    border: i18n.translate('expressionShape.functions.shape.args.borderHelpText', {
+      defaultMessage: 'An {SVG} color for the border outlining the shape.',
+      values: {
+        SVG,
+      },
+    }),
+    borderWidth: i18n.translate('expressionShape.functions.shape.args.borderWidthHelpText', {
+      defaultMessage: 'The thickness of the border.',
+    }),
+    fill: i18n.translate('expressionShape.functions.shape.args.fillHelpText', {
+      defaultMessage: 'An {SVG} color to fill the shape.',
+      values: {
+        SVG,
+      },
+    }),
+    maintainAspect: i18n.translate('expressionShape.functions.shape.args.maintainAspectHelpText', {
+      defaultMessage: `Maintain the shape's original aspect ratio?`,
+    }),
+  },
+};
 
 export const shapeFunction: ExpressionShapeFunction = () => {
-  const { help, args: argHelp } = getFunctionHelp().shape;
-  const errors = getFunctionErrors().shape;
+  const { help, args: argHelp } = strings;
 
   return {
     name: 'shape',
     aliases: [],
-    type: 'render',
-    inputTypes: ['number'],
+    inputTypes: ['null'],
     help,
     args: {
-      image: {
-        types: ['string', 'null'],
-        help: argHelp.image,
-        default: elasticOutline,
-      },
-      emptyImage: {
-        types: ['string', 'null'],
-        help: argHelp.emptyImage,
-        default: null,
-      },
-      origin: {
+      shape: {
         types: ['string'],
-        help: argHelp.origin,
-        default: 'bottom',
-        options: Object.values(Origin),
+        help: argHelp.shape,
+        aliases: ['_'],
+        default: 'square',
+        options: Object.values(Shape),
+      },
+      border: {
+        types: ['string'],
+        aliases: ['stroke'],
+        help: argHelp.border,
+      },
+      borderWidth: {
+        types: ['number'],
+        aliases: ['strokeWidth'],
+        help: argHelp.borderWidth,
+        default: 0,
+      },
+      fill: {
+        types: ['string'],
+        help: argHelp.fill,
+        default: 'black',
+      },
+      maintainAspect: {
+        types: ['boolean'],
+        help: argHelp.maintainAspect,
+        default: false,
+        options: [true, false],
       },
     },
-    fn: (percent, args) => {
-      if (percent > 1 || percent < 0) {
-        throw errors.invalidPercent(percent);
-      }
-
-      return {
-        type: 'render',
-        as: 'shape',
-        value: {
-          percent,
-          ...args,
-          image: resolveWithMissingImage(args.image, elasticOutline) as string,
-          emptyImage: resolveWithMissingImage(args.emptyImage) as string,
-        },
-      };
-    },
+    fn: (input, args) => ({
+      type: 'shape',
+      ...args,
+    }),
   };
 };

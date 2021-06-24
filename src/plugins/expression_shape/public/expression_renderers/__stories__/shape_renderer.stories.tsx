@@ -8,19 +8,19 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { shapeRenderer } from '../';
-import { elasticOutline, elasticLogo } from '../../../../presentation_util/public';
+import { shapeRenderer as shape } from '../';
 import { Render } from '../../../../presentation_util/public/__stories__';
-
-import { Origin } from '../../../common/types/expression_functions';
+import { Shape } from '../../../common/types';
 
 storiesOf('renderers/shape', module).add('default', () => {
   const config = {
-    image: elasticLogo,
-    emptyImage: elasticOutline,
-    origin: Origin.LEFT,
-    percent: 0.45,
+    type: 'shape' as 'shape',
+    border: '#FFEEDD',
+    borderWidth: 8,
+    shape: Shape.BOOKMARK,
+    fill: '#112233',
+    maintainAspect: true,
   };
 
-  return <Render renderer={shapeRenderer} config={config} />;
+  return <Render renderer={shape} config={config} />;
 });

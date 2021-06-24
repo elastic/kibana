@@ -5,13 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { Shape } from './expression_functions';
 
 export type OriginString = 'bottom' | 'left' | 'top' | 'right';
 export interface ShapeRendererConfig {
-  percent: number;
-  origin?: OriginString;
-  image?: string;
-  emptyImage?: string;
+  border: string;
+  borderWidth: number;
+  shape: Shape;
+  fill: string;
+  maintainAspect: boolean;
 }
 
 export interface NodeDimensions {

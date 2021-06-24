@@ -9,19 +9,28 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { i18n } from '@kbn/i18n';
 import { withSuspense } from '../../../presentation_util/public';
-import { getRendererStrings } from '../../common/i18n';
 import { ShapeRendererConfig } from '../../common/types';
 
-const { shape: shapeStrings } = getRendererStrings();
+const strings = {
+  getDisplayName: () =>
+    i18n.translate('expressionShape.renderer.shape.displayName', {
+      defaultMessage: 'Shape',
+    }),
+  getHelpDescription: () =>
+    i18n.translate('expressionShape.renderer.shape.helpDescription', {
+      defaultMessage: 'Render a basic shape',
+    }),
+};
 
 const LazyShapeComponent = lazy(() => import('../components/shape_component'));
 const ShapeComponent = withSuspense(LazyShapeComponent, null);
 
 export const shapeRenderer = (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
   name: 'shape',
-  displayName: shapeStrings.getDisplayName(),
-  help: shapeStrings.getHelpDescription(),
+  displayName: strings.getDisplayName(),
+  help: strings.getHelpDescription(),
   reuseDomNode: true,
   render: async (
     domNode: HTMLElement,

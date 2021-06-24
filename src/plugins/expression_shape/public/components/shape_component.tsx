@@ -8,8 +8,8 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { NodeDimensions, ShapeRendererConfig, OriginString } from '../../common/types';
-import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
+import { ShapeRendererConfig } from '../../common/types';
+import { shapes } from './shapes';
 import './shape.scss';
 
 interface ShapeComponentProps extends ShapeRendererConfig {
@@ -17,118 +17,84 @@ interface ShapeComponentProps extends ShapeRendererConfig {
   parentNode: HTMLElement;
 }
 
-interface ImageStyles {
-  width?: string;
-  height?: string;
-  clipPath?: string;
-}
-
-interface AlignerStyles {
-  backgroundImage?: string;
-}
-
 function ShapeComponent({
   handlers,
   parentNode,
-  percent,
-  origin,
-  image,
-  emptyImage,
+  shape: shapeType,
+  fill,
+  border,
+  borderWidth,
+  maintainAspect,
 }: ShapeComponentProps) {
-  const [loaded, setLoaded] = useState(false);
-  const [dimensions, setDimensions] = useState<NodeDimensions>({
-    width: 1,
-    height: 1,
-  });
+  const parser = new DOMParser();
+  const shapeSvg = parser
+    .parseFromString(shapes[shapeType], 'image/svg+xml')
+    .getElementsByTagName('svg')
+    .item(0)!;
 
-  const imgRef = useRef<HTMLImageElement>(null);
+  const shapeContent = shapeSvg.firstElementChild!;
 
-  // modify the top-level container class
-  parentNode.className = 'shape';
-
-  // set up the overlay image
-  const updateImageView = useCallback(() => {
-    if (imgRef.current) {
-      setDimensions({
-        height: imgRef.current.naturalHeight,
-        width: imgRef.current.naturalWidth,
-      });
-
-      setLoaded(true);
-      return handlers.done();
-    }
-  }, [imgRef, handlers]);
-
-  useEffect(() => {
-    handlers.event({ name: 'onResize', data: updateImageView });
-    return () => {
-      handlers.event({ name: 'destroy' });
-    };
-  }, [handlers, updateImageView]);
-
-  function getClipPath(percentParam: number, originParam: OriginString = 'bottom') {
-    const directions: Record<OriginString, number> = { bottom: 0, left: 1, top: 2, right: 3 };
-    const values: Array<number | string> = [0, 0, 0, 0];
-    values[directions[originParam]] = `${100 - percentParam * 100}%`;
-    return `inset(${values.join(' ')})`;
+  if (fill) {
+    shapeContent.setAttribute('fill', fill);
   }
+  if (border) {
+    shapeContent.setAttribute('stroke', border);
+  }
+  const strokeWidth = Math.max(borderWidth, 0);
+  shapeContent.setAttribute('stroke-width', String(strokeWidth));
+  shapeContent.setAttribute('stroke-miterlimit', '999');
+  shapeContent.setAttribute('vector-effect', 'non-scaling-stroke');
 
-  function getImageSizeStyle() {
-    const imgStyles: ImageStyles = {};
+  shapeSvg.setAttribute('preserveAspectRatio', maintainAspect ? 'xMidYMid meet' : 'none');
+  shapeSvg.setAttribute('overflow', 'visible');
 
-    const imgDimensions = {
-      height: dimensions.height,
-      width: dimensions.width,
-      ratio: dimensions.height / dimensions.width,
-    };
+  const initialViewBox = shapeSvg
+    .getAttribute('viewBox')!
+    .split(' ')
+    .map((v) => parseInt(v, 10));
 
-    const domNodeDimensions = {
-      width: parentNode.clientWidth,
-      height: parentNode.clientHeight,
-      ratio: parentNode.clientHeight / parentNode.clientWidth,
-    };
+  const draw = () => {
+    const width = parentNode.offsetWidth;
+    const height = parentNode.offsetHeight;
 
-    if (imgDimensions.ratio > domNodeDimensions.ratio) {
-      imgStyles.height = `${domNodeDimensions.height}px`;
-      imgStyles.width = 'initial';
+    // adjust viewBox based on border width
+    let [minX, minY, shapeWidth, shapeHeight] = initialViewBox;
+    const borderOffset = strokeWidth;
+
+    if (width) {
+      const xOffset = (shapeWidth / width) * borderOffset;
+      minX -= xOffset;
+      shapeWidth += xOffset * 2;
     } else {
-      imgStyles.width = `${domNodeDimensions.width}px`;
-      imgStyles.height = 'initial';
+      shapeWidth = 0;
     }
 
-    return imgStyles;
-  }
+    if (height) {
+      const yOffset = (shapeHeight / height) * borderOffset;
+      minY -= yOffset;
+      shapeHeight += yOffset * 2;
+    } else {
+      shapeHeight = 0;
+    }
 
-  const imgSrc = isValidUrl(image ?? '') ? image : elasticOutline;
+    shapeSvg.setAttribute('width', String(width));
+    shapeSvg.setAttribute('height', String(height));
+    shapeSvg.setAttribute('viewBox', [minX, minY, shapeWidth, shapeHeight].join(' '));
 
-  const alignerStyles: AlignerStyles = {};
+    const oldShape = parentNode.firstElementChild;
+    if (oldShape) {
+      parentNode.removeChild(oldShape);
+    }
 
-  if (isValidUrl(emptyImage ?? '')) {
-    // only use empty image if one is provided
-    alignerStyles.backgroundImage = `url(${emptyImage})`;
-  }
+    parentNode.style.lineHeight = '0';
+    parentNode.appendChild(shapeSvg);
+  };
 
-  let imgStyles: ImageStyles = {};
-  if (imgRef.current && loaded) imgStyles = getImageSizeStyle();
+  draw();
+  handlers.done();
+  handlers.event({ name: 'onResize', data: draw }); // debouncing avoided for fluidity
 
-  imgStyles.clipPath = getClipPath(percent, origin);
-  if (imgRef.current && loaded) {
-    imgRef.current.style.setProperty('-webkit-clip-path', getClipPath(percent, origin));
-  }
-
-  return (
-    <div className="shapeAligner" style={alignerStyles}>
-      <img
-        ref={imgRef}
-        onLoad={updateImageView}
-        className="shape__image"
-        src={imgSrc ?? ''}
-        alt=""
-        role="presentation"
-        style={imgStyles}
-      />
-    </div>
-  );
+  return <div className="shapeAligner" />;
 }
 
 // default export required for React.Lazy
