@@ -42,10 +42,11 @@ export function UXActionMenu({
 
   const uxExploratoryViewLink = createExploratoryViewUrl(
     {
-      'ux-series': {
+      'ux-series': ({
         dataType: 'ux',
+        isNew: true,
         time: { from: rangeFrom, to: rangeTo },
-      } as SeriesUrl,
+      } as unknown) as SeriesUrl,
     },
     http?.basePath.get()
   );

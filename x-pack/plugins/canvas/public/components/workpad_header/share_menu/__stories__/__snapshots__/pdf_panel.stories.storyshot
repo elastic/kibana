@@ -37,7 +37,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
         >
           <button
             aria-checked={false}
-            aria-describedby="generated-id-help"
+            aria-describedby="generated-id-help-0"
             aria-labelledby="generated-id"
             className="euiSwitch__button"
             data-test-subj="reportModeToggle"
@@ -80,7 +80,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
         </div>
         <div
           className="euiFormHelpText euiFormRow__text"
-          id="generated-id-help"
+          id="generated-id-help-0"
         >
           Remove borders and footer logo
         </div>
