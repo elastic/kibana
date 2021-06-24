@@ -33,11 +33,12 @@ export const useHostIsolationStatus = ({
   const { addError } = useAppToasts();
 
   useEffect(() => {
+    const abortCtrl = new AbortController();
     // isMounted tracks if a component is mounted before changing state
     let isMounted = true;
     const fetchData = async () => {
       try {
-        const metadataResponse = await getHostMetadata({ agentId });
+        const metadataResponse = await getHostMetadata({ agentId, signal: abortCtrl.signal });
         if (isMounted) {
           setIsIsolated(isEndpointHostIsolated(metadataResponse.metadata));
           setAgentStatus(metadataResponse.host_status);
@@ -62,6 +63,7 @@ export const useHostIsolationStatus = ({
     return () => {
       // updates to show component is unmounted
       isMounted = false;
+      abortCtrl.abort();
     };
   }, [addError, agentId]);
   return { loading, isIsolated, agentStatus };
