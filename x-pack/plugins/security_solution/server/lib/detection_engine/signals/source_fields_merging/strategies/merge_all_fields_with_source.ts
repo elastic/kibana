@@ -26,13 +26,13 @@ import { isTypeObject } from '../utils/is_type_object';
  * @param throwOnFailSafe Defaults to false, but if set to true it will cause a throw if the fail safe is triggered to indicate we need to add a new explicit test condition
  * @returns The two merged together in one object where we can
  */
-export const mergeAllFieldsWithSource = ({ doc }: { doc: SignalSourceHit }): SignalSource => {
+export const mergeAllFieldsWithSource = ({ doc }: { doc: SignalSourceHit }): SignalSourceHit => {
   const source = doc._source ?? {};
   const fields = doc.fields ?? {};
   const fieldEntries = Object.entries(fields);
   const filteredEntries = filterFieldEntries(fieldEntries);
 
-  return filteredEntries.reduce(
+  const transformedSource = filteredEntries.reduce(
     (merged, [fieldsKey, fieldsValue]: [string, FieldsType]) => {
       if (
         hasEarlyReturnConditions({
@@ -76,6 +76,11 @@ export const mergeAllFieldsWithSource = ({ doc }: { doc: SignalSourceHit }): Sig
     },
     { ...source }
   );
+
+  return {
+    ...doc,
+    _source: transformedSource,
+  };
 };
 
 /**

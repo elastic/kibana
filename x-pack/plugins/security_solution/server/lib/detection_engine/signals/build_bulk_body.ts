@@ -35,16 +35,18 @@ export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
   doc: SignalSourceHit
 ): SignalHit => {
-  const mergedSource = mergeMissingFieldsWithSource({ doc });
-  const rule = buildRuleWithOverrides(ruleSO, mergedSource);
+  const mergedDoc = mergeMissingFieldsWithSource({ doc });
+  const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const signal: Signal = {
-    ...buildSignal([doc], rule),
-    ...additionalSignalFields(doc),
+    ...buildSignal([mergedDoc], rule),
+    ...additionalSignalFields(mergedDoc),
   };
-  const event = buildEventTypeSignal(doc);
-  const { threshold_result: thresholdResult, ...omitThresholdResult } = mergedSource;
+  const event = buildEventTypeSignal(mergedDoc);
+  const { threshold_result: thresholdResult, ...filteredSource } = mergedDoc._source || {
+    threshold_result: null,
+  };
   const signalHit: SignalHit = {
-    ...omitThresholdResult,
+    ...filteredSource,
     '@timestamp': new Date().toISOString(),
     event,
     signal,
@@ -130,18 +132,18 @@ export const buildSignalFromEvent = (
   ruleSO: SavedObject<AlertAttributes>,
   applyOverrides: boolean
 ): SignalHit => {
-  const mergedSource = mergeMissingFieldsWithSource({ doc: event });
+  const mergedEvent = mergeMissingFieldsWithSource({ doc: event });
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, mergedSource)
+    ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = {
-    ...buildSignal([event], rule),
-    ...additionalSignalFields(event),
+    ...buildSignal([mergedEvent], rule),
+    ...additionalSignalFields(mergedEvent),
   };
-  const eventFields = buildEventTypeSignal(event);
+  const eventFields = buildEventTypeSignal(mergedEvent);
   // TODO: better naming for SignalHit - it's really a new signal to be inserted
   const signalHit: SignalHit = {
-    ...mergedSource,
+    ...mergedEvent._source,
     '@timestamp': new Date().toISOString(),
     event: eventFields,
     signal,

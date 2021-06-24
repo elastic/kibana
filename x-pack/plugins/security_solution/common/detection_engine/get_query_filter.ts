@@ -121,6 +121,7 @@ export const buildEqlSearchRequest = (
         },
       },
       event_category_field: eventCategoryOverride,
+      fields: [{ field: '*', include_unmapped: true }],
     },
   };
 };

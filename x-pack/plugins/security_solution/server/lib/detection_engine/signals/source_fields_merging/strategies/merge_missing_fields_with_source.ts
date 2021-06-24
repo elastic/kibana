@@ -22,13 +22,17 @@ import { isNestedObject } from '../utils/is_nested_object';
  * @param throwOnFailSafe Defaults to false, but if set to true it will cause a throw if the fail safe is triggered to indicate we need to add a new explicit test condition
  * @returns The two merged together in one object where we can
  */
-export const mergeMissingFieldsWithSource = ({ doc }: { doc: SignalSourceHit }): SignalSource => {
+export const mergeMissingFieldsWithSource = ({
+  doc,
+}: {
+  doc: SignalSourceHit;
+}): SignalSourceHit => {
   const source = doc._source ?? {};
   const fields = doc.fields ?? {};
   const fieldEntries = Object.entries(fields);
   const filteredEntries = filterFieldEntries(fieldEntries);
 
-  return filteredEntries.reduce(
+  const transformedSource = filteredEntries.reduce(
     (merged, [fieldsKey, fieldsValue]: [string, FieldsType]) => {
       if (
         hasEarlyReturnConditions({
@@ -46,6 +50,11 @@ export const mergeMissingFieldsWithSource = ({ doc }: { doc: SignalSourceHit }):
     },
     { ...source }
   );
+
+  return {
+    ...doc,
+    _source: transformedSource,
+  };
 };
 
 /**

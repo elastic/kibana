@@ -1143,6 +1143,12 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+          ],
         },
       });
     });
@@ -1180,6 +1186,12 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+          ],
         },
       });
     });
@@ -1262,6 +1274,12 @@ describe('get_filter', () => {
               ],
             },
           },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+          ],
         },
       });
     });
