@@ -14,8 +14,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import { ProxySettings, ResponseSettings, TLSSettings } from './types';
-import { getTLSSettingsFromConfig } from './builtin_action_types/lib/get_node_tls_options';
+import { ProxySettings, ResponseSettings, SSLSettings } from './types';
+import { getSSLSettingsFromConfig } from './builtin_action_types/lib/get_node_ssl_options';
 
 export { AllowedHosts, EnabledActionTypes } from './config';
 
@@ -31,7 +31,7 @@ export interface ActionsConfigurationUtilities {
   ensureHostnameAllowed: (hostname: string) => void;
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
-  getTLSSettings: () => TLSSettings;
+  getSSLSettings: () => SSLSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
@@ -94,8 +94,8 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
     proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
     proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
-    proxyTLSSettings: getTLSSettingsFromConfig(
-      config.tls?.proxyVerificationMode,
+    proxySSLSettings: getSSLSettingsFromConfig(
+      config.ssl?.proxyVerificationMode,
       config.proxyRejectUnauthorizedCertificates
     ),
   };
@@ -146,8 +146,8 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    getTLSSettings: () =>
-      getTLSSettingsFromConfig(config.tls?.verificationMode, config.rejectUnauthorized),
+    getSSLSettings: () =>
+      getSSLSettingsFromConfig(config.ssl?.verificationMode, config.rejectUnauthorized),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
