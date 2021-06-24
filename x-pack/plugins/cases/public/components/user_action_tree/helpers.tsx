@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
-
+import classNames from 'classnames';
 import {
   CaseFullExternalService,
   ActionConnector,
@@ -382,8 +382,9 @@ export const getActionAttachment = ({
       fullName={comment.createdBy.fullName}
     />
   ),
-  className: 'comment-action',
-  type: 'update',
+  className: classNames({
+    isEdit: manageMarkdownEditIds.includes(comment.id),
+  }),
   event: (
     <HostIsolationCommentEvent
       type={comment.actions.type}
