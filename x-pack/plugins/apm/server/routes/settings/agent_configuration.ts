@@ -200,22 +200,31 @@ const agentConfigurationSearchRoute = createApmServerRoute({
     });
 
     if (!config) {
-      logger.debug(
+      logger.info(
         `[Central configuration] Config was not found for ${service.name}/${service.environment}`
       );
       throw Boom.notFound();
     }
 
-    logger.info(`Config was found for ${service.name}/${service.environment}`);
+    const willMarkAsApplied =
+      (markAsAppliedByAgent || etag === config._source.etag) &&
+      !config._source.applied_by_agent;
+
+    logger.info(
+      `[Central configuration] Config was found for:
+        service.name = ${service.name},
+        service.environment = ${service.environment},
+        etag (requested) = ${etag},
+        etag (existing) = ${config._source.etag},
+        markAsAppliedByAgent = ${markAsAppliedByAgent},
+        willMarkAsApplied = ${willMarkAsApplied}`
+    );
 
     // update `applied_by_agent` field
     // when `markAsAppliedByAgent` is true (Jaeger agent doesn't have etags)
     // or if etags match.
     // this happens in the background and doesn't block the response
-    if (
-      (markAsAppliedByAgent || etag === config._source.etag) &&
-      !config._source.applied_by_agent
-    ) {
+    if (willMarkAsApplied) {
       markAppliedByAgent({ id: config._id, body: config._source, setup });
     }
 
