@@ -368,49 +368,62 @@ export const getPrepopulatedEndpointException = ({
   const { file, host } = alertEcsData;
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
-  const filePathDefault = host?.os?.name === 'Linux' ? 'file.path' : 'file.path.caseless';
+  const isLinux = host?.os?.name === 'Linux';
+  const filePathDefault = isLinux ? 'file.path' : 'file.path.caseless';
 
-  // TODO: Fix this
+  const codeSignatureFields = [
+    {
+      field: 'file.Ext.code_signature',
+      type: 'nested',
+      entries: [
+        {
+          field: 'subject_name',
+          operator: 'included',
+          type: 'match',
+          value: codeSignature != null ? codeSignature.subjectName : '',
+        },
+        {
+          field: 'trusted',
+          operator: 'included',
+          type: 'match',
+          value: codeSignature != null ? codeSignature.trusted : '',
+        },
+      ],
+    },
+  ];
+
+  const commonFields = [
+    {
+      field: filePathDefault,
+      operator: 'included',
+      type: 'match',
+      value: filePath ?? '',
+    },
+    {
+      field: 'file.hash.sha256',
+      operator: 'included',
+      type: 'match',
+      value: sha256Hash ?? '',
+    },
+    {
+      field: 'event.code',
+      operator: 'included',
+      type: 'match',
+      value: eventCode ?? '',
+    },
+  ];
+
+  const entriesToAdd = () => {
+    if (isLinux) {
+      return commonFields;
+    } else {
+      return [...codeSignatureFields, ...commonFields];
+    }
+  };
+
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
-    entries: addIdToEntries([
-      {
-        field: 'file.Ext.code_signature',
-        type: 'nested',
-        entries: [
-          {
-            field: 'subject_name',
-            operator: 'included',
-            type: 'match',
-            value: codeSignature != null ? codeSignature.subjectName : '',
-          },
-          {
-            field: 'trusted',
-            operator: 'included',
-            type: 'match',
-            value: codeSignature != null ? codeSignature.trusted : '',
-          },
-        ],
-      },
-      {
-        field: filePathDefault,
-        operator: 'included',
-        type: 'match',
-        value: filePath ?? '',
-      },
-      {
-        field: 'file.hash.sha256',
-        operator: 'included',
-        type: 'match',
-        value: sha256Hash ?? '',
-      },
-      {
-        field: 'event.code',
-        operator: 'included',
-        type: 'match',
-        value: eventCode ?? '',
-      },
-    ]),
+    entries: addIdToEntries(entriesToAdd()),
   };
 };
 
