@@ -8,6 +8,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiPageContent,
   EuiEmptyPrompt,
   EuiPopover,
   EuiButtonEmpty,
@@ -23,10 +24,10 @@ import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
 import {
   WithPrivileges,
   NotAuthorizedSection,
-  SectionError,
+  PageError,
+  PageLoading,
   Error,
 } from '../../../../shared_imports';
-import { SectionLoading } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useLoadRestores } from '../../../services/http';
 import { linkToSnapshots } from '../../../services/navigation';
@@ -70,22 +71,24 @@ export const RestoreList: React.FunctionComponent = () => {
 
   let content: JSX.Element;
 
-  if (isInitialRequest) {
+  if (isInitialRequest || true) {
     if (isLoading) {
       // Because we're polling for new data, we only want to hide the list during the initial fetch.
-      content = (
-        <SectionLoading>
+      return (
+        <PageLoading>
           <FormattedMessage
             id="xpack.snapshotRestore.restoreList.loadingRestoresDescription"
             defaultMessage="Loading restores…"
           />
-        </SectionLoading>
+        </PageLoading>
       );
-    } else if (error) {
+    }
+
+    if (error) {
       // If we get an error while polling we don't need to show it to the user because they can still
       // work with the table.
-      content = (
-        <SectionError
+      return (
+        <PageError
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.restoreList.loadingRestoresErrorMessage"
@@ -96,9 +99,16 @@ export const RestoreList: React.FunctionComponent = () => {
         />
       );
     }
-  } else {
-    if (restores && restores.length === 0) {
-      content = (
+  }
+
+  if (restores && restores.length === 0) {
+    return (
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -131,93 +141,89 @@ export const RestoreList: React.FunctionComponent = () => {
           }
           data-test-subj="emptyPrompt"
         />
-      );
-    } else {
-      content = (
-        <Fragment>
-          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                id="srRestoreListIntervalMenu"
-                button={
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="arrowDown"
-                    iconSide="right"
-                    onClick={() => setIsIntervalMenuOpen(!isIntervalMenuOpen)}
-                  >
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.restoreList.intervalMenuButtonText"
-                      defaultMessage="Refresh data every {interval}"
-                      values={{
-                        interval:
-                          currentInterval >= ONE_MINUTE_MS ? (
-                            <FormattedMessage
-                              id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
-                              defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
-                              values={{ minutes: Math.ceil(currentInterval / ONE_MINUTE_MS) }}
-                            />
-                          ) : (
-                            <FormattedMessage
-                              id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
-                              defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
-                              values={{ seconds: Math.ceil(currentInterval / ONE_SECOND_MS) }}
-                            />
-                          ),
-                      }}
-                    />
-                  </EuiButtonEmpty>
-                }
-                isOpen={isIntervalMenuOpen}
-                closePopover={() => setIsIntervalMenuOpen(false)}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenuPanel
-                  items={INTERVAL_OPTIONS.map((interval) => (
-                    <EuiContextMenuItem
-                      key={interval}
-                      icon="empty"
-                      onClick={() => {
-                        resendRequest();
-                        setCurrentInterval(interval);
-                        setIsIntervalMenuOpen(false);
-                      }}
-                    >
-                      {interval >= ONE_MINUTE_MS ? (
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
-                          defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
-                          values={{ minutes: Math.ceil(interval / ONE_MINUTE_MS) }}
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
-                          defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
-                          values={{ seconds: Math.ceil(interval / ONE_SECOND_MS) }}
-                        />
-                      )}
-                    </EuiContextMenuItem>
-                  ))}
-                />
-              </EuiPopover>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {isLoading ? <EuiLoadingSpinner size="m" /> : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          <RestoreTable restores={restores} />
-        </Fragment>
-      );
-    }
+      </EuiPageContent>
+    );
   }
 
   return (
     <WithPrivileges privileges={APP_RESTORE_INDEX_PRIVILEGES.map((name) => `index.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
-          <section data-test-subj="restoreList">{content}</section>
+          <section data-test-subj="restoreList">
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  id="srRestoreListIntervalMenu"
+                  button={
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType="arrowDown"
+                      iconSide="right"
+                      onClick={() => setIsIntervalMenuOpen(!isIntervalMenuOpen)}
+                    >
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.restoreList.intervalMenuButtonText"
+                        defaultMessage="Refresh data every {interval}"
+                        values={{
+                          interval:
+                            currentInterval >= ONE_MINUTE_MS ? (
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
+                                defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
+                                values={{ minutes: Math.ceil(currentInterval / ONE_MINUTE_MS) }}
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
+                                defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
+                                values={{ seconds: Math.ceil(currentInterval / ONE_SECOND_MS) }}
+                              />
+                            ),
+                        }}
+                      />
+                    </EuiButtonEmpty>
+                  }
+                  isOpen={isIntervalMenuOpen}
+                  closePopover={() => setIsIntervalMenuOpen(false)}
+                  panelPaddingSize="none"
+                  anchorPosition="downLeft"
+                >
+                  <EuiContextMenuPanel
+                    items={INTERVAL_OPTIONS.map((interval) => (
+                      <EuiContextMenuItem
+                        key={interval}
+                        icon="empty"
+                        onClick={() => {
+                          resendRequest();
+                          setCurrentInterval(interval);
+                          setIsIntervalMenuOpen(false);
+                        }}
+                      >
+                        {interval >= ONE_MINUTE_MS ? (
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.restoreList.intervalMenu.minutesIntervalValue"
+                            defaultMessage="{minutes} {minutes, plural, one {minute} other {minutes}}"
+                            values={{ minutes: Math.ceil(interval / ONE_MINUTE_MS) }}
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.restoreList.intervalMenu.secondsIntervalValue"
+                            defaultMessage="{seconds} {seconds, plural, one {second} other {seconds}}"
+                            values={{ seconds: Math.ceil(interval / ONE_SECOND_MS) }}
+                          />
+                        )}
+                      </EuiContextMenuItem>
+                    ))}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {isLoading ? <EuiLoadingSpinner size="m" /> : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+            <RestoreTable restores={restores} />
+          </section>
         ) : (
           <NotAuthorizedSection
             title={

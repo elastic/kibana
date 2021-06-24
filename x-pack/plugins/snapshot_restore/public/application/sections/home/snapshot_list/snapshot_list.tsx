@@ -9,11 +9,24 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiPageContent, EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
+import {
+  EuiPageContent,
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiEmptyPrompt,
+  EuiSpacer,
+  EuiIcon,
+} from '@elastic/eui';
 
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
-import { WithPrivileges, PageLoading, PageError, SectionError, Error } from '../../../../shared_imports';
-import { SectionLoading } from '../../../components';
+import {
+  WithPrivileges,
+  PageLoading,
+  PageError,
+  SectionError,
+  Error,
+} from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
 import {
@@ -106,10 +119,12 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   if (isLoading) {
     return (
       <PageLoading>
-        <FormattedMessage
-          id="xpack.snapshotRestore.snapshotList.loadingSnapshotsDescription"
-          defaultMessage="Loading snapshots…"
-        />
+        <span data-test-subj="snapshotListEmpty">
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotList.loadingSnapshotsDescription"
+            defaultMessage="Loading snapshots…"
+          />
+        </span>
       </PageLoading>
     );
   }
@@ -176,6 +191,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         paddingSize="none"
         verticalPosition="center"
         horizontalPosition="center"
+        data-test-subj="snapshotListEmpty"
       >
         <EuiEmptyPrompt
           iconType="managementApp"
@@ -235,7 +251,9 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             </h1>
           }
           body={
-            <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
+            <WithPrivileges
+              privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}
+            >
               {({ hasPrivileges }) =>
                 hasPrivileges ? (
                   <Fragment>

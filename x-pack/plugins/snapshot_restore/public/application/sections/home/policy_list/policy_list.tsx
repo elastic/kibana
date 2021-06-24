@@ -8,12 +8,13 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiPageContent, EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import {
-  SectionError,
+  PageLoading,
+  PageError,
   Error,
   WithPrivileges,
   NotAuthorizedSection,
@@ -21,7 +22,6 @@ import {
 
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
-import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useDecodedParams } from '../../../lib';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
@@ -88,17 +88,19 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   let content: JSX.Element;
 
   if (isLoading) {
-    content = (
-      <SectionLoading>
+    return (
+      <PageLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.policyList.loadingPoliciesDescription"
           defaultMessage="Loading policies…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
-  } else if (error) {
-    content = (
-      <SectionError
+  }
+
+  if (error) {
+    return (
+      <PageError
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.policyList.LoadingPoliciesErrorMessage"
@@ -108,91 +110,58 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         error={error as Error}
       />
     );
-  } else if (policies && policies.length === 0) {
-    content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyList.emptyPromptTitle"
-              defaultMessage="Create your first snapshot policy"
-            />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                defaultMessage="A policy automates the creation and deletion of snapshots."
-              />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            {...reactRouterNavigate(history, linkToAddPolicy())}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createPolicyButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.createPolicyButton"
-              defaultMessage="Create a policy"
-            />
-          </EuiButton>
-        }
-        data-test-subj="emptyPrompt"
-      />
-    );
-  } else {
-    const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
-    const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
-    const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
+  }
 
-    content = (
-      <Fragment>
-        {hasDuplicateSchedules ? (
-          <Fragment>
-            <EuiCallOut
-              title={
+  if (policies && policies.length === 0) {
+    return (
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyList.emptyPromptTitle"
+                defaultMessage="Create your first snapshot policy"
+              />
+            </h1>
+          }
+          body={
+            <Fragment>
+              <p>
                 <FormattedMessage
-                  id="xpack.snapshotRestore.policyScheduleWarningTitle"
-                  defaultMessage="Two or more policies have the same schedule"
+                  id="xpack.snapshotRestore.policyList.emptyPromptDescription"
+                  defaultMessage="A policy automates the creation and deletion of snapshots."
                 />
-              }
-              color="warning"
-              iconType="alert"
+              </p>
+            </Fragment>
+          }
+          actions={
+            <EuiButton
+              {...reactRouterNavigate(history, linkToAddPolicy())}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="createPolicyButton"
             >
               <FormattedMessage
-                id="xpack.snapshotRestore.policyScheduleWarningDescription"
-                defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit or delete the policies."
+                id="xpack.snapshotRestore.createPolicyButton"
+                defaultMessage="Create a policy"
               />
-            </EuiCallOut>
-            <EuiSpacer />
-          </Fragment>
-        ) : null}
-
-        {hasRetention ? (
-          <PolicyRetentionSchedule
-            retentionSettings={retentionSettings}
-            onRetentionScheduleUpdated={reloadRetentionSettings}
-            isLoading={isLoadingRetentionSettings}
-            error={retentionSettingsError}
-          />
-        ) : null}
-
-        <PolicyTable
-          policies={policies || []}
-          reload={reload}
-          openPolicyDetailsUrl={openPolicyDetailsUrl}
-          onPolicyDeleted={onPolicyDeleted}
-          onPolicyExecuted={onPolicyExecuted}
+            </EuiButton>
+          }
+          data-test-subj="emptyPrompt"
         />
-      </Fragment>
+      </EuiPageContent>
     );
   }
+
+  const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
+  const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
+  const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
 
   return (
     <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
@@ -207,7 +176,43 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
                 onPolicyExecuted={onPolicyExecuted}
               />
             ) : null}
-            {content}
+            {hasDuplicateSchedules ? (
+              <Fragment>
+                <EuiCallOut
+                  title={
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.policyScheduleWarningTitle"
+                      defaultMessage="Two or more policies have the same schedule"
+                    />
+                  }
+                  color="warning"
+                  iconType="alert"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.policyScheduleWarningDescription"
+                    defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit or delete the policies."
+                  />
+                </EuiCallOut>
+                <EuiSpacer />
+              </Fragment>
+            ) : null}
+
+            {hasRetention ? (
+              <PolicyRetentionSchedule
+                retentionSettings={retentionSettings}
+                onRetentionScheduleUpdated={reloadRetentionSettings}
+                isLoading={isLoadingRetentionSettings}
+                error={retentionSettingsError}
+              />
+            ) : null}
+
+            <PolicyTable
+              policies={policies || []}
+              reload={reload}
+              openPolicyDetailsUrl={openPolicyDetailsUrl}
+              onPolicyDeleted={onPolicyDeleted}
+              onPolicyExecuted={onPolicyExecuted}
+            />
           </section>
         ) : (
           <NotAuthorizedSection
