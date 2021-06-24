@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
+import { SNAPSHOT_LIST_MAX_SIZE } from '../../../common/constants';
 import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
 import { getManagedRepositoryName } from '../../lib';
@@ -49,8 +50,8 @@ export function registerSnapshotsRoutes({
           order: 'desc',
           // TODO We are temporarily hard-coding the maximum number of snapshots returned
           // in order to prevent an unusable UI for users with large number of snapshots
-          // In the future, we will support server-side pagination
-          size: 200,
+          // In the near future, this will be resolved with server-side pagination
+          size: SNAPSHOT_LIST_MAX_SIZE,
         });
 
         // Decorate each snapshot with the repository with which it's associated.

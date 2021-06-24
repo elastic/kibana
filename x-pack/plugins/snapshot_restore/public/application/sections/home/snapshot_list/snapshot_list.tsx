@@ -9,9 +9,9 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiLink, EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { APP_SLM_CLUSTER_PRIVILEGES, SNAPSHOT_LIST_MAX_SIZE } from '../../../../../common';
 import { WithPrivileges, SectionError, Error } from '../../../../shared_imports';
 import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
@@ -46,7 +46,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     resendRequest: reload,
   } = useLoadSnapshots();
 
-  const { uiMetricService } = useServices();
+  const { uiMetricService, i18n } = useServices();
   const { docLinks } = useCore();
 
   const openSnapshotDetailsUrl = (
@@ -258,15 +258,49 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     );
   } else {
     content = (
-      <SnapshotTable
-        snapshots={snapshots}
-        repositories={repositories}
-        reload={reload}
-        openSnapshotDetailsUrl={openSnapshotDetailsUrl}
-        onSnapshotDeleted={onSnapshotDeleted}
-        repositoryFilter={filteredRepository}
-        policyFilter={filteredPolicy}
-      />
+      <>
+        {snapshots.length === SNAPSHOT_LIST_MAX_SIZE && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="help"
+              title={i18n.translate(
+                'xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedTitle',
+                { defaultMessage: 'Snapshot list may be incomplete' }
+              )}
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDescription"
+                defaultMessage="You've reached the maximum number of snapshots that can be displayed. To manage all of your snapshots, use {docLink}."
+                values={{
+                  docLink: (
+                    <EuiLink
+                      href={docLinks.links.snapshotRestore.getSnapshot}
+                      target="_blank"
+                      data-test-subj="documentationLink"
+                    >
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDocLinkText"
+                        defaultMessage="the Elasticsearch API"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        <SnapshotTable
+          snapshots={snapshots}
+          repositories={repositories}
+          reload={reload}
+          openSnapshotDetailsUrl={openSnapshotDetailsUrl}
+          onSnapshotDeleted={onSnapshotDeleted}
+          repositoryFilter={filteredRepository}
+          policyFilter={filteredPolicy}
+        />
+      </>
     );
   }
 
