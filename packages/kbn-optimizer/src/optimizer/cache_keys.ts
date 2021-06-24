@@ -118,10 +118,6 @@ export interface OptimizerCacheKey {
 }
 
 async function getLastCommit() {
-  if (!Fs.existsSync(Path.join(REPO_ROOT, '.git'))) {
-    return undefined;
-  }
-
   const { stdout } = await execa(
     'git',
     ['log', '-n', '1', '--pretty=format:%H', '--', RELATIVE_DIR],
@@ -133,7 +129,16 @@ async function getLastCommit() {
   return stdout.trim() || undefined;
 }
 
-export async function getOptimizerCacheKey(config: OptimizerConfig) {
+export async function getOptimizerCacheKey(config: OptimizerConfig): Promise<OptimizerCacheKey> {
+  if (!Fs.existsSync(Path.resolve(REPO_ROOT, '.git'))) {
+    return {
+      lastCommit: undefined,
+      modifiedTimes: {},
+      workerConfig: config.getCacheableWorkerConfig(),
+      deletedPaths: [],
+    };
+  }
+
   const [changes, lastCommit] = await Promise.all([
     getChanges(RELATIVE_DIR),
     getLastCommit(),

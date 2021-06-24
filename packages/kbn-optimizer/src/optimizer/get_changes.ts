@@ -9,7 +9,6 @@
 import Path from 'path';
 
 import execa from 'execa';
-import fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/dev-utils';
 
@@ -20,10 +19,6 @@ export type Changes = Map<string, 'modified' | 'deleted'>;
  */
 export async function getChanges(relativeDir: string) {
   const changes: Changes = new Map();
-
-  if (!fs.existsSync(Path.join(REPO_ROOT, '.git'))) {
-    return changes;
-  }
 
   const { stdout } = await execa('git', ['ls-files', '-dmt', '--', relativeDir], {
     cwd: REPO_ROOT,
