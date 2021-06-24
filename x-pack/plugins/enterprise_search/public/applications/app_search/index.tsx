@@ -37,7 +37,7 @@ import {
   SETUP_GUIDE_PATH,
   SETTINGS_PATH,
   CREDENTIALS_PATH,
-  ROLE_MAPPINGS_PATH,
+  USERS_AND_ROLES_PATH,
   ENGINES_PATH,
   ENGINE_PATH,
   LIBRARY_PATH,
@@ -104,9 +104,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
       <Route exact path={ENGINES_PATH}>
         <EnginesOverview />
       </Route>
-      <Route path={ENGINE_PATH}>
-        <EngineRouter />
-      </Route>
       {canManageEngines && (
         <Route exact path={ENGINE_CREATION_PATH}>
           <EngineCreation />
@@ -117,6 +114,9 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <MetaEngineCreation />
         </Route>
       )}
+      <Route path={ENGINE_PATH}>
+        <EngineRouter />
+      </Route>
       {canViewSettings && (
         <Route exact path={SETTINGS_PATH}>
           <Settings />
@@ -128,7 +128,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
         </Route>
       )}
       {canViewRoleMappings && (
-        <Route path={ROLE_MAPPINGS_PATH}>
+        <Route path={USERS_AND_ROLES_PATH}>
           <RoleMappings />
         </Route>
       )}
@@ -162,7 +162,7 @@ export const AppSearchNav: React.FC = () => {
         <SideNavLink to={CREDENTIALS_PATH}>{CREDENTIALS_TITLE}</SideNavLink>
       )}
       {canViewRoleMappings && (
-        <SideNavLink shouldShowActiveForSubroutes to={ROLE_MAPPINGS_PATH}>
+        <SideNavLink shouldShowActiveForSubroutes to={USERS_AND_ROLES_PATH}>
           {ROLE_MAPPINGS_TITLE}
         </SideNavLink>
       )}

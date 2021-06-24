@@ -54,7 +54,7 @@ describe('CreateCaseFlyout', () => {
       </TestProviders>
     );
 
-    wrapper.find('.euiFlyout__closeButton').first().simulate('click');
+    wrapper.find(`[data-test-subj='euiFlyoutCloseButton']`).first().simulate('click');
     expect(onCloseFlyout).toBeCalled();
   });
 });

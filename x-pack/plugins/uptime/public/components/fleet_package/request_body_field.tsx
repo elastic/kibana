@@ -5,72 +5,23 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { stringify, parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { stringify, parse } from 'query-string';
-
-import styled from 'styled-components';
-
-import { EuiCodeEditor, EuiPanel, EuiTabbedContent } from '@elastic/eui';
-
-import { Mode } from './types';
-
+import { EuiTabbedContent } from '@elastic/eui';
+import { Mode, MonacoEditorLangId } from './types';
 import { KeyValuePairsField, Pair } from './key_value_field';
-
-import 'brace/theme/github';
-import 'brace/mode/xml';
-import 'brace/mode/json';
-import 'brace/ext/language_tools';
-
-const CodeEditorContainer = styled(EuiPanel)`
-  padding: 0;
-`;
-
-enum ResponseBodyType {
-  CODE = 'code',
-  FORM = 'form',
-}
-
-const CodeEditor = ({
-  ariaLabel,
-  id,
-  mode,
-  onChange,
-  value,
-}: {
-  ariaLabel: string;
-  id: string;
-  mode: Mode;
-  onChange: (value: string) => void;
-  value: string;
-}) => {
-  return (
-    <CodeEditorContainer borderRadius="none" hasShadow={false} hasBorder={true}>
-      <div id={`${id}-editor`}>
-        <EuiCodeEditor
-          mode={mode}
-          theme="github"
-          width="100%"
-          height="250px"
-          value={value}
-          onChange={onChange}
-          setOptions={{
-            fontSize: '14px',
-            enableBasicAutocompletion: true,
-            enableSnippets: true,
-            enableLiveAutocompletion: true,
-          }}
-          aria-label={ariaLabel}
-        />
-      </div>
-    </CodeEditorContainer>
-  );
-};
+import { CodeEditor } from './code_editor';
 
 interface Props {
   onChange: (requestBody: { type: Mode; value: string }) => void;
   type: Mode;
   value: string;
+}
+
+enum ResponseBodyType {
+  CODE = 'code',
+  FORM = 'form',
 }
 
 // TO DO: Look into whether or not code editor reports errors, in order to prevent form submission on an error
@@ -129,9 +80,9 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
 
   const tabs = [
     {
-      id: Mode.TEXT,
-      name: modeLabels[Mode.TEXT],
-      'data-test-subj': `syntheticsRequestBodyTab__${Mode.TEXT}`,
+      id: Mode.PLAINTEXT,
+      name: modeLabels[Mode.PLAINTEXT],
+      'data-test-subj': `syntheticsRequestBodyTab__${Mode.PLAINTEXT}`,
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
@@ -140,8 +91,8 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
               defaultMessage: 'Text code editor',
             }
           )}
-          id={Mode.TEXT}
-          mode={Mode.TEXT}
+          id={Mode.PLAINTEXT}
+          languageId={MonacoEditorLangId.PLAINTEXT}
           onChange={(code) =>
             setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
           }
@@ -162,7 +113,7 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
             }
           )}
           id={Mode.JSON}
-          mode={Mode.JSON}
+          languageId={MonacoEditorLangId.JSON}
           onChange={(code) =>
             setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
           }
@@ -183,7 +134,7 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
             }
           )}
           id={Mode.XML}
-          mode={Mode.XML}
+          languageId={MonacoEditorLangId.XML}
           onChange={(code) =>
             setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
           }
@@ -229,7 +180,7 @@ const modeLabels = {
       defaultMessage: 'Form',
     }
   ),
-  [Mode.TEXT]: i18n.translate(
+  [Mode.PLAINTEXT]: i18n.translate(
     'xpack.uptime.createPackagePolicy.stepConfigure.requestBodyType.text',
     {
       defaultMessage: 'Text',

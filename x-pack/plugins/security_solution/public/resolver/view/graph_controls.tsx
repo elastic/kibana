@@ -207,7 +207,7 @@ export const GraphControls = React.memo(
           />
         </StyledGraphControlsColumn>
         <StyledGraphControlsColumn>
-          <EuiPanel className="panning-controls" paddingSize="none" hasShadow>
+          <EuiPanel className="panning-controls" paddingSize="none" hasBorder>
             <div className="panning-controls-top">
               <button
                 className="north-button"
@@ -265,7 +265,7 @@ export const GraphControls = React.memo(
               </button>
             </div>
           </EuiPanel>
-          <EuiPanel className="zoom-controls" paddingSize="none" hasShadow>
+          <EuiPanel className="zoom-controls" paddingSize="none" hasBorder>
             <button
               title={i18n.translate('xpack.securitySolution.resolver.graphControls.zoomIn', {
                 defaultMessage: 'Zoom In',
