@@ -25,7 +25,7 @@ export const FieldPreview = () => {
 
   const {
     params: {
-      value: { name, script, format },
+      value: { name, script },
     },
     previewCount,
     fields,
