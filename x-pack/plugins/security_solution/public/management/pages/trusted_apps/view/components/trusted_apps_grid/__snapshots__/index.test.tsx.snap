@@ -34,15 +34,8 @@ exports[`TrustedAppsGrid renders correctly initially 1`] = `
           <div
             class="euiEmptyPrompt"
           >
-            <span
-              class="euiTextColor euiTextColor--subdued"
-            >
-              <span>
-                No items found
-              </span>
-              <div
-                class="euiSpacer euiSpacer--m"
-              />
+            <span>
+              No items found
             </span>
           </div>
         </div>
@@ -189,6 +182,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                   >
                     <span
                       class="euiButtonContent__icon"
+                      color="inherit"
                       data-euiicon-type="arrowDown"
                     />
                     <span
@@ -219,6 +213,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                 <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="arrowLeft"
                 />
               </button>
@@ -363,6 +358,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                 <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="arrowRight"
                 />
               </button>
@@ -424,7 +420,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -511,7 +507,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -582,7 +584,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -591,7 +593,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -600,7 +602,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -609,7 +611,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -618,7 +620,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -627,7 +629,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -713,7 +715,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -800,7 +802,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -871,7 +879,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -880,7 +888,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -889,7 +897,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -898,7 +906,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -907,7 +915,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -916,7 +924,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -1002,7 +1010,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1089,7 +1097,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1160,7 +1174,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1169,7 +1183,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -1178,7 +1192,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1187,7 +1201,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -1196,7 +1210,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1205,7 +1219,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -1291,7 +1305,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1378,7 +1392,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1449,7 +1469,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1458,7 +1478,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -1467,7 +1487,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1476,7 +1496,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -1485,7 +1505,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1494,7 +1514,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -1580,7 +1600,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1667,7 +1687,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -1738,7 +1764,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1747,7 +1773,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -1756,7 +1782,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1765,7 +1791,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -1774,7 +1800,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -1783,7 +1809,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -1869,7 +1895,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1956,7 +1982,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2027,7 +2059,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2036,7 +2068,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -2045,7 +2077,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2054,7 +2086,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -2063,7 +2095,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2072,7 +2104,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -2158,7 +2190,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2245,7 +2277,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2316,7 +2354,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2325,7 +2363,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -2334,7 +2372,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2343,7 +2381,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -2352,7 +2390,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2361,7 +2399,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -2447,7 +2485,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2534,7 +2572,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2605,7 +2649,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2614,7 +2658,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -2623,7 +2667,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2632,7 +2676,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -2641,7 +2685,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2650,7 +2694,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -2736,7 +2780,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2823,7 +2867,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -2894,7 +2944,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2903,7 +2953,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -2912,7 +2962,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2921,7 +2971,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -2930,7 +2980,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -2939,7 +2989,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -3025,7 +3075,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3112,7 +3162,13 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -3183,7 +3239,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -3192,7 +3248,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -3201,7 +3257,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -3210,7 +3266,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -3219,7 +3275,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -3228,7 +3284,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -3341,6 +3397,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   >
                     <span
                       class="euiButtonContent__icon"
+                      color="inherit"
                       data-euiicon-type="arrowDown"
                     />
                     <span
@@ -3371,6 +3428,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="arrowLeft"
                 />
               </button>
@@ -3515,6 +3573,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="arrowRight"
                 />
               </button>
@@ -3619,7 +3678,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3706,7 +3765,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -3777,7 +3842,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -3786,7 +3851,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -3795,7 +3860,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -3804,7 +3869,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -3813,7 +3878,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -3822,7 +3887,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -3908,7 +3973,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3995,7 +4060,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4066,7 +4137,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4075,7 +4146,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -4084,7 +4155,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4093,7 +4164,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -4102,7 +4173,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4111,7 +4182,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -4197,7 +4268,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4284,7 +4355,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4355,7 +4432,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4364,7 +4441,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -4373,7 +4450,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4382,7 +4459,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -4391,7 +4468,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4400,7 +4477,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -4486,7 +4563,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4573,7 +4650,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4644,7 +4727,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4653,7 +4736,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -4662,7 +4745,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4671,7 +4754,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -4680,7 +4763,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4689,7 +4772,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -4775,7 +4858,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4862,7 +4945,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -4933,7 +5022,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4942,7 +5031,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -4951,7 +5040,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4960,7 +5049,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -4969,7 +5058,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -4978,7 +5067,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -5064,7 +5153,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5151,7 +5240,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -5222,7 +5317,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5231,7 +5326,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -5240,7 +5335,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5249,7 +5344,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -5258,7 +5353,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5267,7 +5362,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -5353,7 +5448,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5440,7 +5535,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -5511,7 +5612,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5520,7 +5621,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -5529,7 +5630,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5538,7 +5639,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -5547,7 +5648,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5556,7 +5657,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -5642,7 +5743,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5729,7 +5830,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -5800,7 +5907,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5809,7 +5916,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -5818,7 +5925,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5827,7 +5934,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -5836,7 +5943,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -5845,7 +5952,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -5931,7 +6038,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6018,7 +6125,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -6089,7 +6202,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6098,7 +6211,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -6107,7 +6220,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6116,7 +6229,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -6125,7 +6238,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6134,7 +6247,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -6220,7 +6333,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6307,7 +6420,13 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -6378,7 +6497,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6387,7 +6506,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -6396,7 +6515,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6405,7 +6524,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -6414,7 +6533,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6423,7 +6542,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -6536,6 +6655,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   >
                     <span
                       class="euiButtonContent__icon"
+                      color="inherit"
                       data-euiicon-type="arrowDown"
                     />
                     <span
@@ -6566,6 +6686,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="arrowLeft"
                 />
               </button>
@@ -6710,6 +6831,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="arrowRight"
                 />
               </button>
@@ -6771,7 +6893,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="body-content undefined"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6858,7 +6980,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -6929,7 +7057,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6938,7 +7066,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -6947,7 +7075,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6956,7 +7084,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -6965,7 +7093,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -6974,7 +7102,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -7060,7 +7188,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7147,7 +7275,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -7218,7 +7352,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7227,7 +7361,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -7236,7 +7370,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7245,7 +7379,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -7254,7 +7388,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7263,7 +7397,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -7349,7 +7483,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7436,7 +7570,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -7507,7 +7647,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7516,7 +7656,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -7525,7 +7665,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7534,7 +7674,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -7543,7 +7683,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7552,7 +7692,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -7638,7 +7778,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7725,7 +7865,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -7796,7 +7942,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7805,7 +7951,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -7814,7 +7960,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7823,7 +7969,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -7832,7 +7978,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -7841,7 +7987,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -7927,7 +8073,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8014,7 +8160,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8085,7 +8237,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8094,7 +8246,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -8103,7 +8255,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8112,7 +8264,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -8121,7 +8273,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8130,7 +8282,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -8216,7 +8368,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8303,7 +8455,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8374,7 +8532,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8383,7 +8541,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -8392,7 +8550,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8401,7 +8559,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -8410,7 +8568,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8419,7 +8577,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -8505,7 +8663,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8592,7 +8750,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8663,7 +8827,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8672,7 +8836,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -8681,7 +8845,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8690,7 +8854,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -8699,7 +8863,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8708,7 +8872,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -8794,7 +8958,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8881,7 +9045,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -8952,7 +9122,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8961,7 +9131,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -8970,7 +9140,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8979,7 +9149,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -8988,7 +9158,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -8997,7 +9167,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -9083,7 +9253,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -9170,7 +9340,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -9241,7 +9417,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -9250,7 +9426,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -9259,7 +9435,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -9268,7 +9444,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -9277,7 +9453,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -9286,7 +9462,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -9372,7 +9548,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow trusted-app"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder trusted-app"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -9459,7 +9635,13 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <dd
                     class="euiDescriptionList__description c4 eui-textBreakWord"
                   >
-                    someone
+                    <span
+                      class="euiToolTipAnchor eui-textTruncate"
+                    >
+                      <span>
+                        someone
+                      </span>
+                    </span>
                   </dd>
                   <dt
                     class="euiDescriptionList__title c3"
@@ -9530,7 +9712,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 30%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -9539,7 +9721,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Field
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -9548,7 +9730,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 20%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -9557,7 +9739,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Operator
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                     <th
                                       class="euiTableHeaderCell"
@@ -9566,7 +9748,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                       scope="col"
                                       style="width: 60%;"
                                     >
-                                      <div
+                                      <span
                                         class="euiTableCellContent"
                                       >
                                         <span
@@ -9575,7 +9757,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                         >
                                           Value
                                         </span>
-                                      </div>
+                                      </span>
                                     </th>
                                   </tr>
                                 </thead>
@@ -9688,6 +9870,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   >
                     <span
                       class="euiButtonContent__icon"
+                      color="inherit"
                       data-euiicon-type="arrowDown"
                     />
                     <span
@@ -9717,6 +9900,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="arrowLeft"
                 />
               </button>
@@ -9815,6 +9999,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 <span
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
+                  color="inherit"
                   data-euiicon-type="arrowRight"
                 />
               </button>

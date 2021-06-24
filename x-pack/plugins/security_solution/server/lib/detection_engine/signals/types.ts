@@ -25,13 +25,14 @@ import {
   BaseHit,
   RuleAlertAction,
   SearchTypes,
+  EqlSequence,
 } from '../../../../common/detection_engine/types';
-import { RefreshTypes } from '../types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger, SavedObject } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
 import { RuleParams } from '../schemas/rule_schemas';
+import { GenericBulkCreateResponse } from './bulk_create_factory';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -153,9 +154,9 @@ export interface GetResponse {
 }
 
 export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
-export type SignalSourceHit = estypes.Hit<SignalSource>;
+export type SignalSourceHit = estypes.SearchHit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
-export type BaseSignalHit = estypes.Hit<SignalSource>;
+export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
@@ -255,12 +256,20 @@ export interface QueryFilter {
 
 export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
 
+export type BulkCreate = <T>(docs: Array<BaseHit<T>>) => Promise<GenericBulkCreateResponse<T>>;
+
+export type SimpleHit = BaseHit<{ '@timestamp': string }>;
+
+export type WrapHits = (hits: Array<estypes.SearchHit<SignalSource>>) => SimpleHit[];
+
+export type WrapSequences = (sequences: Array<EqlSequence<SignalSource>>) => SimpleHit[];
+
 export interface SearchAfterAndBulkCreateParams {
-  tuples: Array<{
+  tuple: {
     to: moment.Moment;
     from: moment.Moment;
     maxSignals: number;
-  }>;
+  };
   ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
@@ -272,9 +281,10 @@ export interface SearchAfterAndBulkCreateParams {
   signalsIndex: string;
   pageSize: number;
   filter: unknown;
-  refresh: RefreshTypes;
   buildRuleMessage: BuildRuleMessage;
   enrichment?: SignalsEnrichment;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -284,8 +294,9 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
-  createdSignals: SignalHit[];
+  createdSignals: unknown[];
   errors: string[];
+  warningMessages: string[];
   totalToFromTuples?: Array<{
     to: Moment | undefined;
     from: Moment | undefined;

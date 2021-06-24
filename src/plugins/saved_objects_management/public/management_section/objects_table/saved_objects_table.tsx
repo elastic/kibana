@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { debounce } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { EuiSpacer, Query, EuiPageContent } from '@elastic/eui';
+import { EuiSpacer, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   SavedObjectsClientContract,
@@ -358,7 +358,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     saveAs(blob, 'export.ndjson');
 
     const exportDetails = await extractExportDetails(blob);
-    this.showExportSuccessMessage(exportDetails);
+    this.showExportCompleteMessage(exportDetails);
   };
 
   onExportAll = async () => {
@@ -395,31 +395,45 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     saveAs(blob, 'export.ndjson');
 
     const exportDetails = await extractExportDetails(blob);
-    this.showExportSuccessMessage(exportDetails);
+    this.showExportCompleteMessage(exportDetails);
     this.setState({ isShowingExportAllOptionsModal: false });
   };
 
-  showExportSuccessMessage = (exportDetails: SavedObjectsExportResultDetails | undefined) => {
+  showExportCompleteMessage = (exportDetails: SavedObjectsExportResultDetails | undefined) => {
     const { notifications } = this.props;
-    if (exportDetails && exportDetails.missingReferences.length > 0) {
-      notifications.toasts.addWarning({
-        title: i18n.translate(
-          'savedObjectsManagement.objectsTable.export.successWithMissingRefsNotification',
-          {
-            defaultMessage:
-              'Your file is downloading in the background. ' +
-              'Some related objects could not be found. ' +
-              'Please see the last line in the exported file for a list of missing objects.',
-          }
-        ),
-      });
-    } else {
-      notifications.toasts.addSuccess({
-        title: i18n.translate('savedObjectsManagement.objectsTable.export.successNotification', {
-          defaultMessage: 'Your file is downloading in the background',
-        }),
-      });
+    if (exportDetails) {
+      if (exportDetails.missingReferences.length > 0) {
+        return notifications.toasts.addWarning({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.export.successWithMissingRefsNotification',
+            {
+              defaultMessage:
+                'Your file is downloading in the background. ' +
+                'Some related objects could not be found. ' +
+                'Please see the last line in the exported file for a list of missing objects.',
+            }
+          ),
+        });
+      }
+      if (exportDetails.excludedObjects.length > 0) {
+        return notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.export.successWithExcludedObjectsNotification',
+            {
+              defaultMessage:
+                'Your file is downloading in the background. ' +
+                'Some objects were excluded from the export. ' +
+                'Please see the last line in the exported file for a list of excluded objects.',
+            }
+          ),
+        });
+      }
     }
+    return notifications.toasts.addSuccess({
+      title: i18n.translate('savedObjectsManagement.objectsTable.export.successNotification', {
+        defaultMessage: 'Your file is downloading in the background',
+      }),
+    });
   };
 
   finishImport = () => {
@@ -603,7 +617,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }));
 
     return (
-      <EuiPageContent horizontalPosition="center">
+      <div>
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
@@ -614,7 +628,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
         />
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="l" />
         <RedirectAppLinks application={applications}>
           <Table
             basePath={http.basePath}
@@ -642,7 +656,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             canGoInApp={this.props.canGoInApp}
           />
         </RedirectAppLinks>
-      </EuiPageContent>
+      </div>
     );
   }
 }

@@ -10,7 +10,6 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RecursiveReadonly } from '@kbn/utility-types';
 import type {
   CoreSetup,
   CoreStart,
@@ -36,9 +35,12 @@ import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuditServiceSetup } from './audit';
 import { AuditService, SecurityAuditLogger } from './audit';
-import type { AuthenticationServiceStart } from './authentication';
+import type {
+  AuthenticationServiceStart,
+  InternalAuthenticationServiceStart,
+} from './authentication';
 import { AuthenticationService } from './authentication';
-import type { AuthorizationServiceSetup } from './authorization';
+import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
@@ -74,11 +76,14 @@ export interface SecurityPluginSetup {
   /**
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
    */
-  authz: Pick<
-    AuthorizationServiceSetup,
-    'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
-  >;
+  authz: AuthorizationServiceSetup;
+  /**
+   * Exposes information about the available security features under the current license.
+   */
   license: SecurityLicense;
+  /**
+   * Exposes services for audit logging.
+   */
   audit: AuditServiceSetup;
 }
 
@@ -86,11 +91,14 @@ export interface SecurityPluginSetup {
  * Describes public Security plugin contract returned at the `start` stage.
  */
 export interface SecurityPluginStart {
-  authc: Pick<AuthenticationServiceStart, 'apiKeys' | 'getCurrentUser'>;
-  authz: Pick<
-    AuthorizationServiceSetup,
-    'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
-  >;
+  /**
+   * Authentication services to confirm the user is who they say they are.
+   */
+  authc: AuthenticationServiceStart;
+  /**
+   * Authorization services to manage and access the permissions a particular user has.
+   */
+  authz: AuthorizationServiceSetup;
 }
 
 export interface PluginSetupDependencies {
@@ -113,14 +121,9 @@ export interface PluginStartDependencies {
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
 export class SecurityPlugin
-  implements
-    Plugin<
-      RecursiveReadonly<SecurityPluginSetup>,
-      RecursiveReadonly<SecurityPluginStart>,
-      PluginSetupDependencies
-    > {
+  implements Plugin<SecurityPluginSetup, SecurityPluginStart, PluginSetupDependencies> {
   private readonly logger: Logger;
-  private authorizationSetup?: AuthorizationServiceSetup;
+  private authorizationSetup?: AuthorizationServiceSetupInternal;
   private auditSetup?: AuditServiceSetup;
   private anonymousAccessStart?: AnonymousAccessServiceStart;
   private configSubscription?: Subscription;
@@ -152,7 +155,7 @@ export class SecurityPlugin
   private readonly authenticationService = new AuthenticationService(
     this.initializerContext.logger.get('authentication')
   );
-  private authenticationStart?: AuthenticationServiceStart;
+  private authenticationStart?: InternalAuthenticationServiceStart;
   private readonly getAuthentication = () => {
     if (!this.authenticationStart) {
       throw new Error(`authenticationStart is not registered!`);

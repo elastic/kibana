@@ -10,5 +10,5 @@
  * Allows the getSharingData function to be lazy loadable
  */
 export async function loadSharingDataHelpers() {
-  return await import('../application/helpers/get_sharing_data');
+  return await import('../application/apps/main/utils/get_sharing_data');
 }

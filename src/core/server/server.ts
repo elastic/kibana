@@ -193,8 +193,6 @@ export class Server {
 
     const deprecationsSetup = this.deprecations.setup({
       http: httpSetup,
-      elasticsearch: elasticsearchServiceSetup,
-      coreUsageData: coreUsageDataSetup,
     });
 
     const coreSetup: InternalCoreSetup = {
@@ -250,6 +248,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+    this.status.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,

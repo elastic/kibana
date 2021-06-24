@@ -10,16 +10,26 @@ import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import * as i18n from '../translations';
 
-const NoCasesComponent = ({ createCaseHref }: { createCaseHref: string }) => (
-  <>
-    <span>{i18n.NO_CASES}</span>
-    <EuiLink
-      data-test-subj="no-cases-create-case"
-      href={createCaseHref}
-    >{` ${i18n.START_A_NEW_CASE}`}</EuiLink>
-    {'!'}
-  </>
-);
+const NoCasesComponent = ({
+  createCaseHref,
+  hasWritePermissions,
+}: {
+  createCaseHref: string;
+  hasWritePermissions: boolean;
+}) => {
+  return hasWritePermissions ? (
+    <>
+      <span>{i18n.NO_CASES}</span>
+      <EuiLink
+        data-test-subj="no-cases-create-case"
+        href={createCaseHref}
+      >{` ${i18n.START_A_NEW_CASE}`}</EuiLink>
+      {'!'}
+    </>
+  ) : (
+    <span data-test-subj="no-cases-readonly">{i18n.NO_CASES_READ_ONLY}</span>
+  );
+};
 
 NoCasesComponent.displayName = 'NoCasesComponent';
 

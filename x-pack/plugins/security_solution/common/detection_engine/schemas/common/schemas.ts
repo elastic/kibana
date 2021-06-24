@@ -82,6 +82,8 @@ export const ruleIdOrUndefined = t.union([rule_id, t.undefined]);
 export type RuleIdOrUndefined = t.TypeOf<typeof ruleIdOrUndefined>;
 
 export const id = UUID;
+export type Id = t.TypeOf<typeof id>;
+
 export const idOrUndefined = t.union([id, t.undefined]);
 export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 
@@ -408,3 +410,13 @@ export const privilege = t.type({
 });
 
 export type Privilege = t.TypeOf<typeof privilege>;
+
+export enum BulkAction {
+  'enable' = 'enable',
+  'disable' = 'disable',
+  'export' = 'export',
+  'delete' = 'delete',
+  'duplicate' = 'duplicate',
+}
+
+export const bulkAction = t.keyof(BulkAction);

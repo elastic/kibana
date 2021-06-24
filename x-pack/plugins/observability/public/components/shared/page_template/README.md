@@ -12,7 +12,42 @@ To register a solution's navigation structure you'll first need to ensure your s
 ],
 ```
 
-Now within your solution's **public** plugin `setup` lifecycle method you can call the `registerSections` method, this will register your solution's specific navigation structure with the overall Observability navigation registry. E.g.
+Now within your solution's **public** plugin `setup` lifecycle method you can
+call the `registerSections` method, this will register your solution's specific
+navigation structure with the overall Observability navigation registry.
+
+The `registerSections` function takes an `Observable` of an array of
+`NavigationSection`s. Each section can be defined as
+
+```typescript
+export interface NavigationSection {
+  // the label of the section, should be translated
+  label: string | undefined;
+  // the key to sort by in ascending order relative to other entries
+  sortKey: number;
+  // the entries to render inside the section
+  entries: NavigationEntry[];
+}
+```
+
+Each entry inside of a navigation section is defined as
+
+```typescript
+export interface NavigationEntry {
+  // the label of the menu entry, should be translated
+  label: string;
+  // the kibana app id
+  app: string;
+  // the path after the application prefix corresponding to this entry
+  path: string;
+  // whether to only match when the full path matches, defaults to `false`
+  matchFullPath?: boolean;
+  // whether to ignore trailing slashes, defaults to `true`
+  ignoreTrailingSlash?: boolean;
+}
+```
+
+A registration might therefore look like the following:
 
 ```typescript
 // x-pack/plugins/example_plugin/public/plugin.ts
@@ -29,6 +64,7 @@ export class Plugin implements PluginClass {
           label: 'A solution section',
           sortKey: 200,
           entries: [
+            { label: 'Home Page', app: 'exampleA', path: '/', matchFullPath: true },
             { label: 'Example Page', app: 'exampleA', path: '/example' },
             { label: 'Another Example Page', app: 'exampleA', path: '/another-example' },
           ],

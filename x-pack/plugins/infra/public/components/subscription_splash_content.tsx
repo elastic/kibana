@@ -7,28 +7,30 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiImage,
-} from '@elastic/eui';
+import { EuiText, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { euiStyled, EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import { HttpStart } from '../../../../../src/core/public';
 import { useTrialStatus } from '../hooks/use_trial_status';
-import { LoadingPage } from '../components/loading_page';
+import { LoadingPrompt } from '../components/loading_page';
+import { PageTemplate } from './page_template';
+import type { LazyObservabilityPageTemplateProps } from '../../../observability/public';
 
-export const SubscriptionSplashContent: React.FC = () => {
+const loadingMessage = i18n.translate('xpack.infra.ml.splash.loadingMessage', {
+  defaultMessage: 'Checking license...',
+});
+
+export const SubscriptionSplashPage: React.FC<LazyObservabilityPageTemplateProps> = (
+  templateProps
+) => {
+  return (
+    <PageTemplate {...templateProps} isEmptyState={true}>
+      <SubscriptionSplashPrompt />
+    </PageTemplate>
+  );
+};
+
+export const SubscriptionSplashPrompt: React.FC = () => {
   const { services } = useKibana<{ http: HttpStart }>();
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
 
@@ -37,13 +39,7 @@ export const SubscriptionSplashContent: React.FC = () => {
   }, [checkTrialAvailability]);
 
   if (loadState === 'pending') {
-    return (
-      <LoadingPage
-        message={i18n.translate('xpack.infra.ml.splash.loadingMessage', {
-          defaultMessage: 'Checking license...',
-        })}
-      />
-    );
+    return <LoadingPrompt message={loadingMessage} />;
   }
 
   const canStartTrial = isTrialAvailable && loadState === 'resolved';
@@ -102,74 +98,15 @@ export const SubscriptionSplashContent: React.FC = () => {
   }
 
   return (
-    <EuiThemeProvider>
-      <SubscriptionPage>
-        <EuiPageBody>
-          <SubscriptionPageContent verticalPosition="center" horizontalPosition="center">
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2>{title}</h2>
-                </EuiTitle>
-                <EuiSpacer size="xl" />
-                <EuiText>
-                  <p>{description}</p>
-                </EuiText>
-                <EuiSpacer />
-                <div>{cta}</div>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiImage
-                  alt={i18n.translate('xpack.infra.ml.splash.splashImageAlt', {
-                    defaultMessage: 'Placeholder image',
-                  })}
-                  url={services.http.basePath.prepend(
-                    '/plugins/infra/assets/anomaly_chart_minified.svg'
-                  )}
-                  size="fullWidth"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <SubscriptionPageFooter>
-              <EuiTitle size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.infra.ml.splash.learnMoreTitle"
-                    defaultMessage="Want to learn more?"
-                  />
-                </h3>
-              </EuiTitle>
-              <EuiButtonEmpty
-                flush="left"
-                iconType="training"
-                target="_blank"
-                color="text"
-                href="https://www.elastic.co/guide/en/kibana/master/xpack-logs-analysis.html"
-              >
-                <FormattedMessage
-                  id="xpack.infra.ml.splash.learnMoreLink"
-                  defaultMessage="Read documentation"
-                />
-              </EuiButtonEmpty>
-            </SubscriptionPageFooter>
-          </SubscriptionPageContent>
-        </EuiPageBody>
-      </SubscriptionPage>
-    </EuiThemeProvider>
+    <EuiEmptyPrompt
+      iconType={'visLine'}
+      title={<h2>{title}</h2>}
+      body={
+        <EuiText>
+          <p>{description}</p>
+        </EuiText>
+      }
+      actions={cta}
+    />
   );
 };
-
-const SubscriptionPage = euiStyled(EuiPage)`
-  height: 100%
-`;
-
-const SubscriptionPageContent = euiStyled(EuiPageContent)`
-  max-width: 768px !important;
-`;
-
-const SubscriptionPageFooter = euiStyled.div`
-  background: ${(props) => props.theme.eui.euiColorLightestShade};
-  margin: 0 -${(props) => props.theme.eui.paddingSizes.l} -${(props) =>
-  props.theme.eui.paddingSizes.l};
-  padding: ${(props) => props.theme.eui.paddingSizes.l};
-`;

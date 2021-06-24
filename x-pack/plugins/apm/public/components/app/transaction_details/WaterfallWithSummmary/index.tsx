@@ -15,7 +15,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
@@ -34,7 +33,6 @@ type DistributionBucket = DistributionApiResponse['buckets'][0];
 
 interface Props {
   urlParams: IUrlParams;
-  location: Location;
   waterfall: IWaterfall;
   exceedsMax: boolean;
   isLoading: boolean;
@@ -43,7 +41,6 @@ interface Props {
 
 export function WaterfallWithSummmary({
   urlParams,
-  location,
   waterfall,
   exceedsMax,
   isLoading,
@@ -86,13 +83,13 @@ export function WaterfallWithSummmary({
       />
     );
 
-    return <EuiPanel paddingSize="m">{content}</EuiPanel>;
+    return <EuiPanel hasBorder={true}>{content}</EuiPanel>;
   }
 
   const entryTransaction = entryWaterfallTransaction.doc;
 
   return (
-    <EuiPanel paddingSize="m">
+    <EuiPanel hasBorder={true}>
       <EuiFlexGroup>
         <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
           <EuiTitle size="xs">
@@ -135,7 +132,6 @@ export function WaterfallWithSummmary({
 
       <TransactionTabs
         transaction={entryTransaction}
-        location={location}
         urlParams={urlParams}
         waterfall={waterfall}
         exceedsMax={exceedsMax}

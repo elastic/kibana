@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('index pattern with unmapped fields', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('unmapped_fields');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/unmapped_fields');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'test-index-unmapped-fields',
         'discover:searchFieldsFromSource': false,
@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('unmapped_fields');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/unmapped_fields');
     });
 
     it('unmapped fields exist on a new saved search', async () => {

@@ -21,7 +21,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
-      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
       await ml.testResources.resetKibanaTimeZone();

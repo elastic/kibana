@@ -20,13 +20,13 @@ import {
   sendUpdateAgentPolicy,
   useConfig,
   sendGetAgentStatus,
+  useAgentPolicyRefresh,
 } from '../../../../../hooks';
 import {
   AgentPolicyForm,
   agentPolicyFormValidation,
   ConfirmDeployAgentPolicyModal,
 } from '../../../components';
-import { useAgentPolicyRefresh } from '../../hooks';
 
 const FormWrapper = styled.div`
   max-width: 800px;
@@ -65,12 +65,13 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       setIsLoading(true);
       try {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { name, description, namespace, monitoring_enabled } = agentPolicy;
+        const { name, description, namespace, monitoring_enabled, unenroll_timeout } = agentPolicy;
         const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
           name,
           description,
           namespace,
           monitoring_enabled,
+          unenroll_timeout,
         });
         if (data) {
           notifications.toasts.addSuccess(

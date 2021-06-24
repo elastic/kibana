@@ -11,27 +11,29 @@ import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
+import { FeatureEditTools } from './feature_draw_controls/feature_edit_tools';
 import { FitToData } from './fit_to_data';
 import { TimesliderToggleButton } from './timeslider_toggle_button';
-import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 
 export interface Props {
   addFilters?: ((filters: Filter[], actionId: string) => Promise<void>) | null;
-  geoFields: GeoFieldWithIndex[];
+  showToolsControl: boolean;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
+  shapeDrawModeActive: boolean;
+  pointDrawModeActive: boolean;
   showFitToBoundsButton: boolean;
   showTimesliderButton: boolean;
 }
 
 export function ToolbarOverlay(props: Props) {
   const toolsButton =
-    props.addFilters && props.geoFields.length ? (
+    props.addFilters && props.showToolsControl ? (
       <EuiFlexItem>
         <ToolsControl
-          geoFields={props.geoFields}
           getFilterActions={props.getFilterActions}
           getActionContext={props.getActionContext}
+          disableToolsControl={props.pointDrawModeActive || props.shapeDrawModeActive}
         />
       </EuiFlexItem>
     ) : null;
@@ -47,6 +49,13 @@ export function ToolbarOverlay(props: Props) {
       <TimesliderToggleButton />
     </EuiFlexItem>
   ) : null;
+
+  const featureDrawControl =
+    props.shapeDrawModeActive || props.pointDrawModeActive ? (
+      <EuiFlexItem>
+        <FeatureEditTools pointsOnly={props.pointDrawModeActive} />
+      </EuiFlexItem>
+    ) : null;
 
   return (
     <EuiFlexGroup
@@ -65,6 +74,8 @@ export function ToolbarOverlay(props: Props) {
       {toolsButton}
 
       {timesliderToogleButon}
+
+      {featureDrawControl}
     </EuiFlexGroup>
   );
 }

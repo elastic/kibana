@@ -27,25 +27,22 @@ export const EndpointIsolateSuccess = memo<EndpointIsolateSuccessProps>(
   }) => {
     return (
       <>
-        {isolateAction === 'isolateHost' ? (
-          <EuiCallOut
-            iconType="check"
-            color="success"
-            title={GET_ISOLATION_SUCCESS_MESSAGE(hostName)}
-            data-test-subj="hostIsolateSuccessMessage"
-          >
-            {additionalInfo}
-          </EuiCallOut>
-        ) : (
-          <EuiCallOut
-            iconType="check"
-            color="success"
-            title={GET_UNISOLATION_SUCCESS_MESSAGE(hostName)}
-          >
-            {additionalInfo}
-          </EuiCallOut>
-        )}
-
+        <EuiCallOut
+          iconType="check"
+          color="success"
+          title={
+            isolateAction === 'isolateHost'
+              ? GET_ISOLATION_SUCCESS_MESSAGE(hostName)
+              : GET_UNISOLATION_SUCCESS_MESSAGE(hostName)
+          }
+          data-test-subj={
+            isolateAction === 'isolateHost'
+              ? 'hostIsolateSuccessMessage'
+              : 'hostUnisolateSuccessMessage'
+          }
+        >
+          {additionalInfo}
+        </EuiCallOut>
         <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

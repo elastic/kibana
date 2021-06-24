@@ -181,6 +181,7 @@ import {
   tabifyGetColumns,
   calcAutoIntervalLessThan,
 } from '../common';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export {
   // aggs
@@ -237,6 +238,7 @@ export {
   DataRequestHandlerContext,
   AsyncSearchResponse,
   AsyncSearchStatusResponse,
+  NoSearchIdInSessionError,
 } from './search';
 
 // Search namespace
@@ -301,6 +303,7 @@ export {
 };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
     autocomplete: true,
     search: true,

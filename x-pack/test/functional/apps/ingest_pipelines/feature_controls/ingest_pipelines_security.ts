@@ -17,12 +17,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     describe('global all privileges (aka kibana_admin)', () => {
@@ -60,7 +60,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Ingest" section with ingest pipelines', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
+        // We gave the ingest node pipelines user access to advanced settings to allow them to use ingest node pipelines.
+        // See https://github.com/elastic/kibana/pull/102409/
+        expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'ingest',
           sectionLinks: ['ingest_pipelines'],

@@ -6,28 +6,33 @@
  */
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
-import { setMockValues, rerender } from '../__mocks__';
+import { setMockValues } from '../__mocks__/kea_logic';
+import { mockUseRouteMatch } from '../__mocks__/react_router';
 import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/enterprise_search_url.mock';
-import '../__mocks__/react_router_history.mock';
 
 import React from 'react';
 
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 
+import { rerender } from '../test_helpers';
+
 jest.mock('./app_logic', () => ({ AppLogic: jest.fn() }));
 import { AppLogic } from './app_logic';
 
+import { Credentials } from './components/credentials';
 import { EngineRouter, EngineNav } from './components/engine';
 import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
+import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
-import { RoleMappingsRouter } from './components/role_mappings';
+import { RoleMappings } from './components/role_mappings';
+import { Settings } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
@@ -100,51 +105,49 @@ describe('AppSearchConfigured', () => {
     expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 
-  describe('ability checks', () => {
-    describe('canViewRoleMappings', () => {
-      it('renders RoleMappings when canViewRoleMappings is true', () => {
-        setMockValues({ myRole: { canViewRoleMappings: true } });
-        rerender(wrapper);
-        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(1);
-      });
+  describe('routes with ability checks', () => {
+    const runRouteAbilityCheck = (routeAbility: string, View: React.FC) => {
+      describe(View.name, () => {
+        it(`renders ${View.name} when user ${routeAbility} is true`, () => {
+          setMockValues({ myRole: { [routeAbility]: true } });
+          rerender(wrapper);
+          expect(wrapper.find(View)).toHaveLength(1);
+        });
 
-      it('does not render RoleMappings when user canViewRoleMappings is false', () => {
-        setMockValues({ myRole: { canManageEngines: false } });
-        rerender(wrapper);
-        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(0);
+        it(`does not render ${View.name} when user ${routeAbility} is false`, () => {
+          setMockValues({ myRole: { [routeAbility]: false } });
+          rerender(wrapper);
+          expect(wrapper.find(View)).toHaveLength(0);
+        });
       });
+    };
+
+    runRouteAbilityCheck('canViewSettings', Settings);
+    runRouteAbilityCheck('canViewAccountCredentials', Credentials);
+    runRouteAbilityCheck('canViewRoleMappings', RoleMappings);
+    runRouteAbilityCheck('canManageEngines', EngineCreation);
+    runRouteAbilityCheck('canManageMetaEngines', MetaEngineCreation);
+  });
+
+  describe('library', () => {
+    it('renders a library page in development', () => {
+      const OLD_ENV = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      rerender(wrapper);
+
+      expect(wrapper.find(Library)).toHaveLength(1);
+      process.env.NODE_ENV = OLD_ENV;
     });
 
-    describe('canManageEngines', () => {
-      it('renders EngineCreation when user canManageEngines is true', () => {
-        setMockValues({ myRole: { canManageEngines: true } });
-        rerender(wrapper);
+    it("doesn't in production", () => {
+      const OLD_ENV = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
 
-        expect(wrapper.find(EngineCreation)).toHaveLength(1);
-      });
+      rerender(wrapper);
 
-      it('does not render EngineCreation when user canManageEngines is false', () => {
-        setMockValues({ myRole: { canManageEngines: false } });
-        rerender(wrapper);
-
-        expect(wrapper.find(EngineCreation)).toHaveLength(0);
-      });
-    });
-
-    describe('canManageMetaEngines', () => {
-      it('renders MetaEngineCreation when user canManageMetaEngines is true', () => {
-        setMockValues({ myRole: { canManageMetaEngines: true } });
-        rerender(wrapper);
-
-        expect(wrapper.find(MetaEngineCreation)).toHaveLength(1);
-      });
-
-      it('does not render MetaEngineCreation when user canManageMetaEngines is false', () => {
-        setMockValues({ myRole: { canManageMetaEngines: false } });
-        rerender(wrapper);
-
-        expect(wrapper.find(MetaEngineCreation)).toHaveLength(0);
-      });
+      expect(wrapper.find(Library)).toHaveLength(0);
+      process.env.NODE_ENV = OLD_ENV;
     });
   });
 });
@@ -161,14 +164,14 @@ describe('AppSearchNav', () => {
     const getEnginesLink = (wrapper: ShallowWrapper) => wrapper.find(SideNavLink).dive();
 
     it('does not render the engine subnav on top-level routes', () => {
-      (useRouteMatch as jest.Mock).mockReturnValueOnce(false);
+      mockUseRouteMatch.mockReturnValueOnce(false);
       const wrapper = shallow(<AppSearchNav />);
 
       expect(getEnginesLink(wrapper).find(EngineNav)).toHaveLength(0);
     });
 
     it('renders the engine subnav if currently on an engine route', () => {
-      (useRouteMatch as jest.Mock).mockReturnValueOnce(true);
+      mockUseRouteMatch.mockReturnValueOnce(true);
       const wrapper = shallow(<AppSearchNav />);
 
       expect(getEnginesLink(wrapper).find(EngineNav)).toHaveLength(1);

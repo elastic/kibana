@@ -154,12 +154,14 @@ export const expectResponses = {
         // bulk request error
         expect(object.type).to.eql(type);
         expect(object.id).to.eql(id);
-        expect(object.error).to.eql(error.output.payload);
+        expect(object.error.error).to.eql(error.output.payload.error);
+        expect(object.error.statusCode).to.eql(error.output.payload.statusCode);
+        // ignore the error.message, because it can vary for decorated errors
       } else {
         // non-bulk request error
         expect(object.error).to.eql(error.output.payload.error);
         expect(object.statusCode).to.eql(error.output.payload.statusCode);
-        // ignore the error.message, because it can vary for decorated non-bulk errors (e.g., conflict)
+        // ignore the error.message, because it can vary for decorated errors
       }
     } else {
       // fall back to default behavior of testing the success outcome
@@ -191,6 +193,64 @@ export const expectResponses = {
   },
 };
 
+const commonUsers = {
+  noAccess: {
+    ...NOT_A_KIBANA_USER,
+    description: 'user with no access',
+    authorizedAtSpaces: [],
+  },
+  superuser: {
+    ...SUPERUSER,
+    description: 'superuser',
+    authorizedAtSpaces: ['*'],
+  },
+  legacyAll: { ...KIBANA_LEGACY_USER, description: 'legacy user', authorizedAtSpaces: [] },
+  allGlobally: {
+    ...KIBANA_RBAC_USER,
+    description: 'rbac user with all globally',
+    authorizedAtSpaces: ['*'],
+  },
+  readGlobally: {
+    ...KIBANA_RBAC_DASHBOARD_ONLY_USER,
+    description: 'rbac user with read globally',
+    authorizedAtSpaces: ['*'],
+  },
+  dualAll: {
+    ...KIBANA_DUAL_PRIVILEGES_USER,
+    description: 'dual-privileges user',
+    authorizedAtSpaces: ['*'],
+  },
+  dualRead: {
+    ...KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+    description: 'dual-privileges readonly user',
+    authorizedAtSpaces: ['*'],
+  },
+};
+
+interface Security<T> {
+  modifier?: T;
+  users: Record<
+    | keyof typeof commonUsers
+    | 'allAtDefaultSpace'
+    | 'readAtDefaultSpace'
+    | 'allAtSpace1'
+    | 'readAtSpace1',
+    TestUser
+  >;
+}
+interface SecurityAndSpaces<T> {
+  modifier?: T;
+  users: Record<
+    keyof typeof commonUsers | 'allAtSpace' | 'readAtSpace' | 'allAtOtherSpace',
+    TestUser
+  >;
+  spaceId: string;
+}
+interface Spaces<T> {
+  modifier?: T;
+  spaceId: string;
+}
+
 /**
  * Get test scenarios for each type of suite.
  * @param modifier Use this to generate additional permutations of test scenarios.
@@ -203,66 +263,10 @@ export const expectResponses = {
  *  ]
  */
 export const getTestScenarios = <T>(modifiers?: T[]) => {
-  const commonUsers = {
-    noAccess: {
-      ...NOT_A_KIBANA_USER,
-      description: 'user with no access',
-      authorizedAtSpaces: [],
-    },
-    superuser: {
-      ...SUPERUSER,
-      description: 'superuser',
-      authorizedAtSpaces: ['*'],
-    },
-    legacyAll: { ...KIBANA_LEGACY_USER, description: 'legacy user', authorizedAtSpaces: [] },
-    allGlobally: {
-      ...KIBANA_RBAC_USER,
-      description: 'rbac user with all globally',
-      authorizedAtSpaces: ['*'],
-    },
-    readGlobally: {
-      ...KIBANA_RBAC_DASHBOARD_ONLY_USER,
-      description: 'rbac user with read globally',
-      authorizedAtSpaces: ['*'],
-    },
-    dualAll: {
-      ...KIBANA_DUAL_PRIVILEGES_USER,
-      description: 'dual-privileges user',
-      authorizedAtSpaces: ['*'],
-    },
-    dualRead: {
-      ...KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
-      description: 'dual-privileges readonly user',
-      authorizedAtSpaces: ['*'],
-    },
-  };
-
-  interface Security {
-    modifier?: T;
-    users: Record<
-      | keyof typeof commonUsers
-      | 'allAtDefaultSpace'
-      | 'readAtDefaultSpace'
-      | 'allAtSpace1'
-      | 'readAtSpace1',
-      TestUser
-    >;
-  }
-  interface SecurityAndSpaces {
-    modifier?: T;
-    users: Record<
-      keyof typeof commonUsers | 'allAtSpace' | 'readAtSpace' | 'allAtOtherSpace',
-      TestUser
-    >;
-    spaceId: string;
-  }
-  interface Spaces {
-    modifier?: T;
-    spaceId: string;
-  }
-
-  let spaces: Spaces[] = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map((x) => ({ spaceId: x }));
-  let security: Security[] = [
+  let spaces: Array<Spaces<T>> = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID].map((x) => ({
+    spaceId: x,
+  }));
+  let security: Array<Security<T>> = [
     {
       users: {
         ...commonUsers,
@@ -289,7 +293,7 @@ export const getTestScenarios = <T>(modifiers?: T[]) => {
       },
     },
   ];
-  let securityAndSpaces: SecurityAndSpaces[] = [
+  let securityAndSpaces: Array<SecurityAndSpaces<T>> = [
     {
       spaceId: DEFAULT_SPACE_ID,
       users: {

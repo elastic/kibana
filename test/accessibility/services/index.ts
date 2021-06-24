@@ -7,9 +7,9 @@
  */
 
 import { services as kibanaFunctionalServices } from '../../functional/services';
-import { A11yProvider } from './a11y';
+import { AccessibilityService } from './a11y';
 
 export const services = {
   ...kibanaFunctionalServices,
-  a11y: A11yProvider,
+  a11y: AccessibilityService,
 };

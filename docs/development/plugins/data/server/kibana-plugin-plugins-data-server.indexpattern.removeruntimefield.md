@@ -4,7 +4,7 @@
 
 ## IndexPattern.removeRuntimeField() method
 
-Remove a runtime field - removed from mapped field or removed unmapped field as appropriate
+Remove a runtime field - removed from mapped field or removed unmapped field as appropriate. Doesn't clear associated field attributes.
 
 <b>Signature:</b>
 
@@ -16,7 +16,7 @@ removeRuntimeField(name: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  name | <code>string</code> |  |
+|  name | <code>string</code> | Field name to remove |
 
 <b>Returns:</b>
 

@@ -155,6 +155,7 @@ describe('ScriptedFieldsTable', () => {
     );
 
     await component.update(); // Fire `componentWillMount()`
+    // @ts-expect-error lang is not valid
     component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
     await component.update();
 
@@ -179,6 +180,7 @@ describe('ScriptedFieldsTable', () => {
     );
 
     await component.update(); // Fire `componentWillMount()`
+    // @ts-expect-error lang is not valid
     component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
 
     await component.update();

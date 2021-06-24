@@ -10,10 +10,3 @@ export * from './constants';
 export * from './index_controls';
 export * from './lib';
 export * from './types';
-
-export {
-  getServiceNowITSMActionType,
-  getServiceNowSIRActionType,
-} from '../application/components/builtin_action_types/servicenow';
-export { getJiraActionType } from '../application/components/builtin_action_types/jira';
-export { getResilientActionType } from '../application/components/builtin_action_types/resilient';

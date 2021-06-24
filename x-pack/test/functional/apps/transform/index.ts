@@ -32,8 +32,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
       await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
 
-      await esArchiver.unload('ml/farequote');
-      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
 
       await transform.testResources.resetKibanaTimeZone();
       await transform.securityUI.logout();

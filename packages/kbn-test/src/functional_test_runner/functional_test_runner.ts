@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { relative } from 'path';
 
 import { ToolingLog } from '@kbn/dev-utils';
 
@@ -119,6 +120,9 @@ export class FunctionalTestRunner {
       ) {
         throw new Error('No tests defined.');
       }
+
+      // eslint-disable-next-line
+      console.log(`--- Running ${relative(process.cwd(), this.configFile)}`);
 
       const dockerServers = new DockerServersService(
         config.get('dockerServers'),

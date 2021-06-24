@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -806,23 +807,21 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        // @ts-ignore schema mismatch
         const { datafeedId, job, datafeed } = request.body;
 
-        if (datafeedId !== undefined) {
-          const { body } = await mlClient.previewDatafeed(
-            {
-              datafeed_id: datafeedId,
-            },
-            getAuthorizationHeader(request)
-          );
-          return response.ok({
-            body,
-          });
-        }
+        const payload =
+          datafeedId !== undefined
+            ? {
+                datafeed_id: datafeedId,
+              }
+            : ({
+                body: {
+                  job_config: job,
+                  datafeed_config: datafeed,
+                },
+              } as estypes.MlPreviewDatafeedRequest);
 
-        const { datafeedPreview } = jobServiceProvider(client, mlClient);
-        const body = await datafeedPreview(job, datafeed);
+        const { body } = await mlClient.previewDatafeed(payload, getAuthorizationHeader(request));
         return response.ok({
           body,
         });

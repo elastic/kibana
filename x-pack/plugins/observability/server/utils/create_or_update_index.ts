@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CreateIndexRequest, PutMappingRequest } from '@elastic/elasticsearch/api/types';
+import { estypes } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
 import { Logger, ElasticsearchClient } from 'src/core/server';
 
-export type Mappings = Required<CreateIndexRequest>['body']['mappings'] &
-  Required<PutMappingRequest>['body'];
+export type Mappings = Required<estypes.IndicesCreateRequest>['body']['mappings'] &
+  Required<estypes.IndicesPutMappingRequest>['body'];
 
 export async function createOrUpdateIndex({
   index,
@@ -71,7 +71,7 @@ function createNewIndex({
 }: {
   index: string;
   client: ElasticsearchClient;
-  mappings: Required<CreateIndexRequest>['body']['mappings'];
+  mappings: Required<estypes.IndicesCreateRequest>['body']['mappings'];
 }) {
   return client.indices.create({
     index,
@@ -90,7 +90,7 @@ function updateExistingIndex({
 }: {
   index: string;
   client: ElasticsearchClient;
-  mappings: PutMappingRequest['body'];
+  mappings: estypes.IndicesPutMappingRequest['body'];
 }) {
   return client.indices.putMapping({
     index,

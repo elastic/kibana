@@ -44,7 +44,8 @@ export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const DEFAULT_TRANSFORMS = 'securitySolution:transforms';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
-export const GLOBAL_HEADER_HEIGHT = 98; // px
+export const GLOBAL_HEADER_HEIGHT = 96; // px
+export const GLOBAL_HEADER_HEIGHT_WITH_GLOBAL_BANNER = 128; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
@@ -69,6 +70,11 @@ export enum SecurityPageName {
   case = 'case',
   administration = 'administration',
 }
+
+/**
+ * The ID of the cases plugin
+ */
+export const CASES_APP_ID = `${APP_ID}:${SecurityPageName.case}`;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
 export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
@@ -186,6 +192,7 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
+export const DETECTION_ENGINE_RULES_BULK_ACTION = `${DETECTION_ENGINE_RULES_URL}/_bulk_action`;
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINES_URL = '/api/timelines';
@@ -234,6 +241,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
   '.pagerduty',
+  '.swimlane',
   '.webhook',
   '.servicenow',
   '.jira',

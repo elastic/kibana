@@ -6,7 +6,7 @@
  */
 
 import { delay, finalize, switchMap, tap } from 'rxjs/operators';
-import _, { debounce } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
@@ -44,7 +44,7 @@ function subscribeToExternalContext(
 
   const dispatchFromExternal = (searchSessionId = search.session.start()) => {
     const globalFilters = filterManager.getFilters();
-    const filters = _.isEqual(getState().app.filters, globalFilters)
+    const filters = isEqual(getState().app.filters, globalFilters)
       ? null
       : { filters: globalFilters };
     dispatch(

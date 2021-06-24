@@ -13,13 +13,19 @@ export default function ({ getService, loadTestFile }) {
 
   describe('custom visualizations', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/visualize');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',
       });
       await browser.setWindowSize(1300, 900);
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/visualize.json'
+      );
     });
 
     loadTestFile(require.resolve('./self_changing_vis'));

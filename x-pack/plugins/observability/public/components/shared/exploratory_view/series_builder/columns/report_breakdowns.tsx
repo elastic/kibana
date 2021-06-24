@@ -16,5 +16,11 @@ export function ReportBreakdowns({
   dataViewSeries: DataSeries;
   seriesId: string;
 }) {
-  return <Breakdowns breakdowns={dataViewSeries.breakdowns ?? []} seriesId={seriesId} />;
+  return (
+    <Breakdowns
+      reportViewConfig={dataViewSeries}
+      breakdowns={dataViewSeries.breakdowns ?? []}
+      seriesId={seriesId}
+    />
+  );
 }

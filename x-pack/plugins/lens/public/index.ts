@@ -20,6 +20,7 @@ export type {
   ValueLabelConfig,
   YAxisMode,
   XYCurveType,
+  YConfig,
 } from './xy_visualization/types';
 export type { DataType, OperationMetadata } from './types';
 export type {
@@ -54,6 +55,8 @@ export type {
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
 } from './indexpattern_datasource/types';
+export type { LensEmbeddableInput } from './editor_frame_service/embeddable';
+
 export { LensPublicStart } from './plugin';
 
 export const plugin = () => new LensPlugin();

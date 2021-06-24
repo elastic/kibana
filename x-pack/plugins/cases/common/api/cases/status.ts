@@ -27,4 +27,13 @@ export const CasesStatusResponseRt = rt.type({
   count_closed_cases: rt.number,
 });
 
+export const CasesStatusRequestRt = rt.partial({
+  /**
+   * The owner of the cases to retrieve the status stats from. If no owner is provided the stats for all cases
+   * that the user has access to will be returned.
+   */
+  owner: rt.union([rt.array(rt.string), rt.string]),
+});
+
 export type CasesStatusResponse = rt.TypeOf<typeof CasesStatusResponseRt>;
+export type CasesStatusRequest = rt.TypeOf<typeof CasesStatusRequestRt>;
