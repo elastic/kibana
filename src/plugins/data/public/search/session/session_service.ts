@@ -246,7 +246,7 @@ export class SessionService {
    * Continue previous search session
    * Can be used to share a running search session between different apps, so they can reuse search cache
    *
-   * This is different from {@link restore} as this doesn't try to reuse saved in elasticsearch search results when restoring
+   * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
    * @param sessionId
    */
   public continue(sessionId: string) {
