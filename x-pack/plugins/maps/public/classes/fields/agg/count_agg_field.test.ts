@@ -19,8 +19,8 @@ const defaultParams = {
 };
 
 describe('supportsFieldMeta', () => {
-  test('Counting aggregations should not support field meta', () => {
+  test('Count aggs should support field meta', () => {
     const countMetric = new CountAggField({ ...defaultParams });
-    expect(countMetric.supportsFieldMeta()).toBe(false);
+    expect(countMetric.supportsFieldMeta()).toBe(true);
   });
 });

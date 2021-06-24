@@ -29,13 +29,13 @@ describe('supportsFieldMeta', () => {
     expect(termsMetric.supportsFieldMeta()).toBe(true);
   });
 
-  test('Counting aggregations should not support field meta', () => {
+  test('Counting aggregations should also support field meta', () => {
     const sumMetric = new AggField({ ...defaultParams, aggType: AGG_TYPE.SUM });
-    expect(sumMetric.supportsFieldMeta()).toBe(false);
+    expect(sumMetric.supportsFieldMeta()).toBe(true);
     const uniqueCountMetric = new AggField({
       ...defaultParams,
       aggType: AGG_TYPE.UNIQUE_COUNT,
     });
-    expect(uniqueCountMetric.supportsFieldMeta()).toBe(false);
+    expect(uniqueCountMetric.supportsFieldMeta()).toBe(true);
   });
 });
