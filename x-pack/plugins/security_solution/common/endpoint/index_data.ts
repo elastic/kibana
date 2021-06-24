@@ -449,6 +449,7 @@ const indexFleetActionsForHost = async (
       action_id: action.action_id,
       agent_id: agentId,
       action_data: action.data,
+      error: fleetActionGenerator.randomFloat() < 0.4 ? undefined : 'some error happened',
     });
 
     await esClient.index(
