@@ -76,7 +76,7 @@ export class MockStyle implements IStyle {
     return LAYER_STYLE_TYPE.VECTOR;
   }
 
-  getStyleMeta(): StyleMetaFromLocal {
+  getStyleMetaFromLocal(): StyleMetaFromLocal {
     const geomTypes: GeometryTypes = {
       isPointsOnly: false,
       isLinesOnly: false,
