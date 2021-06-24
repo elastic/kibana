@@ -340,7 +340,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     } else {
       setClusterData((prev) => ({ ...prev, currentIdx: prev.currentIdx + 1 }));
     }
-    setIsLoadingPreview(true);
   }, [currentIdx, totalDocs]);
 
   const goToPrevDoc = useCallback(() => {
@@ -349,7 +348,6 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     } else {
       setClusterData((prev) => ({ ...prev, currentIdx: prev.currentIdx - 1 }));
     }
-    setIsLoadingPreview(true);
   }, [currentIdx, totalDocs]);
 
   const reset = useCallback(() => {

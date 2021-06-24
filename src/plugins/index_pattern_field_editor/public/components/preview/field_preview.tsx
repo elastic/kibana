@@ -36,7 +36,7 @@ export const FieldPreview = () => {
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API
   const isEmptyPromptVisible =
-    name === null && script === null && format === null
+    name === null && script === null
       ? true
       : // We have a response from the preview
       error !== null || fields.length > 0

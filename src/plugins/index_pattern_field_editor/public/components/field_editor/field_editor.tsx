@@ -173,7 +173,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
 
-  const [formData] = useFormData({ form });
+  const [formData] = useFormData<FieldFormInternal>({ form });
   const isFormModified = useFormIsModified({
     form,
     discard: [
@@ -217,7 +217,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxErr
         isValueVisible === false || Boolean(updatedScript?.source.trim()) === false
           ? null
           : updatedScript,
-      format: updatedFormat,
+      format: updatedFormat?.id !== undefined ? updatedFormat : null,
     });
   }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
 
