@@ -9,94 +9,122 @@
 
 export interface FleetAgentCacheItem {
   policy_id: string | undefined;
-  policy_version: string | undefined;
+  policy_version: number | undefined | null;
 }
 
 // EP Policy Response
 
-export interface EndpointMetricsPolicyResponse {
-  agent: EndpointAgent; // endpoint agent
-  elastic: EndpointPolicyAgent; // fleet agent
-  Endpoint: EndpointPolicyResponse;
-  event: EndpointPolicyEvent;
-  host: EndpointPolicyHost;
-}
-
-interface EndpointAgent {
-  id: string;
-}
-
-interface EndpointPolicyResponse {
-  policy: {
-    applied: {
-      artifacts: EndpointPolicyResponseArtifacts;
-      actions: EndpointPolicyResponseAction[];
-      name: string;
-      id: string;
-      endpoint_policy_version: string;
-      version: string;
-      status: string;
+export interface EndpointPolicyResponseAggregation {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    policy_responses: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+        latest_response: EndpointPolicyResponseHits;
+      }>;
     };
   };
 }
 
-interface EndpointPolicyResponseArtifacts {
-  global: {
-    version: string;
-  };
-  user: {
-    vesrion: string;
+interface EndpointPolicyResponseHits {
+  hits: {
+    total: { value: number };
+    hits: EndpointPolicyResponseDocument[];
   };
 }
 
-interface EndpointPolicyResponseAction {
-  name: string;
-  message: string;
-  status: string;
-}
-
-interface EndpointPolicyAgent {
-  agent: {
-    id: string;
+export interface EndpointPolicyResponseDocument {
+  _source: {
+    '@timestamp': string;
+    agent: {
+      id: string;
+    };
+    event: {
+      agent_id_status: string;
+    };
+    Endpoint: {};
   };
-}
-
-interface EndpointPolicyHost {
-  hostname: string;
-  os: {
-    kernel: string;
-    family: string;
-    version: string;
-    architecture: string;
-  };
-}
-
-interface EndpointPolicyEvent {
-  agent_id_status: string;
-  created: string;
-  action: string;
 }
 
 // EP Metrics
 
+export interface EndpointMetricsAggregation {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    endpoint_agents: {
+      buckets: Array<{ key: string; doc_count: number; latest_metrics: EndpointMetricHits }>;
+    };
+  };
+}
+
+interface EndpointMetricHits {
+  hits: {
+    total: { value: number };
+    hits: EndpointMetricDocument[];
+  };
+}
+
+interface EndpointMetricDocument {
+  _source: {
+    '@timestamp': string;
+    agent: {
+      id: string;
+    };
+    Endpoint: {
+      metrics: EndpointMetrics;
+    };
+    elastic: {
+      agent: {
+        id: string;
+      };
+    };
+    host: {
+      os: EndpointMetricOS;
+    };
+    event: {
+      agent_id_status: string;
+    };
+  };
+}
+
 export interface EndpointMetrics {
-  endpoint_id: string;
-  fleet_agent_id: string;
-  os_name: string;
-  os_platform: string;
-  os_version: string;
-  uptime_endpoint: string;
-  uptime_system: string;
-  memory: EndpointMetricMemory;
-  cpu: EndpointMetricCPU;
+  memory: {
+    endpoint: {
+      private: {
+        mean: number;
+        latest: number;
+      };
+    };
+  };
+  cpu: {
+    endpoint: {
+      histogram: {
+        counts: number[];
+        values: number[];
+      };
+      mean: number;
+      latest: number;
+    };
+  };
+  uptime: {
+    endpoint: number;
+    system: number;
+  };
 }
 
-interface EndpointMetricMemory {
-  mean: string;
-  latest: string;
-}
-
-interface EndpointMetricCPU {
-  mean: string;
-  histogram: Array<{ key: string; value: number }>;
+interface EndpointMetricOS {
+  Ext: {
+    variant: string;
+  };
+  kernel: string;
+  name: string;
+  family: string;
+  version: string;
+  platform: string;
+  full: string;
 }

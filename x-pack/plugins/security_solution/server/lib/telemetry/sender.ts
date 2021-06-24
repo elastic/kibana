@@ -20,7 +20,6 @@ import { TelemetryDiagTask } from './diagnostic_task';
 import { TelemetryEndpointTask } from './endpoint_task';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
-import { EndpointMetricsPolicyResponse } from './types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -155,35 +154,28 @@ export class TelemetryEventsSender {
           endpoint_agents: {
             terms: {
               size: this.max_records,
-              field: 'agent.id',
-              aggs: {
-                latest_metrics: {
-                  top_hits: {
-                    size: 1,
-                    sort: [
-                      {
-                        '@timestamp': {
-                          order: 'desc',
-                        },
+              field: 'agent.id.keyword',
+            },
+            aggs: {
+              latest_metrics: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      '@timestamp': {
+                        order: 'desc',
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
-            },
-          },
-        },
-        query: {
-          range: {
-            '@timestamp': {
-              gte: 'now-1d/d',
-              lt: 'now/d',
             },
           },
         },
       },
     };
 
+    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
     return this.esClient.search(query);
   }
 
@@ -192,8 +184,6 @@ export class TelemetryEventsSender {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
-    // require ALL fleet agents (inc inactive), not just the ones with EP Package.
-    // the reason for this is that the EP package could have failed to install.
     return this.agentService?.listAgents(this.esClient, {
       perPage: this.max_records,
       showInactive: true,
@@ -215,30 +205,44 @@ export class TelemetryEventsSender {
       throw Error('could not fetch policy responses. es client is not available');
     }
 
-    /* 
-      TODO: Grant kibana_system access to this datastream
-        ~~>> https://github.com/elastic/elasticsearch/pull/74309
-      Re-indexed .ds-metrics-endpoint.policy* to .fleet-pjhampton-metrics-endpoint-policy*
-      query the last 24h worth of failed policy responses 
-    */
     const query = {
       expand_wildcards: 'open,hidden',
-      index: `.fleet-pjhampton-metrics-endpoint-policy*`,
+      index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
-      size: 10_000,
+      size: 0, // no query results required - only aggregation quantity
       body: {
         query: {
           match: {
             'Endpoint.policy.applied.status': 'failure',
           },
         },
+        aggs: {
+          policy_responses: {
+            terms: {
+              size: this.max_records,
+              field: 'Endpoint.policy.applied.id.keyword',
+            },
+            aggs: {
+              latest_response: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      '@timestamp': {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
       },
     };
 
-    const {
-      body: failedPolicyResponses,
-    } = await this.esClient.search<EndpointMetricsPolicyResponse>(query);
-    return failedPolicyResponses;
+    // @ts-expect-error The types of 'body.aggs' are incompatible between these types.
+    return this.esClient.search(query);
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
