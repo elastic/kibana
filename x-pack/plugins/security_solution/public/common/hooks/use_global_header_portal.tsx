@@ -11,10 +11,10 @@ import { createPortalNode } from 'react-reverse-portal';
 /**
  * A singleton portal for rendering content in the global header
  */
-const globalHeaderPortalNodeSingleton = createPortalNode();
+const globalKQLHeaderPortalNodeSingleton = createPortalNode();
 
 export const useGlobalHeaderPortal = () => {
-  const [globalHeaderPortalNode] = useState(globalHeaderPortalNodeSingleton);
+  const [globalKQLHeaderPortalNode] = useState(globalKQLHeaderPortalNodeSingleton);
 
-  return { globalHeaderPortalNode };
+  return { globalKQLHeaderPortalNode };
 };
