@@ -15,14 +15,15 @@ import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../context/apm_plugin/mock_apm_plugin_context';
-import { useBreadcrumbs } from './use_breadcrumbs';
+import { useApmBreadcrumbs } from './use_apm_breadcrumbs';
+import { useBreadcrumbs } from '../../../observability/public';
+
+jest.mock('../../../observability/public');
 
 function createWrapper(path: string) {
   return ({ children }: { children?: ReactNode }) => {
     const value = (produce(mockApmPluginContextValue, (draft) => {
       draft.core.application.navigateToUrl = (url: string) => Promise.resolve();
-      draft.core.chrome.docTitle.change = changeTitle;
-      draft.core.chrome.setBreadcrumbs = setBreadcrumbs;
     }) as unknown) as ApmPluginContextValue;
 
     return (
@@ -36,27 +37,18 @@ function createWrapper(path: string) {
 }
 
 function mountBreadcrumb(path: string) {
-  renderHook(() => useBreadcrumbs(apmRouteConfig), {
+  renderHook(() => useApmBreadcrumbs(apmRouteConfig), {
     wrapper: createWrapper(path),
   });
 }
 
-const changeTitle = jest.fn();
-const setBreadcrumbs = jest.fn();
-
-describe('useBreadcrumbs', () => {
-  it('changes the page title', () => {
-    mountBreadcrumb('/');
-
-    expect(changeTitle).toHaveBeenCalledWith(['APM']);
-  });
-
+describe('useApmBreadcrumbs', () => {
   test('/services/:serviceName/errors/:groupId', () => {
     mountBreadcrumb(
       '/services/opbeans-node/errors/myGroupId?kuery=myKuery&rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0'
     );
 
-    expect(setBreadcrumbs).toHaveBeenCalledWith(
+    expect(useBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
@@ -81,20 +73,12 @@ describe('useBreadcrumbs', () => {
         expect.objectContaining({ text: 'myGroupId', href: undefined }),
       ])
     );
-
-    expect(changeTitle).toHaveBeenCalledWith([
-      'myGroupId',
-      'Errors',
-      'opbeans-node',
-      'Services',
-      'APM',
-    ]);
   });
 
   test('/services/:serviceName/errors', () => {
     mountBreadcrumb('/services/opbeans-node/errors?kuery=myKuery');
 
-    expect(setBreadcrumbs).toHaveBeenCalledWith(
+    expect(useBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
@@ -111,19 +95,12 @@ describe('useBreadcrumbs', () => {
         expect.objectContaining({ text: 'Errors', href: undefined }),
       ])
     );
-
-    expect(changeTitle).toHaveBeenCalledWith([
-      'Errors',
-      'opbeans-node',
-      'Services',
-      'APM',
-    ]);
   });
 
   test('/services/:serviceName/transactions', () => {
     mountBreadcrumb('/services/opbeans-node/transactions?kuery=myKuery');
 
-    expect(setBreadcrumbs).toHaveBeenCalledWith(
+    expect(useBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
@@ -140,13 +117,6 @@ describe('useBreadcrumbs', () => {
         expect.objectContaining({ text: 'Transactions', href: undefined }),
       ])
     );
-
-    expect(changeTitle).toHaveBeenCalledWith([
-      'Transactions',
-      'opbeans-node',
-      'Services',
-      'APM',
-    ]);
   });
 
   test('/services/:serviceName/transactions/view?transactionName=my-transaction-name', () => {
@@ -154,7 +124,7 @@ describe('useBreadcrumbs', () => {
       '/services/opbeans-node/transactions/view?kuery=myKuery&transactionName=my-transaction-name'
     );
 
-    expect(setBreadcrumbs).toHaveBeenCalledWith(
+    expect(useBreadcrumbs).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           text: 'APM',
@@ -179,13 +149,5 @@ describe('useBreadcrumbs', () => {
         }),
       ])
     );
-
-    expect(changeTitle).toHaveBeenCalledWith([
-      'my-transaction-name',
-      'Transactions',
-      'opbeans-node',
-      'Services',
-      'APM',
-    ]);
   });
 });
