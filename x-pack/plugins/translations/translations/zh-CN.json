@@ -21286,7 +21286,6 @@
     "xpack.securitySolution.search.cases.configure": "配置案例",
     "xpack.securitySolution.search.cases.create": "创建新案例",
     "xpack.securitySolution.search.detections": "检测",
-    "xpack.securitySolution.search.detections.manage": "管理规则",
     "xpack.securitySolution.search.hosts": "主机",
     "xpack.securitySolution.search.hosts.anomalies": "异常",
     "xpack.securitySolution.search.hosts.authentications": "身份验证",
