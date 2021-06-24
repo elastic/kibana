@@ -186,7 +186,7 @@ export class FollowerIndicesList extends PureComponent {
                 id="xpack.crossClusterReplication.followerIndexList.noPermissionText"
                 defaultMessage="You do not have permission to view or add follower indices."
               />
-            )
+            ),
           }}
         />
       );

@@ -187,7 +187,7 @@ export class AutoFollowPatternList extends PureComponent {
                 id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
                 defaultMessage="You do not have permission to view or add auto-follow patterns."
               />
-            )
+            ),
           }}
         />
       );

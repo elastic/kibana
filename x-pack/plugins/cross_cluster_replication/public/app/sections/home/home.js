@@ -89,7 +89,6 @@ export class CrossClusterReplicationHome extends PureComponent {
 
         <EuiSpacer size="l" />
 
-
         <div className={APP_WRAPPER_CLASS}>
           <Switch>
             <Route exact path={`/follower_indices`} component={FollowerIndicesList} />
