@@ -22,6 +22,9 @@ export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
     name: 'security_solution/cypress',
   }),
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/osquery/cypress/tsconfig.json'), {
+    name: 'osquery/cypress',
+  }),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/e2e/tsconfig.json'), {
     name: 'apm/cypress',
     disableTypeCheck: true,
@@ -54,6 +57,9 @@ export const PROJECTS = [
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
     .sync('test/interpreter_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map((path) => new Project(resolve(REPO_ROOT, path))),
+  ...glob
+    .sync('test/server_integration/__fixtures__/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
 ];
 
