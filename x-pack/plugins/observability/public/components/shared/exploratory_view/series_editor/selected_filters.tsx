@@ -30,7 +30,7 @@ export function SelectedFilters({ seriesId, isNew, seriesConfig }: Props) {
 
   const filters: UrlFilter[] = series.filters ?? [];
 
-  let definitionFilters: UrlFilter[] = getFiltersFromDefs(reportDefinitions, seriesConfig);
+  let definitionFilters: UrlFilter[] = getFiltersFromDefs(reportDefinitions);
 
   // we don't want to display report definition filters in new series view
   if (isNew) {
