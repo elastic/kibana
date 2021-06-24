@@ -16,7 +16,7 @@ const policyElasticAgentOnCloudAgent = {
   secretToken: 'apm_cloud_token',
 };
 
-const agents = [
+const fleetAgents = [
   {
     id: '1',
     name: 'agent foo',
@@ -32,13 +32,6 @@ const agents = [
 ];
 
 describe('TutorialConfigAgent', () => {
-  beforeAll(() => {
-    jest.spyOn(console, 'error').mockImplementation(() => null);
-  });
-
-  afterAll(() => {
-    jest.restoreAllMocks();
-  });
   it('renders loading component while API is being called', () => {
     const component = render(
       <TutorialConfigAgent
@@ -62,7 +55,7 @@ describe('TutorialConfigAgent', () => {
           ({
             get: jest.fn().mockReturnValue({
               cloudStandaloneSetup: undefined,
-              agents,
+              fleetAgents,
             }),
           } as unknown) as HttpStart
         }
@@ -108,7 +101,7 @@ describe('TutorialConfigAgent', () => {
             ({
               get: jest.fn().mockReturnValue({
                 cloudStandaloneSetup: undefined,
-                agents,
+                fleetAgents,
               }),
             } as unknown) as HttpStart
           }
@@ -120,7 +113,7 @@ describe('TutorialConfigAgent', () => {
         await screen.findByText('Default Standalone configuration')
       ).toBeInTheDocument();
       expect(
-        component.getByTestId('policySelector_onPrem_standalone')
+        component.getByTestId('policySelector_onPrem')
       ).toBeInTheDocument();
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
@@ -147,7 +140,7 @@ describe('TutorialConfigAgent', () => {
                   apmServerUrl: 'cloud_url',
                   secretToken: 'cloud_token',
                 },
-                agents,
+                fleetAgents,
               }),
             } as unknown) as HttpStart
           }
@@ -158,9 +151,7 @@ describe('TutorialConfigAgent', () => {
       expect(
         await screen.findByText('Default Standalone configuration')
       ).toBeInTheDocument();
-      expect(
-        component.getByTestId('policySelector_cloud_standalone')
-      ).toBeInTheDocument();
+      expect(component.getByTestId('policySelector_cloud')).toBeInTheDocument();
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
@@ -184,7 +175,7 @@ describe('TutorialConfigAgent', () => {
                   apmServerUrl: 'cloud_url',
                   secretToken: 'cloud_token',
                 },
-                agents: [...agents, policyElasticAgentOnCloudAgent],
+                fleetAgents: [...fleetAgents, policyElasticAgentOnCloudAgent],
               }),
             } as unknown) as HttpStart
           }

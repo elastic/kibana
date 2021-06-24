@@ -16,10 +16,10 @@ import { HttpStart } from 'kibana/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { APIReturnType } from '../..//services/rest/createCallApmApi';
-import { CopyCommands } from './copy_commands';
-import { PolicySelectorOption, PolicySelector } from './policy_selector';
 import { getCommands } from './commands/get_commands';
-import { getPolicyOptions } from './get_policy_options';
+import { CopyCommands } from './copy_commands';
+import { getPolicyOptions, PolicyOption } from './get_policy_options';
+import { PolicySelector } from './policy_selector';
 
 export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
 
@@ -53,12 +53,11 @@ function TutorialConfigAgent({
   isCloudEnabled,
 }: Props) {
   const [data, setData] = useState<APIResponseType>({
-    agents: [],
+    fleetAgents: [],
     cloudStandaloneSetup: undefined,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedOption, setSelectedOption] = useState<PolicySelectorOption>();
-  console.log('### caue ~ selectedOption', selectedOption);
+  const [selectedOption, setSelectedOption] = useState<PolicyOption>();
 
   useEffect(() => {
     async function fetchData() {
@@ -77,10 +76,13 @@ function TutorialConfigAgent({
 
   // Depending the environment running (onPrem/Cloud) different values must be available and automatically selected
   const options = useMemo(() => {
-    const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+    const availableOptions = getPolicyOptions({
       isCloudEnabled,
       data,
     });
+    const defaultSelectedOption = availableOptions.find(
+      ({ isSelected }) => isSelected
+    );
     setSelectedOption(defaultSelectedOption);
     setIsLoading(false);
     return availableOptions;
@@ -102,7 +104,7 @@ function TutorialConfigAgent({
     },
   });
 
-  const hasFleetAgents = !!data.agents.length;
+  const hasFleetAgents = !!data.fleetAgents.length;
   const fleetLink = hasFleetAgents
     ? {
         label: MANAGE_FLEET_POLICIES_LABEL,

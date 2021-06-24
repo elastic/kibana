@@ -6,7 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 import { APIResponseType } from './';
-import { PolicySelectorOption } from './policy_selector';
 
 const POLICY_ELASTIC_AGENT_ON_CLOUD = 'policy-elastic-agent-on-cloud';
 
@@ -15,12 +14,7 @@ const DEFAULT_STANDALONE_CONFIG_LABEL = i18n.translate(
   { defaultMessage: 'Default Standalone configuration' }
 );
 
-const onPremStandaloneOption = {
-  key: 'onPrem_standalone',
-  label: DEFAULT_STANDALONE_CONFIG_LABEL,
-  apmServerUrl: 'http://localhost:8200',
-  secretToken: '',
-};
+export type PolicyOption = ReturnType<typeof getPolicyOptions>[0];
 
 export function getPolicyOptions({
   isCloudEnabled,
@@ -29,48 +23,54 @@ export function getPolicyOptions({
   isCloudEnabled: boolean;
   data: APIResponseType;
 }) {
-  const availableOptions: PolicySelectorOption[] = [];
-  let defaultSelectedOption: PolicySelectorOption;
-  // When running on cloud and apm.url is defined
-  if (isCloudEnabled && data.cloudStandaloneSetup?.apmServerUrl) {
-    // pushes APM cloud standalone
-    const cloudStandaloneOption = {
-      key: 'cloud_standalone',
+  const isCloudVisible = !!(
+    isCloudEnabled && data.cloudStandaloneSetup?.apmServerUrl
+  );
+
+  const fleetAgentsOptions = data.fleetAgents.map((agent) => {
+    return {
+      key: agent.id,
+      type: 'fleetAgents',
+      label: agent.name,
+      apmServerUrl: agent.apmServerUrl,
+      secretToken: agent.secretToken,
+      isVisible: true,
+      isSelected: agent.id === POLICY_ELASTIC_AGENT_ON_CLOUD,
+    };
+  });
+
+  const hasFleetAgentsSelected = fleetAgentsOptions.some(
+    ({ isSelected }) => isSelected
+  );
+
+  return [
+    {
+      key: 'cloud',
+      type: 'standalone',
       label: DEFAULT_STANDALONE_CONFIG_LABEL,
       apmServerUrl: data.cloudStandaloneSetup?.apmServerUrl,
       secretToken: data.cloudStandaloneSetup?.secretToken,
-    };
-    availableOptions.push(cloudStandaloneOption);
-    defaultSelectedOption = cloudStandaloneOption;
-  } else {
-    // pushes APM onprem standalone
-    availableOptions.push(onPremStandaloneOption);
-    defaultSelectedOption = onPremStandaloneOption;
-  }
-
-  if (data.agents.length) {
-    // Adds fleet policies group label and remaining agents with APM integration
-    availableOptions.push({
-      label: i18n.translate(
-        'xpack.apm.tutorial.agent_config.fleetPoliciesLabel',
-        { defaultMessage: 'Fleet policies' }
-      ),
-      options: data.agents.map(
-        (agent): PolicySelectorOption => {
-          const agentOption = {
-            key: agent.id,
-            label: agent.name,
-            apmServerUrl: agent.apmServerUrl,
-            secretToken: agent.secretToken,
-          };
-          if (agent.id === POLICY_ELASTIC_AGENT_ON_CLOUD) {
-            defaultSelectedOption = agentOption;
-          }
-          return agentOption;
-        }
-      ),
-    });
-  }
-
-  return { availableOptions, defaultSelectedOption };
+      isVisible: isCloudVisible,
+      isSelected: !hasFleetAgentsSelected,
+    },
+    {
+      key: 'onPrem',
+      type: 'standalone',
+      label: DEFAULT_STANDALONE_CONFIG_LABEL,
+      apmServerUrl: 'http://localhost:8200',
+      secretToken: '',
+      isVisible: !isCloudVisible,
+      isSelected: !hasFleetAgentsSelected,
+    },
+    ...fleetAgentsOptions,
+    // {
+    //   key: 'fleet_policies',
+    //   label: i18n.translate(
+    //     'xpack.apm.tutorial.agent_config.fleetPoliciesLabel',
+    //     { defaultMessage: 'Fleet policies' }
+    //   ),
+    //   isVisible: !!data.fleetAgents.length,
+    //   options: fleetAgentsOptions,
+    // },
+  ].filter(({ isVisible }) => isVisible);
 }

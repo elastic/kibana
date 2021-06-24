@@ -13,12 +13,12 @@ import { HttpStart } from 'kibana/public';
 import TutorialFleetInstructions from '.';
 
 interface Args {
-  hasFleetPolicyWithApmIntegration: boolean;
+  hasFleetPoliciesWithApmIntegration: boolean;
 }
 
-function Wrapper({ hasFleetPolicyWithApmIntegration }: Args) {
+function Wrapper({ hasFleetPoliciesWithApmIntegration }: Args) {
   const http = ({
-    get: () => ({ hasData: hasFleetPolicyWithApmIntegration }),
+    get: () => ({ hasData: hasFleetPoliciesWithApmIntegration }),
   } as unknown) as HttpStart;
   return (
     <TutorialFleetInstructions
@@ -33,8 +33,8 @@ export default {
   title: 'app/Tutorial/FleetInstructions',
   component: TutorialFleetInstructions,
   argTypes: {
-    hasFleetPolicyWithApmIntegration: {
-      control: { type: 'inline-radio', options: [true, false] },
+    hasFleetPoliciesWithApmIntegration: {
+      control: { type: 'boolean', options: [true, false] },
     },
   },
 };
@@ -44,5 +44,5 @@ export const Instructions: Story<Args> = (_args) => {
 };
 
 Instructions.args = {
-  hasFleetPolicyWithApmIntegration: true,
+  hasFleetPoliciesWithApmIntegration: true,
 };

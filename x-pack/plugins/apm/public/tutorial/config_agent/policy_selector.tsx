@@ -13,17 +13,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { groupBy } from 'lodash';
 import React from 'react';
-
-export type PolicySelectorOption = EuiComboBoxOptionOption & {
-  apmServerUrl?: string;
-  secretToken?: string;
-};
+import { PolicyOption } from './get_policy_options';
 
 interface Props {
-  options: PolicySelectorOption[];
-  selectedOption?: PolicySelectorOption;
-  onChange: (selectedOption?: PolicySelectorOption) => void;
+  options: PolicyOption[];
+  selectedOption?: PolicyOption;
+  onChange: (selectedOption?: PolicyOption) => void;
   fleetLink: {
     label: string;
     href: string;
@@ -36,6 +33,25 @@ export function PolicySelector({
   onChange,
   fleetLink,
 }: Props) {
+  const { fleetAgents, standalone } = groupBy(options, 'type');
+
+  const standaloneComboboxOptions: EuiComboBoxOptionOption[] = standalone.map(
+    ({ key, label }) => ({ key, label })
+  );
+
+  const fleetAgentsComboboxOptions = fleetAgents?.length
+    ? [
+        {
+          key: 'fleet_policies',
+          label: i18n.translate(
+            'xpack.apm.tutorial.agent_config.fleetPoliciesLabel',
+            { defaultMessage: 'Fleet policies' }
+          ),
+          options: fleetAgents.map(({ key, label }) => ({ key, label })),
+        },
+      ]
+    : [];
+
   return (
     <EuiFormRow
       label={i18n.translate(
@@ -59,11 +75,17 @@ export function PolicySelector({
         data-test-subj={`policySelector_${selectedOption?.key}`}
         isClearable={false}
         singleSelection={{ asPlainText: true }}
-        options={options}
-        selectedOptions={selectedOption ? [selectedOption] : []}
+        options={[...standaloneComboboxOptions, ...fleetAgentsComboboxOptions]}
+        selectedOptions={
+          selectedOption
+            ? [{ key: selectedOption.key, label: selectedOption.label }]
+            : []
+        }
         onChange={(selectedOptions) => {
-          console.log('### caue ~ selectedOptions', selectedOptions);
-          onChange(selectedOptions[0]);
+          const newSelectedOption = options.find(
+            ({ key }) => key === selectedOptions[0].key
+          );
+          onChange(newSelectedOption);
         }}
       />
     </EuiFormRow>

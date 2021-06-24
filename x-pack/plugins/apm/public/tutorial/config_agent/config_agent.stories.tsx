@@ -16,20 +16,20 @@ import { APIReturnType } from '../..//services/rest/createCallApmApi';
 export type APIResponseType = APIReturnType<'GET /api/apm/fleet/agents'>;
 
 interface Args {
-  variantId: string;
-  environment: 'cloud' | 'onprem';
-  addAgents: boolean;
-  addPolicyOnCloudAgent: boolean;
+  apmAgent: string;
+  onPrem: boolean;
+  hasFleetPoliciesWithApmIntegration: boolean;
+  hasCloudPolicyWithApmIntegration: boolean;
 }
 
-const policyElasticAgentOnCloudAgent: APIResponseType['agents'][0] = {
+const policyElasticAgentOnCloudAgent: APIResponseType['fleetAgents'][0] = {
   id: 'policy-elastic-agent-on-cloud',
   name: 'Elastic Cloud agent policy',
   apmServerUrl: 'apm_cloud_url',
   secretToken: 'apm_cloud_token',
 };
 
-const _agents: APIResponseType['agents'] = [
+const fleetAgents: APIResponseType['fleetAgents'] = [
   {
     id: '1',
     name: 'agent foo',
@@ -45,16 +45,18 @@ const _agents: APIResponseType['agents'] = [
 ];
 
 function Wrapper({
-  addAgents,
-  variantId,
-  environment,
-  addPolicyOnCloudAgent,
+  hasFleetPoliciesWithApmIntegration,
+  apmAgent,
+  onPrem,
+  hasCloudPolicyWithApmIntegration,
 }: Args) {
   const http = ({
     get: () => ({
-      agents: [
-        ...(addAgents ? _agents : []),
-        ...(addPolicyOnCloudAgent ? [policyElasticAgentOnCloudAgent] : []),
+      fleetAgents: [
+        ...(hasFleetPoliciesWithApmIntegration ? fleetAgents : []),
+        ...(hasCloudPolicyWithApmIntegration
+          ? [policyElasticAgentOnCloudAgent]
+          : []),
       ],
       cloudStandaloneSetup: {
         apmServerUrl: 'cloud_url',
@@ -66,8 +68,8 @@ function Wrapper({
     <TutorialConfigAgent
       http={http}
       basePath="http://localhost:5601"
-      isCloudEnabled={environment === 'cloud'}
-      variantId={variantId}
+      isCloudEnabled={!onPrem}
+      variantId={apmAgent}
     />
   );
 }
@@ -76,17 +78,17 @@ export const Integration: Story<Args> = (_args) => {
 };
 
 Integration.args = {
-  variantId: 'java',
-  environment: 'onprem',
-  addAgents: false,
-  addPolicyOnCloudAgent: false,
+  apmAgent: 'java',
+  onPrem: true,
+  hasFleetPoliciesWithApmIntegration: false,
+  hasCloudPolicyWithApmIntegration: false,
 };
 
 export default {
   title: 'app/Tutorial/AgentConfig',
   component: TutorialConfigAgent,
   argTypes: {
-    variantId: {
+    apmAgent: {
       control: {
         type: 'select',
         options: [
@@ -104,14 +106,14 @@ export default {
         ],
       },
     },
-    environment: {
-      control: { type: 'select', options: ['onprem', 'cloud'] },
+    onPrem: {
+      control: { type: 'boolean', options: [true, false] },
     },
-    addAgents: {
-      control: { type: 'inline-radio', options: [true, false] },
+    hasFleetPoliciesWithApmIntegration: {
+      control: { type: 'boolean', options: [true, false] },
     },
-    addPolicyOnCloudAgent: {
-      control: { type: 'inline-radio', options: [true, false] },
+    hasCloudPolicyWithApmIntegration: {
+      control: { type: 'boolean', options: [true, false] },
     },
   },
 };

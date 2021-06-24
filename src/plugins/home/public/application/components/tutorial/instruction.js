@@ -115,16 +115,6 @@ export function Instruction({
 
       {post}
 
-      {LazyCustomComponent && (
-        <Suspense fallback={<EuiLoadingSpinner />}>
-          <LazyCustomComponent
-            basePath={getBasePath()}
-            isDarkTheme={uiSettings.get('theme:darkMode')}
-            http={http}
-          />
-        </Suspense>
-      )}
-
       <EuiSpacer />
     </div>
   );

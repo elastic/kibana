@@ -16,7 +16,7 @@ const policyElasticAgentOnCloudAgent = {
   secretToken: 'apm_cloud_token',
 };
 
-const agents = [
+const fleetAgents = [
   {
     id: '1',
     name: 'agent foo',
@@ -36,122 +36,121 @@ describe('getPolicyOptions', () => {
     describe('with APM on cloud', () => {
       it('shows apm on cloud standalone option', () => {
         const data: APIResponseType = {
-          agents: [],
+          fleetAgents: [],
           cloudStandaloneSetup: {
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
           },
         };
-        const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+        const options = getPolicyOptions({
           isCloudEnabled: true,
           data,
         });
-        expect(defaultSelectedOption).toEqual({
-          key: 'cloud_standalone',
-          label: 'Default Standalone configuration',
-          apmServerUrl: 'cloud_url',
-          secretToken: 'cloud_token',
-        });
-        expect(availableOptions).toEqual([
+        expect(options).toEqual([
           {
-            key: 'cloud_standalone',
+            key: 'cloud',
+            type: 'standalone',
             label: 'Default Standalone configuration',
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
+            isVisible: true,
+            isSelected: true,
           },
         ]);
       });
       it('shows apm on cloud standalone option and fleet agents options', () => {
         const data: APIResponseType = {
-          agents,
+          fleetAgents,
           cloudStandaloneSetup: {
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
           },
         };
-        const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+        const options = getPolicyOptions({
           isCloudEnabled: true,
           data,
         });
-        expect(defaultSelectedOption).toEqual({
-          key: 'cloud_standalone',
-          label: 'Default Standalone configuration',
-          apmServerUrl: 'cloud_url',
-          secretToken: 'cloud_token',
-        });
-        expect(availableOptions).toEqual([
+
+        expect(options).toEqual([
           {
-            key: 'cloud_standalone',
+            key: 'cloud',
+            type: 'standalone',
             label: 'Default Standalone configuration',
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
+            isVisible: true,
+            isSelected: true,
+          },
+
+          {
+            key: '1',
+            type: 'fleetAgents',
+            label: 'agent foo',
+            apmServerUrl: 'foo',
+            secretToken: 'foo',
+            isVisible: true,
+            isSelected: false,
           },
           {
-            label: 'Fleet policies',
-            options: [
-              {
-                key: '1',
-                label: 'agent foo',
-                apmServerUrl: 'foo',
-                secretToken: 'foo',
-              },
-              {
-                key: '2',
-                label: 'agent bar',
-                apmServerUrl: 'bar',
-                secretToken: 'bar',
-              },
-            ],
+            key: '2',
+            type: 'fleetAgents',
+            label: 'agent bar',
+            apmServerUrl: 'bar',
+            secretToken: 'bar',
+            isVisible: true,
+            isSelected: false,
           },
         ]);
       });
       it('selects policy elastic agent on cloud when available', () => {
         const data: APIResponseType = {
-          agents: [policyElasticAgentOnCloudAgent, ...agents],
+          fleetAgents: [policyElasticAgentOnCloudAgent, ...fleetAgents],
           cloudStandaloneSetup: {
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
           },
         };
-        const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+        const options = getPolicyOptions({
           isCloudEnabled: true,
           data,
         });
-        expect(defaultSelectedOption).toEqual({
-          key: 'policy-elastic-agent-on-cloud',
-          label: 'Elastic Cloud agent policy',
-          apmServerUrl: 'apm_cloud_url',
-          secretToken: 'apm_cloud_token',
-        });
-        expect(availableOptions).toEqual([
+
+        expect(options).toEqual([
           {
-            key: 'cloud_standalone',
+            key: 'cloud',
+            type: 'standalone',
             label: 'Default Standalone configuration',
             apmServerUrl: 'cloud_url',
             secretToken: 'cloud_token',
+            isVisible: true,
+            isSelected: false,
           },
           {
-            label: 'Fleet policies',
-            options: [
-              {
-                key: 'policy-elastic-agent-on-cloud',
-                label: 'Elastic Cloud agent policy',
-                apmServerUrl: 'apm_cloud_url',
-                secretToken: 'apm_cloud_token',
-              },
-              {
-                key: '1',
-                label: 'agent foo',
-                apmServerUrl: 'foo',
-                secretToken: 'foo',
-              },
-              {
-                key: '2',
-                label: 'agent bar',
-                apmServerUrl: 'bar',
-                secretToken: 'bar',
-              },
-            ],
+            key: 'policy-elastic-agent-on-cloud',
+            type: 'fleetAgents',
+            label: 'Elastic Cloud agent policy',
+            apmServerUrl: 'apm_cloud_url',
+            secretToken: 'apm_cloud_token',
+            isVisible: true,
+            isSelected: true,
+          },
+          {
+            key: '1',
+            type: 'fleetAgents',
+            label: 'agent foo',
+            apmServerUrl: 'foo',
+            secretToken: 'foo',
+            isVisible: true,
+            isSelected: false,
+          },
+          {
+            key: '2',
+            type: 'fleetAgents',
+            label: 'agent bar',
+            apmServerUrl: 'bar',
+            secretToken: 'bar',
+            isVisible: true,
+            isSelected: false,
           },
         ]);
       });
@@ -159,114 +158,112 @@ describe('getPolicyOptions', () => {
     describe('with APM on prem', () => {
       it('shows apm on prem standalone option', () => {
         const data: APIResponseType = {
-          agents: [],
+          fleetAgents: [],
           cloudStandaloneSetup: undefined,
         };
-        const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+        const options = getPolicyOptions({
           isCloudEnabled: true,
           data,
         });
-        expect(defaultSelectedOption).toEqual({
-          key: 'onPrem_standalone',
-          label: 'Default Standalone configuration',
-          apmServerUrl: 'http://localhost:8200',
-          secretToken: '',
-        });
-        expect(availableOptions).toEqual([
+
+        expect(options).toEqual([
           {
-            key: 'onPrem_standalone',
+            key: 'onPrem',
+            type: 'standalone',
             label: 'Default Standalone configuration',
             apmServerUrl: 'http://localhost:8200',
             secretToken: '',
+            isVisible: true,
+            isSelected: true,
           },
         ]);
       });
       it('shows apm on prem standalone option and fleet agents options', () => {
         const data: APIResponseType = {
-          agents,
+          fleetAgents,
           cloudStandaloneSetup: undefined,
         };
-        const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+        const options = getPolicyOptions({
           isCloudEnabled: true,
           data,
         });
-        expect(defaultSelectedOption).toEqual({
-          key: 'onPrem_standalone',
-          label: 'Default Standalone configuration',
-          apmServerUrl: 'http://localhost:8200',
-          secretToken: '',
-        });
-        expect(availableOptions).toEqual([
+        expect(options).toEqual([
           {
-            key: 'onPrem_standalone',
+            key: 'onPrem',
+            type: 'standalone',
             label: 'Default Standalone configuration',
             apmServerUrl: 'http://localhost:8200',
             secretToken: '',
+            isVisible: true,
+            isSelected: true,
+          },
+
+          {
+            key: '1',
+            type: 'fleetAgents',
+            label: 'agent foo',
+            apmServerUrl: 'foo',
+            secretToken: 'foo',
+            isVisible: true,
+            isSelected: false,
           },
           {
-            label: 'Fleet policies',
-            options: [
-              {
-                key: '1',
-                label: 'agent foo',
-                apmServerUrl: 'foo',
-                secretToken: 'foo',
-              },
-              {
-                key: '2',
-                label: 'agent bar',
-                apmServerUrl: 'bar',
-                secretToken: 'bar',
-              },
-            ],
+            key: '2',
+            type: 'fleetAgents',
+            label: 'agent bar',
+            apmServerUrl: 'bar',
+            secretToken: 'bar',
+            isVisible: true,
+            isSelected: false,
           },
         ]);
       });
       it('selects policy elastic agent on cloud when available', () => {
         const data: APIResponseType = {
-          agents: [policyElasticAgentOnCloudAgent, ...agents],
+          fleetAgents: [policyElasticAgentOnCloudAgent, ...fleetAgents],
           cloudStandaloneSetup: undefined,
         };
-        const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+        const options = getPolicyOptions({
           isCloudEnabled: true,
           data,
         });
-        expect(defaultSelectedOption).toEqual({
-          key: 'policy-elastic-agent-on-cloud',
-          label: 'Elastic Cloud agent policy',
-          apmServerUrl: 'apm_cloud_url',
-          secretToken: 'apm_cloud_token',
-        });
-        expect(availableOptions).toEqual([
+
+        expect(options).toEqual([
           {
-            key: 'onPrem_standalone',
+            key: 'onPrem',
+            type: 'standalone',
             label: 'Default Standalone configuration',
             apmServerUrl: 'http://localhost:8200',
             secretToken: '',
-            checked: undefined,
+            isVisible: true,
+            isSelected: false,
           },
           {
-            label: 'Fleet policies',
-            options: [
-              {
-                key: 'policy-elastic-agent-on-cloud',
-                label: 'Elastic Cloud agent policy',
-                apmServerUrl: 'apm_cloud_url',
-                secretToken: 'apm_cloud_token',
-              },
-              {
-                key: '1',
-                label: 'agent foo',
-                apmServerUrl: 'foo',
-                secretToken: 'foo',
-              },
-              {
-                key: '2',
-                label: 'agent bar',
-                apmServerUrl: 'bar',
-                secretToken: 'bar',
-              },
-            ],
+            key: 'policy-elastic-agent-on-cloud',
+            type: 'fleetAgents',
+            label: 'Elastic Cloud agent policy',
+            apmServerUrl: 'apm_cloud_url',
+            secretToken: 'apm_cloud_token',
+            isVisible: true,
+            isSelected: true,
+          },
+          {
+            key: '1',
+            type: 'fleetAgents',
+            label: 'agent foo',
+            apmServerUrl: 'foo',
+            secretToken: 'foo',
+            isVisible: true,
+            isSelected: false,
+          },
+          {
+            key: '2',
+            type: 'fleetAgents',
+            label: 'agent bar',
+            apmServerUrl: 'bar',
+            secretToken: 'bar',
+            isVisible: true,
+            isSelected: false,
           },
         ]);
       });
@@ -275,66 +272,63 @@ describe('getPolicyOptions', () => {
   describe('Running on prem', () => {
     it('shows apm on prem standalone option', () => {
       const data: APIResponseType = {
-        agents: [],
+        fleetAgents: [],
         cloudStandaloneSetup: undefined,
       };
-      const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+      const options = getPolicyOptions({
         isCloudEnabled: false,
         data,
       });
-      expect(defaultSelectedOption).toEqual({
-        key: 'onPrem_standalone',
-        label: 'Default Standalone configuration',
-        apmServerUrl: 'http://localhost:8200',
-        secretToken: '',
-      });
-      expect(availableOptions).toEqual([
+
+      expect(options).toEqual([
         {
-          key: 'onPrem_standalone',
+          key: 'onPrem',
+          type: 'standalone',
           label: 'Default Standalone configuration',
           apmServerUrl: 'http://localhost:8200',
           secretToken: '',
+          isVisible: true,
+          isSelected: true,
         },
       ]);
     });
     it('shows apm on prem standalone option and fleet agents options', () => {
       const data: APIResponseType = {
-        agents,
+        fleetAgents,
         cloudStandaloneSetup: undefined,
       };
-      const { availableOptions, defaultSelectedOption } = getPolicyOptions({
+      const options = getPolicyOptions({
         isCloudEnabled: false,
         data,
       });
-      expect(defaultSelectedOption).toEqual({
-        key: 'onPrem_standalone',
-        label: 'Default Standalone configuration',
-        apmServerUrl: 'http://localhost:8200',
-        secretToken: '',
-      });
-      expect(availableOptions).toEqual([
+
+      expect(options).toEqual([
         {
-          key: 'onPrem_standalone',
+          key: 'onPrem',
+          type: 'standalone',
           label: 'Default Standalone configuration',
           apmServerUrl: 'http://localhost:8200',
           secretToken: '',
+          isVisible: true,
+          isSelected: true,
         },
         {
-          label: 'Fleet policies',
-          options: [
-            {
-              key: '1',
-              label: 'agent foo',
-              apmServerUrl: 'foo',
-              secretToken: 'foo',
-            },
-            {
-              key: '2',
-              label: 'agent bar',
-              apmServerUrl: 'bar',
-              secretToken: 'bar',
-            },
-          ],
+          key: '1',
+          type: 'fleetAgents',
+          label: 'agent foo',
+          apmServerUrl: 'foo',
+          secretToken: 'foo',
+          isVisible: true,
+          isSelected: false,
+        },
+        {
+          key: '2',
+          type: 'fleetAgents',
+          label: 'agent bar',
+          apmServerUrl: 'bar',
+          secretToken: 'bar',
+          isVisible: true,
+          isSelected: false,
         },
       ]);
     });

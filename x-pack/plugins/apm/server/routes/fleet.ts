@@ -61,7 +61,7 @@ const fleetAgentsRoute = createApmServerRoute({
     const policiesGroupedById = keyBy(packagePolicies.items, 'policy_id');
 
     // fetches all agents with the found package policies
-    const agents = await getFleetAgents({
+    const fleetAgents = await getFleetAgents({
       policyIds: Object.keys(policiesGroupedById),
       core,
       fleetPluginStart,
@@ -69,7 +69,7 @@ const fleetAgentsRoute = createApmServerRoute({
 
     return {
       cloudStandaloneSetup,
-      agents: agents.map((agent) => {
+      fleetAgents: fleetAgents.map((agent) => {
         const packagePolicy = policiesGroupedById[agent.id];
         const apmServerCompiledInputs =
           packagePolicy.inputs[0].compiled_input['apm-server'];
