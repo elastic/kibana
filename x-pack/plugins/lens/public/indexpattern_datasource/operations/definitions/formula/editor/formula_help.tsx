@@ -68,7 +68,82 @@ function FormulaHelp({
     label: i18n.translate('xpack.lens.formulaFrequentlyUsedHeading', {
       defaultMessage: 'Common formulas',
     }),
-    items: [],
+    description: i18n.translate('xpack.lens.formulaCommonFormulaDocumentation', {
+      defaultMessage: `The most common formulas are dividing two values to produce a percent. To display accurately, set "value format" to "percent".`,
+    }),
+
+    items: [
+      {
+        label: i18n.translate('xpack.lens.formulaDocumentation.filterRatio', {
+          defaultMessage: 'Filter ratio',
+        }),
+        description: (
+          <Markdown
+            markdown={i18n.translate('xpack.lens.formulaDocumentation.filterRatioDescription', {
+              defaultMessage: `### Filter ratio:
+
+Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.
+For example, to see how the error rate changes over time:
+
+\`\`\`
+count(kql='response.status_code > 400') / count()
+\`\`\`
+        `,
+
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            })}
+          />
+        ),
+      },
+      {
+        label: i18n.translate('xpack.lens.formulaDocumentation.weekOverWeek', {
+          defaultMessage: 'Week over week',
+        }),
+        description: (
+          <Markdown
+            markdown={i18n.translate('xpack.lens.formulaDocumentation.weekOverWeekDescription', {
+              defaultMessage: `### Week over week:
+
+Use \`shift='1w'\` to get the value of each grouping from
+the previous week. Time shift should not be used with the *Top values* function.
+
+\`\`\`
+percentile(system.network.in.bytes, percentile=99) /
+percentile(system.network.in.bytes, percentile=99, shift='1w')
+\`\`\`
+        `,
+
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            })}
+          />
+        ),
+      },
+      {
+        label: i18n.translate('xpack.lens.formulaDocumentation.percentOfTotal', {
+          defaultMessage: 'Percent of total',
+        }),
+        description: (
+          <Markdown
+            markdown={i18n.translate('xpack.lens.formulaDocumentation.percentOfTotalDescription', {
+              defaultMessage: `### Percent of total
+
+Formulas can calculate \`overall_sum\` for all the groupings,
+which lets you convert each grouping into a percent of total:
+
+\`\`\`
+sum(products.base_price) / overall_sum(sum(products.base_price))
+\`\`\`
+        `,
+
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            })}
+          />
+        ),
+      },
+    ],
   });
 
   helpGroups.push({
@@ -337,58 +412,7 @@ Use the symbols +, -, /, and * to perform basic math.
               />
             </section>
 
-            <section
-              className="lnsFormula__docsTextGroup"
-              ref={(el) => {
-                if (el) {
-                  scrollTargets.current[helpGroups[1].label] = el;
-                }
-              }}
-            >
-              <Markdown
-                markdown={i18n.translate('xpack.lens.formulaCommonFormulaDocumentation', {
-                  defaultMessage: `
-## Common formulas
-
-The most common formulas are dividing two values to produce a percent.
-To display accurately, set *Value format* to *Percent*.
-
-### Filter ratio:
-
-Use \`kql=''\` to filter one set of documents and compare it to other documents within the same grouping.
-For example, to see how the error rate changes over time:
-
-\`\`\`
-count(kql='response.status_code > 400') / count()
-\`\`\`
-
-### Week over week:
-
-Use \`shift='1w'\` to get the value of each grouping from
-the previous week. Time shift should not be used with the *Top values* function.
-
-\`\`\`
-percentile(system.network.in.bytes, percentile=99) /
-percentile(system.network.in.bytes, percentile=99, shift='1w')
-\`\`\`
-
-### Percent of total:
-
-Formulas can calculate \`overall_sum\` for all the groupings,
-which lets you convert each grouping into a percent of total:
-
-\`\`\`
-sum(products.base_price) / overall_sum(sum(products.base_price))
-\`\`\`
-
-                  `,
-                  description:
-                    'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-                })}
-              />
-            </section>
-
-            {helpGroups.slice(2).map((helpGroup, index) => {
+            {helpGroups.slice(1).map((helpGroup, index) => {
               return (
                 <section
                   className="lnsFormula__docsTextGroup"
@@ -403,7 +427,7 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
 
                   <p>{helpGroup.description}</p>
 
-                  {helpGroups[index + 2].items.map((helpItem) => {
+                  {helpGroups[index + 1].items.map((helpItem) => {
                     return (
                       <article
                         className="lnsFormula__docsTextItem"
