@@ -10,7 +10,7 @@ import * as React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const text = i18n.translate('share.urlService.redirect.Redirecting', {
+const text = i18n.translate('share.urlService.redirect.components.Spinner.label', {
   defaultMessage: 'Redirecting…',
   description: 'Redirect endpoint spinner label.',
 });
@@ -24,7 +24,7 @@ export const Spinner: React.FC = () => {
             <EuiLoadingElastic size="xxl" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size={'m'}>
+            <EuiText color="subdued" size={'s'}>
               {text}
             </EuiText>
           </EuiFlexItem>

@@ -8,7 +8,9 @@
 
 import type { CoreSetup } from 'src/core/public';
 import type { History } from 'history';
+import { i18n } from '@kbn/i18n';
 import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import { BehaviorSubject } from 'rxjs';
 import type { UrlService } from '../../../common/url_service';
 import { render } from './render';
 
@@ -23,11 +25,17 @@ export interface RedirectOptions {
   params: unknown & SerializableState;
 }
 
+export interface RedirectManagerError {
+  message: string;
+}
+
 export interface RedirectManagerDependencies {
   url: UrlService;
 }
 
 export class RedirectManager {
+  public readonly error$ = new BehaviorSubject<null | RedirectManagerError>(null);
+
   constructor(public readonly deps: RedirectManagerDependencies) {}
 
   public registerRedirectApp(core: CoreSetup) {
@@ -36,7 +44,7 @@ export class RedirectManager {
       title: 'Redirect endpoint',
       chromeless: true,
       mount: (params) => {
-        const unmount = render(params.element);
+        const unmount = render(params.element, { manager: this });
         this.onMount(params.history);
         return () => {
           unmount();
@@ -73,8 +81,16 @@ export class RedirectManager {
     const params = search.get('p');
 
     if (!id) {
-      // TODO: show this error in UI.
-      throw new Error('Invalid locator ID (specify "l" param).');
+      const message = i18n.translate(
+        'share.urlService.redirect.RedirectManager.invalidParamLocator',
+        {
+          defaultMessage: 'Invalid locator ID (specify "l" param).',
+          description:
+            'Title displayed to user in redirect endpoint when redirection cannot be performed successfully.',
+        }
+      );
+      this.error$.next({ message });
+      throw new Error(message);
     }
 
     if (!version) {

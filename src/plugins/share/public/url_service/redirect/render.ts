@@ -8,10 +8,10 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Spinner } from './components/spinner';
+import { Page, PageProps } from './components/page';
 
-export const render = (container: HTMLElement) => {
-  ReactDOM.render(<Spinner />, container);
+export const render = (container: HTMLElement, props: PageProps) => {
+  ReactDOM.render(React.createElement(Page, props), container);
 
   return () => {
     ReactDOM.unmountComponentAtNode(container);
