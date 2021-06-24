@@ -298,7 +298,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <StyledEuiPanel height={panelHeight}>
+        <StyledEuiPanel height={panelHeight} hasBorder>
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}

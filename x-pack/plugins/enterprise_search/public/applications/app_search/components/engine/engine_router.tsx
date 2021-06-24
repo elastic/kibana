@@ -13,11 +13,10 @@ import { useValues, useActions } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
 import { AppLogic } from '../../app_logic';
 
 import {
+  ENGINE_PATH,
   ENGINES_PATH,
   ENGINE_ANALYTICS_PATH,
   ENGINE_DOCUMENTS_PATH,
@@ -38,6 +37,7 @@ import { CrawlerRouter } from '../crawler';
 import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
+import { AppSearchPageTemplate } from '../layout';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
 import { SchemaRouter } from '../schema';
@@ -45,7 +45,7 @@ import { SearchUI } from '../search_ui';
 import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
-import { EngineLogic, getEngineBreadcrumbs } from './';
+import { EngineLogic } from './';
 
 export const EngineRouter: React.FC = () => {
   const {
@@ -66,12 +66,19 @@ export const EngineRouter: React.FC = () => {
 
   const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
   const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
-  const { setEngineName, initializeEngine, clearEngine } = useActions(EngineLogic);
+  const { setEngineName, initializeEngine, pollEmptyEngine, stopPolling, clearEngine } = useActions(
+    EngineLogic
+  );
 
   useEffect(() => {
     setEngineName(engineNameFromUrl);
     initializeEngine();
-    return clearEngine;
+    pollEmptyEngine();
+
+    return () => {
+      stopPolling();
+      clearEngine();
+    };
   }, [engineNameFromUrl]);
 
   if (engineNotFound) {
@@ -85,10 +92,13 @@ export const EngineRouter: React.FC = () => {
   }
 
   const isLoadingNewEngine = engineName !== engineNameFromUrl;
-  if (isLoadingNewEngine || dataLoading) return <Loading />;
+  if (isLoadingNewEngine || dataLoading) return <AppSearchPageTemplate isLoading />;
 
   return (
     <Switch>
+      <Route exact path={ENGINE_PATH}>
+        <EngineOverview />
+      </Route>
       {canViewEngineAnalytics && (
         <Route path={ENGINE_ANALYTICS_PATH}>
           <AnalyticsRouter />
@@ -109,9 +119,14 @@ export const EngineRouter: React.FC = () => {
           <SchemaRouter />
         </Route>
       )}
-      {canManageEngineCurations && (
-        <Route path={ENGINE_CURATIONS_PATH}>
-          <CurationsRouter />
+      {canViewMetaEngineSourceEngines && (
+        <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
+          <SourceEngines />
+        </Route>
+      )}
+      {canViewEngineCrawler && (
+        <Route path={ENGINE_CRAWLER_PATH}>
+          <CrawlerRouter />
         </Route>
       )}
       {canManageEngineRelevanceTuning && (
@@ -124,14 +139,14 @@ export const EngineRouter: React.FC = () => {
           <Synonyms />
         </Route>
       )}
+      {canManageEngineCurations && (
+        <Route path={ENGINE_CURATIONS_PATH}>
+          <CurationsRouter />
+        </Route>
+      )}
       {canManageEngineResultSettings && (
         <Route path={ENGINE_RESULT_SETTINGS_PATH}>
           <ResultSettings />
-        </Route>
-      )}
-      {canViewEngineApiLogs && (
-        <Route path={ENGINE_API_LOGS_PATH}>
-          <ApiLogs />
         </Route>
       )}
       {canManageEngineSearchUi && (
@@ -139,20 +154,11 @@ export const EngineRouter: React.FC = () => {
           <SearchUI />
         </Route>
       )}
-      {canViewMetaEngineSourceEngines && (
-        <Route path={META_ENGINE_SOURCE_ENGINES_PATH}>
-          <SourceEngines />
+      {canViewEngineApiLogs && (
+        <Route path={ENGINE_API_LOGS_PATH}>
+          <ApiLogs />
         </Route>
       )}
-      {canViewEngineCrawler && (
-        <Route path={ENGINE_CRAWLER_PATH}>
-          <CrawlerRouter />
-        </Route>
-      )}
-      <Route>
-        <SetPageChrome trail={getEngineBreadcrumbs()} />
-        <EngineOverview />
-      </Route>
     </Switch>
   );
 };

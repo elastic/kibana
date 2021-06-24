@@ -9,14 +9,15 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiPageHeader, EuiButton, EuiPageContentBody } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../../shared/flash_messages';
-import { Loading } from '../../../../shared/loading';
 import { SchemaAddFieldModal } from '../../../../shared/schema';
+import { getEngineBreadcrumbs } from '../../engine';
+import { AppSearchPageTemplate } from '../../layout';
 
 import { SchemaCallouts, SchemaTable, EmptyState } from '../components';
+import { SCHEMA_TITLE } from '../constants';
 import { SchemaLogic } from '../schema_logic';
 
 export const Schema: React.FC = () => {
@@ -31,19 +32,18 @@ export const Schema: React.FC = () => {
     loadSchema();
   }, []);
 
-  if (dataLoading) return <Loading />;
-
   return (
-    <>
-      <EuiPageHeader
-        pageTitle={i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.pageTitle', {
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([SCHEMA_TITLE])}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.pageTitle', {
           defaultMessage: 'Manage engine schema',
-        })}
-        description={i18n.translate(
+        }),
+        description: i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.schema.pageDescription',
           { defaultMessage: 'Add new fields or change the types of existing ones.' }
-        )}
-        rightSideItems={[
+        ),
+        rightSideItems: [
           <EuiButton
             fill
             disabled={!hasSchemaChanged}
@@ -53,11 +53,12 @@ export const Schema: React.FC = () => {
           >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.schema.updateSchemaButtonLabel',
-              { defaultMessage: 'Update types' }
+              { defaultMessage: 'Save changes' }
             )}
           </EuiButton>,
           <EuiButton
             color="secondary"
+            iconType="plusInCircle"
             disabled={isUpdating}
             onClick={openModal}
             data-test-subj="addSchemaFieldModalButton"
@@ -67,16 +68,17 @@ export const Schema: React.FC = () => {
               { defaultMessage: 'Create a schema field' }
             )}
           </EuiButton>,
-        ]}
-      />
-      <FlashMessages />
-      <EuiPageContentBody>
-        <SchemaCallouts />
-        {hasSchema ? <SchemaTable /> : <EmptyState />}
-        {isModalOpen && (
-          <SchemaAddFieldModal addNewField={addSchemaField} closeAddFieldModal={closeModal} />
-        )}
-      </EuiPageContentBody>
-    </>
+        ],
+      }}
+      isLoading={dataLoading}
+      isEmptyState={!hasSchema}
+      emptyState={<EmptyState />}
+    >
+      <SchemaCallouts />
+      <SchemaTable />
+      {isModalOpen && (
+        <SchemaAddFieldModal addNewField={addSchemaField} closeAddFieldModal={closeModal} />
+      )}
+    </AppSearchPageTemplate>
   );
 };

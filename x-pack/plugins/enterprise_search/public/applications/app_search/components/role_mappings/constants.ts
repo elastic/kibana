@@ -9,14 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 import { AdvanceRoleType } from '../../types';
 
-export const DELETE_ROLE_MAPPING_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.deleteRoleMappingMessage',
-  {
-    defaultMessage:
-      'Are you sure you want to permanently delete this mapping? This action is not reversible and some users might lose access.',
-  }
-);
-
 export const ROLE_MAPPING_DELETED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingDeletedMessage',
   {
