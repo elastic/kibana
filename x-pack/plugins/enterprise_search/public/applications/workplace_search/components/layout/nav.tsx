@@ -33,8 +33,11 @@ export const useWorkplaceSearchNav = () => {
     {
       id: 'sources',
       name: NAV.SOURCES,
-      ...generateNavLink({ to: SOURCES_PATH }),
-      items: useSourceSubNav(),
+      ...generateNavLink({
+        to: SOURCES_PATH,
+        shouldShowActiveForSubroutes: true,
+        items: useSourceSubNav(),
+      }),
     },
     {
       id: 'groups',

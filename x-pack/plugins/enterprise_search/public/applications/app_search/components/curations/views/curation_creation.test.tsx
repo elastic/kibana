@@ -6,6 +6,7 @@
  */
 
 import { setMockActions } from '../../../../__mocks__/kea_logic';
+import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 

@@ -22,7 +22,6 @@ import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
 
 import {
-  DELETE_ROLE_MAPPING_MESSAGE,
   ROLE_MAPPING_DELETED_MESSAGE,
   ROLE_MAPPING_CREATED_MESSAGE,
   ROLE_MAPPING_UPDATED_MESSAGE,
@@ -59,10 +58,16 @@ interface RoleMappingsActions {
   initializeRoleMappings(): void;
   resetState(): void;
   setRoleMapping(roleMapping: ASRoleMapping): { roleMapping: ASRoleMapping };
+  setRoleMappings({
+    roleMappings,
+  }: {
+    roleMappings: ASRoleMapping[];
+  }): { roleMappings: ASRoleMapping[] };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
   openRoleMappingFlyout(): void;
   closeRoleMappingFlyout(): void;
   setRoleMappingErrors(errors: string[]): { errors: string[] };
+  enableRoleBasedAccess(): void;
 }
 
 interface RoleMappingsValues {
@@ -91,6 +96,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMapping: (roleMapping: ASRoleMapping) => ({ roleMapping }),
+    setRoleMappings: ({ roleMappings }: { roleMappings: ASRoleMapping[] }) => ({ roleMappings }),
     setRoleMappingErrors: (errors: string[]) => ({ errors }),
     handleAuthProviderChange: (value: string) => ({ value }),
     handleRoleChange: (roleType: RoleTypes) => ({ roleType }),
@@ -101,6 +107,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     }),
     handleAttributeValueChange: (value: string) => ({ value }),
     handleAccessAllEnginesChange: (selected: boolean) => ({ selected }),
+    enableRoleBasedAccess: true,
     resetState: true,
     initializeRoleMappings: true,
     initializeRoleMapping: (roleMappingId) => ({ roleMappingId }),
@@ -114,13 +121,16 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       true,
       {
         setRoleMappingsData: () => false,
+        setRoleMappings: () => false,
         resetState: () => true,
+        enableRoleBasedAccess: () => true,
       },
     ],
     roleMappings: [
       [],
       {
         setRoleMappingsData: (_, { roleMappings }) => roleMappings,
+        setRoleMappings: (_, { roleMappings }) => roleMappings,
         resetState: () => [],
       },
     ],
@@ -267,6 +277,17 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     ],
   }),
   listeners: ({ actions, values }) => ({
+    enableRoleBasedAccess: async () => {
+      const { http } = HttpLogic.values;
+      const route = '/api/app_search/role_mappings/enable_role_based_access';
+
+      try {
+        const response = await http.post(route);
+        actions.setRoleMappings(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     initializeRoleMappings: async () => {
       const { http } = HttpLogic.values;
       const route = '/api/app_search/role_mappings';
@@ -286,14 +307,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const { http } = HttpLogic.values;
       const route = `/api/app_search/role_mappings/${roleMappingId}`;
 
-      if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
-        try {
-          await http.delete(route);
-          actions.initializeRoleMappings();
-          setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
-        } catch (e) {
-          flashAPIErrors(e);
-        }
+      try {
+        await http.delete(route);
+        actions.initializeRoleMappings();
+        setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
+      } catch (e) {
+        flashAPIErrors(e);
       }
     },
     handleSaveMapping: async () => {
