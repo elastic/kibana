@@ -7,15 +7,14 @@
 
 import dateMath from '@elastic/datemath';
 
-import { find, omit } from 'lodash';
 import {
   EuiFieldText,
   EuiModal,
-  EuiComboBox,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiMarkdownEditorUiPlugin,
+  EuiMarkdownContext,
   EuiCodeBlock,
   EuiSpacer,
   EuiModalFooter,
@@ -24,10 +23,8 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiFormRow,
-  EuiDatePicker,
-  EuiDatePickerRange,
-  EuiFlyoutBody,
 } from '@elastic/eui';
+import { insertText } from '@elastic/eui/lib/components/markdown_editor/markdown_actions';
 import { IndexPattern } from 'src/plugins/data/public';
 import React, { useCallback, useContext, useMemo, useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -39,9 +36,8 @@ import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
-  LensEmbeddableInput,
 } from '../../../../../../../lens/public';
-import { toMountPoint, createKibanaReactContext, useKibana } from '../../../../lib/kibana';
+import { useKibana } from '../../../../lib/kibana';
 import { LensMarkDownRenderer } from './processor';
 import { ID } from './constants';
 import * as i18n from './translations';
@@ -49,7 +45,10 @@ import { LensContext } from './context';
 
 const ModalContainer = styled.div`
   width: ${({ theme }) => theme.eui.euiBreakpoints.m};
-  min-height: 500px;
+
+  .euiModalBody {
+    min-height: 300px;
+  }
 `;
 
 // Generate a Lens state based on some app-specific input parameters.
@@ -88,7 +87,7 @@ function getLensAttributes(defaultIndexPattern: IndexPattern): TypedLensByValueI
         layerId: 'layer1',
         seriesType: 'bar_stacked',
         xAccessor: 'col1',
-        yConfig: [{ forAccessor: 'col2', color: 'red' }],
+        yConfig: [{ forAccessor: 'col2', color: undefined }],
       },
     ],
     legend: { isVisible: true, position: 'right' },
@@ -99,11 +98,16 @@ function getLensAttributes(defaultIndexPattern: IndexPattern): TypedLensByValueI
 
   return {
     visualizationType: 'lnsXY',
-    title: 'Prefilled from example app',
+    title: '',
     references: [
       {
         id: defaultIndexPattern.id!,
         name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: defaultIndexPattern.id!,
+        name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
     ],
@@ -123,40 +127,49 @@ function getLensAttributes(defaultIndexPattern: IndexPattern): TypedLensByValueI
 }
 
 interface LensEditorProps {
+  editMode?: boolean | null;
   id?: string | null;
   title?: string | null;
   startDate?: Moment | null;
   endDate?: Moment | null;
   onClosePopover: () => void;
-  onInsert: (markdown: string, config: { block: boolean }) => void;
+  onSave: (markdown: string, config: { block: boolean }) => void;
 }
 
-const LensEditorComponent: React.FC<LensEditorProps> = ({
-  editMode,
-  id,
-  title,
-  startDate: defaultStartDate,
-  endDate: defaultEndDate,
-  onClosePopover,
-  onInsert,
-}) => {
+const LensEditorComponent: React.FC<LensEditorProps> = ({ node, onClosePopover, onSave }) => {
   const location = useLocation();
-  const { embeddable, savedObjects, uiSettings, lens, storage, ...rest } = useKibana().services;
+  const {
+    embeddable,
+    savedObjects,
+    uiSettings,
+    lens,
+    storage,
+    data: {
+      indexPatterns,
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+    ...rest
+  } = useKibana().services;
 
-  const [lensEmbeddableAttributes, setLensEmbeddableAttributes] = useState(null);
+  const [lensEmbeddableAttributes, setLensEmbeddableAttributes] = useState(
+    node?.attributes ?? null
+  );
   const [startDate, setStartDate] = useState<Moment | null>(
-    defaultStartDate ? moment(defaultStartDate) : moment().subtract(7, 'd')
+    node?.startDate ? moment(node.startDate) : moment().subtract(7, 'd')
   );
   const [endDate, setEndDate] = useState<Moment | null>(
-    defaultEndDate ? moment(defaultEndDate) : moment()
+    node?.endDate ? moment(node.endDate) : moment()
   );
-  const [lensTitle, setLensTitle] = useState(title ?? '');
+  const [lensTitle, setLensTitle] = useState(node?.title ?? '');
   const [showLensSavedObjectsModal, setShowLensSavedObjectsModal] = useState(false);
   const context = useContext(LensContext);
+  const markdownContext = useContext(EuiMarkdownContext);
 
   console.error('contextcontextcontext', context);
 
-  console.error('rest', rest.data.query.timefilter.timefilter.getTime(), rest);
+  console.error('rest', timefilter.getTime(), rest);
 
   const handleLensDateChange = useCallback((data) => {
     if (data.range?.length === 2) {
@@ -170,8 +183,12 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
   }, []);
 
   const handleAdd = useCallback(() => {
+    if (node) {
+      return;
+    }
+
     if (lensEmbeddableAttributes) {
-      onInsert(
+      onSave(
         `!{lens${JSON.stringify({
           startDate,
           endDate,
@@ -183,7 +200,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
         }
       );
     }
-  }, [lensEmbeddableAttributes, onInsert, startDate, endDate, lensTitle]);
+  }, [lensEmbeddableAttributes, onSave, startDate, endDate, lensTitle]);
 
   const originatingPath = useMemo(() => {
     const commentId = context?.editorId;
@@ -195,9 +212,18 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
     return `${location.pathname}/${commentId}${location.search}`;
   }, [context?.editorId, location.pathname, location.search]);
 
-  const handleEditInLensClick = useCallback(() => {
-    console.error('handleEditInLensClick', location);
-    lens.navigateToPrefilledEditor(
+  const handleEditInLensClick = useCallback(async () => {
+    storage.set(
+      'xpack.cases.commentDraft',
+      JSON.stringify({
+        commentId: context?.editorId,
+        comment: context?.value,
+        position: node?.position,
+        title: lensTitle,
+      })
+    );
+
+    lens?.navigateToPrefilledEditor(
       {
         id: '',
         timeRange: {
@@ -205,37 +231,25 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
           to: lensEmbeddableAttributes ? endDate : 'now',
           mode: startDate ? 'absolute' : 'relative',
         },
-        attributes:
-          lensEmbeddableAttributes ??
-          getLensAttributes({
-            id: 'logs-*',
-            name: 'indexpattern-datasource-current-indexpattern',
-            type: 'index-pattern',
-          }),
+        attributes: lensEmbeddableAttributes ?? getLensAttributes(await indexPatterns.getDefault()),
       },
       {
         originatingApp: 'securitySolution:case',
         originatingPath,
       }
     );
-
-    storage.set(
-      'xpack.cases.commentDraft',
-      JSON.stringify({
-        commentId: context?.editorId,
-        comment: context?.value,
-      })
-    );
   }, [
-    context.editorId,
-    context.value,
-    endDate,
-    originatingPath,
+    storage,
+    context?.editorId,
+    context?.value,
+    node?.position,
+    lensTitle,
     lens,
     lensEmbeddableAttributes,
-    location,
     startDate,
-    storage,
+    endDate,
+    indexPatterns,
+    originatingPath,
   ]);
 
   useEffect(() => {
@@ -248,16 +262,19 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
       incomingEmbeddablePackage?.input?.attributes
     ) {
       setLensEmbeddableAttributes(incomingEmbeddablePackage?.input.attributes);
-      const lensTime = rest.data.query.timefilter.timefilter.getTime();
-
-      if (lensTime) {
-        setStartDate(dateMath.parse(lensTime.from));
-        setEndDate(dateMath.parse(lensTime.to));
+      const lensTime = timefilter.getTime();
+      if (lensTime?.from && lensTime?.to) {
+        setStartDate(dateMath.parse(lensTime.from!));
+        setEndDate(dateMath.parse(lensTime.to!));
       }
     }
 
     console.error('stoargesgeet', storage.get('xpack.cases.commentDraft'));
   }, [embeddable, storage]);
+
+  console.error('insertText', insertText);
+
+  console.error('markdownContext', markdownContext);
 
   console.error('lensEmbeddableAttributes', lensEmbeddableAttributes);
 
@@ -266,7 +283,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
       <ModalContainer>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            {editMode ? 'Edit Lens visualization' : 'Add Lens visualization'}
+            {node ? 'Edit Lens visualization' : 'Add Lens visualization'}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
@@ -279,7 +296,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
                 iconType="lensApp"
                 fill
               >
-                Create visualization
+                {'Create visualization'}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -289,7 +306,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
                 iconType="folderOpen"
                 onClick={() => setShowLensSavedObjectsModal(true)}
               >
-                Add from library
+                {'Add from library'}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -304,34 +321,6 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-              {/* <EuiFlexItem>
-              <EuiFormRow label="Date range">
-                <EuiDatePickerRange
-                  startDateControl={
-                    <EuiDatePicker
-                      selected={startDate}
-                      onChange={setStartDate}
-                      startDate={startDate}
-                      endDate={endDate}
-                      isInvalid={startDate && endDate ? startDate > endDate : false}
-                      aria-label="Start date"
-                      showTimeSelect
-                    />
-                  }
-                  endDateControl={
-                    <EuiDatePicker
-                      selected={endDate}
-                      onChange={setEndDate}
-                      startDate={startDate}
-                      endDate={endDate}
-                      isInvalid={startDate && endDate ? startDate > endDate : false}
-                      aria-label="End date"
-                      showTimeSelect
-                    />
-                  }
-                />
-              </EuiFormRow>
-            </EuiFlexItem> */}
               <EuiFlexItem grow={false}>
                 <EuiButton
                   iconType="lensApp"
@@ -365,7 +354,7 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({
           <ModalContainer>
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                <h1>Modal title</h1>
+                <h1>{'Modal title'}</h1>
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
@@ -433,16 +422,6 @@ export const plugin: EuiMarkdownEditorUiPlugin = {
   editor: function editor({ node, onSave, onCancel, ...rest }) {
     console.error('editorr', node);
     console.error('ssssssa', rest);
-    return (
-      <LensEditor
-        editMode={!!node}
-        id={node?.id}
-        startDate={node?.startDate}
-        endDate={node?.endDate}
-        title={node?.title}
-        onClosePopover={onCancel}
-        onInsert={onSave}
-      />
-    );
+    return <LensEditor node={node} onClosePopover={onCancel} onSave={onSave} />;
   },
 };

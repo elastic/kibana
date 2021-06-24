@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  useContext,
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useImperativeHandle,
-} from 'react';
+import React, { memo, forwardRef, useRef, useState, useImperativeHandle } from 'react';
 import { PluggableList } from 'unified';
-import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin, EuiMarkdownContext } from '@elastic/eui';
+import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { usePlugins } from './use_plugins';
 import { useLensContext } from '../lens_context/use_lens_context';
 
@@ -39,9 +30,7 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = forwardRef(
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
     const LensContextProvider = useLensContext()?.editor_context.Provider;
     const editorRef = useRef(null);
-    const markdownContext = useContext(EuiMarkdownContext);
 
-    console.error('markdownContext', markdownContext);
     console.error('useRef', ref?.current);
 
     useImperativeHandle(ref, () => {
