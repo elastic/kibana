@@ -9,23 +9,16 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiEmptyPrompt, EuiPageContent, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 
 export const AccessDeniedPage = () => (
   <>
-    <EuiPageHeader
+    <EuiPageContent
+      verticalPosition="center"
+      horizontalPosition="center"
+      color="danger"
       data-test-subj="mlPageAccessDenied"
-      pageTitle={
-        <FormattedMessage
-          id="xpack.ml.management.jobsList.noPermissionToAccessPageTitle"
-          defaultMessage="Machine Learning"
-        />
-      }
-      bottomBorder
-    />
-
-    <EuiSpacer size="l" />
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+    >
       <EuiEmptyPrompt
         iconType="alert"
         title={
@@ -40,7 +33,7 @@ export const AccessDeniedPage = () => (
           <p>
             <FormattedMessage
               id="xpack.ml.management.jobsList.noGrantedPrivilegesDescription"
-              defaultMessage="You don’t have permission to manage Machine Learning jobs."
+              defaultMessage="You don’t have permission to manage Machine Learning jobs. Access to the plugin requires the Machine Learning feature to be visible in this space."
             />
           </p>
         }

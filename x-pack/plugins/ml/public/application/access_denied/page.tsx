@@ -40,7 +40,7 @@ export const Page = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.ml.accessDenied.description"
-                    defaultMessage="You don’t have permission to access the Machine Learning plugin."
+                    defaultMessage="You don’t have permission to view the Machine Learning plugin. Access to the plugin requires the Machine Learning feature to be visible in this space."
                   />
                 </p>
               }

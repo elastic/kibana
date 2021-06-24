@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 
-import { EuiEmptyPrompt, EuiLink, EuiPageContent, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageContent } from '@elastic/eui';
 
 interface Props {
   basePath: CoreStart['http']['basePath'];
@@ -18,19 +18,12 @@ interface Props {
 
 export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
   <>
-    <EuiPageHeader
+    <EuiPageContent
+      verticalPosition="center"
+      horizontalPosition="center"
+      color="danger"
       data-test-subj="mlPageInsufficientLicense"
-      pageTitle={
-        <FormattedMessage
-          id="xpack.ml.management.jobsList.insufficientLicenseTitle"
-          defaultMessage="Machine Learning"
-        />
-      }
-      bottomBorder
-    />
-
-    <EuiSpacer size="l" />
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+    >
       <EuiEmptyPrompt
         iconType="alert"
         title={
@@ -45,7 +38,7 @@ export const InsufficientLicensePage: FC<Props> = ({ basePath }) => (
           <p>
             <FormattedMessage
               id="xpack.ml.management.jobsList.insufficientLicenseDescription"
-              defaultMessage="Machine Learning is only available on a trial, platinum or enterprise license. Please {link} to use Machine Learning features"
+              defaultMessage="Machine Learning is available only with trial, platinum or enterprise licenses. Please {link} to use Machine Learning features."
               values={{
                 link: (
                   <EuiLink href={`${basePath.get()}/app/management/stack/license_management/home`}>
