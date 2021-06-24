@@ -25,6 +25,9 @@ import { UNNAMED_LOCATION } from '../../../common/constants';
 import { MonitorStatusTranslations } from '../../../common/translations';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs, UptimeESClient } from '../lib';
+import { ActionGroupIdsOf } from '../../../../alerting/common';
+
+export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 
 const getMonIdByLoc = (monitorId: string, location: string) => {
   return monitorId + '-' + location;
@@ -185,7 +188,7 @@ export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   return `${urlText}_${monIdByLoc}`;
 };
 
-export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
+export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
   id: 'xpack.uptime.alerts.monitorStatus',
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',
