@@ -65,7 +65,6 @@ export const HelpPopover = ({
       isOpen={isOpen}
       ownFocus
       panelClassName="lnsHelpPopover__panel"
-      panelPaddingSize="none"
     >
       {title && <EuiPopoverTitle>{title}</EuiPopoverTitle>}
 
