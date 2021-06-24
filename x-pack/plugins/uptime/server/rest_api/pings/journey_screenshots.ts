@@ -60,10 +60,15 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       });
     } else if (isRefResult(result)) {
       const blockIds = result.screenshot_ref.blocks.map(({ hash }) => hash);
-      const blocks: ScreenshotBlockDoc[] = await libs.requests.getJourneyScreenshotBlocks({
-        uptimeEsClient,
-        blockIds,
-      });
+      let blocks: ScreenshotBlockDoc[];
+      try {
+        blocks = await libs.requests.getJourneyScreenshotBlocks({
+          uptimeEsClient,
+          blockIds,
+        });
+      } catch (e: unknown) {
+        return response.custom({ statusCode: 500, body: { message: e } });
+      }
       return response.ok({
         body: {
           screenshotRef: result,

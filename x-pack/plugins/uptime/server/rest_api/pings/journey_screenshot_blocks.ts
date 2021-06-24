@@ -10,6 +10,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { ScreenshotBlockDoc } from '../../../common/runtime_types/ping/synthetics';
 
 export const createJourneyScreenshotBlockRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -28,10 +29,15 @@ export const createJourneyScreenshotBlockRoute: UMRestApiRouteFactory = (libs: U
       return response.badRequest();
     }
     const { right: data } = decoded;
-    const result = await libs.requests.getJourneyScreenshotBlocks({
-      blockIds: Array.isArray(data) ? data : [data],
-      uptimeEsClient,
-    });
+    let result: ScreenshotBlockDoc[];
+    try {
+      result = await libs.requests.getJourneyScreenshotBlocks({
+        blockIds: Array.isArray(data) ? data : [data],
+        uptimeEsClient,
+      });
+    } catch (e: unknown) {
+      return response.custom({ statusCode: 500, body: { message: e } });
+    }
     if (result.length === 0) {
       return response.notFound();
     }
