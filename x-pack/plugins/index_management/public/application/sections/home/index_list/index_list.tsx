@@ -8,12 +8,13 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { APP_WRAPPER_CLASS } from '../../../../shared_imports';
 import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
 
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   return (
-    <div className="im-snapshotTestSubject" data-test-subj="indicesList">
+    <div className={`${APP_WRAPPER_CLASS} im-snapshotTestSubject`} data-test-subj="indicesList">
       <IndexTable history={history} />
       <DetailPanel />
     </div>

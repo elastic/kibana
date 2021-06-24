@@ -26,6 +26,7 @@ describe('CaseActionBar', () => {
     onRefresh,
     onUpdateField,
     currentExternalIncident: null,
+    userCanCrud: true,
   };
 
   beforeEach(() => {

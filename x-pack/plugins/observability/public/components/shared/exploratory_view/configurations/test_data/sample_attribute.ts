@@ -10,16 +10,16 @@ export const sampleAttribute = {
   visualizationType: 'lnsXY',
   references: [
     { id: 'apm-*', name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern' },
-    { id: 'apm-*', name: 'indexpattern-datasource-layer-layer1', type: 'index-pattern' },
+    { id: 'apm-*', name: 'indexpattern-datasource-layer-layer0', type: 'index-pattern' },
   ],
   state: {
     datasourceStates: {
       indexpattern: {
         layers: {
-          layer1: {
-            columnOrder: ['x-axis-column', 'y-axis-column'],
+          layer0: {
+            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0'],
             columns: {
-              'x-axis-column': {
+              'x-axis-column-layer0': {
                 sourceField: 'transaction.duration.us',
                 label: 'Page load time',
                 dataType: 'number',
@@ -32,13 +32,18 @@ export const sampleAttribute = {
                   maxBars: 'auto',
                 },
               },
-              'y-axis-column': {
+              'y-axis-column-layer0': {
                 dataType: 'number',
                 isBucketed: false,
                 label: 'Pages loaded',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: 'Records',
+                filter: {
+                  language: 'kuery',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                },
               },
             },
             incompleteColumns: {},
@@ -57,18 +62,15 @@ export const sampleAttribute = {
       preferredSeriesType: 'line',
       layers: [
         {
-          accessors: ['y-axis-column'],
-          layerId: 'layer1',
+          accessors: ['y-axis-column-layer0'],
+          layerId: 'layer0',
           seriesType: 'line',
-          yConfig: [{ forAccessor: 'y-axis-column', color: 'green' }],
-          xAccessor: 'x-axis-column',
+          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
+          xAccessor: 'x-axis-column-layer0',
         },
       ],
     },
     query: { query: '', language: 'kuery' },
-    filters: [
-      { meta: { index: 'apm-*' }, query: { match_phrase: { 'transaction.type': 'page-load' } } },
-      { meta: { index: 'apm-*' }, query: { match_phrase: { 'processor.event': 'transaction' } } },
-    ],
+    filters: [],
   },
 };

@@ -40,3 +40,19 @@ export interface RoleMapping {
 
 const productNames = [APP_SEARCH_PLUGIN.NAME, WORKPLACE_SEARCH_PLUGIN.NAME] as const;
 export type ProductName = typeof productNames[number];
+
+export interface Invitation {
+  email: string;
+  code: string;
+}
+
+export interface ElasticsearchUser {
+  email: string | null;
+  username: string;
+}
+
+export interface SingleUserRoleMapping<T> {
+  invitation: Invitation;
+  elasticsearchUser: ElasticsearchUser;
+  roleMapping: T;
+}

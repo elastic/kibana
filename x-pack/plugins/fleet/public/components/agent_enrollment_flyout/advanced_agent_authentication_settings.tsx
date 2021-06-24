@@ -21,20 +21,19 @@ import {
 
 interface Props {
   agentPolicyId?: string;
+  selectedApiKeyId?: string;
   onKeyChange: (key?: string) => void;
 }
 
 export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   agentPolicyId,
+  selectedApiKeyId,
   onKeyChange,
 }) => {
   const { notifications } = useStartServices();
   const [enrollmentAPIKeys, setEnrollmentAPIKeys] = useState<GetEnrollmentAPIKeysResponse['list']>(
     []
   );
-  // TODO: Remove this piece of state since we don't need it here. The currently selected enrollment API key only
-  // needs to live on the form
-  const [selectedEnrollmentApiKey, setSelectedEnrollmentApiKey] = useState<undefined | string>();
   const [isLoadingEnrollmentKey, setIsLoadingEnrollmentKey] = useState(false);
   const [isAuthenticationSettingsOpen, setIsAuthenticationSettingsOpen] = useState<boolean>(false);
 
@@ -51,7 +50,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
           return;
         }
         setEnrollmentAPIKeys([res.data.item]);
-        setSelectedEnrollmentApiKey(res.data.item.id);
+        onKeyChange(res.data.item.id);
         notifications.toasts.addSuccess(
           i18n.translate('xpack.fleet.newEnrollmentKey.keyCreatedToasts', {
             defaultMessage: 'Enrollment token created',
@@ -65,15 +64,6 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
       }
     }
   };
-
-  useEffect(
-    function triggerOnKeyChangeEffect() {
-      if (onKeyChange) {
-        onKeyChange(selectedEnrollmentApiKey);
-      }
-    },
-    [onKeyChange, selectedEnrollmentApiKey]
-  );
 
   useEffect(
     function useEnrollmentKeysForAgentPolicyEffect() {
@@ -97,9 +87,13 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
             throw new Error('No data while fetching enrollment API keys');
           }
 
-          setEnrollmentAPIKeys(
-            res.data.list.filter((key) => key.policy_id === agentPolicyId && key.active === true)
+          const enrollmentAPIKeysResponse = res.data.list.filter(
+            (key) => key.policy_id === agentPolicyId && key.active === true
           );
+
+          setEnrollmentAPIKeys(enrollmentAPIKeysResponse);
+          // Default to the first enrollment key if there is one.
+          onKeyChange(enrollmentAPIKeysResponse[0]?.id);
         } catch (error) {
           notifications.toasts.addError(error, {
             title: 'Error',
@@ -108,21 +102,21 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
       }
       fetchEnrollmentAPIKeys();
     },
-    [agentPolicyId, notifications.toasts]
+    [onKeyChange, agentPolicyId, notifications.toasts]
   );
 
   useEffect(
     function useDefaultEnrollmentKeyForAgentPolicyEffect() {
       if (
-        !selectedEnrollmentApiKey &&
+        !selectedApiKeyId &&
         enrollmentAPIKeys.length > 0 &&
         enrollmentAPIKeys[0].policy_id === agentPolicyId
       ) {
         const enrollmentAPIKeyId = enrollmentAPIKeys[0].id;
-        setSelectedEnrollmentApiKey(enrollmentAPIKeyId);
+        onKeyChange(enrollmentAPIKeyId);
       }
     },
-    [enrollmentAPIKeys, selectedEnrollmentApiKey, agentPolicyId]
+    [enrollmentAPIKeys, selectedApiKeyId, agentPolicyId, onKeyChange]
   );
   return (
     <>
@@ -139,14 +133,14 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
       {isAuthenticationSettingsOpen && (
         <>
           <EuiSpacer size="m" />
-          {enrollmentAPIKeys.length && selectedEnrollmentApiKey ? (
+          {enrollmentAPIKeys.length && selectedApiKeyId ? (
             <EuiSelect
               fullWidth
               options={enrollmentAPIKeys.map((key) => ({
                 value: key.id,
                 text: key.name,
               }))}
-              value={selectedEnrollmentApiKey || undefined}
+              value={selectedApiKeyId || undefined}
               prepend={
                 <EuiText>
                   <FormattedMessage
@@ -156,7 +150,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
                 </EuiText>
               }
               onChange={(e) => {
-                setSelectedEnrollmentApiKey(e.target.value);
+                onKeyChange(e.target.value);
               }}
             />
           ) : (

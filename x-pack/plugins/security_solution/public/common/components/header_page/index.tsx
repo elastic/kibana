@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiProgress,
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled, { css } from 'styled-components';
@@ -25,36 +31,16 @@ interface HeaderProps {
 }
 
 const Header = styled.header.attrs({
-  className: 'siemHeaderPage',
+  className: 'securitySolutionHeaderPage',
 })<HeaderProps>`
   ${({ border, theme }) => css`
     margin-bottom: ${theme.eui.euiSizeL};
-
-    ${border &&
-    css`
-      border-bottom: ${theme.eui.euiBorderThin};
-      padding-bottom: ${theme.eui.paddingSizes.l};
-      .euiProgress {
-        top: ${theme.eui.paddingSizes.l};
-      }
-    `}
   `}
 `;
 Header.displayName = 'Header';
 
-const FlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => css`
-    display: block;
-
-    @media only screen and (min-width: ${theme.eui.euiBreakpoints.m}) {
-      max-width: 50%;
-    }
-  `}
-`;
-FlexItem.displayName = 'FlexItem';
-
 const LinkBack = styled.div.attrs({
-  className: 'siemHeaderPage__linkBack',
+  className: 'securitySolutionHeaderPage__linkBack',
 })`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
@@ -117,9 +103,9 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
     [backOptions, history]
   );
   return (
-    <Header border={border} {...rest}>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <FlexItem>
+    <>
+      <EuiPageHeader alignItems="center" bottomBorder={border}>
+        <EuiPageHeaderSection>
           {backOptions && (
             <LinkBack>
               <LinkIcon
@@ -146,16 +132,18 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
           {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
           {border && isLoading && <EuiProgress size="xs" color="accent" />}
-        </FlexItem>
+        </EuiPageHeaderSection>
 
         {children && (
-          <FlexItem data-test-subj="header-page-supplements" grow={false}>
+          <EuiPageHeaderSection data-test-subj="header-page-supplements">
             {children}
-          </FlexItem>
+          </EuiPageHeaderSection>
         )}
-      </EuiFlexGroup>
-      {!hideSourcerer && <Sourcerer scope={SourcererScopeName.default} />}
-    </Header>
+        {!hideSourcerer && <Sourcerer scope={SourcererScopeName.default} />}
+      </EuiPageHeader>
+      {/* Manually add a 'padding-bottom' to header */}
+      <EuiSpacer size="l" />
+    </>
   );
 };
 

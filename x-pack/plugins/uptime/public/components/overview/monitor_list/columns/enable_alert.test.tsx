@@ -33,9 +33,7 @@ describe('EnableAlertComponent', () => {
       'href',
       '/settings?focusConnectorField=true'
     );
-    expect(
-      getByText('To start enabling alerts, please define a default alert action connector in')
-    );
+    expect(getByText('to receive status alerts.'));
   });
 
   it('does not displays define connectors when there is connector', () => {
