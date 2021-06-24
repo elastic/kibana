@@ -5,13 +5,64 @@
  * 2.0.
  */
 
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
 import {
   ExpressionFunction,
   ExpressionFunctionParameter,
 } from '../../../../../../src/plugins/expressions';
 
-const { ExpressionInput: strings } = ComponentStrings;
+import { BOLD_MD_TOKEN } from '../../../i18n/constants';
+
+const strings = {
+  getArgReferenceAliasesDetail: (aliases: string) =>
+    i18n.translate('xpack.canvas.expressionInput.argReferenceAliasesDetail', {
+      defaultMessage: '{BOLD_MD_TOKEN}Aliases{BOLD_MD_TOKEN}: {aliases}',
+      values: {
+        BOLD_MD_TOKEN,
+        aliases,
+      },
+    }),
+  getArgReferenceDefaultDetail: (defaultVal: string) =>
+    i18n.translate('xpack.canvas.expressionInput.argReferenceDefaultDetail', {
+      defaultMessage: '{BOLD_MD_TOKEN}Default{BOLD_MD_TOKEN}: {defaultVal}',
+      values: {
+        BOLD_MD_TOKEN,
+        defaultVal,
+      },
+    }),
+  getArgReferenceRequiredDetail: (required: string) =>
+    i18n.translate('xpack.canvas.expressionInput.argReferenceRequiredDetail', {
+      defaultMessage: '{BOLD_MD_TOKEN}Required{BOLD_MD_TOKEN}: {required}',
+      values: {
+        BOLD_MD_TOKEN,
+        required,
+      },
+    }),
+  getArgReferenceTypesDetail: (types: string) =>
+    i18n.translate('xpack.canvas.expressionInput.argReferenceTypesDetail', {
+      defaultMessage: '{BOLD_MD_TOKEN}Types{BOLD_MD_TOKEN}: {types}',
+      values: {
+        BOLD_MD_TOKEN,
+        types,
+      },
+    }),
+  getFunctionReferenceAcceptsDetail: (acceptTypes: string) =>
+    i18n.translate('xpack.canvas.expressionInput.functionReferenceAccepts', {
+      defaultMessage: '{BOLD_MD_TOKEN}Accepts{BOLD_MD_TOKEN}: {acceptTypes}',
+      values: {
+        BOLD_MD_TOKEN,
+        acceptTypes,
+      },
+    }),
+  getFunctionReferenceReturnsDetail: (returnType: string) =>
+    i18n.translate('xpack.canvas.expressionInput.functionReferenceReturns', {
+      defaultMessage: '{BOLD_MD_TOKEN}Returns{BOLD_MD_TOKEN}: {returnType}',
+      values: {
+        BOLD_MD_TOKEN,
+        returnType,
+      },
+    }),
+};
 
 /**
  * Given an expression function, this function returns a markdown string
