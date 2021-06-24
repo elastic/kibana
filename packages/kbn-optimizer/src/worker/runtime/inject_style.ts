@@ -22,7 +22,7 @@ const getStyle = (styles: StyleMap, tag: ThemeTag) => {
   let style = styles[tag];
 
   // resolve references
-  while (typeof style === 'object' && style !== null) {
+  while (typeof style === 'object') {
     style = styles[style.ref];
   }
 
@@ -33,7 +33,7 @@ export function injectStyle(styles: StyleMap) {
   const tag: ThemeTag = (window as any).__kbnThemeTag__;
   let style = getStyle(styles, tag);
 
-  if (!style) {
+  while (!style) {
     const missingTag = tag;
     const tags = Object.keys(styles) as ThemeTag[];
 
@@ -43,7 +43,7 @@ export function injectStyle(styles: StyleMap) {
         .slice()
         .sort((a, b) => compare(b, tag) - compare(a, tag))
         .shift()!
-    )!;
+    );
 
     // eslint-disable-next-line no-console
     console.error(
