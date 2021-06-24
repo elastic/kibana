@@ -18,7 +18,6 @@ import {
   EuiTabs,
   EuiToolTip,
   EuiWindowEvent,
-  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
@@ -115,6 +114,7 @@ import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
+import { BadgeOptions } from '../../../../../common/components/header_page/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -253,15 +253,20 @@ const RuleDetailsPageComponent = () => {
   const title = useMemo(
     () => (
       <>
-        {rule?.name}{' '}
-        {ruleLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : (
-          !isExistingRule && <EuiBadge>{i18n.DELETED_RULE}</EuiBadge>
-        )}
+        {rule?.name} {ruleLoading && <EuiLoadingSpinner size="m" />}
       </>
     ),
-    [rule, ruleLoading, isExistingRule]
+    [rule, ruleLoading]
+  );
+  const badgeOptions = useMemo<BadgeOptions | undefined>(
+    () =>
+      !ruleLoading && !isExistingRule
+        ? {
+            text: i18n.DELETED_RULE,
+            color: 'default',
+          }
+        : undefined,
+    [isExistingRule, ruleLoading]
   );
   const subTitle = useMemo(
     () =>
@@ -595,6 +600,7 @@ const RuleDetailsPageComponent = () => {
                   </>,
                 ]}
                 title={title}
+                badgeOptions={badgeOptions}
               >
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
