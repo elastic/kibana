@@ -46,13 +46,13 @@ export const HelpMenu: FC<Props> = ({ functionRegistry }) => {
 
   return (
     <>
-      <EuiButtonEmpty size="xs" flush="left" iconType="keyboardShortcut" onClick={showFlyout}>
+      <EuiButtonEmpty size="s" flush="left" iconType="keyboardShortcut" onClick={showFlyout}>
         {strings.getKeyboardShortcutsLinkLabel()}
       </EuiButtonEmpty>
 
       {FunctionReferenceGenerator ? (
         <Suspense fallback={null}>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
           <FunctionReferenceGenerator functionRegistry={functionRegistry} />
         </Suspense>
       ) : null}
