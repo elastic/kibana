@@ -7,9 +7,36 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerOrgRoleMappingsRoute, registerOrgRoleMappingRoute } from './role_mappings';
+import {
+  registerOrgEnableRoleMappingsRoute,
+  registerOrgRoleMappingsRoute,
+  registerOrgRoleMappingRoute,
+} from './role_mappings';
 
 describe('role mappings routes', () => {
+  describe('POST /api/workplace_search/org/role_mappings/enable_role_based_access', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/org/role_mappings/enable_role_based_access',
+      });
+
+      registerOrgEnableRoleMappingsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/role_mappings/enable_role_based_access',
+      });
+    });
+  });
+
   describe('GET /api/workplace_search/org/role_mappings', () => {
     let mockRouter: MockRouter;
 

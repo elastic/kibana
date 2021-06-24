@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
 import { Header } from './header';
 
 const timelineId = 'test';
@@ -72,7 +71,7 @@ describe('Header', () => {
 
     wrapper.find('[data-test-subj="reset-fields"]').first().simulate('click');
 
-    expect(onUpdateColumns).toBeCalledWith(defaultHeaders);
+    expect(onUpdateColumns).toBeCalled();
   });
 
   test('it invokes onOutsideClick when the user clicks the Reset Fields button', () => {

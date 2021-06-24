@@ -44,8 +44,8 @@ describe('when using the EndpointHostIsolationStatus component', () => {
   });
 
   it.each([
-    ['Isolating pending', { pendingIsolate: 2 }],
-    ['Unisolating pending', { pendingUnIsolate: 2 }],
+    ['Isolating', { pendingIsolate: 2 }],
+    ['Releasing', { pendingUnIsolate: 2 }],
     ['4 actions pending', { isIsolated: true, pendingUnIsolate: 2, pendingIsolate: 2 }],
   ])('should show %s}', (expectedLabel, componentProps) => {
     const { getByTestId } = render(componentProps);

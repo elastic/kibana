@@ -19,7 +19,7 @@ import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
+} from '../../../../../src/core/types/elasticsearch';
 import { PromiseReturnType } from '../../../observability/typings/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
