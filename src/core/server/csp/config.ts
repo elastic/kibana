@@ -82,7 +82,6 @@ const configSchema = schema.object(
     }),
     report_to: schema.arrayOf(schema.string(), {
       defaultValue: [],
-      validate: getDirectiveValidator({ allowNone: true, allowNonce: false }),
     }),
     strict: schema.boolean({ defaultValue: true }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
@@ -93,12 +92,15 @@ const configSchema = schema.object(
       if (cspConfig.rules && hasDirectiveSpecified(cspConfig)) {
         return `"csp.rules" cannot be used when specifying per-directive additions such as "script_src", "worker_src" or "style_src"`;
       }
-      if (
-        cspConfig.strict &&
-        (cspConfig.script_src.includes(`unsafe-inline`) ||
-          cspConfig.script_src.includes(`'unsafe-inline'`))
-      ) {
+      const hasUnsafeInlineScriptSrc =
+        cspConfig.script_src.includes(`unsafe-inline`) ||
+        cspConfig.script_src.includes(`'unsafe-inline'`);
+
+      if (cspConfig.strict && hasUnsafeInlineScriptSrc) {
         return 'cannot use `unsafe-inline` for `script_src` when `csp.strict` is true';
+      }
+      if (cspConfig.warnLegacyBrowsers && hasUnsafeInlineScriptSrc) {
+        return 'cannot use `unsafe-inline` for `script_src` when `csp.warnLegacyBrowsers` is true';
       }
     },
   }
@@ -136,12 +138,15 @@ export const config: ServiceConfigDescriptor<CspConfigType> = {
       if (cspConfig?.rules) {
         addDeprecation({
           message:
-            'csp.rules is deprecated in favor of directive specific configuration. ' +
-            'Please use `csp.script_src`, `csp.worker_src` and `csp.style_src` instead',
+            '`csp.rules` is deprecated in favor of directive specific configuration. Please use `csp.connect_src`, ' +
+            '`csp.default_src`, `csp.font_src`, `csp.frame_ancestors`, `csp.frame_src`, `csp.img_src`, ' +
+            '`csp.report_uri`, `csp.report_to`, `csp.script_src`, `csp.style_src`, and `csp.worker_src` instead.',
           correctiveActions: {
             manualSteps: [
-              `Remove "csp.rules" from the Kibana config file"`,
-              `Add directive specific configurations to the config file, using "csp.script_src", "csp.worker_src" and "csp.style_src"`,
+              `Remove "csp.rules" from the Kibana config file."`,
+              `Add directive specific configurations to the config file using "csp.connect_src", "csp.default_src", "csp.font_src", ` +
+                `"csp.frame_ancestors", "csp.frame_src", "csp.img_src", "csp.report_uri", "csp.report_to", "csp.script_src", ` +
+                `"csp.style_src", and "csp.worker_src".`,
             ],
           },
         });

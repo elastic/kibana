@@ -38,10 +38,31 @@ describe('config.validate()', () => {
       );
     });
 
-    it(`does not throw if containing 'unsafe-inline' when 'strict' is false`, () => {
+    it(`throws if containing 'unsafe-inline' when 'warnLegacyBrowsers' is true`, () => {
+      expect(() =>
+        config.schema.validate({
+          warnLegacyBrowsers: true,
+          script_src: [`'self'`, `unsafe-inline`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+      );
+
+      expect(() =>
+        config.schema.validate({
+          warnLegacyBrowsers: true,
+          script_src: [`'self'`, `'unsafe-inline'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+      );
+    });
+
+    it(`does not throw if containing 'unsafe-inline' when 'strict' and 'warnLegacyBrowsers' are false`, () => {
       expect(() =>
         config.schema.validate({
           strict: false,
+          warnLegacyBrowsers: false,
           script_src: [`'self'`, `unsafe-inline`],
         })
       ).not.toThrow();
@@ -49,6 +70,7 @@ describe('config.validate()', () => {
       expect(() =>
         config.schema.validate({
           strict: false,
+          warnLegacyBrowsers: false,
           script_src: [`'self'`, `'unsafe-inline'`],
         })
       ).not.toThrow();
