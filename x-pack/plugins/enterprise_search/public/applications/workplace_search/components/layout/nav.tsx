@@ -15,7 +15,7 @@ import { NAV } from '../../constants';
 import {
   SOURCES_PATH,
   SECURITY_PATH,
-  ROLE_MAPPINGS_PATH,
+  USERS_AND_ROLES_PATH,
   GROUPS_PATH,
   ORG_SETTINGS_PATH,
 } from '../../routes';
@@ -48,7 +48,7 @@ export const useWorkplaceSearchNav = () => {
     {
       id: 'usersRoles',
       name: NAV.ROLE_MAPPINGS,
-      ...generateNavLink({ to: ROLE_MAPPINGS_PATH }),
+      ...generateNavLink({ to: USERS_AND_ROLES_PATH }),
     },
     {
       id: 'security',
@@ -92,7 +92,7 @@ export const WorkplaceSearchNav: React.FC<Props> = ({
     <SideNavLink to={GROUPS_PATH} subNav={groupsSubNav}>
       {NAV.GROUPS}
     </SideNavLink>
-    <SideNavLink shouldShowActiveForSubroutes to={ROLE_MAPPINGS_PATH}>
+    <SideNavLink shouldShowActiveForSubroutes to={USERS_AND_ROLES_PATH}>
       {NAV.ROLE_MAPPINGS}
     </SideNavLink>
     <SideNavLink to={SECURITY_PATH}>{NAV.SECURITY}</SideNavLink>

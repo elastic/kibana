@@ -15,16 +15,18 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   describe('context app', function () {
     this.tags('ciGroup1');
 
-    before(async function () {
+    before(async () => {
       await browser.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/visualize');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/visualize.json'
+      );
     });
 
     loadTestFile(require.resolve('./_context_navigation'));
