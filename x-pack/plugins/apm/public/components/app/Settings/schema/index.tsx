@@ -16,7 +16,7 @@ import {
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { NotificationsStart } from 'kibana/public';
 
-type CloudApmPackagePolicyResponse = APIReturnType<'GET /api/apm/fleet/cloud_apm_package_policy'>;
+type FleetMigrationCheckResponse = APIReturnType<'GET /api/apm/fleet/migration_check'>;
 
 export function Schema() {
   const { toasts } = useApmPluginContext().core.notifications;
@@ -29,16 +29,21 @@ export function Schema() {
 
   const {
     refetch,
-    data = {} as CloudApmPackagePolicyResponse,
+    data = {} as FleetMigrationCheckResponse,
     status,
   } = useFetcher(
     (callApmApi) =>
-      callApmApi({ endpoint: 'GET /api/apm/fleet/cloud_apm_package_policy' }),
+      callApmApi({ endpoint: 'GET /api/apm/fleet/migration_check' }),
     [],
     { preservePreviousData: false }
   );
   const isLoading = status !== FETCH_STATUS.SUCCESS;
-  const isMigrated = !!data.cloud_apm_package_policy;
+  const cloudApmMigrationEnabled = !!data.cloud_apm_migration_enabled;
+  const hasCloudAgentPolicy = !!data.has_cloud_agent_policy;
+  const hasCloudApmPackagePolicy = !!data.has_cloud_apm_package_policy;
+  const hasRequiredRole = !!data.has_required_role;
+  const isEnabled =
+    cloudApmMigrationEnabled && hasCloudAgentPolicy && hasRequiredRole;
   return (
     <>
       <SchemaOverview
@@ -53,9 +58,10 @@ export function Schema() {
           setIsLoadingConfirmation(false);
           setIsSwitchActive(true);
         }}
-        isMigrated={isMigrated}
+        isMigrated={hasCloudApmPackagePolicy}
         isLoading={isLoading}
         isLoadingConfirmation={isLoadingConfirmation}
+        isDisabled={!isEnabled}
       />
       {isSwitchActive && (
         <ConfirmSwitchModal

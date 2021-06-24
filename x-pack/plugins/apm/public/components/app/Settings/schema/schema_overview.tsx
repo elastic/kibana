@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
-import rocketLaunchGraphic from './rocket_launch_graphic.png';
+import rocketLaunchGraphic from './blog-rocket-720x420.png';
 import { APMLink } from '../../../shared/Links/apm/APMLink';
 
 interface Props {
@@ -29,12 +29,14 @@ interface Props {
   isMigrated: boolean;
   isLoading: boolean;
   isLoadingConfirmation: boolean;
+  isDisabled: boolean;
 }
 export function SchemaOverview({
   onSwitch,
   isMigrated,
   isLoading,
   isLoadingConfirmation,
+  isDisabled,
 }: Props) {
   if (isLoading) {
     return (
@@ -133,12 +135,14 @@ export function SchemaOverview({
                   fill
                   isLoading={isLoadingConfirmation}
                   aria-label="Switch to data streams"
+                  isDisabled={isDisabled}
                 >
                   Switch to data streams
                 </EuiButton>
               </div>
             }
             onClick={onSwitch}
+            isDisabled={isDisabled}
           />
         </EuiFlexItem>
         <EuiFlexItem />
