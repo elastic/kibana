@@ -141,7 +141,7 @@ export class AlertsClient {
     id,
     data,
     index,
-  }: UpdateOptions<Params>): Promise<ParsedTechnicalFields | null | undefined> {
+  }: UpdateOptions<Params>) {
     try {
       const alert = await this.fetchAlert({
         id,

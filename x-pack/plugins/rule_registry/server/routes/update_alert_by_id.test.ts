@@ -11,13 +11,6 @@ import { requestContextMock } from './__mocks__/request_context';
 import { getUpdateRequest } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
 
-const getMockAlert = () => ({
-  '@timestamp': '2021-06-21T21:33:05.713Z',
-  'rule.id': 'apm.error_rate',
-  'kibana.rac.alert.owner': 'apm',
-  'kibana.rac.alert.status': 'open',
-});
-
 describe('updateAlertByIdRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -27,8 +20,13 @@ describe('updateAlertByIdRoute', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.rac.update.mockResolvedValue({
-      ...getMockAlert(),
-      'kibana.rac.alert.status': 'closed',
+      _index: '.alerts-observability-apm',
+      _id: 'NoxgpHkBqbdrfX07MqXV',
+      _version: 2,
+      result: 'updated',
+      _shards: { total: 2, successful: 1, failed: 0 },
+      _seq_no: 1,
+      _primary_term: 1,
     });
 
     updateAlertByIdRoute(server.router);
@@ -40,8 +38,13 @@ describe('updateAlertByIdRoute', () => {
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
       alerts: {
-        ...getMockAlert(),
-        'kibana.rac.alert.status': 'closed',
+        _index: '.alerts-observability-apm',
+        _id: 'NoxgpHkBqbdrfX07MqXV',
+        _version: 2,
+        result: 'updated',
+        _shards: { total: 2, successful: 1, failed: 0 },
+        _seq_no: 1,
+        _primary_term: 1,
       },
       success: true,
     });
