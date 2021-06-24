@@ -73,3 +73,5 @@ export const POPULATED_DOC_COUNT_SAMPLE_SIZE = 1000;
 
 export const PERCENTILES_STEP = 2;
 export const TERMS_SIZE = 50;
+export const SIGNIFICANT_FRACTION = 3;
+export const SIGNIFICANT_VALUE_DIGITS = 3;

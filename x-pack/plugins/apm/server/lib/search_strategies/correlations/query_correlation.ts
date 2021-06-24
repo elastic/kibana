@@ -13,7 +13,6 @@ import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldname
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
-import { PERCENTILES_STEP } from './constants';
 
 export interface HistogramItem {
   key: number;
@@ -41,72 +40,21 @@ interface BucketCorrelation {
 
 export const getTransactionDurationCorrelationRequest = (
   params: SearchServiceParams,
-  percentiles: number[],
+  expectations: number[],
+  ranges: estypes.AggregationsAggregationRange[],
+  fractions: number[],
   totalHits: number,
   fieldName?: string,
   fieldValue?: string
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({ params, fieldName, fieldValue });
 
-  const ranges = percentiles.reduce(
-    (p, to) => {
-      const from = p[p.length - 1].to;
-      p.push({ from, to });
-      return p;
-    },
-    [{ to: 0 }] as Array<{ from?: number; to?: number }>
-  );
-  ranges.push({ from: ranges[ranges.length - 1].to });
-
-  const step = PERCENTILES_STEP;
-  const tempPercentiles = [percentiles[0]];
-  const tempFractions = [step / 100];
-  // Collapse duplicates
-  for (let i = 1; i < percentiles.length; i++) {
-    if (percentiles[i] !== percentiles[i - 1]) {
-      tempPercentiles.push(percentiles[i]);
-      tempFractions.push(2 / 100);
-    } else {
-      tempFractions[tempFractions.length - 1] =
-        tempFractions[tempFractions.length - 1] + step / 100;
-    }
-  }
-  tempFractions.push(2 / 100);
-
-  const tempRanges = percentiles.reduce((p, to) => {
-    const from = p[p.length - 1]?.to;
-    if (from) {
-      p.push({ from, to });
-    } else {
-      p.push({ to });
-    }
-    return p;
-  }, [] as Array<{ from?: number; to?: number }>);
-  tempRanges.push({ from: tempRanges[tempRanges.length - 1].to });
-
-  const tempExpectations = [tempPercentiles[0]];
-  for (let i = 1; i < tempPercentiles.length; i++) {
-    tempExpectations.push(
-      (tempFractions[i - 1] * tempPercentiles[i - 1] +
-        tempFractions[i] * tempPercentiles[i]) /
-        (tempFractions[i - 1] + tempFractions[i])
-    );
-  }
-  tempExpectations.push(tempPercentiles[tempPercentiles.length - 1]);
-
-  const expectations = percentiles.map((d, index) => {
-    const previous = percentiles[index - 1] || 0;
-    return (previous + d) / 2;
-  });
-  expectations.unshift(0);
-  expectations.push(percentiles[percentiles.length - 1]);
-
   const bucketCorrelation: BucketCorrelation = {
     buckets_path: 'latency_ranges>_count',
     function: {
       count_correlation: {
         indicator: {
-          expectations: tempExpectations,
+          expectations,
           doc_count: totalHits,
         },
       },
@@ -120,7 +68,7 @@ export const getTransactionDurationCorrelationRequest = (
       latency_ranges: {
         range: {
           field: TRANSACTION_DURATION,
-          ranges: tempRanges,
+          ranges,
         },
       },
       // Pearson correlation value
@@ -145,7 +93,9 @@ export const getTransactionDurationCorrelationRequest = (
 export const fetchTransactionDurationCorrelation = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
-  percentiles: number[],
+  expectations: number[],
+  ranges: estypes.AggregationsAggregationRange[],
+  fractions: number[],
   totalHits: number,
   fieldName?: string,
   fieldValue?: string
@@ -157,7 +107,9 @@ export const fetchTransactionDurationCorrelation = async (
   const resp = await esClient.search<ResponseHit>(
     getTransactionDurationCorrelationRequest(
       params,
-      percentiles,
+      expectations,
+      ranges,
+      fractions,
       totalHits,
       fieldName,
       fieldValue

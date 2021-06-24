@@ -6,3 +6,4 @@
  */
 
 export * from './math_utils';
+export * from './aggregation_utils';

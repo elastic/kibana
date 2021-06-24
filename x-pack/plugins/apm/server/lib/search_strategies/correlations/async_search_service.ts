@@ -21,10 +21,12 @@ import type {
   SearchServiceParams,
   SearchServiceValue,
 } from '../../../../common/search_strategies/correlations/types';
+import { SIGNIFICANT_FRACTION } from './constants';
+import { computeExpectationsAndRanges } from './utils/aggregation_utils';
+import { fetchTransactionDurationFractions } from './query_fractions';
 
 const CORRELATION_THRESHOLD = 0.3;
 const KS_TEST_THRESHOLD = 0.1;
-const SIGNIFICANT_FRACTION = 3;
 
 interface HashedSearchServiceValue {
   histogram: HistogramItem[];
@@ -101,13 +103,6 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
-      const {
-        fieldCandidates,
-        totalHits,
-      } = await fetchTransactionDurationFieldCandidates(esClient, params);
-
-      progress.loadedFieldCanditates = 1;
-
       // Create an array of ranges [2, 4, 6, ..., 98]
       const percents = Array.from(range(2, 100, 2));
       const percentilesRecords = await fetchTransactionDurationPecentiles(
@@ -122,6 +117,13 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
+      const {
+        fieldCandidates,
+        totalHits,
+      } = await fetchTransactionDurationFieldCandidates(esClient, params);
+
+      progress.loadedFieldCanditates = 1;
+
       const fieldValuePairs = await fetchTransactionDurationFieldValuePairs(
         esClient,
         params,
@@ -133,6 +135,16 @@ export const asyncSearchServiceProvider = (
         isRunning = false;
         return;
       }
+
+      const { expectations, ranges } = computeExpectationsAndRanges(
+        percentiles
+      );
+
+      const fractions = await fetchTransactionDurationFractions(
+        esClient,
+        params,
+        ranges
+      );
 
       async function* fetchTransactionDurationHistograms() {
         for (const item of shuffle(fieldValuePairs)) {
@@ -150,7 +162,9 @@ export const asyncSearchServiceProvider = (
             } = await fetchTransactionDurationCorrelation(
               esClient,
               params,
-              percentiles,
+              expectations,
+              ranges,
+              fractions,
               totalHits,
               item.field,
               item.value

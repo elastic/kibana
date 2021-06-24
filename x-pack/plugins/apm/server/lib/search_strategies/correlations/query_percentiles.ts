@@ -13,6 +13,7 @@ import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldname
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
+import { SIGNIFICANT_VALUE_DIGITS } from './constants';
 
 export interface HistogramItem {
   key: number;
@@ -43,7 +44,7 @@ export const getTransactionDurationPercentilesRequest = (
         transaction_duration_percentiles: {
           percentiles: {
             hdr: {
-              number_of_significant_value_digits: 3,
+              number_of_significant_value_digits: SIGNIFICANT_VALUE_DIGITS,
             },
             field: TRANSACTION_DURATION,
             ...(Array.isArray(percents) ? { percents } : {}),
