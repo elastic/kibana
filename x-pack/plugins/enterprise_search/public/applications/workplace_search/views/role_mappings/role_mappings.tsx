@@ -10,9 +10,14 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { RoleMappingsTable, RoleMappingsHeading } from '../../../shared/role_mapping';
+import {
+  RoleMappingsTable,
+  RoleMappingsHeading,
+  RolesEmptyPrompt,
+} from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
+import { SECURITY_DOCS_URL } from '../../routes';
 
 import { ROLE_MAPPINGS_TABLE_HEADER } from './constants';
 
@@ -20,9 +25,12 @@ import { RoleMapping } from './role_mapping';
 import { RoleMappingsLogic } from './role_mappings_logic';
 
 export const RoleMappings: React.FC = () => {
-  const { initializeRoleMappings, initializeRoleMapping, handleDeleteMapping } = useActions(
-    RoleMappingsLogic
-  );
+  const {
+    enableRoleBasedAccess,
+    initializeRoleMappings,
+    initializeRoleMapping,
+    handleDeleteMapping,
+  } = useActions(RoleMappingsLogic);
 
   const {
     roleMappings,
@@ -35,10 +43,19 @@ export const RoleMappings: React.FC = () => {
     initializeRoleMappings();
   }, []);
 
+  const rolesEmptyState = (
+    <RolesEmptyPrompt
+      productName={WORKPLACE_SEARCH_PLUGIN.NAME}
+      docsLink={SECURITY_DOCS_URL}
+      onEnable={enableRoleBasedAccess}
+    />
+  );
+
   const roleMappingsSection = (
     <section>
       <RoleMappingsHeading
         productName={WORKPLACE_SEARCH_PLUGIN.NAME}
+        docsLink={SECURITY_DOCS_URL}
         onClick={() => initializeRoleMapping()}
       />
       <RoleMappingsTable
@@ -57,6 +74,8 @@ export const RoleMappings: React.FC = () => {
       pageChrome={[ROLE_MAPPINGS_TITLE]}
       pageHeader={{ pageTitle: ROLE_MAPPINGS_TITLE }}
       isLoading={dataLoading}
+      isEmptyState={roleMappings.length < 1}
+      emptyState={rolesEmptyState}
     >
       {roleMappingFlyoutOpen && <RoleMapping />}
       {roleMappingsSection}
