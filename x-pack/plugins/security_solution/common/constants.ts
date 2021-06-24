@@ -115,9 +115,6 @@ export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}`;
 export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}`;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}`;
 
-export const CASES_APP_ID = `${APP_ID}:${SecurityPageName.case}`;
-export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${DETECTIONS}`;
-
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
