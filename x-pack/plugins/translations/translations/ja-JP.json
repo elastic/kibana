@@ -20913,7 +20913,6 @@
     "xpack.securitySolution.search.cases.configure": "ケースを構成",
     "xpack.securitySolution.search.cases.create": "新規ケースを作成",
     "xpack.securitySolution.search.detections": "検出",
-    "xpack.securitySolution.search.detections.manage": "ルールの管理",
     "xpack.securitySolution.search.hosts": "ホスト",
     "xpack.securitySolution.search.hosts.anomalies": "異常",
     "xpack.securitySolution.search.hosts.authentications": "認証",
