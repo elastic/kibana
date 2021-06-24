@@ -39,17 +39,14 @@ import { useGetCaseUserActions } from '../../containers/use_get_case_user_action
 import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import {
-  getConnectorById,
-  normalizeActionConnector,
-  getNoneConnector,
-} from '../configure_cases/utils';
+import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
+import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
