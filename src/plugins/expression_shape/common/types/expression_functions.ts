@@ -27,8 +27,8 @@ export interface Output {
   percent: number;
 }
 
-export type ExpressionRevealImageFunction = () => ExpressionFunctionDefinition<
-  'revealImage',
+export type ExpressionShapeFunction = () => ExpressionFunctionDefinition<
+  'shape',
   number,
   Arguments,
   ExpressionValueRender<Output>

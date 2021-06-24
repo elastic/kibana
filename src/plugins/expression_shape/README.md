@@ -1,6 +1,6 @@
-# expressionRevealImage
+# expressionShape
 
-Expression Reveal Image plugin adds a `revealImage` function to the expression plugin and an associated renderer. The renderer will display the given percentage of a given image.
+Expression Shape plugin adds a `shape` function to the expression plugin and an associated renderer. @TODO add some description later.
 
 ---
 

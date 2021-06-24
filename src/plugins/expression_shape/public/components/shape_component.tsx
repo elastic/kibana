@@ -8,11 +8,11 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
+import { NodeDimensions, ShapeRendererConfig, OriginString } from '../../common/types';
 import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
-import './reveal_image.scss';
+import './shape.scss';
 
-interface RevealImageComponentProps extends RevealImageRendererConfig {
+interface ShapeComponentProps extends ShapeRendererConfig {
   handlers: IInterpreterRenderHandlers;
   parentNode: HTMLElement;
 }
@@ -27,14 +27,14 @@ interface AlignerStyles {
   backgroundImage?: string;
 }
 
-function RevealImageComponent({
+function ShapeComponent({
   handlers,
   parentNode,
   percent,
   origin,
   image,
   emptyImage,
-}: RevealImageComponentProps) {
+}: ShapeComponentProps) {
   const [loaded, setLoaded] = useState(false);
   const [dimensions, setDimensions] = useState<NodeDimensions>({
     width: 1,
@@ -44,7 +44,7 @@ function RevealImageComponent({
   const imgRef = useRef<HTMLImageElement>(null);
 
   // modify the top-level container class
-  parentNode.className = 'revealImage';
+  parentNode.className = 'shape';
 
   // set up the overlay image
   const updateImageView = useCallback(() => {
@@ -117,11 +117,11 @@ function RevealImageComponent({
   }
 
   return (
-    <div className="revealImageAligner" style={alignerStyles}>
+    <div className="shapeAligner" style={alignerStyles}>
       <img
         ref={imgRef}
         onLoad={updateImageView}
-        className="revealImage__image"
+        className="shape__image"
         src={imgSrc ?? ''}
         alt=""
         role="presentation"
@@ -133,4 +133,4 @@ function RevealImageComponent({
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export { RevealImageComponent as default };
+export { ShapeComponent as default };

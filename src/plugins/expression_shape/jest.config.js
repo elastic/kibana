@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/expression_reveal_image'],
+  roots: ['<rootDir>/src/plugins/expression_shape'],
 };

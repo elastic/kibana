@@ -8,16 +8,16 @@
 
 import { functionWrapper, elasticOutline, elasticLogo } from '../../../presentation_util/public';
 import { getFunctionErrors } from '../../common/i18n';
-import { revealImageFunction } from './reveal_image_function';
+import { shapeFunction } from './shape_function';
 import { Origin } from '../../common/types/expression_functions';
 import { ExecutionContext } from 'src/plugins/expressions';
 
-const errors = getFunctionErrors().revealImage;
+const errors = getFunctionErrors().shape;
 
-describe('revealImageFunction', () => {
-  const fn = functionWrapper(revealImageFunction);
+describe('shapeFunction', () => {
+  const fn = functionWrapper(shapeFunction);
 
-  it('returns a render as revealImage', () => {
+  it('returns a render as shape', () => {
     const result = fn(
       0.5,
       {
@@ -28,7 +28,7 @@ describe('revealImageFunction', () => {
       {} as ExecutionContext
     );
     expect(result).toHaveProperty('type', 'render');
-    expect(result).toHaveProperty('as', 'revealImage');
+    expect(result).toHaveProperty('as', 'shape');
   });
 
   describe('context', () => {

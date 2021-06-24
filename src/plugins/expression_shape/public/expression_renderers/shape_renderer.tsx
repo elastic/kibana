@@ -11,21 +11,21 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { withSuspense } from '../../../presentation_util/public';
 import { getRendererStrings } from '../../common/i18n';
-import { RevealImageRendererConfig } from '../../common/types';
+import { ShapeRendererConfig } from '../../common/types';
 
-const { revealImage: revealImageStrings } = getRendererStrings();
+const { shape: shapeStrings } = getRendererStrings();
 
-const LazyRevealImageComponent = lazy(() => import('../components/reveal_image_component'));
-const RevealImageComponent = withSuspense(LazyRevealImageComponent, null);
+const LazyShapeComponent = lazy(() => import('../components/shape_component'));
+const ShapeComponent = withSuspense(LazyShapeComponent, null);
 
-export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRendererConfig> => ({
-  name: 'revealImage',
-  displayName: revealImageStrings.getDisplayName(),
-  help: revealImageStrings.getHelpDescription(),
+export const shapeRenderer = (): ExpressionRenderDefinition<ShapeRendererConfig> => ({
+  name: 'shape',
+  displayName: shapeStrings.getDisplayName(),
+  help: shapeStrings.getHelpDescription(),
   reuseDomNode: true,
   render: async (
     domNode: HTMLElement,
-    config: RevealImageRendererConfig,
+    config: ShapeRendererConfig,
     handlers: IInterpreterRenderHandlers
   ) => {
     handlers.onDestroy(() => {
@@ -34,7 +34,7 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
 
     render(
       <I18nProvider>
-        <RevealImageComponent handlers={handlers} {...config} parentNode={domNode} />
+        <ShapeComponent handlers={handlers} {...config} parentNode={domNode} />
       </I18nProvider>,
       domNode
     );

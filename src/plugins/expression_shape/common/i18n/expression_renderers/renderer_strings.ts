@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { revealImage } from './dict';
+import { shape } from './dict';
 
 /**
  * Help text for Canvas Functions should be properly localized. This function will
@@ -17,5 +17,5 @@ import { revealImage } from './dict';
  * if ever necessary.
  */
 export const getRendererStrings = () => ({
-  revealImage,
+  shape,
 });

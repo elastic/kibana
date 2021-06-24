@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { revealImageRenderer } from './reveal_image_renderer';
+import { shapeRenderer } from './shape_renderer';
 
-export const renderers = [revealImageRenderer];
+export const renderers = [shapeRenderer];
 
-export { revealImageRenderer };
+export { shapeRenderer };

@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 
 export const strings = {
   getDisplayName: () =>
-    i18n.translate('expressionRevealImage.renderer.revealImage.displayName', {
+    i18n.translate('expressionShape.renderer.shape.displayName', {
       defaultMessage: 'Image reveal',
     }),
   getHelpDescription: () =>
-    i18n.translate('expressionRevealImage.renderer.revealImage.helpDescription', {
+    i18n.translate('expressionShape.renderer.shape.helpDescription', {
       defaultMessage: 'Reveal a percentage of an image to make a custom gauge-style chart',
     }),
 };

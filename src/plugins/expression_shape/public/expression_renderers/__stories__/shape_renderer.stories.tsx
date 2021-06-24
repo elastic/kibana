@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { revealImageRenderer } from '../';
+import { shapeRenderer } from '../';
 import { elasticOutline, elasticLogo } from '../../../../presentation_util/public';
 import { Render } from '../../../../presentation_util/public/__stories__';
 
 import { Origin } from '../../../common/types/expression_functions';
 
-storiesOf('renderers/revealImage', module).add('default', () => {
+storiesOf('renderers/shape', module).add('default', () => {
   const config = {
     image: elasticLogo,
     emptyImage: elasticOutline,
@@ -22,5 +22,5 @@ storiesOf('renderers/revealImage', module).add('default', () => {
     percent: 0.45,
   };
 
-  return <Render renderer={revealImageRenderer} config={config} />;
+  return <Render renderer={shapeRenderer} config={config} />;
 });

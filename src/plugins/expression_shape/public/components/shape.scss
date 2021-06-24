@@ -1,4 +1,4 @@
-.revealImage {
+.shape {
   height: 100%;
   width: 100%;
   display: flex;
@@ -6,13 +6,13 @@
   justify-content: center;
   pointer-events: none;
 
-  .revealImageAligner {
+  .shapeAligner {
     background-size: contain;
     background-repeat: no-repeat;
   }
 
   // disables selection and dragging
-  .revealImage__image {
+  .shape__image {
     user-select: none;
   }
 }

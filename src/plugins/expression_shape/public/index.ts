@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionRevealImagePlugin } from './plugin';
+import { ExpressionShapePlugin } from './plugin';
 
-export type { ExpressionRevealImagePluginSetup, ExpressionRevealImagePluginStart } from './plugin';
+export type { ExpressionShapePluginSetup, ExpressionShapePluginStart } from './plugin';
 
 export function plugin() {
-  return new ExpressionRevealImagePlugin();
+  return new ExpressionShapePlugin();
 }
 
 export * from './expression_functions';

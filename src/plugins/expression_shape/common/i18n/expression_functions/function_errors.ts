@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { errors as revealImage } from './dict/reveal_image';
+import { errors as shape } from './dict/shape';
 
 export const getFunctionErrors = () => ({
-  revealImage,
+  shape,
 });

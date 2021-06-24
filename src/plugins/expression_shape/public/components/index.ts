@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './reveal_image_component';
+export * from './shape_component';

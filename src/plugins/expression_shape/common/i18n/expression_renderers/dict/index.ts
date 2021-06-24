@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { strings as revealImage } from './reveal_image';
+export { strings as shape } from './shape';

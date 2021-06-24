@@ -8,14 +8,14 @@
 
 import { resolveWithMissingImage, elasticOutline } from '../../../presentation_util/public';
 import { getFunctionHelp, getFunctionErrors } from '../../common/i18n';
-import { ExpressionRevealImageFunction, Origin } from '../../common/types';
+import { ExpressionShapeFunction, Origin } from '../../common/types';
 
-export const revealImageFunction: ExpressionRevealImageFunction = () => {
-  const { help, args: argHelp } = getFunctionHelp().revealImage;
-  const errors = getFunctionErrors().revealImage;
+export const shapeFunction: ExpressionShapeFunction = () => {
+  const { help, args: argHelp } = getFunctionHelp().shape;
+  const errors = getFunctionErrors().shape;
 
   return {
-    name: 'revealImage',
+    name: 'shape',
     aliases: [],
     type: 'render',
     inputTypes: ['number'],
@@ -45,7 +45,7 @@ export const revealImageFunction: ExpressionRevealImageFunction = () => {
 
       return {
         type: 'render',
-        as: 'revealImage',
+        as: 'shape',
         value: {
           percent,
           ...args,

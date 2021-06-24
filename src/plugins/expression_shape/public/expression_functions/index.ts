@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { revealImageFunction } from './reveal_image_function';
+import { shapeFunction } from './shape_function';
 
-export const functions = [revealImageFunction];
+export const functions = [shapeFunction];
 
-export { revealImageFunction };
+export { shapeFunction };

@@ -7,7 +7,7 @@
  */
 
 export type OriginString = 'bottom' | 'left' | 'top' | 'right';
-export interface RevealImageRendererConfig {
+export interface ShapeRendererConfig {
   percent: number;
   origin?: OriginString;
   image?: string;

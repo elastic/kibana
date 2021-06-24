@@ -8,8 +8,8 @@
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { revealImageFunction } from './expression_functions';
-import { revealImageRenderer } from './expression_renderers';
+import { shapeFunction } from './expression_functions';
+import { shapeRenderer } from './expression_renderers';
 
 interface SetupDeps {
   expressions: ExpressionsSetup;
@@ -19,23 +19,17 @@ interface StartDeps {
   expression: ExpressionsStart;
 }
 
-export type ExpressionRevealImagePluginSetup = void;
-export type ExpressionRevealImagePluginStart = void;
+export type ExpressionShapePluginSetup = void;
+export type ExpressionShapePluginStart = void;
 
-export class ExpressionRevealImagePlugin
-  implements
-    Plugin<
-      ExpressionRevealImagePluginSetup,
-      ExpressionRevealImagePluginStart,
-      SetupDeps,
-      StartDeps
-    > {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionRevealImagePluginSetup {
-    expressions.registerFunction(revealImageFunction);
-    expressions.registerRenderer(revealImageRenderer);
+export class ExpressionShapePlugin
+  implements Plugin<ExpressionShapePluginSetup, ExpressionShapePluginStart, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
+    expressions.registerFunction(shapeFunction);
+    expressions.registerRenderer(shapeRenderer);
   }
 
-  public start(core: CoreStart): ExpressionRevealImagePluginStart {}
+  public start(core: CoreStart): ExpressionShapePluginStart {}
 
   public stop() {}
 }
