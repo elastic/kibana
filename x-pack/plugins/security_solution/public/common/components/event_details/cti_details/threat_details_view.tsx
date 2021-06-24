@@ -65,19 +65,21 @@ const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
 const columns: Array<EuiBasicTableColumn<SummaryRow>> = getSummaryColumns(ThreatDetailsDescription);
 
 const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
-  Object.keys(enrichment).map((field) => {
-    const displayField = field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
-      ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}.`, '')
-      : field;
+  Object.keys(enrichment)
+    .sort()
+    .map((field) => {
+      const displayField = field.startsWith(DEFAULT_INDICATOR_SOURCE_PATH)
+        ? field.replace(`${DEFAULT_INDICATOR_SOURCE_PATH}.`, '')
+        : field;
 
-    return {
-      title: displayField,
-      description: {
-        fieldName: field,
-        value: getFirstElement(enrichment[field]),
-      },
-    };
-  });
+      return {
+        title: displayField,
+        description: {
+          fieldName: field,
+          value: getFirstElement(enrichment[field]),
+        },
+      };
+    });
 
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
