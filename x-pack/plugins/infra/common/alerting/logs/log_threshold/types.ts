@@ -313,9 +313,7 @@ export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
         rt.type({
           buckets: rt.array(
             rt.intersection([
-              rt.type({
-                ...bucketFieldsRT.props,
-              }),
+              bucketFieldsRT,
               ChartPreviewBucketsRT,
             ])
           ),
