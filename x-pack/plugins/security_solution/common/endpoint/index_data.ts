@@ -412,6 +412,7 @@ const indexFleetActionsForHost = async (
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
   const agentId = endpointHost.elastic.agent.id;
   const total = fleetActionGenerator.randomN(5);
+  const query = 'SELECT name, path, pid FROM processes WHERE on_disk = 0;';
 
   for (let i = 0; i < total; i++) {
     // create an action
@@ -423,7 +424,7 @@ const indexFleetActionsForHost = async (
     const OSQueryAction = fleetActionGenerator.generateOSQueryAction({
       input_type: 'osquery',
       data: {
-        query: 'SELECT name, path, pid FROM processes WHERE on_disk = 0;',
+        query,
       },
     });
 
@@ -469,20 +470,49 @@ const indexFleetActionsForHost = async (
       error: fleetActionGenerator.randomFloat() < 0.4 ? undefined : 'some error happened',
     });
 
-    await esClient.index(
-      {
-        index: AGENT_ACTIONS_RESULTS_INDEX,
-        body: actionResponse,
+    const OSQueryActionResponse = fleetActionGenerator.generateOSQueryResponse({
+      action_id: OSQueryAction.action_id,
+      agent_id: agentId,
+      action_data: {
+        query,
       },
-      ES_INDEX_OPTIONS
-    );
+      error: fleetActionGenerator.randomFloat() < 0.4 ? undefined : 'some error happened',
+    });
+
+    const fleetActionResponse = fleetActionGenerator.generateFleetResponse({
+      agent_id: agentId,
+    });
+
+    await Promise.all([
+      esClient.index(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          body: actionResponse,
+        },
+        ES_INDEX_OPTIONS
+      ),
+      esClient.index(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          body: OSQueryActionResponse,
+        },
+        ES_INDEX_OPTIONS
+      ),
+      esClient.index(
+        {
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          body: fleetActionResponse,
+        },
+        ES_INDEX_OPTIONS
+      ),
+    ]);
   }
 
   // Add edge cases (maybe)
   if (fleetActionGenerator.randomFloat() < 0.3) {
     const randomFloat = fleetActionGenerator.randomFloat();
 
-    // 60% of the time just add either an Isoalte -OR- an UnIsolate action
+    // 60% of the time just add either an Isolate -OR- an UnIsolate action
     if (randomFloat < 0.6) {
       let action: EndpointAction;
 
