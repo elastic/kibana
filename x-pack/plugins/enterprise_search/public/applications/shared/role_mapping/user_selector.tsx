@@ -16,7 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Role as ASRole } from '../../app_search/types';
+import { RoleTypes as ASRole } from '../../app_search/types';
 import { ElasticsearchUser } from '../../shared/types';
 import { Role as WSRole } from '../../workplace_search/types';
 
@@ -80,7 +80,7 @@ export const UserSelector: React.FC<Props> = ({
   );
 
   const emailInput = (
-    <EuiFormRow label={EMAIL_LABEL} helpText={!elasticsearchUser.email && REQUIRED_LABEL}>
+    <EuiFormRow label={EMAIL_LABEL}>
       <EuiFieldText
         name={EMAIL_LABEL}
         data-test-subj="EmailInput"
@@ -95,6 +95,7 @@ export const UserSelector: React.FC<Props> = ({
       <EuiFormRow label={USERNAME_LABEL} helpText={!elasticsearchUser.username && REQUIRED_LABEL}>
         <EuiFieldText
           name={USERNAME_LABEL}
+          disabled={!isNewUser}
           data-test-subj="UsernameInput"
           value={elasticsearchUser.username}
           onChange={(e) => setElasticsearchUsernameValue(e.target.value)}

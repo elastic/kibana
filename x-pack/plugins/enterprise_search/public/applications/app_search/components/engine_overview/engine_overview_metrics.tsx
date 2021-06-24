@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useActions, useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +17,16 @@ import { AppSearchPageTemplate } from '../layout';
 
 import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 
+import { EngineOverviewLogic } from './';
+
 export const EngineOverviewMetrics: React.FC = () => {
+  const { loadOverviewMetrics } = useActions(EngineOverviewLogic);
+  const { dataLoading } = useValues(EngineOverviewLogic);
+
+  useEffect(() => {
+    loadOverviewMetrics();
+  }, []);
+
   return (
     <AppSearchPageTemplate
       pageChrome={getEngineBreadcrumbs()}
@@ -24,6 +35,7 @@ export const EngineOverviewMetrics: React.FC = () => {
           defaultMessage: 'Engine overview',
         }),
       }}
+      isLoading={dataLoading}
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>

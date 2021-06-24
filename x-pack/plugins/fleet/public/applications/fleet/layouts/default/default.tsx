@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { Section } from '../sections';
-import { useLink, useConfig } from '../hooks';
-import { WithHeaderLayout } from '../../../layouts';
+import type { Section } from '../../sections';
+import { useLink, useConfig } from '../../hooks';
+import { WithHeaderLayout } from '../../../../layouts';
+
+import { DefaultPageTitle } from './default_page_title';
 
 interface Props {
   section?: Section;
@@ -24,31 +25,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({ section, childre
 
   return (
     <WithHeaderLayout
-      leftColumn={
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
-            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage id="xpack.fleet.overviewPageTitle" defaultMessage="Fleet" />
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.fleet.overviewPageSubtitle"
-                  defaultMessage="Centralized management for Elastic Agents"
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      leftColumn={<DefaultPageTitle />}
       tabs={[
         {
           name: (

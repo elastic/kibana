@@ -15,7 +15,7 @@ export const LIBRARY_PATH = '/library';
 export const SETTINGS_PATH = '/settings';
 export const CREDENTIALS_PATH = '/credentials';
 
-export const ROLE_MAPPINGS_PATH = '/role_mappings';
+export const USERS_AND_ROLES_PATH = '/users_and_roles';
 
 export const ENGINES_PATH = '/engines';
 export const ENGINE_CREATION_PATH = `${ENGINES_PATH}/new`; // This is safe from conflicting with an :engineName path because new is a reserved name
