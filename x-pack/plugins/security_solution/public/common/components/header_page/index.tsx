@@ -148,3 +148,5 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
     </>
   );
 };
+
+export const HeaderPage = React.memo(HeaderPageComponent);
