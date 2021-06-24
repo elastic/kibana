@@ -5,6 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { VisTypeXyServerPlugin } from './plugin';
 
-export const DEFAULT_PERCENT_DECIMALS = 2;
-export const LEGACY_PIE_CHARTS_LIBRARY = 'visualization:visualize:legacyPieChartsLibrary';
+export const plugin = () => new VisTypeXyServerPlugin();
