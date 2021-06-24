@@ -87,6 +87,13 @@ describe('RoleMappingsLogic', () => {
       });
     });
 
+    it('setRoleMappings', () => {
+      RoleMappingsLogic.actions.setRoleMappings({ roleMappings: [asRoleMapping] });
+
+      expect(RoleMappingsLogic.values.roleMappings).toEqual([asRoleMapping]);
+      expect(RoleMappingsLogic.values.dataLoading).toEqual(false);
+    });
+
     it('handleRoleChange', () => {
       RoleMappingsLogic.actions.handleRoleChange('dev');
 
@@ -266,6 +273,30 @@ describe('RoleMappingsLogic', () => {
   });
 
   describe('listeners', () => {
+    describe('enableRoleBasedAccess', () => {
+      it('calls API and sets values', async () => {
+        const setRoleMappingsSpy = jest.spyOn(RoleMappingsLogic.actions, 'setRoleMappings');
+        http.post.mockReturnValue(Promise.resolve(mappingsServerProps));
+        RoleMappingsLogic.actions.enableRoleBasedAccess();
+
+        expect(RoleMappingsLogic.values.dataLoading).toEqual(true);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/api/app_search/role_mappings/enable_role_based_access'
+        );
+        await nextTick();
+        expect(setRoleMappingsSpy).toHaveBeenCalledWith(mappingsServerProps);
+      });
+
+      it('handles error', async () => {
+        http.post.mockReturnValue(Promise.reject('this is an error'));
+        RoleMappingsLogic.actions.enableRoleBasedAccess();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+      });
+    });
+
     describe('initializeRoleMappings', () => {
       it('calls API and sets values', async () => {
         const setRoleMappingsDataSpy = jest.spyOn(RoleMappingsLogic.actions, 'setRoleMappingsData');
@@ -400,17 +431,7 @@ describe('RoleMappingsLogic', () => {
     });
 
     describe('handleDeleteMapping', () => {
-      let confirmSpy: any;
       const roleMappingId = 'r1';
-
-      beforeEach(() => {
-        confirmSpy = jest.spyOn(window, 'confirm');
-        confirmSpy.mockImplementation(jest.fn(() => true));
-      });
-
-      afterEach(() => {
-        confirmSpy.mockRestore();
-      });
 
       it('calls API and refreshes list', async () => {
         mount(mappingsServerProps);
@@ -435,14 +456,6 @@ describe('RoleMappingsLogic', () => {
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
-      });
-
-      it('will do nothing if not confirmed', () => {
-        mount(mappingsServerProps);
-        jest.spyOn(window, 'confirm').mockReturnValueOnce(false);
-        RoleMappingsLogic.actions.handleDeleteMapping(roleMappingId);
-
-        expect(http.delete).not.toHaveBeenCalled();
       });
     });
   });
