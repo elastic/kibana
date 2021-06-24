@@ -12,7 +12,6 @@ import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../ty
 import { AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
-  DETECTION_ENGINE,
   ALERTS,
   RULES,
   EXCEPTIONS,
@@ -53,7 +52,7 @@ export const topDeepLinks: AppDeepLink[] = [
   },
   {
     id: SecurityPageName.detections,
-    title: DETECTION_ENGINE,
+    title: ALERTS,
     path: ALERTS_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
     keywords: [
@@ -137,20 +136,6 @@ const nestedDeepLinks: SecurityDeepLinks = {
   },
   [SecurityPageName.detections]: {
     base: [
-      {
-        id: SecurityPageName.alerts,
-        title: ALERTS,
-        path: ALERTS_PATH,
-        navLinkStatus: AppNavLinkStatus.hidden,
-        keywords: [
-          i18n.translate('xpack.securitySolution.search.alerts', {
-            defaultMessage: 'Alerts',
-          }),
-        ],
-        searchable: true,
-        order: 9001,
-        euiIconType: APP_ICON_SOLUTION,
-      },
       {
         id: SecurityPageName.rules,
         title: RULES,

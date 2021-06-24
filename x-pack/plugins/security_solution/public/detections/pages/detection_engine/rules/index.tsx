@@ -125,7 +125,6 @@ const RulesPageComponent: React.FC = () => {
   const goToNewRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      // history.push(getCreateRuleUrl());
       navigateToApp(APP_ID, { deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
     },
     [navigateToApp]
