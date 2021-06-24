@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { Datatable, DatatableColumn, getType } from '../../expression_types';
+import { getFirstNonNullValue } from './helpers';
 
 export interface MapColumnArguments {
   id?: string | null;
@@ -103,7 +104,7 @@ export const mapColumn: ExpressionFunctionDefinition<
 
       return rows$.pipe<Datatable>(
         map((rows) => {
-          const type = getType(rows[0]?.[id]);
+          const type = getType(getFirstNonNullValue(rows, id));
           const newColumn: DatatableColumn = {
             id,
             name: args.name,

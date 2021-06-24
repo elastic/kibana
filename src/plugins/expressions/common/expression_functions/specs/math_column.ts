@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { math, MathArguments } from './math';
 import { Datatable, DatatableColumn, getType } from '../../expression_types';
+import { getFirstNonNullValue } from './helpers';
 
 export type MathColumnArguments = MathArguments & {
   id: string;
@@ -104,7 +105,7 @@ export const mathColumn: ExpressionFunctionDefinition<
 
       return { ...row, [args.id]: result };
     });
-    const type = newRows.length ? getType(newRows[0][args.id]) : 'null';
+    const type = getType(getFirstNonNullValue(newRows, args.id));
     const newColumn: DatatableColumn = {
       id: args.id,
       name: args.name ?? args.id,
