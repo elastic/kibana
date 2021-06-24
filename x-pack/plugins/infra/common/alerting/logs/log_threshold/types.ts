@@ -311,12 +311,7 @@ export const OptimizedGroupedSearchQueryResponseRT = rt.intersection([
     aggregations: rt.type({
       groups: rt.intersection([
         rt.type({
-          buckets: rt.array(
-            rt.intersection([
-              bucketFieldsRT,
-              ChartPreviewBucketsRT,
-            ])
-          ),
+          buckets: rt.array(rt.intersection([bucketFieldsRT, ChartPreviewBucketsRT])),
         }),
         afterKeyRT,
       ]),
