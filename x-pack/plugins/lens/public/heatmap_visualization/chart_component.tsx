@@ -62,7 +62,10 @@ function shiftAndNormalizeStops(
   { min, max }: { min: number; max: number }
 ) {
   // data min is the fallback in case of default options
-  return [params.rangeMin ?? min, ...getStops(params, { min, max })].map((value) => {
+  return [
+    params.stops.length && params.rangeMin != null ? params.rangeMin : min,
+    ...getStops(params, { min, max }),
+  ].map((value) => {
     let result = value;
     if (params.range === 'percent') {
       result = min + ((max - min) * value) / 100;
