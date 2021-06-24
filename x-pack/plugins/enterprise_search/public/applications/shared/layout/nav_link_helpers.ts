@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EuiSideNavItemType } from '@elastic/eui';
+
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { KibanaLogic } from '../kibana';
@@ -14,12 +16,14 @@ interface Params {
   to: string;
   isRoot?: boolean;
   shouldShowActiveForSubroutes?: boolean;
+  items?: Array<EuiSideNavItemType<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper
 }
 
-export const generateNavLink = ({ to, ...rest }: Params & ReactRouterProps) => {
+export const generateNavLink = ({ to, items, ...rest }: Params & ReactRouterProps) => {
   return {
     ...generateReactRouterProps({ to, ...rest }),
-    isSelected: getNavLinkActive({ to, ...rest }),
+    isSelected: getNavLinkActive({ to, items, ...rest }),
+    items,
   };
 };
 
@@ -27,14 +31,19 @@ export const getNavLinkActive = ({
   to,
   isRoot = false,
   shouldShowActiveForSubroutes = false,
+  items = [],
 }: Params): boolean => {
   const { pathname } = KibanaLogic.values.history.location;
   const currentPath = stripTrailingSlash(pathname);
 
-  const isActive =
-    currentPath === to ||
-    (shouldShowActiveForSubroutes && currentPath.startsWith(to)) ||
-    (isRoot && currentPath === '');
+  if (currentPath === to) return true;
 
-  return isActive;
+  if (isRoot && currentPath === '') return true;
+
+  if (shouldShowActiveForSubroutes) {
+    if (items.length) return false; // If a nav link has sub-nav items open, never show it as active
+    if (currentPath.startsWith(to)) return true;
+  }
+
+  return false;
 };

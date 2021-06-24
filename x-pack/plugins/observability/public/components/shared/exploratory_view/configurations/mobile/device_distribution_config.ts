@@ -14,7 +14,7 @@ import { MobileFields } from './mobile_fields';
 
 export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
   return {
-    reportType: 'mobile-device-distribution',
+    reportType: 'device-data-distribution',
     defaultSeriesType: 'bar',
     seriesTypes: ['bar', 'bar_horizontal'],
     xAxisColumn: {

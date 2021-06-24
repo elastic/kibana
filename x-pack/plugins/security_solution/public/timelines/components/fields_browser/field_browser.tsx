@@ -19,13 +19,8 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import {
-  isEscape,
-  isTab,
-  stopPropagationAndPreventDefault,
-} from '../../../common/components/accessibility/helpers';
+import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../timelines/public';
 import { BrowserFields } from '../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 import { Header } from './header';
@@ -42,6 +37,7 @@ import { FieldBrowserProps, OnHideFieldBrowser } from './types';
 import { timelineActions } from '../../store/timeline';
 
 import * as i18n from './translations';
+import { ColumnHeaderOptions } from '../../../../common';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
   background-color: ${({ theme }) => theme.eui.euiColorLightestShade};

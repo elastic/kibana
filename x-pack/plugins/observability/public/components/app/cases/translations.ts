@@ -201,3 +201,17 @@ export const CONNECTORS = i18n.translate('xpack.observability.cases.caseView.con
 export const EDIT_CONNECTOR = i18n.translate('xpack.observability.cases.caseView.editConnector', {
   defaultMessage: 'Change external incident management system',
 });
+
+export const READ_ONLY_BADGE_TEXT = i18n.translate(
+  'xpack.observability.cases.badge.readOnly.text',
+  {
+    defaultMessage: 'Read only',
+  }
+);
+
+export const READ_ONLY_BADGE_TOOLTIP = i18n.translate(
+  'xpack.observability.cases.badge.readOnly.tooltip',
+  {
+    defaultMessage: 'Unable to create or edit cases',
+  }
+);
