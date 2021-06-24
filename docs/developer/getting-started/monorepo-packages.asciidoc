@@ -87,6 +87,7 @@ yarn kbn watch-bazel
 - @kbn/mapbox-gl
 - @kbn/monaco
 - @kbn/optimizer
+- @kbn/plugin-helpers
 - @kbn/rule-data-utils
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-hook-utils
