@@ -16,8 +16,6 @@ import { LICENSED_SUPPORT_URL } from '../../../../common/constants';
 import { LicensingLogic } from '../licensing';
 import { EuiButtonTo } from '../react_router_helpers';
 
-import './logos/logo.scss';
-
 interface Props {
   productSupportUrl: string;
   backToLink?: string;
