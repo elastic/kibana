@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -21,13 +22,18 @@ import {
   getEventLog,
 } from '../../../common/lib';
 import { IValidatedEvent } from '../../../../../plugins/event_log/server';
+import {
+  TaskRunning,
+  TaskRunningStage,
+} from '../../../../../plugins/task_manager/server/task_running';
+import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 
 const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
@@ -128,11 +134,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 'alert:test.always-firing',
                 reference
               );
-              expect(alertSearchResult.hits.total.value).to.eql(1);
-              const alertSearchResultWithoutDates = omit(alertSearchResult.hits.hits[0]._source, [
-                'alertInfo.createdAt',
-                'alertInfo.updatedAt',
-              ]);
+              expect(alertSearchResult.body.hits.total.value).to.eql(1);
+              const alertSearchResultWithoutDates = omit(
+                alertSearchResult.body.hits.hits[0]._source,
+                ['alertInfo.createdAt', 'alertInfo.updatedAt']
+              );
               expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
@@ -171,10 +177,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   ruleTypeName: 'Test: Always Firing',
                 },
               });
-              expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+              expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.createdAt).to.match(
                 /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
               );
-              expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+              expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.updatedAt).to.match(
                 /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
               );
 
@@ -183,8 +189,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(actionSearchResult.hits.total.value).to.eql(1);
-              expect(actionSearchResult.hits.hits[0]._source).to.eql({
+              expect(actionSearchResult.body.hits.total.value).to.eql(1);
+              expect(actionSearchResult.body.hits.hits[0]._source).to.eql({
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
@@ -275,11 +281,11 @@ instanceStateValue: true
                 'alert:test.always-firing',
                 reference
               );
-              expect(alertSearchResult.hits.total.value).to.eql(1);
-              const alertSearchResultWithoutDates = omit(alertSearchResult.hits.hits[0]._source, [
-                'alertInfo.createdAt',
-                'alertInfo.updatedAt',
-              ]);
+              expect(alertSearchResult.body.hits.total.value).to.eql(1);
+              const alertSearchResultWithoutDates = omit(
+                alertSearchResult.body.hits.hits[0]._source,
+                ['alertInfo.createdAt', 'alertInfo.updatedAt']
+              );
               expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
@@ -319,10 +325,10 @@ instanceStateValue: true
                 },
               });
 
-              expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+              expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.createdAt).to.match(
                 /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
               );
-              expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+              expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.updatedAt).to.match(
                 /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
               );
               // Ensure only 1 action executed with proper params
@@ -330,8 +336,8 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(actionSearchResult.hits.total.value).to.eql(1);
-              expect(actionSearchResult.hits.hits[0]._source).to.eql({
+              expect(actionSearchResult.body.hits.total.value).to.eql(1);
+              expect(actionSearchResult.body.hits.hits[0]._source).to.eql({
                 config: {
                   unencrypted: 'ignored-but-required',
                 },
@@ -410,9 +416,9 @@ instanceStateValue: true
             reference2
           );
 
-          expect(alertSearchResult.hits.total.value).to.be.greaterThan(0);
+          expect(alertSearchResult.body.hits.total.value).to.be.greaterThan(0);
           const alertSearchResultInfoWithoutDates = omit(
-            alertSearchResult.hits.hits[0]._source.alertInfo,
+            alertSearchResult.body.hits.hits[0]._source.alertInfo,
             ['createdAt', 'updatedAt']
           );
           expect(alertSearchResultInfoWithoutDates).to.eql({
@@ -445,16 +451,16 @@ instanceStateValue: true
             ruleTypeName: 'Test: Always Firing',
           });
 
-          expect(alertSearchResult.hits.hits[0]._source.alertInfo.createdAt).to.match(
+          expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.createdAt).to.match(
             /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
           );
-          expect(alertSearchResult.hits.hits[0]._source.alertInfo.updatedAt).to.match(
+          expect(alertSearchResult.body.hits.hits[0]._source.alertInfo.updatedAt).to.match(
             /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
           );
         });
 
         it('should handle custom retry logic when appropriate', async () => {
-          const testStart = new Date();
+          const testStart = new Date().toISOString();
           // We have to provide the test.rate-limit the next runAt, for testing purposes
           const retryDate = new Date(Date.now() + 60000);
 
@@ -525,8 +531,12 @@ instanceStateValue: true
               objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Wait for the task to be attempted once and idle
-              const scheduledActionTask = await retry.try(async () => {
-                const searchResult = await es.search({
+              const scheduledActionTask: estypes.SearchHit<
+                TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
+              > = await retry.try(async () => {
+                const searchResult: ApiResponse<
+                  estypes.SearchResponse<TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>>
+                > = await es.search({
                   index: '.kibana_task_manager',
                   body: {
                     query: {
@@ -559,12 +569,12 @@ instanceStateValue: true
                     },
                   },
                 });
-                expect(searchResult.hits.total.value).to.eql(1);
-                return searchResult.hits.hits[0];
+                expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.eql(1);
+                return searchResult.body.hits.hits[0];
               });
 
               // Ensure the next runAt is set to the retryDate by custom logic
-              expect(scheduledActionTask._source.task.runAt).to.eql(retryDate.toISOString());
+              expect(scheduledActionTask._source!.task.runAt).to.eql(retryDate.toISOString());
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -620,21 +630,21 @@ instanceStateValue: true
 
               // Ensure only 1 document exists with proper params
               searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              expect(searchResult.hits.hits[0]._source.state).to.eql({
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
                 callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
-                  ...searchResult.hits.hits[0]._source.state.callClusterError,
+                  ...searchResult.body.hits.hits[0]._source.state.callClusterError,
                 },
                 callScopedClusterError: {
-                  ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
+                  ...searchResult.body.hits.hits[0]._source.state.callScopedClusterError,
                 },
                 savedObjectsClientError: {
-                  ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
+                  ...searchResult.body.hits.hits[0]._source.state.savedObjectsClientError,
                   output: {
-                    ...searchResult.hits.hits[0]._source.state.savedObjectsClientError.output,
+                    ...searchResult.body.hits.hits[0]._source.state.savedObjectsClientError.output,
                     statusCode: 403,
                   },
                 },
@@ -651,15 +661,15 @@ instanceStateValue: true
 
               // Ensure only 1 document exists with proper params
               searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              expect(searchResult.hits.hits[0]._source.state).to.eql({
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
                 callScopedClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
-                  ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
+                  ...searchResult.body.hits.hits[0]._source.state.savedObjectsClientError,
                   output: {
-                    ...searchResult.hits.hits[0]._source.state.savedObjectsClientError.output,
+                    ...searchResult.body.hits.hits[0]._source.state.savedObjectsClientError.output,
                     statusCode: 404,
                   },
                 },
@@ -737,21 +747,21 @@ instanceStateValue: true
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              expect(searchResult.hits.hits[0]._source.state).to.eql({
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
                 callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
-                  ...searchResult.hits.hits[0]._source.state.callClusterError,
+                  ...searchResult.body.hits.hits[0]._source.state.callClusterError,
                 },
                 callScopedClusterError: {
-                  ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
+                  ...searchResult.body.hits.hits[0]._source.state.callScopedClusterError,
                 },
                 savedObjectsClientError: {
-                  ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
+                  ...searchResult.body.hits.hits[0]._source.state.savedObjectsClientError,
                   output: {
-                    ...searchResult.hits.hits[0]._source.state.savedObjectsClientError.output,
+                    ...searchResult.body.hits.hits[0]._source.state.savedObjectsClientError.output,
                     statusCode: 403,
                   },
                 },
@@ -776,15 +786,15 @@ instanceStateValue: true
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              expect(searchResult.hits.hits[0]._source.state).to.eql({
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
                 callScopedClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
-                  ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
+                  ...searchResult.body.hits.hits[0]._source.state.savedObjectsClientError,
                   output: {
-                    ...searchResult.hits.hits[0]._source.state.savedObjectsClientError.output,
+                    ...searchResult.body.hits.hits[0]._source.state.savedObjectsClientError.output,
                     statusCode: 404,
                   },
                 },
@@ -842,7 +852,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -921,8 +931,8 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(2);
-              const messages: string[] = searchResult.hits.hits.map(
+              expect(searchResult.body.hits.total.value).to.eql(2);
+              const messages: string[] = searchResult.body.hits.hits.map(
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default', 'from:other']);
@@ -995,8 +1005,8 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(2);
-              const messages: string[] = searchResult.hits.hits.map(
+              expect(searchResult.body.hits.total.value).to.eql(2);
+              const messages: string[] = searchResult.body.hits.hits.map(
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default:next', 'from:default:prev']);
@@ -1058,7 +1068,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(2);
+              expect(searchResult.body.hits.total.value).to.eql(2);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1116,7 +1126,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(executedActionsResult.hits.total.value).to.eql(0);
+              expect(executedActionsResult.body.hits.total.value).to.eql(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1174,7 +1184,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(executedActionsResult.hits.total.value).to.eql(0);
+              expect(executedActionsResult.body.hits.total.value).to.eql(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1233,7 +1243,7 @@ instanceStateValue: true
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(1);
+              expect(searchResult.body.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -1304,7 +1314,6 @@ instanceStateValue: true
       license: 'basic',
       category: ruleObject.alertInfo.ruleTypeId,
       ruleset: ruleObject.alertInfo.producer,
-      namespace: spaceId,
       name: ruleObject.alertInfo.name,
     });
 
