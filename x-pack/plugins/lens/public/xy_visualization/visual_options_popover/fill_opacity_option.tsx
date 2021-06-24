@@ -33,13 +33,13 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
   return isFillOpacityEnabled ? (
     <>
-      <EuiSpacer />
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate('xpack.lens.xyChart.fillOpacityLabel', {
           defaultMessage: 'Fill opacity',
         })}
         fullWidth
+        className="lnsXyToolbar__visualOption"
       >
         <EuiRange
           data-test-subj="lnsFillOpacity"

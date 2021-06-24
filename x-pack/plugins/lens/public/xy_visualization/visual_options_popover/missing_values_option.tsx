@@ -63,7 +63,6 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
 
   return (
     <>
-      {isValueLabelsEnabled || (isFittingEnabled && <EuiSpacer />)}
       {isValueLabelsEnabled && (
         <EuiFormRow
           display="columnCompressed"
@@ -74,6 +73,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
               })}
             </span>
           }
+          className="lnsXyToolbar__visualOption"
         >
           <EuiButtonGroup
             isFullWidth
@@ -97,6 +97,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
       {isFittingEnabled && (
         <EuiFormRow
           display="columnCompressed"
+          className="lnsXyToolbar__visualOption"
           label={
             <>
               {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
