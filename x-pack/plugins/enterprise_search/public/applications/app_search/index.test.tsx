@@ -17,7 +17,7 @@ import { Redirect } from 'react-router-dom';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Layout, SideNav, SideNavLink } from '../shared/layout';
+import { SideNav, SideNavLink } from '../shared/layout';
 
 import { rerender } from '../test_helpers';
 
@@ -83,13 +83,6 @@ describe('AppSearchConfigured', () => {
     wrapper = shallow(<AppSearchConfigured {...DEFAULT_INITIAL_APP_DATA} />);
   });
 
-  it('renders with layout', () => {
-    expect(wrapper.find(Layout)).toHaveLength(1);
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
-    expect(wrapper.find(EnginesOverview)).toHaveLength(1);
-    expect(wrapper.find(EngineRouter)).toHaveLength(1);
-  });
-
   it('renders header actions', () => {
     expect(renderHeaderActions).toHaveBeenCalled();
   });
@@ -98,11 +91,9 @@ describe('AppSearchConfigured', () => {
     expect(AppLogic).toHaveBeenCalledWith(DEFAULT_INITIAL_APP_DATA);
   });
 
-  it('passes readOnlyMode state', () => {
-    setMockValues({ myRole: {}, readOnlyMode: true });
-    rerender(wrapper);
-
-    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
+  it('renders engine routes', () => {
+    expect(wrapper.find(EnginesOverview)).toHaveLength(1);
+    expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
 
   describe('routes with ability checks', () => {
@@ -196,6 +187,6 @@ describe('AppSearchNav', () => {
     setMockValues({ myRole: { canViewRoleMappings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/role_mappings');
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/users_and_roles');
   });
 });

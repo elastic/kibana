@@ -15,12 +15,9 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent,
   EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
@@ -105,37 +102,38 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const docsLink = (
+    <EuiButtonEmpty
+      href={esTransform}
+      target="_blank"
+      iconType="help"
+      data-test-subj="documentationLink"
+    >
+      <FormattedMessage
+        id="xpack.transform.transformsWizard.transformDocsLinkText"
+        defaultMessage="Transform docs"
+      />
+    </EuiButtonEmpty>
+  );
+
   return (
     <PrivilegesWrapper privileges={APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES}>
-      <EuiPageContent data-test-subj="transformPageCloneTransform">
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <h1>
-                <FormattedMessage
-                  id="xpack.transform.transformsWizard.cloneTransformTitle"
-                  defaultMessage="Clone transform"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={esTransform}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.transform.transformsWizard.transformDocsLinkText"
-                  defaultMessage="Transform docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiPageContentBody>
-          <EuiSpacer size="l" />
-          {typeof errorMessage !== 'undefined' && (
+      <EuiPageHeader
+        pageTitle={
+          <FormattedMessage
+            id="xpack.transform.transformsWizard.cloneTransformTitle"
+            defaultMessage="Clone transform"
+          />
+        }
+        rightSideItems={[docsLink]}
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
+      <EuiPageContentBody data-test-subj="transformPageCloneTransform">
+        {typeof errorMessage !== 'undefined' && (
+          <>
             <EuiCallOut
               title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
                 defaultMessage: 'An error occurred getting the transform configuration.',
@@ -145,12 +143,13 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
             >
               <pre>{JSON.stringify(errorMessage)}</pre>
             </EuiCallOut>
-          )}
-          {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
-            <Wizard cloneConfig={transformConfig} searchItems={searchItems} />
-          )}
-        </EuiPageContentBody>
-      </EuiPageContent>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
+          <Wizard cloneConfig={transformConfig} searchItems={searchItems} />
+        )}
+      </EuiPageContentBody>
     </PrivilegesWrapper>
   );
 };
