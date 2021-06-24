@@ -22,9 +22,10 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
-import { HeaderMenuPortal } from '../../../../observability/public';
+import { HeaderMenuPortal, useBreadcrumbs } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { useLinkProps } from '../../hooks/use_link_props';
+import { logsTitle, streamTitle } from './page_titles';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -33,6 +34,13 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const { initialize } = useLogSourceContext();
 
   const kibana = useKibana();
+
+  // useBreadcrumbs([
+  //   {
+  //     text: logsTitle,
+  //     href: `logs/stream`,
+  //   },
+  // ]);
 
   useMount(() => {
     initialize();
@@ -104,7 +112,14 @@ export const LogsPageContent: React.FunctionComponent = () => {
       <Header
         breadcrumbs={[
           {
-            text: pageTitle,
+            text: i18n.translate('xpack.observability.breadcrumbs.observabilityLinkText', {
+              defaultMessage: 'Observability',
+            }),
+            //href: appPath + '/overview',
+          },
+          {
+            text: logsTitle,
+            href: `logs/stream`,
           },
         ]}
         readOnlyBadge={!uiCapabilities?.logs?.save}

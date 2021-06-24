@@ -7,10 +7,23 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
+import { logCategoriesTitle } from '../page_titles';
+import { LOGS_APP } from '../../../../common/constants';
+
 
 export const LogEntryCategoriesPage = () => {
+  useBreadcrumbs(
+    [
+      {
+        text: logCategoriesTitle,
+      },
+    ],
+    LOGS_APP
+  );
+
   return (
     <EuiErrorBoundary>
       <LogEntryCategoriesPageProviders>

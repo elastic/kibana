@@ -11,6 +11,8 @@ import React, { useEffect } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useTrackPageview } from '../../../../../observability/public';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+
 import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
@@ -18,6 +20,7 @@ import { MetricsExplorerToolbar } from './components/toolbar';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
+import { METRICS_APP } from '../../../../common/constants';
 
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
@@ -65,6 +68,15 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [loadData, shouldLoadDefault]);
+
+  useBreadcrumbs(
+    [
+      {
+        text: metricsExplorerTitle,
+      },
+    ],
+    METRICS_APP
+  );
 
   return (
     <EuiErrorBoundary>
