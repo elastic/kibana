@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { DOCS_PREFIX } from '../../../../routes';
 import { RelevanceTuningLogic } from '../../relevance_tuning_logic';
 
-import { getStepDescription } from './utils';
+import { STEP_DESCRIPTIONS } from './constants';
 
 export const PrecisionSlider: React.FC = () => {
   const {
@@ -33,7 +33,7 @@ export const PrecisionSlider: React.FC = () => {
 
   const { updatePrecision } = useActions(RelevanceTuningLogic);
 
-  const stepDescription = getStepDescription(precision);
+  const stepDescription = STEP_DESCRIPTIONS[precision];
 
   return (
     <>

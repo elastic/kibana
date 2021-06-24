@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-jest.mock('./utils', () => ({
-  __esModule: true,
-  getStepDescription: jest.fn(),
-}));
-
 import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -19,7 +14,6 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { rerender } from '../../../../../test_helpers';
 
 import { PrecisionSlider } from './precision_slider';
-import { getStepDescription } from './utils';
 
 const MOCK_VALUES = {
   // RelevanceTuningLogic
@@ -65,19 +59,19 @@ describe('PrecisionSlider', () => {
 
   describe('Step Description', () => {
     it('is visible when there is a step description', () => {
-      (getStepDescription as jest.Mock).mockImplementationOnce(() => 'test description');
+      setMockValues({ ...MOCK_VALUES, precision: 10 });
       rerender(wrapper);
 
       expect(wrapper.find('[data-test-subj="StepDescription"]').render().text()).toEqual(
-        'test description'
+        'Default. High recall, low precision.'
       );
     });
 
     it('is hidden when there is no step description', () => {
-      (getStepDescription as jest.Mock).mockImplementationOnce(() => undefined);
+      setMockValues({ ...MOCK_VALUES, precision: 14 });
       rerender(wrapper);
 
-      expect(wrapper.find('[data-test-subj="StepDescription"]')).toHaveLength(0);
+      expect(wrapper.contains('[data-test-subj="StepDescription"]')).toBe(false);
     });
   });
 

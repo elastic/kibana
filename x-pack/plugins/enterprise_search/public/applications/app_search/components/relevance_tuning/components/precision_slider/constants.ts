@@ -86,6 +86,7 @@ const STEP_11_DESCRIPTION = i18n.translate(
 );
 
 export const STEP_DESCRIPTIONS = [
+  undefined, // The precision number we get from the API starts with 1 instead of 0, so we leave this blank
   STEP_01_DESCRIPTION,
   STEP_02_DESCRIPTION,
   STEP_03_DESCRIPTION,
