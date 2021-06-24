@@ -75,6 +75,7 @@ export const RelevanceTuning: React.FC = () => {
 
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={3}>
+          <EuiSpacer size="m" />
           <PrecisionSlider />
           <EuiSpacer />
           <RelevanceTuningForm />
