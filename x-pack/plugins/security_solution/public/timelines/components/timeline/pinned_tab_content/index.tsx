@@ -19,7 +19,6 @@ import { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
-import { RowRenderer } from '../body/renderers/row_renderer';
 import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -29,14 +28,18 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { TimelineModel } from '../../../store/timeline/model';
-import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import {
+  ControlColumnProps,
+  RowRenderer,
+  TimelineTabs,
+  ToggleDetailPanel,
+} from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
-import { defaultControlColumn, ControlColumnProps } from '../body/control_columns';
+import { defaultControlColumn } from '../body/control_columns';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;

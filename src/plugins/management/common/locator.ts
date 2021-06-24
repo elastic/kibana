@@ -7,7 +7,7 @@
  */
 
 import { SerializableState } from 'src/plugins/kibana_utils/common';
-import { LocatorDefinition } from 'src/plugins/share/common';
+import { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common';
 import { MANAGEMENT_APP_ID } from './contants';
 
 export const MANAGEMENT_APP_LOCATOR = 'MANAGEMENT_APP_LOCATOR';
@@ -17,15 +17,18 @@ export interface ManagementAppLocatorParams extends SerializableState {
   appId?: string;
 }
 
-export class ManagementAppLocator implements LocatorDefinition<ManagementAppLocatorParams> {
+export type ManagementAppLocator = LocatorPublic<ManagementAppLocatorParams>;
+
+export class ManagementAppLocatorDefinition
+  implements LocatorDefinition<ManagementAppLocatorParams> {
   public readonly id = MANAGEMENT_APP_LOCATOR;
 
   public readonly getLocation = async (params: ManagementAppLocatorParams) => {
-    const route = `/${params.sectionId}${params.appId ? '/' + params.appId : ''}`;
+    const path = `/${params.sectionId}${params.appId ? '/' + params.appId : ''}`;
 
     return {
       app: MANAGEMENT_APP_ID,
-      route,
+      path,
       state: {},
     };
   };
