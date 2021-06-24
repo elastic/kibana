@@ -579,7 +579,6 @@ export function FormulaEditor({
             <div className="lnsFormula__editorHeader">
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup">
-                  {/* TODO: Replace `bolt` with `wordWrap` icon (after latest EUI is deployed) and hook up button to enable/disable word wrapping. */}
                   <EuiToolTip
                     content={
                       isWordWrapped
@@ -593,7 +592,7 @@ export function FormulaEditor({
                     position="top"
                   >
                     <EuiButtonIcon
-                      iconType="bolt"
+                      iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
                       display={!isWordWrapped ? 'fill' : undefined}
                       color={'text'}
                       aria-label={
@@ -719,7 +718,7 @@ export function FormulaEditor({
                         color="text"
                         onClick={() => setIsHelpOpen(!isHelpOpen)}
                       >
-                        <EuiIcon type="help" />
+                        <EuiIcon type="documentation" />
                         <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
                       </EuiLink>
                     </EuiToolTip>
@@ -741,7 +740,7 @@ export function FormulaEditor({
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                             onClick={() => setIsHelpOpen(!isHelpOpen)}
-                            iconType="help"
+                            iconType="documentation"
                             color="text"
                             size="s"
                             aria-label={i18n.translate(
