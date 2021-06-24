@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { KBN_IS_TILE_COMPLETE, KBN_METADATA_FEATURE } from '../../../../plugins/maps/common';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
@@ -224,7 +225,11 @@ export default function ({ getPageObjects, getService }) {
         source: 'n1t6f',
         minzoom: 0,
         maxzoom: 24,
-        filter: ['==', ['get', '__kbn_metadata_feature__'], true],
+        filter: [
+          'all',
+          ['==', ['get', KBN_METADATA_FEATURE], true],
+          ['==', ['get', KBN_IS_TILE_COMPLETE], false],
+        ],
         layout: { visibility: 'visible' },
         paint: { 'fill-pattern': '__kbn_too_many_features_image_id__', 'fill-opacity': 0.75 },
       });
