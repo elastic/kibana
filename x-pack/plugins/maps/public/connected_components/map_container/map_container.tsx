@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { Observable } from 'rxjs';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
@@ -47,6 +48,7 @@ export interface Props {
   description?: string;
   settings: MapSettings;
   layerList: ILayer[];
+  waitUntilTimeLayersLoad$: Observable<void>;
 }
 
 interface State {
@@ -223,7 +225,7 @@ export class MapContainer extends Component<Props, State> {
           <RightSideControls />
         </EuiFlexItem>
 
-        <Timeslider />
+        <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
 
         <EuiFlexItem
           className={classNames('mapMapLayerPanel', {

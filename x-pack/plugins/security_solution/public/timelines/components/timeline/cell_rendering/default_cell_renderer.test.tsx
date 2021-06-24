@@ -17,6 +17,8 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
 
+jest.mock('../../../../common/lib/kibana');
+
 jest.mock('../body/renderers/get_column_renderer');
 const getColumnRendererMock = getColumnRenderer as jest.Mock;
 const mockImplementation = {

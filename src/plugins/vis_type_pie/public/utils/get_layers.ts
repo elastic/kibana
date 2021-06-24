@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   Datum,
   PartitionFillLabel,
@@ -125,11 +124,6 @@ export const getLayers = (
       },
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => {
-        if (d === '') {
-          return i18n.translate('visTypePie.emptyLabelValue', {
-            defaultMessage: '(empty)',
-          });
-        }
         if (col.format) {
           const formattedLabel = formatter.deserialize(col.format).convert(d) ?? '';
           if (visParams.labels.truncate && formattedLabel.length <= visParams.labels.truncate) {

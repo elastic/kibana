@@ -13,6 +13,7 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../..
 import { PluginSetupContract as ActionsPluginSetupContract } from '../../../../../../../plugins/actions/server/plugin';
 import { ActionType } from '../../../../../../../plugins/actions/server';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
+import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
 import { initPlugin as initJira } from './jira_simulation';
 import { initPlugin as initResilient } from './resilient_simulation';
@@ -23,6 +24,7 @@ export const NAME = 'actions-FTS-external-service-simulators';
 
 export enum ExternalServiceSimulator {
   PAGERDUTY = 'pagerduty',
+  SWIMLANE = 'swimlane',
   SERVICENOW = 'servicenow',
   SLACK = 'slack',
   JIRA = 'jira',
@@ -64,6 +66,10 @@ export async function getHttpsWebhookServer(): Promise<https.Server> {
 
 export async function getSlackServer(): Promise<http.Server> {
   return await initSlack();
+}
+
+export async function getSwimlaneServer(): Promise<http.Server> {
+  return await initSwimlane();
 }
 
 interface FixtureSetupDeps {

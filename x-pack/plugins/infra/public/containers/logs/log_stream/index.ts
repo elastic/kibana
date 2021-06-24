@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
@@ -65,6 +66,12 @@ export function useLogStream({
   const prevStartTimestamp = usePrevious(startTimestamp);
   const prevEndTimestamp = usePrevious(endTimestamp);
 
+  const cachedQuery = useRef(query);
+
+  if (!isEqual(query, cachedQuery)) {
+    cachedQuery.current = query;
+  }
+
   useEffect(() => {
     if (prevStartTimestamp && prevStartTimestamp > startTimestamp) {
       setState({ hasMoreBefore: true });
@@ -82,10 +89,10 @@ export function useLogStream({
       sourceId,
       startTimestamp,
       endTimestamp,
-      query,
+      query: cachedQuery.current,
       columnOverrides: columns,
     }),
-    [columns, endTimestamp, query, sourceId, startTimestamp]
+    [columns, endTimestamp, cachedQuery, sourceId, startTimestamp]
   );
 
   const {

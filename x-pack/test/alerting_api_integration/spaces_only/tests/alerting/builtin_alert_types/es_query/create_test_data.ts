@@ -54,7 +54,7 @@ async function createEsDocument(es: any, epochMillis: number, testedValue: numbe
     body: document,
   });
 
-  if (response.result !== 'created') {
+  if (response.body.result !== 'created') {
     throw new Error(`document not created: ${JSON.stringify(response)}`);
   }
 }
