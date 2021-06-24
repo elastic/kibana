@@ -6,10 +6,10 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { isEmpty } from 'lodash';
-
 import * as i18n from './translations';
 import { LinkAnchor } from '../links';
+import { useKibana } from '../../common/lib/kibana';
+import { SECURITY_SOLUTION_APP_ID } from './constants';
 
 interface Props {
   type: string;
@@ -18,29 +18,30 @@ interface Props {
 }
 
 const HostIsolationCommentEventComponent: React.FC<Props> = ({ type, hostId, hostName }) => {
+  const activityLogPath = `/administration/endpoints?selected_endpoint=${hostId}&show=activity_log`;
+  const { getUrlForApp, navigateToUrl } = useKibana().services.application;
+  const endpointDetailsHref = getUrlForApp(SECURITY_SOLUTION_APP_ID, {
+    path: activityLogPath,
+  });
+
   const onLinkClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      //  if (onHostDetailsClick) onHostDetailsClick(hostId, ev);
+      return navigateToUrl(endpointDetailsHref);
     },
-    //  [hostId, onHostDetailsClick]
-    []
+    [endpointDetailsHref, navigateToUrl]
   );
-  // const hostDetailsHref = getHostDetailsHref(hostId);
-  const hostDetailsHref = '#todo';
 
   return (
     <>
-      {type === 'isolate' ? `${i18n.ISOLATED_HOST}` : `${i18n.RELEASED_HOST}`}
-      {!isEmpty(hostId) && (
-        <LinkAnchor
-          onClick={onLinkClick}
-          href={hostDetailsHref}
-          data-test-subj={`endpointDetails-activity-log-link-${hostId ?? 'deleted'}`}
-        >
-          {hostName}
-        </LinkAnchor>
-      )}
+      {type === 'isolate' ? `${i18n.ISOLATED_HOST} ` : `${i18n.RELEASED_HOST} `}
+      <LinkAnchor
+        onClick={onLinkClick}
+        href={endpointDetailsHref}
+        data-test-subj={`endpointDetails-activity-log-link-${hostId}`}
+      >
+        {hostName}
+      </LinkAnchor>
     </>
   );
 };
