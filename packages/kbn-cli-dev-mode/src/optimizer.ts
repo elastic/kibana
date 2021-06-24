@@ -18,7 +18,13 @@ import {
 } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
 import { ignoreElements } from 'rxjs/operators';
-import { runOptimizer, OptimizerConfig, logOptimizerState, OptimizerUpdate } from '@kbn/optimizer';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  logOptimizerState,
+  logOptimizerProgress,
+  OptimizerUpdate,
+} from '@kbn/optimizer';
 
 export interface Options {
   enabled: boolean;
@@ -111,6 +117,7 @@ export class Optimizer {
       subscriber.add(
         runOptimizer(config)
           .pipe(
+            logOptimizerProgress(log),
             logOptimizerState(log, config),
             tap(({ state }) => {
               this.phase$.next(state.phase);
