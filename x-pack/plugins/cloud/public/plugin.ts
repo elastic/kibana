@@ -47,8 +47,6 @@ interface CloudStartDependencies {
   security?: SecurityPluginStart;
 }
 
-const ELASTIC_CLOUD_PRINCIPAL_ATTR_NAME = `saml(http://saml.elastic-cloud.com/attributes/principal)`;
-
 export interface CloudSetup {
   cloudId?: string;
   cname?: string;
@@ -194,28 +192,17 @@ export const loadFullStoryUserId = async ({
       return undefined;
     }
 
-    const metadata: any = currentUser.metadata ?? {};
-    const cloudUserIdArray = metadata[ELASTIC_CLOUD_PRINCIPAL_ATTR_NAME];
-
     // Log very defensively here so we can debug this easily if it breaks
-    if (
-      // Only proceed if the key is specified
-      !cloudUserIdArray ||
-      // Only accept this value if it's an array
-      !Array.isArray(cloudUserIdArray) ||
-      // Only accept the first array value if it's a string or a number
-      (typeof cloudUserIdArray[0] !== 'number' && typeof cloudUserIdArray[0] !== 'string')
-    ) {
+    if (!currentUser.username) {
       // eslint-disable-next-line no-console
       console.debug(
-        `[cloud.full_story] "${ELASTIC_CLOUD_PRINCIPAL_ATTR_NAME}" not specified correctly in user metadata: ${JSON.stringify(
+        `[cloud.full_story] username not specified. User metadata: ${JSON.stringify(
           currentUser.metadata
         )}`
       );
-      return undefined;
     }
 
-    return (cloudUserIdArray[0] as string | number).toString();
+    return currentUser.username;
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error(`[cloud.full_story] Error loading the current user: ${e.toString()}`, e);

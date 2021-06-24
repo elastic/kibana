@@ -58,10 +58,7 @@ describe('Cloud Plugin', () => {
         const { initContext } = await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' } },
           currentUserProps: {
-            username: 'bar',
-            metadata: {
-              'saml(http://saml.elastic-cloud.com/attributes/principal)': ['1234'],
-            },
+            username: '1234',
           },
         });
 
@@ -321,24 +318,11 @@ describe('Cloud Plugin', () => {
       consoleMock.mockRestore();
     });
 
-    it('returns principal ID when specified as a string or number array', async () => {
+    it('returns principal ID when username specified', async () => {
       expect(
         await loadFullStoryUserId({
           getCurrentUser: jest.fn().mockResolvedValue({
-            metadata: {
-              'saml(http://saml.elastic-cloud.com/attributes/principal)': ['1234'],
-            },
-          }),
-        })
-      ).toEqual('1234');
-      expect(consoleMock).not.toHaveBeenCalled();
-
-      expect(
-        await loadFullStoryUserId({
-          getCurrentUser: jest.fn().mockResolvedValue({
-            metadata: {
-              'saml(http://saml.elastic-cloud.com/attributes/principal)': [1234],
-            },
+            username: '1234',
           }),
         })
       ).toEqual('1234');
@@ -361,55 +345,17 @@ describe('Cloud Plugin', () => {
       ).toBeUndefined();
     });
 
-    it('returns undefined and logs if no metadata', async () => {
-      expect(
-        await loadFullStoryUserId({
-          getCurrentUser: jest.fn().mockResolvedValue({}),
-        })
-      ).toBeUndefined();
-      expect(consoleMock).toHaveBeenLastCalledWith(
-        `[cloud.full_story] "saml(http://saml.elastic-cloud.com/attributes/principal)" not specified correctly in user metadata: undefined`
-      );
-    });
-
-    it('returns undefined and logs if missing Elastic Cloud key in metadata', async () => {
-      expect(
-        await loadFullStoryUserId({
-          getCurrentUser: jest.fn().mockResolvedValue({ metadata: { foo: 'bar' } }),
-        })
-      ).toBeUndefined();
-      expect(consoleMock).toHaveBeenLastCalledWith(
-        `[cloud.full_story] "saml(http://saml.elastic-cloud.com/attributes/principal)" not specified correctly in user metadata: {"foo":"bar"}`
-      );
-    });
-
-    it('returns undefined and logs if key is not an array', async () => {
+    it('returns undefined and logs if username undefined', async () => {
       expect(
         await loadFullStoryUserId({
           getCurrentUser: jest.fn().mockResolvedValue({
-            metadata: {
-              'saml(http://saml.elastic-cloud.com/attributes/principal)': '1234',
-            },
+            username: undefined,
+            metadata: { foo: 'bar' },
           }),
         })
       ).toBeUndefined();
-      expect(consoleMock).toHaveBeenCalledWith(
-        `[cloud.full_story] "saml(http://saml.elastic-cloud.com/attributes/principal)" not specified correctly in user metadata: {"saml(http://saml.elastic-cloud.com/attributes/principal)":"1234"}`
-      );
-    });
-
-    it('returns undefined and logs if key is not a number or string', async () => {
-      expect(
-        await loadFullStoryUserId({
-          getCurrentUser: jest.fn().mockResolvedValue({
-            metadata: {
-              'saml(http://saml.elastic-cloud.com/attributes/principal)': true,
-            },
-          }),
-        })
-      ).toBeUndefined();
-      expect(consoleMock).toHaveBeenCalledWith(
-        `[cloud.full_story] "saml(http://saml.elastic-cloud.com/attributes/principal)" not specified correctly in user metadata: {"saml(http://saml.elastic-cloud.com/attributes/principal)":true}`
+      expect(consoleMock).toHaveBeenLastCalledWith(
+        `[cloud.full_story] username not specified. User metadata: {"foo":"bar"}`
       );
     });
   });
