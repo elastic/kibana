@@ -214,10 +214,6 @@
                 "version": {
                     "ignore_above": 1024,
                     "type": "keyword"
-                },
-                "namespace": {
-                    "ignore_above": 1024,
-                    "type": "keyword"
                 }
             }
         },
@@ -240,6 +236,16 @@
                 "server_uuid": {
                     "type": "keyword",
                     "ignore_above": 1024
+                },
+                "task": {
+                    "properties": {
+                        "scheduled": {
+                            "type": "date"
+                        },
+                        "schedule_delay": {
+                            "type": "long"
+                        }
+                    }
                 },
                 "alerting": {
                     "properties": {

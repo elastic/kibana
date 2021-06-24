@@ -46,8 +46,8 @@ interface SharedRoleMapping extends ASRoleMapping, WSRoleMapping {
 interface Props {
   accessItemKey: 'groups' | 'engines';
   singleUserRoleMappings: Array<SingleUserRoleMapping<ASRoleMapping | WSRoleMapping>>;
-  initializeSingleUserRoleMapping(roleId: string): string;
-  handleDeleteMapping(roleId: string): string;
+  initializeSingleUserRoleMapping(roleMappingId: string): void;
+  handleDeleteMapping(roleMappingId: string): void;
 }
 
 const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
@@ -110,6 +110,7 @@ export const UsersTable: React.FC<Props> = ({
     {
       field: 'id',
       name: '',
+      align: 'right',
       render: (_, { id, username }: SharedUser) => (
         <UsersAndRolesRowActions
           username={username}

@@ -16,7 +16,6 @@ import {
 
 interface AppValues extends WorkplaceSearchInitialData {
   hasInitialized: boolean;
-  isFederatedAuth: boolean;
   isOrganization: boolean;
 }
 interface AppActions {
@@ -32,10 +31,7 @@ const emptyAccount = {} as Account;
 export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
   path: ['enterprise_search', 'workplace_search', 'app_logic'],
   actions: {
-    initializeAppData: ({ workplaceSearch, isFederatedAuth }) => ({
-      workplaceSearch,
-      isFederatedAuth,
-    }),
+    initializeAppData: ({ workplaceSearch }) => ({ workplaceSearch }),
     setContext: (isOrganization) => isOrganization,
     setOrgName: (name: string) => name,
     setSourceRestriction: (canCreatePersonalSources: boolean) => canCreatePersonalSources,
@@ -45,12 +41,6 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
       false,
       {
         initializeAppData: () => true,
-      },
-    ],
-    isFederatedAuth: [
-      true,
-      {
-        initializeAppData: (_, { isFederatedAuth }) => !!isFederatedAuth,
       },
     ],
     isOrganization: [
