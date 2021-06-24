@@ -29,7 +29,7 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
 
   const series = getSeries(seriesId);
 
-  const { indexPattern } = useAppIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
@@ -49,7 +49,7 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
 
     if (!isEmpty(selectedReportDefinitions)) {
       reportDefinitions.forEach(({ field: fieldT, custom }) => {
-        if (!custom && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
+        if (!custom && indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
           const values = selectedReportDefinitions?.[fieldT];
           const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
           filtersN.push(valueFilter.query);
@@ -64,16 +64,18 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>
       <EuiFlexItem>
-        <FieldValueSuggestions
-          label={labels[field]}
-          sourceField={field}
-          indexPatternTitle={indexPattern.title}
-          selectedValue={selectedReportDefinitions?.[field]}
-          onChange={(val?: string[]) => onChange(field, val)}
-          filters={queryFilters}
-          time={series.time}
-          fullWidth={true}
-        />
+        {indexPattern && (
+          <FieldValueSuggestions
+            label={labels[field]}
+            sourceField={field}
+            indexPatternTitle={indexPattern.title}
+            selectedValue={selectedReportDefinitions?.[field]}
+            onChange={(val?: string[]) => onChange(field, val)}
+            filters={queryFilters}
+            time={series.time}
+            fullWidth={true}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
