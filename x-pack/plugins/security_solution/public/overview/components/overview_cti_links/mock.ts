@@ -20,6 +20,7 @@ export const mockEventCountsByDataset = {
   abusemalware: 1,
   alienvaultotx: 0,
   anomali: 2,
+  anomalithreatstream: 0,
   malwarebazaar: 2,
   misp: 4,
 };
@@ -37,6 +38,7 @@ export const mockCtiLinksResponse = {
     { title: 'abusemalware', count: 2, path: '/dashboard_path_abusemalware' },
     { title: 'alienvaultotx', count: 7, path: '/dashboard_path_alienvaultotx' },
     { title: 'anomali', count: 0, path: '/dashboard_path_anomali' },
+    { title: 'anomalithreatstream', count: 0, path: '/dashboard_path_anomalithreatstream' },
     { title: 'malwarebazaar', count: 4, path: '/dashboard_path_malwarebazaar' },
     { title: 'misp', count: 6, path: '/dashboard_path_misp' },
   ],
@@ -50,6 +52,7 @@ export const mockEmptyCtiLinksResponse = {
     { title: 'abusemalware', count: 0, path: '/dashboard_path_abusemalware' },
     { title: 'alienvaultotx', count: 0, path: '/dashboard_path_alienvaultotx' },
     { title: 'anomali', count: 0, path: '/dashboard_path_anomali' },
+    { title: 'anomalithreatstream', count: 0, path: '/dashboard_path_anomalithreatstream' },
     { title: 'malwarebazaar', count: 0, path: '/dashboard_path_malwarebazaar' },
     { title: 'misp', count: 0, path: '/dashboard_path_misp' },
   ],

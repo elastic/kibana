@@ -63,6 +63,7 @@ export const CTI_DEFAULT_SOURCES = [
   'Abuse Malware',
   'AlienVault OTX',
   'Anomali',
+  'Anomali ThreatStream',
   'Malware Bazaar',
   'MISP',
 ];
