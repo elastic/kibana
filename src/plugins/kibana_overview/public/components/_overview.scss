@@ -1,9 +1,12 @@
-// Ensure card heights are stretched equally when wrapped with this element
-.kbnRedirectCrossAppLinks {
-  align-items: flex-start;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
+.kbnOverviewApps__item,
+.kbnOverviewMore__item {
+  // Ensure card heights are stretched equally when wrapped with this element
+  .kbnRedirectCrossAppLinks {
+    align-items: flex-start;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
 }
 
 .kbnOverviewApps__item {
