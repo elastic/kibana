@@ -7,6 +7,7 @@
  */
 
 import { CoreSetup } from 'src/core/public';
+import { render } from './render';
 
 export class RedirectManager {
   public registerRedirectApp(core: CoreSetup) {
@@ -15,8 +16,10 @@ export class RedirectManager {
       title: 'Redirect endpoint',
       chromeless: true,
       mount: (params) => {
-        params.element.innerHTML = '…';
-        return async () => {};
+        const unmount = render(params.element);
+        return () => {
+          unmount();
+        };
       },
     });
   }
