@@ -7,7 +7,15 @@
  */
 
 import * as React from 'react';
-import { EuiEmptyPrompt, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiCallOut,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const defaultTitle = i18n.translate('share.urlService.redirect.components.Error.title', {
@@ -28,13 +36,13 @@ export const Error: React.FC<ErrorProps> = ({ title = defaultTitle, error }) => 
       iconColor={'danger'}
       title={<h2>{title}</h2>}
       body={
-        <EuiCallOut
-          title={error.message}
-          color="danger"
-          iconType="alert"
-          style={{ textAlign: 'left' }}
-        >
-          <EuiSpacer />
+        <EuiCallOut color="danger">
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem>
+              <EuiText color="danger">{error.message}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size={'l'} />
           <EuiCodeBlock language="bash" className="eui-textBreakAll" isCopyable>
             {error.stack ? error.stack : ''}
           </EuiCodeBlock>
