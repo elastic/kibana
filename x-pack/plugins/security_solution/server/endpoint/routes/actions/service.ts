@@ -9,6 +9,7 @@ import { Logger } from 'kibana/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../../fleet/common';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { ActivityLog } from '../../../../common/endpoint/types';
 
 const getShouldClauses = ({
   indices,
@@ -149,12 +150,22 @@ export const getAuditLogResponse = async ({
     throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
   }
 
+  const resultData = result.body.hits.hits.map((e) => ({
+    type: e._index.startsWith('.fleet-actions') ? 'action' : 'response',
+    item: { id: e._id, data: e._source },
+  })) as ActivityLog['data'];
+
+  const endpointActionIds = resultData
+    .filter((e) => e.type === 'action')
+    .map((e) => e.item.data.action_id);
+
+  const data = resultData.filter((e) =>
+    e.type === 'response' ? endpointActionIds.includes(e.item.data.action_id) : e
+  );
+
   return {
     page,
     pageSize,
-    data: result.body.hits.hits.map((e) => ({
-      type: e._index.startsWith('.fleet-actions') ? 'action' : 'response',
-      item: { id: e._id, data: e._source },
-    })),
+    data,
   };
 };
