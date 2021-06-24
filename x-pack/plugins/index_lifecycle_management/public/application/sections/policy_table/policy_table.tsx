@@ -89,7 +89,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
     // if the table size changes (ie: applying a filter) due to the flex props of the page wrapper.
     content = (
       <div>
-        <EuiFlexGroup gutterSize="l">
+        <EuiFlexGroup gutterSize="l" alignItems="center">
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
