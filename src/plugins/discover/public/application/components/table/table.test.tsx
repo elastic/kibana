@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { IntlProvider } from 'react-intl';
+import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewerTable, DocViewerTableProps } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -78,9 +78,9 @@ indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPat
 
 const mountComponent = (props: DocViewerTableProps) => {
   return mount(
-    <IntlProvider locale={'en'}>
+    <I18nProvider>
       <DocViewerTable {...props} />
-    </IntlProvider>
+    </I18nProvider>
   );
 };
 
