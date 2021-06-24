@@ -26,6 +26,7 @@ import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import {
   ActionConnector,
+  ActionCommentRequestRt,
   AlertCommentRequestRt,
   Case,
   CaseUserActions,
@@ -45,6 +46,7 @@ import {
   getAlertAttachment,
   getGeneratedAlertsAttachment,
   RuleDetailsNavigation,
+  getActionAttachment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -445,8 +447,30 @@ export const UserActionTree = React.memo(
                       ]
                     : []),
                 ];
-              } else if (comment !== null && comment.type === CommentType.actions) {
-                console.log('do something');
+              } else if (
+                comment != null &&
+                isRight(ActionCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.actions
+              ) {
+                // console.log(comment);
+                return [
+                  ...comments,
+                  ...(comment.actions !== null
+                    ? [
+                        getActionAttachment({
+                          comment,
+                          userCanCrud,
+                          isLoadingIds,
+                          getCaseDetailHrefWithCommentId,
+                          manageMarkdownEditIds,
+                          handleManageMarkdownEditId,
+                          handleManageQuote,
+                          handleSaveComment,
+                          action,
+                        }),
+                      ]
+                    : []),
+                ];
               }
             }
 

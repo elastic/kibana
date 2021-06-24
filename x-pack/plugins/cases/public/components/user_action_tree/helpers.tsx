@@ -13,6 +13,8 @@ import {
   ActionConnector,
   CaseStatuses,
   CommentType,
+  Comment,
+  CommentRequestActionsType,
 } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
@@ -20,7 +22,9 @@ import { parseString } from '../../containers/utils';
 import { Tags } from '../tag_list/tags';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
+import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { UserActionCopyLink } from './user_action_copy_link';
+import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
@@ -351,67 +355,69 @@ export const getGeneratedAlertsAttachment = ({
   ),
 });
 
-export const getHostIsolationAttachment = ({
-  action,
-  alertId,
+export const getActionAttachment = ({
+  comment,
+  userCanCrud,
+  isLoadingIds,
   getCaseDetailHrefWithCommentId,
-  getRuleDetailsHref,
-  index,
-  loadingAlertData,
-  onRuleDetailsClick,
-  onShowAlertDetails,
-  ruleId,
-  ruleName,
+  manageMarkdownEditIds,
+  handleManageMarkdownEditId,
+  handleManageQuote,
+  handleSaveComment,
+  action,
 }: {
-  action: CaseUserActions;
-  alertId: string;
+  comment: Comment & CommentRequestActionsType;
+  userCanCrud: boolean;
+  isLoadingIds: string[];
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
-  getRuleDetailsHref: RuleDetailsNavigation['href'];
-  index: string;
-  loadingAlertData: boolean;
-  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
-  onShowAlertDetails: (alertId: string, index: string) => void;
-  ruleId?: string | null;
-  ruleName?: string | null;
+  manageMarkdownEditIds: string[];
+  handleManageMarkdownEditId: (id: string) => void;
+  handleManageQuote: (id: string) => void;
+  handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
+  actionComment: CommentRequestActionsType;
+  action: CaseUserActions;
 }): EuiCommentProps => ({
   username: (
     <UserActionUsernameWithAvatar
-      username={action.actionBy.username}
-      fullName={action.actionBy.fullName}
+      username={comment.createdBy.username}
+      fullName={comment.createdBy.fullName}
     />
   ),
-  className: 'comment-alert',
+  className: 'comment-action',
   type: 'update',
   event: (
     <HostIsolationCommentEvent
-      commentType={CommentType.actions}
-      getHostDetailsHref={getRuleDetailsHref}
-      onHostDetailsClick={onRuleDetailsClick}
-      hostId={ruleId}
-      hostName={ruleName}
-      loadingAlertData={loadingAlertData}
+      type={comment.actions.type}
+      hostId={comment.actions.endpointId}
+      hostName={comment.actions.hostname}
     />
   ),
-  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+  'data-test-subj': 'endpoint-action',
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-  timelineIcon: 'lock',
+  timelineIcon: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
   actions: (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <UserActionCopyLink
-          id={action.actionId}
-          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <UserActionShowAlert
-          id={action.actionId}
-          alertId={alertId}
-          index={index}
-          onShowAlertDetails={onShowAlertDetails}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <UserActionContentToolbar
+      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+      id={comment.id}
+      editLabel={i18n.EDIT_COMMENT}
+      quoteLabel={i18n.QUOTE}
+      disabled={!userCanCrud}
+      isLoading={isLoadingIds.includes(comment.id)}
+      onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
+      onQuote={handleManageQuote.bind(null, comment.comment)}
+    />
+  ),
+  children: (
+    <UserActionMarkdown
+      id={comment.id}
+      content={comment.comment}
+      isEditable={manageMarkdownEditIds.includes(comment.id)}
+      onChangeEditable={handleManageMarkdownEditId}
+      onSaveContent={handleSaveComment.bind(null, {
+        id: comment.id,
+        version: comment.version,
+      })}
+    />
   ),
 });
 

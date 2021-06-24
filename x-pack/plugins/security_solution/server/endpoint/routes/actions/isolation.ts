@@ -161,7 +161,7 @@ export const isolationRequestHandler = function (
           actions: {
             endpointId: agentIDs[0],
             hostname: 'whatever',
-            type: isolate ? 'isolateHost' : 'releaseHost',
+            type: isolate ? 'isolate' : 'unisolate',
           },
           owner: APP_ID,
         },

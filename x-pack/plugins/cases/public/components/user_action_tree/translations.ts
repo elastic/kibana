@@ -60,3 +60,7 @@ export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.lab
 export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
   defaultMessage: 'isolated host',
 });
+
+export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
+  defaultMessage: 'released host',
+});
