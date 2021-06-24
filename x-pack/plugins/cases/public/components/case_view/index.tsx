@@ -152,6 +152,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             if (isStale) {
               return;
             }
+
             await fetchCase();
           },
           refreshUserActionsAndComments: async () => {
@@ -161,8 +162,11 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             if (isStale || isLoadingUserActions) {
               return;
             }
-            await fetchCase(true);
-            await fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
+
+            await Promise.all([
+              fetchCase(true),
+              fetchCaseUserActions(caseId, caseData.connector.id, subCaseId),
+            ]);
           },
         };
 

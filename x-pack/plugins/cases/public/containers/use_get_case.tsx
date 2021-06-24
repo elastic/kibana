@@ -108,8 +108,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseId, subCaseId]
+    [caseId, subCaseId, toasts]
   );
 
   useEffect(() => {
