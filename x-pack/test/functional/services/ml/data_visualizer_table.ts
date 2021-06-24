@@ -18,6 +18,8 @@ export function MachineLearningDataVisualizerTableProvider(
 ) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
+  const browser = getService('browser');
 
   return new (class DataVisualizerTable {
     public async parseDataVisualizerTable() {
@@ -79,6 +81,25 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail(this.rowSelector(fieldName));
     }
 
+    public async assertRowNotExists(fieldName: string) {
+      await retry.tryForTime(1000, async () => {
+        await testSubjects.missingOrFail(this.rowSelector(fieldName));
+      });
+    }
+
+    public async assertDisplayName(fieldName: string, expectedDisplayName: string) {
+      await retry.tryForTime(10000, async () => {
+        const subj = await testSubjects.find(
+          this.rowSelector(fieldName, `dataVisualizerDisplayName-${fieldName}`)
+        );
+        const displayName = await subj.getVisibleText();
+        expect(displayName).to.eql(
+          expectedDisplayName,
+          `Expected display name of ${fieldName} to be '${expectedDisplayName}' (got '${displayName}')`
+        );
+      });
+    }
+
     public detailsSelector(fieldName: string, subSelector?: string) {
       const row = `~dataVisualizerTable > ~dataVisualizerFieldExpandedRow-${fieldName}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
@@ -133,15 +154,118 @@ export function MachineLearningDataVisualizerTableProvider(
       );
     }
 
-    public async assertViewInLensActionEnabled(fieldName: string) {
+    public async ensureAllMenuPopoversClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const popoverExists = await find.existsByCssSelector('euiContextMenuPanel');
+        expect(popoverExists).to.eql(false, 'All popovers should be closed');
+      });
+    }
+
+    public async ensureActionsMenuOpen(fieldName: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.ensureAllMenuPopoversClosed();
+        await testSubjects.click(this.rowSelector(fieldName, 'euiCollapsedItemActionsButton'));
+        await find.existsByCssSelector('euiContextMenuPanel');
+      });
+    }
+
+    public async assertActionsMenuClosed(fieldName: string, action: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail(action, { timeout: 5000 });
+      });
+    }
+
+    public async assertActionMenuViewInLensEnabled(fieldName: string, expectedValue: boolean) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.ensureActionsMenuOpen(fieldName);
+        const actionMenuViewInLensButton = await find.byCssSelector(
+          '[data-test-subj="dataVisualizerActionViewInLensButton"][class="euiContextMenuItem"]'
+        );
+        const isEnabled = await actionMenuViewInLensButton.isEnabled();
+        expect(isEnabled).to.eql(
+          expectedValue,
+          `Expected "Explore in lens" action menu button for '${fieldName}' to be '${
+            expectedValue ? 'enabled' : 'disabled'
+          }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+        );
+      });
+    }
+
+    public async assertActionMenuDeleteIndexPatternFieldButtonEnabled(
+      fieldName: string,
+      expectedValue: boolean
+    ) {
+      await this.ensureActionsMenuOpen(fieldName);
+      const actionMenuViewInLensButton = await find.byCssSelector(
+        '[data-test-subj="dataVisualizerActionDeleteIndexPatternFieldButton"][class="euiContextMenuItem"]'
+      );
+      const isEnabled = await actionMenuViewInLensButton.isEnabled();
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "Delete index pattern field" action menu button for '${fieldName}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async clickActionMenuDeleteIndexPatternFieldButton(fieldName: string) {
+      const testSubj = 'dataVisualizerActionDeleteIndexPatternFieldButton';
+      await retry.tryForTime(5000, async () => {
+        await this.ensureActionsMenuOpen(fieldName);
+
+        const button = await find.byCssSelector(
+          `[data-test-subj="${testSubj}"][class="euiContextMenuItem"]`
+        );
+        await button.click();
+        await this.assertActionsMenuClosed(fieldName, testSubj);
+        await testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+      });
+    }
+
+    public async assertViewInLensActionEnabled(fieldName: string, expectedValue: boolean) {
       const actionButton = this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton');
       await testSubjects.existOrFail(actionButton);
-      await testSubjects.isEnabled(actionButton);
+      const isEnabled = await testSubjects.isEnabled(actionButton);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "Explore in lens" button for '${fieldName}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
     }
 
     public async assertViewInLensActionNotExists(fieldName: string) {
       const actionButton = this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton');
       await testSubjects.missingOrFail(actionButton);
+    }
+
+    public async assertEditIndexPatternFieldButtonEnabled(
+      fieldName: string,
+      expectedValue: boolean
+    ) {
+      const selector = this.rowSelector(
+        fieldName,
+        'dataVisualizerActionEditIndexPatternFieldButton'
+      );
+      await testSubjects.existOrFail(selector);
+      const isEnabled = await testSubjects.isEnabled(selector);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "Edit index pattern" button for '${fieldName}' to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    }
+
+    public async clickEditIndexPatternFieldButton(fieldName: string) {
+      await retry.tryForTime(5000, async () => {
+        await this.assertEditIndexPatternFieldButtonEnabled(fieldName, true);
+        await testSubjects.click(
+          this.rowSelector(fieldName, 'dataVisualizerActionEditIndexPatternFieldButton')
+        );
+        await testSubjects.existOrFail('indexPatternFieldEditorForm');
+      });
     }
 
     public async assertFieldDistinctValuesExist(fieldName: string) {
@@ -263,6 +387,7 @@ export function MachineLearningDataVisualizerTableProvider(
       docCountFormatted: string,
       topValuesCount: number,
       viewableInLens: boolean,
+      hasActionMenu = false,
       checkDistributionPreviewExist = true
     ) {
       await this.assertRowExists(fieldName);
@@ -282,7 +407,11 @@ export function MachineLearningDataVisualizerTableProvider(
         await this.assertDistributionPreviewExist(fieldName);
       }
       if (viewableInLens) {
-        await this.assertViewInLensActionEnabled(fieldName);
+        if (hasActionMenu) {
+          await this.assertActionMenuViewInLensEnabled(fieldName, true);
+        } else {
+          await this.assertViewInLensActionEnabled(fieldName, true);
+        }
       } else {
         await this.assertViewInLensActionNotExists(fieldName);
       }
@@ -378,7 +507,8 @@ export function MachineLearningDataVisualizerTableProvider(
       fieldName: string,
       docCountFormatted: string,
       exampleCount: number,
-      viewableInLens: boolean
+      viewableInLens: boolean,
+      hasActionMenu?: boolean
     ) {
       // Currently the data used in the data visualizer tests only contains these field types.
       if (fieldType === ML_JOB_FIELD_TYPES.DATE) {
@@ -394,7 +524,11 @@ export function MachineLearningDataVisualizerTableProvider(
       }
 
       if (viewableInLens) {
-        await this.assertViewInLensActionEnabled(fieldName);
+        if (hasActionMenu) {
+          await this.assertActionMenuViewInLensEnabled(fieldName, true);
+        } else {
+          await this.assertViewInLensActionEnabled(fieldName, true);
+        }
       } else {
         await this.assertViewInLensActionNotExists(fieldName);
       }

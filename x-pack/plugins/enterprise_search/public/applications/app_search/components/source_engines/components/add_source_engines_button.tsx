@@ -18,7 +18,7 @@ export const AddSourceEnginesButton: React.FC = () => {
   const { openModal } = useActions(SourceEnginesLogic);
 
   return (
-    <EuiButton color="secondary" fill onClick={openModal}>
+    <EuiButton fill iconType="plusInCircle" onClick={openModal}>
       {ADD_SOURCE_ENGINES_BUTTON_LABEL}
     </EuiButton>
   );

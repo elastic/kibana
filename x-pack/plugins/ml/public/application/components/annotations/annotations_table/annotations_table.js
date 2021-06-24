@@ -494,13 +494,13 @@ class AnnotationsTableUI extends Component {
         render: (annotation) => {
           const viewDataFeedText = (
             <FormattedMessage
-              id="xpack.ml.annotationsTable.viewDatafeedTooltip"
-              defaultMessage="View datafeed"
+              id="xpack.ml.annotationsTable.datafeedChartTooltip"
+              defaultMessage="Datafeed chart"
             />
           );
           const viewDataFeedTooltipAriaLabelText = i18n.translate(
-            'xpack.ml.annotationsTable.viewDatafeedTooltipAriaLabel',
-            { defaultMessage: 'View datafeed' }
+            'xpack.ml.annotationsTable.datafeedChartTooltipAriaLabel',
+            { defaultMessage: 'Datafeed chart' }
           );
           return (
             <EuiButtonEmpty
@@ -735,9 +735,7 @@ class AnnotationsTableUI extends Component {
               });
             }}
             end={this.state.datafeedEnd}
-            timefield={this.props.jobs[0].data_description.time_field}
             jobId={this.state.jobId}
-            bucketSpan={this.props.jobs[0].analysis_config.bucket_span}
           />
         ) : null}
       </Fragment>

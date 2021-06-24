@@ -18,6 +18,7 @@ import {
   getHover,
   suggest,
   monacoPositionToOffset,
+  offsetToRowColumn,
   getInfoAtZeroIndexedPosition,
 } from './math_completion';
 
@@ -360,6 +361,36 @@ describe('math completion', () => {
         data: dataPluginMock.createStartContract(),
       });
       expect(results.list).toEqual(['bytes', 'memory']);
+    });
+  });
+
+  describe('offsetToRowColumn', () => {
+    it('should work with single-line strings', () => {
+      const input = `0123456`;
+      expect(offsetToRowColumn(input, 5)).toEqual(
+        expect.objectContaining({
+          lineNumber: 1,
+          column: 6,
+        })
+      );
+    });
+
+    it('should work with multi-line strings accounting for newline characters', () => {
+      const input = `012
+456
+89')`;
+      expect(offsetToRowColumn(input, 0)).toEqual(
+        expect.objectContaining({
+          lineNumber: 1,
+          column: 1,
+        })
+      );
+      expect(offsetToRowColumn(input, 9)).toEqual(
+        expect.objectContaining({
+          lineNumber: 3,
+          column: 2,
+        })
+      );
     });
   });
 

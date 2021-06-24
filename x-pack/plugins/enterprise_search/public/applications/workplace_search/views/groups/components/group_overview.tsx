@@ -24,7 +24,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { TruncatedContent } from '../../../../shared/truncate';
-import { AppLogic } from '../../../app_logic';
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { ContentSection } from '../../../components/shared/content_section';
@@ -124,8 +123,6 @@ export const GroupOverview: React.FC = () => {
     confirmDeleteModalVisible,
   } = useValues(GroupLogic);
 
-  const { isFederatedAuth } = useValues(AppLogic);
-
   const truncatedName = name && (
     <TruncatedContent tooltipType="title" content={name} length={MAX_NAME_LENGTH} />
   );
@@ -167,7 +164,7 @@ export const GroupOverview: React.FC = () => {
       {MANAGE_SOURCES_BUTTON_TEXT}
     </EuiButton>
   );
-  const manageUsersButton = !isFederatedAuth && (
+  const manageUsersButton = (
     <EuiButton color="primary" onClick={showManageUsersModal}>
       {MANAGE_USERS_BUTTON_TEXT}
     </EuiButton>
@@ -199,7 +196,7 @@ export const GroupOverview: React.FC = () => {
     </>
   );
 
-  const usersSection = !isFederatedAuth && (
+  const usersSection = (
     <ContentSection
       title="Group users"
       description={hasUsers ? GROUP_USERS_DESCRIPTION : EMPTY_USERS_DESCRIPTION}

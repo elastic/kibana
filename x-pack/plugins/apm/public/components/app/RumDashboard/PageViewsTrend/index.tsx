@@ -64,7 +64,7 @@ export function PageViewsTrend() {
     {
       [`${serviceName}-page-views`]: {
         dataType: 'ux',
-        reportType: 'kpi',
+        reportType: 'kpi-over-time',
         time: { from: rangeFrom!, to: rangeTo! },
         reportDefinitions: {
           'service.name': serviceName as string[],

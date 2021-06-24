@@ -8,10 +8,10 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> warm phase validation', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: ValidationTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -28,7 +28,7 @@ describe('<EditPolicy /> warm phase validation', () => {
     httpRequestsMockHelpers.setLoadPolicies([]);
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupValidationTestBed();
     });
 
     const { component, actions } = testBed;
@@ -60,7 +60,6 @@ describe('<EditPolicy /> warm phase validation', () => {
   describe('shrink', () => {
     test(`doesn't allow 0 for shrink`, async () => {
       const { actions } = testBed;
-      await actions.warm.toggleShrink();
       await actions.warm.setShrink('0');
 
       actions.errors.waitForValidation();
@@ -69,7 +68,6 @@ describe('<EditPolicy /> warm phase validation', () => {
     });
     test(`doesn't allow -1 for shrink`, async () => {
       const { actions } = testBed;
-      await actions.warm.toggleShrink();
       await actions.warm.setShrink('-1');
 
       actions.errors.waitForValidation();
