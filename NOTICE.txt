@@ -236,6 +236,10 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
+Portions of this code are licensed under the following license:
+For license information please see https://edge.fullstory.com/s/fs.js.LICENSE.txt
+
+---
 This product bundles bootstrap@3.3.6 which is available under a
 "MIT" license.
 

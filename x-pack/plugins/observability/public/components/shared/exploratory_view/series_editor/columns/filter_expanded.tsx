@@ -18,7 +18,7 @@ import { DataSeries, UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
 import { useValuesList } from '../../../../../hooks/use_values_list';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { ESFilter } from '../../../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearch';
 import { PersistableFilter } from '../../../../../../../lens/common';
 import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 
@@ -41,8 +41,6 @@ export function FilterExpanded({
   isNegated,
   filters: defaultFilters,
 }: Props) {
-  const { indexPattern } = useAppIndexPatternContext();
-
   const [value, setValue] = useState('');
 
   const [isOpen, setIsOpen] = useState({ value: '', negate: false });
@@ -53,23 +51,25 @@ export function FilterExpanded({
 
   const queryFilters: ESFilter[] = [];
 
+  const { indexPatterns } = useAppIndexPatternContext(series.dataType);
+
   defaultFilters?.forEach((qFilter: PersistableFilter | ExistsFilter) => {
     if (qFilter.query) {
       queryFilters.push(qFilter.query);
     }
     const asExistFilter = qFilter as ExistsFilter;
     if (asExistFilter?.exists) {
-      queryFilters.push(asExistFilter.exists as QueryDslQueryContainer);
+      queryFilters.push({ exists: asExistFilter.exists } as QueryDslQueryContainer);
     }
   });
 
   const { values, loading } = useValuesList({
     query: value,
-    indexPatternTitle: indexPattern?.title,
     sourceField: field,
     time: series.time,
     keepHistory: true,
     filters: queryFilters,
+    indexPatternTitle: indexPatterns[series.dataType]?.title,
   });
 
   const filters = series?.filters ?? [];
