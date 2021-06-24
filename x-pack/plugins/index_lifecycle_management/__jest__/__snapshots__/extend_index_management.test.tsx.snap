@@ -314,89 +314,99 @@ exports[`extend index management ilm summary extension should return extension w
         </span>
       </div>
       <EuiText
+        color="default"
         size="s"
       >
         <div
           className="euiText euiText--small"
         >
-          illegal_argument_exception
-          : 
-          setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined
-          <EuiSpacer
-            size="s"
+          <EuiTextColor
+            color="default"
+            component="div"
           >
             <div
-              className="euiSpacer euiSpacer--s"
-            />
-          </EuiSpacer>
-          <EuiPopover
-            anchorPosition="downCenter"
-            button={
-              <EuiButtonEmpty
-                onClick={[Function]}
-              >
-                <FormattedMessage
-                  defaultMessage="Stack trace"
-                  id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                  values={Object {}}
-                />
-              </EuiButtonEmpty>
-            }
-            closePopover={[Function]}
-            display="inlineBlock"
-            hasArrow={true}
-            id="stackPopover"
-            isOpen={false}
-            ownFocus={true}
-            panelPaddingSize="m"
-          >
-            <div
-              className="euiPopover euiPopover--anchorDownCenter"
-              id="stackPopover"
+              className="euiTextColor euiTextColor--default"
             >
-              <div
-                className="euiPopover__anchor"
+              illegal_argument_exception
+              : 
+              setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined
+              <EuiSpacer
+                size="s"
               >
-                <EuiButtonEmpty
-                  onClick={[Function]}
-                >
-                  <button
-                    className="euiButtonEmpty euiButtonEmpty--primary"
-                    disabled={false}
+                <div
+                  className="euiSpacer euiSpacer--s"
+                />
+              </EuiSpacer>
+              <EuiPopover
+                anchorPosition="downCenter"
+                button={
+                  <EuiButtonEmpty
                     onClick={[Function]}
-                    type="button"
                   >
-                    <EuiButtonContent
-                      className="euiButtonEmpty__content"
-                      iconSide="left"
-                      iconSize="m"
-                      textProps={
-                        Object {
-                          "className": "euiButtonEmpty__text",
-                        }
-                      }
+                    <FormattedMessage
+                      defaultMessage="Stack trace"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
+                      values={Object {}}
+                    />
+                  </EuiButtonEmpty>
+                }
+                closePopover={[Function]}
+                display="inlineBlock"
+                hasArrow={true}
+                id="stackPopover"
+                isOpen={false}
+                ownFocus={true}
+                panelPaddingSize="m"
+              >
+                <div
+                  className="euiPopover euiPopover--anchorDownCenter"
+                  id="stackPopover"
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <EuiButtonEmpty
+                      onClick={[Function]}
                     >
-                      <span
-                        className="euiButtonContent euiButtonEmpty__content"
+                      <button
+                        className="euiButtonEmpty euiButtonEmpty--primary"
+                        disabled={false}
+                        onClick={[Function]}
+                        type="button"
                       >
-                        <span
-                          className="euiButtonEmpty__text"
+                        <EuiButtonContent
+                          className="euiButtonEmpty__content"
+                          iconSide="left"
+                          iconSize="m"
+                          textProps={
+                            Object {
+                              "className": "euiButtonEmpty__text",
+                            }
+                          }
                         >
-                          <FormattedMessage
-                            defaultMessage="Stack trace"
-                            id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
-                            values={Object {}}
+                          <span
+                            className="euiButtonContent euiButtonEmpty__content"
                           >
-                            Stack trace
-                          </FormattedMessage>
-                        </span>
-                      </span>
-                    </EuiButtonContent>
-                  </button>
-                </EuiButtonEmpty>
-              </div>
+                            <span
+                              className="euiButtonEmpty__text"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Stack trace"
+                                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stackTraceButton"
+                                values={Object {}}
+                              >
+                                Stack trace
+                              </FormattedMessage>
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonEmpty>
+                  </div>
+                </div>
+              </EuiPopover>
             </div>
-          </EuiPopover>
+          </EuiTextColor>
         </div>
       </EuiText>
     </div>

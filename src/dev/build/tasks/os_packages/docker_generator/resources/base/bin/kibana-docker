@@ -69,7 +69,6 @@ kibana_vars=(
     logging.appenders
     logging.appenders.console
     logging.appenders.file
-    logging.appenders.rolling-file
     logging.dest
     logging.json
     logging.loggers
@@ -204,8 +203,8 @@ kibana_vars=(
     xpack.actions.proxyUrl
     xpack.actions.rejectUnauthorized
     xpack.actions.responseTimeout
-    xpack.actions.tls.proxyVerificationMode
-    xpack.actions.tls.verificationMode
+    xpack.actions.ssl.proxyVerificationMode
+    xpack.actions.ssl.verificationMode
     xpack.alerting.healthCheck.interval
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay

@@ -35,7 +35,7 @@ Cypress.Commands.add(
   'stubSearchStrategyApi',
   function (stubObject, factoryQueryType, searchStrategyName = 'securitySolutionSearchStrategy') {
     cy.intercept('POST', '/internal/bsearch', (req) => {
-      if (searchStrategyName === 'securitySolutionIndexFields') {
+      if (searchStrategyName === 'indexFields') {
         req.reply(stubObject.rawResponse);
       } else if (factoryQueryType === 'overviewHost') {
         req.reply(stubObject.overviewHost);

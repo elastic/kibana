@@ -2901,7 +2901,7 @@ export class SavedObjectsRepository {
     resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions<T>): Promise<SavedObjectsUpdateResponse<T>>;
     updateObjectsSpaces(objects: SavedObjectsUpdateObjectsSpacesObject[], spacesToAdd: string[], spacesToRemove: string[], options?: SavedObjectsUpdateObjectsSpacesOptions): Promise<import("./update_objects_spaces").SavedObjectsUpdateObjectsSpacesResponse>;
-}
+    }
 
 // @public
 export interface SavedObjectsRepositoryFactory {

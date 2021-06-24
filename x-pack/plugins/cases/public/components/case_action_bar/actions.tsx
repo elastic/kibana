@@ -19,14 +19,12 @@ interface CaseViewActions {
   allCasesNavigation: CasesNavigation;
   caseData: Case;
   currentExternalIncident: CaseService | null;
-  disabled?: boolean;
 }
 
 const ActionsComponent: React.FC<CaseViewActions> = ({
   allCasesNavigation,
   caseData,
   currentExternalIncident,
-  disabled = false,
 }) => {
   // Delete case
   const {
@@ -39,7 +37,6 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   const propertyActions = useMemo(
     () => [
       {
-        disabled,
         iconType: 'trash',
         label: i18n.DELETE_CASE(),
         onClick: handleToggleModal,
@@ -54,7 +51,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
           ]
         : []),
     ],
-    [disabled, handleToggleModal, currentExternalIncident]
+    [handleToggleModal, currentExternalIncident]
   );
 
   if (isDeleted) {

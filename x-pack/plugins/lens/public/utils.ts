@@ -9,42 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternsContract, TimefilterContract } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
-import { LensFilterEvent } from './types';
-
-/** replaces the value `(empty) to empty string for proper filtering` */
-export const desanitizeFilterContext = (
-  context: LensFilterEvent['data']
-): LensFilterEvent['data'] => {
-  const emptyTextValue = i18n.translate('xpack.lens.indexpattern.emptyTextColumnValue', {
-    defaultMessage: '(empty)',
-  });
-  const result: LensFilterEvent['data'] = {
-    ...context,
-    data: context.data.map((point) =>
-      point.value === emptyTextValue
-        ? {
-            ...point,
-            value: '',
-            table: {
-              ...point.table,
-              rows: point.table.rows.map((row, index) =>
-                index === point.row
-                  ? {
-                      ...row,
-                      [point.table.columns[point.column].id]: '',
-                    }
-                  : row
-              ),
-            },
-          }
-        : point
-    ),
-  };
-  if (context.timeFieldName) {
-    result.timeFieldName = context.timeFieldName;
-  }
-  return result;
-};
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
