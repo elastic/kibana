@@ -7,6 +7,10 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import {
+  APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
+  APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
+} from '../../common/apm_saved_object_constants';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import {
@@ -52,9 +56,9 @@ const saveApmServerSchemaRoute = createApmServerRoute({
     const savedObjectsClient = context.core.savedObjects.client;
     const { schema } = params.body;
     await savedObjectsClient.create(
-      'apm-server-settings',
+      APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
       { schemaJson: JSON.stringify(schema) },
-      { id: 'apm-server-settings', overwrite: true }
+      { id: APM_SERVER_SCHEMA_SAVED_OBJECT_ID, overwrite: true }
     );
     logger.info(`Stored apm-server settings.`);
   },
@@ -67,8 +71,8 @@ const getApmServerSchemaRoute = createApmServerRoute({
     const { context } = resources;
     const savedObjectsClient = context.core.savedObjects.client;
     const { attributes } = await savedObjectsClient.get(
-      'apm-server-settings',
-      'apm-server-settings'
+      APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
+      APM_SERVER_SCHEMA_SAVED_OBJECT_ID
     );
     return attributes;
   },

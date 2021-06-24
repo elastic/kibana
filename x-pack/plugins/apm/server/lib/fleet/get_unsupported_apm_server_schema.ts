@@ -1,5 +1,9 @@
 import { SavedObjectsClientContract } from 'kibana/server';
-import { apmConfigMapping } from './create_cloud_apm_package_policy';
+import {
+  APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
+  APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
+} from '../../../common/apm_saved_object_constants';
+import { apmConfigMapping } from './get_apm_package_policy_definition';
 
 export async function getUnsupportedApmServerSchema({
   savedObjectsClient,
@@ -7,8 +11,8 @@ export async function getUnsupportedApmServerSchema({
   savedObjectsClient: SavedObjectsClientContract;
 }) {
   const { attributes } = await savedObjectsClient.get(
-    'apm-server-settings',
-    'apm-server-settings'
+    APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
+    APM_SERVER_SCHEMA_SAVED_OBJECT_ID
   );
   const apmServerSchema: Record<string, any> = JSON.parse(
     (attributes as { schemaJson: string }).schemaJson

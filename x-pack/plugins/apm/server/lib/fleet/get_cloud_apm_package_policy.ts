@@ -9,6 +9,9 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { AgentPolicy, PackagePolicy } from '../../../../fleet/common';
 import { APMPluginStartDependencies } from '../../types';
 
+export const POLICY_ELASTIC_AGENT_ON_CLOUD = 'policy-elastic-agent-on-cloud';
+export const APM_PACKAGE_NAME = 'apm';
+
 export async function getCloudAgentPolicy({
   fleetPluginStart,
   savedObjectsClient,
@@ -18,7 +21,7 @@ export async function getCloudAgentPolicy({
 }) {
   const cloudAgentPolicy = await fleetPluginStart.agentPolicyService.get(
     savedObjectsClient,
-    'policy-elastic-agent-on-cloud'
+    POLICY_ELASTIC_AGENT_ON_CLOUD
   );
   return cloudAgentPolicy;
 }
@@ -26,6 +29,6 @@ export async function getCloudAgentPolicy({
 export function getApmPackagePolicy(agentPolicy: AgentPolicy) {
   const packagePolicies = agentPolicy.package_policies as PackagePolicy[];
   return packagePolicies.find(
-    (packagePolicy) => packagePolicy?.package?.name === 'apm'
+    (packagePolicy) => packagePolicy?.package?.name === APM_PACKAGE_NAME
   );
 }

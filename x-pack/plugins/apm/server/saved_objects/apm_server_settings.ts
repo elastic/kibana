@@ -7,9 +7,10 @@
 
 import { SavedObjectsType } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
+import { APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE } from '../../common/apm_saved_object_constants';
 
 export const apmServerSettings: SavedObjectsType = {
-  name: 'apm-server-settings',
+  name: APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
@@ -24,8 +25,8 @@ export const apmServerSettings: SavedObjectsType = {
     importableAndExportable: false,
     icon: 'apmApp',
     getTitle: () =>
-      i18n.translate('xpack.apm.apmSettings.index', {
-        defaultMessage: 'APM Server Settings - Index',
+      i18n.translate('xpack.apm.apmSchema.index', {
+        defaultMessage: 'APM Server Schema - Index',
       }),
   },
 };
