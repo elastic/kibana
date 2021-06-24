@@ -16,9 +16,7 @@ import NodeSass from 'node-sass';
 import { parseThemeTags, ALL_THEMES, ThemeTag, ThemeTags } from '../common';
 // @ts-expect-error required to be JS by other tools consuming it
 import postCssConfig from '../../postcss.config.js';
-
-const IS_NATIVE_WIN32_PATH = /^[a-z]:[/\\]|^\\\\/i;
-const ABSOLUTE_SCHEME = /^[A-Za-z0-9+\-.]+:/;
+import { normalizeNodeSassSourceMap } from './normalize_node_sass_source_map';
 
 interface LoaderOptions {
   dist: boolean;
@@ -36,52 +34,6 @@ function parseOptions(ctx: webpack.loader.LoaderContext): LoaderOptions {
     sourceMapRoot: raw.sourceMapRoot,
     themeTags: parseThemeTags(raw.themeTags),
   };
-}
-
-/**
- * @param {string} source
- * @returns {"absolute" | "scheme-relative" | "path-absolute" | "path-absolute"}
- */
-function getURLType(source: string) {
-  if (source[0] === '/') {
-    if (source[1] === '/') {
-      return 'scheme-relative' as const;
-    }
-
-    return 'path-absolute' as const;
-  }
-
-  if (IS_NATIVE_WIN32_PATH.test(source)) {
-    return 'path-absolute' as const;
-  }
-
-  return ABSOLUTE_SCHEME.test(source) ? ('absolute' as const) : ('path-relative' as const);
-}
-
-function normalizeSourceMap(map: Buffer, rootContext: string) {
-  const newMap = JSON.parse(map.toString('utf8'));
-
-  // result.map.file is an optional property that provides the output filename.
-  // Since we don't know the final filename in the webpack build chain yet, it makes no sense to have it.
-  delete newMap.file;
-
-  newMap.sourceRoot = '';
-
-  // node-sass returns POSIX paths, that's why we need to transform them back to native paths.
-  // This fixes an error on windows where the source-map module cannot resolve the source maps.
-  // @see https://github.com/webpack-contrib/sass-loader/issues/366#issuecomment-279460722
-  newMap.sources = newMap.sources.map((source: string) => {
-    const sourceType = getURLType(source);
-
-    // Do no touch `scheme-relative`, `path-absolute` and `absolute` types
-    if (sourceType === 'path-relative') {
-      return Path.resolve(rootContext, Path.normalize(source));
-    }
-
-    return source;
-  });
-
-  return newMap;
 }
 
 const processFile = async ({
@@ -139,7 +91,7 @@ const processFile = async ({
     {
       map: nodeSassResult.map
         ? {
-            prev: normalizeSourceMap(nodeSassResult.map, ctx.rootContext),
+            prev: normalizeNodeSassSourceMap(nodeSassResult.map, ctx.rootContext),
             inline: false,
             annotation: false,
           }

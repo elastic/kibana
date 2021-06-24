@@ -133,7 +133,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.scss$/,
           exclude: /node_modules/,
-          loader: require.resolve('./theme_loader'),
+          loader: require.resolve('../theme_loader/theme_loader'),
           options: {
             dist: worker.dist,
             repoRoot: worker.repoRoot,
