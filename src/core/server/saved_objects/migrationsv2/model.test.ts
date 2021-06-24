@@ -41,9 +41,8 @@ import type {
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
-import { createInitialState, model } from './model';
+import { model } from './model';
 import { ResponseType } from './next';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../migrations/core';
 import { createInitialProgress } from './progress';
 
@@ -90,6 +89,7 @@ describe('migrations v2 model', () => {
         ],
       },
     },
+    knownTypes: ['dashboard', 'config'],
   };
 
   describe('exponential retry delays for retryable_es_client_error', () => {
@@ -1562,192 +1562,6 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
-    });
-  });
-  describe('createInitialState', () => {
-    const migrationsConfig = ({
-      retryAttempts: 15,
-      batchSize: 1000,
-    } as unknown) as SavedObjectsMigrationConfigType;
-    it('creates the initial state for the model based on the passed in paramaters', () => {
-      expect(
-        createInitialState({
-          kibanaVersion: '8.1.0',
-          targetMappings: {
-            dynamic: 'strict',
-            properties: { my_type: { properties: { title: { type: 'text' } } } },
-          },
-          migrationVersionPerType: {},
-          indexPrefix: '.kibana_task_manager',
-          migrationsConfig,
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "batchSize": 1000,
-          "controlState": "INIT",
-          "currentAlias": ".kibana_task_manager",
-          "indexPrefix": ".kibana_task_manager",
-          "kibanaVersion": "8.1.0",
-          "legacyIndex": ".kibana_task_manager",
-          "logs": Array [],
-          "outdatedDocumentsQuery": Object {
-            "bool": Object {
-              "should": Array [],
-            },
-          },
-          "preMigrationScript": Object {
-            "_tag": "None",
-          },
-          "retryAttempts": 15,
-          "retryCount": 0,
-          "retryDelay": 0,
-          "targetIndexMappings": Object {
-            "dynamic": "strict",
-            "properties": Object {
-              "my_type": Object {
-                "properties": Object {
-                  "title": Object {
-                    "type": "text",
-                  },
-                },
-              },
-            },
-          },
-          "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
-          "tempIndexMappings": Object {
-            "dynamic": false,
-            "properties": Object {
-              "migrationVersion": Object {
-                "dynamic": "true",
-                "type": "object",
-              },
-              "type": Object {
-                "type": "keyword",
-              },
-            },
-          },
-          "unusedTypesQuery": Object {
-            "bool": Object {
-              "must_not": Array [
-                Object {
-                  "term": Object {
-                    "type": "fleet-agent-events",
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "type": "tsvb-validation-telemetry",
-                  },
-                },
-                Object {
-                  "bool": Object {
-                    "must": Array [
-                      Object {
-                        "match": Object {
-                          "type": "search-session",
-                        },
-                      },
-                      Object {
-                        "match": Object {
-                          "search-session.persisted": false,
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          },
-          "versionAlias": ".kibana_task_manager_8.1.0",
-          "versionIndex": ".kibana_task_manager_8.1.0_001",
-        }
-      `);
-    });
-    it('returns state with a preMigration script', () => {
-      const preMigrationScript = "ctx._id = ctx._source.type + ':' + ctx._id";
-      const initialState = createInitialState({
-        kibanaVersion: '8.1.0',
-        targetMappings: {
-          dynamic: 'strict',
-          properties: { my_type: { properties: { title: { type: 'text' } } } },
-        },
-        preMigrationScript,
-        migrationVersionPerType: {},
-        indexPrefix: '.kibana_task_manager',
-        migrationsConfig,
-      });
-
-      expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
-      expect((initialState.preMigrationScript as Option.Some<string>).value).toEqual(
-        preMigrationScript
-      );
-    });
-    it('returns state without a preMigration script', () => {
-      expect(
-        Option.isNone(
-          createInitialState({
-            kibanaVersion: '8.1.0',
-            targetMappings: {
-              dynamic: 'strict',
-              properties: { my_type: { properties: { title: { type: 'text' } } } },
-            },
-            preMigrationScript: undefined,
-            migrationVersionPerType: {},
-            indexPrefix: '.kibana_task_manager',
-            migrationsConfig,
-          }).preMigrationScript
-        )
-      ).toEqual(true);
-    });
-    it('returns state with an outdatedDocumentsQuery', () => {
-      expect(
-        createInitialState({
-          kibanaVersion: '8.1.0',
-          targetMappings: {
-            dynamic: 'strict',
-            properties: { my_type: { properties: { title: { type: 'text' } } } },
-          },
-          preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
-          migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
-          indexPrefix: '.kibana_task_manager',
-          migrationsConfig,
-        }).outdatedDocumentsQuery
-      ).toMatchInlineSnapshot(`
-        Object {
-          "bool": Object {
-            "should": Array [
-              Object {
-                "bool": Object {
-                  "must": Object {
-                    "term": Object {
-                      "type": "my_dashboard",
-                    },
-                  },
-                  "must_not": Object {
-                    "term": Object {
-                      "migrationVersion.my_dashboard": "7.10.1",
-                    },
-                  },
-                },
-              },
-              Object {
-                "bool": Object {
-                  "must": Object {
-                    "term": Object {
-                      "type": "my_viz",
-                    },
-                  },
-                  "must_not": Object {
-                    "term": Object {
-                      "migrationVersion.my_viz": "8.0.0",
-                    },
-                  },
-                },
-              },
-            ],
-          },
-        }
-      `);
     });
   });
 });

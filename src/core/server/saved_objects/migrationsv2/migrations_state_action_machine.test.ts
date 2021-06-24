@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
@@ -14,7 +15,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { LoggerAdapter } from '../../logging/logger_adapter';
 import { AllControlStates, State } from './types';
-import { createInitialState } from './model';
+import { createInitialState } from './initial_state';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
 describe('migrationsStateActionMachine', () => {

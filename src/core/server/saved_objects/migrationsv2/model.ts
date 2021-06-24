@@ -11,13 +11,11 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
 import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
-import { AllActionStates, InitState, State } from './types';
+import { AllActionStates, State } from './types';
 import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
-import { SavedObjectsMigrationVersion } from '../types';
 import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
-import { excludeUnusedTypesQuery, TransformErrorObjects } from '../migrations/core';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import { TransformErrorObjects } from '../migrations/core';
 import {
   createInitialProgress,
   incrementProcessedProgress,
@@ -459,24 +457,43 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const source = stateP.sourceIndex;
-      const target = stateP.versionIndex;
       return {
         ...stateP,
-        controlState: 'SET_SOURCE_WRITE_BLOCK',
-        sourceIndex: source,
-        targetIndex: target,
-        targetIndexMappings: disableUnknownTypeMappingFields(
-          stateP.targetIndexMappings,
-          stateP.sourceIndexMappings
-        ),
-        versionIndexReadyActions: Option.some<AliasAction[]>([
-          { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
-          { add: { index: target, alias: stateP.currentAlias } },
-          { add: { index: target, alias: stateP.versionAlias } },
-          { remove_index: { index: stateP.tempIndex } },
-        ]),
+        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
       };
+    } else {
+      return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      const { unknownDocIds } = res.right;
+      if (unknownDocIds.length) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: 'LOL', // TODO
+        };
+      } else {
+        const source = stateP.sourceIndex;
+        const target = stateP.versionIndex;
+        return {
+          ...stateP,
+          controlState: 'SET_SOURCE_WRITE_BLOCK',
+          sourceIndex: source,
+          targetIndex: target,
+          targetIndexMappings: disableUnknownTypeMappingFields(
+            stateP.targetIndexMappings,
+            stateP.sourceIndexMappings
+          ),
+          versionIndexReadyActions: Option.some<AliasAction[]>([
+            { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
+            { add: { index: target, alias: stateP.currentAlias } },
+            { add: { index: target, alias: stateP.versionAlias } },
+            { remove_index: { index: stateP.tempIndex } },
+          ]),
+        };
+      }
     } else {
       return throwBadResponse(stateP, res);
     }
@@ -957,68 +974,4 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else {
     return throwBadControlState(stateP);
   }
-};
-
-/**
- * Construct the initial state for the model
- */
-export const createInitialState = ({
-  kibanaVersion,
-  targetMappings,
-  preMigrationScript,
-  migrationVersionPerType,
-  indexPrefix,
-  migrationsConfig,
-}: {
-  kibanaVersion: string;
-  targetMappings: IndexMapping;
-  preMigrationScript?: string;
-  migrationVersionPerType: SavedObjectsMigrationVersion;
-  indexPrefix: string;
-  migrationsConfig: SavedObjectsMigrationConfigType;
-}): InitState => {
-  const outdatedDocumentsQuery = {
-    bool: {
-      should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
-        bool: {
-          must: { term: { type } },
-          must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
-        },
-      })),
-    },
-  };
-
-  const reindexTargetMappings: IndexMapping = {
-    dynamic: false,
-    properties: {
-      type: { type: 'keyword' },
-      migrationVersion: {
-        // @ts-expect-error we don't allow plugins to set `dynamic`
-        dynamic: 'true',
-        type: 'object',
-      },
-    },
-  };
-
-  const initialState: InitState = {
-    controlState: 'INIT',
-    indexPrefix,
-    legacyIndex: indexPrefix,
-    currentAlias: indexPrefix,
-    versionAlias: `${indexPrefix}_${kibanaVersion}`,
-    versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
-    kibanaVersion,
-    preMigrationScript: Option.fromNullable(preMigrationScript),
-    targetIndexMappings: targetMappings,
-    tempIndexMappings: reindexTargetMappings,
-    outdatedDocumentsQuery,
-    retryCount: 0,
-    retryDelay: 0,
-    retryAttempts: migrationsConfig.retryAttempts,
-    batchSize: migrationsConfig.batchSize,
-    logs: [],
-    unusedTypesQuery: excludeUnusedTypesQuery,
-  };
-  return initialState;
 };
