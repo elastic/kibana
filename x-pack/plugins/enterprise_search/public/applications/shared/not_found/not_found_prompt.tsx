@@ -9,13 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiEmptyPrompt,
-  EuiEmptyPromptProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LICENSED_SUPPORT_URL } from '../../../../common/constants';
@@ -25,18 +19,17 @@ import { EuiButtonTo } from '../react_router_helpers';
 import './logos/logo.scss';
 
 interface Props {
-  logo: EuiEmptyPromptProps['iconType'];
   productSupportUrl: string;
   backToLink?: string;
 }
 
-export const NotFoundPrompt: React.FC<Props> = ({ logo, productSupportUrl, backToLink = '/' }) => {
+export const NotFoundPrompt: React.FC<Props> = ({ productSupportUrl, backToLink = '/' }) => {
   const { hasGoldLicense } = useValues(LicensingLogic);
   const supportUrl = hasGoldLicense ? LICENSED_SUPPORT_URL : productSupportUrl;
 
   return (
     <EuiEmptyPrompt
-      iconType={logo}
+      iconType="logoEnterpriseSearch"
       title={
         <h1>
           {i18n.translate('xpack.enterpriseSearch.notFound.title', {

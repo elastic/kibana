@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiIcon, EuiButton } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
 import { EuiButtonTo } from '../react_router_helpers';
 
@@ -19,25 +19,22 @@ import { NotFoundPrompt } from './';
 
 describe('NotFoundPrompt', () => {
   const subject = (props?: object) =>
-    shallow(<NotFoundPrompt logo="" productSupportUrl="" {...props} />)
+    shallow(<NotFoundPrompt productSupportUrl="" {...props} />)
       .find(EuiEmptyPrompt)
       .dive();
 
   it('renders', () => {
     const wrapper = subject({
-      logo: 'logoAppSearch',
       productSupportUrl: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
     });
 
     expect(wrapper.find('h1').text()).toEqual('404 error');
-    expect(wrapper.find(EuiIcon).prop('type')).toEqual('logoAppSearch');
     expect(wrapper.find(EuiButtonTo).prop('to')).toEqual('/');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(expect.stringContaining('//discuss'));
   });
 
   it('renders with a custom "Back to dashboard" link if passed', () => {
     const wrapper = subject({
-      logo: 'logoWorkplaceSearch',
       productSupportUrl: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
       backToLink: '/workplace_search/p/sources',
     });

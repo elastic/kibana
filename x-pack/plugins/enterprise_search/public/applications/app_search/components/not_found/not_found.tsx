@@ -10,7 +10,6 @@ import React from 'react';
 import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { PageTemplateProps } from '../../../shared/layout';
 import { NotFoundPrompt } from '../../../shared/not_found';
-import { AppSearchLogo } from '../../../shared/not_found/logos';
 import { SendAppSearchTelemetry } from '../../../shared/telemetry';
 import { AppSearchPageTemplate } from '../layout';
 
@@ -18,7 +17,7 @@ export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
   return (
     <AppSearchPageTemplate pageChrome={[...pageChrome, '404']} template="centeredContent">
       <SendAppSearchTelemetry action="error" metric="not_found" />
-      <NotFoundPrompt logo={AppSearchLogo} productSupportUrl={APP_SEARCH_PLUGIN.SUPPORT_URL} />
+      <NotFoundPrompt productSupportUrl={APP_SEARCH_PLUGIN.SUPPORT_URL} />
     </AppSearchPageTemplate>
   );
 };
