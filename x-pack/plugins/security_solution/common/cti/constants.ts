@@ -9,6 +9,7 @@ import { INDICATOR_DESTINATION_PATH } from '../constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
+export const MATCHED_ID = 'matched.id';
 export const MATCHED_TYPE = 'matched.type';
 export const INDICATOR_MATCH_SUBFIELDS = [MATCHED_ATOMIC, MATCHED_FIELD, MATCHED_TYPE];
 
@@ -18,11 +19,12 @@ export const INDICATOR_MATCHED_TYPE = `${INDICATOR_DESTINATION_PATH}.${MATCHED_T
 
 export const EVENT_DATASET = 'event.dataset';
 export const EVENT_REFERENCE = 'event.reference';
+export const EVENT_URL = 'event.url';
 export const PROVIDER = 'provider';
 export const FIRSTSEEN = 'first_seen';
 
 export const INDICATOR_DATASET = `${INDICATOR_DESTINATION_PATH}.${EVENT_DATASET}`;
-export const INDICATOR_EVENT_URL = `${INDICATOR_DESTINATION_PATH}.event.url`;
+export const INDICATOR_EVENT_URL = `${INDICATOR_DESTINATION_PATH}.${EVENT_URL}`;
 export const INDICATOR_FIRSTSEEN = `${INDICATOR_DESTINATION_PATH}.${FIRSTSEEN}`;
 export const INDICATOR_LASTSEEN = `${INDICATOR_DESTINATION_PATH}.last_seen`;
 export const INDICATOR_PROVIDER = `${INDICATOR_DESTINATION_PATH}.${PROVIDER}`;

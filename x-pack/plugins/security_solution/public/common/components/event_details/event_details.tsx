@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
-import { ThreatDetailsView } from './threat_details_view';
+import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
 import { BrowserFields } from '../../containers/source';
@@ -180,7 +180,7 @@ const EventDetailsComponent: React.FC<Props> = ({
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
             name: `${i18n.THREAT_INTEL} (${enrichmentCount})`,
-            content: <ThreatDetailsView threatData={allEnrichments} />,
+            content: <ThreatDetailsView enrichments={allEnrichments} />,
           }
         : undefined,
     [allEnrichments, enrichmentCount, isAlert]

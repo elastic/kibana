@@ -56,3 +56,9 @@ export const getTooltipContent = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime
     ? i18n.INVESTIGATION_TOOLTIP_CONTENT
     : i18n.INDICATOR_TOOLTIP_CONTENT;
+
+export const getFirstElement: <T = unknown>(array: T[] | undefined) => T | undefined = (array) =>
+  array ? array[0] : undefined;
+
+export const getEnrichmentValue = (enrichment: CtiEnrichment, field: string) =>
+  getFirstElement(enrichment[field]) as string | undefined;

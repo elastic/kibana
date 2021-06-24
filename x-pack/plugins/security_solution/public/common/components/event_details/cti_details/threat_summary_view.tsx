@@ -20,12 +20,7 @@ import {
 } from '../../../../../common/cti/constants';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
-import { getTooltipTitle, getTooltipContent } from './helpers';
-
-const getFirstElement: <T = unknown>(array: T[] | undefined) => T | undefined = (array) =>
-  array ? array[0] : undefined;
-const getEnrichmentValue = (enrichment: CtiEnrichment, field: string) =>
-  getFirstElement(enrichment[field]) as string | undefined;
+import { getTooltipTitle, getTooltipContent, getEnrichmentValue } from './helpers';
 
 export interface ThreatSummaryItem {
   title: {
@@ -80,7 +75,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
 }) => (
   <FlexContainer>
     <RightMargin>
-      <FormattedFieldValue
+      <FormattedFieldValue // TODO this contextId is not sufficient, at least with my test data
         key={`alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}-key`}
         contextId={`alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}`}
         eventId={eventId}

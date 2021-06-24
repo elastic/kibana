@@ -8,8 +8,8 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { useMountAppended } from '../../utils/use_mount_appended';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { useMountAppended } from '../../../utils/use_mount_appended';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 import { EmptyThreatDetailsView } from './empty_threat_details_view';
 
 jest.mock('../../lib/kibana');

@@ -8,8 +8,9 @@
 import { EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+
+import { useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';
-import { useKibana } from '../../lib/kibana';
 
 const EmptyThreatDetailsViewContainer = styled.div`
   display: flex;

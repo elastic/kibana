@@ -9,8 +9,8 @@ import React from 'react';
 
 import { ThreatDetailsView } from './threat_details_view';
 
-import { TestProviders } from '../../mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
+import { TestProviders } from '../../../mock';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
   return {
