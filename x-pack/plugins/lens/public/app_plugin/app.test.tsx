@@ -29,7 +29,7 @@ import {
   Query,
 } from '../../../../../src/plugins/data/public';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
-import { LensByValueInput } from '../editor_frame_service/embeddable/embeddable';
+import { LensByValueInput } from '../embeddable/embeddable';
 import { SavedObjectReference } from '../../../../../src/core/types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import moment from 'moment';

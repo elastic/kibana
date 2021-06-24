@@ -26,7 +26,7 @@ import {
   LensByValueInput,
   LensSavedObjectAttributes,
   LensByReferenceInput,
-} from './editor_frame_service/embeddable/embeddable';
+} from './embeddable/embeddable';
 import {
   mockAttributeService,
   createEmbeddableStateTransferMock,

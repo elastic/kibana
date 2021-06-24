@@ -7,7 +7,7 @@
 import { makeDefaultServices, mockLensStore } from '../mocks';
 import { act } from 'react-dom/test-utils';
 import { loadDocument } from './mounter';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
+import { LensEmbeddableInput } from '../embeddable/embeddable';
 
 const defaultSavedObjectId = '1234';
 
