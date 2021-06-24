@@ -1436,10 +1436,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@33.0.0":
-  version "33.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-33.0.0.tgz#525cf5ea6e6ab16c32bb09766e9c23806640240f"
-  integrity sha512-BQ6GJxKVaOF7Fm+IvH2iFeeGnepzygDr4xmmZ8PH2BEfrtkxzGP9YDpqmr/Drg5beVynJ3+72k1AEQT/JE6NTw==
+"@elastic/eui@34.3.0":
+  version "34.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-34.3.0.tgz#5cd7d66c86d9644991c4391682f84824126361df"
+  integrity sha512-cUFh5H7Y95lzbsyRP1yL88mVVe5MAODOhV+O+8jYmuDQH6WrEiDhtSljTKfVYssbP7Bv+qFraVwyUj623dfr2w==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1454,6 +1454,7 @@
     chroma-js "^2.1.0"
     classnames "^2.2.6"
     lodash "^4.17.21"
+    mdast-util-to-hast "^10.0.0"
     numeral "^2.0.6"
     prop-types "^15.6.0"
     react-ace "^7.0.5"
@@ -2616,7 +2617,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
+"@kbn/cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""
 
@@ -2700,7 +2701,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
+"@kbn/plugin-helpers@link:bazel-bin/packages/kbn-plugin-helpers":
   version "0.0.0"
   uid ""
 
@@ -19027,24 +19028,10 @@ mdast-util-from-markdown@^0.8.0:
     parse-entities "^2.0.0"
     unist-util-stringify-position "^2.0.0"
 
-mdast-util-to-hast@10.0.1:
+mdast-util-to-hast@10.0.1, mdast-util-to-hast@^10.0.0:
   version "10.0.1"
   resolved "https://registry.yarnpkg.com/mdast-util-to-hast/-/mdast-util-to-hast-10.0.1.tgz#0cfc82089494c52d46eb0e3edb7a4eb2aea021eb"
   integrity sha512-BW3LM9SEMnjf4HXXVApZMt8gLQWVNXc3jryK0nJu/rOXPOnlkUjmdkDlmxMirpbU9ILncGFIwLH/ubnWBbcdgA==
-  dependencies:
-    "@types/mdast" "^3.0.0"
-    "@types/unist" "^2.0.0"
-    mdast-util-definitions "^4.0.0"
-    mdurl "^1.0.0"
-    unist-builder "^2.0.0"
-    unist-util-generated "^1.0.0"
-    unist-util-position "^3.0.0"
-    unist-util-visit "^2.0.0"
-
-mdast-util-to-hast@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/mdast-util-to-hast/-/mdast-util-to-hast-10.0.0.tgz#744dfe7907bac0263398a68af5aba16d104a9a08"
-  integrity sha512-dRyAC5S4eDcIOdkz4jg0wXbUdlf+5YFu7KppJNHOsMaD7ql5bKIqVcvXYYkcrKjzUkfX8JsKFVMthsU8OWxQ+w==
   dependencies:
     "@types/mdast" "^3.0.0"
     "@types/unist" "^2.0.0"
