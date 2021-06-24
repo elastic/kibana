@@ -1148,6 +1148,10 @@ describe('get_filter', () => {
               field: '*',
               include_unmapped: true,
             },
+            {
+              field: '@timestamp',
+              format: 'epoch_millis',
+            },
           ],
         },
       });
@@ -1190,6 +1194,10 @@ describe('get_filter', () => {
             {
               field: '*',
               include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'epoch_millis',
             },
           ],
         },
@@ -1278,6 +1286,10 @@ describe('get_filter', () => {
             {
               field: '*',
               include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'epoch_millis',
             },
           ],
         },
