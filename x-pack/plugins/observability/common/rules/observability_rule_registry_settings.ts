@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { observabilityFeatureId } from '../const';
+import { observabilityFeatureId } from '..';
 
 export const observabilityRuleRegistrySettings = {
   name: observabilityFeatureId,
