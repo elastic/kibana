@@ -14,7 +14,7 @@ import {
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../common/components/accessibility/helpers';
+} from '../../../../../timelines/public';
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
 import {
