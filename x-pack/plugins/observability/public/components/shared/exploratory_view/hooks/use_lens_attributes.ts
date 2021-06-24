@@ -8,16 +8,12 @@
 import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
-import { LensAttributes } from '../configurations/lens_attributes';
+import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import { useSeriesStorage } from './use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { DataSeries, SeriesUrl, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from './use_app_index_pattern';
-
-interface Props {
-  seriesId: string;
-}
 
 export const getFiltersFromDefs = (
   reportDefinitions: SeriesUrl['reportDefinitions'],
@@ -37,54 +33,51 @@ export const getFiltersFromDefs = (
   });
 };
 
-export const useLensAttributes = ({
-  seriesId,
-}: Props): TypedLensByValueInput['attributes'] | null => {
-  const { getSeries } = useSeriesStorage();
-  const series = getSeries(seriesId);
-  const { breakdown, seriesType, operationType, reportType, dataType, reportDefinitions = {} } =
-    series ?? {};
+export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null => {
+  const { allSeriesIds, allSeries } = useSeriesStorage();
 
-  const { indexPattern } = useAppIndexPatternContext();
+  const { indexPatterns } = useAppIndexPatternContext();
 
   return useMemo(() => {
-    if (!indexPattern || !reportType || isEmpty(reportDefinitions)) {
+    if (isEmpty(indexPatterns) || isEmpty(allSeriesIds)) {
       return null;
     }
 
-    const dataViewConfig = getDefaultConfigs({
-      reportType,
-      dataType,
-      indexPattern,
+    const layerConfigs: LayerConfig[] = [];
+
+    allSeriesIds.forEach((seriesIdT) => {
+      const seriesT = allSeries[seriesIdT];
+      const indexPattern = indexPatterns?.[seriesT?.dataType];
+      if (indexPattern && seriesT.reportType && !isEmpty(seriesT.reportDefinitions)) {
+        const reportViewConfig = getDefaultConfigs({
+          reportType: seriesT.reportType,
+          dataType: seriesT.dataType,
+          indexPattern,
+        });
+
+        const filters: UrlFilter[] = (seriesT.filters ?? []).concat(
+          getFiltersFromDefs(seriesT.reportDefinitions, reportViewConfig)
+        );
+
+        layerConfigs.push({
+          filters,
+          indexPattern,
+          reportConfig: reportViewConfig,
+          breakdown: seriesT.breakdown,
+          operationType: seriesT.operationType,
+          seriesType: seriesT.seriesType,
+          reportDefinitions: seriesT.reportDefinitions ?? {},
+          time: seriesT.time,
+        });
+      }
     });
 
-    const filters: UrlFilter[] = (series.filters ?? []).concat(
-      getFiltersFromDefs(reportDefinitions, dataViewConfig)
-    );
-
-    const lensAttributes = new LensAttributes(
-      indexPattern,
-      dataViewConfig,
-      seriesType,
-      filters,
-      operationType,
-      reportDefinitions,
-      breakdown
-    );
-
-    if (breakdown) {
-      lensAttributes.addBreakdown(breakdown);
+    if (layerConfigs.length < 1) {
+      return null;
     }
 
+    const lensAttributes = new LensAttributes(layerConfigs);
+
     return lensAttributes.getJSON();
-  }, [
-    indexPattern,
-    reportType,
-    reportDefinitions,
-    dataType,
-    series.filters,
-    seriesType,
-    operationType,
-    breakdown,
-  ]);
+  }, [indexPatterns, allSeriesIds, allSeries]);
 };

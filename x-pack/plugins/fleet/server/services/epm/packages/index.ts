@@ -17,6 +17,7 @@ export {
   getFile,
   getInstallationObject,
   getInstallation,
+  getInstallations,
   getPackageInfo,
   getPackages,
   getLimitedPackages,

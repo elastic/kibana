@@ -11,6 +11,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const docTable = getService('docTable');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -57,6 +58,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickFieldListItemRemove('_score');
       expect(await PageObjects.discover.getDocHeader()).not.to.have.string('_score');
       expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
+    });
+
+    it('displays _source viewer in doc viewer', async function () {
+      await docTable.clickRowToggle({ rowIndex: 0 });
+
+      await PageObjects.discover.isShowingDocViewer();
+      await PageObjects.discover.clickDocViewerTab(1);
+      await PageObjects.discover.expectSourceViewerToExist();
     });
   });
 }
