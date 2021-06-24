@@ -19,12 +19,31 @@ export type SerializableValue = string | number | boolean | null | undefined | S
 export type Serializable = SerializableValue | SerializableValue[];
 
 /**
+ * Versioned state is a POJO JavaScript object that can be serialized to JSON,
+ * and which also contains the version information. The version is stored in
+ * semver format and corresponds to the Kibana release version when the object
+ * was created. The version can be used to apply migrations to the object.
+ *
+ * For example:
+ *
+ * ```ts
+ * const obj: VersionedState<{ dashboardId: string }> = [{ dashboardId: '123' }, '7.14.0'];
+ * ```
+ */
+export type VersionedState<S extends SerializableState = SerializableState> = [
+  state: S,
+  version: string
+];
+
+/**
  * Persistable state interface can be implemented by something that persists
  * (stores) state, for example, in a saved object. Once implemented that thing
  * will gain ability to "extract" and "inject" saved object references, which
  * are necessary for various saved object tasks, such as export. It will also be
  * able to do state migrations across Kibana versions, if the shape of the state
  * would change over time.
+ *
+ * @todo Maybe rename it to `PersistableStateItem`?
  */
 export interface PersistableState<P extends SerializableState = SerializableState> {
   /**
@@ -127,19 +146,6 @@ export interface PersistableStateService<P extends SerializableState = Serializa
   extract(state: P): { state: P; references: SavedObjectReference[] };
 
   /**
-   * A function which receives the state of an older object and version and
-   * should migrate the state of the object to the latest possible version using
-   * the `.migrations` dictionary provided on a {@link PersistableState} item.
-   *
-   * @param state The persistable state serializable state object.
-   * @param version Current semver version of the `state`.
-   * @returns A serializable state object migrated to the latest state.
-   *
-   * @todo It should probably also return the latest version?
-   */
-  migrateToLatest?: (state: SerializableState, version: string) => P;
-
-  /**
    * Migrate function runs a specified migration of a {@link PersistableState}
    * item.
    *
@@ -155,4 +161,15 @@ export interface PersistableStateService<P extends SerializableState = Serializa
    *          applied to it.
    */
   migrate(state: SerializableState, version: string): SerializableState;
+
+  /**
+   * A function which receives the state of an older object and version and
+   * should migrate the state of the object to the latest possible version using
+   * the `.migrations` dictionary provided on a {@link PersistableState} item.
+   *
+   * @param state The persistable state serializable state object.
+   * @param version Current semver version of the `state`.
+   * @returns A serializable state object migrated to the latest state.
+   */
+  migrateToLatest?: (state: VersionedState) => VersionedState<P>;
 }
