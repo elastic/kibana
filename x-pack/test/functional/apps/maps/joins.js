@@ -13,7 +13,6 @@ const EXPECTED_JOIN_VALUES = {
   bravo: 3,
   charlie: 12,
   tango: undefined,
-  zulu: undefined,
 };
 
 const VECTOR_SOURCE_ID = 'n1t6f';
@@ -77,10 +76,10 @@ export default function ({ getPageObjects, getService }) {
 
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(10);
+      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(8);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
-        if (properties.name === 'tango' || properties.name === 'zulu') {
+        if (properties.name === 'tango') {
           //left join, which means we won't rescale joins that do not match
           expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(false);
         } else {
@@ -100,12 +99,10 @@ export default function ({ getPageObjects, getService }) {
 
       expect(visibilitiesOfFeatures).to.eql([
         false,
-        false,
         true,
         true,
         true,
         // geo centroids for above features
-        false,
         false,
         true,
         true,
@@ -168,12 +165,10 @@ export default function ({ getPageObjects, getService }) {
 
         expect(visibilitiesOfFeatures).to.eql([
           false,
-          false,
           true,
           false,
           false,
           // geo centroids for above features
-          false,
           false,
           true,
           false,

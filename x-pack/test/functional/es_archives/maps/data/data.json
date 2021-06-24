@@ -136,11 +136,12 @@
   }
 }
 
+
 {
   "type": "doc",
   "value": {
     "id": "999",
-    "index": "geo_shapes",
+    "index": "drawing_data",
     "source": {
       "geometry": {
         "coordinates": [
@@ -165,7 +166,7 @@
         ],
         "type": "polygon"
       },
-      "name": "zulu",
+      "name": "doc-to-delete",
       "prop1": 9
     }
   }

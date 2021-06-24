@@ -14,7 +14,7 @@ export default function ({ getService }) {
         .delete(`/api/maps/feature/999`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          index: 'geo_shapes',
+          index: 'drawing_data',
         })
         .expect(200);
     });
@@ -24,7 +24,7 @@ export default function ({ getService }) {
         .delete(`/api/maps/feature/999`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          index: 'geo_shapes',
+          index: 'drawing_data',
         })
         .expect(404);
     });
@@ -34,7 +34,7 @@ export default function ({ getService }) {
         .delete(`/api/maps/feature/998`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          index: 'geo_shapes',
+          index: 'drawing_data',
         })
         .expect(404);
     });
