@@ -486,7 +486,13 @@ export class HttpServer {
           lookupCompressed: true,
         },
       },
-      options: { auth: false },
+      options: {
+        auth: false,
+        cache: {
+          privacy: 'public',
+          otherwise: 'must-revalidate',
+        },
+      },
     });
   }
 

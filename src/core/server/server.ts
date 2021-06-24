@@ -255,6 +255,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+    this.status.start();
 
     this.coreStart = {
       capabilities: capabilitiesStart,
@@ -268,7 +269,6 @@ export class Server {
 
     await this.plugins.start(this.coreStart);
 
-    this.status.start();
     await this.http.start();
 
     startTransaction?.end();
