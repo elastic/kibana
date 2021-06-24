@@ -95,4 +95,22 @@ describe('mathColumn', () => {
       meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
     });
   });
+
+  it('should infer the meta information from the first non-null value', async () => {
+    const result = await fn(
+      {
+        ...testTable,
+        columns: [...testTable.columns],
+        rows: testTable.rows.map((row, i) => (i > 0 ? { ...row } : { ...row, name: null })),
+      },
+      { id: 'output', name: 'name', expression: 'price + 2' }
+    );
+
+    expect(result.type).toBe('datatable');
+    expect(result.columns[result.columns.length - 1]).toEqual({
+      id: 'output',
+      name: 'name',
+      meta: { type: 'number', params: { id: 'number' } },
+    });
+  });
 });

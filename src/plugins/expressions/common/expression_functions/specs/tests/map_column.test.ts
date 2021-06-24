@@ -219,7 +219,7 @@ describe('mapColumn', () => {
     });
   });
 
-  it('should correctly infer the type fromt he first row if the references column for meta information does not exists', () => {
+  it('should correctly infer the type from the first row if the references column for meta information does not exists', () => {
     testScheduler.run(({ expectObservable }) => {
       expectObservable(
         runFn(
@@ -234,6 +234,53 @@ describe('mapColumn', () => {
               id: 'value',
               name: 'value',
               meta: expect.objectContaining({ type: 'number' }),
+            }),
+          ],
+        }),
+      ]);
+    });
+  });
+
+  it('should correctly infer the type from the first non-null row', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(
+          {
+            ...emptyTable,
+            rows: [...emptyTable.rows, { value: null }, { value: 5 }],
+          },
+          { name: 'value', expression: pricePlusTwo }
+        )
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: [
+            expect.objectContaining({
+              id: 'value',
+              name: 'value',
+              meta: expect.objectContaining({ type: 'number' }),
+            }),
+          ],
+        }),
+      ]);
+    });
+  });
+
+  it('should should be resilient when inferring meta from a datatable with all null values', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(
+          { ...emptyTable, rows: [...emptyTable.rows, { value: null }] },
+          { name: 'value', expression: () => of(null) }
+        )
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: [
+            expect.objectContaining({
+              id: 'value',
+              name: 'value',
+              meta: expect.objectContaining({ type: 'null' }),
             }),
           ],
         }),
