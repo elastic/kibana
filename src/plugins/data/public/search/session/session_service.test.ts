@@ -172,7 +172,7 @@ describe('Session service', () => {
     expect(sessionService.getSessionId()).toBe(sessionId);
   });
 
-  it('Calling clear() more then once still allows to continue previous session from another app', async () => {
+  it('Calling clear() more than once still allows previous session from another app to continue', async () => {
     sessionService.start();
     const sessionId = sessionService.getSessionId();
 
