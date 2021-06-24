@@ -370,28 +370,34 @@ export const getPrepopulatedEndpointException = ({
   const sha256Hash = file?.hash?.sha256 ?? '';
   const isLinux = host?.os?.name === 'Linux';
 
+  const commonFields: Array<{
+    field: string;
+    operator: 'excluded' | 'included';
+    type: 'match';
+    value: string;
+  }> = [
+    {
+      field: isLinux ? 'file.path' : 'file.path.caseless',
+      operator: 'included',
+      type: 'match',
+      value: filePath ?? '',
+    },
+    {
+      field: 'file.hash.sha256',
+      operator: 'included',
+      type: 'match',
+      value: sha256Hash ?? '',
+    },
+    {
+      field: 'event.code',
+      operator: 'included',
+      type: 'match',
+      value: eventCode ?? '',
+    },
+  ];
   const entriesToAdd = () => {
     if (isLinux) {
-      return addIdToEntries([
-        {
-          field: 'file.path',
-          operator: 'included',
-          type: 'match',
-          value: filePath ?? '',
-        },
-        {
-          field: 'file.hash.sha256',
-          operator: 'included',
-          type: 'match',
-          value: sha256Hash ?? '',
-        },
-        {
-          field: 'event.code',
-          operator: 'included',
-          type: 'match',
-          value: eventCode ?? '',
-        },
-      ]);
+      return addIdToEntries(commonFields);
     } else {
       return addIdToEntries([
         {
@@ -412,24 +418,7 @@ export const getPrepopulatedEndpointException = ({
             },
           ],
         },
-        {
-          field: 'file.path.caseless',
-          operator: 'included',
-          type: 'match',
-          value: filePath ?? '',
-        },
-        {
-          field: 'file.hash.sha256',
-          operator: 'included',
-          type: 'match',
-          value: sha256Hash ?? '',
-        },
-        {
-          field: 'event.code',
-          operator: 'included',
-          type: 'match',
-          value: eventCode ?? '',
-        },
+        ...commonFields,
       ]);
     }
   };
