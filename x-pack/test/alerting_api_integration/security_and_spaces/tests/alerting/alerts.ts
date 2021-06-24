@@ -1304,7 +1304,6 @@ instanceStateValue: true
       license: 'basic',
       category: ruleObject.alertInfo.ruleTypeId,
       ruleset: ruleObject.alertInfo.producer,
-      namespace: spaceId,
       name: ruleObject.alertInfo.name,
     });
 

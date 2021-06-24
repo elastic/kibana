@@ -16,17 +16,18 @@ import {
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
-import { AttributeName } from '../../../shared/types';
+import { AttributeName, SingleUserRoleMapping, ElasticsearchUser } from '../../../shared/types';
 import { ASRoleMapping, RoleTypes } from '../../types';
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
 
 import {
-  DELETE_ROLE_MAPPING_MESSAGE,
   ROLE_MAPPING_DELETED_MESSAGE,
   ROLE_MAPPING_CREATED_MESSAGE,
   ROLE_MAPPING_UPDATED_MESSAGE,
 } from './constants';
+
+type UserMapping = SingleUserRoleMapping<ASRoleMapping>;
 
 interface RoleMappingsServerDetails {
   roleMappings: ASRoleMapping[];
@@ -34,14 +35,17 @@ interface RoleMappingsServerDetails {
   authProviders: string[];
   availableEngines: Engine[];
   elasticsearchRoles: string[];
+  elasticsearchUsers: ElasticsearchUser[];
   hasAdvancedRoles: boolean;
   multipleAuthProvidersConfig: boolean;
+  singleUserRoleMappings: UserMapping[];
 }
 
 const getFirstAttributeName = (roleMapping: ASRoleMapping) =>
   Object.entries(roleMapping.rules)[0][0] as AttributeName;
 const getFirstAttributeValue = (roleMapping: ASRoleMapping) =>
   Object.entries(roleMapping.rules)[0][1] as AttributeName;
+const emptyUser = { username: '', email: '' } as ElasticsearchUser;
 
 interface RoleMappingsActions {
   handleAccessAllEnginesChange(selected: boolean): { selected: boolean };
@@ -54,15 +58,34 @@ interface RoleMappingsActions {
   handleDeleteMapping(roleMappingId: string): { roleMappingId: string };
   handleEngineSelectionChange(engineNames: string[]): { engineNames: string[] };
   handleRoleChange(roleType: RoleTypes): { roleType: RoleTypes };
+  handleUsernameSelectChange(username: string): { username: string };
   handleSaveMapping(): void;
+  handleSaveUser(): void;
   initializeRoleMapping(roleMappingId?: string): { roleMappingId?: string };
+  initializeSingleUserRoleMapping(roleMappingId?: string): { roleMappingId?: string };
   initializeRoleMappings(): void;
   resetState(): void;
   setRoleMapping(roleMapping: ASRoleMapping): { roleMapping: ASRoleMapping };
+  setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
+  setRoleMappings({
+    roleMappings,
+  }: {
+    roleMappings: ASRoleMapping[];
+  }): { roleMappings: ASRoleMapping[] };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
+  setElasticsearchUser(
+    elasticsearchUser?: ElasticsearchUser
+  ): { elasticsearchUser: ElasticsearchUser };
   openRoleMappingFlyout(): void;
-  closeRoleMappingFlyout(): void;
+  openSingleUserRoleMappingFlyout(): void;
+  closeUsersAndRolesFlyout(): void;
   setRoleMappingErrors(errors: string[]): { errors: string[] };
+  enableRoleBasedAccess(): void;
+  setUserExistingRadioValue(userFormUserIsExisting: boolean): { userFormUserIsExisting: boolean };
+  setElasticsearchUsernameValue(username: string): { username: string };
+  setElasticsearchEmailValue(email: string): { email: string };
+  setUserCreated(): void;
+  setUserFormIsNewUser(userFormIsNewUser: boolean): { userFormIsNewUser: boolean };
 }
 
 interface RoleMappingsValues {
@@ -74,26 +97,38 @@ interface RoleMappingsValues {
   availableEngines: Engine[];
   dataLoading: boolean;
   elasticsearchRoles: string[];
+  elasticsearchUsers: ElasticsearchUser[];
+  elasticsearchUser: ElasticsearchUser;
   hasAdvancedRoles: boolean;
   multipleAuthProvidersConfig: boolean;
   roleMapping: ASRoleMapping | null;
   roleMappings: ASRoleMapping[];
+  singleUserRoleMapping: UserMapping | null;
+  singleUserRoleMappings: UserMapping[];
   roleType: RoleTypes;
   selectedAuthProviders: string[];
   selectedEngines: Set<string>;
   roleMappingFlyoutOpen: boolean;
+  singleUserRoleMappingFlyoutOpen: boolean;
   selectedOptions: EuiComboBoxOptionOption[];
   roleMappingErrors: string[];
+  userFormUserIsExisting: boolean;
+  userCreated: boolean;
+  userFormIsNewUser: boolean;
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
-  path: ['enterprise_search', 'app_search', 'role_mappings'],
+  path: ['enterprise_search', 'app_search', 'users_and_roles'],
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMapping: (roleMapping: ASRoleMapping) => ({ roleMapping }),
+    setElasticsearchUser: (elasticsearchUser: ElasticsearchUser) => ({ elasticsearchUser }),
+    setSingleUserRoleMapping: (singleUserRoleMapping: UserMapping) => ({ singleUserRoleMapping }),
+    setRoleMappings: ({ roleMappings }: { roleMappings: ASRoleMapping[] }) => ({ roleMappings }),
     setRoleMappingErrors: (errors: string[]) => ({ errors }),
     handleAuthProviderChange: (value: string) => ({ value }),
     handleRoleChange: (roleType: RoleTypes) => ({ roleType }),
+    handleUsernameSelectChange: (username: string) => ({ username }),
     handleEngineSelectionChange: (engineNames: string[]) => ({ engineNames }),
     handleAttributeSelectorChange: (value: string, firstElasticsearchRole: string) => ({
       value,
@@ -101,26 +136,45 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     }),
     handleAttributeValueChange: (value: string) => ({ value }),
     handleAccessAllEnginesChange: (selected: boolean) => ({ selected }),
+    enableRoleBasedAccess: true,
+    openSingleUserRoleMappingFlyout: true,
+    setUserExistingRadioValue: (userFormUserIsExisting: boolean) => ({ userFormUserIsExisting }),
     resetState: true,
     initializeRoleMappings: true,
+    initializeSingleUserRoleMapping: (roleMappingId?: string) => ({ roleMappingId }),
     initializeRoleMapping: (roleMappingId) => ({ roleMappingId }),
     handleDeleteMapping: (roleMappingId: string) => ({ roleMappingId }),
     handleSaveMapping: true,
+    handleSaveUser: true,
     openRoleMappingFlyout: true,
-    closeRoleMappingFlyout: false,
+    closeUsersAndRolesFlyout: false,
+    setElasticsearchUsernameValue: (username: string) => ({ username }),
+    setElasticsearchEmailValue: (email: string) => ({ email }),
+    setUserCreated: true,
+    setUserFormIsNewUser: (userFormIsNewUser: boolean) => ({ userFormIsNewUser }),
   },
   reducers: {
     dataLoading: [
       true,
       {
         setRoleMappingsData: () => false,
+        setRoleMappings: () => false,
         resetState: () => true,
+        enableRoleBasedAccess: () => true,
       },
     ],
     roleMappings: [
       [],
       {
         setRoleMappingsData: (_, { roleMappings }) => roleMappings,
+        setRoleMappings: (_, { roleMappings }) => roleMappings,
+        resetState: () => [],
+      },
+    ],
+    singleUserRoleMappings: [
+      [],
+      {
+        setRoleMappingsData: (_, { singleUserRoleMappings }) => singleUserRoleMappings,
         resetState: () => [],
       },
     ],
@@ -155,6 +209,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       [],
       {
         setRoleMappingsData: (_, { elasticsearchRoles }) => elasticsearchRoles,
+        closeUsersAndRolesFlyout: () => [ANY_AUTH_PROVIDER],
+      },
+    ],
+    elasticsearchUsers: [
+      [],
+      {
+        setRoleMappingsData: (_, { elasticsearchUsers }) => elasticsearchUsers,
+        resetState: () => [],
       },
     ],
     roleMapping: [
@@ -162,7 +224,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       {
         setRoleMapping: (_, { roleMapping }) => roleMapping,
         resetState: () => null,
-        closeRoleMappingFlyout: () => null,
+        closeUsersAndRolesFlyout: () => null,
       },
     ],
     roleType: [
@@ -178,6 +240,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setRoleMapping: (_, { roleMapping }) => roleMapping.accessAllEngines,
         handleRoleChange: (_, { roleType }) => !roleHasScopedEngines(roleType),
         handleAccessAllEnginesChange: (_, { selected }) => selected,
+        closeUsersAndRolesFlyout: () => true,
       },
     ],
     attributeValue: [
@@ -188,7 +251,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
           value === 'role' ? firstElasticsearchRole : '',
         handleAttributeValueChange: (_, { value }) => value,
         resetState: () => '',
-        closeRoleMappingFlyout: () => '',
+        closeUsersAndRolesFlyout: () => '',
       },
     ],
     attributeName: [
@@ -197,7 +260,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setRoleMapping: (_, { roleMapping }) => getFirstAttributeName(roleMapping),
         handleAttributeSelectorChange: (_, { value }) => value,
         resetState: () => 'username',
-        closeRoleMappingFlyout: () => 'username',
+        closeUsersAndRolesFlyout: () => 'username',
       },
     ],
     selectedEngines: [
@@ -212,6 +275,7 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
 
           return newSelectedEngineNames;
         },
+        closeUsersAndRolesFlyout: () => new Set(),
       },
     ],
     availableAuthProviders: [
@@ -241,9 +305,24 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       false,
       {
         openRoleMappingFlyout: () => true,
-        closeRoleMappingFlyout: () => false,
+        closeUsersAndRolesFlyout: () => false,
         initializeRoleMappings: () => false,
         initializeRoleMapping: () => true,
+      },
+    ],
+    singleUserRoleMappingFlyoutOpen: [
+      false,
+      {
+        openSingleUserRoleMappingFlyout: () => true,
+        closeUsersAndRolesFlyout: () => false,
+        initializeSingleUserRoleMapping: () => true,
+      },
+    ],
+    singleUserRoleMapping: [
+      null,
+      {
+        setSingleUserRoleMapping: (_, { singleUserRoleMapping }) => singleUserRoleMapping || null,
+        closeUsersAndRolesFlyout: () => null,
       },
     ],
     roleMappingErrors: [
@@ -251,7 +330,43 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       {
         setRoleMappingErrors: (_, { errors }) => errors,
         handleSaveMapping: () => [],
-        closeRoleMappingFlyout: () => [],
+        closeUsersAndRolesFlyout: () => [],
+      },
+    ],
+    userFormUserIsExisting: [
+      true,
+      {
+        setUserExistingRadioValue: (_, { userFormUserIsExisting }) => userFormUserIsExisting,
+        closeUsersAndRolesFlyout: () => true,
+      },
+    ],
+    elasticsearchUser: [
+      emptyUser,
+      {
+        setRoleMappingsData: (_, { elasticsearchUsers }) => elasticsearchUsers[0] || emptyUser,
+        setElasticsearchUser: (_, { elasticsearchUser }) => elasticsearchUser || emptyUser,
+        setElasticsearchUsernameValue: (state, { username }) => ({
+          ...state,
+          username,
+        }),
+        setElasticsearchEmailValue: (state, { email }) => ({
+          ...state,
+          email,
+        }),
+        closeUsersAndRolesFlyout: () => emptyUser,
+      },
+    ],
+    userCreated: [
+      false,
+      {
+        setUserCreated: () => true,
+        closeUsersAndRolesFlyout: () => false,
+      },
+    ],
+    userFormIsNewUser: [
+      true,
+      {
+        setUserFormIsNewUser: (_, { userFormIsNewUser }) => userFormIsNewUser,
       },
     ],
   },
@@ -267,6 +382,17 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     ],
   }),
   listeners: ({ actions, values }) => ({
+    enableRoleBasedAccess: async () => {
+      const { http } = HttpLogic.values;
+      const route = '/api/app_search/role_mappings/enable_role_based_access';
+
+      try {
+        const response = await http.post(route);
+        actions.setRoleMappings(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     initializeRoleMappings: async () => {
       const { http } = HttpLogic.values;
       const route = '/api/app_search/role_mappings';
@@ -282,18 +408,27 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const roleMapping = values.roleMappings.find(({ id }) => id === roleMappingId);
       if (roleMapping) actions.setRoleMapping(roleMapping);
     },
+    initializeSingleUserRoleMapping: ({ roleMappingId }) => {
+      const singleUserRoleMapping = values.singleUserRoleMappings.find(
+        ({ roleMapping }) => roleMapping.id === roleMappingId
+      );
+      if (singleUserRoleMapping) {
+        actions.setElasticsearchUser(singleUserRoleMapping.elasticsearchUser);
+        actions.setRoleMapping(singleUserRoleMapping.roleMapping);
+      }
+      actions.setSingleUserRoleMapping(singleUserRoleMapping);
+      actions.setUserFormIsNewUser(!singleUserRoleMapping);
+    },
     handleDeleteMapping: async ({ roleMappingId }) => {
       const { http } = HttpLogic.values;
       const route = `/api/app_search/role_mappings/${roleMappingId}`;
 
-      if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
-        try {
-          await http.delete(route);
-          actions.initializeRoleMappings();
-          setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
-        } catch (e) {
-          flashAPIErrors(e);
-        }
+      try {
+        await http.delete(route);
+        actions.initializeRoleMappings();
+        setSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
+      } catch (e) {
+        flashAPIErrors(e);
       }
     },
     handleSaveMapping: async () => {
@@ -338,11 +473,56 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
     resetState: () => {
       clearFlashMessages();
     },
-    closeRoleMappingFlyout: () => {
+    handleSaveUser: async () => {
+      const { http } = HttpLogic.values;
+      const {
+        roleType,
+        singleUserRoleMapping,
+        accessAllEngines,
+        selectedEngines,
+        elasticsearchUser: { email, username },
+      } = values;
+
+      const body = JSON.stringify({
+        roleMapping: {
+          engines: accessAllEngines ? [] : Array.from(selectedEngines),
+          roleType,
+          accessAllEngines,
+          id: singleUserRoleMapping?.roleMapping?.id,
+        },
+        elasticsearchUser: {
+          username,
+          email,
+        },
+      });
+
+      try {
+        const response = await http.post('/api/app_search/single_user_role_mapping', { body });
+        actions.setSingleUserRoleMapping(response);
+        actions.setUserCreated();
+        actions.initializeRoleMappings();
+      } catch (e) {
+        actions.setRoleMappingErrors(e?.body?.attributes?.errors);
+      }
+    },
+    closeUsersAndRolesFlyout: () => {
       clearFlashMessages();
+      const firstUser = values.elasticsearchUsers[0];
+      actions.setElasticsearchUser(firstUser);
     },
     openRoleMappingFlyout: () => {
       clearFlashMessages();
+    },
+    openSingleUserRoleMappingFlyout: () => {
+      clearFlashMessages();
+    },
+    setUserExistingRadioValue: ({ userFormUserIsExisting }) => {
+      const firstUser = values.elasticsearchUsers[0];
+      actions.setElasticsearchUser(userFormUserIsExisting ? firstUser : emptyUser);
+    },
+    handleUsernameSelectChange: ({ username }) => {
+      const user = values.elasticsearchUsers.find((u) => u.username === username);
+      if (user) actions.setElasticsearchUser(user);
     },
   }),
 });

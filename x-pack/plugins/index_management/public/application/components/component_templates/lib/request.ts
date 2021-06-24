@@ -14,6 +14,7 @@ import {
   SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
+  Error,
 } from '../shared_imports';
 
 export type UseRequestHook = <T = any, E = Error>(
