@@ -112,6 +112,8 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+
       const postedCase = await createCase(
         supertest,
         {
