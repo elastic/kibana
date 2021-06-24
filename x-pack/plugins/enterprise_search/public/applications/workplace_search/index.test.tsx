@@ -68,12 +68,6 @@ describe('WorkplaceSearchConfigured', () => {
     expect(mockKibanaValues.renderHeaderActions).toHaveBeenCalledWith(WorkplaceSearchHeaderActions);
   });
 
-  it('initializes app data with passed props', () => {
-    shallow(<WorkplaceSearchConfigured isFederatedAuth />);
-
-    expect(initializeAppData).toHaveBeenCalledWith({ isFederatedAuth: true });
-  });
-
   it('does not re-initialize app data or re-render header actions', () => {
     setMockValues({ hasInitialized: true });
 
