@@ -17,6 +17,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiPortal,
   EuiText,
   EuiTitle,
   EuiSpacer,
@@ -92,22 +93,26 @@ export const UserFlyout: React.FC<Props> = ({
   );
 
   return (
-    <EuiFlyout ownFocus onClose={closeUserFlyout} size="s" aria-labelledby="userFlyoutTitle">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="userFlyoutTitle">{isComplete ? IS_COMPLETE_HEADING : IS_EDITING_HEADING}</h2>
-        </EuiTitle>
-        {!isComplete && (
-          <EuiText size="xs">
-            <p>{IS_EDITING_DESCRIPTION}</p>
-          </EuiText>
-        )}
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {children}
-        <EuiSpacer />
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>{isComplete ? completedFooterAction : editingFooterActions}</EuiFlyoutFooter>
-    </EuiFlyout>
+    <EuiPortal>
+      <EuiFlyout ownFocus onClose={closeUserFlyout} size="s" aria-labelledby="userFlyoutTitle">
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id="userFlyoutTitle">{isComplete ? IS_COMPLETE_HEADING : IS_EDITING_HEADING}</h2>
+          </EuiTitle>
+          {!isComplete && (
+            <EuiText size="xs">
+              <p>{IS_EDITING_DESCRIPTION}</p>
+            </EuiText>
+          )}
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {children}
+          <EuiSpacer />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          {isComplete ? completedFooterAction : editingFooterActions}
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </EuiPortal>
   );
 };

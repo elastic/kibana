@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from '../../../layouts';
-
-export { DefaultLayout, DefaultPageTitle } from './default';
+export { DefaultLayout } from './default';
+export { DefaultPageTitle } from './default_page_title';

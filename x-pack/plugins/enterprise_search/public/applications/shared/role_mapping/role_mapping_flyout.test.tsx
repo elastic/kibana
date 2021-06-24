@@ -20,13 +20,13 @@ import {
 import { RoleMappingFlyout } from './role_mapping_flyout';
 
 describe('RoleMappingFlyout', () => {
-  const closeRoleMappingFlyout = jest.fn();
+  const closeUsersAndRolesFlyout = jest.fn();
   const handleSaveMapping = jest.fn();
 
   const props = {
     isNew: true,
     disabled: false,
-    closeRoleMappingFlyout,
+    closeUsersAndRolesFlyout,
     handleSaveMapping,
   };
 
