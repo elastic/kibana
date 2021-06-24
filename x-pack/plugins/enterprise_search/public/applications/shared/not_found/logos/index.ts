@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { NotFoundPrompt } from './not_found_prompt';
+export { AppSearchLogo } from './app_search_logo';
+export { WorkplaceSearchLogo } from './workplace_search_logo';
