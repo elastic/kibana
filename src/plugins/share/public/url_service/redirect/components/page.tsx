@@ -28,7 +28,7 @@ export const Page: React.FC<PageProps> = ({ manager }) => {
           color: 'danger',
         }}
       >
-        <Error message={error.message} />
+        <Error error={error} />
       </EuiPageTemplate>
     );
   }

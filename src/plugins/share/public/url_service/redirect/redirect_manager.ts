@@ -25,16 +25,12 @@ export interface RedirectOptions {
   params: unknown & SerializableState;
 }
 
-export interface RedirectManagerError {
-  message: string;
-}
-
 export interface RedirectManagerDependencies {
   url: UrlService;
 }
 
 export class RedirectManager {
-  public readonly error$ = new BehaviorSubject<null | RedirectManagerError>(null);
+  public readonly error$ = new BehaviorSubject<null | Error>(null);
 
   constructor(public readonly deps: RedirectManagerDependencies) {}
 
@@ -84,13 +80,15 @@ export class RedirectManager {
       const message = i18n.translate(
         'share.urlService.redirect.RedirectManager.invalidParamLocator',
         {
-          defaultMessage: 'Invalid locator ID (specify "l" param).',
+          defaultMessage:
+            'Invalid locator ID in URL. Specify "l" search parameter to be an existing locator ID.',
           description:
-            'Title displayed to user in redirect endpoint when redirection cannot be performed successfully.',
+            'Error displayed to user in redirect endpoint when redirection cannot be performed successfully, because of invalid or missing locator ID.',
         }
       );
-      this.error$.next({ message });
-      throw new Error(message);
+      const error = new Error(message);
+      this.error$.next(error);
+      throw error;
     }
 
     if (!version) {
