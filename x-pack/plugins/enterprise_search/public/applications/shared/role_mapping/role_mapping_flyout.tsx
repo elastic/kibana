@@ -36,6 +36,7 @@ interface Props {
   children: React.ReactNode;
   isNew: boolean;
   disabled: boolean;
+  formLoading: boolean;
   closeUsersAndRolesFlyout(): void;
   handleSaveMapping(): void;
 }
@@ -44,6 +45,7 @@ export const RoleMappingFlyout: React.FC<Props> = ({
   children,
   isNew,
   disabled,
+  formLoading,
   closeUsersAndRolesFlyout,
   handleSaveMapping,
 }) => (
@@ -77,7 +79,8 @@ export const RoleMappingFlyout: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={disabled}
+              disabled={disabled || formLoading}
+              isLoading={formLoading}
               onClick={handleSaveMapping}
               fill
               data-test-subj="FlyoutButton"

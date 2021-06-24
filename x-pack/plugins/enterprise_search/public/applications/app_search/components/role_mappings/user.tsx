@@ -50,6 +50,7 @@ export const User: React.FC = () => {
     userCreated,
     userFormIsNewUser,
     smtpSettingsPresent,
+    formLoading,
   } = useValues(RoleMappingsLogic);
 
   const roleTypes = hasAdvancedRoles ? [...standardRoles, ...advancedRoles] : standardRoles;
@@ -102,6 +103,7 @@ export const User: React.FC = () => {
   return (
     <UserFlyout
       disabled={flyoutDisabled}
+      formLoading={formLoading}
       isComplete={userCreated}
       isNew={userFormIsNewUser}
       closeUserFlyout={closeUsersAndRolesFlyout}

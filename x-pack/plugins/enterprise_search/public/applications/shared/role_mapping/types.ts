@@ -62,4 +62,5 @@ export interface RoleMappingsBaseValues extends RoleMappingsBaseServerDetails {
   userCreated: boolean;
   userFormIsNewUser: boolean;
   accessAllEngines: boolean;
+  formLoading: boolean;
 }

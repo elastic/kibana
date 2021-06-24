@@ -330,6 +330,15 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setRoleMappingsData: (_, { smtpSettingsPresent }) => smtpSettingsPresent,
       },
     ],
+    formLoading: [
+      false,
+      {
+        handleSaveMapping: () => true,
+        handleSaveUser: () => true,
+        initializeRoleMappings: () => false,
+        setRoleMappingErrors: () => false,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     selectedOptions: [

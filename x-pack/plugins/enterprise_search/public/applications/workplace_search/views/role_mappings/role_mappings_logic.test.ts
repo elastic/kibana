@@ -58,6 +58,7 @@ describe('RoleMappingsLogic', () => {
     userFormIsNewUser: true,
     userFormUserIsExisting: true,
     smtpSettingsPresent: false,
+    formLoading: false,
   };
   const roleGroup = {
     id: '123',

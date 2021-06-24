@@ -48,6 +48,7 @@ export const User: React.FC = () => {
     userCreated,
     userFormIsNewUser,
     smtpSettingsPresent,
+    formLoading,
   } = useValues(RoleMappingsLogic);
 
   const showGroupAssignmentSelector = availableGroups.length > 0;
@@ -99,6 +100,7 @@ export const User: React.FC = () => {
   return (
     <UserFlyout
       disabled={flyoutDisabled}
+      formLoading={formLoading}
       isComplete={userCreated}
       isNew={userFormIsNewUser}
       closeUserFlyout={closeUsersAndRolesFlyout}
