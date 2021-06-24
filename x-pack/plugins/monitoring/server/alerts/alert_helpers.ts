@@ -43,7 +43,7 @@ export class AlertingDefaults {
       clusterName: {
         name: 'clusterName',
         description: i18n.translate('xpack.monitoring.alerts.actionVariables.clusterName', {
-          defaultMessage: 'The cluster to which the node belongs.',
+          defaultMessage: 'The cluster to which the node(s) belongs.',
         }),
       },
       action: {
