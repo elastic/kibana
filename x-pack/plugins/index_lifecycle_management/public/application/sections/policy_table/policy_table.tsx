@@ -102,13 +102,13 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
                 {
                   defaultMessage: 'Search',
-              }
+                }
               )}
               aria-label={i18n.translate(
                 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputAriaLabel',
                 {
                   defaultMessage: 'Search policies',
-              }
+                }
               )}
             />
           </EuiFlexItem>
