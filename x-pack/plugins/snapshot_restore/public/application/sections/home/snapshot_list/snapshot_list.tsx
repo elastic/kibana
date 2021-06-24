@@ -20,12 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
-import {
-  WithPrivileges,
-  PageLoading,
-  PageError,
-  Error,
-} from '../../../../shared_imports';
+import { WithPrivileges, PageLoading, PageError, Error } from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
 import {
