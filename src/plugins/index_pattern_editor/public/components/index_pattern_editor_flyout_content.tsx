@@ -395,12 +395,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
           {/* </EuiFlyoutHeader> */}
           <Form form={form} className="indexPatternEditor__form">
             {indexPatternTypeSelect}
+            <EuiSpacer size="m" />
             <EuiFlexGroup>
               {/* Name */}
               <EuiFlexItem>
                 <TitleField />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="m" />
             <EuiFlexGroup>
               <EuiFlexItem>
                 <TimestampField
@@ -426,6 +428,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiSpacer size="m" />
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <UseField<string, IndexPatternConfig>
