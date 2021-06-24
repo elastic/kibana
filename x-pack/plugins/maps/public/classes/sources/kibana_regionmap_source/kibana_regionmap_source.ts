@@ -131,7 +131,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   getSourceTooltipContent() {
     return {
       tooltipContent: i18n.translate('xpack.maps.source.kbnRegionMap.deprecationTooltipMessage', {
-        defaultMessage: `Layer is using deprecated Kibana config 'map.regionmap' and is not supported in 8.0. 1) Use 'Upload GeoJSON' to upload '{vectorLayer}'. 2) Use Choropleth layer wizard to build a replacement layer. 3) Finally, delete this layer from your map.`,
+        defaultMessage: `'Configured GeoJSON' layer is deprecated. 1) Use 'Upload GeoJSON' to upload '{vectorLayer}'. 2) Use Choropleth layer wizard to build a replacement layer. 3) Finally, delete this layer from your map.`,
         values: {
           vectorLayer: this._descriptor.name,
         },
