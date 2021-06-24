@@ -235,7 +235,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               },
             },
           },
-          templateVersion: new semver.SemVer('7.14.3'),
+          templateVersion: new semver.SemVer('7.14.0'),
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({
