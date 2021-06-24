@@ -145,6 +145,11 @@ export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: 
 
   index += `-${namespace}`;
 
+  // Integrations may append a date to the end of the index.
+  if (namespace !== '*') {
+    index += '*';
+  }
+
   return {
     names: [index],
     privileges: dataStream.permissions?.indices || ['auto_configure', 'create_doc'],
