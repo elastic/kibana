@@ -15,8 +15,7 @@ import type {
 } from '../../../../common/search_strategies/correlations/types';
 
 import { getQueryWithParams } from './get_query_with_params';
-import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
-import { PERCENTILES_STEP, TERMS_SIZE } from './constants';
+import { TERMS_SIZE } from './constants';
 
 interface FieldValuePair {
   field: string;
@@ -26,28 +25,19 @@ type FieldValuePairs = FieldValuePair[];
 
 export type Field = string;
 
-export const getCandidateTerms = (
+export const getTermsAggRequest = (
   params: SearchServiceParams,
-  fieldName: string,
-  ranges: any[]
+  fieldName: string
 ): estypes.SearchRequest => ({
   index: params.index,
   body: {
-    size: 0,
     query: getQueryWithParams({ params }),
+    size: 0,
     aggs: {
-      latency_range: {
-        range: {
-          field: TRANSACTION_DURATION,
-          ranges,
-        },
-        aggs: {
-          field_terms: {
-            terms: {
-              field: fieldName,
-              size: TERMS_SIZE,
-            },
-          },
+      attribute_terms: {
+        terms: {
+          field: fieldName,
+          size: TERMS_SIZE,
         },
       },
     },
@@ -58,20 +48,11 @@ export const fetchTransactionDurationFieldValuePairs = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
   fieldCandidates: Field[],
-  progress: AsyncSearchProviderProgress,
-  percentiles: number[]
+  progress: AsyncSearchProviderProgress
 ): Promise<FieldValuePairs> => {
   const fieldValuePairs: FieldValuePairs = [];
 
   let fieldValuePairsProgress = 0;
-
-  const indices = [50, 75, 85, 95, 99].map((v) => {
-    return Math.floor((v - PERCENTILES_STEP) / PERCENTILES_STEP + 0.5);
-  });
-
-  const ranges = indices.map((index) => ({
-    from: percentiles[Math.min(index, Object.keys(percentiles).length - 1)],
-  }));
 
   for (let i = 0; i < fieldCandidates.length; i++) {
     const fieldName = fieldCandidates[i];
@@ -80,34 +61,24 @@ export const fetchTransactionDurationFieldValuePairs = async (
       fieldValuePairsProgress / fieldCandidates.length;
 
     try {
-      /**
-       * Select the terms which are likely to have high  correlation.
-       */
-      const candidateTermsResp = await esClient.search(
-        getCandidateTerms(params, fieldName, ranges)
-      );
-      if (candidateTermsResp.body.aggregations?.latency_range === undefined) {
+      const resp = await esClient.search(getTermsAggRequest(params, fieldName));
+      if (resp.body.aggregations === undefined) {
+        fieldValuePairsProgress++;
         continue;
       }
-      const candidates = new Set<string>();
-      const latencyRangeBuckets = (candidateTermsResp.body.aggregations
-        .latency_range as estypes.AggregationsMultiBucketAggregate<{
-        field_terms: {
-          buckets: Array<{ key: string }>;
-        };
-      }>).buckets;
+      const buckets = (resp.body.aggregations
+        .attribute_terms as estypes.AggregationsMultiBucketAggregate<{
+        key: string;
+      }>)?.buckets;
+      if (buckets.length > 1) {
+        fieldValuePairs.push(
+          ...buckets.map((d) => ({
+            field: fieldName,
+            value: d.key,
+          }))
+        );
+      }
 
-      latencyRangeBuckets.forEach((latencyRangeBucket) => {
-        latencyRangeBucket.field_terms.buckets.forEach((fieldTerm) => {
-          candidates.add(fieldTerm.key);
-        });
-      });
-      fieldValuePairs.push(
-        ...Array.from(candidates).map((value) => ({
-          field: fieldName,
-          value,
-        }))
-      );
       fieldValuePairsProgress++;
     } catch (e) {
       fieldValuePairsProgress++;

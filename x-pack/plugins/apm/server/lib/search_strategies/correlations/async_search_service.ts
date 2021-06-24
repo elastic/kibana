@@ -126,8 +126,7 @@ export const asyncSearchServiceProvider = (
         esClient,
         params,
         fieldCandidates,
-        progress,
-        percentiles
+        progress
       );
 
       if (isCancelled) {
