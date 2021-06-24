@@ -67,7 +67,6 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
                 'synthetics.type',
                 'synthetics.blob',
                 'synthetics.blob_mime',
-                'synthetics.step.name',
               ],
             },
           },
