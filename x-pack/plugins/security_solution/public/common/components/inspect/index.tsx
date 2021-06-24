@@ -109,7 +109,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           color="text"
           iconSide="left"
           iconType="inspect"
-          isDisabled={loading || isDisabled}
+          isDisabled={loading || isDisabled || false}
           isLoading={loading}
           onClick={handleClick}
         >
@@ -123,7 +123,7 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
-          isDisabled={loading || isDisabled}
+          isDisabled={loading || isDisabled || false}
           title={i18n.INSPECT}
           onClick={handleClick}
         />

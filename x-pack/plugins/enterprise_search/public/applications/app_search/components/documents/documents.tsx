@@ -21,7 +21,7 @@ import { DOCUMENTS_TITLE } from './constants';
 import { SearchExperience } from './search_experience';
 
 export const Documents: React.FC = () => {
-  const { isMetaEngine, engine } = useValues(EngineLogic);
+  const { isMetaEngine, isEngineEmpty } = useValues(EngineLogic);
   const { myRole } = useValues(AppLogic);
 
   return (
@@ -32,7 +32,7 @@ export const Documents: React.FC = () => {
         rightSideItems:
           myRole.canManageEngineDocuments && !isMetaEngine ? [<DocumentCreationButton />] : [],
       }}
-      isEmptyState={!engine.document_count}
+      isEmptyState={isEngineEmpty}
       emptyState={<EmptyState />}
     >
       {isMetaEngine && (
