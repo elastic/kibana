@@ -21,7 +21,6 @@ import { VisualizationContainer } from '../visualization_container';
 import { HeatmapRenderProps } from './types';
 import './index.scss';
 import { LensBrushEvent, LensFilterEvent } from '../types';
-import { desanitizeFilterContext } from '../utils';
 import {
   applyPaletteParams,
   defaultPaletteParams,
@@ -206,7 +205,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       })),
       timeFieldName,
     };
-    onClickValue(desanitizeFilterContext(context));
+    onClickValue(context);
   }) as ElementClickListener;
 
   const onBrushEnd = (e: HeatmapBrushEvent) => {
@@ -253,7 +252,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         })),
         timeFieldName,
       };
-      onClickValue(desanitizeFilterContext(context));
+      onClickValue(context);
     }
   };
 
