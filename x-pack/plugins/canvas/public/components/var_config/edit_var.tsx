@@ -27,9 +27,6 @@ import { VarValueField } from './var_value_field';
 import { ComponentStrings } from '../../../i18n';
 const { VarConfigEditVar: strings } = ComponentStrings;
 
-import './edit_var.scss';
-import './var_panel.scss';
-
 interface Props {
   selectedVar: CanvasVariable | null;
   variables: CanvasVariable[];

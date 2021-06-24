@@ -20,8 +20,6 @@ import { CanvasVariable } from '../../../types';
 import { ComponentStrings } from '../../../i18n';
 const { VarConfigDeleteVar: strings } = ComponentStrings;
 
-import './var_panel.scss';
-
 interface Props {
   selectedVar: CanvasVariable;
   onDelete: (v: CanvasVariable) => void;
