@@ -33,7 +33,7 @@ export function injectStyle(styles: StyleMap) {
   const tag: ThemeTag = (window as any).__kbnThemeTag__;
   let style = getStyle(styles, tag);
 
-  while (!style) {
+  while (style === undefined) {
     const missingTag = tag;
     const tags = Object.keys(styles) as ThemeTag[];
 
