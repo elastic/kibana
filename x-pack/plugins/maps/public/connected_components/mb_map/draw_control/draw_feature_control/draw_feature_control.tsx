@@ -104,7 +104,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
     ] as [MbPoint, MbPoint];
     const selectedFeatures = this.props.mbMap.queryRenderedFeatures(mbBbox, {
       layers: mbEditLayerIds,
-      filter: [EXCLUDE_TOO_MANY_FEATURES_BOX, EXCLUDE_CENTROID_FEATURES],
+      filter: ['all', EXCLUDE_TOO_MANY_FEATURES_BOX, EXCLUDE_CENTROID_FEATURES],
     });
     if (!selectedFeatures.length) {
       return;
