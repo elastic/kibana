@@ -35,7 +35,7 @@ export default function ({ getService }) {
       const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
       expect(layer.length).to.be(1);
       const clusterFeature = layer.feature(0);
-      expect(clusterFeature.type).to.be(1);
+      expect(clusterFeature.type).to.be(2);
       expect(clusterFeature.extent).to.be(4096);
       expect(clusterFeature.id).to.be(undefined);
       expect(clusterFeature.properties).to.eql({ doc_count: 1, avg_of_bytes: 9252 });
