@@ -36,7 +36,7 @@ export const useRequestEventCounts = (to: string, from: string) => {
           ],
           title: 'filebeat-*',
         },
-        queries: [{ query: 'event.kind:enrichment', language: 'kuery' }],
+        queries: [{ query: 'event.type:indicator', language: 'kuery' }],
         filters: [],
       }),
       histogramType: MatrixHistogramType.events,
