@@ -73,8 +73,8 @@ that ship with {kib}.
 
 [NOTE]
 ============
-The `frame-ancestors` directive can also be configured by using <<server-securityResponseHeaders-disableEmbedding,
-`server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors` 
+The `frame-ancestors` directive can also be configured by using 
+<<server-securityResponseHeaders-disableEmbedding, `server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors` 
 are ignored.
 ============
 
