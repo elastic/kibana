@@ -25,9 +25,5 @@ export const EngineOverview: React.FC = () => {
   const canAddDocuments = canManageEngineDocuments && canViewEngineCredentials;
   const showEngineOverview = !isEngineEmpty || !canAddDocuments || isMetaEngine;
 
-  return (
-    <div data-test-subj="EngineOverview">
-      {showEngineOverview ? <EngineOverviewMetrics /> : <EmptyEngineOverview />}
-    </div>
-  );
+  return showEngineOverview ? <EngineOverviewMetrics /> : <EmptyEngineOverview />;
 };
