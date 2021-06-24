@@ -114,6 +114,7 @@ test('runs services on "start"', async () => {
   expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
   expect(mockUiSettingsService.start).not.toHaveBeenCalled();
   expect(mockMetricsService.start).not.toHaveBeenCalled();
+  expect(mockStatusService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -121,6 +122,7 @@ test('runs services on "start"', async () => {
   expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
+  expect(mockStatusService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {

@@ -9,10 +9,13 @@ import { act } from 'react-dom/test-utils';
 import { licensingMock } from '../../../../../licensing/public/mocks';
 import { setupEnvironment } from '../../helpers';
 import { getDefaultHotPhasePolicy } from '../constants';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import {
+  SearchableSnapshotsTestBed,
+  setupSearchableSnapshotsTestBed,
+} from './searchable_snapshots.helpers';
 
 describe('<EditPolicy /> searchable snapshots', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: SearchableSnapshotsTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
@@ -23,7 +26,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupSearchableSnapshotsTestBed();
     });
 
     const { component } = testBed;
@@ -36,7 +39,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
     await actions.togglePhase('warm');
     await actions.togglePhase('cold');
 
-    expect(actions.warm.forceMergeFieldExists()).toBeTruthy();
+    expect(actions.warm.forceMergeExists()).toBeTruthy();
     expect(actions.warm.shrinkExists()).toBeTruthy();
     expect(actions.warm.readonlyExists()).toBeTruthy();
     expect(actions.cold.searchableSnapshotsExists()).toBeTruthy();
@@ -45,7 +48,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
 
     await actions.hot.setSearchableSnapshot('my-repo');
 
-    expect(actions.warm.forceMergeFieldExists()).toBeFalsy();
+    expect(actions.warm.forceMergeExists()).toBeFalsy();
     expect(actions.warm.shrinkExists()).toBeFalsy();
     expect(actions.warm.readonlyExists()).toBeFalsy();
     // searchable snapshot in cold is still visible
@@ -60,7 +63,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
     await actions.rollover.toggle();
     await actions.rollover.toggleDefault();
 
-    expect(actions.hot.forceMergeFieldExists()).toBeTruthy();
+    expect(actions.hot.forceMergeExists()).toBeTruthy();
     expect(actions.hot.shrinkExists()).toBeTruthy();
     expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
   });
@@ -122,7 +125,9 @@ describe('<EditPolicy /> searchable snapshots', () => {
         httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
         await act(async () => {
-          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          testBed = await setupSearchableSnapshotsTestBed({
+            appServicesContext: { cloud: { isCloudEnabled: true } },
+          });
         });
 
         const { component } = testBed;
@@ -149,7 +154,9 @@ describe('<EditPolicy /> searchable snapshots', () => {
         httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
         await act(async () => {
-          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+          testBed = await setupSearchableSnapshotsTestBed({
+            appServicesContext: { cloud: { isCloudEnabled: true } },
+          });
         });
 
         const { component } = testBed;
@@ -184,7 +191,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
       httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['my-repo'] });
 
       await act(async () => {
-        testBed = await setup({
+        testBed = await setupSearchableSnapshotsTestBed({
           appServicesContext: {
             license: licensingMock.createLicense({ license: { type: 'basic' } }),
           },
