@@ -130,10 +130,29 @@ export function initIndexingRoutes({
         }
       } catch (error) {
         logger.error(error);
-        return response.custom({
-          body: error.message,
-          statusCode: 404,
-        });
+        const errorStatusCode = error.meta?.statusCode;
+        if (errorStatusCode === 401) {
+          return response.unauthorized({
+            body: {
+              message: 'User not authorized to delete indexed feature',
+            },
+          });
+        } else if (errorStatusCode === 403) {
+          return response.forbidden({
+            body: {
+              message: 'Access to delete indexed feature forbidden',
+            },
+          });
+        } else if (errorStatusCode === 404) {
+          return response.notFound({
+            body: { message: 'Feature not found' },
+          });
+        } else {
+          return response.custom({
+            body: 'Unknown error deleting feature',
+            statusCode: 500,
+          });
+        }
       }
     }
   );
