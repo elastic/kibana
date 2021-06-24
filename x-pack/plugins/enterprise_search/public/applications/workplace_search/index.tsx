@@ -26,7 +26,7 @@ import {
   SOURCE_ADDED_PATH,
   PERSONAL_SOURCES_PATH,
   ORG_SETTINGS_PATH,
-  ROLE_MAPPINGS_PATH,
+  USERS_AND_ROLES_PATH,
   SECURITY_PATH,
   PERSONAL_SETTINGS_PATH,
   PERSONAL_PATH,
@@ -103,7 +103,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route path={GROUPS_PATH}>
         <GroupsRouter />
       </Route>
-      <Route path={ROLE_MAPPINGS_PATH}>
+      <Route path={USERS_AND_ROLES_PATH}>
         <RoleMappings />
       </Route>
       <Route path={SECURITY_PATH}>

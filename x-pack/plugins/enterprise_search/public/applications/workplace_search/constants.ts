@@ -40,7 +40,7 @@ export const NAV = {
     defaultMessage: 'Content',
   }),
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
-    defaultMessage: 'Users & roles',
+    defaultMessage: 'Users and roles',
   }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
