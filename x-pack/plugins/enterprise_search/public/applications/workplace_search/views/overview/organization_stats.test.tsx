@@ -21,14 +21,6 @@ describe('OrganizationStats', () => {
   it('renders', () => {
     const wrapper = shallow(<OrganizationStats />);
 
-    expect(wrapper.find(StatisticCard)).toHaveLength(2);
-    expect(wrapper.find(EuiFlexGrid).prop('columns')).toEqual(2);
-  });
-
-  it('renders additional cards for federated auth', () => {
-    setMockValues({ isFederatedAuth: false });
-    const wrapper = shallow(<OrganizationStats />);
-
     expect(wrapper.find(StatisticCard)).toHaveLength(4);
     expect(wrapper.find(EuiFlexGrid).prop('columns')).toEqual(4);
   });
