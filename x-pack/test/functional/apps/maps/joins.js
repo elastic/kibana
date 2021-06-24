@@ -13,6 +13,7 @@ const EXPECTED_JOIN_VALUES = {
   bravo: 3,
   charlie: 12,
   tango: undefined,
+  zulu: undefined,
 };
 
 const VECTOR_SOURCE_ID = 'n1t6f';
@@ -79,7 +80,7 @@ export default function ({ getPageObjects, getService }) {
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(10);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
-        if (properties.name === 'tango') {
+        if (properties.name === 'tango' || properties.name === 'zulu') {
           //left join, which means we won't rescale joins that do not match
           expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(false);
         } else {
