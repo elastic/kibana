@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiTable, EuiTableHeaderCell } from '@elastic/eui';
+import { EuiTable } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../../shared/constants';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
@@ -27,7 +27,6 @@ const mockValues = {
   groupsMeta: DEFAULT_META,
   groups,
   hasFiltersSet: false,
-  isFederatedAuth: true,
 };
 
 describe('GroupsTable', () => {
@@ -41,13 +40,6 @@ describe('GroupsTable', () => {
 
     expect(wrapper.find(EuiTable)).toHaveLength(1);
     expect(wrapper.find(GroupRow)).toHaveLength(1);
-  });
-
-  it('renders extra header for non-federated auth', () => {
-    setMockValues({ ...mockValues, isFederatedAuth: false });
-    const wrapper = shallow(<GroupsTable />);
-
-    expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(4);
   });
 
   it('handles pagination', () => {
