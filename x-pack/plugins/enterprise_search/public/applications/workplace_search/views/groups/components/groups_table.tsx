@@ -77,7 +77,7 @@ export const GroupsTable: React.FC<{}> = () => {
         <EuiTableHeader>
           <EuiTableHeaderCell>{GROUP_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>
-          {<EuiTableHeaderCell>{USERS_TABLE_HEADER}</EuiTableHeaderCell>}
+          <EuiTableHeaderCell>{USERS_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell />
         </EuiTableHeader>
         <EuiTableBody>
