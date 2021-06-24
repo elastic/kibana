@@ -128,23 +128,16 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
 
   const imgSrc = basePath + `/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`;
 
-  const [url, setUrl] = useState<string | undefined>(undefined);
+  // When loading a legacy screenshot, set `url` to full-size screenshot path.
+  // Otherwise, we first need to composite the image.
+  const [url, setUrl] = useState<string | undefined>(isScreenshotBlob ? imgSrc : undefined);
 
   // when the image is a composite, we need to fetch the data since we cannot specify a blob URL
   const { data: screenshotRef } = useFetcher(() => {
     if (isScreenshotRef) {
-      return getJourneyScreenshot(
-        `${basePath}/api/uptime/journey/screenshot/${checkGroup}/${stepIndex}`
-      );
+      return getJourneyScreenshot(imgSrc);
     }
   }, [basePath, checkGroup, stepIndex, isScreenshotRef]);
-
-  // when older version screenshot, set `url` to full-size screenshot path
-  useEffect(() => {
-    if (!isScreenshotRef) {
-      setUrl(imgSrc);
-    }
-  }, [imgSrc, isScreenshotRef]);
 
   const shouldRenderImage = hasIntersected || !lazyLoad;
   return (
