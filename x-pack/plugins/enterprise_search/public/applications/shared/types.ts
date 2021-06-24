@@ -49,10 +49,11 @@ export interface Invitation {
 export interface ElasticsearchUser {
   email: string | null;
   username: string;
+  enabled: boolean;
 }
 
 export interface SingleUserRoleMapping<T> {
-  invitation: Invitation;
+  invitation: Invitation | null;
   elasticsearchUser: ElasticsearchUser;
   roleMapping: T;
 }
