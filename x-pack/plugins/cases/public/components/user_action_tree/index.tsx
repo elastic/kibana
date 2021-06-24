@@ -26,7 +26,7 @@ import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import {
   ActionConnector,
-  ActionCommentRequestRt,
+  ActionsCommentRequestRt,
   AlertCommentRequestRt,
   Case,
   CaseUserActions,
@@ -449,7 +449,7 @@ export const UserActionTree = React.memo(
                 ];
               } else if (
                 comment != null &&
-                isRight(ActionCommentRequestRt.decode(comment)) &&
+                isRight(ActionsCommentRequestRt.decode(comment)) &&
                 comment.type === CommentType.actions
               ) {
                 // console.log(comment);

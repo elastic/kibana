@@ -374,7 +374,6 @@ export const getActionAttachment = ({
   handleManageMarkdownEditId: (id: string) => void;
   handleManageQuote: (id: string) => void;
   handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
-  actionComment: CommentRequestActionsType;
   action: CaseUserActions;
 }): EuiCommentProps => ({
   username: (
