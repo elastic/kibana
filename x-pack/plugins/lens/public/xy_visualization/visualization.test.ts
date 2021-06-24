@@ -921,8 +921,7 @@ describe('xy_visualization', () => {
       ).toEqual([
         {
           shortMessage: 'Wrong data type for Horizontal axis.',
-          longMessage:
-            'Data type mismatch for the Horizontal axis. Cannot mix interval and ordinal scale types.',
+          longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
         },
       ]);
     });
