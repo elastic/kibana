@@ -131,13 +131,8 @@ export class RuleDataClient implements IRuleDataClient {
         name: simulatedRollover.new_index,
       }),
     ]);
-    const currentVersions = get(writeIndexMapping, [
-      'body',
-      simulatedRollover.old_index,
-      'mappings',
-      '_meta',
-      'versions',
-    ]);
+    const currentVersions =
+      writeIndexMapping.body[simulatedRollover.old_index]?.mappings?._meta?.versions;
     const targetVersions = get(simulatedIndexMapping, [
       'body',
       'template',
