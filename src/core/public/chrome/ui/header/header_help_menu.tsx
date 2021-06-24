@@ -330,7 +330,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         {customLinks}
         {content && (
           <>
-            {customLinks && <EuiSpacer size="s" />}
+            {customLinks && <EuiSpacer size="xs" />}
             <HeaderExtension extension={content} />
           </>
         )}
