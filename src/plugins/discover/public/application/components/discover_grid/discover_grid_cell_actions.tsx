@@ -79,7 +79,7 @@ export const FilterOutBtn = ({
 };
 
 export function buildCellActions(field: IndexPatternField) {
-  if (!field.aggregatable && !field.searchable) {
+  if (!field.filterable) {
     return undefined;
   }
 
