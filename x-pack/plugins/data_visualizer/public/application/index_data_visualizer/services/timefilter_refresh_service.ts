@@ -6,11 +6,10 @@
  */
 
 import { Subject } from 'rxjs';
-import { Required } from 'utility-types';
 
 export interface Refresh {
   lastRefresh: number;
   timeRange?: { start: string; end: string };
 }
 
-export const dataVisualizerTimefilterRefresh$ = new Subject<Required<Refresh>>();
+export const dataVisualizerRefresh$ = new Subject<Refresh>();

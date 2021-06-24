@@ -66,6 +66,7 @@ export interface IVectorSource extends ISource {
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
 }
@@ -153,6 +154,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   }
 
   getSyncMeta(): VectorSourceSyncMeta | null {
+    return null;
+  }
+
+  async getTimesliceMaskFieldName(): Promise<string | null> {
     return null;
   }
 

@@ -8,6 +8,7 @@
 import { PluginInitializerContext } from '../../../../src/core/public';
 import { Plugin } from './plugin';
 import { PluginSetup } from './types';
+export type { TimelineModel } from './timelines/store/timeline/model';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 

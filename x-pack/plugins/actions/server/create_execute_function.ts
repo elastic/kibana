@@ -11,6 +11,7 @@ import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './ty
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { isSavedObjectExecutionSource } from './lib';
+import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
@@ -23,6 +24,7 @@ export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | '
   id: string;
   spaceId: string;
   apiKey: string | null;
+  relatedSavedObjects?: RelatedSavedObjects;
 }
 
 export type ExecutionEnqueuer = (
@@ -38,7 +40,7 @@ export function createExecutionEnqueuerFunction({
 }: CreateExecuteFunctionOptions) {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
-    { id, params, spaceId, source, apiKey }: ExecuteOptions
+    { id, params, spaceId, source, apiKey, relatedSavedObjects }: ExecuteOptions
   ) {
     if (!isESOCanEncrypt) {
       throw new Error(
@@ -68,6 +70,7 @@ export function createExecutionEnqueuerFunction({
         actionId: id,
         params,
         apiKey,
+        relatedSavedObjects,
       },
       executionSourceAsSavedObjectReferences(source)
     );

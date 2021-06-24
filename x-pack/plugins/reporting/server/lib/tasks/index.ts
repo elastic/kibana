@@ -32,13 +32,6 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
   meta: ReportSource['meta'];
 }
 
-export interface ReportingExecuteTaskInstance /* extends TaskInstanceWithDeprecatedFields */ {
-  state: object;
-  taskType: string;
-  params: ReportTaskParams;
-  runAt?: Date;
-}
-
 export enum ReportingTaskStatus {
   UNINITIALIZED = 'uninitialized',
   INITIALIZED = 'initialized',
@@ -52,6 +45,5 @@ export interface ReportingTask {
     maxAttempts: number;
     timeout: string;
   };
-
   getStatus: () => ReportingTaskStatus;
 }

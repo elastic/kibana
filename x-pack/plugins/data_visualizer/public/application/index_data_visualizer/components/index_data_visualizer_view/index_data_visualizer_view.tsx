@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState, useCallback } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { merge } from 'rxjs';
 import {
   EuiFlexGroup,
@@ -62,10 +62,11 @@ import { kbnTypeToJobType } from '../../../common/util/field_types_utils';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { DatePickerWrapper } from '../../../common/components/date_picker_wrapper';
-import { dataVisualizerTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
+import { dataVisualizerRefresh$ } from '../../services/timefilter_refresh_service';
 import { HelpMenu } from '../../../common/components/help_menu';
 import { TimeBuckets } from '../../services/time_buckets';
 import { extractSearchData } from '../../utils/saved_search_utils';
+import { DataVisualizerIndexPatternManagement } from '../index_pattern_management';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -123,9 +124,8 @@ export interface IndexDataVisualizerViewProps {
 const restorableDefaults = getDefaultDataVisualizerListState();
 
 export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
-  const {
-    services: { lens: lensPlugin, docLinks, notifications, uiSettings },
-  } = useDataVisualizerKibana();
+  const { services } = useDataVisualizerKibana();
+  const { docLinks, notifications, uiSettings } = services;
   const { toasts } = notifications;
 
   const [dataVisualizerListState, setDataVisualizerListState] = usePageUrlState(
@@ -299,7 +299,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   useEffect(() => {
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
-      dataVisualizerTimefilterRefresh$
+      dataVisualizerRefresh$
     ).subscribe(() => {
       setGlobalState({
         time: timefilter.getTime(),
@@ -533,7 +533,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
     const metricExistsFields = allMetricFields.filter((f) => {
       return aggregatableExistsFields.find((existsF) => {
-        return existsF.fieldName === f.displayName;
+        return existsF.fieldName === f.spec.name;
       });
     });
 
@@ -562,7 +562,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
     metricFieldsToShow.forEach((field) => {
       const fieldData = aggregatableFields.find((f) => {
-        return f.fieldName === field.displayName;
+        return f.fieldName === field.spec.name;
       });
 
       const metricConfig: FieldVisConfig = {
@@ -571,7 +571,11 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         type: JOB_FIELD_TYPES.NUMBER,
         loading: true,
         aggregatable: true,
+        deletable: field.runtimeField !== undefined,
       };
+      if (field.displayName !== metricConfig.fieldName) {
+        metricConfig.displayName = field.displayName;
+      }
 
       configs.push(metricConfig);
     });
@@ -607,7 +611,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
 
     allNonMetricFields.forEach((f) => {
       const checkAggregatableField = aggregatableExistsFields.find(
-        (existsField) => existsField.fieldName === f.displayName
+        (existsField) => existsField.fieldName === f.spec.name
       );
 
       if (checkAggregatableField !== undefined) {
@@ -615,7 +619,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         nonMetricFieldData.push(checkAggregatableField);
       } else {
         const checkNonAggregatableField = nonAggregatableExistsFields.find(
-          (existsField) => existsField.fieldName === f.displayName
+          (existsField) => existsField.fieldName === f.spec.name
         );
 
         if (checkNonAggregatableField !== undefined) {
@@ -643,7 +647,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     const configs: FieldVisConfig[] = [];
 
     nonMetricFieldsToShow.forEach((field) => {
-      const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.displayName);
+      const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.spec.name);
 
       const nonMetricConfig = {
         ...fieldData,
@@ -651,6 +655,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         aggregatable: field.aggregatable,
         scripted: field.scripted,
         loading: fieldData.existsInDocs,
+        deletable: field.runtimeField !== undefined,
       };
 
       // Map the field type from the Kibana index pattern to the field type
@@ -663,6 +668,10 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         // field types that do not yet have a specific card type.
         nonMetricConfig.type = field.type;
         nonMetricConfig.isUnsupportedType = true;
+      }
+
+      if (field.displayName !== nonMetricConfig.fieldName) {
+        nonMetricConfig.displayName = field.displayName;
       }
 
       configs.push(nonMetricConfig);
@@ -735,13 +744,33 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     [currentIndexPattern, searchQueryLanguage, searchString]
   );
 
+  // Some actions open up fly-out or popup
+  // This variable is used to keep track of them and clean up when unmounting
+  const actionFlyoutRef = useRef<() => void | undefined>();
+  useEffect(() => {
+    const ref = actionFlyoutRef;
+    return () => {
+      // Clean up any of the flyout/editor opened from the actions
+      if (ref.current) {
+        ref.current();
+      }
+    };
+  }, []);
+
   // Inject custom action column for the index based visualizer
+  // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
-    if (lensPlugin === undefined) {
-      // eslint-disable-next-line no-console
-      console.error('Lens plugin not available');
-      return;
-    }
+    const actions = getActions(
+      currentIndexPattern,
+      services,
+      {
+        searchQueryLanguage,
+        searchString,
+      },
+      actionFlyoutRef
+    );
+    if (!Array.isArray(actions) || actions.length < 1) return;
+
     const actionColumn: EuiTableActionsColumnType<FieldVisConfig> = {
       name: (
         <FormattedMessage
@@ -749,14 +778,15 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
           defaultMessage="Actions"
         />
       ),
-      actions: getActions(currentIndexPattern, lensPlugin, { searchQueryLanguage, searchString }),
+      actions,
       width: '100px',
     };
 
     return [actionColumn];
-  }, [currentIndexPattern, lensPlugin, searchQueryLanguage, searchString]);
+  }, [currentIndexPattern, services, searchQueryLanguage, searchString]);
 
   const helpLink = docLinks.links.ml.guide;
+
   return (
     <Fragment>
       <EuiPage data-test-subj="dataVisualizerIndexPage">
@@ -765,10 +795,24 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
             <EuiFlexItem>
               <EuiPageContentHeader>
                 <EuiPageContentHeaderSection>
-                  <EuiTitle size="l">
-                    <h1>{currentIndexPattern.title}</h1>
-                  </EuiTitle>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <EuiTitle size="l">
+                      <h1>{currentIndexPattern.title}</h1>
+                    </EuiTitle>
+                    <DataVisualizerIndexPatternManagement
+                      currentIndexPattern={currentIndexPattern}
+                      useNewFieldsApi={true}
+                    />
+                  </div>
                 </EuiPageContentHeaderSection>
+
                 <EuiPageContentHeaderSection data-test-subj="dataVisualizerTimeRangeSelectorSection">
                   <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
                     {currentIndexPattern.timeFieldName !== undefined && (

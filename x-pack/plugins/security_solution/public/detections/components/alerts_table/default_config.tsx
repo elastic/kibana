@@ -6,11 +6,11 @@
  */
 
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
-import { RowRendererId } from '../../../../common/types/timeline';
+import { ColumnHeaderOptions, RowRendererId } from '../../../../common/types/timeline';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter } from '../../../../../../../src/plugins/data/common/es_query';
 
-import { ColumnHeaderOptions, SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { columns } from '../../configurations/security_solution_detections/columns';
 
