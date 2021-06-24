@@ -16108,8 +16108,6 @@
     "xpack.monitoring.alerts.searchThreadPoolRejections.description": "当搜索线程池中的拒绝数目超过阈值时告警。",
     "xpack.monitoring.alerts.shardSize.actionVariables.shardIndex": "平均分片大小过大的索引列表。",
     "xpack.monitoring.alerts.shardSize.description": "平均分片大小大于配置的阈值时告警。",
-    "xpack.monitoring.alerts.shardSize.firing.internalFullMessage": "以下索引触发分片大小过大告警：{shardIndices}。{action}",
-    "xpack.monitoring.alerts.shardSize.firing.internalShortMessage": "以下索引触发分片大小过大告警：{shardIndices}。{shortActionText}",
     "xpack.monitoring.alerts.shardSize.fullAction": "查看索引分片大小统计",
     "xpack.monitoring.alerts.shardSize.label": "分片大小",
     "xpack.monitoring.alerts.shardSize.paramDetails.indexPattern.label": "检查以下索引模式",
