@@ -63,6 +63,14 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
             {
               range: {
                 '@timestamp': {
+                  gte: "now-24h",
+                  lte: to,
+                },
+              },
+            },
+            {
+              range: {
+                'monitor.timespan': {
                   gte: from,
                   lte: to,
                 },
