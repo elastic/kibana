@@ -14,6 +14,7 @@ import { getExceptionListSchemaMock } from '../../../../../../../../lists/common
 
 import { ExceptionListsTable } from './exceptions_table';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { useKibana as useKibanaMock } from '../../../../../../common/lib/kibana/__mocks__';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
@@ -61,6 +62,7 @@ describe('ExceptionListsTable', () => {
 
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
+      ...useKibanaMock,
       services: {
         http: {},
         notifications: {
