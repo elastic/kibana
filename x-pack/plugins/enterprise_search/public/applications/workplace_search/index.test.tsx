@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import '../__mocks__/react_router';
 import '../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__/kea_logic';
+import { mockUseRouteMatch } from '../__mocks__/react_router';
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
-
-import { Layout } from '../shared/layout';
 
 import { WorkplaceSearchHeaderActions } from './components/layout';
 import { SourceAdded } from './views/content_sources/components/source_added';
@@ -38,6 +36,14 @@ describe('WorkplaceSearch', () => {
 
     expect(wrapper.find(WorkplaceSearchConfigured)).toHaveLength(1);
   });
+
+  it('renders ErrorState', () => {
+    setMockValues({ errorConnecting: true });
+
+    const wrapper = shallow(<WorkplaceSearch />);
+
+    expect(wrapper.find(ErrorState)).toHaveLength(1);
+  });
 });
 
 describe('WorkplaceSearchUnconfigured', () => {
@@ -56,12 +62,12 @@ describe('WorkplaceSearchConfigured', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockActions({ initializeAppData, setContext });
+    mockUseRouteMatch.mockReturnValue(false);
   });
 
-  it('renders layout, chrome, and header actions', () => {
+  it('renders chrome and header actions', () => {
     const wrapper = shallow(<WorkplaceSearchConfigured />);
 
-    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(Overview)).toHaveLength(1);
 
     expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(true);
@@ -81,22 +87,6 @@ describe('WorkplaceSearchConfigured', () => {
 
     expect(initializeAppData).not.toHaveBeenCalled();
     expect(mockKibanaValues.renderHeaderActions).not.toHaveBeenCalled();
-  });
-
-  it('renders ErrorState', () => {
-    setMockValues({ errorConnecting: true });
-
-    const wrapper = shallow(<WorkplaceSearchConfigured />);
-
-    expect(wrapper.find(ErrorState)).toHaveLength(1);
-  });
-
-  it('passes readOnlyMode state', () => {
-    setMockValues({ readOnlyMode: true });
-
-    const wrapper = shallow(<WorkplaceSearchConfigured />);
-
-    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 
   it('renders SourceAdded', () => {
