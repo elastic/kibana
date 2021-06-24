@@ -17,6 +17,21 @@ const roleMappingBaseSchema = {
   authProvider: schema.arrayOf(schema.string()),
 };
 
+export function registerEnableRoleMappingsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/app_search/role_mappings/enable_role_based_access',
+      validate: false,
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/role_mappings/enable_role_based_access',
+    })
+  );
+}
+
 export function registerRoleMappingsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -27,7 +42,7 @@ export function registerRoleMappingsRoute({
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings',
+      path: '/as/role_mappings',
     })
   );
 
@@ -39,7 +54,7 @@ export function registerRoleMappingsRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings',
+      path: '/as/role_mappings',
     })
   );
 }
@@ -59,7 +74,7 @@ export function registerRoleMappingRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings/:id',
+      path: '/as/role_mappings/:id',
     })
   );
 
@@ -73,12 +88,13 @@ export function registerRoleMappingRoute({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: '/role_mappings/:id',
+      path: '/as/role_mappings/:id',
     })
   );
 }
 
 export const registerRoleMappingsRoutes = (dependencies: RouteDependencies) => {
+  registerEnableRoleMappingsRoute(dependencies);
   registerRoleMappingsRoute(dependencies);
   registerRoleMappingRoute(dependencies);
 };

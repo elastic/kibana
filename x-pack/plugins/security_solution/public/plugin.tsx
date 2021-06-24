@@ -61,7 +61,7 @@ import {
   DETECTION_ENGINE,
   CASE,
   ADMINISTRATION,
-} from './app/home/translations';
+} from './app/translations';
 import {
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,

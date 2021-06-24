@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -20,18 +19,14 @@ import { EngineOverview } from './';
 describe('EngineOverview', () => {
   const values = {
     dataLoading: false,
-    documentCount: 0,
     myRole: {},
+    isEngineEmpty: true,
     isMetaEngine: false,
-  };
-  const actions = {
-    pollForOverviewMetrics: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(values);
-    setMockActions(actions);
   });
 
   it('renders', () => {
@@ -39,21 +34,10 @@ describe('EngineOverview', () => {
     expect(wrapper.find('[data-test-subj="EngineOverview"]')).toHaveLength(1);
   });
 
-  it('initializes data on mount', () => {
-    shallow(<EngineOverview />);
-    expect(actions.pollForOverviewMetrics).toHaveBeenCalledTimes(1);
-  });
-
-  it('renders a loading page template if async data is still loading', () => {
-    setMockValues({ ...values, dataLoading: true });
-    const wrapper = shallow(<EngineOverview />);
-    expect(wrapper.prop('isLoading')).toEqual(true);
-  });
-
   describe('EmptyEngineOverview', () => {
     it('renders when the engine has no documents & the user can add documents', () => {
       const myRole = { canManageEngineDocuments: true, canViewEngineCredentials: true };
-      setMockValues({ ...values, myRole, documentCount: 0 });
+      setMockValues({ ...values, myRole });
       const wrapper = shallow(<EngineOverview />);
       expect(wrapper.find(EmptyEngineOverview)).toHaveLength(1);
     });
@@ -61,7 +45,7 @@ describe('EngineOverview', () => {
 
   describe('EngineOverviewMetrics', () => {
     it('renders when the engine has documents', () => {
-      setMockValues({ ...values, documentCount: 1 });
+      setMockValues({ ...values, isEngineEmpty: false });
       const wrapper = shallow(<EngineOverview />);
       expect(wrapper.find(EngineOverviewMetrics)).toHaveLength(1);
     });
