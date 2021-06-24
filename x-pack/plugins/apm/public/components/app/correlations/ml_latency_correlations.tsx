@@ -19,13 +19,12 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { CorrelationsChart } from './correlations_chart';
 import {
   CorrelationsTable,
@@ -34,21 +33,6 @@ import {
 import { useCorrelations } from './use_correlations';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
-import { ServiceOrTransactionsOverviewLink } from '../../shared/Links/apm/service_transactions_overview_link';
-import {
-  getEnvironmentLabel,
-  getNextEnvironmentUrlParam,
-} from '../../../../common/environment_filter_values';
-import {
-  IStickyProperty,
-  StickyProperties,
-} from '../../shared/StickyProperties';
-import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 
 const DEFAULT_PERCENTILE_THRESHOLD = 95;
@@ -76,22 +60,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
   const { serviceName } = useParams<{ serviceName: string }>();
   const { urlParams } = useUrlParams();
 
-  const transactionData = useFetcher(
-    (callApmApi) => {
-      if (urlParams.transactionId) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/transactions/{transactionId}',
-          params: {
-            path: {
-              transactionId: urlParams.transactionId,
-            },
-          },
-        });
-      }
-    },
-    [urlParams.transactionId]
-  );
-
   const fetchOptions = useMemo(
     () => ({
       ...{
@@ -118,67 +86,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
       percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
     },
   });
-
-  const stickyProperties: IStickyProperty[] = useMemo(() => {
-    const nextEnvironment = getNextEnvironmentUrlParam({
-      requestedEnvironment: serviceName,
-      currentEnvironmentUrlParam: urlParams.environment,
-    });
-
-    const properties: IStickyProperty[] = [];
-    if (serviceName !== undefined && nextEnvironment !== undefined) {
-      properties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
-          defaultMessage: 'Service',
-        }),
-        fieldName: SERVICE_NAME,
-        val: (
-          <ServiceOrTransactionsOverviewLink
-            serviceName={serviceName}
-            environment={nextEnvironment}
-          >
-            {serviceName}
-          </ServiceOrTransactionsOverviewLink>
-        ),
-      });
-    }
-    if (
-      transactionData.data !== undefined &&
-      transactionData.status === FETCH_STATUS.SUCCESS
-    ) {
-      const { transaction } = transactionData.data;
-      properties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.transactionLabel', {
-          defaultMessage: 'Transaction',
-        }),
-        fieldName: TRANSACTION_NAME,
-        val: (
-          <TransactionDetailLink
-            serviceName={transaction.service.name}
-            transactionId={transaction.transaction.id}
-            traceId={transaction.trace.id}
-            transactionName={transaction.transaction.name}
-            transactionType={transaction.transaction.type}
-            environment={urlParams.environment}
-            latencyAggregationType={urlParams.latencyAggregationType}
-          >
-            {transaction.transaction.name}
-          </TransactionDetailLink>
-        ),
-      });
-    }
-    if (urlParams.environment) {
-      properties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.environmentLabel', {
-          defaultMessage: 'Environment',
-        }),
-        fieldName: SERVICE_ENVIRONMENT,
-        val: getEnvironmentLabel(urlParams.environment),
-      });
-    }
-
-    return properties;
-  }, [serviceName, urlParams, transactionData]);
 
   // cancel any running async partial request when unmounting the component
   // we want this effect to execute exactly once after the component mounts
@@ -394,9 +301,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
 
   return (
     <>
-      <StickyProperties stickyProperties={stickyProperties} />
-      <EuiHorizontalRule margin="m" />
-
       <EuiText size="s" color="subdued">
         <p>
           {i18n.translate(
