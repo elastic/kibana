@@ -28,7 +28,7 @@ export const getHistogramIntervalRequest = (
 ): estypes.SearchRequest => ({
   index: params.index,
   body: {
-    query: getQueryWithParams(params),
+    query: getQueryWithParams({ params }),
     size: 0,
     aggs: {
       transaction_duration_min: { min: { field: TRANSACTION_DURATION } },

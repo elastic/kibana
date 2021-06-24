@@ -45,7 +45,7 @@ export const getRandomDocsRequest = (
     _source: false,
     query: {
       function_score: {
-        query: getQueryWithParams(params),
+        query: getQueryWithParams({ params }),
         // @ts-ignore
         random_score: {},
       },

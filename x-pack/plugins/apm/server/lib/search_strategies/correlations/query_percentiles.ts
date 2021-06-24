@@ -32,17 +32,7 @@ export const getTransactionDurationPercentilesRequest = (
   fieldName?: string,
   fieldValue?: string
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams(params);
-
-  if (typeof fieldName === 'string' && typeof fieldValue === 'string') {
-    query.bool.filter.push({
-      term: {
-        [fieldName]: {
-          value: fieldValue,
-        },
-      },
-    });
-  }
+  const query = getQueryWithParams({ params, fieldName, fieldValue });
 
   return {
     index: params.index,

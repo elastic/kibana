@@ -7,24 +7,17 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import {
-  TRANSACTION_DURATION,
-  TRANSACTION_NAME,
   PROCESSOR_EVENT,
   SERVICE_NAME,
+  TRANSACTION_DURATION,
+  TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
 import {
   environmentQuery as getEnvironmentQuery,
   rangeQuery as getRangeQuery,
 } from '../../../utils/queries';
-
-export enum ProcessorEvent {
-  transaction = 'transaction',
-  error = 'error',
-  metric = 'metric',
-  span = 'span',
-  profile = 'profile',
-}
+import { ProcessorEvent } from '../../../../common/processor_event';
 
 const getPercentileThresholdValueQuery = (
   percentileThresholdValue: number | undefined
@@ -42,24 +35,38 @@ const getPercentileThresholdValueQuery = (
     : [];
 };
 
-const getTermsQuery = (fieldName: string, fieldValue: string | undefined) => {
-  return fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
+export const getTermsQuery = (
+  fieldName: string | undefined,
+  fieldValue: string | undefined
+) => {
+  return fieldName && fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
 };
 
+interface QueryParams {
+  params: SearchServiceParams;
+  fieldName?: string;
+  fieldValue?: string;
+}
 export const getQueryWithParams = ({
-  environment,
-  serviceName,
-  start,
-  end,
-  percentileThresholdValue,
-  transactionName,
-}: SearchServiceParams) => {
+  params,
+  fieldName,
+  fieldValue,
+}: QueryParams) => {
+  const {
+    environment,
+    serviceName,
+    start,
+    end,
+    percentileThresholdValue,
+    transactionName,
+  } = params;
   return {
     bool: {
       filter: [
         ...getTermsQuery(PROCESSOR_EVENT, ProcessorEvent.transaction),
         ...getTermsQuery(SERVICE_NAME, serviceName),
         ...getTermsQuery(TRANSACTION_NAME, transactionName),
+        ...getTermsQuery(fieldName, fieldValue),
         ...getRangeQuery(start, end),
         ...getEnvironmentQuery(environment),
         ...getPercentileThresholdValueQuery(percentileThresholdValue),

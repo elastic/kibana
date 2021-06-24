@@ -32,17 +32,8 @@ export const getTransactionDurationRangesRequest = (
   fieldName?: string,
   fieldValue?: string
 ): estypes.SearchRequest => {
-  const query = getQueryWithParams(params);
+  const query = getQueryWithParams({ params, fieldName, fieldValue });
 
-  if (typeof fieldName === 'string' && typeof fieldValue === 'string') {
-    query.bool.filter.push({
-      term: {
-        [fieldName]: {
-          value: fieldValue,
-        },
-      },
-    });
-  }
   const ranges = rangesSteps.reduce(
     (p, to) => {
       const from = p[p.length - 1].to;

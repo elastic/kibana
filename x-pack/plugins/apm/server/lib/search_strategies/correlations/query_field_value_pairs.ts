@@ -34,7 +34,7 @@ export const getCandidateTerms = (
   index: params.index,
   body: {
     size: 0,
-    query: getQueryWithParams(params),
+    query: getQueryWithParams({ params }),
     aggs: {
       latency_range: {
         range: {
