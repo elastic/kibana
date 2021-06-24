@@ -8,8 +8,6 @@
 import React from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
 
-import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { NotFound } from '../../../shared/not_found';
 import {
   ENGINE_ANALYTICS_PATH,
   ENGINE_ANALYTICS_TOP_QUERIES_PATH,
@@ -21,6 +19,7 @@ import {
   ENGINE_ANALYTICS_QUERY_DETAIL_PATH,
 } from '../../routes';
 import { generateEnginePath, getEngineBreadcrumbs } from '../engine';
+import { NotFound } from '../not_found';
 
 import { ANALYTICS_TITLE } from './constants';
 import {
@@ -61,10 +60,7 @@ export const AnalyticsRouter: React.FC = () => {
         <Redirect to={generateEnginePath(ENGINE_ANALYTICS_PATH)} />
       </Route>
       <Route>
-        <NotFound
-          breadcrumbs={getEngineBreadcrumbs([ANALYTICS_TITLE])}
-          product={APP_SEARCH_PLUGIN}
-        />
+        <NotFound pageChrome={getEngineBreadcrumbs([ANALYTICS_TITLE])} />
       </Route>
     </Switch>
   );
