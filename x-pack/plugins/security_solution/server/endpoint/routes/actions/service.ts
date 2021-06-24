@@ -20,14 +20,14 @@ const getShouldClauses = ({
   return indices.map((_index) => {
     const clause = {
       bool: {
-        filter: [
+        must: [
           {
-            term: {
+            match: {
               _index,
             },
           },
           {
-            term: {
+            match: {
               [_index === AGENT_ACTIONS_INDEX ? 'agents' : 'agent_id']: elasticAgentId,
             },
           },
@@ -36,8 +36,8 @@ const getShouldClauses = ({
     };
     // only `endpoint` actions in the result
     if (_index === AGENT_ACTIONS_INDEX) {
-      clause.bool.filter.push({
-        term: {
+      clause.bool.must.push({
+        match: {
           input_type: 'endpoint',
         },
       });
