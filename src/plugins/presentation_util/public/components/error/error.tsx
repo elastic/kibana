@@ -23,6 +23,7 @@ const strings = {
       defaultMessage: 'Whoops! Expression failed',
     }),
 };
+
 export interface Props {
   payload: {
     error: Error;
