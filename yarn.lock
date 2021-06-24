@@ -2701,7 +2701,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
+"@kbn/plugin-helpers@link:bazel-bin/packages/kbn-plugin-helpers":
   version "0.0.0"
   uid ""
 
