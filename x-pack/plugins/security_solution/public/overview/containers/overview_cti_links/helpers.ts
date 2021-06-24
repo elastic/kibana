@@ -20,9 +20,10 @@ export const EMPTY_LIST_ITEMS: CtiListItem[] = CTI_DEFAULT_SOURCES.map((item) =>
   path: '',
 }));
 
+const TAG_REQUEST_BODY_SEARCH = 'threat intel';
 export const TAG_REQUEST_BODY = {
   type: 'tag',
-  search: 'threat intel',
+  search: TAG_REQUEST_BODY_SEARCH,
   searchFields: ['name'],
 };
 

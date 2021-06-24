@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { MatrixHistogramType } from '../../../../common/search_strategy';
-import { EVENT_DATASET } from '../../../../common/cti/constants';
+import { EVENT_DATASET, DEFAULT_CTI_SOURCE_INDEX } from '../../../../common/cti/constants';
 import { useMatrixHistogram } from '../../../common/containers/matrix_histogram';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -40,7 +40,7 @@ export const useRequestEventCounts = (to: string, from: string) => {
         filters: [],
       }),
       histogramType: MatrixHistogramType.events,
-      indexNames: ['filebeat-*'],
+      indexNames: DEFAULT_CTI_SOURCE_INDEX,
       stackByField: EVENT_DATASET,
       startDate: from,
       size: 0,

@@ -34,7 +34,7 @@ describe('CtiDisabledModule', () => {
     store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
-  it('renders danger inner panel', () => {
+  it('renders splitPanel with "danger" variant', () => {
     const wrapper = mount(
       <Provider store={store}>
         <I18nProvider>

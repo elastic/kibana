@@ -117,11 +117,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
           color={'primary'}
           title={i18n.INFO_TITLE}
           body={i18n.INFO_BODY}
-          button={
-            <EuiFlexItem style={{ maxWidth: 250 }}>
-              <EuiButton href={threatIntelDashboardDocLink}>{i18n.INFO_BUTTON}</EuiButton>
-            </EuiFlexItem>
-          }
+          button={<EuiButton href={threatIntelDashboardDocLink}>{i18n.INFO_BUTTON}</EuiButton>}
         />
       ) : null,
     [isDashboardPluginDisabled, threatIntelDashboardDocLink]

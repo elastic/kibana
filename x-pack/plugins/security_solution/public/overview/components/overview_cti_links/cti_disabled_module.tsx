@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { ThreatIntelPanelView } from './threat_intel_panel_view';
 import { EMPTY_LIST_ITEMS } from '../../containers/overview_cti_links/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -25,11 +25,9 @@ export const CtiDisabledModuleComponent = () => {
         title={i18n.DANGER_TITLE}
         body={i18n.DANGER_BODY}
         button={
-          <EuiFlexItem>
-            <EuiButton href={threatIntelDocLink} color={'danger'} style={{ maxWidth: 150 }} fill>
-              {i18n.DANGER_BUTTON}
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiButton href={threatIntelDocLink} color={'danger'} fill>
+            {i18n.DANGER_BUTTON}
+          </EuiButton>
         }
         data-test-subj="cti-inner-panel-danger"
       />

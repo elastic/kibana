@@ -27,9 +27,7 @@ export const useCtiDashboardLinks = (
   const [buttonHref, setButtonHref] = useState<string | undefined>();
   const [listItems, setListItems] = useState<CtiListItem[]>([]);
 
-  const [isDashboardPluginDisabled, setIsDashboardPluginDisabled] = useState(
-    !(createDashboardUrl && savedObjectsClient)
-  );
+  const [isDashboardPluginDisabled, setIsDashboardPluginDisabled] = useState(false);
   const handleDisabledPlugin = useCallback(() => {
     if (!isDashboardPluginDisabled) {
       setIsDashboardPluginDisabled(true);
@@ -51,7 +49,7 @@ export const useCtiDashboardLinks = (
   );
 
   useEffect(() => {
-    if (isDashboardPluginDisabled) {
+    if (!createDashboardUrl || !savedObjectsClient) {
       handleDisabledPlugin();
     } else {
       savedObjectsClient
@@ -67,7 +65,7 @@ export const useCtiDashboardLinks = (
             if (DashboardsSO?.savedObjects?.length) {
               const dashboardUrls = await Promise.all(
                 DashboardsSO.savedObjects.map((SO) =>
-                  createDashboardUrl!({
+                  createDashboardUrl({
                     dashboardId: SO.id,
                     timeRange: {
                       to,

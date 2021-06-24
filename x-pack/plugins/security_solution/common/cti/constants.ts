@@ -67,3 +67,5 @@ export const CTI_DEFAULT_SOURCES = [
   'Malware Bazaar',
   'MISP',
 ];
+
+export const DEFAULT_CTI_SOURCE_INDEX = ['filebeat-*'];

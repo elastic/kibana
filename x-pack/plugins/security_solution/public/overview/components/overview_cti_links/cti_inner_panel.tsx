@@ -13,6 +13,10 @@ const PanelContainer = styled(EuiSplitPanel.Inner)`
   margin-bottom: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
+const ButtonContainer = styled(EuiFlexGroup)`
+  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+`;
+
 const Title = styled(EuiText)<{ textcolor: 'primary' | 'warning' | 'danger' }>`
   color: ${({ theme, textcolor }) =>
     textcolor === 'primary'
@@ -54,7 +58,11 @@ export const CtiInnerPanel = ({
           </EuiFlexGroup>
           {body}
         </EuiFlexItem>
-        {button}
+        {button && (
+          <ButtonContainer>
+            <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+          </ButtonContainer>
+        )}
       </EuiFlexGroup>
     </PanelContainer>
   );

@@ -70,7 +70,7 @@ describe('CtiEnabledModule', () => {
       </Provider>
     );
 
-    expect(wrapper.find('[data-test-subj="cti-with-no-events"]').length).toEqual(1);
+    expect(wrapper.exists('[data-test-subj="cti-with-events"]')).toBe(true);
   });
 
   it('renders null while event counts are loading', () => {

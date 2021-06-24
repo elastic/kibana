@@ -15,7 +15,7 @@ export const useIsThreatIntelModuleEnabled = () => {
   const { to, from } = useMemo(
     () => ({
       to: new Date().toISOString(),
-      from: new Date('01 January 1970 00:00 UTC').toISOString(),
+      from: new Date(0).toISOString(),
     }),
     []
   );
