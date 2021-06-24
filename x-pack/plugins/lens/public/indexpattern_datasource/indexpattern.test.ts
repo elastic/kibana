@@ -435,6 +435,9 @@ describe('IndexPattern Data Source', () => {
                 "partialRows": Array [
                   false,
                 ],
+                "searchId": Array [
+                  "searchId",
+                ],
                 "timeFields": Array [
                   "timestamp",
                 ],
