@@ -1,9 +1,7 @@
+[chapter]
 [role="xpack"]
 [[xpack-siem]]
 = Elastic Security overview
-
-[partintro]
---
 
 https://www.elastic.co/security[Elastic Security] combines SIEM threat detection features with endpoint
 prevention and response capabilities in one solution. These analytical and
@@ -161,6 +159,3 @@ events. {elastic-sec} supports events and indicator index data from any ECS-comp
 
 IMPORTANT: {elastic-sec} requires {ecs-ref}[ECS-compliant data]. If you use third-party data collectors to ship data to {es}, the data must be mapped to ECS.
 {security-guide}/siem-field-reference.html[Elastic Security ECS field reference] lists ECS fields used in {elastic-sec}.
-
-
---
