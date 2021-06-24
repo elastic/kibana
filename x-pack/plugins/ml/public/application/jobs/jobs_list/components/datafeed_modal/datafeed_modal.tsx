@@ -11,25 +11,35 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiIconTip,
   EuiLoadingChart,
   EuiModal,
   EuiModalHeader,
   EuiModalBody,
-  EuiSelect,
   EuiSpacer,
   EuiTabs,
   EuiTab,
+  EuiText,
+  EuiTitle,
   EuiToolTip,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import {
+  AnnotationDomainType,
   Axis,
   Chart,
   CurveType,
+  LineAnnotation,
   LineSeries,
+  LineAnnotationDatum,
   Position,
+  RectAnnotation,
+  RectAnnotationDatum,
   ScaleType,
   Settings,
   timeFormatter,
@@ -42,7 +52,6 @@ import { useMlApiContext } from '../../../../contexts/kibana';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
-import { getIntervalOptions } from './get_interval_options';
 import {
   CHART_DIRECTION,
   ChartDirectionType,
@@ -53,12 +62,18 @@ import {
 } from './constants';
 import { loadFullJob } from '../utils';
 
-const dateFormatter = timeFormatter('MM-DD HH:mm');
+const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
+const MAX_CHART_POINTS = 480;
 
 interface DatafeedModalProps {
   jobId: string;
   end: number;
-  onClose: (deletionApproved?: boolean) => void;
+  onClose: () => void;
+}
+
+function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {
+  lineDatum.header = dateFormatter(lineDatum.dataValue);
+  return lineDatum;
 }
 
 export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) => {
@@ -68,11 +83,17 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
     isInitialized: boolean;
   }>({ datafeedConfig: undefined, bucketSpan: undefined, isInitialized: false });
   const [endDate, setEndDate] = useState<any>(moment(end));
-  const [interval, setInterval] = useState<string | undefined>();
   const [selectedTabId, setSelectedTabId] = useState<TabIdsType>(TAB_IDS.CHART);
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<number[][]>([]);
+  const [annotationData, setAnnotationData] = useState<{
+    rect: RectAnnotationDatum[];
+    line: LineAnnotationDatum[];
+  }>({ rect: [], line: [] });
+  const [modelSnapshotData, setModelSnapshotData] = useState<LineAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
+  const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
+  const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
 
   const {
     results: { getDatafeedResultChartData },
@@ -102,25 +123,30 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
   const handleChange = (date: moment.Moment) => setEndDate(date);
 
   const handleEndDateChange = (direction: ChartDirectionType) => {
-    if (interval === undefined) return;
+    if (data.bucketSpan === undefined) return;
 
     const newEndDate = endDate.clone();
-    const [count, type] = interval.split(' ');
+    const unitMatch = data.bucketSpan.match(/[d | h| m | s]/g)!;
+    const unit = unitMatch[0];
+    const count = Number(data.bucketSpan.replace(/[^0-9]/g, ''));
 
     if (direction === CHART_DIRECTION.FORWARD) {
-      newEndDate.add(Number(count), type);
+      newEndDate.add(MAX_CHART_POINTS * count, unit);
     } else {
-      newEndDate.subtract(Number(count), type);
+      newEndDate.subtract(MAX_CHART_POINTS * count, unit);
     }
     setEndDate(newEndDate);
   };
 
   const getChartData = useCallback(async () => {
-    if (interval === undefined) return;
+    if (data.bucketSpan === undefined) return;
 
     const endTimestamp = moment(endDate).valueOf();
-    const [count, type] = interval.split(' ');
-    const startMoment = endDate.clone().subtract(Number(count), type);
+    const unitMatch = data.bucketSpan.match(/[d | h| m | s]/g)!;
+    const unit = unitMatch[0];
+    const count = Number(data.bucketSpan.replace(/[^0-9]/g, ''));
+    // STARTTIME = ENDTIME - (BucketSpan * MAX_CHART_POINTS)
+    const startMoment = endDate.clone().subtract(MAX_CHART_POINTS * count, unit);
     const startTimestamp = moment(startMoment).valueOf();
 
     try {
@@ -128,6 +154,11 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
 
       setSourceData(chartData.datafeedResults);
       setBucketData(chartData.bucketResults);
+      setAnnotationData({
+        rect: chartData.annotationResultsRect,
+        line: chartData.annotationResultsLine.map(setLineAnnotationHeader),
+      });
+      setModelSnapshotData(chartData.modelSnapshotResultsLine.map(setLineAnnotationHeader));
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedModal.errorToastTitle', {
         defaultMessage: 'Error fetching data',
@@ -135,7 +166,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
       displayErrorToast(error, title);
     }
     setIsLoadingChartData(false);
-  }, [endDate, interval]);
+  }, [endDate, data.bucketSpan]);
 
   const getJobData = async () => {
     try {
@@ -145,11 +176,6 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
         bucketSpan: job.analysis_config.bucket_span,
         isInitialized: true,
       });
-      const intervalOptions = getIntervalOptions(job.analysis_config.bucket_span);
-      const initialInterval = intervalOptions.length
-        ? intervalOptions[intervalOptions.length - 1]
-        : undefined;
-      setInterval(initialInterval?.value || '72 hours');
     } catch (error) {
       displayErrorToast(error);
     }
@@ -161,20 +187,17 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
 
   useEffect(
     function loadChartData() {
-      if (interval !== undefined) {
+      if (data.bucketSpan !== undefined) {
         setIsLoadingChartData(true);
         getChartData();
       }
     },
-    [endDate, interval]
+    [endDate, data.bucketSpan]
   );
 
   const { datafeedConfig, bucketSpan, isInitialized } = data;
-
-  const intervalOptions = useMemo(() => {
-    if (bucketSpan === undefined) return [];
-    return getIntervalOptions(bucketSpan);
-  }, [bucketSpan]);
+  const checkboxIdAnnotation = useMemo(() => htmlIdGenerator()(), []);
+  const checkboxIdModelSnapshot = useMemo(() => htmlIdGenerator()(), []);
 
   return (
     <EuiModal
@@ -185,13 +208,33 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
       <EuiModalHeader>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xl">
           <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.jobsList.datafeedModal.header"
-              defaultMessage="{jobId}"
-              values={{
-                jobId,
-              }}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  color="primary"
+                  type="help"
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.datafeedModal.headerTooltipContent"
+                      defaultMessage="Charts the event counts of the job and the source data to identify where missing data has occurred."
+                    />
+                  }
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.datafeedModal.header"
+                      defaultMessage="Datafeed chart for {jobId}"
+                      values={{
+                        jobId,
+                      }}
+                    />
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiDatePicker
@@ -220,24 +263,45 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>
-                    <EuiSelect
-                      options={intervalOptions}
-                      value={interval}
-                      onChange={(e) => setInterval(e.target.value)}
-                      aria-label={i18n.translate(
-                        'xpack.ml.jobsList.datafeedModal.intervalSelection',
-                        {
-                          defaultMessage: 'Datafeed modal chart interval selection',
-                        }
-                      )}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
                     <EditQueryDelay
                       datafeedId={datafeedConfig.datafeed_id}
                       queryDelay={datafeedConfig.query_delay}
                       isEnabled={datafeedConfig.state === DATAFEED_STATE.STOPPED}
                     />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiCheckbox
+                          id={checkboxIdAnnotation}
+                          label={
+                            <EuiText size={'xs'}>
+                              <FormattedMessage
+                                id="xpack.ml.jobsList.datafeedModal.showAnnotationsCheckboxLabel"
+                                defaultMessage="Show annotations"
+                              />
+                            </EuiText>
+                          }
+                          checked={showAnnotations}
+                          onChange={() => setShowAnnotations(!showAnnotations)}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiCheckbox
+                          id={checkboxIdModelSnapshot}
+                          label={
+                            <EuiText size={'xs'}>
+                              <FormattedMessage
+                                id="xpack.ml.jobsList.datafeedModal.showModelSnapshotsCheckboxLabel"
+                                defaultMessage="Show model snapshots"
+                              />
+                            </EuiText>
+                          }
+                          checked={showModelSnapshots}
+                          onChange={() => setShowModelSnapshots(!showModelSnapshots)}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -298,7 +362,65 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         })}
                         position={Position.Left}
                       />
+                      {showModelSnapshots ? (
+                        <LineAnnotation
+                          id={i18n.translate(
+                            'xpack.ml.jobsList.datafeedModal.modelSnapshotsLineSeriesId',
+                            {
+                              defaultMessage: 'Model snapshots',
+                            }
+                          )}
+                          key="model-snapshots-results-line"
+                          domainType={AnnotationDomainType.XDomain}
+                          dataValues={modelSnapshotData}
+                          marker={<EuiIcon type="asterisk" />}
+                          markerPosition={Position.Top}
+                          style={{
+                            line: {
+                              strokeWidth: 3,
+                              stroke: euiTheme.euiColorVis1,
+                              opacity: 0.5,
+                            },
+                          }}
+                        />
+                      ) : null}
+                      {showAnnotations ? (
+                        <>
+                          <LineAnnotation
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedModal.annotationLineSeriesId',
+                              {
+                                defaultMessage: 'Annotations line result',
+                              }
+                            )}
+                            key="annotation-results-line"
+                            domainType={AnnotationDomainType.XDomain}
+                            dataValues={annotationData.line}
+                            marker={<EuiIcon type="annotation" />}
+                            markerPosition={Position.Top}
+                            style={{
+                              line: {
+                                strokeWidth: 3,
+                                stroke: euiTheme.euiColorDangerText,
+                                opacity: 0.5,
+                              },
+                            }}
+                          />
+                          <RectAnnotation
+                            key="annotation-results-rect"
+                            dataValues={annotationData.rect}
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedModal.annotationRectSeriesId',
+                              {
+                                defaultMessage: 'Annotations rectangle result',
+                              }
+                            )}
+                            style={{ fill: euiTheme.euiColorDangerText }}
+                          />
+                        </>
+                      ) : null}
                       <LineSeries
+                        key={'source-results'}
                         color={euiTheme.euiColorPrimary}
                         id={i18n.translate('xpack.ml.jobsList.datafeedModal.sourceSeriesId', {
                           defaultMessage: 'Source indices',
@@ -311,6 +433,7 @@ export const DatafeedModal: FC<DatafeedModalProps> = ({ jobId, end, onClose }) =
                         curve={CurveType.LINEAR}
                       />
                       <LineSeries
+                        key={'job-results'}
                         color={euiTheme.euiColorAccentText}
                         id={i18n.translate('xpack.ml.jobsList.datafeedModal.bucketSeriesId', {
                           defaultMessage: 'Job results',

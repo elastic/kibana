@@ -108,7 +108,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     policies.map(async (preconfiguredAgentPolicy) => {
       if (preconfiguredAgentPolicy.id) {
         // Check to see if a preconfigured policy with the same preconfiguration id was already deleted by the user
-        const preconfigurationId = String(preconfiguredAgentPolicy.id);
+        const preconfigurationId = preconfiguredAgentPolicy.id.toString();
         const searchParams = {
           searchFields: ['id'],
           search: escapeSearchQueryPhrase(preconfigurationId),

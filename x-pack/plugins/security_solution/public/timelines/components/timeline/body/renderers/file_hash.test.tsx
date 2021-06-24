@@ -13,6 +13,8 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { FileHash } from './file_hash';
 
+jest.mock('../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

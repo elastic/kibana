@@ -57,6 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       if (isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({
           'visualization:visualize:legacyChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
       }
