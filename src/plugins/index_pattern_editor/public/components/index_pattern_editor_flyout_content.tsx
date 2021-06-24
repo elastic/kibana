@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 
 import {
@@ -71,7 +72,7 @@ export interface Props {
 
 export interface IndexPatternConfig {
   title: string;
-  timestampField?: string;
+  timestampField?: EuiComboBoxOptionOption<string>;
   allowHidden: boolean;
   id?: string;
   type: string;
@@ -108,9 +109,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
       // todo show errors
       indexPatternCreationType.checkIndicesForErrors(matchedIndices.exactMatchedIndices);
+
       await onSave({
         title: formData.title,
-        timeFieldName: formData.timestampField,
+        timeFieldName: formData.timestampField?.value,
         id: formData.id,
         ...indexPatternCreationType.getIndexPatternMappings(),
       });
@@ -120,15 +122,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [{ title, allowHidden, type, timestampField }] = useFormData<FormInternal>({ form });
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
-  const [formState, setFormState] = useState<{ isSubmitted: boolean; isValid: boolean }>({
-    isSubmitted: false,
-    isValid: false,
-    /* isValid: field ? true : undefined,
-    submit: field
-      ? async () => ({ isValid: true, data: field })
-      : async () => ({ isValid: false, data: {} as Field }),
-      */
-  });
   const [lastTitle, setLastTitle] = useState('');
   const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
   const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
@@ -233,11 +226,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       const isValidResult =
         !!title?.length && !existingIndexPatterns.includes(title) && exactMatched.length > 0;
 
-      setFormState({
-        isSubmitted: false,
-        isValid: isValidResult, // todo show error when index pattern already exists
-      });
-
       const matchedIndicesResult = getMatchedIndices(
         allSources,
         partialMatched,
@@ -278,8 +266,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     requireTimestampField,
   ]);
 
-  const { isValid } = formState;
-
   // todo
   if (isLoadingSources || isLoadingIndexPatterns) {
     return <EuiLoadingSpinner size="xl" />;
@@ -318,13 +304,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   const renderIndexList = () => {
-    // todo indexPatternExists
     if (isLoadingSources) {
-      //  || indexPatternExists) {
       return <></>;
     }
 
-    // const indicesToList = title?.length ? visibleIndices : sources;
     const indicesToList = title?.length ? matchedIndices.visibleIndices : matchedIndices.allIndices;
     return (
       <IndicesList
@@ -340,11 +323,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     exactMatchedIndices: MatchedItem[];
     partialMatchedIndices: MatchedItem[];
   }) => {
-    // const { query, isLoadingIndices, indexPatternExists, isIncludingSystemIndices } = this.state;
-    // todo previously this code wouldn't show the status message if it was a dupe index pattern
-    // but I think we should just go ahead
     if (isLoadingSources) {
-      // || indexPatternExists) {
       return null;
     }
 
@@ -358,15 +337,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
     );
   };
 
+  // needed to trigger validation without touching advanced options
+  if (title && timestampField) {
+    form.validate();
+  }
+
   // move into render fn
   const disableSubmit =
-    !isValid ||
+    !form.isValid ||
     !matchedIndices.exactMatchedIndices.length ||
     // todo display errors
     !!indexPatternCreationType.checkIndicesForErrors(matchedIndices.exactMatchedIndices) ||
-    (!!timestampFieldOptions.length && timestampField === undefined) ||
-    // todo display error
-    existingIndexPatterns.includes(title);
+    (!!timestampFieldOptions.length && timestampField === undefined);
 
   const previewPanelContent = isLoadingIndexPatterns ? (
     <LoadingIndices />
@@ -470,12 +452,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="primary"
-                  // onClick={onClickSave}
                   onClick={() => form.submit()}
                   data-test-subj="saveIndexPatternButton"
                   fill
                   disabled={disableSubmit}
-                  // isLoading={isSavingField || isValidating}
                 >
                   {i18nTexts.saveButtonLabel}
                 </EuiButton>

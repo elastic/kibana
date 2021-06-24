@@ -9,13 +9,46 @@
 import React, { ChangeEvent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports';
+import {
+  UseField,
+  getFieldValidityAndErrorMessage,
+  ValidationFunc,
+  FieldConfig,
+} from '../../shared_imports';
 import { IndexPatternConfig } from '../index_pattern_editor_flyout_content';
 import { canAppendWildcard } from '../../lib';
+import { schema } from '../form_schema';
 
 interface TitleFieldProps {
   existingIndexPatterns: string[];
 }
+
+const createTitlesNotAllowedValidator = (
+  namesNotAllowed: string[]
+): ValidationFunc<{}, string, string> => ({ value }) => {
+  if (namesNotAllowed.includes(value)) {
+    return {
+      message: i18n.translate('indexPatternEditor.indexPatternExists.ValidationErrorMessage', {
+        defaultMessage: 'An index pattern with this title already exists.',
+      }),
+    };
+  }
+};
+
+const getTitleConfig = (namesNotAllowed: string[]): FieldConfig<string> => {
+  const titleFieldConfig = schema.title;
+
+  // Add validation to not allow duplicates
+  return {
+    ...titleFieldConfig!,
+    validations: [
+      ...(titleFieldConfig.validations ?? []),
+      {
+        validator: createTitlesNotAllowedValidator(namesNotAllowed),
+      },
+    ],
+  };
+};
 
 export const TitleField = ({ existingIndexPatterns }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
@@ -23,7 +56,7 @@ export const TitleField = ({ existingIndexPatterns }: TitleFieldProps) => {
   return (
     <UseField<string, IndexPatternConfig>
       path="title"
-      // config={nameFieldConfig}
+      config={getTitleConfig(existingIndexPatterns)}
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
@@ -61,22 +94,6 @@ export const TitleField = ({ existingIndexPatterns }: TitleFieldProps) => {
                   }
                   field.setValue(query);
                 }
-                /*
-                if (query.length > 1) {
-                  if (existingIndexPatterns.includes(query)) {
-                    console.log('setting error');
-                    field.setErrors([
-                      {
-                        message: 'Index pattern exists already!',
-                        // __isBlocking__: true,
-                        code: 'INDEX_PATTERN_ALREADY_EXISTS',
-                      },
-                    ]);
-                  }
-                } else {
-                  field.clearErrors();
-                }
-                */
                 // todo
                 // setLastTitle(query);
               }}

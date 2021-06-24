@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFormRow, EuiComboBox, EuiFormHelpText } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { UseField } from '../../shared_imports';
 
@@ -32,7 +32,7 @@ export const TimestampField = ({
   }));
 
   return (
-    <UseField<string> path="timestampField">
+    <UseField<EuiComboBoxOptionOption<string>> path="timestampField">
       {({ label, value, setValue }) => {
         if (value === undefined) {
           return null;
@@ -51,14 +51,14 @@ export const TimestampField = ({
                   )}
                   singleSelection={{ asPlainText: true }}
                   options={optionsAsComboBoxOptions}
-                  selectedOptions={[{ label: value }]}
+                  selectedOptions={value ? [value] : undefined}
                   onChange={(newValue) => {
                     if (newValue.length === 0) {
                       // Don't allow clearing the type. One must always be selected
                       return;
                     }
                     //
-                    setValue(newValue[0].label);
+                    setValue(newValue[0]);
                   }}
                   isClearable={false}
                   isDisabled={!optionsAsComboBoxOptions.length}
