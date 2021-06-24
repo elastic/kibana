@@ -1,8 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`icon should use vector icon 1`] = `
+exports[`icon should use no data icon 1`] = `
 <span
-  data-euiicon-type="vector"
+  color="subdued"
+  data-euiicon-type="minusInCircle"
   size="m"
 />
 `;
