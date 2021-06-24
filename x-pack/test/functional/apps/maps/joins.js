@@ -100,10 +100,12 @@ export default function ({ getPageObjects, getService }) {
 
       expect(visibilitiesOfFeatures).to.eql([
         false,
+        false,
         true,
         true,
         true,
         // geo centroids for above features
+        false,
         false,
         true,
         true,
@@ -166,10 +168,12 @@ export default function ({ getPageObjects, getService }) {
 
         expect(visibilitiesOfFeatures).to.eql([
           false,
+          false,
           true,
           false,
           false,
           // geo centroids for above features
+          false,
           false,
           true,
           false,
