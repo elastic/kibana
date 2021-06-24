@@ -42,7 +42,7 @@ export const uptimeRuleFieldMap = {
   'tls.server.x509.not_after': {
     type: 'date',
   },
-  'tls.sever.x509.not_before': {
+  'tls.server.x509.not_before': {
     type: 'date',
   },
   'tls.server.hash.sha256': {

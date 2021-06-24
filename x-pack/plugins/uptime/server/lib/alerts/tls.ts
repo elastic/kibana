@@ -152,7 +152,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
         const alertInstance = alertWithLifecycle({
           id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
           fields: {
-            'tls.server.x509.suject.common_name': cert.common_name,
+            'tls.server.x509.subject.common_name': cert.common_name,
             'tls.server.x509.issuer.common_name': cert.issuer,
             'tls.server.x509.not_after': cert.not_after,
             'tls.server.x509.not_before': cert.not_before,

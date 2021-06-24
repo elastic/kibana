@@ -105,7 +105,7 @@ describe('tls alert', () => {
       mockCertResult.certs.forEach((cert) => {
         expect(alertWithLifecycle).toBeCalledWith({
           fields: expect.objectContaining({
-            'tls.server.x509.suject.common_name': cert.common_name,
+            'tls.server.x509.subject.common_name': cert.common_name,
             'tls.server.x509.issuer.common_name': cert.issuer,
             'tls.server.x509.not_after': cert.not_after,
             'tls.server.x509.not_before': cert.not_before,
