@@ -7,39 +7,24 @@
 
 import { composeStories } from '@storybook/testing-react';
 import React from 'react';
-import { shallow } from 'enzyme';
-import { ExceptionStacktrace } from './exception_stacktrace';
+import { mount } from 'enzyme';
 import * as stories from './exception_stacktrace.stories';
 
 const { JavaWithLongLines } = composeStories(stories);
 
 describe('ExceptionStacktrace', () => {
   describe('render', () => {
-    it('renders', () => {
-      const props = { exceptions: [] };
-
-      expect(() =>
-        shallow(<JavaWithLongLines {...props} />)
-      ).not.toThrowError();
-    });
-
-    describe('with a stack trace', () => {
-      it('renders the stack trace', () => {
-        const props = { exceptions: [{}] };
-
-        expect(
-          shallow(<JavaWithLongLines {...props} />).find('Stacktrace')
-        ).toHaveLength(1);
+    describe('with stacktraces', () => {
+      it('renders the stacktraces', () => {
+        expect(mount(<JavaWithLongLines />).find('Stacktrace')).toHaveLength(3);
       });
     });
 
     describe('with more than one stack trace', () => {
-      it('renders a cause stack trace', () => {
-        const props = { exceptions: [{}, {}] };
-
+      it('renders cause stacktraces', () => {
         expect(
-          shallow(<JavaWithLongLines {...props} />).find('CauseStacktrace')
-        ).toHaveLength(1);
+          mount(<JavaWithLongLines />).find('CauseStacktrace')
+        ).toHaveLength(2);
       });
     });
   });
