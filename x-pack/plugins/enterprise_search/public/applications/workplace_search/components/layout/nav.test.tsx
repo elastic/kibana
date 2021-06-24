@@ -7,7 +7,10 @@
 
 jest.mock('../../../shared/layout', () => ({
   ...jest.requireActual('../../../shared/layout'),
-  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+  generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
+}));
+jest.mock('../../views/content_sources/components/source_sub_nav', () => ({
+  useSourceSubNav: () => [],
 }));
 jest.mock('../../views/groups/components/group_sub_nav', () => ({
   useGroupSubNav: () => [],
@@ -50,8 +53,8 @@ describe('useWorkplaceSearchNav', () => {
           },
           {
             id: 'usersRoles',
-            name: 'Users & roles',
-            href: '/role_mappings',
+            name: 'Users and roles',
+            href: '/users_and_roles',
           },
           {
             id: 'security',

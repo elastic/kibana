@@ -76,7 +76,7 @@ export const useEndpointActionItems = (
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.unIsolateHost"
-              defaultMessage="Unisolate host"
+              defaultMessage="Release host"
             />
           ),
         });
