@@ -36,11 +36,18 @@ const getShouldClauses = ({
     };
     // only `endpoint` actions in the result
     if (_index === AGENT_ACTIONS_INDEX) {
-      clause.bool.must.push({
-        match: {
-          input_type: 'endpoint',
+      clause.bool.must.push(
+        {
+          match: {
+            input_type: 'endpoint',
+          },
         },
-      });
+        {
+          match: {
+            type: 'INPUT_ACTION',
+          },
+        }
+      );
     } else {
       // only when `action_data` field is present (not indexed)
       // `started_at` appears along with `action_data`
