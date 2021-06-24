@@ -6,4 +6,5 @@
  */
 
 export * from './actions';
+export * from './labels';
 export { DEFAULT_META } from './default_meta';
