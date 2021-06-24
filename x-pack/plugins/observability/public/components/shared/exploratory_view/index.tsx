@@ -25,9 +25,11 @@ import { TypedLensByValueInput } from '../../../../../lens/public';
 
 export function ExploratoryViewPage({
   saveAttributes,
+  multiSeries = false,
   useSessionStorage = false,
 }: {
   useSessionStorage?: boolean;
+  multiSeries?: boolean;
   saveAttributes?: (attr: TypedLensByValueInput['attributes'] | null) => void;
 }) {
   useTrackPageview({ app: 'observability-overview', path: 'exploratory-view' });
@@ -59,7 +61,7 @@ export function ExploratoryViewPage({
     <Wrapper>
       <IndexPatternContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-          <ExploratoryView saveAttributes={saveAttributes} />
+          <ExploratoryView saveAttributes={saveAttributes} multiSeries={multiSeries} />
         </UrlStorageContextProvider>
       </IndexPatternContextProvider>
     </Wrapper>

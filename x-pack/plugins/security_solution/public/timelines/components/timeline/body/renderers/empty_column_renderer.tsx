@@ -8,9 +8,8 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-
+import { ColumnHeaderOptions } from '../../../../../../common';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import {
   DraggableWrapper,
   DragEffects,
