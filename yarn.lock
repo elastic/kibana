@@ -1436,10 +1436,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@34.3.0":
-  version "34.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-34.3.0.tgz#5cd7d66c86d9644991c4391682f84824126361df"
-  integrity sha512-cUFh5H7Y95lzbsyRP1yL88mVVe5MAODOhV+O+8jYmuDQH6WrEiDhtSljTKfVYssbP7Bv+qFraVwyUj623dfr2w==
+"@elastic/eui@34.5.0":
+  version "34.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-34.5.0.tgz#951ff0f619907cf4a6c8b9680a007e419614b1e1"
+  integrity sha512-JdSwNud/We4UimtqXqrk0+1YLJuQPVz0nw/zF/QQs7I0PrFbMox7HBsAIN6k06M+Jv9QuSlTFwS4K51NGufCNg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1475,6 +1475,7 @@
     tabbable "^3.0.0"
     text-diff "^1.0.1"
     unified "^9.2.0"
+    unist-util-visit "^2.0.3"
     url-parse "^1.5.0"
     uuid "^8.3.0"
     vfile "^4.2.0"
@@ -27728,7 +27729,7 @@ unist-util-visit-parents@^3.0.0:
     "@types/unist" "^2.0.0"
     unist-util-is "^4.0.0"
 
-unist-util-visit@2.0.3, unist-util-visit@^2.0.0, unist-util-visit@^2.0.2:
+unist-util-visit@2.0.3, unist-util-visit@^2.0.0, unist-util-visit@^2.0.2, unist-util-visit@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/unist-util-visit/-/unist-util-visit-2.0.3.tgz#c3703893146df47203bb8a9795af47d7b971208c"
   integrity sha512-iJ4/RczbJMkD0712mGktuGpm/U4By4FfDonL7N/9tATGIF4imikjOuagyMY53tnZq3NP6BcmlrHhEKAfGWjh7Q==
