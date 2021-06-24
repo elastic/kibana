@@ -21,8 +21,11 @@ export const renderApp = ({
   setHeaderActionMenu,
   services,
   store,
+  usageCollection,
   subPlugins,
 }: RenderAppProps): (() => void) => {
+  const ApplicationUsageTrackingProvider =
+    usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   render(
     <SecurityApp
       history={history}
@@ -31,29 +34,30 @@ export const renderApp = ({
       setHeaderActionMenu={setHeaderActionMenu}
       store={store}
     >
-      <Switch>
-        {[
-          ...subPlugins.overview.routes,
-          ...subPlugins.alerts.routes,
-          ...subPlugins.rules.routes,
-          ...subPlugins.exceptions.routes,
-          ...subPlugins.hosts.routes,
-          ...subPlugins.network.routes,
-          ...subPlugins.timelines.routes,
-          ...subPlugins.cases.routes,
-          ...subPlugins.management.routes,
-        ].map((route, index) => (
-          <Route key={`route-${index}`} {...route} />
-        ))}
+      <ApplicationUsageTrackingProvider>
+        <Switch>
+          {[
+            ...subPlugins.overview.routes,
+            ...subPlugins.alerts.routes,
+            ...subPlugins.rules.routes,
+            ...subPlugins.exceptions.routes,
+            ...subPlugins.hosts.routes,
+            ...subPlugins.network.routes,
+            ...subPlugins.timelines.routes,
+            ...subPlugins.cases.routes,
+            ...subPlugins.management.routes,
+          ].map((route, index) => (
+            <Route key={`route-${index}`} {...route} />
+          ))}
 
-        <Route path="" exact>
-          <Redirect to={OVERVIEW_PATH} />
-        </Route>
-
-        <Route>
-          <NotFoundPage />
-        </Route>
-      </Switch>
+          <Route path="" exact>
+            <Redirect to={OVERVIEW_PATH} />
+          </Route>
+          <Route>
+            <NotFoundPage />
+          </Route>
+        </Switch>
+      </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element
   );
