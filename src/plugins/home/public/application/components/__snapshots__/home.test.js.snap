@@ -2,6 +2,7 @@
 
 exports[`home change home route should render a link to change the default route in advanced settings if advanced settings is enabled 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -45,6 +46,7 @@ exports[`home change home route should render a link to change the default route
 
 exports[`home directories should not render directory entry when showOnHomePage is false 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -88,6 +90,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
 
 exports[`home directories should render ADMIN directory entry in "Manage your data" panel 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -143,6 +146,7 @@ exports[`home directories should render ADMIN directory entry in "Manage your da
 
 exports[`home directories should render DATA directory entry in "Ingest your data" panel 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -198,6 +202,7 @@ exports[`home directories should render DATA directory entry in "Ingest your dat
 
 exports[`home directories should render solutions in the "solution section" 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -293,6 +298,7 @@ exports[`home directories should render solutions in the "solution section" 1`] 
 
 exports[`home header render 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -336,6 +342,7 @@ exports[`home header render 1`] = `
 
 exports[`home header should show "Dev tools" link if console is available 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -391,6 +398,7 @@ exports[`home header should show "Dev tools" link if console is available 1`] = 
 
 exports[`home header should show "Manage" link if stack management is available 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -434,6 +442,7 @@ exports[`home header should show "Manage" link if stack management is available 
 
 exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -477,6 +486,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when there are index patterns 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -520,6 +530,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
 
 exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when there are no index patterns 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -563,6 +574,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
 
 exports[`home should render home component 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -606,6 +618,7 @@ exports[`home should render home component 1`] = `
 
 exports[`home welcome should show the normal home page if loading fails 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -649,6 +662,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
 
 exports[`home welcome should show the normal home page if welcome screen is disabled locally 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
@@ -699,6 +713,7 @@ exports[`home welcome should show the welcome screen if enabled, and there are n
 
 exports[`home welcome stores skip welcome setting if skipped 1`] = `
 <Component
+  data-test-subj="homeApp"
   pageHeader={
     Object {
       "pageTitle": <FormattedMessage
