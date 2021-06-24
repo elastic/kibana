@@ -7,3 +7,4 @@
  */
 
 export * from './types';
+export { migrateToLatest } from './migrate_to_latest';

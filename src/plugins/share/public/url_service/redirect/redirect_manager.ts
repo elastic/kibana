@@ -8,8 +8,9 @@
 
 import type { CoreSetup } from 'src/core/public';
 import type { History } from 'history';
-import { i18n } from '@kbn/i18n';
 import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import { migrateToLatest } from 'src/plugins/kibana_utils/common';
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { UrlService } from '../../../common/url_service';
 import { render } from './render';
@@ -67,10 +68,10 @@ export class RedirectManager {
       throw error;
     }
 
-    // TODO: Perform migration to the latest version.
+    const [migratedParams] = migrateToLatest(locator.migrations, [options.params, options.version]);
 
     locator
-      .navigate(options.params)
+      .navigate(migratedParams)
       .then()
       .catch((error) => {
         // eslint-disable-next-line no-console
