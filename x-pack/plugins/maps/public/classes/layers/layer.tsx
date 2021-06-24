@@ -13,7 +13,7 @@ import _ from 'lodash';
 import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
-import { FeatureCollection, Feature } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
   AGG_TYPE,

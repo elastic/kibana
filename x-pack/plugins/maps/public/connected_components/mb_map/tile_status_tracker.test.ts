@@ -84,8 +84,8 @@ describe('TileStatusTracker', () => {
     const loadedMap: Map<string, boolean> = new Map<string, boolean>();
     new TileStatusTracker({
       mbMap: (mockMbMap as unknown) as MbMap,
-      setAreTilesLoaded: (layerId, areTilesLoaded) => {
-        loadedMap.set(layerId, areTilesLoaded);
+      setAreTilesLoaded: (layer, areTilesLoaded) => {
+        loadedMap.set(layer.getId(), areTilesLoaded);
       },
       getCurrentLayerList: () => {
         return [

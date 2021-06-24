@@ -36,10 +36,12 @@ import {
 } from '../../../common/constants';
 import { getGlyphUrl, isRetina } from '../../util';
 import { syncLayerOrder } from './sort_layers';
+
 import {
   addSpriteSheetToMapFromImageData,
   loadSpriteSheetImageData,
   removeOrphanedSourcesAndLayers,
+  // @ts-expect-error
 } from './utils';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
