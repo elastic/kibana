@@ -423,7 +423,7 @@ describe('suggestions', () => {
       oneGroupResults.forEach((r) => {
         scores[r.state.shape] = { ...(scores[r.state.shape] || {}), one: r.score };
       });
-      expect(Object.keys(scores).length).toEqual(3);
+      expect(Object.keys(scores).length).toEqual(2);
       Object.values(scores).forEach(({ one, two }) => {
         expect(two).toBeGreaterThan(one);
       });
