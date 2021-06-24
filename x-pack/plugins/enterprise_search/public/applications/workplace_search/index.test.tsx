@@ -7,6 +7,7 @@
 
 import '../__mocks__/react_router';
 import '../__mocks__/shallow_useeffect.mock';
+import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { setMockValues, setMockActions, mockKibanaValues } from '../__mocks__/kea_logic';
 
 import React from 'react';
@@ -66,6 +67,13 @@ describe('WorkplaceSearchConfigured', () => {
 
     expect(mockKibanaValues.setChromeIsVisible).toHaveBeenCalledWith(true);
     expect(mockKibanaValues.renderHeaderActions).toHaveBeenCalledWith(WorkplaceSearchHeaderActions);
+  });
+
+  it('initializes app data with passed props', () => {
+    const { workplaceSearch } = DEFAULT_INITIAL_APP_DATA;
+    shallow(<WorkplaceSearchConfigured workplaceSearch={workplaceSearch} />);
+
+    expect(initializeAppData).toHaveBeenCalledWith({ workplaceSearch });
   });
 
   it('does not re-initialize app data or re-render header actions', () => {
