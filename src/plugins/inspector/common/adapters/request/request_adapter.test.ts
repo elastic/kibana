@@ -31,8 +31,10 @@ describe('RequestAdapter', () => {
       adapter.start('req1', { prefix: 'prefix' });
       adapter.start('req1', { id: 'myId', prefix: 'prefix' });
 
-      expect(adapter.getRequests().every(({ id }) => id.includes('prefix'))).toBe(true);
-      expect(adapter.getRequests().some(({ id }) => id === 'prefix--MyId')).toBe(true);
+      const requests = adapter.getRequests();
+
+      expect(requests.every(({ id }) => id.includes('prefix'))).toBe(true);
+      expect(requests.some(({ id }) => id === 'prefix--myId')).toBe(true);
     });
   });
 

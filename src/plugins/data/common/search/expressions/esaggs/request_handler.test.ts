@@ -140,7 +140,8 @@ describe('esaggs expression function - public', () => {
       inspector: {
         title: 'Data',
         description: 'This request queries Elasticsearch to fetch the data for the visualization.',
-        adapter: undefined,
+        adapter: mockParams.inspectorAdapters.requests,
+        searchId: undefined,
       },
     });
   });
@@ -155,7 +156,7 @@ describe('esaggs expression function - public', () => {
       inspector: {
         title: 'Data',
         description: 'This request queries Elasticsearch to fetch the data for the visualization.',
-        adapter: undefined,
+        adapter: mockParams.inspectorAdapters.requests,
         searchId: 'searchId',
       },
     });
