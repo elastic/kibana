@@ -109,7 +109,10 @@ export function suggestions({
     });
   }
 
-  if (groups.length <= MAX_TREEMAP_BUCKETS) {
+  if (
+    groups.length <= MAX_TREEMAP_BUCKETS &&
+    (!subVisualizationId || subVisualizationId === 'treemap')
+  ) {
     results.push({
       title: i18n.translate('xpack.lens.pie.treemapSuggestionLabel', {
         defaultMessage: 'As Treemap',
