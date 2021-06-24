@@ -725,7 +725,7 @@ export function FormulaEditor({
                         color="text"
                         onClick={() => setIsHelpOpen(!isHelpOpen)}
                       >
-                        <EuiIcon type="help" />
+                        <EuiIcon type="documentation" />
                         <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
                       </EuiLink>
                     </EuiToolTip>
@@ -747,7 +747,7 @@ export function FormulaEditor({
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                             onClick={() => setIsHelpOpen(!isHelpOpen)}
-                            iconType="help"
+                            iconType="documentation"
                             color="text"
                             size="s"
                             aria-label={i18n.translate(
