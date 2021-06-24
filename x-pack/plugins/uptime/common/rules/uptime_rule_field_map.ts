@@ -13,6 +13,9 @@ export const uptimeRuleFieldMap = {
   'url.full': {
     type: 'keyword',
   },
+  'observer.geo.name': {
+    type: 'keyword',
+  },
   reason: {
     type: 'text',
   },
@@ -29,49 +32,25 @@ export const uptimeRuleFieldMap = {
   'monitor.type': {
     type: 'keyword',
   },
-  'observer.geo.name': {
-    type: 'keyword',
-  },
   // tls alert fields
-  'cert_status.count': {
-    type: 'integer',
-  },
-  'cert_status.aging_count': {
-    type: 'integer',
-  },
-  'cert_status.aging_common_name_and_date': {
-    type: 'text',
-  },
-  'cert_status.expiring_count': {
-    type: 'integer',
-  },
-  'cert_status.expiring_common_name_and_date': {
-    type: 'text',
-  },
-  'cert_status.has_aging': {
-    type: 'boolean',
-  },
-  'cert_status.has_expired': {
-    type: 'boolean',
-  },
-  // anomaly alert fields
-  'anomaly.severity': {
+  'tls.server.x509.issuer.common_name': {
     type: 'keyword',
   },
-  'anomaly.severity_score': {
-    type: 'double',
+  'tls.server.x509.subject.common_name': {
+    type: 'keyword',
   },
-  'anomaly.start': {
+  'tls.server.x509.not_after': {
     type: 'date',
   },
-  'anomaly.slowest_response': {
-    type: 'double',
+  'tls.sever.x509.not_before': {
+    type: 'date',
   },
-  'anomaly.expected_response': {
-    type: 'double',
-  },
-  'anomaly.observer_location': {
+  'tls.server.hash.sha256': {
     type: 'keyword',
+  },
+  // anomaly alert fields
+  'anomaly.start': {
+    type: 'date',
   },
 } as const;
 
