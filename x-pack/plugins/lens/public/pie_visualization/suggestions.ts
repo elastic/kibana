@@ -51,7 +51,7 @@ export function suggestions({
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
-  if (groups.length <= MAX_PIE_BUCKETS) {
+  if (groups.length <= MAX_PIE_BUCKETS && subVisualizationId !== 'treemap') {
     let newShape: PieVisualizationState['shape'] =
       (subVisualizationId as PieVisualizationState['shape']) || 'donut';
     if (groups.length !== 1 && !subVisualizationId) {
