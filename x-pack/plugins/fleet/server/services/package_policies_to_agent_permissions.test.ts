@@ -177,7 +177,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'test-policy': {
         indices: [
           {
-            names: ['logs-some-logs-test'],
+            names: ['logs-some-logs-test*'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],
@@ -267,7 +267,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'test-policy': {
         indices: [
           {
-            names: ['logs-compiled-test'],
+            names: ['logs-compiled-test*'],
             privileges: ['auto_configure', 'create_doc'],
           },
         ],
@@ -292,7 +292,7 @@ describe('getDataStreamPermissions()', () => {
     const permissions = getDataStreamPermissions(dataStream, 'namespace');
 
     expect(permissions).toMatchObject({
-      names: ['logs-test-namespace'],
+      names: ['logs-test-namespace*'],
       privileges: ['auto_configure', 'create_doc'],
     });
   });
@@ -306,7 +306,7 @@ describe('getDataStreamPermissions()', () => {
     const permissions = getDataStreamPermissions(dataStream, 'namespace');
 
     expect(permissions).toMatchObject({
-      names: ['logs-test.*-namespace'],
+      names: ['logs-test.*-namespace*'],
       privileges: ['auto_configure', 'create_doc'],
     });
   });
@@ -320,7 +320,7 @@ describe('getDataStreamPermissions()', () => {
     const permissions = getDataStreamPermissions(dataStream, 'namespace');
 
     expect(permissions).toMatchObject({
-      names: ['.logs-test-namespace'],
+      names: ['.logs-test-namespace*'],
       privileges: ['auto_configure', 'create_doc'],
     });
   });
@@ -334,7 +334,7 @@ describe('getDataStreamPermissions()', () => {
     const permissions = getDataStreamPermissions(dataStream, 'namespace');
 
     expect(permissions).toMatchObject({
-      names: ['logs-test-namespace'],
+      names: ['logs-test-namespace*'],
       privileges: ['read', 'write'],
     });
   });
