@@ -153,7 +153,9 @@ export async function mountApp(
         },
       });
     } else {
-      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp);
+      coreStart.application.navigateToApp(embeddableEditorIncomingState?.originatingApp, {
+        path: embeddableEditorIncomingState?.originatingPath,
+      });
     }
   };
   const initialContext =
