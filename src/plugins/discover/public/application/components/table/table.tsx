@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { CriteriaWithPagination, EuiInMemoryTable } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiInMemoryTable } from '@elastic/eui';
 import { IndexPattern, IndexPatternField } from '../../../../../data/public';
 import { SHOW_MULTIFIELDS } from '../../../../common';
 import { getServices } from '../../../kibana_services';
@@ -54,11 +54,6 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const [pagination, setPagination] = useState({
-    pageSize: 50,
-    pageIndex: 0,
-    pageSizeOptions: [25, 50, 75],
-  });
   const showMultiFields = getServices().uiSettings.get(SHOW_MULTIFIELDS);
 
   const mapping = useCallback((name) => indexPattern?.fields.getByName(name), [
@@ -86,14 +81,6 @@ export const DocViewerTable = ({
       className: 'kbnDocViewer__tableRow',
       'data-test-subj': `tableDocViewRow-${fieldName}`,
     };
-  }, []);
-
-  const onTableChange = useCallback(({ page }: CriteriaWithPagination<FieldRecord>) => {
-    setPagination((prevPagination) => ({
-      ...prevPagination,
-      pageSize: page.size,
-      pageIndex: page.index,
-    }));
   }, []);
 
   if (!indexPattern) {
@@ -142,9 +129,8 @@ export const DocViewerTable = ({
       className="kbnDocViewer__table"
       items={items}
       columns={DOC_VIEW_COLUMNS}
-      pagination={pagination}
-      onTableChange={onTableChange}
       rowProps={onSetRowProps}
+      pagination={false}
       responsive={false}
     />
   );

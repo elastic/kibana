@@ -16,13 +16,13 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero eui-textBreakAll"
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
-        class="euiToolTipAnchor kbnDocViewer__fieldName eui-textBreakAll"
+        class="euiToolTipAnchor eui-textBreakAll"
       >
         <span>
           test.test.test
@@ -49,13 +49,13 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero eui-textBreakAll"
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
-        class="euiToolTipAnchor kbnDocViewer__fieldName eui-textBreakAll"
+        class="euiToolTipAnchor eui-textBreakAll"
       >
         <span>
           test.test.test
@@ -82,13 +82,13 @@ Array [
     </span>
   </div>,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero eui-textBreakAll"
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
       <span
-        class="euiToolTipAnchor kbnDocViewer__fieldName eui-textBreakAll"
+        class="euiToolTipAnchor eui-textBreakAll"
       >
         <span>
           test
