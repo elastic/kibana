@@ -9,6 +9,7 @@ import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
+import semver from 'semver';
 
 import {
   CoreSetup,
@@ -234,7 +235,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               },
             },
           },
-          templateVersion: 1,
+          templateVersion: new semver.SemVer('7.14.3'),
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({
@@ -249,7 +250,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               ],
             },
           },
-          templateVersion: 1,
+          templateVersion: new semver.SemVer('7.14.0'),
         });
       });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import semver from 'semver';
 import { IndicesRolloverResponse } from '@elastic/elasticsearch/api/types';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { get } from 'lodash';
@@ -167,25 +168,31 @@ export class RuleDataClient implements IRuleDataClient {
     currentVersions: object | undefined,
     targetVersions: object | undefined
   ): boolean {
-    if (targetVersions == null) {
+    // If any of the target versions can't be parsed by semver, something is wrong so don't rollover
+    if (
+      targetVersions == null ||
+      Object.entries(targetVersions).some(
+        ([_, targetVersion]) => semver.valid(targetVersion) == null
+      )
+    ) {
       return false;
     }
-    // At this point targetVersions can't be undefined, so if currentVersions is undefined then we should definitely rollover
-    if (currentVersions == null) {
+    // At this point we know we have a valid set of target versions so if we can't find currentVersions
+    // then we rollover. We also roll over if there are less keys in targetVersions, as this means
+    // a template has been removed.
+    if (
+      currentVersions == null ||
+      Object.keys(currentVersions).length > Object.keys(targetVersions).length
+    ) {
       return true;
     }
-    const componentTemplateRemoved =
-      Object.keys(currentVersions).length > Object.keys(targetVersions).length;
-    const componentTemplateUpdatedOrAdded = Object.entries(targetVersions).reduce(
-      (acc, [templateName, targetTemplateVersion]) => {
-        const currentTemplateVersion = get(currentVersions, templateName);
-        const templateUpdated =
-          currentTemplateVersion == null || currentTemplateVersion < Number(targetTemplateVersion);
-        return acc || templateUpdated;
-      },
-      false
-    );
-    return componentTemplateRemoved || componentTemplateUpdatedOrAdded;
+    // Finally, we compare the target versions to the current versions. Current versions that can't be parsed are treated
+    // as though they are always less than a target version if the target version is valid.
+    return Object.entries(targetVersions).some(([templateName, targetVersion]) => {
+      const currentTemplateVersion = get(currentVersions, templateName);
+      const parsedCurrentVersion = semver.valid(currentTemplateVersion);
+      return parsedCurrentVersion == null || semver.lt(parsedCurrentVersion, targetVersion);
+    });
   }
 
   async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {

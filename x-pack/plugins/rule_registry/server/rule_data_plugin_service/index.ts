@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semver from 'semver';
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
@@ -83,7 +84,7 @@ export class RuleDataPluginService {
         name: this.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
         body: technicalComponentTemplate,
       },
-      templateVersion: 1,
+      templateVersion: new semver.SemVer('7.14.0'),
     });
 
     await this._createOrUpdateComponentTemplate({
@@ -91,7 +92,7 @@ export class RuleDataPluginService {
         name: this.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
         body: ecsComponentTemplate,
       },
-      templateVersion: 1,
+      templateVersion: new semver.SemVer('7.14.0'),
     });
 
     this.options.logger.info(`Installed all assets`);
@@ -104,7 +105,7 @@ export class RuleDataPluginService {
     templateVersion,
   }: {
     template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>;
-    templateVersion: number;
+    templateVersion: semver.SemVer;
   }) {
     this.assertWriteEnabled();
 
@@ -113,7 +114,9 @@ export class RuleDataPluginService {
     const mergedTemplate = merge(
       {
         body: {
-          template: { mappings: { _meta: { versions: { [template.name]: templateVersion } } } },
+          template: {
+            mappings: { _meta: { versions: { [template.name]: templateVersion.version } } },
+          },
         },
       },
       template
@@ -126,7 +129,7 @@ export class RuleDataPluginService {
     templateVersion,
   }: {
     template: PutIndexTemplateRequest;
-    templateVersion: number;
+    templateVersion: semver.SemVer;
   }) {
     this.assertWriteEnabled();
 
@@ -143,7 +146,9 @@ export class RuleDataPluginService {
     const mergedTemplate = merge(
       {
         body: {
-          template: { mappings: { _meta: { versions: { [template.name]: templateVersion } } } },
+          template: {
+            mappings: { _meta: { versions: { [template.name]: templateVersion.version } } },
+          },
         },
       },
       template
@@ -164,7 +169,7 @@ export class RuleDataPluginService {
     templateVersion,
   }: {
     template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>;
-    templateVersion: number;
+    templateVersion: semver.SemVer;
   }) {
     await this.wait();
     return this._createOrUpdateComponentTemplate({ template, templateVersion });
@@ -175,7 +180,7 @@ export class RuleDataPluginService {
     templateVersion,
   }: {
     template: PutIndexTemplateRequest;
-    templateVersion: number;
+    templateVersion: semver.SemVer;
   }) {
     await this.wait();
     return this._createOrUpdateIndexTemplate({ template, templateVersion });
