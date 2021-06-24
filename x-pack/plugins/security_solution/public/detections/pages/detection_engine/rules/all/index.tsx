@@ -95,7 +95,6 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
-        <EuiSpacer />
         {tabs}
         <EuiSpacer />
         <RulesTables

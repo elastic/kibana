@@ -107,7 +107,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   );
   return (
     <>
-      <EuiPageHeader alignItems="center" bottomBorder={border} paddingSize="l">
+      <EuiPageHeader alignItems="center" bottomBorder={border}>
         <EuiPageHeaderSection>
           {backOptions && (
             <LinkBack>
