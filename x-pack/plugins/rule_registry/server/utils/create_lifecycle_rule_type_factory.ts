@@ -32,10 +32,13 @@ import { AlertTypeWithExecutor } from '../types';
 import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
 import { getRuleExecutorData } from './get_rule_executor_data';
 
-export type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
+export type LifecycleAlertService<
+  TAlertInstanceContext extends Record<string, unknown>,
+  TActionGroupIds extends string = string
+> = (alert: {
   id: string;
   fields: Record<string, unknown>;
-}) => AlertInstance<AlertInstanceState, TAlertInstanceContext, string>;
+}) => AlertInstance<AlertInstanceState, TAlertInstanceContext, TActionGroupIds>;
 
 const trackedAlertStateRt = t.type({
   alertId: t.string,

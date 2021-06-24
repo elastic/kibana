@@ -9,6 +9,7 @@ import { UMServerLibs, UptimeESClient } from '../lib';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { AlertTypeWithExecutor, LifecycleAlertService } from '../../../../rule_registry/server';
 import { AlertInstanceContext } from '../../../../alerting/common';
+import { AlertServices } from '../../../../alerting/server';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,
@@ -16,12 +17,12 @@ import { AlertInstanceContext } from '../../../../alerting/common';
  *
  * When we register all the alerts we can inject this field.
  */
-export type DefaultUptimeAlertInstance = Omit<
+export type DefaultUptimeAlertInstance<ActionGroupIds extends string> = Omit<
   AlertTypeWithExecutor<
     Record<string, any>,
     AlertInstanceContext,
     {
-      alertWithLifecycle: LifecycleAlertService<AlertInstanceContext>;
+      alertWithLifecycle: LifecycleAlertService<AlertInstanceContext, ActionGroupIds>;
       dynamicSettings: DynamicSettings;
       uptimeEsClient: UptimeESClient;
     }
@@ -29,8 +30,8 @@ export type DefaultUptimeAlertInstance = Omit<
   'producer'
 >;
 
-export type UptimeAlertTypeFactory = (
+export type UptimeAlertTypeFactory<ActionGroupIds extends string> = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins
-) => DefaultUptimeAlertInstance;
+) => DefaultUptimeAlertInstance<ActionGroupIds>;

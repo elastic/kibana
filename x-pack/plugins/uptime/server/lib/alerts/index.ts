@@ -6,14 +6,17 @@
  */
 
 import { UptimeAlertTypeFactory } from './types';
-import { statusCheckAlertFactory } from './status_check';
-import { tlsAlertFactory } from './tls';
-import { tlsLegacyAlertFactory } from './tls_legacy';
-import { durationAnomalyAlertFactory } from './duration_anomaly';
-
-export const uptimeAlertTypeFactories: UptimeAlertTypeFactory[] = [
-  statusCheckAlertFactory,
-  tlsAlertFactory,
-  tlsLegacyAlertFactory,
+import { statusCheckAlertFactory, ActionGroupIds as statusCheckActionGroup } from './status_check';
+import { tlsAlertFactory, ActionGroupIds as tlsActionGroup } from './tls';
+import { tlsLegacyAlertFactory, ActionGroupIds as tlsLegacyActionGroup } from './tls_legacy';
+import {
   durationAnomalyAlertFactory,
-];
+  ActionGroupIds as durationAnomalyActionGroup,
+} from './duration_anomaly';
+
+export const uptimeAlertTypeFactories: [
+  UptimeAlertTypeFactory<statusCheckActionGroup>,
+  UptimeAlertTypeFactory<tlsActionGroup>,
+  UptimeAlertTypeFactory<tlsLegacyActionGroup>,
+  UptimeAlertTypeFactory<durationAnomalyActionGroup>
+] = [statusCheckAlertFactory, tlsAlertFactory, tlsLegacyAlertFactory, durationAnomalyAlertFactory];
