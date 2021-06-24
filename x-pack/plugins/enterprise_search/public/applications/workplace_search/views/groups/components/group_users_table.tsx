@@ -53,7 +53,7 @@ export const GroupUsersTable: React.FC = () => {
   return (
     <>
       <EuiTable>
-        <TableHeader extraCell={false} headerItems={headerItems} />
+        <TableHeader headerItems={headerItems} />
         <EuiTableBody>
           {users.slice(firstItem, lastItem + 1).map((user: User) => (
             <UserRow key={user.id} showEmail user={user} />
