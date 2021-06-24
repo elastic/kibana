@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiTabbedContent, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+  EuiSpacer,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -92,6 +99,9 @@ const EventDetailsComponent: React.FC<Props> = ({
     (tab: EuiTabbedContentTab) => setSelectedTabId(tab.id as EventViewId),
     [setSelectedTabId]
   );
+  const viewThreatIntelTab = useCallback(() => setSelectedTabId(EventsViewType.threatIntelView), [
+    setSelectedTabId,
+  ]);
 
   const { addError } = useAppToasts();
   const kibana = useKibana();
@@ -160,17 +170,34 @@ const EventDetailsComponent: React.FC<Props> = ({
                   }}
                 />
                 {enrichmentCount > 0 && (
-                  <ThreatSummaryView
-                    eventId={id}
-                    timelineId={timelineId}
-                    enrichments={allEnrichments}
-                  />
+                  <>
+                    <ThreatSummaryView
+                      eventId={id}
+                      timelineId={timelineId}
+                      enrichments={allEnrichments}
+                    />
+                    <EuiSpacer size="s" />
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton onClick={viewThreatIntelTab}>{i18n.VIEW_CTI_DATA}</EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
                 )}
               </>
             ),
           }
         : undefined,
-    [isAlert, data, id, browserFields, timelineId, enrichmentCount, allEnrichments]
+    [
+      isAlert,
+      data,
+      id,
+      browserFields,
+      timelineId,
+      enrichmentCount,
+      allEnrichments,
+      viewThreatIntelTab,
+    ]
   );
 
   const threatIntelTab = useMemo(
