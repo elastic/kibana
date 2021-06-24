@@ -435,14 +435,31 @@ const indexFleetActionsForHost = async (
 
     action.agents = [agentId];
     fleetAction.agents = [agentId];
+    OSQueryAction.agents = [agentId];
 
-    await esClient.bulk(
-      {
-        index: AGENT_ACTIONS_INDEX,
-        body: [action, OSQueryAction, fleetAction],
-      },
-      ES_INDEX_OPTIONS
-    );
+    await Promise.all([
+      esClient.index(
+        {
+          index: AGENT_ACTIONS_INDEX,
+          body: action,
+        },
+        ES_INDEX_OPTIONS
+      ),
+      await esClient.index(
+        {
+          index: AGENT_ACTIONS_INDEX,
+          body: fleetAction,
+        },
+        ES_INDEX_OPTIONS
+      ),
+      await esClient.index(
+        {
+          index: AGENT_ACTIONS_INDEX,
+          body: OSQueryAction,
+        },
+        ES_INDEX_OPTIONS
+      ),
+    ]);
 
     // Create an action response for the above
     const actionResponse = fleetActionGenerator.generateResponse({
