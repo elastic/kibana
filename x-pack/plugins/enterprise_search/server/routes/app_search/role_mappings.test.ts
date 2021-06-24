@@ -7,7 +7,11 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerRoleMappingsRoute, registerRoleMappingRoute } from './role_mappings';
+import {
+  registerEnableRoleMappingsRoute,
+  registerRoleMappingsRoute,
+  registerRoleMappingRoute,
+} from './role_mappings';
 
 const roleMappingBaseSchema = {
   rules: { username: 'user' },
@@ -18,6 +22,29 @@ const roleMappingBaseSchema = {
 };
 
 describe('role mappings routes', () => {
+  describe('POST /api/app_search/role_mappings/enable_role_based_access', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/app_search/role_mappings/enable_role_based_access',
+      });
+
+      registerEnableRoleMappingsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/role_mappings/enable_role_based_access',
+      });
+    });
+  });
+
   describe('GET /api/app_search/role_mappings', () => {
     let mockRouter: MockRouter;
 
@@ -36,7 +63,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings',
+        path: '/as/role_mappings',
       });
     });
   });
@@ -59,7 +86,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings',
+        path: '/as/role_mappings',
       });
     });
 
@@ -94,7 +121,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/:id',
+        path: '/as/role_mappings/:id',
       });
     });
 
@@ -129,7 +156,7 @@ describe('role mappings routes', () => {
 
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/role_mappings/:id',
+        path: '/as/role_mappings/:id',
       });
     });
   });
