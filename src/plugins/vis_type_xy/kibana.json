@@ -2,8 +2,10 @@
   "id": "visTypeXy",
   "version": "kibana",
   "ui": true,
+  "server": true,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "usageCollection"],
   "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
+  "extraPublicDirs": ["common/index"],
   "owner": {
     "name": "Kibana App",
     "githubTeam": "kibana-app"

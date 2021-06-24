@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
   EuiModal,
   EuiPageContent,
   EuiPageContentBody,
+  EuiPageHeader,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { APP_GET_TRANSFORM_CLUSTER_PRIVILEGES } from '../../../../common/constants';
@@ -77,73 +75,91 @@ export const TransformManagement: FC = () => {
     setSavedObjectId(id);
   };
 
+  const docsLink = (
+    <EuiButtonEmpty
+      href={esTransform}
+      target="_blank"
+      iconType="help"
+      data-test-subj="documentationLink"
+    >
+      <FormattedMessage
+        id="xpack.transform.transformList.transformDocsLinkText"
+        defaultMessage="Transform docs"
+      />
+    </EuiButtonEmpty>
+  );
+
   return (
-    <Fragment>
-      <EuiPageContent data-test-subj="transformPageTransformList">
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <h1 data-test-subj="transformAppTitle">
-                <FormattedMessage
-                  id="xpack.transform.transformList.transformTitle"
-                  defaultMessage="Transforms"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={esTransform}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.transform.transformList.transformDocsLinkText"
-                  defaultMessage="Transform docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiTitle size="s">
-          <EuiText color="subdued">
+    <>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="transformAppTitle">
             <FormattedMessage
-              id="xpack.transform.transformList.transformDescription"
-              defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access."
+              id="xpack.transform.transformList.transformTitle"
+              defaultMessage="Transforms"
             />
-          </EuiText>
-        </EuiTitle>
-        <EuiPageContentBody>
-          <EuiSpacer size="l" />
-          {!isInitialized && <EuiLoadingContent lines={2} />}
-          {isInitialized && (
-            <>
-              <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
-              <EuiSpacer size="s" />
-              {typeof errorMessage !== 'undefined' && (
-                <EuiCallOut
-                  title={i18n.translate('xpack.transform.list.errorPromptTitle', {
-                    defaultMessage: 'An error occurred getting the transform list.',
-                  })}
-                  color="danger"
-                  iconType="alert"
-                >
-                  <pre>{JSON.stringify(errorMessage)}</pre>
-                </EuiCallOut>
-              )}
-              {typeof errorMessage === 'undefined' && (
-                <TransformList
-                  onCreateTransform={onOpenModal}
-                  transformNodes={transformNodes}
-                  transforms={transforms}
-                  transformsLoading={transformsLoading}
-                />
-              )}
-            </>
-          )}
-        </EuiPageContentBody>
-      </EuiPageContent>
+          </span>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.transform.transformList.transformDescription"
+            defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access."
+          />
+        }
+        rightSideItems={[docsLink]}
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
+      <EuiPageContentBody data-test-subj="transformPageTransformList">
+        {!isInitialized && <EuiLoadingContent lines={2} />}
+        {isInitialized && (
+          <>
+            <TransformStatsBar transformNodes={transformNodes} transformsList={transforms} />
+            <EuiSpacer size="s" />
+            {typeof errorMessage !== 'undefined' && (
+              <EuiFlexGroup justifyContent="spaceAround">
+                <EuiFlexItem grow={false}>
+                  <EuiSpacer size="l" />
+                  <EuiPageContent
+                    verticalPosition="center"
+                    horizontalPosition="center"
+                    color="danger"
+                  >
+                    <EuiEmptyPrompt
+                      iconType="alert"
+                      title={
+                        <h2>
+                          <FormattedMessage
+                            id="xpack.transform.list.errorPromptTitle"
+                            defaultMessage="An error occurred getting the transform list"
+                          />
+                        </h2>
+                      }
+                      body={
+                        <p>
+                          <pre>{JSON.stringify(errorMessage)}</pre>
+                        </p>
+                      }
+                      actions={[]}
+                    />
+                  </EuiPageContent>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+            {typeof errorMessage === 'undefined' && (
+              <TransformList
+                onCreateTransform={onOpenModal}
+                transformNodes={transformNodes}
+                transforms={transforms}
+                transformsLoading={transformsLoading}
+              />
+            )}
+          </>
+        )}
+      </EuiPageContentBody>
+
       {isSearchSelectionVisible && (
         <EuiModal
           onClose={onCloseModal}
@@ -153,7 +169,7 @@ export const TransformManagement: FC = () => {
           <SearchSelection onSearchSelected={onSearchSelected} />
         </EuiModal>
       )}
-    </Fragment>
+    </>
   );
 };
 

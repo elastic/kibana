@@ -178,89 +178,19 @@ describe('useSecuritySolutionNavigation', () => {
           useSecuritySolutionNavigation()
         );
 
-        // Navigation Cases should be in the snapshot.
-        expect(result.current).toMatchInlineSnapshot(`
+        const caseNavItem = (result.current?.items || [])[0].items?.find(
+          (item) => item['data-test-subj'] === 'navigation-case'
+        );
+        expect(caseNavItem).toMatchInlineSnapshot(`
           Object {
-            "icon": "logoSecurity",
-            "items": Array [
-              Object {
-                "id": "securitySolution",
-                "items": Array [
-                  Object {
-                    "data-href": "securitySolution:overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-overview",
-                    "disabled": false,
-                    "href": "securitySolution:overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "overview",
-                    "isSelected": false,
-                    "name": "Overview",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:detections?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-detections",
-                    "disabled": false,
-                    "href": "securitySolution:detections?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "detections",
-                    "isSelected": false,
-                    "name": "Detections",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-hosts",
-                    "disabled": false,
-                    "href": "securitySolution:hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "hosts",
-                    "isSelected": true,
-                    "name": "Hosts",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-network",
-                    "disabled": false,
-                    "href": "securitySolution:network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "network",
-                    "isSelected": false,
-                    "name": "Network",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-timelines",
-                    "disabled": false,
-                    "href": "securitySolution:timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "timelines",
-                    "isSelected": false,
-                    "name": "Timelines",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-case",
-                    "disabled": false,
-                    "href": "securitySolution:case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "case",
-                    "isSelected": false,
-                    "name": "Cases",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:administration",
-                    "data-test-subj": "navigation-administration",
-                    "disabled": false,
-                    "href": "securitySolution:administration",
-                    "id": "administration",
-                    "isSelected": false,
-                    "name": "Administration",
-                    "onClick": [Function],
-                  },
-                ],
-                "name": "",
-              },
-            ],
-            "name": "Security",
+            "data-href": "securitySolution:case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "data-test-subj": "navigation-case",
+            "disabled": false,
+            "href": "securitySolution:case?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "id": "case",
+            "isSelected": false,
+            "name": "Cases",
+            "onClick": [Function],
           }
         `);
       });
@@ -275,81 +205,10 @@ describe('useSecuritySolutionNavigation', () => {
           useSecuritySolutionNavigation()
         );
 
-        // Cases navigation should not show up in the below list
-        expect(result.current).toMatchInlineSnapshot(`
-          Object {
-            "icon": "logoSecurity",
-            "items": Array [
-              Object {
-                "id": "securitySolution",
-                "items": Array [
-                  Object {
-                    "data-href": "securitySolution:overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-overview",
-                    "disabled": false,
-                    "href": "securitySolution:overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "overview",
-                    "isSelected": false,
-                    "name": "Overview",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:detections?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-detections",
-                    "disabled": false,
-                    "href": "securitySolution:detections?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "detections",
-                    "isSelected": false,
-                    "name": "Detections",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-hosts",
-                    "disabled": false,
-                    "href": "securitySolution:hosts?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "hosts",
-                    "isSelected": true,
-                    "name": "Hosts",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-network",
-                    "disabled": false,
-                    "href": "securitySolution:network?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "network",
-                    "isSelected": false,
-                    "name": "Network",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "data-test-subj": "navigation-timelines",
-                    "disabled": false,
-                    "href": "securitySolution:timelines?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-                    "id": "timelines",
-                    "isSelected": false,
-                    "name": "Timelines",
-                    "onClick": [Function],
-                  },
-                  Object {
-                    "data-href": "securitySolution:administration",
-                    "data-test-subj": "navigation-administration",
-                    "disabled": false,
-                    "href": "securitySolution:administration",
-                    "id": "administration",
-                    "isSelected": false,
-                    "name": "Administration",
-                    "onClick": [Function],
-                  },
-                ],
-                "name": "",
-              },
-            ],
-            "name": "Security",
-          }
-        `);
+        const caseNavItem = (result.current?.items || [])[0].items?.find(
+          (item) => item['data-test-subj'] === 'navigation-case'
+        );
+        expect(caseNavItem).toBeFalsy();
       });
     });
   });

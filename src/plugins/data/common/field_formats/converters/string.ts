@@ -13,6 +13,10 @@ import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { shortenDottedString } from '../../utils';
 
+export const emptyLabel = i18n.translate('data.fieldFormats.string.emptyLabel', {
+  defaultMessage: '(empty)',
+});
+
 const TRANSFORM_OPTIONS = [
   {
     kind: false,
@@ -103,6 +107,9 @@ export class StringFormat extends FieldFormat {
   }
 
   textConvert: TextContextTypeConvert = (val) => {
+    if (val === '') {
+      return emptyLabel;
+    }
     switch (this.param('transform')) {
       case 'lower':
         return String(val).toLowerCase();
