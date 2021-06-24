@@ -75,6 +75,10 @@ describe('PrecisionSlider', () => {
     });
   });
 
-  // TODO: Add documentation link
-  // it('contains a documentation link', () => {});
+  it('contains a documentation link', () => {
+    const documentationLink = wrapper.find('[data-test-subj="documentationLink"]');
+
+    expect(documentationLink.prop('href')).toContain('/precision-tuning.html');
+    expect(documentationLink.prop('target')).toEqual('_blank');
+  });
 });
