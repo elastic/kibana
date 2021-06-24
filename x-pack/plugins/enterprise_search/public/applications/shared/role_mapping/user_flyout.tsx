@@ -77,12 +77,7 @@ export const UserFlyout: React.FC<Props> = ({
         <EuiButtonEmpty onClick={closeUserFlyout}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton
-          disabled={disabled}
-          isLoading={formLoading}
-          onClick={handleSaveUser}
-          fill
-        >
+        <EuiButton disabled={disabled} isLoading={formLoading} onClick={handleSaveUser} fill>
           {isNew ? ADD_USER_LABEL : UPDATE_USER_LABEL}
         </EuiButton>
       </EuiFlexItem>
