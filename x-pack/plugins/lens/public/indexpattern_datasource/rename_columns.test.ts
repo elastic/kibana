@@ -83,29 +83,6 @@ describe('rename_columns', () => {
     `);
   });
 
-  it('should replace "" with a visible value', () => {
-    const input: Datatable = {
-      type: 'datatable',
-      columns: [{ id: 'a', name: 'A', meta: { type: 'string' } }],
-      rows: [{ a: '' }],
-    };
-
-    const idMap = {
-      a: {
-        id: 'a',
-        label: 'Austrailia',
-      },
-    };
-
-    const result = renameColumns.fn(
-      input,
-      { idMap: JSON.stringify(idMap) },
-      createMockExecutionContext()
-    );
-
-    expect(result.rows[0].a).toEqual('(empty)');
-  });
-
   it('should keep columns which are not mapped', () => {
     const input: Datatable = {
       type: 'datatable',
