@@ -165,7 +165,7 @@ export const isolationRequestHandler = function (
           type: CommentType.actions,
           comment: req.body.comment || '',
           actions: {
-            endpointId: agentIDs[0],
+            endpointId: req?.body?.endpoint_ids[0],
             hostname: 'whatever',
             type: isolate ? 'isolate' : 'unisolate',
           },
