@@ -116,8 +116,9 @@ export const UserAgent: FunctionComponent = () => {
                   defaultMessage="Extract device type"
                 />
               </EuiFlexItem>
-              <EuiFlexItem style={{ marginBottom: -4 }}>
+              <EuiFlexItem>
                 <EuiBetaBadge
+                  size="s"
                   label="Beta"
                   tooltipContent={i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.userAgentForm.extractDeviceNameTooltipText',
