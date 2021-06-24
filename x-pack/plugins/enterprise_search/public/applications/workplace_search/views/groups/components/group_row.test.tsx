@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';

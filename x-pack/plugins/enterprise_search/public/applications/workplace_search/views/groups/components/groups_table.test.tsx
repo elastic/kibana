@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiTable, EuiTableHeaderCell } from '@elastic/eui';
+import { EuiTable } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../../shared/constants';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';

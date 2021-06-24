@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { setMockValues } from './__mocks__';
 import './__mocks__/overview_logic.mock';
 
 import React from 'react';
