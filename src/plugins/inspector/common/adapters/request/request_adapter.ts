@@ -11,6 +11,15 @@ import uuid from 'uuid/v4';
 import { RequestResponder } from './request_responder';
 import { Request, RequestParams, RequestStatus } from './types';
 
+const DIVIDER = '--';
+
+function getId(id?: string, prefix?: string) {
+  const baseId = id ?? uuid();
+  if (prefix) {
+    return `${prefix}${DIVIDER}${baseId}`;
+  }
+  return baseId;
+}
 /**
  * An generic inspector adapter to log requests.
  * These can be presented in the inspector using the requests view.
@@ -42,7 +51,7 @@ export class RequestAdapter extends EventEmitter {
       name,
       startTime: Date.now(),
       status: RequestStatus.PENDING,
-      id: params.id ?? uuid(),
+      id: getId(params.id, params.prefix),
     };
     this.requests.set(req.id, req);
     this._onChange();

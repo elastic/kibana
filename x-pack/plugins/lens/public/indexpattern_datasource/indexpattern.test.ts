@@ -144,6 +144,8 @@ const expectedIndexPatterns = {
   },
 };
 
+const searchId = 'searchId';
+
 type IndexPatternBaseState = Omit<
   IndexPatternPrivateState,
   'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
@@ -287,7 +289,7 @@ describe('IndexPattern Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = await indexPatternDatasource.initialize();
-      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+      expect(indexPatternDatasource.toExpression(state, 'first', searchId)).toEqual(null);
     });
 
     it('should generate an empty expression when there is a formula without aggs', async () => {
@@ -311,7 +313,7 @@ describe('IndexPattern Data Source', () => {
         },
       };
       const state = enrichBaseState(queryBaseState);
-      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+      expect(indexPatternDatasource.toExpression(state, 'first', searchId)).toEqual(null);
     });
 
     it('should generate an expression for an aggregated query', async () => {
@@ -346,7 +348,7 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
 
-      expect(indexPatternDatasource.toExpression(state, 'first')).toMatchInlineSnapshot(`
+      expect(indexPatternDatasource.toExpression(state, 'first', searchId)).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -497,7 +499,7 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
 
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
@@ -534,7 +536,7 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
 
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
       expect((ast.chain[0].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
     });
 
@@ -583,7 +585,7 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
 
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
       expect(ast.chain[0].arguments.aggs[0]).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -696,7 +698,7 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
 
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
       const formatCalls = ast.chain.filter((fn) => fn.function === 'lens_format_column');
       expect(timeScaleCalls).toHaveLength(1);
@@ -781,7 +783,7 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
 
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
       const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
       expect(calculationIndex).toBeLessThan(formatIndex);
@@ -830,7 +832,7 @@ describe('IndexPattern Data Source', () => {
       };
 
       const state = enrichBaseState(queryBaseState);
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
       expect(ast.chain[0].arguments.metricsAtAllLevels).toEqual([false]);
       expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
         'col-0-0': expect.objectContaining({ id: 'bucket1' }),
@@ -871,7 +873,7 @@ describe('IndexPattern Data Source', () => {
 
       const state = enrichBaseState(queryBaseState);
 
-      const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+      const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
       expect(ast.chain[0].arguments.timeFields).toEqual(['timestamp']);
       expect(ast.chain[0].arguments.timeFields).not.toContain('timefield');
     });
@@ -919,7 +921,7 @@ describe('IndexPattern Data Source', () => {
 
         const state = enrichBaseState(queryBaseState);
 
-        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[2]).toEqual('mock');
@@ -955,7 +957,7 @@ describe('IndexPattern Data Source', () => {
 
         const state = enrichBaseState(queryBaseState);
 
-        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
         expect(JSON.parse(ast.chain[1].arguments.idMap[0] as string)).toEqual({
           'col-0-0': expect.objectContaining({
             id: 'col1',
@@ -1042,7 +1044,7 @@ describe('IndexPattern Data Source', () => {
 
         const state = enrichBaseState(queryBaseState);
 
-        const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+        const ast = indexPatternDatasource.toExpression(state, 'first', searchId) as Ast;
         const chainLength = ast.chain.length;
         expect(ast.chain[chainLength - 2].arguments.name).toEqual(['math']);
         expect(ast.chain[chainLength - 1].arguments.id).toEqual(['formula']);

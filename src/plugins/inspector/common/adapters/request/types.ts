@@ -39,6 +39,7 @@ export interface RequestParams {
   id?: string;
   description?: string;
   searchSessionId?: string;
+  prefix?: string;
 }
 
 export interface RequestStatistics {

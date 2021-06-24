@@ -354,12 +354,13 @@ export class SearchSource {
    ******/
 
   private inspectSearch(s$: Observable<IKibanaSearchResponse<any>>, options: ISearchOptions) {
-    const { id, title, description, adapter } = options.inspector || { title: '' };
+    const { id, title, description, adapter, searchId } = options.inspector || { title: '' };
 
     const requestResponder = adapter?.start(title, {
       id,
       description,
       searchSessionId: options.sessionId,
+      prefix: searchId,
     });
 
     const trackRequestBody = () => {

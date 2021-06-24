@@ -21,6 +21,7 @@ jest.mock('../../tabify', () => ({
 
 import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
+import { RequestAdapter } from 'src/plugins/inspector/public';
 
 describe('esaggs expression function - public', () => {
   let mockParams: MockedKeys<RequestHandlerParams>;
@@ -46,7 +47,12 @@ describe('esaggs expression function - public', () => {
       } as unknown) as jest.Mocked<IAggConfigs>,
       filters: undefined,
       indexPattern: ({ id: 'logstash-*' } as unknown) as jest.Mocked<IndexPattern>,
-      inspectorAdapters: {},
+      inspectorAdapters: {
+        requests: ({
+          getRequests: jest.fn().mockReturnValue([{ id: 'searchId' }]),
+          reset: jest.fn(),
+        } as unknown) as RequestAdapter,
+      },
       partialRows: false,
       query: undefined,
       searchSessionId: 'abc123',
@@ -137,6 +143,38 @@ describe('esaggs expression function - public', () => {
         adapter: undefined,
       },
     });
+  });
+
+  test('should propagate searchId if passed without reset the requests map', async () => {
+    await handleRequest({ ...mockParams, searchId: 'searchId' });
+    const searchSource = await mockParams.searchSourceService.create();
+
+    expect(searchSource.fetch$).toHaveBeenCalledWith({
+      abortSignal: mockParams.abortSignal,
+      sessionId: mockParams.searchSessionId,
+      inspector: {
+        title: 'Data',
+        description: 'This request queries Elasticsearch to fetch the data for the visualization.',
+        adapter: undefined,
+        searchId: 'searchId',
+      },
+    });
+
+    expect(mockParams!.inspectorAdapters!.requests!.reset).not.toBeCalled();
+  });
+
+  test('should reset the requests map if no searchId is passed', async () => {
+    await handleRequest(mockParams);
+    await mockParams.searchSourceService.create();
+
+    expect(mockParams!.inspectorAdapters!.requests!.reset).toBeCalled();
+  });
+
+  test('should reset the requests map if new searchId is passed', async () => {
+    await handleRequest({ ...mockParams, searchId: 'newSearchId' });
+    await mockParams.searchSourceService.create();
+
+    expect(mockParams!.inspectorAdapters!.requests!.reset).toBeCalled();
   });
 
   test('tabifies response data', async () => {

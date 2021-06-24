@@ -28,7 +28,8 @@ import { dateHistogramOperation } from './operations/definitions';
 function getExpressionForLayer(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  options: { searchId: string }
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
@@ -254,6 +255,7 @@ function getExpressionForLayer(
           metricsAtAllLevels: false,
           partialRows: false,
           timeFields: allDateHistogramFields,
+          searchId: options.searchId,
         }).toAst(),
         {
           type: 'function',
@@ -302,13 +304,15 @@ function sortedReferences(columns: Array<readonly [string, IndexPatternColumn]>)
 export function toExpression(
   state: IndexPatternPrivateState,
   layerId: string,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  options: { searchId: string }
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
       state.indexPatterns[state.layers[layerId].indexPatternId],
-      uiSettings
+      uiSettings,
+      options
     );
   }
 

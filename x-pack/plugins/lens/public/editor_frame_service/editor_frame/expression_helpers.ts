@@ -6,6 +6,7 @@
  */
 
 import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { generateId } from '../../id_generator';
 import { Visualization, Datasource, DatasourcePublicAPI } from '../../types';
 
 export function prependDatasourceExpression(
@@ -20,13 +21,14 @@ export function prependDatasourceExpression(
   >
 ): Ast | null {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
+  const searchId = generateId();
 
   Object.entries(datasourceMap).forEach(([datasourceId, datasource]) => {
     const state = datasourceStates[datasourceId].state;
     const layers = datasource.getLayers(datasourceStates[datasourceId].state);
 
     layers.forEach((layerId) => {
-      const result = datasource.toExpression(state, layerId);
+      const result = datasource.toExpression(state, layerId, searchId);
       if (result) {
         datasourceExpressions.push([layerId, result]);
       }

@@ -30,6 +30,7 @@ interface Arguments {
   metricsAtAllLevels?: boolean;
   partialRows?: boolean;
   timeFields?: string[];
+  searchId?: string;
 }
 
 export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -90,6 +91,13 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       multi: true,
       help: i18n.translate('data.search.functions.esaggs.timeFields.help', {
         defaultMessage: 'Provide time fields to get the resolved time ranges for the query',
+      }),
+    },
+    searchId: {
+      types: ['string'],
+      help: i18n.translate('data.search.functions.esaggs.searchId.help', {
+        defaultMessage:
+          'Provides an identifier for the current search, useful to map multiple requests',
       }),
     },
   },

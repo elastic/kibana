@@ -16,6 +16,26 @@ describe('RequestAdapter', () => {
     adapter = new RequestAdapter();
   });
 
+  describe('start()', () => {
+    it('should generate a new uuid if no id was passed', () => {
+      adapter.start('req1');
+      expect(adapter.getRequests().every(({ id }) => id != null)).toBe(true);
+    });
+
+    it('should use the provided id', () => {
+      adapter.start('req1', { id: 'myId' });
+      expect(adapter.getRequests().every(({ id }) => id === 'myId')).toBe(true);
+    });
+
+    it('should take into account the prefix if passed', () => {
+      adapter.start('req1', { prefix: 'prefix' });
+      adapter.start('req1', { id: 'myId', prefix: 'prefix' });
+
+      expect(adapter.getRequests().every(({ id }) => id.includes('prefix'))).toBe(true);
+      expect(adapter.getRequests().some(({ id }) => id === 'prefix--MyId')).toBe(true);
+    });
+  });
+
   describe('getRequests()', () => {
     function requestNames(requests: Request[]) {
       return requests.map((req) => req.name);

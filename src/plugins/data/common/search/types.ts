@@ -85,6 +85,7 @@ export interface IInspectorInfo {
   title: string;
   id?: string;
   description?: string;
+  searchId?: string;
 }
 
 export interface ISearchOptions {

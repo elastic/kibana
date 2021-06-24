@@ -30,6 +30,7 @@ export interface RequestHandlerParams {
   timeFields?: string[];
   timeRange?: TimeRange;
   getNow?: () => Date;
+  searchId?: string;
 }
 
 export const handleRequest = async ({
@@ -45,6 +46,7 @@ export const handleRequest = async ({
   timeFields,
   timeRange,
   getNow,
+  searchId,
 }: RequestHandlerParams) => {
   const forceNow = getNow?.();
   const searchSource = await searchSourceService.create();
@@ -100,13 +102,19 @@ export const handleRequest = async ({
   requestSearchSource.setField('filter', filters);
   requestSearchSource.setField('query', query);
 
-  inspectorAdapters.requests?.reset();
+  if (
+    searchId == null ||
+    !inspectorAdapters.requests?.getRequests().some(({ id }) => id.includes(searchId))
+  ) {
+    inspectorAdapters.requests?.reset();
+  }
 
   const { rawResponse: response } = await requestSearchSource
     .fetch$({
       abortSignal,
       sessionId: searchSessionId,
       inspector: {
+        searchId,
         adapter: inspectorAdapters.requests,
         title: i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
           defaultMessage: 'Data',

@@ -27,7 +27,8 @@ type PostFlightRequestFn<TAggConfig> = (
   searchSource: ISearchSource,
   inspectorRequestAdapter?: RequestAdapter,
   abortSignal?: AbortSignal,
-  searchSessionId?: string
+  searchSessionId?: string,
+  searchId?: string
 ) => Promise<estypes.SearchResponse<any>>;
 
 export interface AggTypeConfig<

@@ -1074,6 +1074,7 @@ describe('SearchSource', () => {
             adapter: {
               start: jest.fn().mockReturnValue(requestResponder),
             } as any,
+            searchId: 'searchId',
           },
         };
 
@@ -1086,11 +1087,10 @@ describe('SearchSource', () => {
           .toPromise()
           .catch(() => {});
 
-        expect(options.inspector.adapter.start).toBeCalledTimes(1);
-        expect(requestResponder.json).toBeCalledTimes(1);
-        expect(requestResponder.error).toBeCalledTimes(1);
-        expect(requestResponder.ok).toBeCalledTimes(0);
-        expect(requestResponder.stats).toBeCalledTimes(0);
+        expect(options.inspector.adapter.start).toBeCalledWith(
+          'a',
+          expect.objectContaining({ prefix: options.inspector.searchId })
+        );
       });
     });
 
@@ -1269,6 +1269,66 @@ describe('SearchSource', () => {
         expect(fetchSub.complete).toHaveBeenCalledTimes(0);
         expect(fetchSub.error).toHaveBeenCalledTimes(1);
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(1);
+      });
+
+      test('calls post flight requests passing over searchId', async () => {
+        const requestResponder: RequestResponder = ({
+          stats: jest.fn(),
+          ok: jest.fn(),
+          error: jest.fn(),
+          json: jest.fn(),
+        } as unknown) as RequestResponder;
+
+        const options = {
+          inspector: {
+            title: 'other',
+            adapter: {
+              start: jest.fn().mockReturnValue(requestResponder),
+            } as any,
+            searchId: 'searchId',
+          },
+        };
+        const typesRegistry = mockAggTypesRegistry();
+        typesRegistry.get('avg').postFlightRequest = jest.fn().mockResolvedValue({
+          other: 5,
+        });
+
+        const allac = new AggConfigs(
+          indexPattern3,
+          [
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field1' },
+            },
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'field2' },
+            },
+            {
+              type: 'avg',
+              enabled: true,
+              params: { field: 'foo-bar' },
+            },
+          ],
+          {
+            typesRegistry,
+          }
+        );
+
+        searchSource = new SearchSource({}, searchSourceDependencies);
+        searchSource.setField('index', indexPattern);
+        searchSource.setField('aggs', allac);
+        const fetch$ = searchSource.fetch$(options);
+        fetch$.subscribe(fetchSub);
+
+        await fetch$.toPromise();
+
+        expect(options.inspector.adapter.start).toHaveBeenLastCalledWith(
+          'other',
+          expect.objectContaining({ prefix: options.inspector.searchId })
+        );
       });
     });
   });
