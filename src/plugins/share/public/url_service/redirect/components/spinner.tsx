@@ -24,7 +24,7 @@ export const Spinner: React.FC = () => {
             <EuiLoadingElastic size="xxl" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size={'s'}>
+            <EuiText color="subdued" size={'m'}>
               {text}
             </EuiText>
           </EuiFlexItem>

@@ -67,7 +67,8 @@ export class RedirectManager {
       throw error;
     }
 
-    // TODO: perform migration first
+    // TODO: Perform migration to the latest version.
+
     locator
       .navigate(options.params)
       .then()
@@ -83,16 +84,16 @@ export class RedirectManager {
     const search = new URLSearchParams(history.location.search);
     const id = search.get('l');
     const version = search.get('v');
-    const params = search.get('p');
+    const paramsJson = search.get('p');
 
     if (!id) {
       const message = i18n.translate(
-        'share.urlService.redirect.RedirectManager.invalidParamLocator',
+        'share.urlService.redirect.RedirectManager.missingParamLocator',
         {
           defaultMessage:
             'Locator ID not specified. Specify "l" search parameter in the URL, which should be an existing locator ID.',
           description:
-            'Error displayed to user in redirect endpoint when redirection cannot be performed successfully, because of invalid or missing locator ID.',
+            'Error displayed to user in redirect endpoint when redirection cannot be performed successfully, because of missing locator ID.',
         }
       );
       const error = new Error(message);
@@ -101,19 +102,57 @@ export class RedirectManager {
     }
 
     if (!version) {
-      // TODO: show this error in UI.
-      throw new Error('Invalid locator version (specify "v" param).');
+      const message = i18n.translate(
+        'share.urlService.redirect.RedirectManager.missingParamVersion',
+        {
+          defaultMessage:
+            'Locator params version not specified. Specify "v" search parameter in the URL, which should be the release version of Kibana when locator params were generated.',
+          description:
+            'Error displayed to user in redirect endpoint when redirection cannot be performed successfully, because of missing version parameter.',
+        }
+      );
+      const error = new Error(message);
+      this.error$.next(error);
+      throw error;
     }
 
-    if (!params) {
-      // TODO: show this error in UI.
-      throw new Error('Invalid locator params (specify "p" param).');
+    if (!paramsJson) {
+      const message = i18n.translate(
+        'share.urlService.redirect.RedirectManager.missingParamParams',
+        {
+          defaultMessage:
+            'Locator params not specified. Specify "p" search parameter in the URL, which should be JSON serialized object of locator params.',
+          description:
+            'Error displayed to user in redirect endpoint when redirection cannot be performed successfully, because of missing params parameter.',
+        }
+      );
+      const error = new Error(message);
+      this.error$.next(error);
+      throw error;
+    }
+
+    let params: unknown & SerializableState;
+    try {
+      params = JSON.parse(paramsJson);
+    } catch {
+      const message = i18n.translate(
+        'share.urlService.redirect.RedirectManager.invalidParamParams',
+        {
+          defaultMessage:
+            'Could not parse locator params. Locator params must be serialized as JSON and set at "p" URL search parameter.',
+          description:
+            'Error displayed to user in redirect endpoint when redirection cannot be performed successfully, because locator parameters could not be parsed as JSON.',
+        }
+      );
+      const error = new Error(message);
+      this.error$.next(error);
+      throw error;
     }
 
     return {
       id,
       version,
-      params: JSON.parse(params),
+      params,
     };
   }
 }
