@@ -18,13 +18,27 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
+
 import { getDefaultIndex } from '../../lib/es_service';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
-const { DatasourceDatasourceComponent: strings } = ComponentStrings;
-
+const strings = {
+  getExpressionArgDescription: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.expressionArgDescription', {
+      defaultMessage:
+        'The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.',
+    }),
+  getPreviewButtonLabel: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.previewButtonLabel', {
+      defaultMessage: 'Preview data',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.datasourceDatasourceComponent.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+};
 export class DatasourceComponent extends PureComponent {
   static propTypes = {
     args: PropTypes.object.isRequired,
