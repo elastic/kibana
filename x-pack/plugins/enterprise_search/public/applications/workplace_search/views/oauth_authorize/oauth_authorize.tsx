@@ -88,7 +88,7 @@ export const OAuthAuthorize: React.FC = () => {
       return (
         <li>
           <FormattedMessage
-            id="xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.UnknownScopeDescription"
+            id="xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.unknownScopeDescription"
             defaultMessage="{unknownAction} your data"
             values={{
               unknownAction: scope,
@@ -121,7 +121,7 @@ export const OAuthAuthorize: React.FC = () => {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.AuthorizationDescription"
+                id="xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.authorizationDescription"
                 defaultMessage="Authorize {strongClientName} to use your account?"
                 values={{
                   strongClientName: <strong>{cachedPreAuth.clientName}</strong>,

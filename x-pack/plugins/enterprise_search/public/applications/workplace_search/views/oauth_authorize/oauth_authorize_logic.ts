@@ -53,9 +53,9 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
   actions: {
     setServerProps: (serverProps: OAuthPreAuthServerProps) => serverProps,
     initializeOAuthPreAuth: (queryString: string) => queryString,
-    allowOAuthAuthorization: () => null,
-    denyOAuthAuthorization: () => null,
-    setButtonNotLoading: () => null,
+    allowOAuthAuthorization: null,
+    denyOAuthAuthorization: null,
+    setButtonNotLoading: null,
   },
   reducers: {
     dataLoading: [
@@ -144,14 +144,14 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
   }),
 });
 
-const transformServerPreAuth = (serverProps: OAuthPreAuthServerProps): OAuthPreAuthorization => {
-  return {
-    clientId: serverProps.client_id,
-    clientName: serverProps.client_name,
-    redirectUri: serverProps.redirect_uri,
-    responseType: serverProps.response_type,
-    rawScopes: serverProps.scope,
-    scopes: serverProps.scope.split(', '),
-    state: serverProps.state,
-  };
-};
+export const transformServerPreAuth = (
+  serverProps: OAuthPreAuthServerProps
+): OAuthPreAuthorization => ({
+  clientId: serverProps.client_id,
+  clientName: serverProps.client_name,
+  redirectUri: serverProps.redirect_uri,
+  responseType: serverProps.response_type,
+  rawScopes: serverProps.scope,
+  scopes: serverProps.scope.split(', '),
+  state: serverProps.state,
+});

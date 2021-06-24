@@ -17,6 +17,7 @@ import {
   OAuthPreAuthServerProps,
   OAuthPreAuthorization,
   oauthAuthorizeRoute,
+  transformServerPreAuth,
 } from '../oauth_authorize/oauth_authorize_logic';
 
 interface SearchAuthorizeValues {
@@ -38,8 +39,8 @@ export const SearchAuthorizeLogic = kea<
   actions: {
     setServerProps: (serverProps: OAuthPreAuthServerProps) => serverProps,
     initializeSearchAuth: (searchOAuth: SearchOAuth, search: string) => [searchOAuth, search],
-    authorizeSearch: () => null,
-    setRedirectNotPending: () => null,
+    authorizeSearch: null,
+    setRedirectNotPending: null,
   },
   reducers: {
     redirectPending: [
@@ -109,15 +110,3 @@ export const SearchAuthorizeLogic = kea<
     },
   }),
 });
-
-const transformServerPreAuth = (serverProps: OAuthPreAuthServerProps): OAuthPreAuthorization => {
-  return {
-    clientId: serverProps.client_id,
-    clientName: serverProps.client_name,
-    redirectUri: serverProps.redirect_uri,
-    responseType: serverProps.response_type,
-    rawScopes: serverProps.scope,
-    scopes: serverProps.scope.split(', '),
-    state: serverProps.state,
-  };
-};

@@ -22,35 +22,35 @@ export const SCOPES_LEAD_IN_MESSAGE = i18n.translate(
 );
 
 export const AUTHORIZATION_REQUIRED_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.AuthorizationTitle',
+  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.authorizationTitle',
   {
     defaultMessage: 'Authorization required',
   }
 );
 
 export const AUTHORIZE_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.AuthorizeButtonLabel',
+  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.authorizeButtonLabel',
   {
     defaultMessage: 'Authorize',
   }
 );
 
 export const DENY_BUTTON_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.DenyButtonLabel',
+  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.denyButtonLabel',
   {
     defaultMessage: 'Deny',
   }
 );
 
 export const SEARCH_SCOPE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.SearchScopeDescription',
+  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.searchScopeDescription',
   {
     defaultMessage: 'Search your data',
   }
 );
 
 export const WRITE_SCOPE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.WriteScopeDescription',
+  'xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.writeScopeDescription',
   {
     defaultMessage: 'Modify your data',
   }
