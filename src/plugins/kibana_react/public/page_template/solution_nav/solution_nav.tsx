@@ -51,7 +51,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
 
-  // Keep each method of open/closed separate since they have different defaults
+  // This is used for both the EuiSideNav and EuiFlyout toggling
   const [isSideNavOpenOnMobile, setisSideNavOpenOnMobile] = useState(false);
   const toggleOpenOnMobile = () => {
     setisSideNavOpenOnMobile(!isSideNavOpenOnMobile);

@@ -1,9 +1,8 @@
 .kbnPageTemplateSolutionNavCollapseButton {
-  // transition: left $euiAnimSpeedFast $euiAnimSlightResistance,
-  //             opacity $euiAnimSpeedFast $euiAnimSlightResistance;
-  position: fixed;
+  position: absolute;
   opacity: 0;
   left: 240px - $euiSize;
+  top: $euiSize;
   z-index: 2;
 
   @include euiCanAnimate {
