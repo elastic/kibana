@@ -36,12 +36,12 @@ export const MetricsAlertDropdown = () => {
     () => ({
       id: 1,
       title: i18n.translate('xpack.infra.alerting.infrastructureDropdownTitle', {
-        defaultMessage: 'Infrastructure alerts',
+        defaultMessage: 'Infrastructure rules',
       }),
       items: [
         {
           name: i18n.translate('xpack.infra.alerting.createInventoryAlertButton', {
-            defaultMessage: 'Create inventory alert',
+            defaultMessage: 'Create inventory rule',
           }),
           onClick: () => setVisibleFlyoutType('inventory'),
         },
@@ -54,12 +54,12 @@ export const MetricsAlertDropdown = () => {
     () => ({
       id: 2,
       title: i18n.translate('xpack.infra.alerting.metricsDropdownTitle', {
-        defaultMessage: 'Metrics alerts',
+        defaultMessage: 'Metrics rules',
       }),
       items: [
         {
           name: i18n.translate('xpack.infra.alerting.createThresholdAlertButton', {
-            defaultMessage: 'Create threshold alert',
+            defaultMessage: 'Create threshold rule',
           }),
           onClick: () => setVisibleFlyoutType('threshold'),
         },
@@ -76,7 +76,7 @@ export const MetricsAlertDropdown = () => {
   const manageAlertsMenuItem = useMemo(
     () => ({
       name: i18n.translate('xpack.infra.alerting.manageAlerts', {
-        defaultMessage: 'Manage alerts',
+        defaultMessage: 'Manage rules',
       }),
       icon: 'tableOfContents',
       onClick: manageAlertsLinkProps.onClick,
@@ -112,7 +112,7 @@ export const MetricsAlertDropdown = () => {
         {
           id: 0,
           title: i18n.translate('xpack.infra.alerting.alertDropdownTitle', {
-            defaultMessage: 'Alerts',
+            defaultMessage: 'Alerts and rules',
           }),
           items: firstPanelMenuItems,
         },

@@ -37,7 +37,7 @@ import {
   SETUP_GUIDE_PATH,
   SETTINGS_PATH,
   CREDENTIALS_PATH,
-  ROLE_MAPPINGS_PATH,
+  USERS_AND_ROLES_PATH,
   ENGINES_PATH,
   ENGINE_PATH,
   LIBRARY_PATH,
@@ -76,7 +76,13 @@ export const AppSearchUnconfigured: React.FC = () => (
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
-    myRole: { canManageEngines, canManageMetaEngines, canViewRoleMappings },
+    myRole: {
+      canManageEngines,
+      canManageMetaEngines,
+      canViewSettings,
+      canViewAccountCredentials,
+      canViewRoleMappings,
+    },
   } = useValues(AppLogic(props));
   const { renderHeaderActions } = useValues(KibanaLogic);
   const { readOnlyMode } = useValues(HttpLogic);
@@ -92,39 +98,43 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
           <Library />
         </Route>
       )}
+      <Route exact path={ROOT_PATH}>
+        <Redirect to={ENGINES_PATH} />
+      </Route>
+      <Route exact path={ENGINES_PATH}>
+        <EnginesOverview />
+      </Route>
+      {canManageEngines && (
+        <Route exact path={ENGINE_CREATION_PATH}>
+          <EngineCreation />
+        </Route>
+      )}
+      {canManageMetaEngines && (
+        <Route exact path={META_ENGINE_CREATION_PATH}>
+          <MetaEngineCreation />
+        </Route>
+      )}
+      <Route path={ENGINE_PATH}>
+        <EngineRouter />
+      </Route>
+      {canViewSettings && (
+        <Route exact path={SETTINGS_PATH}>
+          <Settings />
+        </Route>
+      )}
+      {canViewAccountCredentials && (
+        <Route exact path={CREDENTIALS_PATH}>
+          <Credentials />
+        </Route>
+      )}
       {canViewRoleMappings && (
-        <Route path={ROLE_MAPPINGS_PATH}>
+        <Route path={USERS_AND_ROLES_PATH}>
           <RoleMappings />
         </Route>
       )}
       <Route>
         <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           <Switch>
-            <Route exact path={ROOT_PATH}>
-              <Redirect to={ENGINES_PATH} />
-            </Route>
-            <Route exact path={ENGINES_PATH}>
-              <EnginesOverview />
-            </Route>
-            <Route path={ENGINE_PATH}>
-              <EngineRouter />
-            </Route>
-            <Route exact path={SETTINGS_PATH}>
-              <Settings />
-            </Route>
-            <Route exact path={CREDENTIALS_PATH}>
-              <Credentials />
-            </Route>
-            {canManageEngines && (
-              <Route exact path={ENGINE_CREATION_PATH}>
-                <EngineCreation />
-              </Route>
-            )}
-            {canManageMetaEngines && (
-              <Route exact path={META_ENGINE_CREATION_PATH}>
-                <MetaEngineCreation />
-              </Route>
-            )}
             <Route>
               <NotFound product={APP_SEARCH_PLUGIN} />
             </Route>
@@ -152,7 +162,7 @@ export const AppSearchNav: React.FC = () => {
         <SideNavLink to={CREDENTIALS_PATH}>{CREDENTIALS_TITLE}</SideNavLink>
       )}
       {canViewRoleMappings && (
-        <SideNavLink shouldShowActiveForSubroutes to={ROLE_MAPPINGS_PATH}>
+        <SideNavLink shouldShowActiveForSubroutes to={USERS_AND_ROLES_PATH}>
           {ROLE_MAPPINGS_TITLE}
         </SideNavLink>
       )}

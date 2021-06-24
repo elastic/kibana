@@ -90,6 +90,11 @@ import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer'
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
 
+// @ts-expect-error untyped library
+import Dropzone from 'react-dropzone';
+jest.mock('react-dropzone');
+Dropzone.mockImplementation(() => 'Dropzone');
+
 // This element uses a `ref` and cannot be rendered by Jest snapshots.
 import { RenderedElement } from '../shareable_runtime/components/rendered_element';
 jest.mock('../shareable_runtime/components/rendered_element');
@@ -111,7 +116,7 @@ addSerializer(styleSheetSerializer);
 
 // Initialize Storyshots and build the Jest Snapshots
 initStoryshots({
-  configPath: path.resolve(__dirname, './../storybook'),
+  configPath: path.resolve(__dirname),
   framework: 'react',
   test: multiSnapshotWithOptions({}),
   // Don't snapshot tests that start with 'redux'

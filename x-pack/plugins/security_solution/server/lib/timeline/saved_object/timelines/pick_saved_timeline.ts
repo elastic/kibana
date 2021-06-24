@@ -12,10 +12,9 @@ import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../comm
 
 export const pickSavedTimeline = (
   timelineId: string | null,
-  savedTimeline: SavedTimeline,
+  savedTimeline: SavedTimeline & { savedObjectId?: string | null },
   userInfo: AuthenticatedUser | null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any => {
+): SavedTimeline & { savedObjectId?: string | null } => {
   const dateNow = new Date().valueOf();
 
   if (timelineId == null) {

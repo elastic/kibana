@@ -238,6 +238,7 @@ export {
   DataRequestHandlerContext,
   AsyncSearchResponse,
   AsyncSearchStatusResponse,
+  NoSearchIdInSessionError,
 } from './search';
 
 // Search namespace
