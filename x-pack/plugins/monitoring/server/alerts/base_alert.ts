@@ -273,7 +273,6 @@ export class BaseAlert {
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
-
     // for each cluster filter the nodes that belong to this cluster
     for (const cluster of clusters) {
       const nodes = data.filter((node) => node.clusterUuid === cluster.clusterUuid);
@@ -286,7 +285,10 @@ export class BaseAlert {
       // for each node, update the alert's state with node state
       for (const node of nodes) {
         const newAlertStates: AlertNodeState[] = [];
-        const instance = services.alertInstanceFactory(node.meta.nodeId || node.meta.instanceId);
+        // quick fix for now so that non node level alerts will use the cluster id
+        const instance = services.alertInstanceFactory(
+          node.meta.nodeId || node.meta.instanceId || cluster.clusterUuid
+        );
 
         if (node.shouldFire) {
           const { meta } = node;
