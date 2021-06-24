@@ -34,15 +34,8 @@ exports[`TrustedAppsGrid renders correctly initially 1`] = `
           <div
             class="euiEmptyPrompt"
           >
-            <span
-              class="euiTextColor euiTextColor--subdued"
-            >
-              <span>
-                No items found
-              </span>
-              <div
-                class="euiSpacer euiSpacer--m"
-              />
+            <span>
+              No items found
             </span>
           </div>
         </div>
