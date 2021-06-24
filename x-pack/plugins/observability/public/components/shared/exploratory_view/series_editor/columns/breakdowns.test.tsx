@@ -14,7 +14,7 @@ import { USER_AGENT_OS } from '../../configurations/constants/elasticsearch_fiel
 
 describe('Breakdowns', function () {
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'dist',
+    reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
     dataType: 'ux',
   });
@@ -52,7 +52,7 @@ describe('Breakdowns', function () {
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       breakdown: 'user_agent.name',
       dataType: 'ux',
-      reportType: 'dist',
+      reportType: 'data-distribution',
       time: { from: 'now-15m', to: 'now' },
     });
     expect(setSeries).toHaveBeenCalledTimes(1);

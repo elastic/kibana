@@ -10,10 +10,10 @@ import { FieldLabels, RECORDS_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 import { MONITORS_DURATION_LABEL, PINGS_LABEL } from '../constants/labels';
 
-export function getSyntheticsDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getSyntheticsDistributionConfig({ series, indexPattern }: ConfigProps): DataSeries {
   return {
     reportType: 'data-distribution',
-    defaultSeriesType: 'line',
+    defaultSeriesType: series?.seriesType || 'line',
     seriesTypes: [],
     xAxisColumn: {
       sourceField: 'performance.metric',
