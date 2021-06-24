@@ -21,7 +21,8 @@ interface KibanaRequestParams {
 
 export function decodeRequestParams<T extends RouteParamsRT>(
   params: KibanaRequestParams,
-  paramsRt: T
+  paramsRt: T,
+  useStrictParams=true
 ): t.OutputOf<T> {
   const paramMap = omitBy(
     {
@@ -33,7 +34,12 @@ export function decodeRequestParams<T extends RouteParamsRT>(
   );
 
   // decode = validate
-  const result = strictKeysRt(paramsRt).decode(paramMap);
+  let result;
+  if (useStrictParams) {
+    result = strictKeysRt(paramsRt).decode(paramMap);
+  } else {
+    result = paramsRt.decode(paramMap);
+  }
 
   if (isLeft(result)) {
     throw Boom.badRequest(PathReporter.report(result)[0]);

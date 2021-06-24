@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { jsonRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import { getCloudApmPackgePolicy } from '../lib/fleet/get_cloud_apm_package_policy';
@@ -38,16 +37,16 @@ const hasFleetDataRoute = createApmServerRoute({
 
 const saveApmServerSchemaRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/fleet/apm_server_schema',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  options: { tags: ['access:apm', 'access:apm_write'], useStrictParams: false },
   params: t.type({
     body: t.type({
-      schemaJson: jsonRt.pipe(t.UnknownRecord),
+      schema: t.UnknownRecord,
     }),
   }),
   handler: async (resources) => {
     const { params, logger, context } = resources;
     const savedObjectsClient = context.core.savedObjects.client;
-    const schema = params.body.schemaJson;
+    const { schema } = params.body;
     await savedObjectsClient.create(
       'apm-server-settings',
       { schemaJson: JSON.stringify(schema) },
