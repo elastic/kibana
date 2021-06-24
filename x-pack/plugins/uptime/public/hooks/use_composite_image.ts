@@ -13,7 +13,7 @@ import { ScreenshotRefImageData } from '../../common/runtime_types/ping/syntheti
  * Checks if two refs are the same. If the ref is unchanged, there's no need
  * to run the expensive draw procedure.
  */
-function isNewRef(a?: ScreenshotRefImageData, b?: ScreenshotRefImageData): boolean {
+function isNewRef(a: ScreenshotRefImageData, b: ScreenshotRefImageData): boolean {
   if (typeof a === 'undefined' || typeof b === 'undefined') return false;
   const stepA = a.ref.screenshotRef.synthetics.step;
   const stepB = b.ref.screenshotRef.synthetics.step;
@@ -23,19 +23,15 @@ function isNewRef(a?: ScreenshotRefImageData, b?: ScreenshotRefImageData): boole
 /**
  * Assembles the data for a composite image and returns the composite to a callback.
  * @param imgRef the data and dimensions for the composite image.
- * @param callback sends the composited image to this callback.
+ * @param onComposemageSuccess sends the composited image to this callback.
  * @param url this is the composited image value, if it is truthy the function will skip the compositing process
  */
 export const useCompositeImage = (
   imgRef: ScreenshotRefImageData,
-  callback: React.Dispatch<string | undefined>,
+  onComposemageSuccess: React.Dispatch<string | undefined>,
   url?: string
 ): void => {
-  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData | undefined>(undefined);
-
-  if (curRef === null) {
-    setCurRef(imgRef);
-  }
+  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData>(imgRef);
 
   React.useEffect(() => {
     const canvas = document.createElement('canvas');
@@ -43,7 +39,7 @@ export const useCompositeImage = (
     async function compose() {
       await composeScreenshotRef(imgRef, canvas);
       const imgData = canvas.toDataURL('image/png', 1.0);
-      callback(imgData);
+      onComposemageSuccess(imgData);
     }
 
     // if the URL is truthy it means it's already been composed, so there
@@ -55,5 +51,5 @@ export const useCompositeImage = (
     return () => {
       canvas.parentElement?.removeChild(canvas);
     };
-  }, [imgRef, callback, curRef, url]);
+  }, [imgRef, onComposemageSuccess, curRef, url]);
 };
