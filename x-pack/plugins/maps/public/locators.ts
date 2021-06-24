@@ -20,7 +20,7 @@ import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 import type { LocatorDefinition, LocatorPublic } from '../../../../src/plugins/share/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
-import { INITIAL_LAYERS_KEY } from '../common/constants';
+import { INITIAL_LAYERS_KEY, APP_ID } from '../common/constants';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 
 export interface MapsAppLocatorParams extends SerializableState {
@@ -108,7 +108,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     }
 
     return {
-      app: 'maps',
+      app: APP_ID,
       path,
       state: {},
     };
