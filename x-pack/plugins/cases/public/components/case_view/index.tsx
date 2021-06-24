@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +27,6 @@ import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
@@ -244,21 +242,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [caseServices, caseData.connector]
     );
 
-    const { pushButton, pushCallouts } = usePushToService({
-      configureCasesNavigation,
-      connector: {
-        ...caseData.connector,
-        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
-      },
-      caseServices,
-      caseId: caseData.id,
-      caseStatus: caseData.status,
-      connectors,
-      updateCase: handleUpdateCase,
-      userCanCrud,
-      isValidConnector: isLoadingConnectors ? true : isValidConnector,
-    });
-
     const onSubmitConnector = useCallback(
       (connectorId, connectorFields, onError, onSuccess) => {
         const connector = getConnectorById(connectorId, connectors);
@@ -372,7 +355,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
         </HeaderWrapper>
         <WhitePageWrapper>
           <MyWrapper>
-            {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && (
@@ -405,27 +387,20 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
                     />
-                    {(caseData.type !== CaseType.collection || hasDataToPush) && userCanCrud && (
+                    {caseData.type !== CaseType.collection && userCanCrud && (
                       <>
                         <MyEuiHorizontalRule
                           margin="s"
                           data-test-subj="case-view-bottom-actions-horizontal-rule"
                         />
                         <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
-                          {caseData.type !== CaseType.collection && (
-                            <EuiFlexItem grow={false}>
-                              <StatusActionButton
-                                status={caseData.status}
-                                onStatusChanged={changeStatus}
-                                isLoading={isLoading && updateKey === 'status'}
-                              />
-                            </EuiFlexItem>
-                          )}
-                          {hasDataToPush && (
-                            <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                              {pushButton}
-                            </EuiFlexItem>
-                          )}
+                          <EuiFlexItem grow={false}>
+                            <StatusActionButton
+                              status={caseData.status}
+                              onStatusChanged={changeStatus}
+                              isLoading={isLoading && updateKey === 'status'}
+                            />
+                          </EuiFlexItem>
                         </EuiFlexGroup>
                       </>
                     )}
@@ -454,17 +429,24 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   isLoading={isLoading && updateKey === 'tags'}
                 />
                 <EditConnector
+                  caseData={caseData}
                   caseFields={caseData.connector.fields}
+                  caseServices={caseServices}
+                  configureCasesNavigation={configureCasesNavigation}
+                  connectorName={connectorName}
                   connectors={connectors}
-                  userCanCrud={userCanCrud}
+                  hasDataToPush={hasDataToPush && userCanCrud}
                   hideConnectorServiceNowSir={
                     subCaseId != null || caseData.type === CaseType.collection
                   }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
+                  isValidConnector={isLoadingConnectors ? true : isValidConnector}
                   onSubmit={onSubmitConnector}
-                  selectedConnector={caseData.connector.id}
-                  userActions={caseUserActions}
                   permissionsError={permissionsError}
+                  selectedConnector={caseData.connector.id}
+                  updateCase={handleUpdateCase}
+                  userActions={caseUserActions}
+                  userCanCrud={userCanCrud}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

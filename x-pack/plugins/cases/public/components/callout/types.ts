@@ -8,6 +8,6 @@
 export interface ErrorMessage {
   id: string;
   title: string;
-  description: JSX.Element;
+  description: JSX.Element | string;
   errorType?: 'primary' | 'success' | 'warning' | 'danger';
 }

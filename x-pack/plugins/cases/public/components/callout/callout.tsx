@@ -13,37 +13,39 @@ import { ErrorMessage } from './types';
 import * as i18n from './translations';
 
 export interface CallOutProps {
+  handleDismissCallout: (
+    e: React.MouseEvent,
+    id: string,
+    type: NonNullable<ErrorMessage['errorType']>
+  ) => void;
   id: string;
-  type: NonNullable<ErrorMessage['errorType']>;
-  title: string;
   messages: ErrorMessage[];
-  showCallOut: boolean;
-  handleDismissCallout: (id: string, type: NonNullable<ErrorMessage['errorType']>) => void;
+  title: string;
+  type: NonNullable<ErrorMessage['errorType']>;
 }
 
-const CallOutComponent = ({
-  id,
-  type,
-  title,
-  messages,
-  showCallOut,
-  handleDismissCallout,
-}: CallOutProps) => {
-  const handleCallOut = useCallback(() => handleDismissCallout(id, type), [
+const CallOutComponent = ({ handleDismissCallout, id, messages, title, type }: CallOutProps) => {
+  const handleCallOut = useCallback((e) => handleDismissCallout(e, id, type), [
     handleDismissCallout,
     id,
     type,
   ]);
 
-  return showCallOut && !isEmpty(messages) ? (
-    <EuiCallOut title={title} color={type} iconType="gear" data-test-subj={`case-callout-${id}`}>
+  return !isEmpty(messages) ? (
+    <EuiCallOut
+      title={title}
+      color={type}
+      iconType="gear"
+      data-test-subj={`case-callout-${id}`}
+      size="s"
+    >
       <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
       <EuiButton
         data-test-subj={`callout-dismiss-${id}`}
         color={type === 'success' ? 'secondary' : type}
         onClick={handleCallOut}
       >
-        {i18n.DISMISS_CALLOUT}
+        {i18n.ADD_CONNECTOR}
       </EuiButton>
     </EuiCallOut>
   ) : null;

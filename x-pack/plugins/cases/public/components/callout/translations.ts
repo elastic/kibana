@@ -7,6 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DISMISS_CALLOUT = i18n.translate('xpack.cases.dismissErrorsPushServiceCallOutTitle', {
-  defaultMessage: 'Dismiss',
+export const ADD_CONNECTOR = i18n.translate('xpack.cases.addConnector.title', {
+  defaultMessage: 'Add connector',
 });

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
   'xpack.cases.caseView.errorsPushServiceCallOutTitle',
   {
-    defaultMessage: 'To send cases to external systems, you need to:',
+    defaultMessage: 'Select an external connector',
   }
 );
 export const PUSH_THIRD = (thirdParty: string) => {
@@ -39,17 +39,28 @@ export const UPDATE_THIRD = (thirdParty: string) => {
   });
 };
 
-export const PUSH_DISABLE_BY_NO_CONFIG_TITLE = i18n.translate(
-  'xpack.cases.caseView.pushToServiceDisableByNoConfigTitle',
-  {
-    defaultMessage: 'Configure external connector',
+export const PUSH_LOCKED_TITLE = (thirdParty: string) => {
+  if (thirdParty === 'none') {
+    return i18n.translate('xpack.cases.caseView.lockedIncidentTitle', {
+      defaultMessage: 'External incident is up to date',
+    });
   }
-);
 
-export const PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE = i18n.translate(
-  'xpack.cases.caseView.pushToServiceDisableByNoCaseConfigTitle',
+  return i18n.translate('xpack.cases.caseView.lockedIncidentTitle', {
+    values: { thirdParty },
+    defaultMessage: '{ thirdParty } incident is up to date',
+  });
+};
+
+export const PUSH_LOCKED_DESC = i18n.translate('xpack.cases.caseView.lockedIncidentDesc', {
+  defaultMessage: 'No update is required',
+});
+
+export const CONFIGURE_CONNECTOR = i18n.translate(
+  'xpack.cases.caseView.pushToService.configureConnector',
   {
-    defaultMessage: 'Select external connector',
+    defaultMessage:
+      'To open and update cases in external systems, you must select an external incident management system for this case.',
   }
 );
 
@@ -81,10 +92,3 @@ export const LINK_CLOUD_DEPLOYMENT = i18n.translate('xpack.cases.caseView.cloudD
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.caseView.appropiateLicense', {
   defaultMessage: 'appropriate license',
 });
-
-export const LINK_CONNECTOR_CONFIGURE = i18n.translate(
-  'xpack.cases.caseView.connectorConfigureLink',
-  {
-    defaultMessage: 'connector',
-  }
-);

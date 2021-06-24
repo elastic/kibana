@@ -36,11 +36,6 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
   }, []);
   const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
 
-  useEffect(
-    () => document.querySelector<HTMLElement>('textarea.euiMarkdownEditorTextArea')?.focus(),
-    []
-  );
-
   return (
     <EuiMarkdownEditor
       aria-label={ariaLabel}
