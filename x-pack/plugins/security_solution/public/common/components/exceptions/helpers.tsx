@@ -369,61 +369,74 @@ export const getPrepopulatedEndpointException = ({
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
   const isLinux = host?.os?.name === 'Linux';
-  const filePathDefault = isLinux ? 'file.path' : 'file.path.caseless';
-
-  const codeSignatureFields = [
-    {
-      field: 'file.Ext.code_signature',
-      type: 'nested',
-      entries: [
-        {
-          field: 'subject_name',
-          operator: 'included',
-          type: 'match',
-          value: codeSignature != null ? codeSignature.subjectName : '',
-        },
-        {
-          field: 'trusted',
-          operator: 'included',
-          type: 'match',
-          value: codeSignature != null ? codeSignature.trusted : '',
-        },
-      ],
-    },
-  ];
-
-  const commonFields = [
-    {
-      field: filePathDefault,
-      operator: 'included',
-      type: 'match',
-      value: filePath ?? '',
-    },
-    {
-      field: 'file.hash.sha256',
-      operator: 'included',
-      type: 'match',
-      value: sha256Hash ?? '',
-    },
-    {
-      field: 'event.code',
-      operator: 'included',
-      type: 'match',
-      value: eventCode ?? '',
-    },
-  ];
 
   const entriesToAdd = () => {
     if (isLinux) {
-      return commonFields;
+      return addIdToEntries([
+        {
+          field: 'file.path',
+          operator: 'included',
+          type: 'match',
+          value: filePath ?? '',
+        },
+        {
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: sha256Hash ?? '',
+        },
+        {
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: eventCode ?? '',
+        },
+      ]);
     } else {
-      return [...codeSignatureFields, ...commonFields];
+      return addIdToEntries([
+        {
+          field: 'file.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: codeSignature != null ? codeSignature.subjectName : '',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: codeSignature != null ? codeSignature.trusted : '',
+            },
+          ],
+        },
+        {
+          field: 'file.path.caseless',
+          operator: 'included',
+          type: 'match',
+          value: filePath ?? '',
+        },
+        {
+          field: 'file.hash.sha256',
+          operator: 'included',
+          type: 'match',
+          value: sha256Hash ?? '',
+        },
+        {
+          field: 'event.code',
+          operator: 'included',
+          type: 'match',
+          value: eventCode ?? '',
+        },
+      ]);
     }
   };
 
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
-    entries: addIdToEntries(entriesToAdd()),
+    entries: entriesToAdd(),
   };
 };
 
