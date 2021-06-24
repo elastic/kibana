@@ -28,7 +28,7 @@ export const RoleMapping: React.FC = () => {
     handleAuthProviderChange,
     handleRoleChange,
     handleSaveMapping,
-    closeRoleMappingFlyout,
+    closeUsersAndRolesFlyout,
   } = useActions(RoleMappingsLogic);
 
   const {
@@ -68,7 +68,7 @@ export const RoleMapping: React.FC = () => {
     <RoleMappingFlyout
       disabled={attributeValueInvalid || !hasEngineAssignment}
       isNew={isNew}
-      closeRoleMappingFlyout={closeRoleMappingFlyout}
+      closeUsersAndRolesFlyout={closeUsersAndRolesFlyout}
       handleSaveMapping={handleSaveMapping}
     >
       <EuiForm isInvalid={roleMappingErrors.length > 0} error={roleMappingErrors}>
