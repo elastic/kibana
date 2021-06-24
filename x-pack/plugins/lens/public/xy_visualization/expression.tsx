@@ -53,7 +53,6 @@ import {
   SeriesLayer,
 } from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
-import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration, GroupsConfiguration, validateExtent } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
@@ -575,7 +574,7 @@ export function XYChart({
       })),
       timeFieldName: xDomain && isDateField ? xAxisFieldName : undefined,
     };
-    onClickValue(desanitizeFilterContext(context));
+    onClickValue(context);
   };
 
   const brushHandler: BrushEndListener = ({ x }) => {
