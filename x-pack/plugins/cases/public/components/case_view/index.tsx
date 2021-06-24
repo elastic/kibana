@@ -159,15 +159,13 @@ export const CaseComponent = React.memo<CaseComponentProps>(
           },
           refreshUserActionsAndComments: async () => {
             // Do nothing if component (or instance of this render cycle) is stale
-            // OR
+            // -- OR --
             // it is already loading
             if (isStale || isLoadingUserActions) {
               return;
             }
-            await Promise.all([
-              fetchCaseUserActions(caseId, caseData.connector.id, subCaseId),
-              fetchCase(true),
-            ]);
+            await fetchCase(true);
+            fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
           },
         };
 

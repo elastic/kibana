@@ -33,7 +33,7 @@ export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
 export type CaseViewRefreshPropInterface = null | {
   /**
    * Refreshes the all of the user actions/comments in the view's timeline
-   * (note: this also triggers a `refreshCase()`
+   * (note: this also triggers a silent `refreshCase()`)
    */
   refreshUserActionsAndComments: () => Promise<void>;
   /** Refreshes the Case information only */
