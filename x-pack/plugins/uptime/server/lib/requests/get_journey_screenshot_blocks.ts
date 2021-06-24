@@ -38,7 +38,7 @@ export const getJourneyScreenshotBlocks: UMElasticsearchQueryFn<
         ],
       },
     },
-    size: 10000,
+    size: 1000,
     _source: ['synthetics.blob', 'synthetics.blob_mime'],
   };
 
