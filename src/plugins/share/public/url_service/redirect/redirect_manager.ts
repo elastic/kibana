@@ -54,8 +54,17 @@ export class RedirectManager {
     const locator = this.deps.url.locators.get(options.id);
 
     if (!locator) {
-      // TODO: show this error in UI.
-      throw new Error('Locator not found.');
+      const message = i18n.translate('share.urlService.redirect.RedirectManager.locatorNotFound', {
+        defaultMessage: 'Locator [ID = {id}] does not exist.',
+        values: {
+          id: options.id,
+        },
+        description:
+          'Error displayed to user in redirect endpoint when redirection cannot be performed successfully, because locator does not exist.',
+      });
+      const error = new Error(message);
+      this.error$.next(error);
+      throw error;
     }
 
     // TODO: perform migration first
@@ -81,7 +90,7 @@ export class RedirectManager {
         'share.urlService.redirect.RedirectManager.invalidParamLocator',
         {
           defaultMessage:
-            'Invalid locator ID in URL. Specify "l" search parameter to be an existing locator ID.',
+            'Locator ID not specified. Specify "l" search parameter in the URL, which should be an existing locator ID.',
           description:
             'Error displayed to user in redirect endpoint when redirection cannot be performed successfully, because of invalid or missing locator ID.',
         }
