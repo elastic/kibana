@@ -20,7 +20,7 @@ export function ReportFilters({
     <SeriesFilter
       seriesConfig={seriesConfig}
       filterFields={seriesConfig.filterFields}
-      baseFilters={seriesConfig.systemFilters}
+      baseFilters={seriesConfig.baseFilters}
       seriesId={seriesId}
       isNew={true}
       labels={seriesConfig.labels}

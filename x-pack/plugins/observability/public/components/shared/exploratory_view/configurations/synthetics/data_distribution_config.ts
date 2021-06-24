@@ -37,7 +37,7 @@ export function getSyntheticsDistributionConfig({
       'tags',
       'url.port',
     ],
-    systemFilters: [...buildExistsFilter('summary.up', indexPattern)],
+    baseFilters: [...buildExistsFilter('summary.up', indexPattern)],
     definitionFields: ['monitor.name', 'url.full'],
     metricOptions: [
       { label: 'Monitor duration', id: 'monitor.duration.us', field: 'monitor.duration.us' },

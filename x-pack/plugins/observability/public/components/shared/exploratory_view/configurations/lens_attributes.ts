@@ -454,7 +454,7 @@ export class LensAttributes {
     const {
       filters,
       time: { from, to },
-      seriesConfig: { systemFilters: layerFilters, reportType },
+      seriesConfig: { baseFilters: layerFilters, reportType },
     } = layerConfig;
     let baseFilters = '';
     if (reportType !== 'kpi-over-time' && totalLayers > 1) {

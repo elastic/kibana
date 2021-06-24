@@ -24,7 +24,7 @@ import { useSeriesStorage } from '../../hooks/use_series_storage';
 interface Props {
   seriesId: string;
   filterFields: SeriesConfig['filterFields'];
-  baseFilters: SeriesConfig['systemFilters'];
+  baseFilters: SeriesConfig['baseFilters'];
   seriesConfig: SeriesConfig;
   isNew?: boolean;
   labels?: Record<string, string>;

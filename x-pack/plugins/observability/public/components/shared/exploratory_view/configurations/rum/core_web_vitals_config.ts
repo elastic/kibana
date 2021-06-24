@@ -82,7 +82,7 @@ export function getCoreWebVitalsConfig({ indexPattern }: ConfigProps): SeriesCon
       USER_AGENT_DEVICE,
       URL_FULL,
     ],
-    systemFilters: [
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],

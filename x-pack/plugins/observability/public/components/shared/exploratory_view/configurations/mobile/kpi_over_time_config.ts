@@ -41,7 +41,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
     hasOperationType: true,
     filterFields: Object.keys(MobileFields),
     breakdownFields: Object.keys(MobileFields),
-    systemFilters: [
+    baseFilters: [
       ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
     ],
     labels: {

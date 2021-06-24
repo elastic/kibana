@@ -82,7 +82,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
       { label: FID_LABEL, id: FID_FIELD, field: FID_FIELD },
       { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
     ],
-    systemFilters: [
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],

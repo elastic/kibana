@@ -30,7 +30,7 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
     hasOperationType: false,
     filterFields: Object.keys(MobileFields),
     breakdownFields: Object.keys(MobileFields),
-    systemFilters: [
+    baseFilters: [
       ...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern),
       ...buildPhraseFilter('processor.event', 'transaction', indexPattern),
     ],

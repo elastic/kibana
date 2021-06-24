@@ -35,7 +35,7 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
     hasOperationType: false,
     filterFields: Object.keys(MobileFields),
     breakdownFields: Object.keys(MobileFields),
-    systemFilters: [
+    baseFilters: [
       ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
     ],
     labels: {

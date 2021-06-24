@@ -33,11 +33,11 @@ export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange 
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
-  const { labels, systemFilters, definitionFields } = seriesConfig;
+  const { labels, baseFilters, definitionFields } = seriesConfig;
 
   const queryFilters = useMemo(() => {
     const filtersN: ESFilter[] = [];
-    (systemFilters ?? []).forEach((qFilter: PersistableFilter | ExistsFilter) => {
+    (baseFilters ?? []).forEach((qFilter: PersistableFilter | ExistsFilter) => {
       if (qFilter.query) {
         filtersN.push(qFilter.query);
       }
@@ -59,7 +59,7 @@ export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange 
 
     return filtersN;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(selectedReportDefinitions), JSON.stringify(systemFilters)]);
+  }, [JSON.stringify(selectedReportDefinitions), JSON.stringify(baseFilters)]);
 
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>

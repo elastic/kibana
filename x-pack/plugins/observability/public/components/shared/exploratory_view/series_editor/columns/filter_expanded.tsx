@@ -29,7 +29,7 @@ interface Props {
   isNegated?: boolean;
   goBack: () => void;
   nestedField?: string;
-  filters: SeriesConfig['systemFilters'];
+  filters: SeriesConfig['baseFilters'];
 }
 
 export function FilterExpanded({

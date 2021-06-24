@@ -27,7 +27,7 @@ describe('Lens Attribute', () => {
     indexPattern: mockIndexPattern,
   });
 
-  reportViewConfig.systemFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
+  reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
 
   let lnsAttr: LensAttributes;
 
@@ -380,7 +380,7 @@ describe('Lens Attribute', () => {
 
   describe('Layer Filters', function () {
     it('should return expected filters', function () {
-      reportViewConfig.systemFilters?.push(
+      reportViewConfig.baseFilters?.push(
         ...buildPhrasesFilter('service.name', ['elastic', 'kibana'], mockIndexPattern)
       );
 

@@ -30,7 +30,7 @@ export function getSyntheticsKPIConfig({ indexPattern }: ConfigProps): SeriesCon
     hasOperationType: false,
     filterFields: ['observer.geo.name', 'monitor.type', 'tags'],
     breakdownFields: ['observer.geo.name', 'monitor.type'],
-    systemFilters: [...buildExistsFilter('summary.up', indexPattern)],
+    baseFilters: [...buildExistsFilter('summary.up', indexPattern)],
     palette: { type: 'palette', name: 'status' },
     definitionFields: ['monitor.name', 'url.full'],
     metricOptions: [

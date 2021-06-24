@@ -51,7 +51,7 @@ export function SeriesEditor() {
           filterFields={seriesConfig.filterFields}
           seriesId={id}
           seriesConfig={seriesConfig}
-          baseFilters={seriesConfig.systemFilters}
+          baseFilters={seriesConfig.baseFilters}
         />
       ),
     },

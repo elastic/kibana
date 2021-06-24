@@ -68,7 +68,7 @@ export function getKPITrendsLensConfig({ indexPattern }: ConfigProps): SeriesCon
       },
     ],
     breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
-    systemFilters: [
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
