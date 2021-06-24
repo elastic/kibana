@@ -4947,8 +4947,6 @@
     "visTypePie.editors.pie.showLabelsLabel": "ラベルを表示",
     "visTypePie.editors.pie.showTopLevelOnlyLabel": "トップレベルのみ表示",
     "visTypePie.editors.pie.showValuesLabel": "値を表示",
-    "visualizations.advancedSettings.visualization.legacyChartsLibrary.description": "Visualizeでエリア、折れ線、棒グラフのレガシーグラフライブラリを有効にします。",
-    "visualizations.advancedSettings.visualization.legacyChartsLibrary.name": "レガシーグラフライブラリ",
     "visualizations.advancedSettings.visualizeEnableLabsText": "ユーザーが実験的なビジュアライゼーションを作成、表示、編集できるようになります。無効の場合、\n            ユーザーは本番準備が整ったビジュアライゼーションのみを利用できます。",
     "visualizations.advancedSettings.visualizeEnableLabsTitle": "実験的なビジュアライゼーションを有効にする",
     "visualizations.disabledLabVisualizationLink": "ドキュメンテーションを表示",
