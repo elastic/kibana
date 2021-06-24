@@ -584,8 +584,7 @@ a|`server.securityResponseHeaders:`
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
 To disable, set to `null`. *Default:* `null`
 
-[[server-securityResponseHeaders-disableEmbedding]]
-a|`server.securityResponseHeaders:`
+|[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders:`
 `disableEmbedding:`
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding
