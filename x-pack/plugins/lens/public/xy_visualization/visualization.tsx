@@ -576,7 +576,7 @@ function checkXAccessorCompatibility(
         },
       }),
       longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong', {
-        defaultMessage: `Data type mismatch for the {axis}. Cannot mix interval and ordinal scale types.`,
+        defaultMessage: `Data type mismatch for the {axis}, use a different function.`,
         values: {
           axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
         },
