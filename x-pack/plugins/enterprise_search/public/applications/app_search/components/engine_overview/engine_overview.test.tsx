@@ -29,11 +29,6 @@ describe('EngineOverview', () => {
     setMockValues(values);
   });
 
-  it('renders', () => {
-    const wrapper = shallow(<EngineOverview />);
-    expect(wrapper.find('[data-test-subj="EngineOverview"]')).toHaveLength(1);
-  });
-
   describe('EmptyEngineOverview', () => {
     it('renders when the engine has no documents & the user can add documents', () => {
       const myRole = { canManageEngineDocuments: true, canViewEngineCredentials: true };

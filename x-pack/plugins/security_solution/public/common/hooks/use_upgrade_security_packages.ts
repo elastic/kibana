@@ -6,31 +6,31 @@
  */
 
 import { useEffect } from 'react';
-import { HttpFetchOptions, HttpStart } from 'src/core/public';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { HttpFetchOptions, HttpStart } from 'kibana/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   epmRouteService,
   appRoutesService,
   CheckPermissionsResponse,
   BulkInstallPackagesResponse,
-} from '../../../../../fleet/common';
-import { StartServices } from '../../../types';
-import { useIngestEnabledCheck } from './ingest_enabled';
+} from '../../../../fleet/common';
+import { StartServices } from '../../types';
+import { useIngestEnabledCheck } from './endpoint/ingest_enabled';
 
 /**
- * Requests that the endpoint package be upgraded to the latest version
+ * Requests that the endpoint and security_detection_engine package be upgraded to the latest version
  *
  * @param http an http client for sending the request
  * @param options an object containing options for the request
  */
-const sendUpgradeEndpointPackage = async (
+const sendUpgradeSecurityPackages = async (
   http: HttpStart,
   options: HttpFetchOptions = {}
 ): Promise<BulkInstallPackagesResponse> => {
   return http.post<BulkInstallPackagesResponse>(epmRouteService.getBulkInstallPath(), {
     ...options,
     body: JSON.stringify({
-      packages: ['endpoint'],
+      packages: ['endpoint', 'security_detection_engine'],
     }),
   });
 };
@@ -51,7 +51,7 @@ const sendCheckPermissions = async (
   });
 };
 
-export const useUpgradeEndpointPackage = () => {
+export const useUpgradeSecurityPackages = () => {
   const context = useKibana<StartServices>();
   const { allEnabled: ingestEnabled } = useIngestEnabledCheck();
 
@@ -79,7 +79,7 @@ export const useUpgradeEndpointPackage = () => {
           }
 
           // ignore the response for now since we aren't notifying the user
-          await sendUpgradeEndpointPackage(context.services.http, { signal });
+          await sendUpgradeSecurityPackages(context.services.http, { signal });
         } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
 
