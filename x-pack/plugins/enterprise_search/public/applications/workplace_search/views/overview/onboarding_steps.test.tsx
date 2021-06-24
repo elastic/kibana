@@ -58,7 +58,7 @@ describe('OnboardingSteps', () => {
   });
 
   describe('Users & Invitations', () => {
-    it('renders 0 users when not on federated auth', () => {
+    it('renders 0 users state', () => {
       setMockValues({
         account,
         accountsCount: 0,
