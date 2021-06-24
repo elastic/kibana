@@ -78,7 +78,7 @@ export const UserFlyout: React.FC<Props> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          disabled={disabled || formLoading}
+          disabled={disabled}
           isLoading={formLoading}
           onClick={handleSaveUser}
           fill
