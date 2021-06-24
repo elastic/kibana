@@ -17,6 +17,7 @@ import {
   UserSelector,
   UserAddedInfo,
   UserInvitationCallout,
+  DeactivatedUserCallout,
 } from '../../../shared/role_mapping';
 import { RoleTypes } from '../../types';
 
@@ -55,6 +56,11 @@ export const User: React.FC = () => {
   const showEngineAssignmentSelector = hasEngines && hasAdvancedRoles;
   const flyoutDisabled =
     !userFormUserIsExisting && (!elasticsearchUser.email || !elasticsearchUser.username);
+  const userIsDeactivated = !!(
+    singleUserRoleMapping &&
+    !singleUserRoleMapping.invitation &&
+    !singleUserRoleMapping.elasticsearchUser.enabled
+  );
 
   const userAddedInfo = singleUserRoleMapping && (
     <UserAddedInfo
@@ -101,6 +107,7 @@ export const User: React.FC = () => {
     >
       {userCreated ? userAddedInfo : createUserForm}
       {userInvitationCallout}
+      {userIsDeactivated && <DeactivatedUserCallout isNew={userFormIsNewUser} />}
     </UserFlyout>
   );
 };
