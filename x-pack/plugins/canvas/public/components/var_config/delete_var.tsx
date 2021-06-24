@@ -15,10 +15,29 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { CanvasVariable } from '../../../types';
 
-import { ComponentStrings } from '../../../i18n';
-const { VarConfigDeleteVar: strings } = ComponentStrings;
+const strings = {
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfigDeleteVar.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getDeleteButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfigDeleteVar.deleteButtonLabel', {
+      defaultMessage: 'Delete variable',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.varConfigDeleteVar.titleLabel', {
+      defaultMessage: 'Delete variable?',
+    }),
+  getWarningDescription: () =>
+    i18n.translate('xpack.canvas.varConfigDeleteVar.warningDescription', {
+      defaultMessage:
+        'Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?',
+    }),
+};
 
 import './var_panel.scss';
 
