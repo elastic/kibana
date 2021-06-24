@@ -47,6 +47,7 @@ export const User: React.FC = () => {
     roleMappingErrors,
     userCreated,
     userFormIsNewUser,
+    smtpSettingsPresent,
   } = useValues(RoleMappingsLogic);
 
   const showGroupAssignmentSelector = availableGroups.length > 0;
@@ -79,6 +80,7 @@ export const User: React.FC = () => {
     <EuiForm isInvalid={roleMappingErrors.length > 0} error={roleMappingErrors}>
       <UserSelector
         isNewUser={userFormIsNewUser}
+        smtpSettingsPresent={smtpSettingsPresent}
         elasticsearchUsers={elasticsearchUsers}
         handleRoleChange={handleRoleChange}
         elasticsearchUser={elasticsearchUser}

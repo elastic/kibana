@@ -15,6 +15,7 @@ export interface RoleMappingsBaseServerDetails {
   elasticsearchRoles: string[];
   elasticsearchUsers: ElasticsearchUser[];
   multipleAuthProvidersConfig: boolean;
+  smtpSettingsPresent: boolean;
 }
 
 export interface RoleMappingsBaseActions {

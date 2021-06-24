@@ -57,6 +57,7 @@ describe('RoleMappingsLogic', () => {
     userCreated: false,
     userFormIsNewUser: true,
     userFormUserIsExisting: true,
+    smtpSettingsPresent: false,
   };
   const roleGroup = {
     id: '123',
@@ -76,6 +77,7 @@ describe('RoleMappingsLogic', () => {
     elasticsearchRoles: [],
     singleUserRoleMappings: [wsSingleUserRoleMapping],
     elasticsearchUsers,
+    smtpSettingsPresent: false,
   };
 
   beforeEach(() => {

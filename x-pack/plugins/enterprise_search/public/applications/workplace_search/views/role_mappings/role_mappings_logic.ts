@@ -324,6 +324,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         setUserFormIsNewUser: (_, { userFormIsNewUser }) => userFormIsNewUser,
       },
     ],
+    smtpSettingsPresent: [
+      false,
+      {
+        setRoleMappingsData: (_, { smtpSettingsPresent }) => smtpSettingsPresent,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     selectedOptions: [
