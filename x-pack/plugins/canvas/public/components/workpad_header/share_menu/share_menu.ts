@@ -7,14 +7,23 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { ComponentStrings } from '../../../../i18n';
+import { i18n } from '@kbn/i18n';
+
 import { CanvasWorkpad, State } from '../../../../types';
 import { downloadWorkpad } from '../../../lib/download_workpad';
 import { withServices, WithServicesProps } from '../../../services';
 import { getPages, getWorkpad } from '../../../state/selectors/workpad';
 import { Props as ComponentProps, ShareMenu as Component } from './share_menu.component';
 
-const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
+const strings = {
+  getUnknownExportErrorMessage: (type: string) =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.unknownExportErrorMessage', {
+      defaultMessage: 'Unknown export type: {type}',
+      values: {
+        type,
+      },
+    }),
+};
 
 const mapStateToProps = (state: State) => ({
   workpad: getWorkpad(state),
