@@ -20,7 +20,8 @@ import { callObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
 import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
-import { AlertsTable } from './alerts_table';
+// import { AlertsTable } from './alerts_table';
+import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
@@ -161,8 +162,16 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {/* <EuiFlexItem>
+            <AlertsTable items={topAlerts ?? []} />
+          </EuiFlexItem> */}
           <EuiFlexItem>
-            <AlertsTable items={alerts ?? []} />
+            <AlertsTableTGrid
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              kuery={kuery}
+              status={status}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
