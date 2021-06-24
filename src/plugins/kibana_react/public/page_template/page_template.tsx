@@ -90,7 +90,6 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
     <EuiPageTemplate
       template={template}
       restrictWidth={restrictWidth}
-      paddingSize={template === 'centeredBody' ? 'none' : 'l'}
       pageHeader={pageHeader}
       pageSideBar={pageSideBar}
       pageSideBarProps={{
