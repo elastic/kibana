@@ -7,14 +7,15 @@
 
 import { History, Location } from 'history';
 import { ChromeBreadcrumb } from 'kibana/public';
-import { MouseEvent, ReactNode, useEffect } from 'react';
+import { MouseEvent } from 'react';
 import {
+  match as Match,
   matchPath,
   RouteComponentProps,
   useHistory,
-  match as Match,
   useLocation,
 } from 'react-router-dom';
+import { useBreadcrumbs } from '../../../observability/public';
 import { APMRouteDefinition, BreadcrumbTitle } from '../application/routes';
 import { getAPMHref } from '../components/shared/Links/apm/APMLink';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
@@ -165,32 +166,16 @@ function routeDefinitionsToBreadcrumbs({
 }
 
 /**
- * Get an array for a page title from a list of breadcrumbs
- */
-function getTitleFromBreadcrumbs(breadcrumbs: ChromeBreadcrumb[]): string[] {
-  function removeNonStrings(item: ReactNode): item is string {
-    return typeof item === 'string';
-  }
-
-  return breadcrumbs
-    .map(({ text }) => text)
-    .reverse()
-    .filter(removeNonStrings);
-}
-
-/**
  * Determine the breadcrumbs from the routes, set them, and update the page
  * title when the route changes.
  */
-export function useBreadcrumbs(routes: APMRouteDefinition[]) {
+export function useApmBreadcrumbs(routes: APMRouteDefinition[]) {
   const history = useHistory();
   const location = useLocation();
   const { search } = location;
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
   const { navigateToUrl } = core.application;
-  const { docTitle, setBreadcrumbs } = core.chrome;
-  const changeTitle = docTitle.change;
 
   function wrappedGetAPMHref(path: string) {
     return getAPMHref({ basePath, path, search });
@@ -206,10 +191,6 @@ export function useBreadcrumbs(routes: APMRouteDefinition[]) {
     wrappedGetAPMHref,
     navigateToUrl,
   });
-  const title = getTitleFromBreadcrumbs(breadcrumbs);
 
-  useEffect(() => {
-    changeTitle(title);
-    setBreadcrumbs(breadcrumbs);
-  }, [breadcrumbs, changeTitle, location, title, setBreadcrumbs]);
+  useBreadcrumbs(breadcrumbs);
 }
