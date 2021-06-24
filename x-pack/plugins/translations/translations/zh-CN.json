@@ -4974,8 +4974,6 @@
     "visTypePie.editors.pie.showLabelsLabel": "显示标签",
     "visTypePie.editors.pie.showTopLevelOnlyLabel": "仅显示顶级",
     "visTypePie.editors.pie.showValuesLabel": "显示值",
-    "visualizations.advancedSettings.visualization.legacyChartsLibrary.description": "在 Visualize 中启用面积图、折线图和条形图的旧版图表库。",
-    "visualizations.advancedSettings.visualization.legacyChartsLibrary.name": "旧版图表库",
     "visualizations.advancedSettings.visualizeEnableLabsText": "允许用户创建、查看和编辑实验性可视化。如果禁用，\n            仅被视为生产就绪的可视化可供用户使用。",
     "visualizations.advancedSettings.visualizeEnableLabsTitle": "启用实验性可视化",
     "visualizations.disabledLabVisualizationLink": "阅读文档",
