@@ -61,10 +61,8 @@ function shiftAndNormalizeStops(
   params: CustomPaletteState,
   { min, max }: { min: number; max: number }
 ) {
-  return [
-    params.range === 'percent' ? params.rangeMin : min,
-    ...getStops(params, { min, max }),
-  ].map((value) => {
+  // data min is the fallback in case of default options
+  return [params.rangeMin ?? min, ...getStops(params, { min, max })].map((value) => {
     let result = value;
     if (params.range === 'percent') {
       result = min + ((max - min) * value) / 100;
