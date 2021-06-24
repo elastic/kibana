@@ -83,7 +83,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     initialize: jest.fn((_state?) => Promise.resolve()),
     renderDataPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
-    toExpression: jest.fn((_frame, _state) => null),
+    toExpression: jest.fn((_frame, _state, searchId) => null),
     insertLayer: jest.fn((_state, _newLayerId) => {}),
     removeLayer: jest.fn((_state, _layerId) => {}),
     removeColumn: jest.fn((props) => {}),
