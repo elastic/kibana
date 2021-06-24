@@ -24,7 +24,7 @@ import { LensAttributeService } from '../lens_attribute_service';
 import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
+jest.mock('../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
   open: false,
 }));
