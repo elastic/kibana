@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { docLinksServiceMock } from '../../doc_links/doc_links_service.mock';
@@ -103,50 +92,6 @@ describe('publicBaseUrl warning', () => {
 
     it('does not add toast if storage key set', () => {
       const http = httpServiceMock.createStartContract({ publicBaseUrl: undefined });
-
-      setupPublicBaseUrlConfigWarning({
-        docLinks,
-        notifications,
-        http,
-        location: {
-          hostname: 'myhost.com',
-          toString() {
-            return 'http://myhost.com/';
-          },
-        } as Location,
-        storage: {
-          getItem: (id: string) => 'true',
-        } as Storage,
-      });
-
-      expect(notifications.toasts.addWarning).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('config mismatch toast', () => {
-    it('adds toast if location does not start with publicBaseUrl', () => {
-      const http = httpServiceMock.createStartContract({ publicBaseUrl: 'http://myhost.com:9999' });
-
-      setupPublicBaseUrlConfigWarning({
-        docLinks,
-        notifications,
-        http,
-        location: {
-          hostname: 'myhost.com',
-          toString() {
-            return 'http://myhost.com/';
-          },
-        } as Location,
-      });
-
-      expect(notifications.toasts.addWarning).toHaveBeenCalledWith({
-        title: 'Configuration issue',
-        text: expect.any(Function),
-      });
-    });
-
-    it('does not add toast if storage key set', () => {
-      const http = httpServiceMock.createStartContract({ publicBaseUrl: 'http://myhost.com:9999' });
 
       setupPublicBaseUrlConfigWarning({
         docLinks,
