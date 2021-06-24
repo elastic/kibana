@@ -69,9 +69,7 @@ export const RestoreList: React.FunctionComponent = () => {
     uiMetricService.trackUiMetric(UIM_RESTORE_LIST_LOAD);
   }, [uiMetricService]);
 
-  let content: JSX.Element;
-
-  if (isInitialRequest || true) {
+  if (isInitialRequest) {
     if (isLoading) {
       // Because we're polling for new data, we only want to hide the list during the initial fetch.
       return (

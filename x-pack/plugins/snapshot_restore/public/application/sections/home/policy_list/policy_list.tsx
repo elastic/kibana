@@ -85,8 +85,6 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     uiMetricService.trackUiMetric(UIM_POLICY_LIST_LOAD);
   }, [uiMetricService]);
 
-  let content: JSX.Element;
-
   if (isLoading) {
     return (
       <PageLoading>

@@ -114,8 +114,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     uiMetricService.trackUiMetric(UIM_SNAPSHOT_LIST_LOAD);
   }, [uiMetricService]);
 
-  let content;
-
   if (isLoading) {
     return (
       <PageLoading>

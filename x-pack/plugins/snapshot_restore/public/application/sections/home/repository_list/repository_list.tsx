@@ -67,8 +67,6 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     uiMetricService.trackUiMetric(UIM_REPOSITORY_LIST_LOAD);
   }, [uiMetricService]);
 
-  let content;
-
   if (isLoading) {
     return (
       <PageLoading>
