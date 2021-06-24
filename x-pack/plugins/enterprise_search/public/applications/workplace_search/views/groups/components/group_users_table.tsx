@@ -14,7 +14,6 @@ import { Pager } from '@elastic/eui';
 
 import { USERNAME_LABEL, EMAIL_LABEL } from '../../../../shared/constants';
 import { TableHeader } from '../../../../shared/table_header';
-import { AppLogic } from '../../../app_logic';
 import { UserRow } from '../../../components/shared/user_row';
 import { User } from '../../../types';
 import { GroupLogic } from '../group_logic';
@@ -22,14 +21,10 @@ import { GroupLogic } from '../group_logic';
 const USERS_PER_PAGE = 10;
 
 export const GroupUsersTable: React.FC = () => {
-  const { isFederatedAuth } = useValues(AppLogic);
   const {
     group: { users },
   } = useValues(GroupLogic);
-  const headerItems = [USERNAME_LABEL];
-  if (!isFederatedAuth) {
-    headerItems.push(EMAIL_LABEL);
-  }
+  const headerItems = [USERNAME_LABEL, EMAIL_LABEL];
 
   const [firstItem, setFirstItem] = useState(0);
   const [lastItem, setLastItem] = useState(USERS_PER_PAGE - 1);
@@ -58,10 +53,10 @@ export const GroupUsersTable: React.FC = () => {
   return (
     <>
       <EuiTable>
-        <TableHeader extraCell={isFederatedAuth} headerItems={headerItems} />
+        <TableHeader headerItems={headerItems} />
         <EuiTableBody>
           {users.slice(firstItem, lastItem + 1).map((user: User) => (
-            <UserRow key={user.id} showEmail={!isFederatedAuth} user={user} />
+            <UserRow key={user.id} showEmail user={user} />
           ))}
         </EuiTableBody>
       </EuiTable>
