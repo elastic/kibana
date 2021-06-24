@@ -137,6 +137,20 @@ const nestedDeepLinks: SecurityDeepLinks = {
   [SecurityPageName.detections]: {
     base: [
       {
+        id: SecurityPageName.alerts,
+        title: ALERTS,
+        path: ALERTS_PATH,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.alerts', {
+            defaultMessage: 'Alerts',
+          }),
+        ],
+        searchable: true,
+        order: 9001,
+        euiIconType: APP_ICON_SOLUTION,
+      },
+      {
         id: SecurityPageName.rules,
         title: RULES,
         path: RULES_PATH,
