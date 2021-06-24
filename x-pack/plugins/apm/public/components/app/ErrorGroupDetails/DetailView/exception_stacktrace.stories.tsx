@@ -16,23 +16,17 @@ export default {
   title: 'app/ErrorGroupDetails/DetailView/ExceptionStacktrace',
   component: ExceptionStacktrace,
   decorators: [
-    (Story: ComponentType) => {
-      return (
-        <EuiThemeProvider>
-          <Story />
-        </EuiThemeProvider>
-      );
-    },
+    (StoryComponent: ComponentType) => (
+      <EuiThemeProvider>
+        <StoryComponent />
+      </EuiThemeProvider>
+    ),
   ],
 };
 
-export const JavaWithLongLines: Story<
-  ComponentProps<typeof ExceptionStacktrace>
-> = ({ codeLanguage, exceptions }) => {
-  return (
-    <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
-  );
-};
+export const JavaWithLongLines: Story<Args> = (args) => (
+  <ExceptionStacktrace {...args} />
+);
 JavaWithLongLines.args = {
   codeLanguage: 'java',
   exceptions: [
@@ -1745,24 +1739,18 @@ JavaWithLongLines.args = {
       type: 'org.springframework.aop.AopInvocationException',
     },
   ],
-} as Args;
+};
 JavaWithLongLines.decorators = [
-  (Story: ComponentType) => {
-    return (
-      <div style={{ border: '1px dotted #aaa', width: 768 }}>
-        <Story />
-      </div>
-    );
-  },
+  (StoryComponent: ComponentType) => (
+    <div style={{ border: '1px dotted #aaa', width: 768 }}>
+      <StoryComponent />
+    </div>
+  ),
 ];
 
-export const JavaScriptWithSomeContext: Story<
-  ComponentProps<typeof ExceptionStacktrace>
-> = ({ codeLanguage, exceptions }) => {
-  return (
-    <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
-  );
-};
+export const JavaScriptWithSomeContext: Story<Args> = (args) => (
+  <ExceptionStacktrace {...args} />
+);
 JavaScriptWithSomeContext.storyName = 'JavaScript With Some Context';
 JavaScriptWithSomeContext.args = {
   codeLanguage: 'javascript',
@@ -1890,13 +1878,9 @@ JavaScriptWithSomeContext.args = {
   ],
 };
 
-export const RubyWithContextAndLibraryFrames: Story<
-  ComponentProps<typeof ExceptionStacktrace>
-> = ({ codeLanguage, exceptions }) => {
-  return (
-    <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
-  );
-};
+export const RubyWithContextAndLibraryFrames: Story<Args> = (args) => (
+  <ExceptionStacktrace {...args} />
+);
 RubyWithContextAndLibraryFrames.args = {
   codeLanguage: 'ruby',
   exceptions: [
