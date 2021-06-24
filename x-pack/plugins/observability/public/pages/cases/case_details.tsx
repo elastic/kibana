@@ -5,45 +5,35 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { CaseView } from '../../components/app/cases/case_view';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useKibana } from '../../utils/kibana_react';
 import { CASES_APP_ID } from '../../components/app/cases/constants';
-import { CaseCallOut, permissionsReadOnlyErrorMessage } from '../../components/app/cases/callout';
+import { useReadonlyHeader } from '../../hooks/use_readonly_header';
 
 export const CaseDetailsPage = React.memo(() => {
   const {
     application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
+  const casesUrl = getUrlForApp(CASES_APP_ID);
   const userPermissions = useGetUserCasesPermissions();
   const { detailName: caseId, subCaseId } = useParams<{
     detailName?: string;
     subCaseId?: string;
   }>();
+  useReadonlyHeader();
 
-  const casesUrl = getUrlForApp(CASES_APP_ID);
-  if (userPermissions != null && !userPermissions.read) {
-    navigateToUrl(casesUrl);
-    return null;
-  }
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToUrl(casesUrl);
+    }
+  }, [casesUrl, navigateToUrl, userPermissions]);
 
   return caseId != null ? (
-    <>
-      {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
-        <CaseCallOut
-          title={permissionsReadOnlyErrorMessage.title}
-          messages={[{ ...permissionsReadOnlyErrorMessage, title: '' }]}
-        />
-      )}
-      <CaseView
-        caseId={caseId}
-        subCaseId={subCaseId}
-        userCanCrud={userPermissions?.crud ?? false}
-      />
-    </>
+    <CaseView caseId={caseId} subCaseId={subCaseId} userCanCrud={userPermissions?.crud ?? false} />
   ) : null;
 });
 

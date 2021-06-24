@@ -1370,6 +1370,57 @@ describe('editor_frame', () => {
         })
       );
     });
+
+    it('should avoid completely to compute suggestion when in fullscreen mode', async () => {
+      const props = {
+        ...getDefaultProps(),
+        initialContext: {
+          indexPatternId: '1',
+          fieldName: 'test',
+        },
+        visualizationMap: {
+          testVis: mockVisualization,
+        },
+        datasourceMap: {
+          testDatasource: mockDatasource,
+          testDatasource2: mockDatasource2,
+        },
+
+        ExpressionRenderer: expressionRendererMock,
+      };
+
+      const { instance: el } = await mountWithProvider(
+        <EditorFrame {...props} />,
+        props.plugins.data
+      );
+      instance = el;
+
+      expect(
+        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
+      ).not.toBeUndefined();
+
+      await act(async () => {
+        (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
+          type: 'TOGGLE_FULLSCREEN',
+        });
+      });
+
+      instance.update();
+
+      expect(instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement).toBe(false);
+
+      await act(async () => {
+        (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
+          type: 'TOGGLE_FULLSCREEN',
+        });
+      });
+
+      instance.update();
+
+      expect(
+        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
+      ).not.toBeUndefined();
+    });
   });
 
   describe('passing state back to the caller', () => {

@@ -20,12 +20,61 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { CanvasVariable } from '../../../types';
+import { i18n } from '@kbn/i18n';
 
+import { CanvasVariable } from '../../../types';
 import { VarValueField } from './var_value_field';
 
-import { ComponentStrings } from '../../../i18n';
-const { VarConfigEditVar: strings } = ComponentStrings;
+const strings = {
+  getAddTitle: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.addTitleLabel', {
+      defaultMessage: 'Add variable',
+    }),
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getDuplicateNameError: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.duplicateNameError', {
+      defaultMessage: 'Variable name already in use',
+    }),
+  getEditTitle: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.editTitleLabel', {
+      defaultMessage: 'Edit variable',
+    }),
+  getEditWarning: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.editWarning', {
+      defaultMessage: 'Editing a variable in use may adversely affect your workpad',
+    }),
+  getNameFieldLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.nameFieldLabel', {
+      defaultMessage: 'Name',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.saveButtonLabel', {
+      defaultMessage: 'Save changes',
+    }),
+  getTypeBooleanLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.typeBooleanLabel', {
+      defaultMessage: 'Boolean',
+    }),
+  getTypeFieldLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.typeFieldLabel', {
+      defaultMessage: 'Type',
+    }),
+  getTypeNumberLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.typeNumberLabel', {
+      defaultMessage: 'Number',
+    }),
+  getTypeStringLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.typeStringLabel', {
+      defaultMessage: 'String',
+    }),
+  getValueFieldLabel: () =>
+    i18n.translate('xpack.canvas.varConfigEditVar.valueFieldLabel', {
+      defaultMessage: 'Value',
+    }),
+};
 
 import './edit_var.scss';
 import './var_panel.scss';

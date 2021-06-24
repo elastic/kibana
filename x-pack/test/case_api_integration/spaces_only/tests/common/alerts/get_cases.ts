@@ -12,10 +12,11 @@ import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/
 import {
   createCase,
   createComment,
-  getCaseIDsByAlert,
+  getCasesByAlert,
   deleteAllCaseItems,
   getAuthWithSuperUser,
 } from '../../../../common/lib/utils';
+import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -57,16 +58,14 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      const caseIDsWithAlert = await getCaseIDsByAlert({
+      const cases = await getCasesByAlert({
         supertest,
         alertID: 'test-id',
         auth: authSpace1,
       });
 
-      expect(caseIDsWithAlert.length).to.eql(3);
-      expect(caseIDsWithAlert).to.contain(case1.id);
-      expect(caseIDsWithAlert).to.contain(case2.id);
-      expect(caseIDsWithAlert).to.contain(case3.id);
+      expect(cases.length).to.eql(3);
+      validateCasesFromAlertIDResponse(cases, [case1, case2, case3]);
     });
 
     it('should return 1 case in space2 when 2 cases were created in space1 and 1 in space2', async () => {
@@ -97,14 +96,14 @@ export default ({ getService }: FtrProviderContext): void => {
         }),
       ]);
 
-      const caseIDsWithAlert = await getCaseIDsByAlert({
+      const casesByAlert = await getCasesByAlert({
         supertest,
         alertID: 'test-id',
         auth: authSpace2,
       });
 
-      expect(caseIDsWithAlert.length).to.eql(1);
-      expect(caseIDsWithAlert).to.eql([case3.id]);
+      expect(casesByAlert.length).to.eql(1);
+      expect(casesByAlert).to.eql([{ id: case3.id, title: case3.title }]);
     });
   });
 };
