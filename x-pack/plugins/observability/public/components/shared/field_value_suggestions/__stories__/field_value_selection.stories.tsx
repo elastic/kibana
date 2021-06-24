@@ -15,6 +15,11 @@ import { createKibanaReactContext } from '../../../../../../../../src/plugins/ki
 import { FieldValueSelectionProps } from '../types';
 import { FieldValueSelection } from '../field_value_selection';
 
+const values = [
+  { label: 'elastic co frontend', count: 1 },
+  { label: 'apm server', count: 2 },
+];
+
 const KibanaReactContext = createKibanaReactContext(({
   uiSettings: { get: () => {}, get$: () => new Observable() },
 } as unknown) as Partial<CoreStart>);
@@ -29,7 +34,7 @@ export default {
           <EuiThemeProvider>
             <FieldValueSelection
               label="Service name"
-              values={['elastic co frontend', 'apm server', 'opbean python']}
+              values={values}
               onChange={() => {}}
               selectedValue={[]}
               loading={false}
@@ -46,7 +51,7 @@ export function ValuesLoaded() {
   return (
     <FieldValueSelection
       label="Service name"
-      values={['elastic co frontend', 'apm server', 'opbean python']}
+      values={values}
       onChange={() => {}}
       selectedValue={[]}
       loading={false}
@@ -59,7 +64,7 @@ export function LoadingState() {
   return (
     <FieldValueSelection
       label="Service name"
-      values={['elastic co frontend', 'apm server', 'opbean python']}
+      values={values}
       onChange={() => {}}
       selectedValue={[]}
       loading={true}
@@ -92,7 +97,7 @@ export function SearchState(args: FieldValueSelectionProps) {
   return (
     <FieldValueSelection
       label="Service name"
-      values={['elastic co frontend', 'apm server', 'opbean python']}
+      values={values}
       onChange={() => {}}
       selectedValue={[]}
       loading={false}

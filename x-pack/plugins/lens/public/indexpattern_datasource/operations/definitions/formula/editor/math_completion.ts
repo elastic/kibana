@@ -13,6 +13,7 @@ import {
   TinymathLocation,
   TinymathAST,
   TinymathFunction,
+  TinymathVariable,
   TinymathNamedArgument,
 } from '@kbn/tinymath';
 import type {
@@ -21,7 +22,7 @@ import type {
 } from '../../../../../../../../../src/plugins/data/public';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { tinymathFunctions, groupArgsByType } from '../util';
+import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
@@ -47,6 +48,7 @@ export type LensMathSuggestion =
 export interface LensMathSuggestions {
   list: LensMathSuggestion[];
   type: SUGGESTION_TYPE;
+  range?: monaco.IRange;
 }
 
 function inLocation(cursorPosition: number, location: TinymathLocation) {
@@ -92,7 +94,7 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
   let lineNumber = 1;
   for (const line of lines) {
     if (line.length >= remainingChars) {
-      return new monaco.Position(lineNumber, remainingChars);
+      return new monaco.Position(lineNumber, remainingChars + 1);
     }
     remainingChars -= line.length + 1;
     lineNumber++;
@@ -128,7 +130,7 @@ export async function suggest({
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   data: DataPublicPluginStart;
   dateHistogramInterval?: number;
-}): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
+}): Promise<LensMathSuggestions> {
   const text =
     expression.substr(0, zeroIndexedOffset) + MARKER + expression.substr(zeroIndexedOffset);
   try {
@@ -154,6 +156,7 @@ export async function suggest({
       return getArgumentSuggestions(
         tokenInfo.parent,
         tokenInfo.parent.args.findIndex((a) => a === tokenAst),
+        text,
         indexPattern,
         operationDefinitionMap
       );
@@ -210,6 +213,7 @@ function getFunctionSuggestions(
 function getArgumentSuggestions(
   ast: TinymathFunction,
   position: number,
+  expression: string,
   indexPattern: IndexPattern,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
@@ -280,7 +284,16 @@ function getArgumentSuggestions(
         .filter((op) => op.operationType === operation.type)
         .map((op) => ('field' in op ? op.field : undefined))
         .filter((field) => field);
-      return { list: fields as string[], type: SUGGESTION_TYPE.FIELD };
+      const fieldArg = ast.args[0];
+      const location = typeof fieldArg !== 'string' && (fieldArg as TinymathVariable).location;
+      let range: monaco.IRange | undefined;
+      if (location) {
+        const start = offsetToRowColumn(expression, location.min);
+        // This accounts for any characters that the user has already typed
+        const end = offsetToRowColumn(expression, location.max - MARKER.length);
+        range = monaco.Range.fromPositions(start, end);
+      }
+      return { list: fields as string[], type: SUGGESTION_TYPE.FIELD, range };
     } else {
       return { list: [], type: SUGGESTION_TYPE.FIELD };
     }
@@ -375,7 +388,8 @@ export function getSuggestion(
   suggestion: LensMathSuggestion,
   type: SUGGESTION_TYPE,
   operationDefinitionMap: Record<string, GenericOperationDefinition>,
-  triggerChar: string | undefined
+  triggerChar: string | undefined,
+  range?: monaco.IRange
 ): monaco.languages.CompletionItem {
   let kind: monaco.languages.CompletionItemKind = monaco.languages.CompletionItemKind.Method;
   let label: string =
@@ -397,6 +411,10 @@ export function getSuggestion(
       break;
     case SUGGESTION_TYPE.FIELD:
       kind = monaco.languages.CompletionItemKind.Value;
+      // Look for unsafe characters
+      if (unquotedStringRegex.test(label)) {
+        insertText = `'${label.replaceAll(`'`, "\\'")}'`;
+      }
       break;
     case SUGGESTION_TYPE.FUNCTIONS:
       insertText = `${label}($0)`;
@@ -450,7 +468,7 @@ export function getSuggestion(
     command,
     additionalTextEdits: [],
     // @ts-expect-error Monaco says this type is required, but provides a default value
-    range: undefined,
+    range,
     sortText,
     filterText,
   };
