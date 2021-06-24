@@ -10,7 +10,13 @@ import './solution_nav.scss';
 import React, { FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiFlyout, EuiSideNav, EuiSideNavProps, useIsWithinBreakpoints } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiSideNav,
+  EuiSideNavItemType,
+  EuiSideNavProps,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
 
 import classNames from 'classnames';
 import {
@@ -35,6 +41,16 @@ export type KibanaPageTemplateSolutionNavProps = Partial<EuiSideNavProps> & {
   onCollapse?: () => void;
 };
 
+const negativeTabIndex = (items: Array<EuiSideNavItemType<{}>>) => {
+  return items.map((item) => {
+    // TODO need EUI support
+    // @ts-ignore
+    item.tabIndex = -1;
+    item.items = item.items && negativeTabIndex(item.items);
+    return item;
+  });
+};
+
 /**
  * A wrapper around EuiSideNav but also creates the appropriate title with optional solution logo
  */
@@ -52,10 +68,12 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
 
   // This is used for both the EuiSideNav and EuiFlyout toggling
-  const [isSideNavOpenOnMobile, setisSideNavOpenOnMobile] = useState(false);
+  const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
   const toggleOpenOnMobile = () => {
-    setisSideNavOpenOnMobile(!isSideNavOpenOnMobile);
+    setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
   };
+
+  const isHidden = isLargerBreakpoint && !isOpenOnDesktop;
 
   /**
    * Create the avatar
@@ -88,11 +106,12 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   let sideNav;
   if (items) {
     const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
-      'kbnPageTemplateSolutionNav--hidden': isLargerBreakpoint && !isOpenOnDesktop,
+      'kbnPageTemplateSolutionNav--hidden': isHidden,
     });
 
     sideNav = (
       <EuiSideNav
+        aria-hidden={isHidden}
         className={sideNavClasses}
         heading={titleText}
         mobileTitle={
@@ -103,7 +122,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
         }
         toggleOpenOnMobile={toggleOpenOnMobile}
         isOpenOnMobile={isSideNavOpenOnMobile}
-        items={items}
+        items={isHidden ? negativeTabIndex(items) : items}
         {...rest}
       />
     );
@@ -118,7 +137,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
             <EuiFlyout
               ownFocus={false}
               outsideClickCloses
-              onClose={() => setisSideNavOpenOnMobile(false)}
+              onClose={() => setIsSideNavOpenOnMobile(false)}
               side="left"
               size={240}
               closeButtonPosition="outside"

@@ -11,6 +11,7 @@ import React, { FunctionComponent } from 'react';
 import classNames from 'classnames';
 
 import { EuiButtonIcon, EuiButtonIconPropsForButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export type KibanaPageTemplateSolutionNavCollapseButtonProps = Partial<EuiButtonIconPropsForButton> & {
   /**
@@ -35,6 +36,10 @@ export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<Kiba
     className
   );
 
+  const label = i18n.translate('kibana-react.solutionNav.collapsibleLabel', {
+    defaultMessage: 'Collapse side navigation',
+  });
+
   return (
     <EuiButtonIcon
       className={classes}
@@ -42,8 +47,8 @@ export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<Kiba
       size="s"
       display="fill"
       color="text"
-      aria-label="Collapse side navigation"
-      title="Collapse side navigation"
+      aria-label={label}
+      title={label}
       {...rest}
     />
   );
