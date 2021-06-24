@@ -7,6 +7,7 @@
 
 import { revealImageRenderer } from '../../../../../src/plugins/expression_reveal_image/public';
 import { errorRenderer } from '../../../../../src/plugins/expression_error/public';
+import { shapeRenderer } from '../../../../../src/plugins/expression_shape/public';
 
-export const renderFunctions = [revealImageRenderer, errorRenderer];
+export const renderFunctions = [revealImageRenderer, errorRenderer, shapeRenderer];
 export const renderFunctionFactories = [];

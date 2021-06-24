@@ -13,11 +13,11 @@ import { metric } from '../canvas_plugin_src/renderers/metric';
 import { pie } from '../canvas_plugin_src/renderers/pie';
 import { plot } from '../canvas_plugin_src/renderers/plot';
 import { progress } from '../canvas_plugin_src/renderers/progress';
-import { shape } from '../canvas_plugin_src/renderers/shape';
 import { table } from '../canvas_plugin_src/renderers/table';
 import { text } from '../canvas_plugin_src/renderers/text';
 import { revealImageRenderer as revealImage } from '../../../../src/plugins/expression_reveal_image/public';
 import { errorRenderer as error } from '../../../../src/plugins/expression_error/public';
+import { shapeRenderer as shape } from '../../../../src/plugins/expression_shape/public';
 
 /**
  * This is a collection of renderers which are bundled with the runtime.  If
