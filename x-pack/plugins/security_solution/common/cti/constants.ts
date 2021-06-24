@@ -45,6 +45,11 @@ export const SORTED_THREAT_SUMMARY_FIELDS = [
   INDICATOR_LASTSEEN,
 ];
 
+export enum ENRICHMENT_TYPES {
+  InvestigationTime = 'investigation_time',
+  IndicatorMatchRule = 'indicator_match_rule',
+}
+
 export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
   'file.hash.md5': 'threatintel.indicator.file.hash.md5',
   'file.hash.sha1': 'threatintel.indicator.file.hash.sha1',
