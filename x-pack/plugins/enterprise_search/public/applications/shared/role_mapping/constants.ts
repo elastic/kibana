@@ -136,7 +136,7 @@ export const FILTER_ROLE_MAPPINGS_PLACEHOLDER = i18n.translate(
 export const ROLE_MAPPINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.roleMappingsTitle',
   {
-    defaultMessage: 'Users & roles',
+    defaultMessage: 'Users and roles',
   }
 );
 
@@ -406,3 +406,19 @@ export const FILTER_USERS_LABEL = i18n.translate(
 export const NO_USERS_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.noUsersLabel', {
   defaultMessage: 'No matching users found',
 });
+
+export const EXTERNAL_ATTRIBUTE_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.externalAttributeTooltip',
+  {
+    defaultMessage:
+      'External attributes are defined by the identity provider, and varies from service to service.',
+  }
+);
+
+export const AUTH_PROVIDER_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.authProviderTooltip',
+  {
+    defaultMessage:
+      'Provider-specific role mapping is still applied, but configuration is now deprecated.',
+  }
+);
