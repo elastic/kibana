@@ -53,8 +53,8 @@ describe('useWorkplaceSearchNav', () => {
           },
           {
             id: 'usersRoles',
-            name: 'Users & roles',
-            href: '/role_mappings',
+            name: 'Users and roles',
+            href: '/users_and_roles',
           },
           {
             id: 'security',
