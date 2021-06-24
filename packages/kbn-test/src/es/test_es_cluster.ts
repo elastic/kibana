@@ -44,7 +44,7 @@ interface Node {
   stop: () => Promise<void>;
 }
 
-export interface EsTestCluster {
+interface Cluster {
   ports: number[];
   nodes: Node[];
   getStartTimeout: () => number;
@@ -52,21 +52,18 @@ export interface EsTestCluster {
   stop: () => Promise<void>;
   cleanup: () => Promise<void>;
   getClient: () => KibanaClient;
-  getUrl: () => string;
   getHostUrls: () => string[];
 }
 
+export type EsTestCluster<
+  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
+> = Options['nodes'] extends TestEsClusterNodesOptions[]
+  ? Cluster
+  : Cluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
+
 export interface CreateTestEsClusterOptions {
-  /**
-   * Port to run Elasticsearch on. If you configure a
-   * multi-node cluster with the `nodes` option, this
-   * port will be incremented by one for each added node.
-   */
-  port?: number;
-  password?: string;
-  license?: 'basic' | 'gold' | 'trial'; // | 'oss'
   basePath?: string;
-  esFrom?: string;
+  clusterName?: string;
   /**
    * Path to data archive snapshot to run Elasticsearch with.
    * To prepare the the snapshot:
@@ -78,21 +75,75 @@ export interface CreateTestEsClusterOptions {
    */
   dataArchive?: string;
   /**
+   * Elasticsearch configuration options. These are key/value pairs formatted as:
+   * `['key.1=val1', 'key.2=val2']`
+   */
+  esArgs?: string[];
+  esFrom?: string;
+  esJavaOpts?: string;
+  /**
+   * License to run your cluster under. Keep in mind that a `trial` license
+   * has an expiration date. If you are using a `dataArchive` with your tests,
+   * you'll likely need to use `basic` or `gold` to prevent the test from failing
+   * when the license expires.
+   */
+  license?: 'basic' | 'gold' | 'trial'; // | 'oss'
+  log: ToolingLog;
+  /**
    * Node-specific configuration if you wish to run a multi-node
    * cluster. One node will be added for each item in the array.
    *
    * If this option is not provided, the config will default
    * to a single-node cluster.
+   *
+   * @example
+   * {
+   *   nodes: [
+   *     {
+   *       name: 'node-01',
+   *       dataArchive: Path.join(__dirname, 'path', 'to', 'data_01')
+   * .   },
+   *     {
+   *       name: 'node-02',
+   *       dataArchive: Path.join(__dirname, 'path', 'to', 'data_02')
+   * .   },
+   *   ],
+   * }
    */
   nodes?: TestEsClusterNodesOptions[];
-  esArgs?: string[];
-  esJavaOpts?: string;
-  clusterName?: string;
-  log: ToolingLog;
+  /**
+   * Password for the `elastic` user. This is set after the cluster has started.
+   *
+   * Defaults to `changeme`.
+   */
+  password?: string;
+  /**
+   * Port to run Elasticsearch on. If you configure a
+   * multi-node cluster with the `nodes` option, this
+   * port will be incremented by one for each added node.
+   *
+   * @example
+   * {
+   *   nodes: [
+   *     {
+   *       name: 'node-01',
+   *       dataArchive: Path.join(__dirname, 'path', 'to', 'data_01')
+   * .   },
+   *     {
+   *       name: 'node-02',
+   *       dataArchive: Path.join(__dirname, 'path', 'to', 'data_02')
+   * .   },
+   *   ],
+   *   port: 6200, // node-01 will use 6200, node-02 will use 6201
+   * }
+   */
+  port?: number;
   ssl?: boolean;
 }
 
-export function createTestEsCluster(options: CreateTestEsClusterOptions): EsTestCluster {
+export function createTestEsCluster<
+  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
+>(options: Options): EsTestCluster<Options> {
   const {
     port = esTestConfig.getPort(),
     password = 'changeme',
@@ -166,6 +217,10 @@ export function createTestEsCluster(options: CreateTestEsClusterOptions): EsTest
         throw new Error(`unknown option esFrom "${esFrom}"`);
       }
 
+      // Collect promises so we can run them in parallel
+      const extractDirectoryPromises = [];
+      const nodeStartPromises = [];
+
       for (let i = 0; i < this.nodes.length; i++) {
         const node = nodes[i];
         const nodePort = this.ports[i];
@@ -173,29 +228,47 @@ export function createTestEsCluster(options: CreateTestEsClusterOptions): EsTest
 
         const archive = node.dataArchive || dataArchive;
         if (archive) {
-          const nodeDataDirectory = node.dataArchive ? `data-${node.name}` : 'data';
-          await this.nodes[i].extractDataDirectory(installPath, archive, nodeDataDirectory);
-          overriddenArgs.push(`path.data=${Path.resolve(installPath, nodeDataDirectory)}`);
+          extractDirectoryPromises.push(async () => {
+            const nodeDataDirectory = node.dataArchive ? `data-${node.name}` : 'data';
+            overriddenArgs.push(`path.data=${Path.resolve(installPath, nodeDataDirectory)}`);
+            return await this.nodes[i].extractDataDirectory(
+              installPath,
+              archive,
+              nodeDataDirectory
+            );
+          });
         }
 
-        log.info(`[es] starting node ${node.name} on port ${nodePort}`);
-        await this.nodes[i].start(installPath, {
-          password: config.password,
-          esArgs: assignArgs(esArgs, overriddenArgs),
-          esJavaOpts,
-          // If we have multiple nodes, we shouldn't try setting up the native realm
-          // right away, or ES will complain as the cluster isn't ready. So we only
-          // set it up after the last node is started.
-          skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+        nodeStartPromises.push(async () => {
+          log.info(`[es] starting node ${node.name} on port ${nodePort}`);
+          return await this.nodes[i].start(installPath, {
+            password: config.password,
+            esArgs: assignArgs(esArgs, overriddenArgs),
+            esJavaOpts,
+            // If we have multiple nodes, we shouldn't try setting up the native realm
+            // right away, or ES will complain as the cluster isn't ready. So we only
+            // set it up after the last node is started.
+            skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
+          });
         });
+      }
+
+      await Promise.all(extractDirectoryPromises.map(async (extract) => await extract()));
+      for (const start of nodeStartPromises) {
+        await start();
       }
     }
 
     async stop() {
+      const nodeStopPromises = [];
       for (let i = 0; i < this.nodes.length; i++) {
-        log.info(`[es] stopping node ${nodes[i].name}`);
-        await this.nodes[i].stop();
+        nodeStopPromises.push(async () => {
+          log.info(`[es] stopping node ${nodes[i].name}`);
+          return await this.nodes[i].stop();
+        });
       }
+      await Promise.all(nodeStopPromises.map(async (stop) => await stop()));
+
       log.info('[es] stopped');
     }
 
@@ -210,11 +283,17 @@ export function createTestEsCluster(options: CreateTestEsClusterOptions): EsTest
      */
     getClient(): KibanaClient {
       return new Client({
-        node: this.getUrl(),
+        node: this.getHostUrls()[0],
       });
     }
 
     getUrl() {
+      if (this.nodes.length > 1) {
+        throw new Error(
+          '`getUrl()` can only be used with a single-node cluster. For multi-node clusters, use `getHostUrls()`.'
+        );
+      }
+
       const parts = esTestConfig.getUrlParts();
       parts.port = port;
 
