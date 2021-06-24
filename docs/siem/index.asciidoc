@@ -2,6 +2,9 @@
 [role="xpack"]
 [[xpack-siem]]
 = Elastic Security overview
+++++
+<titleabbrev>Security</titleabbrev>
+++++
 
 https://www.elastic.co/security[Elastic Security] combines SIEM threat detection features with endpoint
 prevention and response capabilities in one solution. These analytical and
