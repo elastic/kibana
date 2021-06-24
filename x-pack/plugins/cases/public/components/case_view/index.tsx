@@ -164,8 +164,8 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             if (isStale || isLoadingUserActions) {
               return;
             }
+            await fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
             await fetchCase(true);
-            fetchCaseUserActions(caseId, caseData.connector.id, subCaseId);
           },
         };
 
