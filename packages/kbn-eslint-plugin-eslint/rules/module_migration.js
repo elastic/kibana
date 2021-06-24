@@ -102,7 +102,9 @@ module.exports = {
         checkModuleNameNode(context, mappings, node.source);
       },
       ExportNamedDeclaration(node) {
-        checkModuleNameNode(context, mappings, node.source, 'Re-exported');
+        if (node.source) {
+          checkModuleNameNode(context, mappings, node.source, 'Re-exported');
+        }
       },
       CallExpression(node) {
         if (

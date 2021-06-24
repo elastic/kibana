@@ -24,6 +24,7 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
         import "bar"
         require('bar')
         export { foo } from "bar"
+        export const foo2 = 'bar'
       `,
 
       options: [
@@ -43,6 +44,7 @@ ruleTester.run('@kbn/eslint/module-migration', rule, {
         import "foo"
         require('foo/foo2')
         export { foo } from 'foo'
+        export const foo2 = 'bar'
       `,
 
       options: [
