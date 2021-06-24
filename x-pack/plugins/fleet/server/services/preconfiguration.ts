@@ -373,6 +373,11 @@ function deepMergeVars(
       throw new Error(name);
     }
     const originalVar = original.vars[name];
-    Reflect.set(original.vars, name, { ...originalVar, ...val });
+    const newVar =
+      // If a single value was passed in to a multi field, ensure it gets converted to a multi
+      Array.isArray(originalVar.value) && !Array.isArray(val.value)
+        ? { ...val, value: [val.value] }
+        : val;
+    Reflect.set(original.vars, name, { ...originalVar, ...newVar });
   }
 }

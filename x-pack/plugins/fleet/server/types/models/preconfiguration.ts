@@ -23,7 +23,13 @@ const varsSchema = schema.maybe(
     schema.object({
       name: schema.string(),
       type: schema.maybe(schema.string()),
-      value: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+      value: schema.maybe(
+        schema.oneOf([
+          schema.string(),
+          schema.number(),
+          schema.arrayOf(schema.oneOf([schema.string(), schema.number()])),
+        ])
+      ),
       frozen: schema.maybe(schema.boolean()),
     })
   )
