@@ -63,14 +63,5 @@ export function getPolicyOptions({
       isSelected: !hasFleetAgentsSelected,
     },
     ...fleetAgentsOptions,
-    // {
-    //   key: 'fleet_policies',
-    //   label: i18n.translate(
-    //     'xpack.apm.tutorial.agent_config.fleetPoliciesLabel',
-    //     { defaultMessage: 'Fleet policies' }
-    //   ),
-    //   isVisible: !!data.fleetAgents.length,
-    //   options: fleetAgentsOptions,
-    // },
   ].filter(({ isVisible }) => isVisible);
 }
