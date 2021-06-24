@@ -77,6 +77,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       namespaceTypes: ['single', 'agnostic'],
       notifications,
       showTrustedApps: false,
+      showEventFilters: false,
     });
     const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists(
       {
