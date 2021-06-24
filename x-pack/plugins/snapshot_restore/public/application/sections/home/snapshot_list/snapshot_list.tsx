@@ -9,7 +9,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
 
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
 import { WithPrivileges, SectionError, Error } from '../../../../shared_imports';
@@ -17,7 +17,6 @@ import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
 import {
-  linkToRepositories,
   linkToAddRepository,
   linkToPolicies,
   linkToAddPolicy,
@@ -43,7 +42,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const {
     error,
     isLoading,
-    data: { snapshots = [], repositories = [], policies = [], errors = {} },
+    data: { snapshots = [], repositories = [], policies = [] },
     resendRequest: reload,
   } = useLoadSnapshots();
 
@@ -122,38 +121,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           />
         }
         error={error as Error}
-      />
-    );
-  } else if (Object.keys(errors).length && repositories.length === 0) {
-    content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1 data-test-subj="title">
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPrompt.errorRepositoriesTitle"
-              defaultMessage="Some repositories contain errors"
-            />
-          </h1>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
-              defaultMessage="Go to {repositoryLink} to fix the errors."
-              values={{
-                repositoryLink: (
-                  <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.repositoryWarningLinkText"
-                      defaultMessage="Repositories"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        }
       />
     );
   } else if (repositories.length === 0) {
@@ -290,51 +257,16 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
       />
     );
   } else {
-    const repositoryErrorsWarning = Object.keys(errors).length ? (
-      <Fragment>
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryWarningTitle"
-              defaultMessage="Some repositories contain errors"
-            />
-          }
-          color="warning"
-          iconType="alert"
-        >
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryWarningDescription"
-            defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
-            values={{
-              repositoryLink: (
-                <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.repositoryWarningLinkText"
-                    defaultMessage="Repositories"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
-        <EuiSpacer />
-      </Fragment>
-    ) : null;
-
     content = (
-      <Fragment>
-        {repositoryErrorsWarning}
-
-        <SnapshotTable
-          snapshots={snapshots}
-          repositories={repositories}
-          reload={reload}
-          openSnapshotDetailsUrl={openSnapshotDetailsUrl}
-          onSnapshotDeleted={onSnapshotDeleted}
-          repositoryFilter={filteredRepository}
-          policyFilter={filteredPolicy}
-        />
-      </Fragment>
+      <SnapshotTable
+        snapshots={snapshots}
+        repositories={repositories}
+        reload={reload}
+        openSnapshotDetailsUrl={openSnapshotDetailsUrl}
+        onSnapshotDeleted={onSnapshotDeleted}
+        repositoryFilter={filteredRepository}
+        policyFilter={filteredPolicy}
+      />
     );
   }
 

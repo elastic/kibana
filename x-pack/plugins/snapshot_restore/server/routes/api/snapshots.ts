@@ -36,74 +36,44 @@ export function registerSnapshotsRoutes({
         // Silently swallow error as policy names aren't required in UI
       }
 
-      /*
-       * TODO: For 8.0, replace the logic in this handler with one call to `GET /_snapshot/_all/_all`
-       * when no repositories bug is fixed: https://github.com/elastic/elasticsearch/issues/43547
-       */
-
-      let repositoryNames: string[];
+      const allRepos: string[] = [];
+      const snapshots: SnapshotDetails[] = [];
 
       try {
-        const {
-          body: repositoriesByName,
-        } = await clusterClient.asCurrentUser.snapshot.getRepository({
+        // If any of these repositories 504 they will cost the request significant time.
+        const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
           repository: '_all',
+          snapshot: '_all',
+          ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
+          // @ts-expect-error @elastic/elasticsearch "desc" is a new param
+          order: 'desc',
+          // TODO We are temporarily hard-coding the maximum number of snapshots returned
+          // in order to prevent an unusable UI for users with large number of snapshots
+          // In the future, we will support server-side pagination
+          size: 200,
         });
-        repositoryNames = Object.keys(repositoriesByName);
 
-        if (repositoryNames.length === 0) {
-          return res.ok({
-            body: { snapshots: [], errors: [], repositories: [], policies },
-          });
-        }
+        // Decorate each snapshot with the repository with which it's associated.
+        fetchedSnapshots?.snapshots?.forEach((snapshot) => {
+          snapshots.push(
+            deserializeSnapshotDetails(snapshot as SnapshotDetailsEs, managedRepository)
+          );
+          // @ts-expect-error @elastic/elasticsearch repository is a new field in the response
+          allRepos.push(snapshot.repository);
+        });
       } catch (e) {
         return handleEsError({ error: e, response: res });
       }
 
-      const snapshots: SnapshotDetails[] = [];
-      const errors: any = {};
-      const repositories: string[] = [];
-
-      const fetchSnapshotsForRepository = async (repository: string) => {
-        try {
-          // If any of these repositories 504 they will cost the request significant time.
-          const response = await clusterClient.asCurrentUser.snapshot.get({
-            repository,
-            snapshot: '_all',
-            ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
-          });
-
-          const { responses: fetchedResponses = [] } = response.body;
-
-          // Decorate each snapshot with the repository with which it's associated.
-          fetchedResponses.forEach(({ snapshots: fetchedSnapshots = [] }) => {
-            fetchedSnapshots.forEach((snapshot) => {
-              snapshots.push(
-                deserializeSnapshotDetails(
-                  repository,
-                  snapshot as SnapshotDetailsEs,
-                  managedRepository
-                )
-              );
-            });
-          });
-
-          repositories.push(repository);
-        } catch (error) {
-          // These errors are commonly due to a misconfiguration in the repository or plugin errors,
-          // which can result in a variety of 400, 404, and 500 errors.
-          errors[repository] = error;
-        }
-      };
-
-      await Promise.all(repositoryNames.map(fetchSnapshotsForRepository));
+      const uniqueRepos = allRepos.filter((repo, index) => {
+        return allRepos.indexOf(repo) === index;
+      });
 
       return res.ok({
         body: {
           snapshots,
           policies,
-          repositories,
-          errors,
+          repositories: uniqueRepos,
         },
       });
     })
@@ -132,13 +102,12 @@ export function registerSnapshotsRoutes({
           ignore_unavailable: true,
         });
 
-        const { responses: snapshotsResponse } = response.body;
+        const { snapshots: snapshotsList } = response.body;
 
-        const snapshotsList =
-          snapshotsResponse && snapshotsResponse[0] && snapshotsResponse[0].snapshots;
         if (!snapshotsList || snapshotsList.length === 0) {
           return res.notFound({ body: 'Snapshot not found' });
         }
+
         const selectedSnapshot = snapshotsList.find(
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;
@@ -156,7 +125,6 @@ export function registerSnapshotsRoutes({
 
         return res.ok({
           body: deserializeSnapshotDetails(
-            repository,
             selectedSnapshot,
             managedRepository,
             successfulSnapshots
