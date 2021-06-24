@@ -16,6 +16,10 @@ import { commonStateTranslations, tlsTranslations } from './translations';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { TlsTranslations } from '../../../common/translations';
 
+import { ActionGroupIdsOf } from '../../../../alerting/common';
+
+export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
+
 export const DEFAULT_SIZE = 20;
 
 interface TlsAlertState {
@@ -90,7 +94,7 @@ export const getCertSummary = (
   };
 };
 
-export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
+export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
   id: 'xpack.uptime.alerts.tlsCertificate',
   name: tlsTranslations.alertFactoryName,
   validate: {
@@ -148,13 +152,11 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
         const alertInstance = alertWithLifecycle({
           id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
           fields: {
-            'cert_status.count': summary.count,
-            'cert_status.aging_count': summary.agingCount,
-            'cert_status.aging_common_name_and_date': summary.agingCommonNameAndDate,
-            'cert_status.expiring_count': summary.expiringCount,
-            'cert_status.expiring_common_name_and_date': summary.expiringCommonNameAndDate,
-            'cert_status.has_aging': summary.hasAging,
-            'cert_status.has_expired': summary.hasExpired,
+            'tls.server.x509.suject.common_name': cert.common_name,
+            'tls.server.x509.issuer.common_name': cert.issuer,
+            'tls.server.x509.not_after': cert.not_after,
+            'tls.server.x509.not_before': cert.not_before,
+            'tls.server.hash.sha256': cert.sha256,
             reason: generateAlertMessage(TlsTranslations.defaultActionMessage, summary),
           },
         });

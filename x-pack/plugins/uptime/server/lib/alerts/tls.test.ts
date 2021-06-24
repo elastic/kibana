@@ -43,6 +43,7 @@ const mockCertResult: CertResult = {
     {
       not_after: '2020-07-16T03:15:39.000Z',
       not_before: '2019-07-24T03:15:39.000Z',
+      issuer: 'Sample issuer',
       common_name: 'Common-One',
       monitors: [{ name: 'monitor-one', id: 'monitor1' }],
       sha256: 'abc',
@@ -50,6 +51,7 @@ const mockCertResult: CertResult = {
     {
       not_after: '2020-07-18T03:15:39.000Z',
       not_before: '2019-07-20T03:15:39.000Z',
+      issuer: 'Sample issuer',
       common_name: 'Common-Two',
       monitors: [{ name: 'monitor-two', id: 'monitor2' }],
       sha256: 'bcd',
@@ -57,6 +59,7 @@ const mockCertResult: CertResult = {
     {
       not_after: '2020-07-19T03:15:39.000Z',
       not_before: '2019-07-22T03:15:39.000Z',
+      issuer: 'Sample issuer',
       common_name: 'Common-Three',
       monitors: [{ name: 'monitor-three', id: 'monitor3' }],
       sha256: 'cde',
@@ -64,6 +67,7 @@ const mockCertResult: CertResult = {
     {
       not_after: '2020-07-25T03:15:39.000Z',
       not_before: '2019-07-25T03:15:39.000Z',
+      issuer: 'Sample issuer',
       common_name: 'Common-Four',
       monitors: [{ name: 'monitor-four', id: 'monitor4' }],
       sha256: 'def',
@@ -95,28 +99,20 @@ describe('tls alert', () => {
       const {
         services: { alertWithLifecycle },
       } = options;
-      // @ts-ignore the executor can return `void`, but ours never does
-      const state: Record<string, any> = await alert.executor(options);
+      await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
-      expect(alertWithLifecycle).toHaveBeenCalledTimes(1);
-      expect(alertWithLifecycle).toBeCalledWith({
-        fields: {
-          'cert_status.count': 4,
-          'cert_status.aging_common_name_and_date': '',
-          'cert_status.aging_count': 0,
-          'cert_status.expiring_common_name_and_date':
-            'Common-One, expired on 2020-07-16T03:15:39.000Z 301 days ago.; Common-Two, expired on 2020-07-18T03:15:39.000Z 299 days ago.; Common-Three, expired on 2020-07-19T03:15:39.000Z 298 days ago.',
-          'cert_status.expiring_count': 4,
-          'cert_status.has_aging': null,
-          'cert_status.has_expired': true,
-          reason: `Detected 4 TLS certificates expiring or becoming too old.
-
-Expiring cert count: 4
-Expiring Certificates: Common-One, expired on 2020-07-16T03:15:39.000Z 301 days ago.; Common-Two, expired on 2020-07-18T03:15:39.000Z 299 days ago.; Common-Three, expired on 2020-07-19T03:15:39.000Z 298 days ago.
-
-`,
-        },
-        id: TLS.id,
+      expect(alertWithLifecycle).toHaveBeenCalledTimes(4);
+      mockCertResult.certs.forEach((cert) => {
+        expect(alertWithLifecycle).toBeCalledWith({
+          fields: expect.objectContaining({
+            'tls.server.x509.suject.common_name': cert.common_name,
+            'tls.server.x509.issuer.common_name': cert.issuer,
+            'tls.server.x509.not_after': cert.not_after,
+            'tls.server.x509.not_before': cert.not_before,
+            'tls.server.hash.sha256': cert.sha256,
+          }),
+          id: `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`,
+        });
       });
       expect(mockGetter).toBeCalledWith(
         expect.objectContaining({
@@ -131,25 +127,17 @@ Expiring Certificates: Common-One, expired on 2020-07-16T03:15:39.000Z 301 days 
         })
       );
       const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
-      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(1);
-      expect(alertInstanceMock.replaceState).toBeCalledWith({
-        agingCommonNameAndDate: '',
-        agingCount: 0,
-        count: 4,
-        currentTriggerStarted: mockDate,
-        expiringCommonNameAndDate:
-          'Common-One, expired on 2020-07-16T03:15:39.000Z 301 days ago.; Common-Two, expired on 2020-07-18T03:15:39.000Z 299 days ago.; Common-Three, expired on 2020-07-19T03:15:39.000Z 298 days ago.',
-        expiringCount: 4,
-        firstCheckedAt: mockDate,
-        firstTriggeredAt: mockDate,
-        hasAging: null,
-        hasExpired: true,
-        isTriggered: true,
-        lastCheckedAt: mockDate,
-        lastResolvedAt: undefined,
-        lastTriggeredAt: mockDate,
+      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(4);
+      mockCertResult.certs.forEach((cert) => {
+        expect(alertInstanceMock.replaceState).toBeCalledWith(
+          expect.objectContaining({
+            commonName: cert.common_name,
+            issuer: cert.issuer,
+            status: 'expired',
+          })
+        );
       });
-      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(4);
       expect(alertInstanceMock.scheduleActions).toBeCalledWith(TLS.id);
     });
 
@@ -162,69 +150,14 @@ Expiring Certificates: Common-One, expired on 2020-07-16T03:15:39.000Z 301 days 
       const alert = tlsAlertFactory(server, libs, plugins);
       const certSettings = { certAgeThreshold: 10, certExpirationThreshold: 5 };
       const options = mockOptions(certSettings);
-      const {
-        services: { alertWithLifecycle },
-      } = options;
-      // @ts-ignore the executor can return `void`, but ours never does
-      const state: Record<string, any> = await alert.executor(options);
+      await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
-      expect(alertWithLifecycle).toHaveBeenCalledTimes(1);
-      expect(alertWithLifecycle).toBeCalledWith({
-        fields: {
-          'cert_status.count': 4,
-          'cert_status.aging_common_name_and_date':
-            'Common-Two, valid since 2019-07-20T03:15:39.000Z, 663 days ago.; Common-Three, valid since 2019-07-22T03:15:39.000Z, 661 days ago.; Common-One, valid since 2019-07-24T03:15:39.000Z, 659 days ago.',
-          'cert_status.aging_count': 4,
-          'cert_status.expiring_common_name_and_date':
-            'Common-One, expired on 2020-07-16T03:15:39.000Z 301 days ago.; Common-Two, expired on 2020-07-18T03:15:39.000Z 299 days ago.; Common-Three, expired on 2020-07-19T03:15:39.000Z 298 days ago.',
-          'cert_status.expiring_count': 4,
-          'cert_status.has_aging': true,
-          'cert_status.has_expired': true,
-          reason: `Detected 4 TLS certificates expiring or becoming too old.
-
-Expiring cert count: 4
-Expiring Certificates: Common-One, expired on 2020-07-16T03:15:39.000Z 301 days ago.; Common-Two, expired on 2020-07-18T03:15:39.000Z 299 days ago.; Common-Three, expired on 2020-07-19T03:15:39.000Z 298 days ago.
-
-Aging cert count: 4
-Aging Certificates: Common-Two, valid since 2019-07-20T03:15:39.000Z, 663 days ago.; Common-Three, valid since 2019-07-22T03:15:39.000Z, 661 days ago.; Common-One, valid since 2019-07-24T03:15:39.000Z, 659 days ago.
-`,
-        },
-        id: TLS.id,
-      });
       expect(mockGetter).toBeCalledWith(
         expect.objectContaining({
-          from: DEFAULT_FROM,
-          to: DEFAULT_TO,
-          index: 0,
-          size: DEFAULT_SIZE,
           notValidAfter: `now+${certSettings.certExpirationThreshold}d`,
           notValidBefore: `now-${certSettings.certAgeThreshold}d`,
-          sortBy: 'common_name',
-          direction: 'desc',
         })
       );
-      const [{ value: alertInstanceMock }] = alertWithLifecycle.mock.results;
-      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(1);
-      expect(alertInstanceMock.replaceState).toBeCalledWith({
-        agingCommonNameAndDate:
-          'Common-Two, valid since 2019-07-20T03:15:39.000Z, 663 days ago.; Common-Three, valid since 2019-07-22T03:15:39.000Z, 661 days ago.; Common-One, valid since 2019-07-24T03:15:39.000Z, 659 days ago.',
-        agingCount: 4,
-        count: 4,
-        currentTriggerStarted: mockDate,
-        expiringCommonNameAndDate:
-          'Common-One, expired on 2020-07-16T03:15:39.000Z 301 days ago.; Common-Two, expired on 2020-07-18T03:15:39.000Z 299 days ago.; Common-Three, expired on 2020-07-19T03:15:39.000Z 298 days ago.',
-        expiringCount: 4,
-        firstCheckedAt: mockDate,
-        firstTriggeredAt: mockDate,
-        hasAging: true,
-        hasExpired: true,
-        isTriggered: true,
-        lastCheckedAt: mockDate,
-        lastResolvedAt: undefined,
-        lastTriggeredAt: mockDate,
-      });
-      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(1);
-      expect(alertInstanceMock.scheduleActions).toBeCalledWith(TLS.id);
     });
   });
 
