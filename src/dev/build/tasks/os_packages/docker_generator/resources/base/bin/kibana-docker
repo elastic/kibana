@@ -31,6 +31,17 @@ kibana_vars=(
     csp.rules
     csp.strict
     csp.warnLegacyBrowsers
+    csp.script_src
+    csp.worker_src
+    csp.style_src
+    csp.connect_src
+    csp.default_src
+    csp.font_src
+    csp.frame_src
+    csp.img_src
+    csp.frame_ancestors
+    csp.report_uri
+    csp.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     elasticsearch.customHeaders
