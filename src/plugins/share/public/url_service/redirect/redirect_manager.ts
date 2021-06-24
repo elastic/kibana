@@ -6,10 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from 'src/core/public';
+import type { CoreSetup } from 'src/core/public';
+import type { History } from 'history';
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { UrlService } from '../../../common/url_service';
 import { render } from './render';
 
+export interface RedirectOptions {
+  /** Locator ID. */
+  id: string;
+
+  /** Kibana version when locator params where generated. */
+  version: string;
+
+  /** Locator params. */
+  params: unknown & SerializableState;
+}
+
+export interface RedirectManagerDependencies {
+  url: UrlService;
+}
+
 export class RedirectManager {
+  constructor(public readonly deps: RedirectManagerDependencies) {}
+
   public registerRedirectApp(core: CoreSetup) {
     core.application.register({
       id: 'r',
@@ -17,10 +37,60 @@ export class RedirectManager {
       chromeless: true,
       mount: (params) => {
         const unmount = render(params.element);
+        this.onMount(params.history);
         return () => {
           unmount();
         };
       },
     });
+  }
+
+  protected onMount(history: History) {
+    const options = this.parseSearchParams(history);
+    const locator = this.deps.url.locators.get(options.id);
+
+    if (!locator) {
+      // TODO: show this error in UI.
+      throw new Error('Locator not found.');
+    }
+
+    // TODO: perform migration first
+    locator
+      .navigate(options.params)
+      .then()
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log('Redirect endpoint failed to execute locator redirect.');
+        // eslint-disable-next-line no-console
+        console.error(error);
+      });
+  }
+
+  protected parseSearchParams(history: History): RedirectOptions {
+    const search = new URLSearchParams(history.location.search);
+    const id = search.get('l');
+    const version = search.get('v');
+    const params = search.get('p');
+
+    if (!id) {
+      // TODO: show this error in UI.
+      throw new Error('Invalid locator ID (specify "l" param).');
+    }
+
+    if (!version) {
+      // TODO: show this error in UI.
+      throw new Error('Invalid locator version (specify "v" param).');
+    }
+
+    if (!params) {
+      // TODO: show this error in UI.
+      throw new Error('Invalid locator params (specify "p" param).');
+    }
+
+    return {
+      id,
+      version,
+      params: JSON.parse(params),
+    };
   }
 }

@@ -87,7 +87,9 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
       },
     });
 
-    const redirectManager = new RedirectManager();
+    const redirectManager = new RedirectManager({
+      url: this.url,
+    });
     redirectManager.registerRedirectApp(core);
 
     return {
