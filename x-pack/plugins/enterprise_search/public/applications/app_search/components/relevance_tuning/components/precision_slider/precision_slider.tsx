@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DOCS_PREFIX } from '../../../../routes';
 import { RelevanceTuningLogic } from '../../relevance_tuning_logic';
 
 import { getStepDescription } from './utils';
@@ -54,16 +55,15 @@ export const PrecisionSlider: React.FC = () => {
             {
               defaultMessage: 'Fine tune the precision vs. recall settings on your engine.',
             }
-          )}
-          {/* {' '}
-          <EuiLink>
+          )}{' '}
+          <EuiLink href={`${DOCS_PREFIX}/api-reference.html`} target="_blank">
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.learnMore.link',
               {
                 defaultMessage: 'Learn more.',
               }
             )}
-          </EuiLink> */}
+          </EuiLink>
         </EuiText>
         <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceBetween">
