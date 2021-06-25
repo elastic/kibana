@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { groupBy } from 'lodash';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   INDICATOR_DESTINATION_PATH,
 } from '../../../../../common/constants';
-import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import {
+  ENRICHMENT_TYPES,
+  MATCHED_FIELD,
+  MATCHED_ID,
+  MATCHED_TYPE,
+} from '../../../../../common/cti/constants';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
@@ -75,3 +81,30 @@ export const getEnrichmentValue = (enrichment: CtiEnrichment, field: string) =>
 export const getShimmedIndicatorValue = (enrichment: CtiEnrichment, field: string) =>
   getEnrichmentValue(enrichment, field) ||
   getEnrichmentValue(enrichment, `${DEFAULT_INDICATOR_SOURCE_PATH}.${field}`);
+
+const buildEnrichmentId = (enrichment: CtiEnrichment): string => {
+  const matchedId = getEnrichmentValue(enrichment, MATCHED_ID);
+  const matchedField = getEnrichmentValue(enrichment, MATCHED_FIELD);
+  return `${matchedId}${matchedField}`;
+};
+/**
+ * This function receives an array of enrichments and removes
+ * investigation-time enrichments if that exact indicator already exists
+ * elsewhere in the list.
+ *
+ * @param enrichments {@type CtiEnrichment[]}
+ */
+export const filterDuplicateEnrichments = (enrichments: CtiEnrichment[]): CtiEnrichment[] => {
+  if (enrichments.length < 2) {
+    return enrichments;
+  }
+  const enrichmentsById = groupBy(enrichments, buildEnrichmentId);
+
+  return Object.values(enrichmentsById).map(
+    (enrichmentGroup) =>
+      enrichmentGroup.find(
+        (enrichment) =>
+          getEnrichmentValue(enrichment, MATCHED_TYPE) !== ENRICHMENT_TYPES.InvestigationTime
+      ) ?? enrichmentGroup[0]
+  );
+};

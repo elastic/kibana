@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { parseExistingEnrichments } from './helpers';
+import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
+import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
+import { filterDuplicateEnrichments, parseExistingEnrichments } from './helpers';
 
 describe('parseExistingEnrichments', () => {
   it('returns an empty array if data is empty', () => {
@@ -411,5 +413,33 @@ describe('parseExistingEnrichments', () => {
         },
       ]),
     ]);
+  });
+});
+
+describe('filterDuplicateEnrichments', () => {
+  it('returns an empty array if given one', () => {
+    expect(filterDuplicateEnrichments([])).toEqual([]);
+  });
+
+  it('returns the existing enrichment if given both that and an investigation-time enrichment for the same indicator and field', () => {
+    const existingEnrichment = buildEventEnrichmentMock({
+      'matched.type': [ENRICHMENT_TYPES.IndicatorMatchRule],
+    });
+    const investigationEnrichment = buildEventEnrichmentMock({
+      'matched.type': [ENRICHMENT_TYPES.InvestigationTime],
+    });
+    expect(filterDuplicateEnrichments([existingEnrichment, investigationEnrichment])).toEqual([
+      existingEnrichment,
+    ]);
+  });
+
+  it('includes two enrichments from the same indicator if it matched different fields', () => {
+    const enrichments = [
+      buildEventEnrichmentMock(),
+      buildEventEnrichmentMock({
+        'matched.field': ['other.field'],
+      }),
+    ];
+    expect(filterDuplicateEnrichments(enrichments)).toEqual(enrichments);
   });
 });

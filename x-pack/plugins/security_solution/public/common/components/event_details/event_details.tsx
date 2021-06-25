@@ -28,7 +28,11 @@ import { TimelineTabs } from '../../../../common/types/timeline';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import { useEventEnrichment } from '../../containers/events/event_enrichment';
-import { parseExistingEnrichments, timelineDataToEnrichment } from './cti_details/helpers';
+import {
+  filterDuplicateEnrichments,
+  parseExistingEnrichments,
+  timelineDataToEnrichment,
+} from './cti_details/helpers';
 
 interface EventViewTab {
   id: EventViewId;
@@ -142,11 +146,10 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   const allEnrichments = useMemo(() => {
-    // TODO dedup
     if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
     }
-    return [...existingEnrichments, ...enrichmentsResponse.enrichments];
+    return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
   }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
   const enrichmentCount = allEnrichments.length;
 
