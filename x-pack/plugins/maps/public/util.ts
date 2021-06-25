@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
-import { FeatureCollection } from 'geojson';
-import * as topojson from 'topojson-client';
-import { GeometryCollection } from 'topojson-specification';
 import _ from 'lodash';
-import fetch from 'node-fetch';
 import {
   GIS_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -19,7 +15,6 @@ import {
   EMS_GLYPHS_PATH,
   EMS_APP_NAME,
   FONTS_API_PATH,
-  FORMAT_TYPE,
 } from '../common/constants';
 import {
   getHttp,
