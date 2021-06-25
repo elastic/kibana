@@ -5,7 +5,12 @@
 <titleabbrev>{fleet} settings</titleabbrev>
 ++++
 
-experimental[]
+beta[]
+
+[NOTE]
+====
+In {ecloud}, {fleet} flags are already configured.
+====
 
 You can configure `xpack.fleet` settings in your `kibana.yml`. 
 By default, {fleet} is enabled. To use {fleet}, you also need to configure {kib} and {es} hosts.
@@ -23,6 +28,8 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
   | Set to `true` (default) to enable {fleet}. 
 |===
 
+//QUESTION: These two settings have the same description. How are they different?
+
 [[fleet-data-visualizer-settings]]
 
 ==== {package-manager} settings
@@ -30,7 +37,10 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
 [cols="2*<"]
 |===
 | `xpack.fleet.registryUrl`
-  | The address to use to reach {package-manager} registry.
+  | The address to use to reach the {package-manager} registry.
+| `xpack.fleet.registryProxyUrl`
+  | The proxy address to use to reach the {package-manager} registry.
+
 |===
 
 ==== {fleet} settings
@@ -41,9 +51,100 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information.
   | Hostnames used by {agent} for accessing {fleet-server}.
 | `xpack.fleet.agents.elasticsearch.hosts`
   | Hostnames used by {agent} for accessing {es}.
+| `xpack.fleet.agents.elasticsearch.ca_sha256`
+  | Hash pin used for certificate verification. The pin is a base64-encoded
+    string of the SHA-256 fingerprint.
 |===
 
-[NOTE]
-====
-In {ecloud}, {fleet} flags are already configured.
-====
+
+//QUESTION: Is the xpack.fleet.agents.fleet_server.hosts setting supported? It
+//wasn't listed in https://github.com/elastic/observability-docs/issues/758.
+
+==== Preconfiguration settings
+
+//QUESTION: We should add some details here to help users understand
+//when they might need to modify these settings? Are these customizations that
+//most users won't need to know about?
+
+[cols="2*<a"]
+|===
+
+| `xpack.fleet.packages`
+  | List of integration packages that are installed when the {fleet} app starts
+  up for the first time. Required properties are:
+  
+  `name`:: Package name.
+  `version`:: Either an exact semantic version, or the keyword `latest` to fetch
+  the latest package version.
+
+| `xpack.fleet.agentPolicies`
+  | List of agent policies that are configured when the {fleet} app starts.
+Required properties are:
+
+  `name`:: Policy name.
+  `id`:: Unique ID for this policy. The ID may be a number or string.
+
+Optional properties are:
+  
+  `description`:: Text description of this policy.
+  `namespace`:: String identifying this policy's namespace (for advanced use cases).
+  `monitoring_enabled`:: A list of either or both the keywords `logs` or `metrics`.
+  `is_managed`:: If `true`, this policy is editable by the user and can only
+  be changed by updating the {kib} config.
+  `is_default`:: If `true`, this policy is the default agent policy.
+  `is_default_fleet_server`:: If `true`, this policy is the default {fleet-server} agent policy.
+  `package_policies`:: List of policy integrations to add to this policy.
+    `name`::: (required) Name of the integration policy.
+    `package`::: (required) Object containing
+      `name`:::: Name of the integration package associated with this policy.
+    `description`::: Text string describing this integration policy.
+    `namespace`::: String identifying this policy's namespace.
+    `inputs`::: Array that overrides any default input settings for this
+    policy's package. Follows the same schema as integration inputs, with the
+    exception that any object in `vars` can be passed `frozen: true` in order to
+    prevent that specific `var` from being edited by the user.
+|===
+
+//QUESTION: I don't think the description of monitoring_enabled is complete.
+//Can you provide more info?
+
+//QUESTION: The description of package under package_policies is incomplete
+//in https://github.com/elastic/observability-docs/issues/758. Can 
+//you please fill in the details.
+
+Example configuration:
+
+//QUESTION: Can someone in dev please confirm/test this config example. It's taken
+//from https://github.com/elastic/kibana/pull/96588, and I don't know if it's
+//still valid.
+
+[source,yaml]
+----
+xpack.fleet.packages:
+  - name: apache
+    version: 0.5.0
+
+xpack.fleet.agentPolicies:
+  - name: Preconfigured Policy
+    id: 1
+    namespace: test
+    package_policies:
+      - package:
+          name: system
+        name: System Integration
+        inputs:
+          - type: system/metrics
+            enabled: true
+            vars:
+              - name: system.hostfs
+                value: home/test
+            streams:
+              - data_stream:
+                  dataset: system.core
+                enabled: true
+                vars:
+                  - name: period
+                    value: 20s
+          - type: winlog
+            enabled: false
+----
