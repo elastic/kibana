@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { NotificationsStart } from 'kibana/public';
 import { SchemaOverview } from './schema_overview';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -15,7 +16,6 @@ import {
   APIReturnType,
 } from '../../../../services/rest/createCallApmApi';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { NotificationsStart } from 'kibana/public';
 
 type FleetMigrationCheckResponse = APIReturnType<'GET /api/apm/fleet/migration_check'>;
 
@@ -33,8 +33,7 @@ export function Schema() {
     data = {} as FleetMigrationCheckResponse,
     status,
   } = useFetcher(
-    (callApmApi) =>
-      callApmApi({ endpoint: 'GET /api/apm/fleet/migration_check' }),
+    (callApi) => callApi({ endpoint: 'GET /api/apm/fleet/migration_check' }),
     [],
     { preservePreviousData: false }
   );

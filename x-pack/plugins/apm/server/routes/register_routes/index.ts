@@ -53,7 +53,12 @@ export function registerRoutes({
   const router = core.setup.http.createRouter();
 
   routes.forEach((route) => {
-    const { params, endpoint, options: {useStrictParams=true, ...options}, handler } = route;
+    const {
+      params,
+      endpoint,
+      options: { useStrictParams = true, ...options },
+      handler,
+    } = route;
 
     const { method, pathname } = parseEndpoint(endpoint);
 

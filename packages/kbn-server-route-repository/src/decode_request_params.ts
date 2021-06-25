@@ -22,7 +22,7 @@ interface KibanaRequestParams {
 export function decodeRequestParams<T extends RouteParamsRT>(
   params: KibanaRequestParams,
   paramsRt: T,
-  useStrictParams=true
+  useStrictParams = true
 ): t.OutputOf<T> {
   const paramMap = omitBy(
     {

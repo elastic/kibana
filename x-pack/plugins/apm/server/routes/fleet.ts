@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import { i18n } from '@kbn/i18n';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
@@ -19,7 +20,6 @@ import {
 } from '../lib/fleet/get_cloud_apm_package_policy';
 import { createCloudApmPackgePolicy } from '../lib/fleet/create_cloud_apm_package_policy';
 import { getUnsupportedApmServerSchema } from '../lib/fleet/get_unsupported_apm_server_schema';
-import { i18n } from '@kbn/i18n';
 import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import { isSuperuser } from '../lib/fleet/is_superuser';
 
@@ -100,11 +100,11 @@ const getMigrationCheckRoute = createApmServerRoute({
     const fleetPluginStart = await plugins.fleet.start();
     const securityPluginStart = await plugins.security.start();
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
-    const cloud_apm_package_policy = await getCloudAgentPolicy({
+    const cloudApmPackagePolicy = await getCloudAgentPolicy({
       savedObjectsClient,
       fleetPluginStart,
     });
-    if (!cloud_apm_package_policy) {
+    if (!cloudApmPackagePolicy) {
       return {
         has_cloud_agent_policy: false,
         has_cloud_apm_package_policy: false,
@@ -112,7 +112,7 @@ const getMigrationCheckRoute = createApmServerRoute({
         has_required_role: hasRequiredRole,
       };
     }
-    const apmPackagePolicy = getApmPackagePolicy(cloud_apm_package_policy);
+    const apmPackagePolicy = getApmPackagePolicy(cloudApmPackagePolicy);
     return {
       has_cloud_agent_policy: true,
       has_cloud_apm_package_policy: !!apmPackagePolicy,
