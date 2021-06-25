@@ -723,7 +723,7 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({ unknownDocIds: [] });
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({ unknownDocs: [] });
         const newState = model(checkUnknownDocumentsSourceState, res);
         expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
 
@@ -769,7 +769,10 @@ describe('migrations v2 model', () => {
         };
 
         const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
-          unknownDocIds: ['dashboard:12', 'foo:17'],
+          unknownDocs: [
+            { id: 'dashboard:12', type: 'dashboard' },
+            { id: 'foo:17', type: 'foo' },
+          ],
         });
         const newState = model(checkUnknownDocumentsSourceState, res);
         expect(newState.controlState).toEqual('FATAL');
