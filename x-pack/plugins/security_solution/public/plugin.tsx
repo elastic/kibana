@@ -156,6 +156,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...params,
           services: await startServices,
           store: await this.store(coreStart, startPlugins, subPlugins),
+          usageCollection: plugins.usageCollection,
           subPlugins,
         });
       },
@@ -218,7 +219,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (licensing !== null) {
       this.licensingSubscription = licensing.subscribe((currentLicense) => {
         if (currentLicense.type !== undefined) {
-          this.appUpdater$.next(() => ({ deepLinks: getDeepLinks(currentLicense.type) }));
+          this.appUpdater$.next(() => ({
+            navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+            deepLinks: getDeepLinks(currentLicense.type),
+          }));
         }
       });
     }

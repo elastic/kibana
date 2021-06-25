@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -15,12 +15,11 @@ import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
 import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
-import { useKibana } from '../../common/lib/kibana';
-import { ALERTS_PATH, DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
+import { isDetectionsPath } from '../../helpers';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -33,27 +32,14 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   onAppLeave,
   setHeaderActionMenu,
 }) => {
-  const { application } = useKibana().services;
-  const subPluginId = useRef<string>('');
   const { pathname } = useLocation();
 
-  application.currentAppId$.subscribe((appId) => {
-    subPluginId.current =
-      pathname === ALERTS_PATH || pathname.match(/rules\/id/)
-        ? DETECTIONS_SUB_PLUGIN_ID
-        : appId ?? '';
-  });
-
   useInitSourcerer(
-    subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default
+    isDetectionsPath(pathname) ? SourcererScopeName.detections : SourcererScopeName.default
   );
 
   const { browserFields, indexPattern } = useSourcererScope(
-    subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default
+    isDetectionsPath(pathname) ? SourcererScopeName.detections : SourcererScopeName.default
   );
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
