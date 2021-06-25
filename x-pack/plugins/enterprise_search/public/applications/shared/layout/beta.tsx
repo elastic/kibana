@@ -86,3 +86,18 @@ export const BetaNotification: React.FC = () => {
     </EuiPopover>
   );
 };
+
+export const appendBetaNotificationItem = (sideNav: KibanaPageTemplateProps['solutionNav']) => {
+  if (sideNav?.items) {
+    sideNav.items.push({
+      id: 'beta',
+      name: '',
+      className: 'betaNotificationSideNavItem',
+      renderItem: () => (
+        <div className="betaNotificationWrapper">
+          <BetaNotification />
+        </div>
+      ),
+    });
+  }
+};
