@@ -9,6 +9,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 import {
   elasticLogo,
+  getElasticLogo,
   resolveWithMissingImage,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
 
@@ -29,7 +30,9 @@ export interface Return {
   dataurl: string;
 }
 
-export function image(): ExpressionFunctionDefinition<'image', null, Arguments, Return> {
+export async function image(): Promise<
+  ExpressionFunctionDefinition<'image', null, Arguments, Promise<Return>>
+> {
   const { help, args: argHelp } = getFunctionHelp().image;
   const errors = getFunctionErrors().image;
 
@@ -54,17 +57,17 @@ export function image(): ExpressionFunctionDefinition<'image', null, Arguments, 
         options: Object.values(ImageMode),
       },
     },
-    fn: (input, { dataurl, mode }) => {
+    fn: async (input, { dataurl, mode }) => {
       if (!mode || !Object.values(ImageMode).includes(mode)) {
         throw errors.invalidImageMode();
       }
 
       const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
-
+      const { elasticLogo: elasticLogo1 } = await getElasticLogo();
       return {
         type: 'image',
         mode: modeStyle,
-        dataurl: resolveWithMissingImage(dataurl, elasticLogo) as string,
+        dataurl: resolveWithMissingImage(dataurl, elasticLogo1) as string,
       };
     },
   };

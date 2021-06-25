@@ -115,6 +115,22 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     this.state.transitions.addFunction(fn);
   }
 
+  public async registerFunctionAsync(
+    functionDefinition:
+      | AnyExpressionFunctionDefinition
+      | (() => AnyExpressionFunctionDefinition)
+      | (() => Promise<AnyExpressionFunctionDefinition>)
+  ) {
+    if (typeof functionDefinition === 'object') {
+      this.registerFunction(functionDefinition);
+      return;
+    }
+
+    const fn = await functionDefinition();
+    const expressionFn = new ExpressionFunction(fn);
+    this.state.transitions.addFunction(expressionFn);
+  }
+
   public getFunction(name: string): ExpressionFunction | undefined {
     return this.state.get().functions[name];
   }

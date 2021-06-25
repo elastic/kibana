@@ -95,9 +95,8 @@ export const language: Language = {
   },
 };
 
-export function registerLanguage(functions: ExpressionFunction[]) {
-  language.keywords = functions.map((fn) => fn.name);
-
+export async function registerLanguage(functions: ExpressionFunction[]) {
+  language.keywords = await functions.map((fn) => fn.name);
   monaco.languages.register({ id: LANGUAGE_ID });
   monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, language);
 }

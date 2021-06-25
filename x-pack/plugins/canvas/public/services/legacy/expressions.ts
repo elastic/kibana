@@ -42,6 +42,7 @@ export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService>
               return batchedFunction({ functionName, args, context: serialize(input) });
             },
           });
+
           expressions.registerFunction(fn);
         });
       })();

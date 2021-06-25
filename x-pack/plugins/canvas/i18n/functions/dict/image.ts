@@ -6,12 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { image, ImageMode } from '../../../canvas_plugin_src/functions/common/image';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { URL, BASE64 } from '../../constants';
 
-export const help: FunctionHelp<FunctionFactory<typeof image>> = {
+export const help: FunctionHelp<
+  FunctionFactory<() => UnwrapPromiseOrReturn<ReturnType<typeof image>>>
+> = {
   help: i18n.translate('xpack.canvas.functions.imageHelpText', {
     defaultMessage:
       'Displays an image. Provide an image asset as a {BASE64} data {URL}, or pass in a sub-expression.',

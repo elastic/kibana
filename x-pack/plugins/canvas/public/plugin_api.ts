@@ -22,7 +22,11 @@ export interface CanvasApi {
   addArgumentUIs: AddToRegistry<any>;
   addDatasourceUIs: AddToRegistry<any>;
   addElements: AddToRegistry<ElementFactory>;
-  addFunctions: AddSpecsToRegistry<() => AnyExpressionFunctionDefinition>;
+  addFunctions: AddSpecsToRegistry<
+    | (() => AnyExpressionFunctionDefinition)
+    | (() => Promise<AnyExpressionFunctionDefinition>)
+    | AnyExpressionFunctionDefinition
+  >;
   addModelUIs: AddToRegistry<any>;
   addRenderers: AddSpecsToRegistry<AnyRendererFactory>;
   addTagUIs: AddToRegistry<any>;
@@ -69,9 +73,9 @@ export function getPluginApi(
 
   const api: CanvasApi = {
     // Functions, types and renderers are registered directly to expression plugin
-    addFunctions: (fns) => {
-      fns.forEach((fn) => {
-        expressionsPluginSetup.registerFunction(fn);
+    addFunctions: async (fns) => {
+      fns.forEach(async (fn) => {
+        await expressionsPluginSetup.registerFunctionAsync(fn);
       });
     },
     addTypes: (types) => {

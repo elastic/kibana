@@ -47,6 +47,7 @@ export type ExpressionsServiceSetup = Pick<
   | 'getType'
   | 'getTypes'
   | 'registerFunction'
+  | 'registerFunctionAsync'
   | 'registerRenderer'
   | 'registerType'
   | 'run'
@@ -233,6 +234,13 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   public readonly registerFunction = (
     functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
   ): void => this.executor.registerFunction(functionDefinition);
+
+  public readonly registerFunctionAsync = async (
+    functionDefinition:
+      | AnyExpressionFunctionDefinition
+      | (() => AnyExpressionFunctionDefinition)
+      | (() => Promise<AnyExpressionFunctionDefinition>)
+  ): Promise<void> => await this.executor.registerFunctionAsync(functionDefinition);
 
   public readonly registerType = (
     typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
