@@ -42,7 +42,7 @@ export const EXCEPTIONS_TABLE_TAB = '[data-test-subj="allRulesTableTab-exception
 
 export const EXCEPTIONS_TABLE = '[data-test-subj="exceptions-table"]';
 
-export const EXCEPTIONS_TABLE_SEARCH = '[data-test-subj="header-section-supplements"] input';
+export const EXCEPTIONS_TABLE_SEARCH = '[data-test-subj="exceptionsHeaderSearch"]';
 
 export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingExceptionLists"]';
 

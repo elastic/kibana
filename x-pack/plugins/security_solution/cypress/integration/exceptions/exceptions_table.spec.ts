@@ -125,7 +125,7 @@ describe('Exceptions Table', () => {
     });
   });
 
-  it.skip('Deletes exception list without rule reference', () => {
+  it('Deletes exception list without rule reference', () => {
     waitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
@@ -136,7 +136,7 @@ describe('Exceptions Table', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 2 lists`);
   });
 
-  it.skip('Deletes exception list with rule reference', () => {
+  it('Deletes exception list with rule reference', () => {
     waitForPageWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 

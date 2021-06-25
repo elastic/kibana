@@ -38,10 +38,10 @@ export const EXCEPTIONS_SEARCH_SCHEMA = {
 export const ExceptionsSearchBar = React.memo<ExceptionListsTableSearchProps>(({ onSearch }) => {
   return (
     <EuiSearchBar
-      data-test-subj="exceptionsHeaderSearch"
       aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
       onChange={onSearch}
       box={{
+        [`data-test-subj`]: 'exceptionsHeaderSearch',
         placeholder: i18n.EXCEPTION_LIST_SEARCH_PLACEHOLDER,
         incremental: false,
         schema: EXCEPTIONS_SEARCH_SCHEMA,

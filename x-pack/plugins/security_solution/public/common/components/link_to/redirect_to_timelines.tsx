@@ -13,6 +13,6 @@ export const getTimelineTabsUrl = (tabName: TimelineTypeLiteral, search?: string
   `/${tabName}${appendSearch(search)}`;
 
 export const getTimelineUrl = (id: string, graphEventId?: string) =>
-  `/?timeline=(id:'${id}',isOpen:!t${
+  `?timeline=(id:'${id}',isOpen:!t${
     isEmpty(graphEventId) ? ')' : `,graphEventId:'${graphEventId}')`
   }`;
