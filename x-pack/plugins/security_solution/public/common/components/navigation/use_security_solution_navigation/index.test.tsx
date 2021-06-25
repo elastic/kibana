@@ -75,7 +75,7 @@ describe('useSecuritySolutionNavigation', () => {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: boolean }) =>
-            `${appId}/${options?.deepLinkId ?? ''}${options.path}`,
+            `${appId}/${options?.deepLinkId ?? ''}${options?.path ?? ''}`,
         },
         chrome: {
           setBreadcrumbs: jest.fn(),

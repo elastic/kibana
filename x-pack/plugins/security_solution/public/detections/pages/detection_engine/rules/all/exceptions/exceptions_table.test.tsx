@@ -13,8 +13,6 @@ import { mockHistory } from '../../../../../../common/utils/route/index.test';
 import { getExceptionListSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_schema.mock';
 
 import { ExceptionListsTable } from './exceptions_table';
-import { useKibana } from '../../../../../../common/lib/kibana';
-import { useKibana as useKibanaMock } from '../../../../../../common/lib/kibana/__mocks__';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
@@ -61,21 +59,6 @@ describe('ExceptionListsTable', () => {
   });
 
   beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      ...useKibanaMock,
-      services: {
-        http: {},
-        notifications: {
-          toasts: {
-            addError: jest.fn(),
-          },
-        },
-        application: {
-          getUrlForApp: jest.fn(),
-        },
-      },
-    });
-
     (useApi as jest.Mock).mockReturnValue({
       deleteExceptionList: jest.fn(),
       exportExceptionList: jest.fn(),
