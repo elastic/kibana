@@ -90,10 +90,20 @@ export const useVisualizeAppState = (
       // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
       // defaults applied. If the url was from a previous session which included modifications to the
       // appState then they won't be equal.
-      if (!isEqual(stateContainer.getState().vis, stateDefaults.vis)) {
+      if (
+        !isEqual(stateContainer.getState().vis, stateDefaults.vis) ||
+        !isEqual(stateContainer.getState().query, stateDefaults.query) ||
+        !isEqual(stateContainer.getState().filters, stateDefaults.filters)
+      ) {
         const { aggs, ...visState } = stateContainer.getState().vis;
+        const query = stateContainer.getState().query;
+        const filter = stateContainer.getState().filters;
+        const visSearchSource = instance.vis.data.searchSource?.getFields() || {};
         instance.vis
-          .setState({ ...visState, data: { aggs } })
+          .setState({
+            ...visState,
+            data: { aggs, searchSource: { ...visSearchSource, query, filter } },
+          })
           .then(() => {
             // setting up the stateContainer after setState is successful will prevent loading the editor with failures
             // otherwise the catch will take presedence
