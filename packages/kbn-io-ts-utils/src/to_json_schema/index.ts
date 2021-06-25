@@ -20,16 +20,6 @@ type JSONSchemableValueType =
   | t.UnionType<t.Mixed[]>
   | t.IntersectionType<t.Mixed[]>;
 
-// type JSONSchemaArrayRuntimeType = t.ArrayType<JSONSchemaRuntimeType>;
-
-// type JSONSchemaObjectRuntimeType = t.InterfaceType<{ [key: string]: JSONSchemaRuntimeType }>;
-// type JSONSchemaRuntimeType =
-//   | t.StringType
-//   | t.NumberType
-//   | t.BooleanType
-//   | JSONSchemaArrayRuntimeType
-//   | JSONSchemaObjectRuntimeType
-
 const tags = [
   'StringType',
   'NumberType',

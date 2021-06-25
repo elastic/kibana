@@ -36,161 +36,68 @@ Array [
     ownFocus={true}
     size="s"
   >
-    <EuiWindowEvent
-      event="keydown"
-      handler={[Function]}
-    />
-    <EuiOverlayMask
-      headerZindexLocation="below"
-      onClick={[Function]}
+    <div
+      data-eui="EuiFlyout"
+      data-test-subj="reportInfoFlyout"
+      role="dialog"
     >
-      <Portal
-        containerInfo={
-          <div
-            class="euiOverlayMask euiOverlayMask--belowHeader"
-          />
-        }
+      <button
+        data-test-subj="euiFlyoutCloseButton"
+        onClick={[Function]}
+        type="button"
       />
-    </EuiOverlayMask>
-    <EuiFocusTrap
-      clickOutsideDisables={false}
-    >
-      <div
-        data-eui="EuiFocusTrap"
+      <EuiFlyoutHeader
+        hasBorder={true}
       >
         <div
-          aria-labelledby="flyoutTitle"
-          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-          data-test-subj="reportInfoFlyout"
-          role="dialog"
-          tabIndex={0}
+          className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
         >
-          <EuiI18n
-            default="Close this dialog"
-            token="euiFlyout.closeAriaLabel"
+          <EuiTitle
+            size="m"
           >
-            <EuiButtonIcon
-              aria-label="Close this dialog"
-              className="euiFlyout__closeButton"
-              color="text"
-              data-test-subj="euiFlyoutCloseButton"
-              iconType="cross"
-              onClick={[Function]}
+            <h2
+              className="euiTitle euiTitle--medium"
+              id="flyoutTitle"
             >
-              <button
-                aria-label="Close this dialog"
-                className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
-                data-test-subj="euiFlyoutCloseButton"
-                disabled={false}
-                onClick={[Function]}
-                type="button"
-              >
-                <EuiIcon
-                  aria-hidden="true"
-                  className="euiButtonIcon__icon"
-                  color="inherit"
-                  size="m"
-                  type="cross"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="euiButtonIcon__icon"
-                    color="inherit"
-                    data-euiicon-type="cross"
-                    size="m"
-                  />
-                </EuiIcon>
-              </button>
-            </EuiButtonIcon>
-          </EuiI18n>
-          <EuiFlyoutHeader
-            hasBorder={true}
-          >
-            <div
-              className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
-            >
-              <EuiTitle
-                size="m"
-              >
-                <h2
-                  className="euiTitle euiTitle--medium"
-                  id="flyoutTitle"
-                >
-                  Unable to fetch report info
-                </h2>
-              </EuiTitle>
-            </div>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <div
-              className="euiFlyoutBody"
-            >
-              <div
-                className="euiFlyoutBody__overflow"
-              >
-                <div
-                  className="euiFlyoutBody__overflowContent"
-                >
-                  <EuiText>
-                    <div
-                      className="euiText euiText--medium"
-                    >
-                      Could not fetch the job info
-                    </div>
-                  </EuiText>
-                </div>
-              </div>
-            </div>
-          </EuiFlyoutBody>
+              Unable to fetch report info
+            </h2>
+          </EuiTitle>
         </div>
-      </div>
-    </EuiFocusTrap>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <div
+          className="euiFlyoutBody"
+        >
+          <div
+            className="euiFlyoutBody__overflow"
+            tabIndex={0}
+          >
+            <div
+              className="euiFlyoutBody__overflowContent"
+            >
+              <EuiText>
+                <div
+                  className="euiText euiText--medium"
+                >
+                  Could not fetch the job info
+                </div>
+              </EuiText>
+            </div>
+          </div>
+        </div>
+      </EuiFlyoutBody>
+    </div>
   </EuiFlyout>,
   <div
-    aria-labelledby="flyoutTitle"
-    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+    data-eui="EuiFlyout"
     data-test-subj="reportInfoFlyout"
     role="dialog"
-    tabIndex={0}
   >
-    <EuiI18n
-      default="Close this dialog"
-      token="euiFlyout.closeAriaLabel"
-    >
-      <EuiButtonIcon
-        aria-label="Close this dialog"
-        className="euiFlyout__closeButton"
-        color="text"
-        data-test-subj="euiFlyoutCloseButton"
-        iconType="cross"
-        onClick={[Function]}
-      >
-        <button
-          aria-label="Close this dialog"
-          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
-          data-test-subj="euiFlyoutCloseButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-        >
-          <EuiIcon
-            aria-hidden="true"
-            className="euiButtonIcon__icon"
-            color="inherit"
-            size="m"
-            type="cross"
-          >
-            <span
-              aria-hidden="true"
-              className="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="cross"
-              size="m"
-            />
-          </EuiIcon>
-        </button>
-      </EuiButtonIcon>
-    </EuiI18n>
+    <button
+      data-test-subj="euiFlyoutCloseButton"
+      onClick={[Function]}
+      type="button"
+    />
     <EuiFlyoutHeader
       hasBorder={true}
     >
@@ -215,6 +122,7 @@ Array [
       >
         <div
           className="euiFlyoutBody__overflow"
+          tabIndex={0}
         >
           <div
             className="euiFlyoutBody__overflowContent"
@@ -243,159 +151,66 @@ Array [
     ownFocus={true}
     size="s"
   >
-    <EuiWindowEvent
-      event="keydown"
-      handler={[Function]}
-    />
-    <EuiOverlayMask
-      headerZindexLocation="below"
-      onClick={[Function]}
+    <div
+      data-eui="EuiFlyout"
+      data-test-subj="reportInfoFlyout"
+      role="dialog"
     >
-      <Portal
-        containerInfo={
-          <div
-            class="euiOverlayMask euiOverlayMask--belowHeader"
-          />
-        }
+      <button
+        data-test-subj="euiFlyoutCloseButton"
+        onClick={[Function]}
+        type="button"
       />
-    </EuiOverlayMask>
-    <EuiFocusTrap
-      clickOutsideDisables={false}
-    >
-      <div
-        data-eui="EuiFocusTrap"
+      <EuiFlyoutHeader
+        hasBorder={true}
       >
         <div
-          aria-labelledby="flyoutTitle"
-          className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
-          data-test-subj="reportInfoFlyout"
-          role="dialog"
-          tabIndex={0}
+          className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
         >
-          <EuiI18n
-            default="Close this dialog"
-            token="euiFlyout.closeAriaLabel"
+          <EuiTitle
+            size="m"
           >
-            <EuiButtonIcon
-              aria-label="Close this dialog"
-              className="euiFlyout__closeButton"
-              color="text"
-              data-test-subj="euiFlyoutCloseButton"
-              iconType="cross"
-              onClick={[Function]}
+            <h2
+              className="euiTitle euiTitle--medium"
+              id="flyoutTitle"
             >
-              <button
-                aria-label="Close this dialog"
-                className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
-                data-test-subj="euiFlyoutCloseButton"
-                disabled={false}
-                onClick={[Function]}
-                type="button"
-              >
-                <EuiIcon
-                  aria-hidden="true"
-                  className="euiButtonIcon__icon"
-                  color="inherit"
-                  size="m"
-                  type="cross"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="euiButtonIcon__icon"
-                    color="inherit"
-                    data-euiicon-type="cross"
-                    size="m"
-                  />
-                </EuiIcon>
-              </button>
-            </EuiButtonIcon>
-          </EuiI18n>
-          <EuiFlyoutHeader
-            hasBorder={true}
-          >
-            <div
-              className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
-            >
-              <EuiTitle
-                size="m"
-              >
-                <h2
-                  className="euiTitle euiTitle--medium"
-                  id="flyoutTitle"
-                >
-                  Job Info
-                </h2>
-              </EuiTitle>
-            </div>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <div
-              className="euiFlyoutBody"
-            >
-              <div
-                className="euiFlyoutBody__overflow"
-              >
-                <div
-                  className="euiFlyoutBody__overflowContent"
-                >
-                  <EuiText>
-                    <div
-                      className="euiText euiText--medium"
-                    />
-                  </EuiText>
-                </div>
-              </div>
-            </div>
-          </EuiFlyoutBody>
+              Job Info
+            </h2>
+          </EuiTitle>
         </div>
-      </div>
-    </EuiFocusTrap>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <div
+          className="euiFlyoutBody"
+        >
+          <div
+            className="euiFlyoutBody__overflow"
+            tabIndex={0}
+          >
+            <div
+              className="euiFlyoutBody__overflowContent"
+            >
+              <EuiText>
+                <div
+                  className="euiText euiText--medium"
+                />
+              </EuiText>
+            </div>
+          </div>
+        </div>
+      </EuiFlyoutBody>
+    </div>
   </EuiFlyout>,
   <div
-    aria-labelledby="flyoutTitle"
-    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
+    data-eui="EuiFlyout"
     data-test-subj="reportInfoFlyout"
     role="dialog"
-    tabIndex={0}
   >
-    <EuiI18n
-      default="Close this dialog"
-      token="euiFlyout.closeAriaLabel"
-    >
-      <EuiButtonIcon
-        aria-label="Close this dialog"
-        className="euiFlyout__closeButton"
-        color="text"
-        data-test-subj="euiFlyoutCloseButton"
-        iconType="cross"
-        onClick={[Function]}
-      >
-        <button
-          aria-label="Close this dialog"
-          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
-          data-test-subj="euiFlyoutCloseButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-        >
-          <EuiIcon
-            aria-hidden="true"
-            className="euiButtonIcon__icon"
-            color="inherit"
-            size="m"
-            type="cross"
-          >
-            <span
-              aria-hidden="true"
-              className="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="cross"
-              size="m"
-            />
-          </EuiIcon>
-        </button>
-      </EuiButtonIcon>
-    </EuiI18n>
+    <button
+      data-test-subj="euiFlyoutCloseButton"
+      onClick={[Function]}
+      type="button"
+    />
     <EuiFlyoutHeader
       hasBorder={true}
     >
@@ -420,6 +235,7 @@ Array [
       >
         <div
           className="euiFlyoutBody__overflow"
+          tabIndex={0}
         >
           <div
             className="euiFlyoutBody__overflowContent"

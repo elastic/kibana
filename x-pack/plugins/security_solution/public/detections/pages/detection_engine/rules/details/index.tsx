@@ -18,7 +18,6 @@ import {
   EuiTabs,
   EuiToolTip,
   EuiWindowEvent,
-  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
@@ -49,7 +48,7 @@ import {
   getDetectionEngineUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
-import { WrapperPage } from '../../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import { Rule, useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
@@ -115,6 +114,7 @@ import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/
 import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
+import { BadgeOptions } from '../../../../../common/components/header_page/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -253,15 +253,20 @@ const RuleDetailsPageComponent = () => {
   const title = useMemo(
     () => (
       <>
-        {rule?.name}{' '}
-        {ruleLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : (
-          !isExistingRule && <EuiBadge>{i18n.DELETED_RULE}</EuiBadge>
-        )}
+        {rule?.name} {ruleLoading && <EuiLoadingSpinner size="m" />}
       </>
     ),
-    [rule, ruleLoading, isExistingRule]
+    [rule, ruleLoading]
+  );
+  const badgeOptions = useMemo<BadgeOptions | undefined>(
+    () =>
+      !ruleLoading && !isExistingRule
+        ? {
+            text: i18n.DELETED_RULE,
+            color: 'default',
+          }
+        : undefined,
+    [isExistingRule, ruleLoading]
   );
   const subTitle = useMemo(
     () =>
@@ -563,7 +568,7 @@ const RuleDetailsPageComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <DetectionEngineHeaderPage
                 backOptions={{
@@ -595,6 +600,7 @@ const RuleDetailsPageComponent = () => {
                   </>,
                 ]}
                 title={title}
+                badgeOptions={badgeOptions}
               >
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
@@ -728,14 +734,14 @@ const RuleDetailsPageComponent = () => {
               />
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
 
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.detections} state={{ ruleName: rule?.name }} />
