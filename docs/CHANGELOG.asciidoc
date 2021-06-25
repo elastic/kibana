@@ -181,6 +181,18 @@ You must do a force unenroll to remove the {agent} and invalidate the API keys,
 or unenrollment hangs indefinitely. https://github.com/elastic/fleet-server/issues/380[#380]
 ====
 
+.*TSVB* references to the index pattern are not embedded when exporting a saved object
+[%collapsible]
+====
+*Details*  +
+This issue was reported at https://github.com/elastic/kibana/issues/103059[#103059] and was originally 
+related to moving a TSVB visualization from one space to another. It should be noted that there may be different 
+variants of this problem due to the fact that the used index pattern is not exported correctly.
+
+*Workaround* +
+You should export the used index patterns separately
+====
+
 [float]
 [[breaking-changes-7.13.0]]
 === Breaking changes
