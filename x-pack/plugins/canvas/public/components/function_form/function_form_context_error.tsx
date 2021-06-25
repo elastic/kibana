@@ -7,15 +7,22 @@
 
 import React, { FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
-import { ComponentStrings } from '../../../i18n/components';
+import { i18n } from '@kbn/i18n';
 
+const strings = {
+  getContextErrorMessage: (errorMessage: string) =>
+    i18n.translate('xpack.canvas.functionForm.contextError', {
+      defaultMessage: 'ERROR: {errorMessage}',
+      values: {
+        errorMessage,
+      },
+    }),
+};
 interface Props {
   context: {
     error: string;
   };
 }
-
-const { FunctionFormContextError: strings } = ComponentStrings;
 
 export const FunctionFormContextError: FunctionComponent<Props> = ({ context }) => (
   <div className="canvasFunctionForm canvasFunctionForm--error">

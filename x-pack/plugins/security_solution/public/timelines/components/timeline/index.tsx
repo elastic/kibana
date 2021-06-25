@@ -11,16 +11,15 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { isTab } from '../../../../../timelines/public';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { RowRenderer } from './body/renderers/row_renderer';
 import { CellValueElementProps } from './cell_rendering';
-import { isTab } from '../../../common/components/accessibility/helpers';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
-import { TimelineType, TimelineId } from '../../../../common/types/timeline';
+import { TimelineType, TimelineId, RowRenderer } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';

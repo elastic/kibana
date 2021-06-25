@@ -12,7 +12,7 @@ import {
 } from '../../../../../../../../src/plugins/kibana_utils/public';
 import type {
   AppDataType,
-  ReportViewTypeId,
+  ReportViewType,
   SeriesUrl,
   UrlFilter,
   URLReportDefinition,
@@ -36,6 +36,16 @@ interface ProviderProps {
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
 }
 
+function convertAllShortSeries(allShortSeries: AllShortSeries) {
+  const allSeriesIds = Object.keys(allShortSeries);
+  const allSeriesN: AllSeries = {};
+  allSeriesIds.forEach((seriesKey) => {
+    allSeriesN[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
+  });
+
+  return allSeriesN;
+}
+
 export function UrlStorageContextProvider({
   children,
   storage,
@@ -45,15 +55,14 @@ export function UrlStorageContextProvider({
   const [allShortSeries, setAllShortSeries] = useState<AllShortSeries>(
     () => storage.get(allSeriesKey) ?? {}
   );
-  const [allSeries, setAllSeries] = useState<AllSeries>({});
+  const [allSeries, setAllSeries] = useState<AllSeries>(() =>
+    convertAllShortSeries(storage.get(allSeriesKey) ?? {})
+  );
   const [firstSeriesId, setFirstSeriesId] = useState('');
 
   useEffect(() => {
     const allSeriesIds = Object.keys(allShortSeries);
-    const allSeriesN: AllSeries = {};
-    allSeriesIds.forEach((seriesKey) => {
-      allSeriesN[seriesKey] = convertFromShortUrl(allShortSeries[seriesKey]);
-    });
+    const allSeriesN: AllSeries = convertAllShortSeries(allShortSeries ?? {});
 
     setAllSeries(allSeriesN);
     setFirstSeriesId(allSeriesIds?.[0]);
@@ -68,8 +77,10 @@ export function UrlStorageContextProvider({
   };
 
   const removeSeries = (seriesIdN: string) => {
-    delete allShortSeries[seriesIdN];
-    delete allSeries[seriesIdN];
+    setAllShortSeries((prevState) => {
+      delete prevState[seriesIdN];
+      return { ...prevState };
+    });
   };
 
   const allSeriesIds = Object.keys(allShortSeries);
@@ -115,7 +126,7 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
 
 interface ShortUrlSeries {
   [URL_KEYS.OPERATION_TYPE]?: OperationType;
-  [URL_KEYS.REPORT_TYPE]?: ReportViewTypeId;
+  [URL_KEYS.REPORT_TYPE]?: ReportViewType;
   [URL_KEYS.DATA_TYPE]?: AppDataType;
   [URL_KEYS.SERIES_TYPE]?: SeriesType;
   [URL_KEYS.BREAK_DOWN]?: string;

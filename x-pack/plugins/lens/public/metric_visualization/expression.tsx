@@ -127,7 +127,7 @@ export function MetricChart({
     return <EmptyPlaceholder icon={LensIconChartMetric} />;
   }
 
-  const column = firstTable.columns[0];
+  const column = firstTable.columns.find(({ id }) => id === accessor)!;
   const row = firstTable.rows[0];
 
   // NOTE: Cardinality and Sum never receives "null" as value, but always 0, even for empty dataset.
