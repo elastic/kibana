@@ -28,7 +28,6 @@ import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
 import { EMSTermJoinConfig } from '../../../../maps/public';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
-import { COMMON_EMS_LAYER_IDS } from '../../../common/constants/embeddable_map';
 
 const MAX_ENTITY_VALUES = 3;
 
@@ -177,7 +176,6 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
         }
 
         const suggestion: EMSTermJoinConfig | null = await mapsPlugin.suggestEMSTermJoinConfig({
-          emsLayerIds: COMMON_EMS_LAYER_IDS,
           sampleValues: Array.from(entityValues),
           sampleValuesColumnName: entityName || '',
         });
