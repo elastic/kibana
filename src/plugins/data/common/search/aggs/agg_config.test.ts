@@ -7,6 +7,7 @@
  */
 
 import { identity } from 'lodash';
+import type { ExpressionAstExpression } from 'src/plugins/expressions';
 
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
@@ -662,52 +663,115 @@ describe('AggConfig', () => {
       `);
     });
 
-    it('creates a subexpression for param types other than "agg" which have specified toExpressionAst', () => {
-      // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
-      const range = typesRegistry.get('range') as MetricAggType;
-      range.expressionName = 'aggRange';
-      const rangesParam = range.params.find((p) => p.name === 'ranges');
-      rangesParam!.toExpressionAst = (val: any) => ({
-        type: 'expression',
-        chain: [
-          {
-            type: 'function',
-            function: 'aggRanges',
-            arguments: {
-              ranges: ['oh hi there!'],
-            },
-          },
-        ],
-      });
+    describe('subexpression', () => {
+      let ac: AggConfigs;
 
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
-      const configStates = {
-        type: 'range',
-        params: {
-          field: 'bytes',
-        },
-      };
-
-      const aggConfig = ac.createAggConfig(configStates);
-      const ranges = aggConfig.toExpressionAst()!.chain[0].arguments.ranges;
-      expect(ranges).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "ranges": Array [
-                    "oh hi there!",
-                  ],
+      beforeEach(() => {
+        // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
+        const range = typesRegistry.get('range') as MetricAggType;
+        range.expressionName = 'aggRange';
+        const rangesParam = range.params.find((p) => p.name === 'ranges');
+        rangesParam!.toExpressionAst = (val: any) => {
+          const toExpression = (ranges: any): ExpressionAstExpression => ({
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'aggRanges',
+                arguments: {
+                  ranges,
                 },
-                "function": "aggRanges",
-                "type": "function",
               },
             ],
-            "type": "expression",
+          });
+
+          return Array.isArray(val) ? val.map(toExpression) : toExpression(val);
+        };
+
+        ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      });
+
+      it('creates a subexpression for param types other than "agg" which have specified toExpressionAst', () => {
+        const configStates = {
+          type: 'range',
+          params: {
+            field: 'bytes',
+            ranges: { from: 1, to: 2 },
           },
-        ]
-      `);
+        };
+
+        const aggConfig = ac.createAggConfig(configStates);
+        const ranges = aggConfig.toExpressionAst()!.chain[0].arguments.ranges;
+        expect(ranges).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "ranges": Object {
+                      "from": 1,
+                      "to": 2,
+                    },
+                  },
+                  "function": "aggRanges",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ]
+        `);
+      });
+
+      it('supports subexpressions in multi-value arguments', () => {
+        const configStates = {
+          type: 'range',
+          params: {
+            field: 'bytes',
+            ranges: [
+              { from: 1, to: 2 },
+              { from: 2, to: 3 },
+            ],
+          },
+        };
+
+        const aggConfig = ac.createAggConfig(configStates);
+        const ranges = aggConfig.toExpressionAst()!.chain[0].arguments.ranges;
+        expect(ranges).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "ranges": Object {
+                      "from": 1,
+                      "to": 2,
+                    },
+                  },
+                  "function": "aggRanges",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+            Object {
+              "chain": Array [
+                Object {
+                  "arguments": Object {
+                    "ranges": Object {
+                      "from": 2,
+                      "to": 3,
+                    },
+                  },
+                  "function": "aggRanges",
+                  "type": "function",
+                },
+              ],
+              "type": "expression",
+            },
+          ]
+        `);
+      });
     });
 
     it('stringifies any other params which are an object', () => {
