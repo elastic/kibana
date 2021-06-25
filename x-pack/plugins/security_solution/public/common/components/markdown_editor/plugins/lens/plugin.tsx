@@ -9,7 +9,6 @@ import dateMath from '@elastic/datemath';
 
 import {
   EuiFieldText,
-  EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -24,107 +23,20 @@ import {
   EuiFlexGroup,
   EuiFormRow,
 } from '@elastic/eui';
+// @ts-expect-error update types
 import { insertText } from '@elastic/eui/lib/components/markdown_editor/markdown_actions';
-import { IndexPattern } from 'src/plugins/data/public';
 import React, { useCallback, useContext, useMemo, useRef, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import moment, { Moment } from 'moment';
 import { useLocation } from 'react-router-dom';
 
-import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
-import {
-  TypedLensByValueInput,
-  PersistedIndexPatternLayer,
-  XYState,
-} from '../../../../../../../lens/public';
 import { useKibana } from '../../../../lib/kibana';
 import { LensMarkDownRenderer } from './processor';
 import { ID } from './constants';
 import * as i18n from './translations';
-import { LensContext } from './context';
-
-const ModalContainer = styled.div`
-  width: ${({ theme }) => theme.eui.euiBreakpoints.m};
-
-  .euiModalBody {
-    min-height: 300px;
-  }
-`;
-
-// Generate a Lens state based on some app-specific input parameters.
-// `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
-function getLensAttributes(defaultIndexPattern: IndexPattern): TypedLensByValueInput['attributes'] {
-  const dataLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['col1', 'col2'],
-    columns: {
-      col2: {
-        dataType: 'number',
-        isBucketed: false,
-        label: 'Count of records',
-        operationType: 'count',
-        scale: 'ratio',
-        sourceField: 'Records',
-      },
-      col1: {
-        dataType: 'date',
-        isBucketed: true,
-        label: '@timestamp',
-        operationType: 'date_histogram',
-        params: { interval: 'auto' },
-        scale: 'interval',
-        sourceField: defaultIndexPattern.timeFieldName!,
-      },
-    },
-  };
-
-  const xyConfig: XYState = {
-    axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-    fittingFunction: 'None',
-    gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
-    layers: [
-      {
-        accessors: ['col2'],
-        layerId: 'layer1',
-        seriesType: 'bar_stacked',
-        xAccessor: 'col1',
-        yConfig: [{ forAccessor: 'col2', color: undefined }],
-      },
-    ],
-    legend: { isVisible: true, position: 'right' },
-    preferredSeriesType: 'bar_stacked',
-    tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-    valueLabels: 'hide',
-  };
-
-  return {
-    visualizationType: 'lnsXY',
-    title: '',
-    references: [
-      {
-        id: defaultIndexPattern.id!,
-        name: 'indexpattern-datasource-current-indexpattern',
-        type: 'index-pattern',
-      },
-      {
-        id: defaultIndexPattern.id!,
-        name: 'indexpattern-datasource-layer-layer1',
-        type: 'index-pattern',
-      },
-    ],
-    state: {
-      datasourceStates: {
-        indexpattern: {
-          layers: {
-            layer1: dataLayer,
-          },
-        },
-      },
-      filters: [],
-      query: { language: 'kuery', query: '' },
-      visualization: xyConfig,
-    },
-  };
-}
+import { CommentEditorContext } from './context';
+import { LensSavedObjectsModal } from './lens_saved_objects_modal';
+import { ModalContainer } from './modal_container';
+import { getLensAttributes } from './helpers';
 
 interface LensEditorProps {
   editMode?: boolean | null;
@@ -164,10 +76,10 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({ node, onClosePopover, 
   );
   const [lensTitle, setLensTitle] = useState(node?.title ?? '');
   const [showLensSavedObjectsModal, setShowLensSavedObjectsModal] = useState(false);
-  const context = useContext(LensContext);
+  const commentEditorContext = useContext(CommentEditorContext);
   const markdownContext = useContext(EuiMarkdownContext);
 
-  console.error('contextcontextcontext', context);
+  console.error('contextcontextcontext', commentEditorContext);
 
   console.error('rest', timefilter.getTime(), rest);
 
@@ -183,7 +95,24 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({ node, onClosePopover, 
   }, []);
 
   const handleAdd = useCallback(() => {
+    let draftComment;
+    if (storage.get('xpack.cases.commentDraft')) {
+      try {
+        draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+      } catch (e) {}
+    }
+
     if (node) {
+      markdownContext.replaceNode(
+        draftComment.position,
+        `!{lens${JSON.stringify({
+          startDate,
+          endDate,
+          title: lensTitle,
+          attributes: lensEmbeddableAttributes,
+        })}}`
+      );
+      onClosePopover();
       return;
     }
 
@@ -200,24 +129,29 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({ node, onClosePopover, 
         }
       );
     }
-  }, [lensEmbeddableAttributes, onSave, startDate, endDate, lensTitle]);
+  }, [
+    storage,
+    node,
+    lensEmbeddableAttributes,
+    markdownContext,
+    onClosePopover,
+    onSave,
+    startDate,
+    endDate,
+    lensTitle,
+  ]);
 
-  const originatingPath = useMemo(() => {
-    const commentId = context?.editorId;
-
-    if (!commentId) {
-      return `${location.pathname}${location.search}`;
-    }
-
-    return `${location.pathname}/${commentId}${location.search}`;
-  }, [context?.editorId, location.pathname, location.search]);
+  const originatingPath = useMemo(() => `${location.pathname}${location.search}`, [
+    location.pathname,
+    location.search,
+  ]);
 
   const handleEditInLensClick = useCallback(async () => {
     storage.set(
       'xpack.cases.commentDraft',
       JSON.stringify({
-        commentId: context?.editorId,
-        comment: context?.value,
+        commentId: commentEditorContext?.editorId,
+        comment: commentEditorContext?.value,
         position: node?.position,
         title: lensTitle,
       })
@@ -240,8 +174,8 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({ node, onClosePopover, 
     );
   }, [
     storage,
-    context?.editorId,
-    context?.value,
+    commentEditorContext?.editorId,
+    commentEditorContext?.value,
     node?.position,
     lensTitle,
     lens,
@@ -264,13 +198,24 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({ node, onClosePopover, 
       setLensEmbeddableAttributes(incomingEmbeddablePackage?.input.attributes);
       const lensTime = timefilter.getTime();
       if (lensTime?.from && lensTime?.to) {
-        setStartDate(dateMath.parse(lensTime.from!));
-        setEndDate(dateMath.parse(lensTime.to!));
+        setStartDate(dateMath.parse(lensTime.from)!);
+        setEndDate(dateMath.parse(lensTime.to)!);
       }
     }
 
+    let draftComment;
+    if (storage.get('xpack.cases.commentDraft')) {
+      try {
+        draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+      } catch (e) {}
+    }
+
+    if (draftComment.title) {
+      setLensTitle(draftComment.title);
+    }
+
     console.error('stoargesgeet', storage.get('xpack.cases.commentDraft'));
-  }, [embeddable, storage]);
+  }, [embeddable, storage, timefilter]);
 
   console.error('insertText', insertText);
 
@@ -350,57 +295,17 @@ const LensEditorComponent: React.FC<LensEditorProps> = ({ node, onClosePopover, 
         </EuiModalFooter>
       </ModalContainer>
       {showLensSavedObjectsModal ? (
-        <EuiModal onClose={() => setShowLensSavedObjectsModal(false)}>
-          <ModalContainer>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                <h1>{'Modal title'}</h1>
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-
-            <EuiModalBody>
-              <SavedObjectFinderUi
-                key="searchSavedObjectFinder"
-                onChoose={(savedObjectId, savedObjectType, fullName, savedObject) => {
-                  console.error('apya', savedObjectId, savedObjectType, fullName, savedObject);
-                  setLensEmbeddableAttributes({
-                    ...savedObject.attributes,
-                    references: savedObject.references,
-                  });
-                  setShowLensSavedObjectsModal(false);
-                }}
-                showFilter
-                noItemsMessage={
-                  'No matching lens found.'
-
-                  // i18n.translate(
-                  //   'xpack.transform.newTransform.searchSelection.notFoundLabel',
-                  //   {
-                  //     defaultMessage: 'No matching lens found.',
-                  //   }
-                  // )
-                }
-                savedObjectMetaData={[
-                  {
-                    type: 'lens',
-                    getIconForSavedObject: () => 'lensApp',
-                    name: 'Lens',
-                    includeFields: ['*'],
-                    // i18n.translate(
-                    //   'xpack.transform.newTransform.searchSelection.savedObjectType.search',
-                    //   {
-                    //     defaultMessage: 'Lens',
-                    //   }
-                    // ),
-                  },
-                ]}
-                fixedPageSize={10}
-                uiSettings={uiSettings}
-                savedObjects={savedObjects}
-              />
-            </EuiModalBody>
-          </ModalContainer>
-        </EuiModal>
+        <LensSavedObjectsModal
+          onClose={() => setShowLensSavedObjectsModal(false)}
+          onChoose={(savedObjectId, savedObjectType, fullName, savedObject) => {
+            console.error('apya', savedObjectId, savedObjectType, fullName, savedObject);
+            setLensEmbeddableAttributes({
+              ...savedObject.attributes,
+              references: savedObject.references,
+            });
+            setShowLensSavedObjectsModal(false);
+          }}
+        />
       ) : null}
     </>
   );
@@ -416,12 +321,10 @@ export const plugin: EuiMarkdownEditorUiPlugin = {
   },
   helpText: (
     <EuiCodeBlock language="md" paddingSize="s" fontSize="l">
-      {'[title](url)'}
+      {'{lens!{<config>}}'}
     </EuiCodeBlock>
   ),
   editor: function editor({ node, onSave, onCancel, ...rest }) {
-    console.error('editorr', node);
-    console.error('ssssssa', rest);
     return <LensEditor node={node} onClosePopover={onCancel} onSave={onSave} />;
   },
 };

@@ -18,6 +18,7 @@ interface LensProcessingPluginRendererProps {
 }
 
 export interface CasesLensIntegration {
+  editor_context: any;
   editor_plugins: {
     parsingPlugin: Plugin;
     processingPluginRenderer: React.FC<

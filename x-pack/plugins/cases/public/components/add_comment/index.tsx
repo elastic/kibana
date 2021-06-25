@@ -81,7 +81,7 @@ export const AddComment = React.memo(
       useImperativeHandle(ref, () => ({
         addQuote,
         setComment,
-        editorRef: editorRef.current,
+        editor: editorRef.current,
       }));
 
       const onSubmit = useCallback(async () => {

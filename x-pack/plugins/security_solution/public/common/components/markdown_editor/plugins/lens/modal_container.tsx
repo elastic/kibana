@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import styled from 'styled-components';
 
-export const CommentEditorContext = React.createContext<string | null>(null);
+export const ModalContainer = styled.div`
+  width: ${({ theme }) => theme.eui.euiBreakpoints.m};
+
+  .euiModalBody {
+    min-height: 300px;
+  }
+`;

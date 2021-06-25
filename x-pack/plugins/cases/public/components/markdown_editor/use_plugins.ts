@@ -13,11 +13,11 @@ import {
 import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { TemporaryProcessingPluginsType } from './types';
-import { useLensContext } from '../lens_context/use_lens_context';
+import { useCasesLensIntegrationContext } from '../lens_context/use_lens_context';
 
 export const usePlugins = () => {
   const timelinePlugins = useTimelineContext()?.editor_plugins;
-  const lensPlugins = useLensContext()?.editor_plugins;
+  const lensPlugins = useCasesLensIntegrationContext()?.editor_plugins;
 
   return useMemo(() => {
     const uiPlugins = getDefaultEuiMarkdownUiPlugins();

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, forwardRef, useRef, useState, useImperativeHandle } from 'react';
+import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
 import { PluggableList } from 'unified';
 import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { usePlugins } from './use_plugins';
-import { useLensContext } from '../lens_context/use_lens_context';
+import { useCasesLensIntegrationContext } from '../lens_context/use_lens_context';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
@@ -23,12 +23,15 @@ interface MarkdownEditorProps {
   value: string;
 }
 
-const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = forwardRef(
-  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }, ref) => {
+const MarkdownEditorComponent = forwardRef(
+  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }: MarkdownEditorProps, ref) => {
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
-
+    const onParse = useCallback((err, { messages }) => {
+      setMarkdownErrorMessages(err ? [err] : messages);
+    }, []);
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
-    const LensContextProvider = useLensContext()?.editor_context.Provider;
+    const CasesLensIntegrationContextProvider = useCasesLensIntegrationContext()?.editor_context
+      .Provider;
     const editorRef = useRef(null);
 
     console.error('useRef', ref?.current);
@@ -53,15 +56,16 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = forwardRef(
         uiPlugins={uiPlugins}
         parsingPluginList={parsingPlugins}
         processingPluginList={processingPlugins}
+        onParse={onParse}
         errors={markdownErrorMessages}
         data-test-subj={dataTestSubj}
         height={height}
       />
     );
 
-    if (LensContextProvider) {
+    if (CasesLensIntegrationContextProvider) {
       return (
-        <LensContextProvider
+        <CasesLensIntegrationContextProvider
           value={{
             editorId,
             onChange,
@@ -69,7 +73,7 @@ const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = forwardRef(
           }}
         >
           {editor}
-        </LensContextProvider>
+        </CasesLensIntegrationContextProvider>
       );
     }
 

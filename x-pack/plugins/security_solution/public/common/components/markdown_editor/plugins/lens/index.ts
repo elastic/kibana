@@ -8,6 +8,11 @@
 import { plugin } from './plugin';
 import { LensParser } from './parser';
 import { LensMarkDownRenderer } from './processor';
-import { LensContext } from './context';
+import { CommentEditorContext } from './context';
 
-export { LensContext as context, plugin, LensParser as parser, LensMarkDownRenderer as renderer };
+export {
+  CommentEditorContext as context,
+  plugin,
+  LensParser as parser,
+  LensMarkDownRenderer as renderer,
+};
