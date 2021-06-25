@@ -44,7 +44,7 @@ export const useVisualizeAppState = (
         kbnUrlStateStorage: services.kbnUrlStateStorage,
         byValue,
       });
-      const appState = stateContainer.getState();
+      const currentAppState = stateContainer.getState();
 
       const onDirtyStateChange = ({ isDirty }: { isDirty: boolean }) => {
         if (!isDirty) {
@@ -58,8 +58,8 @@ export const useVisualizeAppState = (
 
       const { filterManager, queryString } = services.data.query;
       // sync initial app state from state to managers
-      filterManager.setAppFilters(cloneDeep(appState.filters));
-      queryString.setQuery(migrateLegacyQuery(appState.query));
+      filterManager.setAppFilters(cloneDeep(currentAppState.filters));
+      queryString.setQuery(migrateLegacyQuery(currentAppState.query));
 
       // setup syncing of app filters between appState and query services
       const stopSyncingAppFilters = connectToQueryState(
@@ -92,13 +92,13 @@ export const useVisualizeAppState = (
       // defaults applied. If the url was from a previous session which included modifications to the
       // appState then they won't be equal.
       if (
-        !isEqual(appState.vis, stateDefaults.vis) ||
-        !isEqual(appState.query, stateDefaults.query) ||
-        !isEqual(appState.filters, stateDefaults.filters)
+        !isEqual(currentAppState.vis, stateDefaults.vis) ||
+        !isEqual(currentAppState.query, stateDefaults.query) ||
+        !isEqual(currentAppState.filters, stateDefaults.filters)
       ) {
-        const { aggs, ...visState } = appState.vis;
-        const query = appState.query;
-        const filter = appState.filters;
+        const { aggs, ...visState } = currentAppState.vis;
+        const query = currentAppState.query;
+        const filter = currentAppState.filters;
         const visSearchSource = instance.vis.data.searchSource?.getFields() || {};
         instance.vis
           .setState({
