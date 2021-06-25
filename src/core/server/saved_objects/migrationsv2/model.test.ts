@@ -38,6 +38,7 @@ import type {
   WaitForYellowSourceState,
   TransformedDocumentsBulkIndex,
   ReindexSourceToTempIndexBulk,
+  CheckUnknownDocumentsState,
 } from './types';
 import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
@@ -497,6 +498,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('LEGACY_SET_WRITE_BLOCK', () => {
       const legacySetWriteBlockState: LegacySetWriteBlockState = {
         ...baseState,
@@ -538,6 +540,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('LEGACY_CREATE_REINDEX_TARGET', () => {
       const legacyCreateReindexTargetState: LegacyCreateReindexTargetState = {
         ...baseState,
@@ -562,6 +565,7 @@ describe('migrations v2 model', () => {
       // returns a left, it will always succeed or timeout. Since timeout
       // failures are always retried we don't explicity test this logic
     });
+
     describe('LEGACY_REINDEX', () => {
       const legacyReindexState: LegacyReindexState = {
         ...baseState,
@@ -581,6 +585,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('LEGACY_REINDEX_WAIT_FOR_TASK', () => {
       const legacyReindexWaitForTaskState: LegacyReindexWaitForTaskState = {
         ...baseState,
@@ -630,6 +635,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(2000);
       });
     });
+
     describe('LEGACY_DELETE', () => {
       const legacyDeleteState: LegacyDeleteState = {
         ...baseState,
@@ -670,6 +676,30 @@ describe('migrations v2 model', () => {
     });
 
     describe('WAIT_FOR_YELLOW_SOURCE', () => {
+      const someMappings = {
+        properties: {},
+      } as const;
+
+      const waitForYellowSourceState: WaitForYellowSourceState = {
+        ...baseState,
+        controlState: 'WAIT_FOR_YELLOW_SOURCE',
+        sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
+        sourceIndexMappings: someMappings,
+      };
+
+      test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS if action succeeds', () => {
+        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+        const newState = model(waitForYellowSourceState, res);
+        expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
+
+        expect(newState).toMatchObject({
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          sourceIndex: Option.some('.kibana_3'),
+        });
+      });
+    });
+
+    describe('CHECK_UNKNOWN_DOCUMENTS', () => {
       const mappingsWithUnknownType = {
         properties: {
           disabled_saved_object_type: {
@@ -685,16 +715,16 @@ describe('migrations v2 model', () => {
         },
       } as const;
 
-      const waitForYellowSourceState: WaitForYellowSourceState = {
-        ...baseState,
-        controlState: 'WAIT_FOR_YELLOW_SOURCE',
-        sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
-        sourceIndexMappings: mappingsWithUnknownType,
-      };
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds and no unknown docs were found', () => {
+        const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
+          ...baseState,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
+          sourceIndexMappings: mappingsWithUnknownType,
+        };
 
-      test('WAIT_FOR_YELLOW_SOURCE -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
-        const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-        const newState = model(waitForYellowSourceState, res);
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({ unknownDocIds: [] });
+        const newState = model(checkUnknownDocumentsSourceState, res);
         expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
 
         expect(newState).toMatchObject({
@@ -729,6 +759,26 @@ describe('migrations v2 model', () => {
           }
         `);
       });
+
+      test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if action succeeds but unknown docs were found', () => {
+        const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
+          ...baseState,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          sourceIndex: Option.some('.kibana_3') as Option.Some<string>,
+          sourceIndexMappings: mappingsWithUnknownType,
+        };
+
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
+          unknownDocIds: ['dashboard:12', 'foo:17'],
+        });
+        const newState = model(checkUnknownDocumentsSourceState, res);
+        expect(newState.controlState).toEqual('FATAL');
+
+        expect(newState).toMatchObject({
+          controlState: 'FATAL',
+          reason: 'LOL',
+        });
+      });
     });
 
     describe('SET_SOURCE_WRITE_BLOCK', () => {
@@ -759,6 +809,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('CREATE_REINDEX_TEMP', () => {
       const state: CreateReindexTempState = {
         ...baseState,
@@ -969,6 +1020,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('REINDEX_SOURCE_TO_TEMP_INDEX_BULK', () => {
       const transformedDocs = [
         {
@@ -1024,6 +1076,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('CLONE_TEMP_TO_TARGET', () => {
       const state: CloneTempToSource = {
         ...baseState,
@@ -1053,6 +1106,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toBe(0);
       });
     });
+
     describe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT', () => {
       const state: OutdatedDocumentsSearchOpenPit = {
         ...baseState,
@@ -1339,6 +1393,7 @@ describe('migrations v2 model', () => {
         });
       });
     });
+
     describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
       const transformedDocs = [
         {
@@ -1395,6 +1450,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
       const updateTargetMappingsWaitForTaskState: UpdateTargetMappingsWaitForTaskState = {
         ...baseState,
@@ -1447,6 +1503,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(2000);
       });
     });
+
     describe('CREATE_NEW_TARGET', () => {
       const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
         AliasAction[]
@@ -1466,6 +1523,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('MARK_VERSION_INDEX_READY', () => {
       const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
         AliasAction[]
@@ -1506,6 +1564,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
     });
+
     describe('MARK_VERSION_INDEX_READY_CONFLICT', () => {
       const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
         AliasAction[]
