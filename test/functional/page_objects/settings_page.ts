@@ -43,7 +43,10 @@ export class SettingsPageObject extends FtrService {
 
   async clickKibanaIndexPatterns() {
     this.log.debug('clickKibanaIndexPatterns link');
-    await this.testSubjects.click('indexPatterns');
+    const currentUrl = await this.browser.getCurrentUrl();
+    if (!currentUrl.endsWith('indexPatterns')) {
+      await this.testSubjects.click('indexPatterns');
+    }
 
     await this.header.waitUntilLoadingHasFinished();
   }
