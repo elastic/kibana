@@ -69,3 +69,46 @@ describe('BetaNotification', () => {
     });
   });
 });
+
+describe('appendBetaNotificationItem', () => {
+  const mockSideNav = {
+    name: 'Hello world',
+    items: [
+      { id: '1', name: 'Link 1' },
+      { id: '2', name: 'Link 2' },
+    ],
+  };
+
+  it('inserts a beta notification into a side nav items array', () => {
+    appendBetaNotificationItem(mockSideNav);
+
+    expect(mockSideNav).toEqual({
+      name: 'Hello world',
+      items: [
+        { id: '1', name: 'Link 1' },
+        { id: '2', name: 'Link 2' },
+        {
+          id: 'beta',
+          name: '',
+          className: 'betaNotificationSideNavItem',
+          renderItem: expect.any(Function),
+        },
+      ],
+    });
+  });
+
+  it('renders the BetaNotification component as a side nav item', () => {
+    const SideNavItem = (mockSideNav.items[2] as any).renderItem;
+    const wrapper = shallow(<SideNavItem />);
+
+    expect(wrapper.hasClass('betaNotificationWrapper')).toBe(true);
+    expect(wrapper.find(BetaNotification)).toHaveLength(1);
+  });
+
+  it('does nothing if a sidenav with no items was passed', () => {
+    const mockEmptySideNav = { name: 'empty' };
+    appendBetaNotificationItem(mockEmptySideNav);
+
+    expect(mockEmptySideNav).toEqual({ name: 'empty' });
+  });
+});
