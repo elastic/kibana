@@ -30,6 +30,7 @@ interface TitleFieldProps {
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
   refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
+  rollupIndices: string[];
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -59,24 +60,23 @@ const createTitlesNotAllowedValidator = (
 });
 
 interface RollupIndexPatternValidatorArgs {
-  rollupIndices: string[];
-  matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: Record<string, { error: string }>;
   refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
+  isRollup: boolean;
 }
 
 const rollupIndexPatternValidator = ({
-  rollupIndices,
-  matchedIndices,
   rollupIndicesCapabilities,
   refreshMatchedIndices,
+  isRollup,
 }: RollupIndexPatternValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value }) => {
-    if (!rollupIndices || !rollupIndices.length) {
+    const results = await refreshMatchedIndices(value);
+    const rollupIndices = Object.keys(rollupIndicesCapabilities);
+
+    if (!isRollup || !rollupIndices || !rollupIndices.length) {
       return;
     }
-
-    const results = await refreshMatchedIndices(value);
 
     const rollupIndexMatches = results.exactMatchedIndices.filter((matchedIndex) =>
       rollupIndices.includes(matchedIndex.name)
@@ -114,7 +114,6 @@ interface GetTitleConfigArgs {
 const getTitleConfig = ({
   namesNotAllowed,
   isRollup,
-  matchedIndices,
   rollupIndicesCapabilities,
   refreshMatchedIndices,
 }: GetTitleConfigArgs): FieldConfig<string> => {
@@ -123,18 +122,12 @@ const getTitleConfig = ({
   const validations = [
     ...titleFieldConfig.validations,
     createTitlesNotAllowedValidator(namesNotAllowed),
+    rollupIndexPatternValidator({
+      rollupIndicesCapabilities,
+      refreshMatchedIndices,
+      isRollup,
+    }),
   ];
-
-  if (isRollup) {
-    validations.push(
-      rollupIndexPatternValidator({
-        rollupIndices: ['test-rollup', 'test-rollup2'],
-        matchedIndices,
-        rollupIndicesCapabilities,
-        refreshMatchedIndices,
-      })
-    );
-  }
 
   // Add validation to not allow duplicates
   return {
