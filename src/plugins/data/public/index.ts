@@ -268,6 +268,7 @@ export {
   IndexPatternSpec,
   IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
+  GetFieldsOptions,
 } from '../common';
 
 export { DuplicateIndexPatternError } from '../common/index_patterns/errors';

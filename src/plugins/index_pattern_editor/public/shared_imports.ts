@@ -11,6 +11,7 @@ export {
   IndexPatternField,
   DataPublicPluginStart,
   IndexPatternSpec,
+  GetFieldsOptions,
 } from '../../data/public';
 
 export {
@@ -31,6 +32,7 @@ export {
   ValidationFunc,
   FieldConfig,
   getFieldValidityAndErrorMessage,
+  ValidationConfig,
 } from '../../es_ui_shared/static/forms/hook_form_lib';
 
 export { fieldValidators } from '../../es_ui_shared/static/forms/helpers';

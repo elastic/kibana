@@ -16,7 +16,6 @@ import {
 
 import { DataPublicPluginStart } from './shared_imports';
 import { OpenEditorOptions } from './open_editor';
-import { IndexPatternManagementServiceStart } from './service';
 
 export interface IndexPatternEditorContext {
   uiSettings: IUiSettingsClient;
@@ -25,7 +24,6 @@ export interface IndexPatternEditorContext {
   notifications: NotificationsStart;
   application: ApplicationStart;
   indexPatternService: DataPublicPluginStart['indexPatterns'];
-  indexPatternCreateService: IndexPatternManagementServiceStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -36,7 +34,6 @@ export interface PluginStart {
   userPermissions: {
     editIndexPattern: () => boolean;
   };
-  indexPatternCreateService: IndexPatternManagementServiceStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

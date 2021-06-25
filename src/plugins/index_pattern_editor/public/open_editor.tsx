@@ -16,7 +16,6 @@ import {
   IndexPattern,
   DataPublicPluginStart,
 } from './shared_imports';
-import { IndexPatternManagementServiceStart } from './service';
 
 import { CloseEditor, IndexPatternEditorContext } from './types';
 import { IndexPatternFlyoutContentContainer } from './components/index_pattern_flyout_content_container';
@@ -28,14 +27,11 @@ export interface OpenEditorOptions {
 interface Dependencies {
   core: CoreStart;
   indexPatternService: DataPublicPluginStart['indexPatterns'];
-  indexPatternCreateService: IndexPatternManagementServiceStart;
 }
 
-export const getEditorOpener = ({
-  core,
-  indexPatternService,
-  indexPatternCreateService,
-}: Dependencies) => (options: OpenEditorOptions): CloseEditor => {
+export const getEditorOpener = ({ core, indexPatternService }: Dependencies) => (
+  options: OpenEditorOptions
+): CloseEditor => {
   const { uiSettings, overlays, docLinks, notifications, http, application } = core;
   const {
     Provider: KibanaReactContextProvider,
@@ -46,7 +42,6 @@ export const getEditorOpener = ({
     notifications,
     application,
     indexPatternService,
-    indexPatternCreateService,
   });
 
   let overlayRef: OverlayRef | null = null;
