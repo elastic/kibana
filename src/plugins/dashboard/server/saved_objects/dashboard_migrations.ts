@@ -25,6 +25,7 @@ import {
   convertSavedDashboardPanelToPanelState,
 } from '../../common/embeddable/embeddable_saved_object_converters';
 import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
 import { SerializableValue } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 
@@ -44,7 +45,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
-      type: 'index-pattern',
+      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
       id: searchSource.index,
     });
     delete searchSource.index;
@@ -57,7 +58,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
-        type: 'index-pattern',
+        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
         id: filterRow.meta.index,
       });
       delete filterRow.meta.index;
