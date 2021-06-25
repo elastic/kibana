@@ -51,7 +51,7 @@ const START_DATE_MINUS_2INTERVALS = getStartDate(-2 * INTERVAL_MILLIS);
 export default function timeSeriesQueryEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('time_series_query endpoint', () => {

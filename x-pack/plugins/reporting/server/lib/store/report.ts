@@ -9,11 +9,25 @@ import moment from 'moment';
 // @ts-ignore no module definition
 import Puid from 'puid';
 import { JOB_STATUSES } from '../../../common/constants';
-import { ReportApiJSON, ReportDocumentHead, ReportSource } from '../../../common/types';
+import {
+  ReportApiJSON,
+  ReportDocument,
+  ReportDocumentHead,
+  ReportSource,
+} from '../../../common/types';
+import { ReportTaskParams } from '../tasks';
+
+export { ReportDocument };
+export { ReportApiJSON, ReportSource };
 
 const puid = new Puid();
+export const MIGRATION_VERSION = '7.14.0';
 
-export class Report implements Partial<ReportSource> {
+/*
+ * The public fields are a flattened version what Elasticsearch returns when you
+ * `GET` a document.
+ */
+export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public _index?: string;
   public _id: string;
   public _primary_term?: number; // set by ES
@@ -35,8 +49,10 @@ export class Report implements Partial<ReportSource> {
   public readonly output?: ReportSource['output'];
   public readonly started_at?: ReportSource['started_at'];
   public readonly completed_at?: ReportSource['completed_at'];
-  public readonly process_expiration?: ReportSource['process_expiration'];
   public readonly timeout?: ReportSource['timeout'];
+
+  public process_expiration?: ReportSource['process_expiration'];
+  public migration_version: string;
 
   /*
    * Create an unsaved report
@@ -47,6 +63,8 @@ export class Report implements Partial<ReportSource> {
     this._index = opts._index;
     this._primary_term = opts._primary_term;
     this._seq_no = opts._seq_no;
+
+    this.migration_version = MIGRATION_VERSION;
 
     this.payload = opts.payload!;
     this.kibana_name = opts.kibana_name!;
@@ -70,7 +88,7 @@ export class Report implements Partial<ReportSource> {
   /*
    * Update the report with "live" storage metadata
    */
-  updateWithEsDoc(doc: Partial<Report>) {
+  updateWithEsDoc(doc: Partial<Report>): void {
     if (doc._index == null || doc._id == null) {
       throw new Error(`Report object from ES has missing fields!`);
     }
@@ -79,29 +97,52 @@ export class Report implements Partial<ReportSource> {
     this._index = doc._index;
     this._primary_term = doc._primary_term;
     this._seq_no = doc._seq_no;
+    this.migration_version = MIGRATION_VERSION;
   }
 
   /*
    * Data structure for writing to Elasticsearch index
    */
-  toEsDocsJSON() {
+  toReportSource(): ReportSource {
     return {
-      _id: this._id,
-      _index: this._index,
-      _source: {
-        jobtype: this.jobtype,
-        created_at: this.created_at,
-        created_by: this.created_by,
-        payload: this.payload,
-        meta: this.meta,
-        timeout: this.timeout,
-        max_attempts: this.max_attempts,
-        browser_type: this.browser_type,
-        status: this.status,
-        attempts: this.attempts,
-        started_at: this.started_at,
-        completed_at: this.completed_at,
-      },
+      migration_version: MIGRATION_VERSION,
+      kibana_name: this.kibana_name,
+      kibana_id: this.kibana_id,
+      jobtype: this.jobtype,
+      created_at: this.created_at,
+      created_by: this.created_by,
+      payload: this.payload,
+      meta: this.meta,
+      timeout: this.timeout!,
+      max_attempts: this.max_attempts,
+      browser_type: this.browser_type!,
+      status: this.status,
+      attempts: this.attempts,
+      started_at: this.started_at,
+      completed_at: this.completed_at,
+      process_expiration: this.process_expiration,
+      output: this.output || null,
+    };
+  }
+
+  /*
+   * Parameters to save in a task instance
+   */
+  toReportTaskJSON(): ReportTaskParams {
+    if (!this._index) {
+      throw new Error(`Task is missing the _index field!`);
+    }
+
+    return {
+      id: this._id,
+      index: this._index,
+      jobtype: this.jobtype,
+      created_at: this.created_at,
+      created_by: this.created_by,
+      payload: this.payload,
+      meta: this.meta,
+      attempts: this.attempts,
+      max_attempts: this.max_attempts,
     };
   }
 
@@ -129,5 +170,3 @@ export class Report implements Partial<ReportSource> {
     };
   }
 }
-
-export { ReportApiJSON, ReportSource };

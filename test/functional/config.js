@@ -58,6 +58,7 @@ export default async function ({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'visualization:visualize:legacyChartsLibrary': true,
+        'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
 
@@ -283,6 +284,21 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['long-window-logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        'test-index-unmapped-fields': {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['test-index-unmapped-fields'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
