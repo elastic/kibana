@@ -7,4 +7,4 @@
  */
 
 export * from './render';
-export * from './with_promise';
+export * from './wait_for';

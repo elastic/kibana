@@ -10,7 +10,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { revealImageRenderer } from '../';
 import { elasticOutline, getElasticLogo } from '../../../../presentation_util/public';
-import { Render, withPromise } from '../../../../presentation_util/public/__stories__';
+import { Render, waitFor } from '../../../../presentation_util/public/__stories__';
 import { Origin } from '../../../common/types/expression_functions';
 
 const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
@@ -28,5 +28,5 @@ storiesOf('renderers/revealImage', module).add(
   (_, props) => {
     return <Renderer elasticLogo={props?.elasticLogo} />;
   },
-  { decorators: [withPromise({ promise: getElasticLogo() })] }
+  { decorators: [waitFor({ waitTarget: getElasticLogo() })] }
 );

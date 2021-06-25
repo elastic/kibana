@@ -11,19 +11,23 @@ import { Story } from '@storybook/react';
 import { StoryFnReactReturnType } from '@storybook/react/dist/client/preview/types';
 import { StoryContext } from '@storybook/addons';
 
-export const withPromise = ({ promise, loading }: { promise: any; loading?: boolean }) => (
-  story: Story
-) => {
-  const [component, setComponent] = useState<StoryFnReactReturnType>();
-  const placeholder = loading ? loading : <div>Loading...</div>;
+export const waitFor = ({
+  waitTarget,
+  loaderComponent,
+}: {
+  waitTarget: Promise<any>;
+  loader?: boolean;
+}) => (story: Story) => {
+  const [storyComponent, setStory] = useState<StoryFnReactReturnType>();
+  const spinner = loaderComponent ?? <div>Loading...</div>;
 
   useEffect(() => {
-    if (!component) {
-      promise.then((res: any) => {
-        setComponent(story(res, {} as StoryContext));
+    if (!storyComponent) {
+      waitTarget.then((waitedTarget: any) => {
+        setStory(story(waitedTarget, {} as StoryContext));
       });
     }
-  }, [story, component]);
+  }, [story, storyComponent]);
 
-  return !component ? placeholder : component;
+  return storyComponent ? storyComponent : spinner;
 };
