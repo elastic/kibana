@@ -28,7 +28,6 @@ import {
 import type {
   ExceptionListType,
   OsTypeArray,
-  OsType,
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
