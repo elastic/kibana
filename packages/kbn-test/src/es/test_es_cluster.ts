@@ -44,7 +44,7 @@ interface Node {
   stop: () => Promise<void>;
 }
 
-export interface Cluster {
+export interface ICluster {
   ports: number[];
   nodes: Node[];
   getStartTimeout: () => number;
@@ -58,8 +58,8 @@ export interface Cluster {
 export type EsTestCluster<
   Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
 > = Options['nodes'] extends TestEsClusterNodesOptions[]
-  ? Cluster
-  : Cluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
+  ? ICluster
+  : ICluster & { getUrl: () => string }; // Only allow use of `getUrl` if `nodes` option isn't provided.
 
 export interface CreateTestEsClusterOptions {
   basePath?: string;

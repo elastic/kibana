@@ -30,7 +30,7 @@ export {
   createTestEsCluster,
   CreateTestEsClusterOptions,
   EsTestCluster,
-  Cluster,
+  ICluster,
 } from './es';
 
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';

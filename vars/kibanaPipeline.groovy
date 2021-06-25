@@ -89,7 +89,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   // Ports 62x2-62x9 kept open for ES nodes
   def esTransportPort = "63${parallelId}1-63${parallelId}9"
   def fleetPackageRegistryPort = "64${parallelId}1"
-  def alertingProxyPort = "64{parallelId}2"
+  def alertingProxyPort = "64${parallelId}2"
   def corsTestServerPort = "64${parallelId}3"
   def apmActive = githubPr.isPr() ? "false" : "true"
 
