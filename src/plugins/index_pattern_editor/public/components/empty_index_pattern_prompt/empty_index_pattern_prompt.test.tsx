@@ -12,14 +12,7 @@ import { shallowWithI18nProvider } from '@kbn/test/jest';
 
 describe('EmptyIndexPatternPrompt', () => {
   it('should render normally', () => {
-    const component = shallowWithI18nProvider(
-      <EmptyIndexPatternPrompt
-        canSave
-        creationOptions={[{ text: 'default', onClick: () => {} }]}
-        docLinksIndexPatternIntro={'testUrl'}
-        setBreadcrumbs={() => {}}
-      />
-    );
+    const component = shallowWithI18nProvider(<EmptyIndexPatternPrompt goToCreate={() => {}} />);
 
     expect(component).toMatchSnapshot();
   });

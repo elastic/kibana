@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { fieldValidators } from '../shared_imports';
+import { INDEX_PATTERN_TYPE } from '../types';
 
 // import { RUNTIME_FIELD_OPTIONS } from './constants';
 
@@ -69,7 +70,7 @@ export const schema = {
     label: i18n.translate('indexPatternEditor.editor.form.TypeLabel', {
       defaultMessage: 'Index pattern type',
     }),
-    defaultValue: 'default',
+    defaultValue: INDEX_PATTERN_TYPE.DEFAULT,
   },
   /*
   script: {
