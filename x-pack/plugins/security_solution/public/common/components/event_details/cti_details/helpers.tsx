@@ -25,6 +25,9 @@ const isEventDetailsItem = (
   item: TimelineEventsDetailsItem[] | null
 ): item is TimelineEventsDetailsItem[] => !!item;
 
+export const isInvestigationTimeEnrichment = (type: string | undefined) =>
+  type === ENRICHMENT_TYPES.InvestigationTime;
+
 export const parseExistingEnrichments = (
   data: TimelineEventsDetailsItem[]
 ): TimelineEventsDetailsItem[][] => {
@@ -57,12 +60,12 @@ export const timelineDataToEnrichment = (data: TimelineEventsDetailsItem[]): Cti
   }, {});
 
 export const getTooltipTitle = (type: string | undefined) =>
-  type === ENRICHMENT_TYPES.InvestigationTime
+  isInvestigationTimeEnrichment(type)
     ? i18n.INVESTIGATION_TOOLTIP_TITLE
     : i18n.INDICATOR_TOOLTIP_TITLE;
 
 export const getTooltipContent = (type: string | undefined) =>
-  type === ENRICHMENT_TYPES.InvestigationTime
+  isInvestigationTimeEnrichment(type)
     ? i18n.INVESTIGATION_TOOLTIP_CONTENT
     : i18n.INDICATOR_TOOLTIP_CONTENT;
 
@@ -103,8 +106,7 @@ export const filterDuplicateEnrichments = (enrichments: CtiEnrichment[]): CtiEnr
   return Object.values(enrichmentsById).map(
     (enrichmentGroup) =>
       enrichmentGroup.find(
-        (enrichment) =>
-          getEnrichmentValue(enrichment, MATCHED_TYPE) !== ENRICHMENT_TYPES.InvestigationTime
+        (enrichment) => !isInvestigationTimeEnrichment(getEnrichmentValue(enrichment, MATCHED_TYPE))
       ) ?? enrichmentGroup[0]
   );
 };

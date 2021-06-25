@@ -21,6 +21,6 @@ export type CtiEnrichment = Record<string, unknown[]>;
 
 export interface CtiEventEnrichmentStrategyResponse extends IEsSearchResponse {
   enrichments: CtiEnrichment[];
-  inspect?: Inspect;
+  inspect: Inspect | null;
   totalCount: number;
 }

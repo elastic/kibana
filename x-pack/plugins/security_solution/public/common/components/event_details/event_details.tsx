@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { EventFieldsBrowser } from './event_fields_browser';
@@ -23,11 +23,9 @@ import { ThreatDetailsView } from './cti_details/threat_details_view';
 import * as i18n from './translations';
 import { AlertSummaryView } from './alert_summary_view';
 import { BrowserFields } from '../../containers/source';
+import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { useKibana } from '../../lib/kibana';
-import { useEventEnrichment } from '../../containers/events/event_enrichment';
 import {
   filterDuplicateEnrichments,
   parseExistingEnrichments,
@@ -107,33 +105,10 @@ const EventDetailsComponent: React.FC<Props> = ({
     setSelectedTabId,
   ]);
 
-  const { addError } = useAppToasts();
-  const kibana = useKibana();
-  const [{ from, to }, setRange] = useState({ from: 'now-30d', to: 'now' });
   const {
-    error: enrichmentError,
     loading: enrichmentsLoading,
     result: enrichmentsResponse,
-    start: getEnrichments,
-  } = useEventEnrichment();
-
-  useEffect(() => {
-    if (enrichmentError) {
-      addError(enrichmentError, { title: 'TODO' });
-    }
-  }, [addError, enrichmentError]);
-
-  useEffect(() => {
-    getEnrichments({
-      data: kibana.services.data,
-      timerange: { from, to, interval: '' },
-      defaultIndex: ['*'], // TODO do we apply the current sources here?
-      eventFields: {
-        'source.ip': '192.168.1.19', // TODO get event values
-      },
-      filterQuery: '', // TODO do we apply the current filters here?
-    });
-  }, [from, getEnrichments, kibana.services.data, to]);
+  } = useInvestigationTimeEnrichment();
 
   const existingEnrichments = useMemo(
     () =>

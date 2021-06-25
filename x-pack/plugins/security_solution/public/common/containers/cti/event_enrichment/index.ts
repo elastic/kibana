@@ -6,3 +6,4 @@
  */
 
 export * from './use_event_enrichment';
+export * from './use_investigation_enrichment';

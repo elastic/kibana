@@ -33,9 +33,16 @@ import {
 } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { getShimmedIndicatorValue, getEnrichmentValue, getFirstElement } from './helpers';
+import {
+  getShimmedIndicatorValue,
+  getEnrichmentValue,
+  getFirstElement,
+  isInvestigationTimeEnrichment,
+} from './helpers';
 import * as i18n from './translations';
 import { EnrichmentIcon } from './enrichment_icon';
+import { QUERY_ID } from '../../../containers/cti/event_enrichment/use_investigation_enrichment';
+import { InspectButton } from '../../inspect';
 
 const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
@@ -49,30 +56,39 @@ const ThreatDetailsHeader: React.FC<{
   provider: string | undefined;
   type: string | undefined;
 }> = ({ field, value, provider, type }) => (
-  <EuiTextColor color="subdued">
-    <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EnrichmentIcon type={type} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          {field} {value}
-        </EuiText>
-      </EuiFlexItem>
-      {provider && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              {i18n.PROVIDER_PREPOSITION} {provider}
-            </EuiText>
-          </EuiFlexItem>
-        </>
-      )}
-      <EuiFlexItem>
-        <EuiHorizontalRule />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiTextColor>
+  <>
+    <EuiTextColor color="subdued">
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EnrichmentIcon type={type} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            {field} {value}
+          </EuiText>
+        </EuiFlexItem>
+        {provider && (
+          <>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                {i18n.PROVIDER_PREPOSITION} {provider}
+              </EuiText>
+            </EuiFlexItem>
+          </>
+        )}
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiTextColor>
+    {isInvestigationTimeEnrichment(type) && (
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <InspectButton queryId={QUERY_ID} title={i18n.INVESTIGATION_QUERY_TITLE} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    )}
+  </>
 );
 
 const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
@@ -132,7 +148,7 @@ const ThreatDetailsViewComponent: React.FC<{
 
   return (
     <>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       {sortedEnrichments.map((enrichment, index) => {
         const key = getEnrichmentValue(enrichment, MATCHED_ID);
         const field = getEnrichmentValue(enrichment, MATCHED_FIELD);
@@ -149,6 +165,7 @@ const ThreatDetailsViewComponent: React.FC<{
               data-test-subj={`threat-details-view-${index}`}
               items={buildThreatDetailsItems(enrichment)}
             />
+            {index < sortedEnrichments.length - 1 && <EuiSpacer size="m" />}
           </Fragment>
         );
       })}
