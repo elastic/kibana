@@ -22,6 +22,7 @@ describe('config.validate()', () => {
       expect(() =>
         config.schema.validate({
           strict: true,
+          warnLegacyBrowsers: false,
           script_src: [`'self'`, `unsafe-inline`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -31,6 +32,7 @@ describe('config.validate()', () => {
       expect(() =>
         config.schema.validate({
           strict: true,
+          warnLegacyBrowsers: false,
           script_src: [`'self'`, `'unsafe-inline'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -41,20 +43,22 @@ describe('config.validate()', () => {
     it(`throws if containing 'unsafe-inline' when 'warnLegacyBrowsers' is true`, () => {
       expect(() =>
         config.schema.validate({
+          strict: false,
           warnLegacyBrowsers: true,
           script_src: [`'self'`, `unsafe-inline`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.warnLegacyBrowsers\` is true"`
       );
 
       expect(() =>
         config.schema.validate({
+          strict: false,
           warnLegacyBrowsers: true,
           script_src: [`'self'`, `'unsafe-inline'`],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.warnLegacyBrowsers\` is true"`
       );
     });
 
