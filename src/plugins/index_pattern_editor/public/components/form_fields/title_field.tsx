@@ -15,16 +15,21 @@ import {
   ValidationConfig,
   FieldConfig,
 } from '../../shared_imports';
-import { IndexPatternConfig } from '../index_pattern_editor_flyout_content';
 import { canAppendWildcard } from '../../lib';
 import { schema } from '../form_schema';
-import { MatchedItem, RollupIndicesCapsResponse } from '../../types';
+import {
+  MatchedItem,
+  RollupIndicesCapsResponse,
+  IndexPatternConfig,
+  MatchedIndicesSet,
+} from '../../types';
 
 interface TitleFieldProps {
   existingIndexPatterns: string[];
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
+  refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -57,19 +62,23 @@ interface RollupIndexPatternValidatorArgs {
   rollupIndices: string[];
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: Record<string, { error: string }>;
+  refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
 }
 
 const rollupIndexPatternValidator = ({
   rollupIndices,
   matchedIndices,
   rollupIndicesCapabilities,
+  refreshMatchedIndices,
 }: RollupIndexPatternValidatorArgs): ValidationConfig<{}, string, string> => ({
-  validator: ({ value }) => {
+  validator: async ({ value }) => {
     if (!rollupIndices || !rollupIndices.length) {
       return;
     }
 
-    const rollupIndexMatches = matchedIndices.filter((matchedIndex) =>
+    const results = await refreshMatchedIndices(value);
+
+    const rollupIndexMatches = results.exactMatchedIndices.filter((matchedIndex) =>
       rollupIndices.includes(matchedIndex.name)
     );
 
@@ -99,6 +108,7 @@ interface GetTitleConfigArgs {
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
+  refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
 }
 
 const getTitleConfig = ({
@@ -106,6 +116,7 @@ const getTitleConfig = ({
   isRollup,
   matchedIndices,
   rollupIndicesCapabilities,
+  refreshMatchedIndices,
 }: GetTitleConfigArgs): FieldConfig<string> => {
   const titleFieldConfig = schema.title;
 
@@ -120,6 +131,7 @@ const getTitleConfig = ({
         rollupIndices: ['test-rollup', 'test-rollup2'],
         matchedIndices,
         rollupIndicesCapabilities,
+        refreshMatchedIndices,
       })
     );
   }
@@ -136,6 +148,7 @@ export const TitleField = ({
   isRollup,
   matchedIndices,
   rollupIndicesCapabilities,
+  refreshMatchedIndices,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
 
@@ -147,6 +160,7 @@ export const TitleField = ({
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
+        refreshMatchedIndices,
       })}
       componentProps={{
         euiFieldProps: {

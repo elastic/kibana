@@ -18,13 +18,7 @@ import {
   GetFieldsOptions,
 } from '../shared_imports';
 
-import {
-  ensureMinimumTime,
-  getIndices,
-  extractTimeFields,
-  getMatchedIndices,
-  MatchedIndicesSet,
-} from '../lib';
+import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
 
 import {
@@ -34,6 +28,7 @@ import {
   RollupIndicesCapsResponse,
   INDEX_PATTERN_TYPE,
   IndexPatternConfig,
+  MatchedIndicesSet,
 } from '../types';
 
 import {
@@ -119,7 +114,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [{ title, allowHidden, type, timestampField }] = useFormData<FormInternal>({ form });
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
-  const [lastTitle, setLastTitle] = useState('');
+  // const [lastTitle, setLastTitle] = useState('');
   const [timestampFieldOptions, setTimestampFieldOptions] = useState<TimestampOption[]>([]);
   const [isLoadingTimestampFields, setIsLoadingTimestampFields] = useState<boolean>(false);
   const [isLoadingMatchedIndices, setIsLoadingMatchedIndices] = useState<boolean>(false);
@@ -193,102 +188,100 @@ const IndexPatternEditorFlyoutContentComponent = ({
     };
   }, [http, type]);
 
-  // fetches indices and timestamp options
-  useEffect(() => {
-    const getRollupIndices = () => Object.keys(rollupIndicesCapabilities);
-    const isRollupIndex = (indexName: string) => getRollupIndices().includes(indexName);
-    const getIndexTags = (indexName: string) =>
-      isRollupIndex(indexName)
-        ? [
-            {
-              key: INDEX_PATTERN_TYPE.ROLLUP,
-              name: i18nTexts.rollupLabel,
-              color: 'primary',
-            },
-          ]
-        : [];
+  const reloadMatchedIndices = useCallback(
+    async (title2: string) => {
+      const getRollupIndices = () => Object.keys(rollupIndicesCapabilities);
+      const isRollupIndex = (indexName: string) => getRollupIndices().includes(indexName);
+      const getIndexTags = (indexName: string) =>
+        isRollupIndex(indexName)
+          ? [
+              {
+                key: INDEX_PATTERN_TYPE.ROLLUP,
+                name: i18nTexts.rollupLabel,
+                color: 'primary',
+              },
+            ]
+          : [];
 
-    const fetchIndices = async (query: string = '') => {
-      setIsLoadingMatchedIndices(true);
-      const indexRequests = [];
+      const fetchIndices = async (query: string = '') => {
+        setIsLoadingMatchedIndices(true);
+        const indexRequests = [];
 
-      if (query?.endsWith('*')) {
-        const exactMatchedQuery = getIndices(http, getIndexTags, query, allowHidden);
-        indexRequests.push(exactMatchedQuery);
-        indexRequests.push(Promise.resolve([]));
-      } else {
-        const exactMatchQuery = getIndices(http, getIndexTags, query, allowHidden);
-        const partialMatchQuery = getIndices(http, getIndexTags, `${query}*`, allowHidden);
+        if (query?.endsWith('*')) {
+          const exactMatchedQuery = getIndices(http, getIndexTags, query, allowHidden);
+          indexRequests.push(exactMatchedQuery);
+          indexRequests.push(Promise.resolve([]));
+        } else {
+          const exactMatchQuery = getIndices(http, getIndexTags, query, allowHidden);
+          const partialMatchQuery = getIndices(http, getIndexTags, `${query}*`, allowHidden);
 
-        indexRequests.push(exactMatchQuery);
-        indexRequests.push(partialMatchQuery);
-      }
-
-      const [exactMatched, partialMatched] = (await ensureMinimumTime(
-        indexRequests
-      )) as MatchedItem[][];
-
-      if (query !== lastTitle) {
-        return;
-      }
-
-      const isValidResult =
-        !!title?.length && !existingIndexPatterns.includes(title) && exactMatched.length > 0;
-
-      const matchedIndicesResult = getMatchedIndices(
-        allSources,
-        partialMatched,
-        exactMatched,
-        allowHidden
-      );
-
-      if (type === INDEX_PATTERN_TYPE.ROLLUP) {
-        const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
-        setRollupIndex(rollupIndices.length === 1 ? rollupIndices[0].name : undefined);
-      } else {
-        setRollupIndex(undefined);
-      }
-
-      setMatchedIndices(matchedIndicesResult);
-      setIsLoadingMatchedIndices(false);
-
-      if (isValidResult) {
-        setIsLoadingTimestampFields(true);
-        const getFieldsOptions: GetFieldsOptions = {
-          pattern: query,
-        };
-        if (type === INDEX_PATTERN_TYPE.ROLLUP) {
-          getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
-          getFieldsOptions.rollupIndex = rollupIndex;
+          indexRequests.push(exactMatchQuery);
+          indexRequests.push(partialMatchQuery);
         }
 
-        const fields = await ensureMinimumTime(
-          indexPatternService.getFieldsForWildcard(getFieldsOptions)
-        );
-        const timeFields = extractTimeFields(fields, requireTimestampField);
-        setIsLoadingTimestampFields(false);
-        setTimestampFieldOptions(timeFields);
-      } else {
-        setTimestampFieldOptions([]);
-      }
-    };
+        const [exactMatched, partialMatched] = (await ensureMinimumTime(
+          indexRequests
+        )) as MatchedItem[][];
 
-    setLastTitle(title);
-    fetchIndices(title);
-  }, [
-    title,
-    existingIndexPatterns,
-    http,
-    indexPatternService,
-    allowHidden,
-    lastTitle,
-    allSources,
-    requireTimestampField,
-    rollupIndex,
-    type,
-    i18nTexts.rollupLabel,
-    rollupIndicesCapabilities,
-  ]);
+        const isValidResult =
+          !!title?.length && !existingIndexPatterns.includes(title) && exactMatched.length > 0;
+
+        const matchedIndicesResult = getMatchedIndices(
+          allSources,
+          partialMatched,
+          exactMatched,
+          allowHidden
+        );
+
+        if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+          const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
+          setRollupIndex(rollupIndices.length === 1 ? rollupIndices[0].name : undefined);
+        } else {
+          setRollupIndex(undefined);
+        }
+
+        setMatchedIndices(matchedIndicesResult);
+        setIsLoadingMatchedIndices(false);
+
+        if (isValidResult) {
+          setIsLoadingTimestampFields(true);
+          const getFieldsOptions: GetFieldsOptions = {
+            pattern: query,
+          };
+          if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+            getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
+            getFieldsOptions.rollupIndex = rollupIndex;
+          }
+
+          const fields = await ensureMinimumTime(
+            indexPatternService.getFieldsForWildcard(getFieldsOptions)
+          );
+          const timeFields = extractTimeFields(fields, requireTimestampField);
+          setIsLoadingTimestampFields(false);
+          setTimestampFieldOptions(timeFields);
+        } else {
+          setTimestampFieldOptions([]);
+        }
+        return matchedIndicesResult;
+      };
+
+      setLastTitle(title2);
+      return fetchIndices(title2);
+    },
+    [
+      title,
+      existingIndexPatterns,
+      http,
+      indexPatternService,
+      allowHidden,
+      allSources,
+      requireTimestampField,
+      rollupIndex,
+      type,
+      i18nTexts.rollupLabel,
+      rollupIndicesCapabilities,
+    ]
+  );
 
   // todo
   if (isLoadingSources || isLoadingIndexPatterns) {
@@ -322,6 +315,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       <EuiFlexItem>
         <TypeField
           onChange={(newType) => {
+            form.setFieldValue('title', '');
+            form.setFieldValue('timestampField', '');
             if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
               form.setFieldValue('allowHidden', false);
             }
@@ -416,6 +411,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 <TitleField
                   isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
                   existingIndexPatterns={existingIndexPatterns}
+                  refreshMatchedIndices={reloadMatchedIndices}
                   matchedIndices={matchedIndices.exactMatchedIndices}
                   rollupIndicesCapabilities={rollupIndicesCapabilities}
                 />

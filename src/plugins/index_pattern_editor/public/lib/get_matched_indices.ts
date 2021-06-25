@@ -50,14 +50,7 @@ function filterSystemIndices(indices: MatchedItem[], isIncludingSystemIndices: b
     We call this `exact` matches because ES is telling us exactly what it matches
  */
 
-import { MatchedItem } from '../types';
-
-export interface MatchedIndicesSet {
-  allIndices: MatchedItem[];
-  exactMatchedIndices: MatchedItem[];
-  partialMatchedIndices: MatchedItem[];
-  visibleIndices: MatchedItem[];
-}
+import { MatchedItem, MatchedIndicesSet } from '../types';
 
 export function getMatchedIndices(
   unfilteredAllIndices: MatchedItem[],

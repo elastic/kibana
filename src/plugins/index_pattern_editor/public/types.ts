@@ -174,3 +174,10 @@ export interface IndexPatternConfig {
   id?: string;
   type: string;
 }
+
+export interface MatchedIndicesSet {
+  allIndices: MatchedItem[];
+  exactMatchedIndices: MatchedItem[];
+  partialMatchedIndices: MatchedItem[];
+  visibleIndices: MatchedItem[];
+}
