@@ -10,6 +10,8 @@ export * from './date_range';
 export * from './date_range_to_ast';
 export * from './extended_bounds';
 export * from './extended_bounds_to_ast';
+export * from './ip_range';
+export * from './ip_range_to_ast';
 export * from './kibana';
 export * from './kibana_context';
 export * from './kql';

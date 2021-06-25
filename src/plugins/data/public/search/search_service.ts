@@ -25,6 +25,7 @@ import {
   SearchSourceDependencies,
   SearchSourceService,
   extendedBoundsFunction,
+  ipRangeFunction,
   kibanaTimerangeFunction,
   luceneFunction,
   kqlFunction,
@@ -120,6 +121,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
+    expressions.registerFunction(ipRangeFunction);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
