@@ -1,15 +1,4 @@
-@mixin docViewerCell {
-  align-items: flex-start;
-  padding: $euiSizeXS;
-  height: 100%;
-}
-
 .kbnDocViewer {
-  table,
-  tbody {
-    height: 100%;
-  }
-
   .euiTableRowCell {
     vertical-align: top;
   }
@@ -20,17 +9,10 @@
 }
 
 .kbnDocViewer__tableRow {
-  height: 100%;
   font-size: $euiFontSizeXS;
   font-family: $euiCodeFontFamily;
-}
-
-.kbnDocViewer__tableActionsCell {
-  @include docViewerCell;
 
   .kbnDocViewer__buttons {
-    white-space: nowrap;
-
     // Show all icons if one is focused,
     &:focus-within {
       .kbnDocViewer__actionButton {
@@ -56,8 +38,10 @@
   }
 }
 
+.kbnDocViewer__tableActionsCell,
 .kbnDocViewer__tableFieldNameCell {
-  @include docViewerCell;
+  align-items: flex-start;
+  padding: $euiSizeXS;
 }
 
 .kbnDocViewer__value {
@@ -68,7 +52,6 @@
   line-height: $euiLineHeight;
   color: $euiColorFullShade;
   vertical-align: top;
-  padding-top: $euiSizeXS;
 }
 
 .kbnDocViewer__warning {
