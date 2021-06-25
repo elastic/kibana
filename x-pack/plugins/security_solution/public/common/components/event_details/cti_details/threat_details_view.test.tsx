@@ -6,109 +6,70 @@
  */
 
 import React from 'react';
-
-import { ThreatDetailsView } from './threat_details_view';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../mock';
-import { useMountAppended } from '../../../utils/use_mount_appended';
-
-jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
-  return {
-    useRuleAsync: jest.fn(),
-  };
-});
-
-const mostRecentDate = '2021-04-25T18:17:00.000Z';
-
-const threatData = [
-  [
-    {
-      category: 'matched',
-      field: 'matched.field',
-      isObjectArray: false,
-      originalValue: ['test_field_2'],
-      values: ['test_field_2'],
-    },
-    {
-      category: 'first_seen',
-      field: 'first_seen',
-      isObjectArray: false,
-      originalValue: ['2019-04-25T18:17:00.000Z'],
-      values: ['2019-04-25T18:17:00.000Z'],
-    },
-    {
-      category: 'event',
-      field: 'event.reference',
-      isObjectArray: false,
-      originalValue: ['https://test.com/'],
-      values: ['https://test.com/'],
-    },
-    {
-      category: 'event',
-      field: 'event.url',
-      isObjectArray: false,
-      originalValue: ['https://test2.com/'],
-      values: ['https://test2.com/'],
-    },
-  ],
-  [
-    {
-      category: 'first_seen',
-      field: 'first_seen',
-      isObjectArray: false,
-      originalValue: [mostRecentDate],
-      values: [mostRecentDate],
-    },
-    {
-      category: 'matched',
-      field: 'matched.field',
-      isObjectArray: false,
-      originalValue: ['test_field'],
-      values: ['test_field'],
-    },
-  ],
-];
+import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
+import { FIRSTSEEN } from '../../../../../common/cti/constants';
+import { ThreatDetailsView } from './threat_details_view';
 
 describe('ThreatDetailsView', () => {
-  const mount = useMountAppended();
+  it('renders a detail view for each enrichment', () => {
+    const enrichments = [
+      buildEventEnrichmentMock(),
+      buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
+    ];
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+    const wrapper = mount(<ThreatDetailsView enrichments={enrichments} />);
 
-  test('render correct items', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <ThreatDetailsView threatData={threatData} />
-      </TestProviders>
+    expect(wrapper.find('[data-test-subj^="threat-details-view"]').hostNodes()).toHaveLength(
+      enrichments.length
     );
-    expect(wrapper.find('[data-test-subj="threat-details-view-0"]').exists()).toEqual(true);
   });
 
-  test('renders empty view if there are no items', () => {
+  it('renders an empty view if there are no enrichments', () => {
     const wrapper = mount(
       <TestProviders>
-        <ThreatDetailsView threatData={[[]]} />
+        <ThreatDetailsView enrichments={[]} />
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="empty-threat-details-view"]').exists()).toEqual(true);
   });
 
-  test('renders link for event.url and event.reference', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <ThreatDetailsView threatData={threatData} />
-      </TestProviders>
-    );
+  it('renders anchor links for event.url and event.reference', () => {
+    const enrichments = [
+      buildEventEnrichmentMock({
+        'event.url': ['http://foo.bar'],
+        'event.reference': ['http://foo.baz'],
+      }),
+    ];
+    const wrapper = mount(<ThreatDetailsView enrichments={enrichments} />);
     expect(wrapper.find('a').length).toEqual(2);
   });
 
-  test('orders items by first_seen', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <ThreatDetailsView threatData={threatData} />
-      </TestProviders>
-    );
-    expect(wrapper.find('.euiToolTipAnchor span').at(0).text()).toEqual(mostRecentDate);
+  it('orders enrichments by first_seen descending', () => {
+    const mostRecentDate = '2021-04-25T18:17:00.000Z';
+    const olderDate = '2021-03-25T18:17:00.000Z';
+    // this simulates a legacy enrichment from the old indicator match rule,
+    // where first_seen is available at the top level
+    const existingEnrichment = buildEventEnrichmentMock({
+      first_seen: [mostRecentDate],
+    });
+    delete existingEnrichment['threatintel.indicator.first_seen'];
+    const newEnrichment = buildEventEnrichmentMock({
+      'matched.id': ['other.id'],
+      'threatintel.indicator.first_seen': [olderDate],
+    });
+
+    const wrapper = mount(<ThreatDetailsView enrichments={[existingEnrichment, newEnrichment]} />);
+
+    const firstSeenRows = wrapper
+      .find('.euiTableRow')
+      .hostNodes()
+      .filterWhere((node) => node.text().includes(FIRSTSEEN));
+    expect(firstSeenRows.map((node) => node.text())).toEqual([
+      `first_seen${mostRecentDate}`,
+      `first_seen${olderDate}`,
+    ]);
   });
 });

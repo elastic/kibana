@@ -12,7 +12,7 @@ import { useMountAppended } from '../../../utils/use_mount_appended';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 import { EmptyThreatDetailsView } from './empty_threat_details_view';
 
-jest.mock('../../lib/kibana');
+jest.mock('../../../lib/kibana');
 
 describe('EmptyThreatDetailsView', () => {
   const mount = useMountAppended();
@@ -26,10 +26,6 @@ describe('EmptyThreatDetailsView', () => {
         xl: '32px',
       },
     },
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
   });
 
   test('renders correct items', () => {

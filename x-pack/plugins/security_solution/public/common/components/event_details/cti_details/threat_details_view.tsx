@@ -29,15 +29,16 @@ import {
   MATCHED_FIELD,
   MATCHED_ATOMIC,
   MATCHED_TYPE,
+  PROVIDER,
 } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { getEnrichmentProvider, getEnrichmentValue, getFirstElement } from './helpers';
+import { getShimmedIndicatorValue, getEnrichmentValue, getFirstElement } from './helpers';
 import * as i18n from './translations';
 import { EnrichmentIcon } from './enrichment_icon';
 
 const getFirstSeen = (enrichment: CtiEnrichment): number => {
-  const firstSeenValue = getEnrichmentValue(enrichment, FIRSTSEEN);
+  const firstSeenValue = getShimmedIndicatorValue(enrichment, FIRSTSEEN);
   const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
   return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
 };
@@ -137,7 +138,7 @@ const ThreatDetailsViewComponent: React.FC<{
         const field = getEnrichmentValue(enrichment, MATCHED_FIELD);
         const value = getEnrichmentValue(enrichment, MATCHED_ATOMIC);
         const type = getEnrichmentValue(enrichment, MATCHED_TYPE);
-        const provider = getEnrichmentProvider(enrichment);
+        const provider = getShimmedIndicatorValue(enrichment, PROVIDER);
 
         return (
           <Fragment key={key}>
@@ -145,7 +146,7 @@ const ThreatDetailsViewComponent: React.FC<{
             <StyledEuiInMemoryTable
               columns={columns}
               compressed
-              dataTestSubj={`threat-details-view-${index}`}
+              data-test-subj={`threat-details-view-${index}`}
               items={buildThreatDetailsItems(enrichment)}
             />
           </Fragment>
