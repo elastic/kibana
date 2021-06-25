@@ -110,7 +110,7 @@ const TopHitAggUi = (props) => {
     PANEL_TYPES.METRIC,
     PANEL_TYPES.MARKDOWN,
   ].includes(panel.type)
-    ? [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING]
+    ? [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING, KBN_FIELD_TYPES.DATE]
     : [KBN_FIELD_TYPES.NUMBER];
 
   const handleChange = createChangeHandler(props.onChange, model);
