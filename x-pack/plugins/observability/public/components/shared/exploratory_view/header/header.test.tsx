@@ -26,7 +26,7 @@ describe('ExploratoryViewHeader', function () {
       data: {
         'uptime-pings-histogram': {
           dataType: 'synthetics' as const,
-          reportType: 'kpi' as const,
+          reportType: 'kpi-over-time' as const,
           breakdown: 'monitor.status',
           time: { from: 'now-15m', to: 'now' },
         },

@@ -8,7 +8,6 @@
 jest.mock('../routes');
 jest.mock('../usage');
 jest.mock('../browsers');
-jest.mock('../lib/create_queue');
 
 import _ from 'lodash';
 import * as Rx from 'rxjs';
@@ -42,6 +41,7 @@ export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup =
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
+    taskManager: { registerTaskDefinitions: jest.fn() } as any,
     logger: createMockLevelLogger(),
     ...setupMock,
   };
@@ -61,12 +61,15 @@ export const createMockPluginStart = (
 
   return {
     browserDriverFactory: startMock.browserDriverFactory,
-    esqueue: startMock.esqueue,
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
     data: startMock.data || dataPluginMock.createStartContract(),
     store,
+    taskManager: {
+      schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
+      ensureScheduled: jest.fn(),
+    } as any,
     logger: createMockLevelLogger(),
     ...startMock,
   };

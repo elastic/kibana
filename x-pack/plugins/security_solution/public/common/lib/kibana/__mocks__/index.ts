@@ -6,6 +6,10 @@
  */
 
 import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createTGridMocks } from '../../../../../../timelines/public/mock';
+
 import {
   createKibanaContextProviderMock,
   createUseUiSettingMock,
@@ -30,14 +34,24 @@ export const useKibana = jest.fn().mockReturnValue({
           })),
         })),
       },
+      query: {
+        ...mockStartServicesMock.data.query,
+        filterManager: {
+          addFilters: jest.fn(),
+          getFilters: jest.fn(),
+          getUpdates$: jest.fn().mockReturnValue({ subscribe: jest.fn() }),
+          setAppFilters: jest.fn(),
+        },
+      },
     },
+    timelines: createTGridMocks(),
   },
 });
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);
 export const useTimeZone = jest.fn();
-export const useDateFormat = jest.fn();
+export const useDateFormat = jest.fn().mockReturnValue('MMM D, YYYY @ HH:mm:ss.SSS');
 export const useBasePath = jest.fn(() => '/test/base/path');
 export const useToasts = jest
   .fn()
