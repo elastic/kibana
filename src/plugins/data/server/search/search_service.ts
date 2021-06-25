@@ -59,6 +59,7 @@ import {
   kibanaFilterFunction,
   kqlFunction,
   luceneFunction,
+  numericalRangeFunction,
   rangeFilterFunction,
   rangeFunction,
   SearchSourceDependencies,
@@ -193,6 +194,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
     expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(numericalRangeFunction);
     expressions.registerFunction(rangeFunction);
     expressions.registerFunction(kibanaFilterFunction);
     expressions.registerFunction(existsFilterFunction);

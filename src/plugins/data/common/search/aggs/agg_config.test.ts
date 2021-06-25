@@ -795,7 +795,7 @@ describe('AggConfig', () => {
         type: 'range',
         params: {
           field: 'bytes',
-          ranges: [
+          json: [
             { from: 0, to: 1000 },
             { from: 1001, to: 2000 },
             { from: 2001, to: 3000 },
@@ -803,8 +803,8 @@ describe('AggConfig', () => {
         },
       };
       const aggConfig = ac.createAggConfig(configStates);
-      const ranges = aggConfig.toExpressionAst()?.chain[0].arguments.ranges;
-      expect(ranges).toEqual([JSON.stringify(configStates.params.ranges)]);
+      const json = aggConfig.toExpressionAst()?.chain[0].arguments.json;
+      expect(json).toEqual([JSON.stringify(configStates.params.json)]);
     });
 
     it('does not stringify arrays which are not objects', () => {

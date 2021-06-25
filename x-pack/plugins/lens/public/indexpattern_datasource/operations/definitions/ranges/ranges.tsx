@@ -9,7 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { AggFunctionsMapping, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
-import { extendedBoundsToAst } from '../../../../../../../../src/plugins/data/common';
+import {
+  extendedBoundsToAst,
+  numericalRangeToAst,
+} from '../../../../../../../../src/plugins/data/common';
 import {
   buildExpressionFunction,
   Range,
@@ -142,8 +145,9 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         enabled: true,
         schema: 'segment',
         field: sourceField,
-        ranges: JSON.stringify(
-          params.ranges.filter(isValidRange).map<Partial<RangeType>>((range) => {
+        ranges: params.ranges
+          .filter(isValidRange)
+          .map<Partial<RangeType>>((range) => {
             if (isFullRange(range)) {
               return range;
             }
@@ -157,7 +161,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
             }
             return partialRange;
           })
-        ),
+          .map(numericalRangeToAst),
       }).toAst();
     }
     const maxBarsDefaultValue =

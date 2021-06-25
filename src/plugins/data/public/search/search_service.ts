@@ -29,6 +29,7 @@ import {
   luceneFunction,
   kqlFunction,
   fieldFunction,
+  numericalRangeFunction,
   rangeFunction,
   dateRangeFunction,
   existsFilterFunction,
@@ -123,6 +124,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(numericalRangeFunction);
     expressions.registerFunction(rangeFunction);
     expressions.registerFunction(kibanaFilterFunction);
     expressions.registerFunction(existsFilterFunction);
