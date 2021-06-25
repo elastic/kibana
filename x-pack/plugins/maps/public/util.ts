@@ -16,19 +16,8 @@ import {
   EMS_APP_NAME,
   FONTS_API_PATH,
 } from '../common/constants';
-import {
-  getHttp,
-  getRegionmapLayers,
-  getTilemap,
-  getKibanaVersion,
-  getEMSSettings,
-} from './kibana_services';
+import { getHttp, getTilemap, getKibanaVersion, getEMSSettings } from './kibana_services';
 import { getLicenseId } from './licensed_features';
-import { LayerConfig } from '../../../../src/plugins/maps_ems/public';
-
-export function getKibanaRegionList(): LayerConfig[] {
-  return getRegionmapLayers();
-}
 
 export function getKibanaTileMap(): unknown {
   return getTilemap();

@@ -264,11 +264,6 @@ export enum SCALING_TYPES {
   MVT = 'MVT',
 }
 
-export enum FORMAT_TYPE {
-  GEOJSON = 'geojson',
-  TOPOJSON = 'topojson',
-}
-
 export enum MVT_FIELD_TYPE {
   STRING = 'String',
   NUMBER = 'Number',

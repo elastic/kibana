@@ -11,7 +11,11 @@ import { FeatureCollection } from 'geojson';
 import * as topojson from 'topojson-client';
 import { GeometryCollection } from 'topojson-specification';
 import fetch from 'node-fetch';
-import { FORMAT_TYPE } from '../../../../common/constants';
+
+export enum FORMAT_TYPE {
+  GEOJSON = 'geojson',
+  TOPOJSON = 'topojson',
+}
 
 export async function fetchGeoJson(
   fetchUrl: string,
