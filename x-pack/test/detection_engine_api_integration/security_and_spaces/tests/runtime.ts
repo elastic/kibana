@@ -93,43 +93,56 @@ export default ({ getService }: FtrProviderContext) => {
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map((signal) => signal._source.host);
         expect(hits).to.eql([
-          {
-            name: 'host name 1_1',
-          },
-          {
-            name: 'host name 1_2',
-          },
-          {
-            name: 'host name 2_1',
-          },
-          {
-            name: 'host name 2_2',
-          },
-          {
-            name: 'host name 3_1',
-          },
-          {
-            name: 'host name 3_2',
-          },
-          {
-            name: 'host name 4_1',
-          },
-          {
-            name: 'host name 4_2',
-          },
+          [
+            {
+              name: 'host name 1_1',
+            },
+            {
+              name: 'host name 1_2',
+            },
+          ],
+          [
+            {
+              name: 'host name 2_1',
+            },
+            {
+              name: 'host name 2_2',
+            },
+          ],
+          [
+            {
+              name: 'host name 3_1',
+            },
+            {
+              name: 'host name 3_2',
+            },
+          ],
+          [
+            {
+              name: 'host name 4_1',
+            },
+            {
+              name: 'host name 4_2',
+            },
+          ],
         ]);
       });
 
-      it('should copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
+      /**
+       * Note, this test shows that we do NOT shadow or overwrite runtime fields on-top of regular fields when we detect those
+       * fields as arrays of objects since the objects are flattened in "fields" and we detect something already there so we skip
+       * this shadowed runtime data as it is ambiguous of where we would put it in the array.
+       */
+      it('should NOT copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map(
-          (signal) => (signal._source.host_alias as Runtime).hostname
+          (signal) => (signal._source.host as Runtime).hostname
         );
-        expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
+        expect(hits).to.eql([undefined, undefined, undefined, undefined]);
       });
     });
   });
