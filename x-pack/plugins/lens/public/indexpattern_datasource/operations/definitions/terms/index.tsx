@@ -497,7 +497,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   defaultMessage: 'Include documents without this field',
                 })}
                 compressed
-                disabled={!currentColumn.params.otherBucket}
+                disabled={
+                  !currentColumn.params.otherBucket ||
+                  indexPattern.getFieldByName(currentColumn.sourceField)?.type !== 'string'
+                }
                 data-test-subj="indexPattern-terms-missing-bucket"
                 checked={Boolean(currentColumn.params.missingBucket)}
                 onChange={(e: EuiSwitchEvent) =>

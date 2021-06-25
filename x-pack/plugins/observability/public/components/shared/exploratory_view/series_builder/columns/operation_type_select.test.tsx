@@ -22,7 +22,7 @@ describe('OperationTypeSelect', function () {
       data: {
         'performance-distribution': {
           dataType: 'ux' as const,
-          reportType: 'kpi' as const,
+          reportType: 'kpi-over-time' as const,
           operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
@@ -39,7 +39,7 @@ describe('OperationTypeSelect', function () {
       data: {
         'series-id': {
           dataType: 'ux' as const,
-          reportType: 'kpi' as const,
+          reportType: 'kpi-over-time' as const,
           operationType: 'median' as const,
           time: { from: 'now-15m', to: 'now' },
         },
@@ -53,7 +53,7 @@ describe('OperationTypeSelect', function () {
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       operationType: 'median',
       dataType: 'ux',
-      reportType: 'kpi',
+      reportType: 'kpi-over-time',
       time: { from: 'now-15m', to: 'now' },
     });
 
@@ -61,7 +61,7 @@ describe('OperationTypeSelect', function () {
     expect(setSeries).toHaveBeenCalledWith('series-id', {
       operationType: '95th',
       dataType: 'ux',
-      reportType: 'kpi',
+      reportType: 'kpi-over-time',
       time: { from: 'now-15m', to: 'now' },
     });
   });

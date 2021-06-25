@@ -34,6 +34,7 @@ export function FeatureEditTools(props: Props) {
   const drawCircleSelected = props.drawShape === DRAW_SHAPE.DISTANCE;
   const drawBBoxSelected = props.drawShape === DRAW_SHAPE.BOUNDS;
   const drawPointSelected = props.drawShape === DRAW_SHAPE.POINT;
+  const deleteSelected = props.drawShape === DRAW_SHAPE.DELETE;
 
   return (
     <EuiPanel paddingSize="none" className="mapToolbarOverlay__buttonGroup">
@@ -116,6 +117,24 @@ export function FeatureEditTools(props: Props) {
         aria-pressed={drawPointSelected}
         isSelected={drawPointSelected}
         display={drawPointSelected ? 'fill' : 'empty'}
+      />
+      <EuiButtonIcon
+        key="delete"
+        size="s"
+        onClick={() => props.setDrawShape(DRAW_SHAPE.DELETE)}
+        iconType="trash"
+        aria-label={i18n.translate(
+          'xpack.maps.toolbarOverlay.featureDraw.deletePointOrShapeLabel',
+          {
+            defaultMessage: 'Delete point or shape',
+          }
+        )}
+        title={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.deletePointOrShapeTitle', {
+          defaultMessage: 'Delete point or shape',
+        })}
+        aria-pressed={deleteSelected}
+        isSelected={deleteSelected}
+        display={deleteSelected ? 'fill' : 'empty'}
       />
 
       <EuiButtonIcon
