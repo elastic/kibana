@@ -101,7 +101,6 @@ export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps`;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters`;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}`;
-export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}`;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}`;
