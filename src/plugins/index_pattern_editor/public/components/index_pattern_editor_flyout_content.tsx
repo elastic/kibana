@@ -370,12 +370,9 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
   };
 
   // needed to trigger validation without touching advanced options
-  if (title && timestampField) {
+  if (title) {
     form.validate().then((isValid) => {
-      const disable =
-        !isValid ||
-        !matchedIndices.exactMatchedIndices.length ||
-        (!!timestampFieldOptions.length && timestampField === undefined);
+      const disable = !isValid || !matchedIndices.exactMatchedIndices.length;
       setDisableSubmit(disable);
     });
   }

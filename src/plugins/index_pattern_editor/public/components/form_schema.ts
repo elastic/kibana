@@ -40,6 +40,7 @@ export const schema = {
     }),
     // defaultValue: '',
     helpText: 'Select a primary time field for use with the global time filter.',
+    /*
     validations: [
       {
         validator: fieldValidators.emptyField(
@@ -52,6 +53,7 @@ export const schema = {
         ),
       },
     ],
+    */
   },
   allowHidden: {
     label: i18n.translate('indexPatternEditor.editor.form.allowHiddenLabel', {
