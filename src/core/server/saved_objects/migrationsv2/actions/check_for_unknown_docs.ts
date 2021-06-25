@@ -9,6 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { estypes } from '@elastic/elasticsearch';
+import type { SavedObjectsRawDocSource } from '../../serialization';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import {
   catchRetryableEsClientErrors,
@@ -24,8 +25,14 @@ export interface CheckForUnknownDocsParams {
 }
 
 /** @internal */
+export interface CheckForUnknownDocsResponseDoc {
+  id: string;
+  type: string;
+}
+
+/** @internal */
 export interface CheckForUnknownDocsResponse {
-  unknownDocIds: string[];
+  unknownDocs: CheckForUnknownDocsResponseDoc[];
 }
 
 export const checkForUnknownDocs = ({
@@ -40,7 +47,7 @@ export const checkForUnknownDocs = ({
   const query = createUnknownDocQuery(unusedTypesQuery, knownTypes);
 
   return client
-    .search({
+    .search<SavedObjectsRawDocSource>({
       index: indexName,
       body: {
         query,
@@ -49,7 +56,7 @@ export const checkForUnknownDocs = ({
     .then((response) => {
       const { hits } = response.body.hits;
       return Either.right({
-        unknownDocIds: hits.map((hit) => hit._id),
+        unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'undefined' })),
       });
     })
     .catch(catchRetryableEsClientErrors);

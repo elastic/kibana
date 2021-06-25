@@ -319,12 +319,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const { unknownDocIds } = res.right;
-      if (unknownDocIds.length) {
+      const { unknownDocs } = res.right;
+      if (unknownDocs.length) {
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(unknownDocIds, stateP.sourceIndex.value),
+          reason: extractUnknownDocFailureReason(unknownDocs, stateP.sourceIndex.value),
         };
       } else {
         const source = stateP.sourceIndex;

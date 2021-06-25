@@ -83,6 +83,7 @@ export { updateAndPickupMappings } from './update_and_pickup_mappings';
 export type {
   CheckForUnknownDocsParams,
   CheckForUnknownDocsResponse,
+  CheckForUnknownDocsResponseDoc,
 } from './check_for_unknown_docs';
 export { checkForUnknownDocs } from './check_for_unknown_docs';
 
