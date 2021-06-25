@@ -52,6 +52,23 @@ describe('BetaNotification', () => {
     });
   });
 
+  describe('toggle button props', () => {
+    it('defaults to a size of xs and flush', () => {
+      const wrapper = shallow(<BetaNotification />);
+      const toggleButton = getToggleButton(wrapper);
+
+      expect(toggleButton.prop('size')).toEqual('xs');
+      expect(toggleButton.prop('flush')).toEqual('both');
+    });
+
+    it('passes down custom button props', () => {
+      const wrapper = shallow(<BetaNotification buttonProps={{ size: 'l' }} />);
+      const toggleButton = getToggleButton(wrapper);
+
+      expect(toggleButton.prop('size')).toEqual('l');
+    });
+  });
+
   describe('links', () => {
     const wrapper = shallowWithIntl(<BetaNotification />);
     const links = wrapper.find(FormattedMessage).dive();

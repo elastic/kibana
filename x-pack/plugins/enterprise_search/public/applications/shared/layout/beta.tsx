@@ -12,6 +12,7 @@ import {
   EuiPopoverTitle,
   EuiPopoverFooter,
   EuiButtonEmpty,
+  EuiButtonEmptyProps,
   EuiText,
   EuiLink,
 } from '@elastic/eui';
@@ -25,7 +26,11 @@ import { getEnterpriseSearchUrl } from '../enterprise_search_url';
 
 import './beta.scss';
 
-export const BetaNotification: React.FC = () => {
+interface Props {
+  buttonProps?: EuiButtonEmptyProps;
+}
+
+export const BetaNotification: React.FC<Props> = ({ buttonProps }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
@@ -37,6 +42,7 @@ export const BetaNotification: React.FC = () => {
           size="xs"
           flush="both"
           iconType="alert"
+          {...buttonProps}
           onClick={togglePopover}
         >
           {i18n.translate('xpack.enterpriseSearch.beta.buttonLabel', {
