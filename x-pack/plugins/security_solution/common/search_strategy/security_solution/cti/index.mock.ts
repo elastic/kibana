@@ -8,6 +8,7 @@
 import { IEsSearchResponse } from 'src/plugins/data/public';
 
 import {
+  CtiEnrichment,
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
@@ -99,11 +100,63 @@ export const buildEventEnrichmentRawResponseMock = (): IEsSearchResponse => ({
   },
 });
 
+export const buildEventEnrichmentMock = (
+  overrides: Partial<CtiEnrichment> = {}
+): CtiEnrichment => ({
+  '@timestamp': ['2021-05-28T18:33:52.993Z'],
+  'agent.ephemeral_id': ['d6b14f65-5bf3-430d-8315-7b5613685979'],
+  'agent.hostname': ['rylastic.local'],
+  'agent.id': ['ff93aee5-86a1-4a61-b0e6-0cdc313d01b5'],
+  'agent.name': ['rylastic.local'],
+  'agent.type': ['filebeat'],
+  'agent.version': ['8.0.0'],
+  'ecs.version': ['1.6.0'],
+  'event.category': ['threat'],
+  'event.created': ['2021-05-28T18:33:52.993Z'],
+  'event.dataset': ['threatintel.abusemalware'],
+  'event.ingested': ['2021-05-28T18:33:55.086Z'],
+  'event.kind': ['enrichment'],
+  'event.module': ['threatintel'],
+  'event.reference': [
+    'https://urlhaus-api.abuse.ch/v1/download/15b012e6f626d0f88c2926d2bf4ca394d7b8ee07cc06d2ec05ea76bed3e8a05e/',
+  ],
+  'event.type': ['indicator'],
+  'fileset.name': ['abusemalware'],
+  'input.type': ['httpjson'],
+  'matched.atomic': ['5529de7b60601aeb36f57824ed0e1ae8'],
+  'matched.field': ['file.hash.md5'],
+  'matched.id': ['31408415b6d5601a92d29b86c2519658f210c194057588ae396d55cc20b3f03d'],
+  'matched.index': ['filebeat-8.0.0-2021.05.28-000001'],
+  'matched.type': ['investigation_time'],
+  'related.hash': [
+    '5529de7b60601aeb36f57824ed0e1ae8',
+    '15b012e6f626d0f88c2926d2bf4ca394d7b8ee07cc06d2ec05ea76bed3e8a05e',
+    '768:NXSFGJ/ooP6FawrB7Bo1MWnF/jRmhJImp:1SFXIqBo1Mwj2p',
+  ],
+  'service.type': ['threatintel'],
+  tags: ['threatintel-abusemalware', 'forwarded'],
+  'threatintel.indicator.file.hash.md5': ['5529de7b60601aeb36f57824ed0e1ae8'],
+  'threatintel.indicator.file.hash.sha256': [
+    '15b012e6f626d0f88c2926d2bf4ca394d7b8ee07cc06d2ec05ea76bed3e8a05e',
+  ],
+  'threatintel.indicator.file.hash.ssdeep': [
+    '768:NXSFGJ/ooP6FawrB7Bo1MWnF/jRmhJImp:1SFXIqBo1Mwj2p',
+  ],
+  'threatintel.indicator.file.hash.tlsh': [
+    'FFB20B82F6617061C32784E2712F7A46B179B04FD1EA54A0F28CD8E9CFE4CAA1617F1C',
+  ],
+  'threatintel.indicator.file.size': [24738],
+  'threatintel.indicator.file.type': ['html'],
+  'threatintel.indicator.first_seen': ['2021-05-28T18:33:29.000Z'],
+  'threatintel.indicator.type': ['file'],
+  ...overrides,
+});
+
 export const buildEventEnrichmentResponseMock = (
   overrides: Partial<CtiEventEnrichmentStrategyResponse> = {}
 ): CtiEventEnrichmentStrategyResponse => ({
   ...buildEventEnrichmentRawResponseMock(),
-  enrichments: [],
+  enrichments: [buildEventEnrichmentMock()],
   inspect: { dsl: ['{"mocked": "json"}'] },
   totalCount: 0,
   ...overrides,

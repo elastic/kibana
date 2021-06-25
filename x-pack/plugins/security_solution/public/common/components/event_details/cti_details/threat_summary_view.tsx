@@ -138,7 +138,7 @@ const ThreatSummaryViewComponent: React.FC<{
   <StyledEuiInMemoryTable
     columns={columns}
     compressed
-    dataTestSubj="threat-summary-view"
+    data-test-subj="threat-summary-view"
     items={buildThreatSummaryItems(enrichments, timelineId, eventId)}
   />
 );
