@@ -11,6 +11,7 @@ import {
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { createPortalNode, OutPortal, InPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
@@ -18,7 +19,8 @@ import { AppMountParameters } from '../../../../../../../src/core/public';
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { ADD_DATA_PATH, APP_DETECTIONS_PATH } from '../../../../common/constants';
+import { ADD_DATA_PATH } from '../../../../common/constants';
+import { isDetectionsPath } from '../../../../public/helpers';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add data',
@@ -32,6 +34,7 @@ export const GlobalHeader = React.memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const portalNode = useMemo(() => createPortalNode(), []);
     const { http } = useKibana().services;
+    const { pathname } = useLocation();
 
     useEffect(() => {
       let unmount = () => {};
@@ -51,7 +54,7 @@ export const GlobalHeader = React.memo(
     return (
       <InPortal node={portalNode}>
         <EuiHeaderSection side="right">
-          {window.location.pathname.includes(APP_DETECTIONS_PATH) && (
+          {isDetectionsPath(pathname) && (
             <EuiHeaderSectionItem>
               <MlPopover />
             </EuiHeaderSectionItem>

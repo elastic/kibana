@@ -12,11 +12,12 @@ import { useLocation } from 'react-router-dom';
 import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AppLeaveHandler } from '../../../../../../../../src/core/public';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
-import { useSourcererScope, isDetectionsPath } from '../../../../common/containers/sourcerer';
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
+import { isDetectionsPath } from '../../../../../public/helpers';
 
 export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 

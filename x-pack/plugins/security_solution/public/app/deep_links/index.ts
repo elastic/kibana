@@ -12,7 +12,6 @@ import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../ty
 import { AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
-  DETECTION_ENGINE,
   ALERTS,
   RULES,
   EXCEPTIONS,
@@ -53,7 +52,7 @@ export const topDeepLinks: AppDeepLink[] = [
   },
   {
     id: SecurityPageName.detections,
-    title: DETECTION_ENGINE,
+    title: ALERTS,
     path: ALERTS_PATH,
     navLinkStatus: AppNavLinkStatus.visible,
     keywords: [

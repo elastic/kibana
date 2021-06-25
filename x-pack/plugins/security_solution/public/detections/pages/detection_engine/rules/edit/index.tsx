@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
@@ -61,7 +61,6 @@ import { APP_ID } from '../../../../../../common/constants';
 const formHookNoop = async (): Promise<undefined> => undefined;
 
 const EditRulePageComponent: FC = () => {
-  const history = useHistory();
   const [, dispatchToaster] = useStateToaster();
   const [
     {
@@ -303,9 +302,12 @@ const EditRulePageComponent: FC = () => {
   const goToDetailsRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      history.replace(getRuleDetailsUrl(ruleId ?? ''));
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: getRuleDetailsUrl(ruleId ?? ''),
+      });
     },
-    [history, ruleId]
+    [navigateToApp, ruleId]
   );
 
   useEffect(() => {

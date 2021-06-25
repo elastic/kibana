@@ -14,15 +14,12 @@ import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
-import {
-  useInitSourcerer,
-  useSourcererScope,
-  isDetectionsPath,
-} from '../../common/containers/sourcerer';
+import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
+import { isDetectionsPath } from '../../helpers';
 
 interface HomePageProps {
   children: React.ReactNode;

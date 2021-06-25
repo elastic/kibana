@@ -72,6 +72,9 @@ const isAlertsRoutes = (spyState: RouteSpyState) =>
 const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.administration;
 
+const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
+  spyState != null && spyState.pageName === SecurityPageName.rules;
+
 // eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps,
@@ -120,7 +123,7 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
-  if (isAlertsRoutes(spyState) && object.navTabs) {
+  if ((isAlertsRoutes(spyState) || isRulesRoutes(spyState)) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: SecurityPageName.alerts, isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
     if (spyState.tabName != null) {
@@ -139,6 +142,7 @@ export const getBreadcrumbsForRoute = (
       ),
     ];
   }
+
   if (isCaseRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'case', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
