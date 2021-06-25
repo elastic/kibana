@@ -41,7 +41,12 @@ import {
 import { AdvancedParametersSection } from './field_editor/advanced_parameters_section';
 import { FlyoutPanels } from './flyout_panels';
 
-import { MatchedItem, ResolveIndexResponseItemAlias, IndexPatternEditorContext } from '../types';
+import {
+  MatchedItem,
+  ResolveIndexResponseItemAlias,
+  IndexPatternEditorContext,
+  RollupIndicesCapsResponse,
+} from '../types';
 
 import {
   LoadingIndices,
@@ -119,21 +124,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
         indexPatternStub.type = ROLLUP_TYPE;
         indexPatternStub.typeMeta = {
           params: {
-            rollup_index: rollupIndex, // name as string
+            rollup_index: rollupIndex,
           },
-          aggs: (rollupIndicesCapabilities[rollupIndex] as any).aggs, // todo
+          aggs: (rollupIndicesCapabilities[rollupIndex] as any).aggs,
         };
       }
 
       await onSave(indexPatternStub);
-      /*
-      await onSave({
-        title: formData.title,
-        timeFieldName: formData.timestampField?.value,
-        id: formData.id,
-        ...indexPatternCreationType.getIndexPatternMappings(),
-      });
-      */
     },
   });
 
@@ -151,21 +148,16 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const [disableSubmit, setDisableSubmit] = useState<boolean>(true);
   const [existingIndexPatterns, setExistingIndexPatterns] = useState<string[]>([]);
   const [rollupIndex, setRollupIndex] = useState<string | undefined>();
-  const [rollupIndicesCapabilities, setRollupIndicesCapabilities] = useState<
-    Record<string, unknown>
-  >({});
+  const [
+    rollupIndicesCapabilities,
+    setRollupIndicesCapabilities,
+  ] = useState<RollupIndicesCapsResponse>({});
   const [matchedIndices, setMatchedIndices] = useState<MatchedIndicesSet>({
     allIndices: [],
     exactMatchedIndices: [],
     partialMatchedIndices: [],
     visibleIndices: [],
   });
-  /*
-  const [
-    indexPatternCreationType,
-    setIndexPatternCreationType,
-  ] = useState<IndexPatternCreationConfig>(indexPatternCreateService.creation.getType('default'));
-  */
 
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;
@@ -218,17 +210,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isMounted = false;
     };
   }, [http, type]);
-
-  // updates index pattern creation type based on selection
-  // todo can I do this without effect?
-  useEffect(() => {
-    // const updatedCreationType = indexPatternCreateService.creation.getType(type);
-    // setIndexPatternCreationType(updatedCreationType);
-    if (type === ROLLUP_TYPE) {
-      form.setFieldValue('allowHidden', false);
-    }
-    // }, [type, indexPatternCreateService.creation, form]);
-  }, [type, form]);
 
   // fetches indices and timestamp options
   useEffect(() => {
@@ -298,14 +279,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           getFieldsOptions.type = ROLLUP_TYPE;
           getFieldsOptions.rollupIndex = rollupIndex;
         }
-        /*
-        const fields = await ensureMinimumTime(
-          indexPatternService.getFieldsForWildcard({
-            pattern: query,
-            ...indexPatternCreationType.getFetchForWildcardOptions(),
-          })
-        );
-        */
+
         const fields = await ensureMinimumTime(
           indexPatternService.getFieldsForWildcard(getFieldsOptions)
         );
@@ -364,7 +338,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <TypeField />
+        <TypeField
+          onChange={(newType) => {
+            if (newType === ROLLUP_TYPE) {
+              form.setFieldValue('allowHidden', false);
+            }
+          }}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
@@ -411,22 +391,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
       const disable =
         !isValid ||
         !matchedIndices.exactMatchedIndices.length ||
-        // todo display errors
-        // !!indexPatternCreationType.checkIndicesForErrors(matchedIndices.exactMatchedIndices) ||
         (!!timestampFieldOptions.length && timestampField === undefined);
       setDisableSubmit(disable);
     });
   }
-
-  // move into render fn
-  /*
-  const disableSubmit =
-    !form.isValid ||
-    !matchedIndices.exactMatchedIndices.length ||
-    // todo display errors
-    !!indexPatternCreationType.checkIndicesForErrors(matchedIndices.exactMatchedIndices) ||
-    (!!timestampFieldOptions.length && timestampField === undefined);
-    */
 
   const previewPanelContent = isLoadingIndexPatterns ? (
     <LoadingIndices />
@@ -472,6 +440,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   isRollup={form.getFields().type?.value === ROLLUP_TYPE}
                   existingIndexPatterns={existingIndexPatterns}
                   matchedIndices={matchedIndices.exactMatchedIndices}
+                  rollupIndicesCapabilities={rollupIndicesCapabilities}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

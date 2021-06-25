@@ -25,6 +25,10 @@ import { UseField } from '../../shared_imports';
 
 import { IndexPatternConfig } from '../index_pattern_editor_flyout_content';
 
+interface TypeFieldProps {
+  onChange: (type: string) => void;
+}
+
 const standardSelectItem = (
   <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
     <EuiDescriptionListTitle>
@@ -63,7 +67,7 @@ const rollupSelectItem = (
   </EuiDescriptionList>
 );
 
-export const TypeField = () => {
+export const TypeField = ({ onChange }: TypeFieldProps) => {
   return (
     <UseField<string, IndexPatternConfig> path="type">
       {({ label, value, setValue }) => {
@@ -86,6 +90,7 @@ export const TypeField = () => {
                 valueOfSelected={value}
                 onChange={(newValue) => {
                   setValue(newValue);
+                  onChange(newValue);
                 }}
                 aria-label={i18n.translate('indexPatternEditor.editor.form.typeSelectAriaLabel', {
                   defaultMessage: 'Type field',

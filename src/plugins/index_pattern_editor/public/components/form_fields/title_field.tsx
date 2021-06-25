@@ -18,12 +18,13 @@ import {
 import { IndexPatternConfig } from '../index_pattern_editor_flyout_content';
 import { canAppendWildcard } from '../../lib';
 import { schema } from '../form_schema';
-import { MatchedItem } from '../../types';
+import { MatchedItem, RollupIndicesCapsResponse } from '../../types';
 
 interface TitleFieldProps {
   existingIndexPatterns: string[];
   isRollup: boolean;
   matchedIndices: MatchedItem[];
+  rollupIndicesCapabilities: RollupIndicesCapsResponse;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -52,10 +53,17 @@ const createTitlesNotAllowedValidator = (
   },
 });
 
-const rollupIndexPatternValidator = (
-  rollupIndices: string[],
-  matchedIndices: MatchedItem[]
-): ValidationConfig<{}, string, string> => ({
+interface RollupIndexPatternValidatorArgs {
+  rollupIndices: string[];
+  matchedIndices: MatchedItem[];
+  rollupIndicesCapabilities: Record<string, { error: string }>;
+}
+
+const rollupIndexPatternValidator = ({
+  rollupIndices,
+  matchedIndices,
+  rollupIndicesCapabilities,
+}: RollupIndexPatternValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: ({ value }) => {
     if (!rollupIndices || !rollupIndices.length) {
       return;
@@ -70,14 +78,35 @@ const rollupIndexPatternValidator = (
     } else if (rollupIndexMatches.length > 1) {
       return rollupIndexPatternTooManyMatchesError;
     }
+
+    const error = rollupIndicesCapabilities[value].error;
+
+    if (error) {
+      return {
+        message: i18n.translate('indexPatternEditor.rollup.uncaughtError', {
+          defaultMessage: 'Rollup index pattern error: {error}',
+          values: {
+            error,
+          },
+        }),
+      };
+    }
   },
 });
 
-const getTitleConfig = (
-  namesNotAllowed: string[],
-  isRollup: boolean,
-  matchedIndices: MatchedItem[]
-): FieldConfig<string> => {
+interface GetTitleConfigArgs {
+  namesNotAllowed: string[];
+  isRollup: boolean;
+  matchedIndices: MatchedItem[];
+  rollupIndicesCapabilities: RollupIndicesCapsResponse;
+}
+
+const getTitleConfig = ({
+  namesNotAllowed,
+  isRollup,
+  matchedIndices,
+  rollupIndicesCapabilities,
+}: GetTitleConfigArgs): FieldConfig<string> => {
   const titleFieldConfig = schema.title;
 
   const validations = [
@@ -86,7 +115,13 @@ const getTitleConfig = (
   ];
 
   if (isRollup) {
-    validations.push(rollupIndexPatternValidator(['test-rollup', 'test-rollup2'], matchedIndices));
+    validations.push(
+      rollupIndexPatternValidator({
+        rollupIndices: ['test-rollup', 'test-rollup2'],
+        matchedIndices,
+        rollupIndicesCapabilities,
+      })
+    );
   }
 
   // Add validation to not allow duplicates
@@ -100,13 +135,19 @@ export const TitleField = ({
   existingIndexPatterns,
   isRollup,
   matchedIndices,
+  rollupIndicesCapabilities,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
 
   return (
     <UseField<string, IndexPatternConfig>
       path="title"
-      config={getTitleConfig(existingIndexPatterns, isRollup, matchedIndices)}
+      config={getTitleConfig({
+        namesNotAllowed: existingIndexPatterns,
+        isRollup,
+        matchedIndices,
+        rollupIndicesCapabilities,
+      })}
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {

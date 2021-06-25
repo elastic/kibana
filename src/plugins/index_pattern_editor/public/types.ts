@@ -152,3 +152,10 @@ export interface Tag {
   key: string;
   color: string;
 }
+
+export interface RollupIndiciesCapability {
+  aggs: unknown;
+  error: string;
+}
+
+export type RollupIndicesCapsResponse = Record<string, RollupIndiciesCapability>;
