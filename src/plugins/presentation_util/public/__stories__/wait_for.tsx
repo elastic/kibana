@@ -16,10 +16,10 @@ export const waitFor = ({
   loaderComponent,
 }: {
   waitTarget: Promise<any>;
-  loader?: boolean;
+  loaderComponent?: boolean;
 }) => (story: Story) => {
   const [storyComponent, setStory] = useState<StoryFnReactReturnType>();
-  const spinner = loaderComponent ?? <div>Loading...</div>;
+  const loader = loaderComponent ?? <div>Loading...</div>;
 
   useEffect(() => {
     if (!storyComponent) {
@@ -29,5 +29,5 @@ export const waitFor = ({
     }
   }, [story, storyComponent]);
 
-  return storyComponent ? storyComponent : spinner;
+  return storyComponent ? storyComponent : loader;
 };
