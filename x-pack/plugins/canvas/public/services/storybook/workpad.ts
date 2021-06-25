@@ -6,22 +6,20 @@
  */
 
 import moment from 'moment';
-
 import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
+import { StorybookParams } from '.';
+import { CanvasWorkpadService } from '../workpad';
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../state/defaults';
-import { CanvasWorkpadService } from '../workpad';
 import { getId } from '../../lib/get_id';
 import { CanvasTemplate } from '../../../types';
 
-type CanvasWorkpadServiceFactory = PluginServiceFactory<CanvasWorkpadService>;
+type CanvasWorkpadServiceFactory = PluginServiceFactory<CanvasWorkpadService, StorybookParams>;
 
-// TODO - All of these need to go to a Storybook service factory
 const TIMEOUT = 500;
 
 const promiseTimeout = (time: number) => () => new Promise((resolve) => setTimeout(resolve, time));
-
 const getName = () => {
   const lorem = 'Lorem ipsum dolor sit amet consectetur adipiscing elit Fusce lobortis aliquet arcu ut turpis duis'.split(
     ' '
@@ -95,11 +93,14 @@ export const findNoTemplates = (timeout = TIMEOUT) => () => {
 export const getNoTemplates = () => ({ templates: [] });
 export const getSomeTemplates = () => ({ templates });
 
-export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
+export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
+  findWorkpads,
+  findTemplates,
+}) => ({
   get: (id: string) => Promise.resolve({ ...getDefaultWorkpad(), id }),
-  findTemplates: findNoTemplates(),
+  findTemplates: findTemplates ? findSomeTemplates() : findNoTemplates(),
   create: (workpad) => Promise.resolve(workpad),
   createFromTemplate: (_templateId: string) => Promise.resolve(getDefaultWorkpad()),
-  find: findNoWorkpads(),
+  find: findWorkpads ? findSomeWorkpads(findWorkpads) : findNoWorkpads(),
   remove: (id: string) => Promise.resolve(),
 });

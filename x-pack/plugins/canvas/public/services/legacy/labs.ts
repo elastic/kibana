@@ -8,10 +8,10 @@
 import {
   projectIDs,
   PresentationLabsService,
-} from '../../../../../src/plugins/presentation_util/public';
+} from '../../../../../../src/plugins/presentation_util/public';
 
 import { CanvasServiceFactory } from '.';
-import { UI_SETTINGS } from '../../common';
+import { UI_SETTINGS } from '../../../common';
 export interface CanvasLabsService extends PresentationLabsService {
   projectIDs: typeof projectIDs;
   isLabsEnabled: () => boolean;

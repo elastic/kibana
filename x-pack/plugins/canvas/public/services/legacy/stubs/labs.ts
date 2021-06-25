@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { projectIDs } from '../../../../../../src/plugins/presentation_util/public';
+import { projectIDs } from '../../../../../../../src/plugins/presentation_util/public';
 import { CanvasLabsService } from '../labs';
 
 const noop = (..._args: any[]): any => {};

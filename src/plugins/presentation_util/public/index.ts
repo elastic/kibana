@@ -15,6 +15,16 @@ export {
   getStubPluginServices,
 } from './services';
 
+export {
+  KibanaPluginServiceFactory,
+  PluginServiceFactory,
+  PluginServices,
+  PluginServiceProviders,
+  PluginServiceProvider,
+  PluginServiceRegistry,
+  KibanaPluginServiceParams,
+} from './services/create';
+
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 export { SaveModalDashboardProps } from './components/types';
 export { projectIDs, ProjectID, Project } from '../common/labs';

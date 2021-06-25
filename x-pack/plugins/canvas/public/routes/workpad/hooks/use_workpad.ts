@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useServices } from '../../../services';
+import { useWorkpadService } from '../../../services';
 import { getWorkpad } from '../../../state/selectors/workpad';
 import { setWorkpad } from '../../../state/actions/workpad';
 // @ts-expect-error
@@ -20,7 +20,7 @@ export const useWorkpad = (
   workpadId: string,
   loadPages: boolean = true
 ): [CanvasWorkpad | undefined, string | Error | undefined] => {
-  const services = useServices();
+  const workpadService = useWorkpadService();
   const dispatch = useDispatch();
   const storedWorkpad = useSelector(getWorkpad);
   const [error, setError] = useState<string | Error | undefined>(undefined);
@@ -28,7 +28,7 @@ export const useWorkpad = (
   useEffect(() => {
     (async () => {
       try {
-        const { assets, ...workpad } = await services.workpad.get(workpadId);
+        const { assets, ...workpad } = await workpadService.get(workpadId);
         dispatch(setAssets(assets));
         dispatch(setWorkpad(workpad, { loadPages }));
         dispatch(setZoomScale(1));
@@ -36,7 +36,7 @@ export const useWorkpad = (
         setError(e);
       }
     })();
-  }, [workpadId, services.workpad, dispatch, setError, loadPages]);
+  }, [workpadId, dispatch, setError, loadPages, workpadService]);
 
   return [storedWorkpad.id === workpadId ? storedWorkpad : undefined, error];
 };

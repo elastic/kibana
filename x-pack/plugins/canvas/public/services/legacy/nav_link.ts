@@ -6,8 +6,8 @@
  */
 
 import { CanvasServiceFactory } from '.';
-import { SESSIONSTORAGE_LASTPATH } from '../../common/lib/constants';
-import { getSessionStorage } from '../lib/storage';
+import { SESSIONSTORAGE_LASTPATH } from '../../../common/lib/constants';
+import { getSessionStorage } from '../../lib/storage';
 
 export interface NavLinkService {
   updatePath: (path: string) => void;

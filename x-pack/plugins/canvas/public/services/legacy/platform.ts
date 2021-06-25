@@ -12,7 +12,7 @@ import {
   ChromeBreadcrumb,
   IBasePath,
   ChromeStart,
-} from '../../../../../src/core/public';
+} from '../../../../../../src/core/public';
 import { CanvasServiceFactory } from '.';
 
 export interface PlatformService {

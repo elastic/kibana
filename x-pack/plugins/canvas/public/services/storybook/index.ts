@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-export * from '../legacy/stubs';
-
 import {
+  PluginServices,
   PluginServiceProviders,
   PluginServiceProvider,
-  PluginServiceRegistry,
 } from '../../../../../../src/plugins/presentation_util/public';
 
 import { CanvasPluginServices } from '..';
+import { providers as stubProviders } from '../stubs';
 import { workpadServiceFactory } from './workpad';
 
-export { workpadServiceFactory } from './workpad';
+export interface StorybookParams {
+  findWorkpads?: number;
+  findTemplates?: boolean;
+}
 
-export const providers: PluginServiceProviders<CanvasPluginServices> = {
+export const providers: PluginServiceProviders<CanvasPluginServices, StorybookParams> = {
+  ...stubProviders,
   workpad: new PluginServiceProvider(workpadServiceFactory),
 };
 
-export const registry = new PluginServiceRegistry<CanvasPluginServices>(providers);
+export const pluginServices = new PluginServices<CanvasPluginServices>();

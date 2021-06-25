@@ -8,76 +8,41 @@
 import React, { useState, useEffect } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import { action } from '@storybook/addon-actions';
-import {
-  reduxDecorator,
-  getAddonPanelParameters,
-  getDisableStoryshotsParameter,
-} from '../../../../storybook';
-import { getSomeWorkpads } from '../../../services/stubs/workpad';
+import { reduxDecorator, getDisableStoryshotsParameter } from '../../../../storybook';
 
-import { WorkpadTable } from './workpad_table';
-import { WorkpadTable as WorkpadTableComponent } from './workpad_table.component';
+import { getSomeWorkpads } from '../../../services/storybook/workpad';
+import { WorkpadTable as Component } from './workpad_table';
 import { WorkpadsContext } from './my_workpads';
 
 export default {
-  title: 'Home/Workpad Table',
-  argTypes: {},
+  title: 'Home/Components/Workpad Table',
+  argTypes: {
+    findWorkpads: {
+      name: 'Number of workpads',
+      type: { name: 'number' },
+      defaultValue: 5,
+      control: {
+        type: 'range',
+      },
+    },
+  },
   decorators: [reduxDecorator()],
-  parameters: { ...getAddonPanelParameters(), ...getDisableStoryshotsParameter() },
+  parameters: { ...getDisableStoryshotsParameter() },
 };
 
-export const NoWorkpads = () => {
-  const [workpads, setWorkpads] = useState(getSomeWorkpads(0));
-
-  return (
-    <WorkpadsContext.Provider value={{ workpads, setWorkpads }}>
-      <EuiPanel>
-        <WorkpadTable />
-      </EuiPanel>
-    </WorkpadsContext.Provider>
-  );
-};
-
-export const HasWorkpads = () => {
-  const [workpads, setWorkpads] = useState(getSomeWorkpads(5));
-
-  return (
-    <WorkpadsContext.Provider value={{ workpads, setWorkpads }}>
-      <EuiPanel>
-        <WorkpadTable />
-      </EuiPanel>
-    </WorkpadsContext.Provider>
-  );
-};
-
-export const Component = ({
-  workpadCount,
-  canUserWrite,
-  dateFormat,
-}: {
-  workpadCount: number;
-  canUserWrite: boolean;
-  dateFormat: string;
-}) => {
-  const [workpads, setWorkpads] = useState(getSomeWorkpads(workpadCount));
+export const WorkpadTable = (args: { findWorkpads: number }) => {
+  const { findWorkpads } = args;
+  const [workpads, setWorkpads] = useState(getSomeWorkpads(findWorkpads));
 
   useEffect(() => {
-    setWorkpads(getSomeWorkpads(workpadCount));
-  }, [workpadCount]);
+    setWorkpads(getSomeWorkpads(findWorkpads));
+  }, [findWorkpads]);
 
   return (
-    <WorkpadsContext.Provider value={{ workpads, setWorkpads }}>
-      <EuiPanel>
-        <WorkpadTableComponent
-          {...{ workpads, canUserWrite, dateFormat }}
-          onCloneWorkpad={action('onCloneWorkpad')}
-          onExportWorkpad={action('onExportWorkpad')}
-        />
-      </EuiPanel>
-    </WorkpadsContext.Provider>
+    <EuiPanel>
+      <WorkpadsContext.Provider value={{ workpads, setWorkpads }}>
+        <Component />
+      </WorkpadsContext.Provider>
+    </EuiPanel>
   );
 };
-
-Component.args = { workpadCount: 5, canUserWrite: true, dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS' };
-Component.argTypes = {};

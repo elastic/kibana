@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EmbeddableFactory } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableFactory } from '../../../../../../src/plugins/embeddable/public';
 import { CanvasServiceFactory } from '.';
 
 export interface EmbeddablesService {

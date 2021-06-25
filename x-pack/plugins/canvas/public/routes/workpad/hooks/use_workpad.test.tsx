@@ -32,10 +32,8 @@ jest.mock('react-redux', () => ({
 }));
 
 jest.mock('../../../services', () => ({
-  useServices: () => ({
-    workpad: {
-      get: mockGetWorkpad,
-    },
+  useWorkpadService: () => ({
+    get: mockGetWorkpad,
   }),
 }));
 
