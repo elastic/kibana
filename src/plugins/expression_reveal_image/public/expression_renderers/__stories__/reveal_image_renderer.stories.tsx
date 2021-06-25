@@ -9,18 +9,24 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { revealImageRenderer } from '../';
-import { elasticOutline, elasticLogo } from '../../../../presentation_util/public';
-import { Render } from '../../../../presentation_util/public/__stories__';
-
+import { elasticOutline, getElasticLogo } from '../../../../presentation_util/public';
+import { Render, withPromise } from '../../../../presentation_util/public/__stories__';
 import { Origin } from '../../../common/types/expression_functions';
 
-storiesOf('renderers/revealImage', module).add('default', () => {
+const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
   const config = {
     image: elasticLogo,
     emptyImage: elasticOutline,
     origin: Origin.LEFT,
     percent: 0.45,
   };
-
   return <Render renderer={revealImageRenderer} config={config} />;
-});
+};
+
+storiesOf('renderers/revealImage', module).add(
+  'default',
+  (_, props) => {
+    return <Renderer elasticLogo={props?.elasticLogo} />;
+  },
+  { decorators: [withPromise({ promise: getElasticLogo() })] }
+);
