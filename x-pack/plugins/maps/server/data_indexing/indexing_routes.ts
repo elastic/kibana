@@ -104,6 +104,59 @@ export function initIndexingRoutes({
     }
   );
 
+  router.delete(
+    {
+      path: `${INDEX_FEATURE_PATH}/{featureId}`,
+      validate: {
+        params: schema.object({
+          featureId: schema.string(),
+        }),
+        body: schema.object({
+          index: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { body: resp } = await context.core.elasticsearch.client.asCurrentUser.delete({
+          index: request.body.index,
+          id: request.params.featureId,
+          refresh: true,
+        });
+        if (resp.result === 'Error') {
+          throw resp;
+        } else {
+          return response.ok({ body: { success: true } });
+        }
+      } catch (error) {
+        logger.error(error);
+        const errorStatusCode = error.meta?.statusCode;
+        if (errorStatusCode === 401) {
+          return response.unauthorized({
+            body: {
+              message: 'User not authorized to delete indexed feature',
+            },
+          });
+        } else if (errorStatusCode === 403) {
+          return response.forbidden({
+            body: {
+              message: 'Access to delete indexed feature forbidden',
+            },
+          });
+        } else if (errorStatusCode === 404) {
+          return response.notFound({
+            body: { message: 'Feature not found' },
+          });
+        } else {
+          return response.custom({
+            body: 'Unknown error deleting feature',
+            statusCode: 500,
+          });
+        }
+      }
+    }
+  );
+
   router.get(
     {
       path: `${GET_MATCHING_INDEXES_PATH}/{indexPattern}`,
