@@ -19,18 +19,9 @@ import {
 } from './plugin';
 import { IndexPatternManagmentContext } from './types';
 
-const createSetupContract = (): IndexPatternManagementSetup => {};
+const createSetupContract = (): IndexPatternManagementSetup => ({});
 
-const createStartContract = (): IndexPatternManagementStart => ({
-  creation: {
-    getType: jest.fn(),
-    getIndexPatternCreationOptions: jest.fn(),
-  } as any,
-  list: {
-    getFieldInfo: jest.fn(),
-    areScriptedFieldsEnabled: jest.fn(),
-  } as any,
-});
+const createStartContract = (): IndexPatternManagementStart => ({});
 
 const createInstance = async () => {
   const plugin = new IndexPatternManagementPlugin({} as PluginInitializerContext);
@@ -39,11 +30,7 @@ const createInstance = async () => {
     management: managementPluginMock.createSetupContract(),
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
   });
-  const doStart = () =>
-    plugin.start(coreMock.createStart(), {
-      data: dataPluginMock.createStartContract(),
-      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
-    });
+  const doStart = () => plugin.start();
 
   return {
     plugin,
@@ -83,6 +70,7 @@ const createIndexPatternManagmentContext = (): {
     indexPatternManagementStart: createStartContract(),
     setBreadcrumbs: () => {},
     fieldFormatEditors: indexPatternFieldEditor.fieldFormatEditors,
+    indexPatternEditor: {}, // todo
   };
 };
 

@@ -71,7 +71,6 @@ export const IndexPatternTable = ({
     http,
     notifications,
     application,
-    indexPatternEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
@@ -161,7 +160,6 @@ export const IndexPatternTable = ({
         notifications,
         application,
         indexPatternService: data.indexPatterns,
-        indexPatternCreateService: indexPatternEditor.indexPatternCreateService,
       }}
       defaultTypeIsRollup={isRollup}
     />

@@ -30,7 +30,6 @@ interface TitleFieldProps {
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
   refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
-  rollupIndices: string[];
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -122,6 +121,7 @@ const getTitleConfig = ({
   const validations = [
     ...titleFieldConfig.validations,
     createTitlesNotAllowedValidator(namesNotAllowed),
+    // note this is responsible for triggering the state update for the selected source list.
     rollupIndexPatternValidator({
       rollupIndicesCapabilities,
       refreshMatchedIndices,

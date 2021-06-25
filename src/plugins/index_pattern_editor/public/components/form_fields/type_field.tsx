@@ -23,9 +23,7 @@ import {
 
 import { UseField } from '../../shared_imports';
 
-import { IndexPatternConfig } from '../index_pattern_editor_flyout_content';
-
-import { INDEX_PATTERN_TYPE } from '../../types';
+import { INDEX_PATTERN_TYPE, IndexPatternConfig } from '../../types';
 
 interface TypeFieldProps {
   onChange: (type: string) => void;
