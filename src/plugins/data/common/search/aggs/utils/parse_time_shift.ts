@@ -20,7 +20,7 @@ export const parseTimeShift = (val: string): moment.Duration | 'previous' | 'inv
   if (trimmedVal === 'previous') {
     return 'previous';
   }
-  const [, amount, unit] = trimmedVal.match(/^(\d+)(\w)$/) || [];
+  const [, amount, unit] = trimmedVal.match(/^(\d+)\s*(\w)$/) || [];
   const parsedAmount = Number(amount);
   if (Number.isNaN(parsedAmount) || !allowedUnits.includes(unit as AllowedUnit)) {
     return 'invalid';

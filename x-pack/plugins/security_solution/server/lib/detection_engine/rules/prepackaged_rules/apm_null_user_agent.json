@@ -30,7 +30,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Web Application Suspicious Activity: No User Agent",
-  "query": "url.path:*",
+  "query": "url.path:*\n",
   "references": [
     "https://en.wikipedia.org/wiki/User_agent"
   ],

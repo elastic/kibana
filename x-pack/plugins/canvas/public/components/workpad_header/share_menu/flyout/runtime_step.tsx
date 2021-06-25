@@ -7,12 +7,26 @@
 
 import React, { FC } from 'react';
 import { EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { ComponentStrings } from '../../../../../i18n/components';
+import { CANVAS } from '../../../../../i18n/constants';
 
 import { OnDownloadFn } from './flyout';
 
-const { ShareWebsiteRuntimeStep: strings } = ComponentStrings;
+const strings = {
+  getDownloadLabel: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.runtimeStep.downloadLabel', {
+      defaultMessage: 'Download runtime',
+    }),
+  getStepDescription: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.runtimeStep.description', {
+      defaultMessage:
+        'In order to render a Shareable Workpad, you also need to include the {CANVAS} Shareable Workpad Runtime. You can skip this step if the runtime is already included on your website.',
+      values: {
+        CANVAS,
+      },
+    }),
+};
 
 export const RuntimeStep: FC<{ onDownload: OnDownloadFn }> = ({ onDownload }) => (
   <EuiText size="s">
