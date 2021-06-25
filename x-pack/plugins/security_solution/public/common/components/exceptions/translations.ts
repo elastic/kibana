@@ -275,7 +275,7 @@ export const OPERATING_SYSTEM_MAC = i18n.translate(
 );
 
 export const OPERATING_SYSTEM_WINDOWS_AND_MAC = i18n.translate(
-  'xpack.securitySolution.exceptions.operatingSystemMac',
+  'xpack.securitySolution.exceptions.operatingSystemWindowsAndMac',
   {
     defaultMessage: 'Windows and macOS',
   }
