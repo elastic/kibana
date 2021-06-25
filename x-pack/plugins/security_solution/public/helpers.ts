@@ -6,9 +6,10 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { matchPath } from 'react-router-dom';
 
 import { CoreStart } from '../../../../src/core/public';
-import { APP_ID } from '../common/constants';
+import { ALERTS_PATH, APP_ID, EXCEPTIONS_PATH, RULES_PATH } from '../common/constants';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -139,3 +140,10 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   response:
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });
+
+export const isDetectionsPath = (pathname: string): boolean => {
+  return !!matchPath(pathname, {
+    path: `(${ALERTS_PATH}|${RULES_PATH}|${EXCEPTIONS_PATH})`,
+    strict: false,
+  });
+};

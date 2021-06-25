@@ -18,6 +18,7 @@ import {
 } from 'redux';
 import { RouteProps } from 'react-router-dom';
 import { AppMountParameters, AppDeepLink } from '../../../../../src/core/public';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
 import { StartedSubPlugins, StartServices } from '../types';
 
 /**
@@ -27,6 +28,7 @@ export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
   subPlugins: StartedSubPlugins;
+  usageCollection?: UsageCollectionSetup;
 }
 
 import { State, SubPluginsInitReducer } from '../common/store';
