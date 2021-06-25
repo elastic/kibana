@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../__mocks__/kea_logic';
-import { mockEngineValues } from '../../__mocks__';
-
 import React from 'react';
 import { Switch } from 'react-router-dom';
 
@@ -18,10 +15,6 @@ import { CrawlerRouter } from './crawler_router';
 
 describe('CrawlerRouter', () => {
   beforeEach(() => {
-    setMockValues({ ...mockEngineValues });
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
   });
 
