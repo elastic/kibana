@@ -159,3 +159,8 @@ export interface RollupIndiciesCapability {
 }
 
 export type RollupIndicesCapsResponse = Record<string, RollupIndiciesCapability>;
+
+export enum INDEX_PATTERN_TYPE {
+  ROLLUP = 'rollup',
+  DEFAULT = 'default',
+}

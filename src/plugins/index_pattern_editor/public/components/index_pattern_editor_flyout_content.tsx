@@ -46,6 +46,7 @@ import {
   ResolveIndexResponseItemAlias,
   IndexPatternEditorContext,
   RollupIndicesCapsResponse,
+  INDEX_PATTERN_TYPE,
 } from '../types';
 
 import {
@@ -60,8 +61,6 @@ import {
   schema,
   geti18nTexts,
 } from '.';
-
-const ROLLUP_TYPE = 'rollup';
 
 export interface Props {
   /**
@@ -107,7 +106,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // return type, interal type
   const { form } = useForm<IndexPatternConfig, FormInternal>({
-    defaultValue: { type: defaultTypeIsRollup ? ROLLUP_TYPE : 'default' },
+    defaultValue: {
+      type: defaultTypeIsRollup ? INDEX_PATTERN_TYPE.ROLLUP : INDEX_PATTERN_TYPE.DEFAULT,
+    },
     schema,
     onSubmit: async (formData, isValid) => {
       if (!isValid) {
@@ -120,8 +121,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
         id: formData.id,
       };
 
-      if (type === ROLLUP_TYPE && rollupIndex) {
-        indexPatternStub.type = ROLLUP_TYPE;
+      if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
+        indexPatternStub.type = INDEX_PATTERN_TYPE.ROLLUP;
         indexPatternStub.typeMeta = {
           params: {
             rollup_index: rollupIndex,
@@ -203,7 +204,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         // Silently swallow failure responses such as expired trials
       }
     };
-    if (type === ROLLUP_TYPE) {
+    if (type === INDEX_PATTERN_TYPE.ROLLUP) {
       getRollups();
     }
     return () => {
@@ -219,7 +220,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isRollupIndex(indexName)
         ? [
             {
-              key: ROLLUP_TYPE,
+              key: INDEX_PATTERN_TYPE.ROLLUP,
               name: i18nTexts.rollupLabel,
               color: 'primary',
             },
@@ -260,7 +261,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         allowHidden
       );
 
-      if (type === ROLLUP_TYPE) {
+      if (type === INDEX_PATTERN_TYPE.ROLLUP) {
         const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
         setRollupIndex(rollupIndices.length === 1 ? rollupIndices[0].name : undefined);
       } else {
@@ -275,8 +276,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
         const getFieldsOptions: GetFieldsOptions = {
           pattern: query,
         };
-        if (type === ROLLUP_TYPE) {
-          getFieldsOptions.type = ROLLUP_TYPE;
+        if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+          getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
           getFieldsOptions.rollupIndex = rollupIndex;
         }
 
@@ -340,7 +341,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       <EuiFlexItem>
         <TypeField
           onChange={(newType) => {
-            if (newType === ROLLUP_TYPE) {
+            if (newType === INDEX_PATTERN_TYPE.ROLLUP) {
               form.setFieldValue('allowHidden', false);
             }
           }}
@@ -378,7 +379,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     return (
       <StatusMessage
         matchedIndices={matched}
-        showSystemIndices={type === ROLLUP_TYPE ? false : true}
+        showSystemIndices={type === INDEX_PATTERN_TYPE.ROLLUP ? false : true}
         isIncludingSystemIndices={allowHidden}
         query={title || ''}
       />
@@ -437,7 +438,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
               {/* Name */}
               <EuiFlexItem>
                 <TitleField
-                  isRollup={form.getFields().type?.value === ROLLUP_TYPE}
+                  isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
                   existingIndexPatterns={existingIndexPatterns}
                   matchedIndices={matchedIndices.exactMatchedIndices}
                   rollupIndicesCapabilities={rollupIndicesCapabilities}

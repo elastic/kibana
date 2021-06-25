@@ -25,6 +25,8 @@ import { UseField } from '../../shared_imports';
 
 import { IndexPatternConfig } from '../index_pattern_editor_flyout_content';
 
+import { INDEX_PATTERN_TYPE } from '../../types';
+
 interface TypeFieldProps {
   onChange: (type: string) => void;
 }
@@ -81,11 +83,19 @@ export const TypeField = ({ onChange }: TypeFieldProps) => {
                 data-test-subj="typeField"
                 options={[
                   {
-                    value: 'default',
-                    inputDisplay: 'Standard',
+                    value: INDEX_PATTERN_TYPE.DEFAULT,
+                    inputDisplay: i18n.translate('indexPatternEditor.typeSelect.standard', {
+                      defaultMessage: 'Standard',
+                    }),
                     dropdownDisplay: standardSelectItem,
                   },
-                  { value: 'rollup', inputDisplay: 'Rollup', dropdownDisplay: rollupSelectItem },
+                  {
+                    value: INDEX_PATTERN_TYPE.ROLLUP,
+                    inputDisplay: i18n.translate('indexPatternEditor.typeSelect.rollup', {
+                      defaultMessage: 'Rollup',
+                    }),
+                    dropdownDisplay: rollupSelectItem,
+                  },
                 ]}
                 valueOfSelected={value}
                 onChange={(newValue) => {
