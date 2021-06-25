@@ -20,7 +20,7 @@ import {
   setProgressTotal,
 } from './progress';
 import { delayRetryState, resetRetryState } from './retry_state';
-import { extractTransformFailuresReason } from './extract_errors';
+import { extractTransformFailuresReason, extractUnknownDocFailureReason } from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
   getAliases,
@@ -324,7 +324,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: 'LOL', // TODO
+          reason: extractUnknownDocFailureReason(unknownDocIds),
         };
       } else {
         const source = stateP.sourceIndex;

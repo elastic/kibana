@@ -34,3 +34,7 @@ export function extractTransformFailuresReason(
     `To allow migrations to proceed, please delete or fix these documents.`
   );
 }
+
+export function extractUnknownDocFailureReason(unknownDocIds: string[]): string {
+  return 'LOL';
+}
