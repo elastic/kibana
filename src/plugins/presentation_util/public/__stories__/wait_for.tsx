@@ -6,21 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactElement } from 'react';
 import { Story } from '@storybook/react';
 import { StoryFnReactReturnType } from '@storybook/react/dist/client/preview/types';
 import { StoryContext } from '@storybook/addons';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
-export const waitFor = ({
-  waitTarget,
-  loaderComponent,
-}: {
-  waitTarget: Promise<any>;
-  loaderComponent?: boolean;
-}) => (story: Story) => {
+export const waitFor = (
+  waitTarget: Promise<any>,
+  spinner: ReactElement | null = <EuiLoadingSpinner />
+) => (story: Story) => {
   const [storyComponent, setStory] = useState<StoryFnReactReturnType>();
-  const loader = loaderComponent ?? <div>Loading...</div>;
-
   useEffect(() => {
     if (!storyComponent) {
       waitTarget.then((waitedTarget: any) => {
@@ -29,5 +25,5 @@ export const waitFor = ({
     }
   }, [story, storyComponent]);
 
-  return storyComponent ? storyComponent : loader;
+  return storyComponent ?? spinner;
 };

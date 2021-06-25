@@ -26,5 +26,5 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
 storiesOf('renderers/revealImage', module).add(
   'default',
   (_, props) => <Renderer elasticLogo={props?.elasticLogo} />,
-  { decorators: [waitFor({ waitTarget: getElasticLogo() })] }
+  { decorators: [waitFor(getElasticLogo())] }
 );
