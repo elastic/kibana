@@ -30,46 +30,75 @@ export function ConfirmSwitchModal({
   isLoading,
 }: Props) {
   const [isConfirmChecked, setIsConfirmChecked] = useState(false);
-  const hasIncompatibleSettings = unsupportedConfigs.length > 0;
+  const hasUnsupportedConfigs = unsupportedConfigs.length > 0;
   return (
     <EuiConfirmModal
-      title="Please confirm your choice"
-      cancelButtonText="Cancel"
+      title={i18n.translate('xpack.apm.settings.schema.confirm.title', {
+        defaultMessage: 'Please confirm your choice',
+      })}
+      cancelButtonText={i18n.translate(
+        'xpack.apm.settings.schema.confirm.cancelText',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
       onCancel={onCancel}
-      confirmButtonText="Switch to data streams"
+      confirmButtonText={i18n.translate(
+        'xpack.apm.settings.schema.confirm.switchButtonText',
+        {
+          defaultMessage: 'Switch to data streams',
+        }
+      )}
       defaultFocusedButton="confirm"
       onConfirm={onConfirm}
       confirmButtonDisabled={!isConfirmChecked}
       isLoading={isLoading}
     >
       <p>
-        If you have custom dashboards, machine learning jobs, or source maps
-        that use classic APM indices, you must reconfigure them for data
-        streams.
+        {i18n.translate('xpack.apm.settings.schema.confirm.descriptionText', {
+          defaultMessage:
+            'If you have custom dashboards, machine learning jobs, or source maps that use classic APM indices, you must reconfigure them for data streams.',
+        })}
       </p>
-      {!hasIncompatibleSettings && (
+      {!hasUnsupportedConfigs && (
         <p>
-          Compatible custom apm-server.yml user settings will be moved to Fleet
-          Server settings for you. We'll let you know which settings are
-          incompatible before removing them.
+          {i18n.translate(
+            'xpack.apm.settings.schema.confirm.unsupportedConfigs.descriptionText',
+            {
+              defaultMessage: `Compatible custom apm-server.yml user settings will be moved to Fleet Server settings for you. We'll let you know which settings are incompatible before removing them.`,
+            }
+          )}
         </p>
       )}
       <EuiCallOut
-        title="Switching to data streams is an irreversible action"
+        title={i18n.translate(
+          'xpack.apm.settings.schema.confirm.irreversibleWarning.title',
+          {
+            defaultMessage: `Switching to data streams is an irreversible action`,
+          }
+        )}
         color="warning"
         iconType="help"
       >
         <p>
-          It might temporarily affect your APM data collection while the
-          migration is in progress. The process of migrating should only take a
-          few minutes.
+          {i18n.translate(
+            'xpack.apm.settings.schema.confirm.irreversibleWarning.message',
+            {
+              defaultMessage: `It might temporarily affect your APM data collection while the migration is in progress. The process of migrating should only take a few minutes.`,
+            }
+          )}
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
-      {hasIncompatibleSettings && (
+      {hasUnsupportedConfigs && (
         <>
           <EuiCallOut
-            title="The following apm-server.yml user settings are incompatible and will be removed"
+            title={i18n.translate(
+              'xpack.apm.settings.schema.confirm.unsupportedConfigs.title',
+              {
+                defaultMessage: `The following apm-server.yml user settings are incompatible and will be removed`,
+              }
+            )}
             iconType="iInCircle"
           >
             <EuiCodeBlock language="yaml">
@@ -96,7 +125,12 @@ export function ConfirmSwitchModal({
       <p>
         <EuiCheckbox
           id={htmlIdGenerator()()}
-          label="I confirm that I wish to switch to data streams"
+          label={i18n.translate(
+            'xpack.apm.settings.schema.confirm.checkboxLabel',
+            {
+              defaultMessage: `I confirm that I wish to switch to data streams`,
+            }
+          )}
           checked={isConfirmChecked}
           onChange={(e) => {
             setIsConfirmChecked(e.target.checked);

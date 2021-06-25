@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 import rocketLaunchGraphic from './blog-rocket-720x420.png';
 import { APMLink } from '../../../shared/Links/apm/APMLink';
+import { useFleetCloudAgentPolicyHref } from '../../../shared/Links/kibana';
 
 interface Props {
   onSwitch: () => void;
@@ -64,12 +65,23 @@ export function SchemaOverview({
                   color="success"
                 />
               }
-              title={`Data streams successfully setup!`}
-              description={`Your APM integration is now setup and ready to receive data from your currently instrumented agents. Feel free to review the policies applied to your integtration.`}
+              title={i18n.translate('xpack.apm.settings.schema.success.title', {
+                defaultMessage: 'Data streams successfully setup!',
+              })}
+              description={i18n.translate(
+                'xpack.apm.settings.schema.success.description',
+                {
+                  defaultMessage:
+                    'Your APM integration is now setup and ready to receive data from your currently instrumented agents. Feel free to review the policies applied to your integtration.',
+                }
+              )}
               footer={
                 <div>
-                  <EuiButton aria-label="View the APM integration in Fleet">
-                    View the APM integration in Fleet
+                  <EuiButton href={useFleetCloudAgentPolicyHref()}>
+                    {i18n.translate(
+                      'xpack.apm.settings.schema.success.viewIntegrationInFleet.buttonText',
+                      { defaultMessage: 'View the APM integration in Fleet' }
+                    )}
                   </EuiButton>
                   <EuiSpacer size="xs" />
                   <EuiText size="s">
@@ -108,13 +120,27 @@ export function SchemaOverview({
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="documents" />}
-            title={`Classic APM indices`}
+            title={i18n.translate(
+              'xpack.apm.settings.schema.migrate.classicIndices.title',
+              { defaultMessage: 'Classic APM indices' }
+            )}
             display="subdued"
-            description={`You are currently using classic APM indices for your data. This data schema is going away and is being replaced by data streams in Elastic Stack version 8.0.`}
+            description={i18n.translate(
+              'xpack.apm.settings.schema.migrate.classicIndices.description',
+              {
+                defaultMessage:
+                  'You are currently using classic APM indices for your data. This data schema is going away and is being replaced by data streams in Elastic Stack version 8.0.',
+              }
+            )}
             footer={
               <div>
                 <EuiText size="s" color="subdued">
-                  <p>Current setup</p>
+                  <p>
+                    {i18n.translate(
+                      'xpack.apm.settings.schema.migrate.classicIndices.currentSetup',
+                      { defaultMessage: 'Current setup' }
+                    )}
+                  </p>
                 </EuiText>
               </div>
             }
@@ -127,17 +153,28 @@ export function SchemaOverview({
                 <img src={rocketLaunchGraphic} alt="rocket launch" />
               </div>
             }
-            title={`Data streams`}
-            description={`Going forward, any newly ingested data gets stored in data streams. Previously ingested data remains in classic APM indices. The APM and UX apps will continue to support both indices.`}
+            title={i18n.translate(
+              'xpack.apm.settings.schema.migrate.dataStreams.title',
+              { defaultMessage: 'Data streams' }
+            )}
+            description={i18n.translate(
+              'xpack.apm.settings.schema.migrate.dataStreams.description',
+              {
+                defaultMessage:
+                  'Going forward, any newly ingested data gets stored in data streams. Previously ingested data remains in classic APM indices. The APM and UX apps will continue to support both indices.',
+              }
+            )}
             footer={
               <div>
                 <EuiButton
                   fill
                   isLoading={isLoadingConfirmation}
-                  aria-label="Switch to data streams"
                   isDisabled={isDisabled}
                 >
-                  Switch to data streams
+                  {i18n.translate(
+                    'xpack.apm.settings.schema.migrate.dataStreams.buttonText',
+                    { defaultMessage: 'Switch to data streams' }
+                  )}
                 </EuiButton>
               </div>
             }
@@ -151,11 +188,21 @@ export function SchemaOverview({
       <EuiFlexGroup justifyContent="center" gutterSize="s">
         <EuiFlexItem />
         <EuiFlexItem grow={2}>
-          <EuiCallOut title="Please note before switching" iconType="iInCircle">
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.apm.settings.schema.migrate.calloutNote.title',
+              { defaultMessage: 'Please note before switching' }
+            )}
+            iconType="iInCircle"
+          >
             <p>
-              If you have custom dashboards, machine learning jobs, or source
-              maps that use classic APM indices, you must reconfigure them for
-              data streams.
+              {i18n.translate(
+                'xpack.apm.settings.schema.migrate.calloutNote.message',
+                {
+                  defaultMessage:
+                    'If you have custom dashboards, machine learning jobs, or source maps that use classic APM indices, you must reconfigure them for data streams.',
+                }
+              )}
             </p>
           </EuiCallOut>
         </EuiFlexItem>

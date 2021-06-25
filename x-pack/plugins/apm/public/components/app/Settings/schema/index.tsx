@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { SchemaOverview } from './schema_overview';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -100,7 +101,12 @@ async function getUnsupportedApmServerConfigs(
     return unsupported;
   } catch (error) {
     toasts.addDanger({
-      title: 'Unable to fetch APM Server settings',
+      title: i18n.translate(
+        'xpack.apm.settings.unsupportedConfigs.errorToast.title',
+        {
+          defaultMessage: 'Unable to fetch APM Server settings',
+        }
+      ),
       text: error.body?.message || error.message,
     });
   }
@@ -119,7 +125,13 @@ async function createCloudApmPackagePolicy(
     return cloudApmPackagePolicy;
   } catch (error) {
     toasts.addDanger({
-      title: 'Unable to create APM package policy on cloud agent policy',
+      title: i18n.translate(
+        'xpack.apm.settings.createApmPackagePolicy.errorToast.title',
+        {
+          defaultMessage:
+            'Unable to create APM package policy on cloud agent policy',
+        }
+      ),
       text: error.body?.message || error.message,
     });
   }

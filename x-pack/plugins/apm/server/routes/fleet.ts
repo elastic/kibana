@@ -29,11 +29,7 @@ const hasFleetDataRoute = createApmServerRoute({
   handler: async ({ core, plugins }) => {
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
-      throw Boom.internal(
-        i18n.translate('xpack.apm.fleet_has_data.fleetRequired', {
-          defaultMessage: `Fleet plugin is required`,
-        })
-      );
+      throw Boom.internal(fleetPluginRequireMessage);
     }
     const packagePolicies = await getApmPackgePolicies({
       core,
@@ -98,9 +94,7 @@ const getMigrationCheckRoute = createApmServerRoute({
     const cloudApmMigrationEnabled =
       config['xpack.apm.agent.migrations.enabled'];
     if (!plugins.fleet || !plugins.security) {
-      return {
-        messsage: 'Fleet and security plugin are required for fleet migration.',
-      };
+      throw Boom.internal(fleetSecurityPluginsRequireMessage);
     }
     const savedObjectsClient = context.core.savedObjects.client;
     const fleetPluginStart = await plugins.fleet.start();
@@ -136,9 +130,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     const cloudApmMigrationEnabled =
       config['xpack.apm.agent.migrations.enabled'];
     if (!plugins.fleet || !plugins.security) {
-      return {
-        messsage: 'Fleet and security plugin are required for fleet migration.',
-      };
+      throw Boom.internal(fleetSecurityPluginsRequireMessage);
     }
     const savedObjectsClient = context.core.savedObjects.client;
     const coreStart = await resources.core.start();
@@ -148,9 +140,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     const securityPluginStart = await plugins.security.start();
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
     if (!hasRequiredRole || !cloudApmMigrationEnabled) {
-      throw Boom.forbidden(
-        'Operation only permitted by Elastic Cloud users with the superuser role.'
-      );
+      throw Boom.forbidden(requiredRoleOnCloudMessage);
     }
     return {
       cloud_apm_package_policy: await createCloudApmPackgePolicy({
@@ -170,3 +160,23 @@ export const apmFleetRouteRepository = createApmServerRouteRepository()
   .add(getUnsupportedApmServerSchemaRoute)
   .add(getMigrationCheckRoute)
   .add(createCloudApmPackagePolicyRoute);
+
+const fleetPluginRequireMessage = i18n.translate(
+  'xpack.apm.api.fleet.has_data.fleetRequired',
+  {
+    defaultMessage: `Fleet plugin is required`,
+  }
+);
+
+const fleetSecurityPluginsRequireMessage = i18n.translate(
+  'xpack.apm.api.fleet.fleetSecurityRequired',
+  { defaultMessage: `Fleet and Security plugins are required` }
+);
+
+const requiredRoleOnCloudMessage = i18n.translate(
+  'xpack.apm.api.fleet.cloud_apm_package_policy.requiredRoleOnCloud',
+  {
+    defaultMessage:
+      'Operation only permitted by Elastic Cloud users with the superuser role.',
+  }
+);
