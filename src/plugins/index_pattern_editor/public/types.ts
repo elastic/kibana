@@ -14,6 +14,8 @@ import {
   HttpSetup,
 } from 'src/core/public';
 
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+
 import { DataPublicPluginStart } from './shared_imports';
 import { OpenEditorOptions } from './open_editor';
 
@@ -163,4 +165,12 @@ export type RollupIndicesCapsResponse = Record<string, RollupIndiciesCapability>
 export enum INDEX_PATTERN_TYPE {
   ROLLUP = 'rollup',
   DEFAULT = 'default',
+}
+
+export interface IndexPatternConfig {
+  title: string;
+  timestampField?: EuiComboBoxOptionOption<string>;
+  allowHidden: boolean;
+  id?: string;
+  type: string;
 }

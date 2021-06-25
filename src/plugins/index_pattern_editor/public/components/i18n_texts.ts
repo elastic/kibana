@@ -10,9 +10,6 @@ import { i18n } from '@kbn/i18n';
 
 export const geti18nTexts = () => {
   return {
-    closeButtonLabel: i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
-      defaultMessage: 'Close',
-    }),
     saveButtonLabel: i18n.translate('indexPatternEditor.editor.flyoutSaveButtonLabel', {
       defaultMessage: 'Create index pattern',
     }),

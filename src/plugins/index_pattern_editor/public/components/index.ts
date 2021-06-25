@@ -26,3 +26,5 @@ export { IndicesList } from './indices_list';
 export { StatusMessage } from './status_message';
 export { LoadingIndices } from './loading_indices';
 export { geti18nTexts } from './i18n_texts';
+export { Footer } from './footer';
+export { AdvancedParamsContent } from './advanced_params_content';

@@ -15,7 +15,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const AdvancedParametersSection = ({ children }: Props) => {
+export const AdvancedParamsSection = ({ children }: Props) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const toggleIsVisible = () => {

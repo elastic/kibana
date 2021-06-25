@@ -7,26 +7,13 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  EuiFlyoutFooter,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSpacer,
-  EuiLoadingSpinner,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import {
   IndexPatternSpec,
   Form,
-  UseField,
   useForm,
-  TextField,
   useFormData,
-  ToggleField,
   useKibana,
   GetFieldsOptions,
 } from '../shared_imports';
@@ -38,7 +25,6 @@ import {
   getMatchedIndices,
   MatchedIndicesSet,
 } from '../lib';
-import { AdvancedParametersSection } from './field_editor/advanced_parameters_section';
 import { FlyoutPanels } from './flyout_panels';
 
 import {
@@ -47,6 +33,7 @@ import {
   IndexPatternEditorContext,
   RollupIndicesCapsResponse,
   INDEX_PATTERN_TYPE,
+  IndexPatternConfig,
 } from '../types';
 
 import {
@@ -60,6 +47,8 @@ import {
   TitleField,
   schema,
   geti18nTexts,
+  Footer,
+  AdvancedParamsContent,
 } from '.';
 
 export interface Props {
@@ -74,14 +63,6 @@ export interface Props {
   existingIndexPatterns: string[];
   defaultTypeIsRollup?: boolean;
   requireTimestampField?: boolean;
-}
-
-export interface IndexPatternConfig {
-  title: string;
-  timestampField?: EuiComboBoxOptionOption<string>;
-  allowHidden: boolean;
-  id?: string;
-  type: string;
 }
 export interface TimestampOption {
   display: string;
@@ -456,67 +437,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-
-            <AdvancedParametersSection>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <UseField<boolean, IndexPatternConfig>
-                    path={'allowHidden'}
-                    component={ToggleField}
-                    data-test-subj="allowHiddenField"
-                    componentProps={{
-                      euiFieldProps: {
-                        'aria-label': i18nTexts.allowHiddenAriaLabel,
-                      },
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <UseField<string, IndexPatternConfig>
-                    path={'id'}
-                    component={TextField}
-                    data-test-subj="savedObjectIdField"
-                    componentProps={{
-                      euiFieldProps: {
-                        'aria-label': i18nTexts.customIndexPatternIdLabel,
-                      },
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </AdvancedParametersSection>
+            <AdvancedParamsContent />
           </Form>
-          {/* </EuiFlyoutBody> */}
-          {/* modal */}
-          <EuiFlyoutFooter className="indexPatternEditor__footer">
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  flush="left"
-                  onClick={onCancel}
-                  data-test-subj="closeFlyoutButton"
-                >
-                  {i18nTexts.closeButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  color="primary"
-                  onClick={() => form.submit()}
-                  data-test-subj="saveIndexPatternButton"
-                  fill
-                  disabled={disableSubmit}
-                >
-                  {i18nTexts.saveButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
+          <Footer
+            onCancel={onCancel}
+            onSubmit={() => form.submit()}
+            submitDisabled={disableSubmit}
+          />
         </FlyoutPanels.Item>
         <FlyoutPanels.Item>{previewPanelContent}</FlyoutPanels.Item>
       </FlyoutPanels.Group>
