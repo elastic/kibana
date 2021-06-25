@@ -422,7 +422,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   return (
     <>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-        <FlyoutPanels.Item>
+        <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
           {/*
           possibly break out into own component
         */}
@@ -433,6 +433,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           {/* </EuiFlyoutHeader> */}
           <Form form={form} className="indexPatternEditor__form">
             {indexPatternTypeSelect}
+            <EuiSpacer size="m" />
             <EuiFlexGroup>
               {/* Name */}
               <EuiFlexItem>
@@ -444,6 +445,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="m" />
             <EuiFlexGroup>
               <EuiFlexItem>
                 <TimestampField
@@ -469,6 +471,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiSpacer size="m" />
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <UseField<string, IndexPatternConfig>
@@ -487,7 +490,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           </Form>
           {/* </EuiFlyoutBody> */}
           {/* modal */}
-          <EuiFlyoutFooter>
+          <EuiFlyoutFooter className="indexPatternEditor__footer">
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty

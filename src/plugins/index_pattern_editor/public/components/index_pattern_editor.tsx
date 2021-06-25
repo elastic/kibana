@@ -11,6 +11,7 @@ import { EuiFlyout } from '@elastic/eui';
 import { IndexPatternFlyoutContentContainer } from './index_pattern_flyout_content_container';
 import { IndexPatternEditorContext } from '../types';
 import { createKibanaReactContext, IndexPattern } from '../shared_imports';
+import './index_pattern_editor.scss';
 
 export interface IndexPatternEditorProps {
   onSave: (indexPattern: IndexPattern) => void;
