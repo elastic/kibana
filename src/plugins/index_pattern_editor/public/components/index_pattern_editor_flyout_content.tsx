@@ -405,19 +405,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <>
       <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
         <FlyoutPanels.Item className="fieldEditor__mainFlyoutPanel" border="right">
-          {/*
-          possibly break out into own component
-        */}
-          {/* <EuiFlyoutHeader> */}
           <EuiTitle data-test-subj="flyoutTitle">
             <h2>Create index pattern</h2>
           </EuiTitle>
-          {/* </EuiFlyoutHeader> */}
           <Form form={form} className="indexPatternEditor__form">
             {indexPatternTypeSelect}
             <EuiSpacer size="m" />
             <EuiFlexGroup>
-              {/* Name */}
               <EuiFlexItem>
                 <TitleField
                   isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
@@ -437,7 +431,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <AdvancedParamsContent />
+            <AdvancedParamsContent disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP} />
           </Form>
           <Footer
             onCancel={onCancel}

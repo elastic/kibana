@@ -10,21 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 export const geti18nTexts = () => {
   return {
-    saveButtonLabel: i18n.translate('indexPatternEditor.editor.flyoutSaveButtonLabel', {
-      defaultMessage: 'Create index pattern',
-    }),
     noTimestampOptionText: i18n.translate(
       'indexPatternEditor.createIndexPattern.stepTime.noTimeFieldsLabel',
       {
         defaultMessage: "The matching data sources don't have time fields.",
       }
     ),
-    allowHiddenAriaLabel: i18n.translate('indexPatternEditor.form.allowHiddenAriaLabel', {
-      defaultMessage: 'Allow hidden and system indices',
-    }),
-    customIndexPatternIdLabel: i18n.translate('indexPatternEditor.form.customIndexPatternIdLabel', {
-      defaultMessage: 'Custom index pattern ID',
-    }),
     timestampFieldHelp: i18n.translate('indexPatternEditor.editor.form.timeFieldHelp', {
       defaultMessage: 'Select a primary time field for use with the global time filter.',
     }),
