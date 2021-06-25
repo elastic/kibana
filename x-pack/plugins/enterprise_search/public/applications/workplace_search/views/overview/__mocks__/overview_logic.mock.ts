@@ -27,7 +27,7 @@ export const mockActions = {
   initializeOverview: jest.fn(() => ({})),
 };
 
-const mockValues = { ...mockOverviewValues, ...mockAppValues, isFederatedAuth: true };
+const mockValues = { ...mockOverviewValues, ...mockAppValues };
 
 setMockActions({ ...mockActions });
 setMockKeaValues({ ...mockValues });
