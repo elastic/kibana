@@ -37,6 +37,7 @@ import { SummaryView } from './summary_view';
 import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 import { LineClamp } from '../line_clamp';
+import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
   padding: 24px 4px 4px;
@@ -53,7 +54,7 @@ const fields = [
   { id: 'signal.rule.severity', label: ALERTS_HEADERS_SEVERITY },
   { id: 'signal.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
-  { id: 'host.status' },
+  { id: 'agent.status' },
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
@@ -178,6 +179,10 @@ const AlertSummaryViewComponent: React.FC<{
     timelineId,
   ]);
 
+  const isEndpointAlert = useMemo(() => {
+    return endpointAlertCheck({ data });
+  }, [data]);
+
   const agentId = useMemo(() => {
     const findAgentId = find({ category: 'agent', field: 'agent.id' }, data)?.values;
     return findAgentId ? findAgentId[0] : '';
@@ -188,7 +193,7 @@ const AlertSummaryViewComponent: React.FC<{
     description: {
       contextId: timelineId,
       eventId,
-      fieldName: 'host.status',
+      fieldName: 'agent.status',
       value: agentId,
       linkValue: undefined,
     },
@@ -209,7 +214,7 @@ const AlertSummaryViewComponent: React.FC<{
       <EuiSpacer size="l" />
       <SummaryView
         summaryColumns={summaryColumns}
-        summaryRows={summaryRowsWithAgentStatus}
+        summaryRows={isEndpointAlert ? summaryRowsWithAgentStatus : summaryRows}
         title={title}
       />
       {maybeRule?.note && (
