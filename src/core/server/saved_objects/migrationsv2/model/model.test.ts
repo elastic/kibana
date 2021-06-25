@@ -776,7 +776,9 @@ describe('migrations v2 model', () => {
 
         expect(newState).toMatchObject({
           controlState: 'FATAL',
-          reason: 'LOL',
+          reason: expect.stringContaining(
+            'Migration failed because documents from unknown types were found'
+          ),
         });
       });
     });

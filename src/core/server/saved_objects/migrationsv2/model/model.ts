@@ -324,7 +324,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: extractUnknownDocFailureReason(unknownDocIds),
+          reason: extractUnknownDocFailureReason(unknownDocIds, stateP.sourceIndex.value),
         };
       } else {
         const source = stateP.sourceIndex;
