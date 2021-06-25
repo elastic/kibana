@@ -265,7 +265,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         return matchedIndicesResult;
       };
 
-      setLastTitle(title2);
+      // setLastTitle(title2);
       return fetchIndices(title2);
     },
     [
@@ -327,6 +327,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   ) : (
     <></>
   );
+
+  /*
+
+TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
+
+
+  */
 
   const renderIndexList = () => {
     if (isLoadingSources) {
