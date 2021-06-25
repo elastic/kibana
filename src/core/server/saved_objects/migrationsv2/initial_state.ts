@@ -59,7 +59,7 @@ export const createInitialState = ({
 
   const knownTypes = typeRegistry.getAllTypes().map((type) => type.name);
 
-  const initialState: InitState = {
+  return {
     controlState: 'INIT',
     indexPrefix,
     legacyIndex: indexPrefix,
@@ -80,5 +80,4 @@ export const createInitialState = ({
     unusedTypesQuery: excludeUnusedTypesQuery,
     knownTypes,
   };
-  return initialState;
 };

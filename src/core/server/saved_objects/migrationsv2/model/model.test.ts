@@ -39,13 +39,13 @@ import type {
   TransformedDocumentsBulkIndex,
   ReindexSourceToTempIndexBulk,
   CheckUnknownDocumentsState,
-} from './types';
-import { SavedObjectsRawDoc } from '..';
-import { AliasAction, RetryableEsClientError } from './actions';
-import { model } from './model';
-import { ResponseType } from './next';
-import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../migrations/core';
+} from '../types';
+import { SavedObjectsRawDoc } from '../../serialization';
+import { TransformErrorObjects, TransformSavedObjectDocumentError } from '../../migrations/core';
+import { AliasAction, RetryableEsClientError } from '../actions';
+import { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
+import { model } from './model';
 
 describe('migrations v2 model', () => {
   const baseState: BaseState = {
