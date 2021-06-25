@@ -6,30 +6,27 @@
  * Side Public License, v 1.
  */
 
-import {
-  TimeRange,
-  Filter,
-  Query,
-  esFilters,
-  QueryState,
-  RefreshInterval,
-} from '../../data/public';
+import type { SerializableState } from 'src/plugins/kibana_utils/common';
+import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
+import type { LocatorDefinition, LocatorPublic } from '../../share/public';
+import type { SavedDashboardPanel } from '../common/types';
+import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../share/public';
-import { SavedObjectLoader } from '../../saved_objects/public';
 import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
-import { SavedDashboardPanel } from '../common/types';
 
-export const STATE_STORAGE_KEY = '_a';
-export const GLOBAL_STATE_STORAGE_KEY = '_g';
+const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
+  Object.keys(stateObj).forEach((key) => {
+    if (stateObj[key] === undefined) {
+      delete stateObj[key];
+    }
+  });
+  return stateObj;
+};
 
-export const DASHBOARD_APP_URL_GENERATOR = 'DASHBOARD_APP_URL_GENERATOR';
+export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';
 
-/**
- * @deprecated Use dashboard locator instead.
- */
-export interface DashboardUrlGeneratorState {
+export interface DashboardAppLocatorParams extends SerializableState {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -43,7 +40,7 @@ export interface DashboardUrlGeneratorState {
   /**
    * Optionally set the refresh interval.
    */
-  refreshInterval?: RefreshInterval;
+  refreshInterval?: RefreshInterval & SerializableState;
 
   /**
    * Optionally apply filers. NOTE: if given and used in conjunction with `dashboardId`, and the
@@ -83,7 +80,7 @@ export interface DashboardUrlGeneratorState {
   /**
    * List of dashboard panels
    */
-  panels?: SavedDashboardPanel[];
+  panels?: SavedDashboardPanel[] & SerializableState;
 
   /**
    * Saved query ID
@@ -91,80 +88,73 @@ export interface DashboardUrlGeneratorState {
   savedQuery?: string;
 }
 
-/**
- * @deprecated Use dashboard locator instead.
- */
-export const createDashboardUrlGenerator = (
-  getStartServices: () => Promise<{
-    appBasePath: string;
-    useHashedUrl: boolean;
-    savedDashboardLoader: SavedObjectLoader;
-  }>
-): UrlGeneratorsDefinition<typeof DASHBOARD_APP_URL_GENERATOR> => ({
-  id: DASHBOARD_APP_URL_GENERATOR,
-  createUrl: async (state) => {
-    const startServices = await getStartServices();
-    const useHash = state.useHash ?? startServices.useHashedUrl;
-    const appBasePath = startServices.appBasePath;
-    const hash = state.dashboardId ? `view/${state.dashboardId}` : `create`;
+export type DashboardAppLocator = LocatorPublic<DashboardAppLocatorParams>;
+
+export interface DashboardAppLocatorDependencies {
+  useHashedUrl: boolean;
+  getDashboardFilterFields: (dashboardId: string) => Promise<Filter[]>;
+}
+
+export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardAppLocatorParams> {
+  public readonly id = DASHBOARD_APP_LOCATOR;
+
+  constructor(protected readonly deps: DashboardAppLocatorDependencies) {}
+
+  public readonly getLocation = async (params: DashboardAppLocatorParams) => {
+    const useHash = params.useHash ?? this.deps.useHashedUrl;
+    const hash = params.dashboardId ? `view/${params.dashboardId}` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
-      if (state.preserveSavedFilters === false) return [];
-      if (!state.dashboardId) return [];
+      if (params.preserveSavedFilters === false) return [];
+      if (!params.dashboardId) return [];
       try {
-        const dashboard = await startServices.savedDashboardLoader.get(state.dashboardId);
-        return dashboard?.searchSource?.getField('filter') ?? [];
+        return await this.deps.getDashboardFilterFields(params.dashboardId);
       } catch (e) {
-        // in case dashboard is missing, built the url without those filters
-        // dashboard app will handle redirect to landing page with toast message
+        // In case dashboard is missing, build the url without those filters.
+        // The Dashboard app will handle redirect to landing page with a toast message.
         return [];
       }
     };
 
-    const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
-      Object.keys(stateObj).forEach((key) => {
-        if (stateObj[key] === undefined) {
-          delete stateObj[key];
-        }
-      });
-      return stateObj;
-    };
-
     // leave filters `undefined` if no filters was applied
     // in this case dashboard will restore saved filters on its own
-    const filters = state.filters && [
+    const filters = params.filters && [
       ...(await getSavedFiltersFromDestinationDashboardIfNeeded()),
-      ...state.filters,
+      ...params.filters,
     ];
 
-    let url = setStateToKbnUrl(
-      STATE_STORAGE_KEY,
+    let path = setStateToKbnUrl(
+      '_a',
       cleanEmptyKeys({
-        query: state.query,
+        query: params.query,
         filters: filters?.filter((f) => !esFilters.isFilterPinned(f)),
-        viewMode: state.viewMode,
-        panels: state.panels,
-        savedQuery: state.savedQuery,
+        viewMode: params.viewMode,
+        panels: params.panels,
+        savedQuery: params.savedQuery,
       }),
       { useHash },
-      `${appBasePath}#/${hash}`
+      `#/${hash}`
     );
 
-    url = setStateToKbnUrl<QueryState>(
-      GLOBAL_STATE_STORAGE_KEY,
+    path = setStateToKbnUrl<QueryState>(
+      '_g',
       cleanEmptyKeys({
-        time: state.timeRange,
+        time: params.timeRange,
         filters: filters?.filter((f) => esFilters.isFilterPinned(f)),
-        refreshInterval: state.refreshInterval,
+        refreshInterval: params.refreshInterval,
       }),
       { useHash },
-      url
+      path
     );
 
-    if (state.searchSessionId) {
-      url = `${url}&${DashboardConstants.SEARCH_SESSION_ID}=${state.searchSessionId}`;
+    if (params.searchSessionId) {
+      path = `${path}&${DashboardConstants.SEARCH_SESSION_ID}=${params.searchSessionId}`;
     }
 
-    return url;
-  },
-});
+    return {
+      app: DashboardConstants.DASHBOARDS_ID,
+      path,
+      state: {},
+    };
+  };
+}
