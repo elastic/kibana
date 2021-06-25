@@ -5,18 +5,4 @@
  * 2.0.
  */
 
-.logo404 {
-  width: $euiSize * 8;
-  height: $euiSize * 8;
-
-  fill: $euiColorEmptyShade;
-  stroke: $euiColorLightShade;
-
-  &__light {
-    fill: $euiColorLightShade;
-  }
-
-  &__dark {
-    fill: $euiColorMediumShade;
-  }
-}
+export { NotFound } from './not_found';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { NotFoundPrompt } from './not_found_prompt';
+export { NotFound } from './not_found';
