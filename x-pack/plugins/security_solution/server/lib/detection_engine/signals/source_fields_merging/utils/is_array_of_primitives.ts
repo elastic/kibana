@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { isObjectLike } from 'lodash/fp';
 import { SearchTypes } from '../../../../../../common/detection_engine/types';
+import { isPrimitive } from './is_primitive';
 
 /**
  * Returns true if this is an array and all elements of the array are primitives and not objects
@@ -16,6 +16,6 @@ import { SearchTypes } from '../../../../../../common/detection_engine/types';
 export const isArrayOfPrimitives = (valueInMergedDocument: SearchTypes | null): boolean => {
   return (
     Array.isArray(valueInMergedDocument) &&
-    valueInMergedDocument.every((value) => !isObjectLike(value))
+    valueInMergedDocument.every((value) => isPrimitive(value))
   );
 };

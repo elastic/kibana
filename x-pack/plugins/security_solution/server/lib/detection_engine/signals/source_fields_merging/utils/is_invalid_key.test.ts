@@ -7,9 +7,6 @@
 
 import { isInvalidKey } from './is_invalid_key';
 
-/**
- * See ./README.md for the nomenclature of any notes within tests below
- */
 describe('matches_invalid_key', () => {
   beforeAll(() => {
     jest.resetAllMocks();

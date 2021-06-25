@@ -7,9 +7,6 @@
 
 import { isMultiField } from './is_multifield';
 
-/**
- * See ./README.md for the nomenclature of any notes within tests below
- */
 describe('is_multifield', () => {
   beforeAll(() => {
     jest.resetAllMocks();

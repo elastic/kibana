@@ -8,9 +8,6 @@
 import { filterFieldEntries } from './filter_field_entries';
 import { FieldsType } from '../types';
 
-/**
- * See ./README.md for the nomenclature of any notes within tests below
- */
 describe('filter_field_entries', () => {
   beforeAll(() => {
     jest.resetAllMocks();

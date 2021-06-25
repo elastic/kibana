@@ -9,9 +9,6 @@ import { SearchTypes } from '../../../../../../common/detection_engine/types';
 import { recursiveUnboxingFields } from './recursive_unboxing_fields';
 import { FieldsType } from '../types';
 
-/**
- * See ./README.md for the nomenclature of any notes within tests below
- */
 describe('recursive_unboxing_fields', () => {
   beforeAll(() => {
     jest.resetAllMocks();
