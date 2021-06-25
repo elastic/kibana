@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { FeatureCollection, GeometryCollection } from 'geojson';
+import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FeatureCollection } from 'geojson';
 import * as topojson from 'topojson-client';
+import { GeometryCollection } from 'topojson-specification';
 import fetch from 'node-fetch';
 import { FORMAT_TYPE } from '../../../../common/constants';
 

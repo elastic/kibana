@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { AddConfigDeprecation } from '@kbn/config';
 import { PluginInitializerContext } from 'src/core/server';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { MapsPlugin } from './plugin';
@@ -33,7 +34,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
         return completeConfig;
       }
       addDeprecation({
-        level: 'critical',
         message: i18n.translate('xpack.maps.deprecation.regionmap.message', {
           defaultMessage: 'map.regionmap is deprecated and will be removed in 8.0.',
         }),
