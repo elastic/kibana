@@ -73,14 +73,14 @@ export const StepScreenshots = ({ step }: Props) => {
           <ScreenshotLink lastSuccessfulStep={lastSuccessfulStep} />
           <StepScreenshotDisplay
             checkGroup={lastSuccessfulStep.monitor.check_group}
-            isScreenshotRef={!!step.synthetics?.isScreenshotRef}
-            isScreenshotBlob={!!step.synthetics?.screenshotExists}
+            isScreenshotRef={!!lastSuccessfulStep.synthetics?.isScreenshotRef}
+            isScreenshotBlob={!!lastSuccessfulStep.synthetics?.screenshotExists}
             stepIndex={lastSuccessfulStep.synthetics?.step?.index}
             stepName={lastSuccessfulStep.synthetics?.step?.name}
             lazyLoad={false}
           />
           <EuiSpacer size="xs" />
-          <Label>{getShortTimeStamp(moment(lastSuccessfulStep.timestamp))}</Label>
+          <Label>{getShortTimeStamp(moment(lastSuccessfulStep['@timestamp']))}</Label>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
