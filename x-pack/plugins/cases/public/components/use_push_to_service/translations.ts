@@ -41,7 +41,7 @@ export const UPDATE_THIRD = (thirdParty: string) => {
 
 export const PUSH_LOCKED_TITLE = (thirdParty: string) => {
   if (thirdParty === 'none') {
-    return i18n.translate('xpack.cases.caseView.lockedIncidentTitle', {
+    return i18n.translate('xpack.cases.caseView.lockedIncidentTitleNone', {
       defaultMessage: 'External incident is up to date',
     });
   }
