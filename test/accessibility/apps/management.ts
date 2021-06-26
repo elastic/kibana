@@ -70,6 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickAddNewIndexPatternButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await a11y.testAppSnapshot();
+      await testSubjects.click('closeFlyoutButton');
     });
 
     // We are navigating back to index pattern page to test field formatters
