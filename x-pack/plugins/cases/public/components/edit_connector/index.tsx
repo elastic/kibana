@@ -264,11 +264,9 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup data-test-subj="edit-connectors" direction="column">
-          <span data-test-subj="bitch-bitch">
-            {!isLoading && !editConnector && pushCallouts && (
-              <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
-            )}
-          </span>
+          {!isLoading && !editConnector && pushCallouts && (
+            <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
+          )}
           <DisappearingFlexItem $isHidden={!editConnector}>
             <Form form={form}>
               <EuiFlexGroup gutterSize="none" direction="row">
@@ -336,7 +334,7 @@ export const EditConnector = React.memo(
           )}
           {pushCallouts == null && !isLoading && !editConnector && (
             <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-              {pushButton}
+              <span>{pushButton}</span>
             </EuiFlexItem>
           )}
         </MyFlexGroup>
