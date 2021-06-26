@@ -4,16 +4,16 @@
 // TODO
 
 
-The reusable field editor across Kibana!   
+Create index patterns from within Kibana apps. 
 
 This editor can be used to
 
-* create or edit a runtime field inside an index pattern.  
+* create an index pattern.  
 * edit concrete (mapped) fields. In this case certain functionalities will be disabled like the possibility to change the field _type_ or to set the field _value_.
 
 ## How to use
 
-You first need to add in your kibana.json the "`indexPatternFieldEditor`" plugin as a required dependency of your plugin.
+You first need to add in your kibana.json the "`indexPatternEditor`" plugin as a required dependency of your plugin.
 
 You will then receive in the start contract of the indexPatternFieldEditor plugin the following API:
 

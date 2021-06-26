@@ -343,10 +343,10 @@ export class SettingsPageObject extends FtrService {
 
       await this.header.waitUntilLoadingHasFinished();
       await this.clickAddNewIndexPatternButton();
-      if (!isStandardIndexPattern) {
-        await this.clickCreateNewRollupButton();
-      }
       await this.header.waitUntilLoadingHasFinished();
+      if (!isStandardIndexPattern) {
+        await this.selectRollupIndexPatternType();
+      }
       await this.retry.try(async () => {
         await this.setIndexPatternField(indexPatternName);
       });
@@ -367,6 +367,12 @@ export class SettingsPageObject extends FtrService {
         this.log.debug('Index pattern created: ' + currentUrl);
       }
     });
+
+    if (!isStandardIndexPattern) {
+      const badges = await this.find.byClassName('euiBadge__text');
+      const text = await badges.getVisibleText();
+      expect(text).to.equal('Rollup');
+    }
 
     return await this.getIndexPatternIdFromUrl();
   }
@@ -391,8 +397,9 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
-  async clickCreateNewRollupButton() {
-    await this.testSubjects.click('createRollupIndexPatternButton');
+  async selectRollupIndexPatternType() {
+    await this.testSubjects.click('typeField');
+    await this.testSubjects.click('rollupType');
   }
 
   async getIndexPatternIdFromUrl() {
