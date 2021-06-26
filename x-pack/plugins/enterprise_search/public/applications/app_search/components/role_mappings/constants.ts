@@ -12,21 +12,21 @@ import { AdvanceRoleType } from '../../types';
 export const ROLE_MAPPING_DELETED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingDeletedMessage',
   {
-    defaultMessage: 'Successfully deleted role mapping',
+    defaultMessage: 'Your role mapping was deleted',
   }
 );
 
 export const ROLE_MAPPING_CREATED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingCreatedMessage',
   {
-    defaultMessage: 'Role mapping successfully created.',
+    defaultMessage: 'Your role mapping was created',
   }
 );
 
 export const ROLE_MAPPING_UPDATED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingUpdatedMessage',
   {
-    defaultMessage: 'Role mapping successfully updated.',
+    defaultMessage: 'Your role mapping was updated',
   }
 );
 
