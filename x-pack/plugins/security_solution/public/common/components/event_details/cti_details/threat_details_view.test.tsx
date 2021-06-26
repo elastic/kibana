@@ -20,7 +20,11 @@ describe('ThreatDetailsView', () => {
       buildEventEnrichmentMock({ 'matched.id': ['other.id'], 'matched.field': ['other.field'] }),
     ];
 
-    const wrapper = mount(<ThreatDetailsView enrichments={enrichments} />);
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={enrichments} />
+      </TestProviders>
+    );
 
     expect(wrapper.find('[data-test-subj^="threat-details-view"]').hostNodes()).toHaveLength(
       enrichments.length
@@ -43,7 +47,11 @@ describe('ThreatDetailsView', () => {
         'event.reference': ['http://foo.baz'],
       }),
     ];
-    const wrapper = mount(<ThreatDetailsView enrichments={enrichments} />);
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={enrichments} />
+      </TestProviders>
+    );
     expect(wrapper.find('a').length).toEqual(2);
   });
 
@@ -60,8 +68,13 @@ describe('ThreatDetailsView', () => {
       'matched.id': ['other.id'],
       'threatintel.indicator.first_seen': [olderDate],
     });
+    const enrichments = [existingEnrichment, newEnrichment];
 
-    const wrapper = mount(<ThreatDetailsView enrichments={[existingEnrichment, newEnrichment]} />);
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatDetailsView enrichments={enrichments} />
+      </TestProviders>
+    );
 
     const firstSeenRows = wrapper
       .find('.euiTableRow')
