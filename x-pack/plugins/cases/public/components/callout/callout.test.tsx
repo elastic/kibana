@@ -11,6 +11,7 @@ import { mount } from 'enzyme';
 import { CallOut, CallOutProps } from './callout';
 
 describe('Callout', () => {
+  const handleButtonClick = jest.fn();
   const defaultProps: CallOutProps = {
     id: 'md5-hex',
     type: 'primary',
@@ -22,8 +23,7 @@ describe('Callout', () => {
         description: <p>{'error'}</p>,
       },
     ],
-    showCallOut: true,
-    handleDismissCallout: jest.fn(),
+    handleButtonClick,
   };
 
   beforeEach(() => {
@@ -34,12 +34,7 @@ describe('Callout', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
     expect(wrapper.find(`[data-test-subj="case-callout-md5-hex"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="callout-messages-md5-hex"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).exists()).toBeTruthy();
-  });
-
-  it('hides the callout', () => {
-    const wrapper = mount(<CallOut {...defaultProps} showCallOut={false} />);
-    expect(wrapper.find(`[data-test-subj="case-callout-md5-hex"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="callout-onclick-md5-hex"]`).exists()).toBeTruthy();
   });
 
   it('does not shows any messages when the list is empty', () => {
@@ -50,7 +45,7 @@ describe('Callout', () => {
   it('transform the button color correctly - primary', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
     const className =
-      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--primary')).toBeTruthy();
   });
@@ -58,7 +53,7 @@ describe('Callout', () => {
   it('transform the button color correctly - success', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'success'} />);
     const className =
-      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--secondary')).toBeTruthy();
   });
@@ -66,7 +61,7 @@ describe('Callout', () => {
   it('transform the button color correctly - warning', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'warning'} />);
     const className =
-      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--warning')).toBeTruthy();
   });
@@ -74,17 +69,17 @@ describe('Callout', () => {
   it('transform the button color correctly - danger', () => {
     const wrapper = mount(<CallOut {...defaultProps} type={'danger'} />);
     const className =
-      wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).first().prop('className') ??
+      wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--danger')).toBeTruthy();
   });
 
-  it('dismiss the callout correctly', () => {
+  // use this for storage if we ever want to bring that back
+  it('onClick passes id and type', () => {
     const wrapper = mount(<CallOut {...defaultProps} />);
-    expect(wrapper.find(`[data-test-subj="callout-dismiss-md5-hex"]`).exists()).toBeTruthy();
-    wrapper.find(`button[data-test-subj="callout-dismiss-md5-hex"]`).simulate('click');
-    wrapper.update();
-
-    expect(defaultProps.handleDismissCallout).toHaveBeenCalledWith('md5-hex', 'primary');
+    expect(wrapper.find(`[data-test-subj="callout-onclick-md5-hex"]`).exists()).toBeTruthy();
+    wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).simulate('click');
+    expect(handleButtonClick.mock.calls[0][1]).toEqual('md5-hex');
+    expect(handleButtonClick.mock.calls[0][2]).toEqual('primary');
   });
 });

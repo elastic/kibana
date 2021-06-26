@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 
@@ -20,7 +20,6 @@ import { CasesNavigation } from '../links';
 import { ErrorMessage } from '../callout/types';
 
 export interface UsePushToService {
-  actionsErrors: ErrorMessage[];
   caseId: string;
   caseServices: CaseServices;
   caseStatus: string;
@@ -40,7 +39,6 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
-  actionsErrors,
   caseId,
   caseServices,
   caseStatus,
@@ -71,7 +69,7 @@ export const usePushToService = ({
   }, [caseId, connector, pushCaseToExternalService, updateCase]);
 
   const errorsMsg = useMemo(() => {
-    let errors: ErrorMessage[] = [...actionsErrors];
+    let errors: ErrorMessage[] = [];
 
     // these message require that the user do some sort of write action as a result of the message, readonly users won't
     // be able to perform such an action so let's not display the error to the user in that situation

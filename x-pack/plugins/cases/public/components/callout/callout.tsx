@@ -13,7 +13,7 @@ import { ErrorMessage } from './types';
 import * as i18n from './translations';
 
 export interface CallOutProps {
-  handleDismissCallout: (
+  handleButtonClick: (
     e: React.MouseEvent,
     id: string,
     type: NonNullable<ErrorMessage['errorType']>
@@ -24,9 +24,9 @@ export interface CallOutProps {
   type: NonNullable<ErrorMessage['errorType']>;
 }
 
-const CallOutComponent = ({ handleDismissCallout, id, messages, title, type }: CallOutProps) => {
-  const handleCallOut = useCallback((e) => handleDismissCallout(e, id, type), [
-    handleDismissCallout,
+const CallOutComponent = ({ handleButtonClick, id, messages, title, type }: CallOutProps) => {
+  const handleCallOut = useCallback((e) => handleButtonClick(e, id, type), [
+    handleButtonClick,
     id,
     type,
   ]);
@@ -41,7 +41,7 @@ const CallOutComponent = ({ handleDismissCallout, id, messages, title, type }: C
     >
       <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
       <EuiButton
-        data-test-subj={`callout-dismiss-${id}`}
+        data-test-subj={`callout-onclick-${id}`}
         color={type === 'success' ? 'secondary' : type}
         onClick={handleCallOut}
       >

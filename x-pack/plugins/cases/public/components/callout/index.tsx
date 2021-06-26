@@ -37,7 +37,7 @@ const CaseCallOutComponent = ({
   messages = [],
 }: CaseCallOutProps) => {
   const handleCallOut = useCallback(
-    (e, id, type) => {
+    (e) => {
       // if theres connectors open dropdown editor
       // if no connectors, redirect to crete case page
       if (hasConnectors) {
@@ -75,7 +75,7 @@ const CaseCallOutComponent = ({
           return (
             <React.Fragment key={id}>
               <CallOut
-                handleDismissCallout={handleCallOut}
+                handleButtonClick={handleCallOut}
                 id={id}
                 messages={groupedByTypeErrorMessages[type].messages}
                 title={title}

@@ -26,18 +26,24 @@ describe('CaseCallOut ', () => {
     jest.clearAllMocks();
     useSecurityLocalStorageMock.mockImplementation(() => securityLocalStorageMock);
   });
+  const defaultProps: CaseCallOutProps = {
+    configureCasesNavigation: {
+      href: 'testHref',
+      onClick: jest.fn(),
+    },
+    hasConnectors: true,
+    messages: [
+      { id: 'message-one', title: 'title', description: <p>{'we have two messages'}</p> },
+      { id: 'message-two', title: 'title', description: <p>{'for real'}</p> },
+    ],
+    onEditClick: jest.fn(),
+    title: 'hey title',
+  };
 
   it('renders a callout correctly', () => {
-    const props: CaseCallOutProps = {
-      title: 'hey title',
-      messages: [
-        { id: 'message-one', title: 'title', description: <p>{'we have two messages'}</p> },
-        { id: 'message-two', title: 'title', description: <p>{'for real'}</p> },
-      ],
-    };
     const wrapper = mount(
       <TestProviders>
-        <CaseCallOut {...props} />
+        <CaseCallOut {...defaultProps} />
       </TestProviders>
     );
 
@@ -47,7 +53,7 @@ describe('CaseCallOut ', () => {
 
   it('groups the messages correctly', () => {
     const props: CaseCallOutProps = {
-      title: 'hey title',
+      ...defaultProps,
       messages: [
         {
           id: 'message-one',
@@ -76,54 +82,37 @@ describe('CaseCallOut ', () => {
     ).toBeTruthy();
   });
 
-  it('dismisses the callout correctly', () => {
-    const props: CaseCallOutProps = {
-      title: 'hey title',
-      messages: [
-        { id: 'message-one', title: 'title', description: <p>{'we have two messages'}</p> },
-      ],
-    };
+  it('Opens edit connectors when hasConnectors=true', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseCallOut {...props} />
+        <CaseCallOut {...defaultProps} />
       </TestProviders>
     );
 
-    const id = createCalloutId(['message-one']);
-
-    expect(wrapper.find(`[data-test-subj="case-callout-${id}"]`).last().exists()).toBeTruthy();
-    wrapper.find(`[data-test-subj="callout-dismiss-${id}"]`).last().simulate('click');
-    expect(wrapper.find(`[data-test-subj="case-callout-${id}"]`).exists()).toBeFalsy();
+    const id = createCalloutId(['message-one', 'message-two']);
+    wrapper.find(`[data-test-subj="callout-onclick-${id}"]`).last().simulate('click');
+    expect(defaultProps.onEditClick).toHaveBeenCalled();
+    expect(defaultProps.configureCasesNavigation.onClick).not.toHaveBeenCalled();
   });
 
-  it('persist the callout of type primary when dismissed', () => {
-    const props: CaseCallOutProps = {
-      title: 'hey title',
-      messages: [
-        { id: 'message-one', title: 'title', description: <p>{'we have two messages'}</p> },
-      ],
+  it('Redirects to configure page when hasConnectors=false', () => {
+    const props = {
+      ...defaultProps,
+      hasConnectors: false,
     };
-
     const wrapper = mount(
       <TestProviders>
         <CaseCallOut {...props} />
       </TestProviders>
     );
 
-    const id = createCalloutId(['message-one']);
-    expect(securityLocalStorageMock.getMessages).toHaveBeenCalledWith('case');
-    wrapper.find(`[data-test-subj="callout-dismiss-${id}"]`).last().simulate('click');
-    expect(securityLocalStorageMock.addMessage).toHaveBeenCalledWith('case', id);
+    const id = createCalloutId(['message-one', 'message-two']);
+    wrapper.find(`[data-test-subj="callout-onclick-${id}"]`).last().simulate('click');
+    expect(defaultProps.onEditClick).not.toHaveBeenCalled();
+    expect(defaultProps.configureCasesNavigation.onClick).toHaveBeenCalled();
   });
 
   it('do not show the callout if is in the localStorage', () => {
-    const props: CaseCallOutProps = {
-      title: 'hey title',
-      messages: [
-        { id: 'message-one', title: 'title', description: <p>{'we have two messages'}</p> },
-      ],
-    };
-
     const id = createCalloutId(['message-one']);
 
     useSecurityLocalStorageMock.mockImplementation(() => ({
@@ -133,85 +122,10 @@ describe('CaseCallOut ', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <CaseCallOut {...props} />
+        <CaseCallOut {...defaultProps} />
       </TestProviders>
     );
 
     expect(wrapper.find(`[data-test-subj="case-callout-${id}"]`).last().exists()).toBeFalsy();
-  });
-
-  it('do not persist a callout of type danger', () => {
-    const props: CaseCallOutProps = {
-      title: 'hey title',
-      messages: [
-        {
-          id: 'message-one',
-          title: 'title one',
-          description: <p>{'we have two messages'}</p>,
-          errorType: 'danger',
-        },
-      ],
-    };
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseCallOut {...props} />
-      </TestProviders>
-    );
-
-    const id = createCalloutId(['message-one']);
-    wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
-    wrapper.update();
-    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
-  });
-
-  it('do not persist a callout of type warning', () => {
-    const props: CaseCallOutProps = {
-      title: 'hey title',
-      messages: [
-        {
-          id: 'message-one',
-          title: 'title one',
-          description: <p>{'we have two messages'}</p>,
-          errorType: 'warning',
-        },
-      ],
-    };
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseCallOut {...props} />
-      </TestProviders>
-    );
-
-    const id = createCalloutId(['message-one']);
-    wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
-    wrapper.update();
-    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
-  });
-
-  it('do not persist a callout of type success', () => {
-    const props: CaseCallOutProps = {
-      title: 'hey title',
-      messages: [
-        {
-          id: 'message-one',
-          title: 'title one',
-          description: <p>{'we have two messages'}</p>,
-          errorType: 'success',
-        },
-      ],
-    };
-
-    const wrapper = mount(
-      <TestProviders>
-        <CaseCallOut {...props} />
-      </TestProviders>
-    );
-
-    const id = createCalloutId(['message-one']);
-    wrapper.find(`button[data-test-subj="callout-dismiss-${id}"]`).simulate('click');
-    wrapper.update();
-    expect(securityLocalStorageMock.addMessage).not.toHaveBeenCalled();
   });
 });

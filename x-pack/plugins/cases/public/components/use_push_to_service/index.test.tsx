@@ -36,6 +36,7 @@ jest.mock('../../containers/configure/api');
 describe('usePushToService', () => {
   const caseId = '12345';
   const updateCase = jest.fn();
+  const onEditClick = jest.fn();
   const pushCaseToExternalService = jest.fn();
   const mockPostPush = {
     isLoading: false,
@@ -55,6 +56,7 @@ describe('usePushToService', () => {
   };
 
   const defaultArgs = {
+    actionsErrors: [],
     connector: {
       id: mockConnector.id,
       name: mockConnector.name,
@@ -69,6 +71,8 @@ describe('usePushToService', () => {
       onClick: jest.fn(),
     },
     connectors: connectorsMock,
+    hasDataToPush: true,
+    onEditClick,
     isValidConnector: true,
     updateCase,
     userCanCrud: true,

@@ -32,8 +32,6 @@ import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
 import { CasesNavigation } from '../links';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { getActionLicenseError } from '../use_push_to_service/helpers';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 
 export interface EditConnectorProps {
   caseData: Case;
@@ -229,11 +227,7 @@ export const EditConnector = React.memo(
       connectors,
     });
 
-    const { actionLicense } = useGetActionLicense();
-    const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
-
     const { pushButton, pushCallouts } = usePushToService({
-      actionsErrors,
       configureCasesNavigation,
       connector: {
         ...caseData.connector,
@@ -270,9 +264,11 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup data-test-subj="edit-connectors" direction="column">
-          {!isLoading && !editConnector && pushCallouts && (
-            <EuiFlexItem>{pushCallouts}</EuiFlexItem>
-          )}
+          <span data-test-subj="bitch-bitch">
+            {!isLoading && !editConnector && pushCallouts && (
+              <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
+            )}
+          </span>
           <DisappearingFlexItem $isHidden={!editConnector}>
             <Form form={form}>
               <EuiFlexGroup gutterSize="none" direction="row">
