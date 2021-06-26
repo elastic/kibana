@@ -7,13 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import styled from 'styled-components';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingContent,
-  EuiLoadingSpinner,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 
 import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector, Ecs } from '../../../common';
 import { HeaderPage } from '../header_page';
@@ -72,13 +66,6 @@ const MyWrapper = styled.div`
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
-`;
-
-const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
-  margin-left: 48px;
-  &.euiHorizontalRule--full {
-    width: calc(100% - 48px);
-  }
 `;
 
 export interface CaseComponentProps extends CaseViewComponentProps {
@@ -325,6 +312,18 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       }
     }, [onComponentInitialized]);
 
+    const statusActionButton = useMemo<JSX.Element | null>(
+      () =>
+        caseData.type !== CaseType.collection && userCanCrud ? (
+          <StatusActionButton
+            status={caseData.status}
+            onStatusChanged={changeStatus}
+            isLoading={isLoading && updateKey === 'status'}
+          />
+        ) : null,
+      [caseData.status, caseData.type, changeStatus, isLoading, updateKey, userCanCrud]
+    );
+
     return (
       <>
         <HeaderWrapper>
@@ -383,27 +382,11 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       renderInvestigateInTimelineActionComponent={
                         timelineUi?.renderInvestigateInTimelineActionComponent
                       }
+                      statusActionButton={statusActionButton}
                       updateCase={updateCase}
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
                     />
-                    {caseData.type !== CaseType.collection && userCanCrud && (
-                      <>
-                        <MyEuiHorizontalRule
-                          margin="s"
-                          data-test-subj="case-view-bottom-actions-horizontal-rule"
-                        />
-                        <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
-                          <EuiFlexItem grow={false}>
-                            <StatusActionButton
-                              status={caseData.status}
-                              onStatusChanged={changeStatus}
-                              isLoading={isLoading && updateKey === 'status'}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </>
-                    )}
                   </>
                 )}
               </EuiFlexItem>
