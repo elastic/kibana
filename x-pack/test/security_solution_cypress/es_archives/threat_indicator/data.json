@@ -47,7 +47,6 @@
       "input": {
         "type": "httpjson"
       },
-      "@timestamp": "2021-03-10T14:51:07.663Z",
       "ecs": {
         "version": "1.6.0"
       },
