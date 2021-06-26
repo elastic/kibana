@@ -111,7 +111,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
   });
 
-  const [{ title, allowHidden, type, timestampField }] = useFormData<FormInternal>({ form });
+  const [{ title, allowHidden, type }] = useFormData<FormInternal>({ form });
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(true);
 
   // const [lastTitle, setLastTitle] = useState('');
