@@ -17,28 +17,40 @@ import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_template
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 
-export function registerGetAllRoute({ router }: RouteDependencies) {
+export function registerGetAllRoute({ router, lib: { isEsError } }: RouteDependencies) {
   router.get({ path: addBasePath('/index_templates'), validate: false }, async (ctx, req, res) => {
     const { callAsCurrentUser } = ctx.dataManagement!.client;
-    const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
-    const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate');
-    const { index_templates: templatesEs } = await callAsCurrentUser(
-      'dataManagement.getComposableIndexTemplates'
-    );
+    try {
+      const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
 
-    const legacyTemplates = deserializeLegacyTemplateList(
-      legacyTemplatesEs,
-      cloudManagedTemplatePrefix
-    );
-    const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
+      const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate');
+      const { index_templates: templatesEs } = await callAsCurrentUser(
+        'dataManagement.getComposableIndexTemplates'
+      );
 
-    const body = {
-      templates,
-      legacyTemplates,
-    };
+      const legacyTemplates = deserializeLegacyTemplateList(
+        legacyTemplatesEs,
+        cloudManagedTemplatePrefix
+      );
+      const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
-    return res.ok({ body });
+      const body = {
+        templates,
+        legacyTemplates,
+      };
+
+      return res.ok({ body });
+    } catch (error) {
+      if (isEsError(error)) {
+        return res.customError({
+          statusCode: error.statusCode,
+          body: error,
+        });
+      }
+      // Case: default
+      throw error;
+    }
   });
 }
 

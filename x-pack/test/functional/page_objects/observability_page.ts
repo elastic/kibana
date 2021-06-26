@@ -20,14 +20,12 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
       expect(disabledAttr).to.be(null);
     },
 
-    async expectCreateCaseButtonDisabled() {
-      const button = await testSubjects.find('createNewCaseBtn', 20000);
-      const disabledAttr = await button.getAttribute('disabled');
-      expect(disabledAttr).to.be('true');
+    async expectCreateCaseButtonMissing() {
+      await testSubjects.missingOrFail('createNewCaseBtn');
     },
 
-    async expectReadOnlyCallout() {
-      await testSubjects.existOrFail('case-callout-e41900b01c9ef0fa81dd6ff326083fb3');
+    async expectReadOnlyGlassesBadge() {
+      await testSubjects.existOrFail('headerBadge');
     },
 
     async expectNoReadOnlyCallout() {
@@ -44,10 +42,8 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
       expect(disabledAttr).to.be(null);
     },
 
-    async expectAddCommentButtonDisabled() {
-      const button = await testSubjects.find('submit-comment', 20000);
-      const disabledAttr = await button.getAttribute('disabled');
-      expect(disabledAttr).to.be('true');
+    async expectAddCommentButtonMissing() {
+      await testSubjects.missingOrFail('submit-comment');
     },
 
     async expectForbidden() {

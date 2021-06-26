@@ -49,29 +49,39 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
         </span>
       </div>
       <EuiText
+        color="default"
         size="s"
       >
         <div
           className="euiText euiText--small"
         >
-          <div>
-            <FormattedMessage
-              defaultMessage="The index pattern associated with this object no longer exists."
-              id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
-              values={Object {}}
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
             >
-              The index pattern associated with this object no longer exists.
-            </FormattedMessage>
-          </div>
-          <div>
-            <FormattedMessage
-              defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-              id="savedObjectsManagement.view.howToFixErrorDescription"
-              values={Object {}}
-            >
-              If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-            </FormattedMessage>
-          </div>
+              <div>
+                <FormattedMessage
+                  defaultMessage="The index pattern associated with this object no longer exists."
+                  id="savedObjectsManagement.view.indexPatternDoesNotExistErrorMessage"
+                  values={Object {}}
+                >
+                  The index pattern associated with this object no longer exists.
+                </FormattedMessage>
+              </div>
+              <div>
+                <FormattedMessage
+                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+                  id="savedObjectsManagement.view.howToFixErrorDescription"
+                  values={Object {}}
+                >
+                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+                </FormattedMessage>
+              </div>
+            </div>
+          </EuiTextColor>
         </div>
       </EuiText>
     </div>
@@ -128,29 +138,39 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
         </span>
       </div>
       <EuiText
+        color="default"
         size="s"
       >
         <div
           className="euiText euiText--small"
         >
-          <div>
-            <FormattedMessage
-              defaultMessage="A field associated with this object no longer exists in the index pattern."
-              id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
-              values={Object {}}
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
             >
-              A field associated with this object no longer exists in the index pattern.
-            </FormattedMessage>
-          </div>
-          <div>
-            <FormattedMessage
-              defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-              id="savedObjectsManagement.view.howToFixErrorDescription"
-              values={Object {}}
-            >
-              If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-            </FormattedMessage>
-          </div>
+              <div>
+                <FormattedMessage
+                  defaultMessage="A field associated with this object no longer exists in the index pattern."
+                  id="savedObjectsManagement.view.fieldDoesNotExistErrorMessage"
+                  values={Object {}}
+                >
+                  A field associated with this object no longer exists in the index pattern.
+                </FormattedMessage>
+              </div>
+              <div>
+                <FormattedMessage
+                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+                  id="savedObjectsManagement.view.howToFixErrorDescription"
+                  values={Object {}}
+                >
+                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+                </FormattedMessage>
+              </div>
+            </div>
+          </EuiTextColor>
         </div>
       </EuiText>
     </div>
@@ -207,29 +227,39 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
         </span>
       </div>
       <EuiText
+        color="default"
         size="s"
       >
         <div
           className="euiText euiText--small"
         >
-          <div>
-            <FormattedMessage
-              defaultMessage="The saved search associated with this object no longer exists."
-              id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
-              values={Object {}}
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
             >
-              The saved search associated with this object no longer exists.
-            </FormattedMessage>
-          </div>
-          <div>
-            <FormattedMessage
-              defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-              id="savedObjectsManagement.view.howToFixErrorDescription"
-              values={Object {}}
-            >
-              If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-            </FormattedMessage>
-          </div>
+              <div>
+                <FormattedMessage
+                  defaultMessage="The saved search associated with this object no longer exists."
+                  id="savedObjectsManagement.view.savedSearchDoesNotExistErrorMessage"
+                  values={Object {}}
+                >
+                  The saved search associated with this object no longer exists.
+                </FormattedMessage>
+              </div>
+              <div>
+                <FormattedMessage
+                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+                  id="savedObjectsManagement.view.howToFixErrorDescription"
+                  values={Object {}}
+                >
+                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+                </FormattedMessage>
+              </div>
+            </div>
+          </EuiTextColor>
         </div>
       </EuiText>
     </div>
@@ -286,21 +316,31 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
         </span>
       </div>
       <EuiText
+        color="default"
         size="s"
       >
         <div
           className="euiText euiText--small"
         >
-          <div />
-          <div>
-            <FormattedMessage
-              defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
-              id="savedObjectsManagement.view.howToFixErrorDescription"
-              values={Object {}}
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
             >
-              If you know what this error means, go ahead and fix it — otherwise click the delete button above.
-            </FormattedMessage>
-          </div>
+              <div />
+              <div>
+                <FormattedMessage
+                  defaultMessage="If you know what this error means, go ahead and fix it — otherwise click the delete button above."
+                  id="savedObjectsManagement.view.howToFixErrorDescription"
+                  values={Object {}}
+                >
+                  If you know what this error means, go ahead and fix it — otherwise click the delete button above.
+                </FormattedMessage>
+              </div>
+            </div>
+          </EuiTextColor>
         </div>
       </EuiText>
     </div>

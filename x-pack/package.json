@@ -26,10 +26,6 @@
     "yarn": "^1.21.1"
   },
   "devDependencies": {
-    "@kbn/plugin-helpers": "link:../packages/kbn-plugin-helpers",
     "@kbn/test": "link:../packages/kbn-test"
-  },
-  "dependencies": {
-    "@kbn/ui-framework": "link:../packages/kbn-ui-framework"
   }
 }

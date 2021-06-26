@@ -38,7 +38,7 @@ export const Create = React.memo(() => {
   );
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       {cases.getCreateCase({
         onCancel: handleSetIsCancel,
         onSuccess,
