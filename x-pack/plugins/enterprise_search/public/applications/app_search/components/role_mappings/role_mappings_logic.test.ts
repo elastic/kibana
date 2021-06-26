@@ -58,6 +58,8 @@ describe('RoleMappingsLogic', () => {
     userCreated: false,
     userFormIsNewUser: true,
     userFormUserIsExisting: true,
+    smtpSettingsPresent: false,
+    formLoading: false,
   };
 
   const mappingsServerProps = {
@@ -70,6 +72,7 @@ describe('RoleMappingsLogic', () => {
     hasAdvancedRoles: false,
     singleUserRoleMappings: [asSingleUserRoleMapping],
     elasticsearchUsers,
+    smtpSettingsPresent: false,
   };
 
   beforeEach(() => {
