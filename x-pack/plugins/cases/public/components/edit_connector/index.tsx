@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React, { useCallback, useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import {
   EuiText,

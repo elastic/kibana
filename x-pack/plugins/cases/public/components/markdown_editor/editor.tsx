@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { PluggableList } from 'unified';
 import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { usePlugins } from './use_plugins';
