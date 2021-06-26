@@ -92,7 +92,7 @@ const RESET_CONFIRMATION_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.resultSettings.confirmResetMessage',
   {
     defaultMessage:
-      'This will revert your settings back to the default: all fields set to raw. The default will take over immediately and impact your search results.',
+      'Are you sure you want to restore result settings defaults? This will set all fields back to raw with no limits.',
   }
 );
 
