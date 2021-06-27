@@ -3,7 +3,7 @@ id: kibCoreDeprecationsService
 slug: /kibana-dev-docs/services/deprecations-service
 title: Core Deprecations service
 summary: The Deprecations service helps surface deprecated configs and features for plugins to our users
-date: 2021-05-03
+date: 2021-06-27
 tags: ['kibana','dev', 'contributor', 'api docs']
 ---
 
@@ -31,8 +31,8 @@ To display Kibana deprecations in the UA set `xpack.upgrade_assistant.readonly: 
 ## How do I use this service for deprecated plugin configurations?
 The deprecations service automatically hooks deprecated configs with the deprecations service. 
 
-All the config deprecation functions (`unused`, `unusedFromRoot`, `rename`, `renameFromRoot`) accept an optional
-parameter to customize the deprecation details.
+All the config deprecation functions (`unused`, `unusedFromRoot`, `rename`, `renameFromRoot`) accept an
+optional parameter to customize the deprecation details.
 
 To read more about the deprecation functions check `/kibana-dev-docs/corePluginApi` in the new doc
 system under `core.ConfigDeprecationFactory`. You can also check the `ConfigDeprecationFactory`
@@ -109,8 +109,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 ```
 
 ## How do I add deprecations for non-config plugin deprecations?
-
-Plugins are responsible for registering any deprecations during the `setup` lifecycle by using the deprecations service.
+Plugins are responsible for registering any deprecations during the `setup` lifecycle by using
+the deprecations service.
 
 Examples of non-config deprecations include things like
 - timelion sheets
@@ -131,16 +131,7 @@ The function provides a context object which contains a scoped Elasticsearch cli
 
 To check the full TS types of the service please check the [generated core docs](../../../../docs/development/core/server/kibana-plugin-core-server.deprecationsservicesetup.md).
 
-### Examples
-
-We have a `Breaking Change` label in the Kibana repo to track the [current list of breaking changes](https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3A%22Breaking+Change%22+label%3A%22Feature%3AUpgrade+Assistant%22+sort%3Aupdated-desc).
-
-Examples of non-config deprecations:
-- Deprecated roles ([#81674](https://github.com/elastic/kibana/issues/81674), [#92485](https://github.com/elastic/kibana/issues/92485)).
-- Removal of coordinate map and regional map visualizations ([#81703]((https://github.com/elastic/kibana/issues/81703)).
-- Removal of expression-based scripted fields ([#77669]((https://github.com/elastic/kibana/issues/77669)).
-
-Below is a code snippet for adding a non-config deprecation in your plugin:
+### Example
 ```ts
 import { DeprecationsDetails, GetDeprecationsContext } from 'src/core/server';
 
@@ -182,13 +173,11 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
 }
  ```
 
-## How to implement a corrective action API?
+## How do I implement the API corrective action?
 The deprecations API allows plugins to provide an API call that can be used to automatically fix specific deprecations.
 To do so create a `PUT` or `POST` route in your plugin and specify data you want to be passed in the payload for the deprecation.
 
-In the example above, `/internal/security/users/test_dashboard_user` will be called when users
-click on `Quick Resolve` in the UA. The service will automatically pass the body provided in the api corrective action
-to provide context to the route for fixing the deprecation.
+In the example above, `/internal/security/users/test_dashboard_user` will be called when users click on `Quick Resolve` in the UA. The service will automatically pass the body provided in the api corrective action to provide context to the route for fixing the deprecation.
 
 The deprecations service expects a `200` status code to recognize the corrective action as a success.
 
@@ -211,9 +200,7 @@ Currently we dont have test objects to run functional tests against the Upgrade 
 Yes. Using this service should help users find and resolve any issues specific to their deployment before upgrading.
 We recommend adding a `documentationUrl` for every deprecation you expose to further assist our users if they need extra help.
 
-
 ## Note on i18n
-
 We've decided to support i18n to the exposed deprecations for a better user experience when using the UA.
 We will inject `i18n` into the deprecation function to enable teams to use it before fully documenting its usage.
 For context follow [this issue](https://github.com/elastic/kibana/issues/99072)
