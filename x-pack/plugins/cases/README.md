@@ -43,6 +43,16 @@ cases: CasesUiStart;
   cases.getCreateCase({
     onCancel: handleSetIsCancel,
     onSuccess,
+    lensIntegration?: {
+      plugins: {
+        parsingPlugin,
+        processingPluginRenderer,
+        uiPlugin,
+      },
+      hooks: {
+        useInsertTimeline,
+      },
+    }
     timelineIntegration?: {
       plugins: {
         parsingPlugin,

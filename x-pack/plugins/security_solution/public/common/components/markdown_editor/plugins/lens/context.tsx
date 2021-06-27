@@ -7,4 +7,7 @@
 
 import React from 'react';
 
-export const CommentEditorContext = React.createContext<string | null>(null);
+export const CommentEditorContext = React.createContext<{
+  editorId: string;
+  value: string;
+} | null>(null);

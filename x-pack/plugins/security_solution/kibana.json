@@ -15,6 +15,7 @@
     "features",
     "taskManager",
     "inspector",
+    "lens",
     "licensing",
     "maps",
     "timelines",
@@ -23,7 +24,6 @@
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
-    "lens",
     "fleet",
     "ml",
     "newsfeed",

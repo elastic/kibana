@@ -8,6 +8,4 @@
 import { useContext } from 'react';
 import { CasesLensIntegrationContext } from '.';
 
-export const useCasesLensIntegrationContext = () => {
-  return useContext(CasesLensIntegrationContext);
-};
+export const useCasesLensIntegrationContext = () => useContext(CasesLensIntegrationContext);

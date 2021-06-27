@@ -6,24 +6,24 @@
  */
 
 import React, { useState } from 'react';
-import { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
+import { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { Plugin } from 'unified';
+import { TypedLensByValueInput } from '../../../../lens/public';
 
 interface LensProcessingPluginRendererProps {
-  id: string | null;
-  title: string;
-  graphEventId?: string;
-  type: 'lens';
-  [key: string]: string | null | undefined;
+  attributes: TypedLensByValueInput['attributes'] | null;
+  id?: string | null;
+  title?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  viewMode?: boolean | undefined;
 }
 
 export interface CasesLensIntegration {
   editor_context: any;
   editor_plugins: {
     parsingPlugin: Plugin;
-    processingPluginRenderer: React.FC<
-      LensProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }
-    >;
+    processingPluginRenderer: React.FC<LensProcessingPluginRendererProps>;
     uiPlugin: EuiMarkdownEditorUiPlugin;
   };
 }

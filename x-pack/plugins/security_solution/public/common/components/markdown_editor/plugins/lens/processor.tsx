@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 
 import { createGlobalStyle } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { EmbeddableComponentProps, TypedLensByValueInput } from '../../../../../../../lens/public';
+import { TypedLensByValueInput } from '../../../../../../../lens/public';
 import { useKibana } from '../../../../lib/kibana';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
@@ -32,7 +32,6 @@ interface LensMarkDownRendererProps {
   title?: string | null;
   startDate?: string | null;
   endDate?: string | null;
-  onBrushEnd?: EmbeddableComponentProps['onBrushEnd'];
   viewMode?: boolean | undefined;
 }
 
@@ -41,7 +40,6 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
   title,
   startDate,
   endDate,
-  onBrushEnd,
   viewMode = true,
 }) => {
   const location = useLocation();
@@ -51,9 +49,38 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     canUseEditor,
   } = useKibana().services.lens;
 
-  console.error('loaa', location);
+  // console.error('loaa', location);
 
-  console.error('sss', attributes, canUseEditor());
+  // console.error('sss', attributes, canUseEditor());
+
+  const handleClick = useCallback(() => {
+    if (attributes) {
+      navigateToPrefilledEditor(
+        {
+          id: '',
+          timeRange: {
+            from: startDate ?? 'now-7d',
+            to: endDate ?? 'now',
+            mode: startDate ? 'absolute' : 'relative',
+          },
+          attributes,
+        },
+        {
+          openInNewTab: true,
+          // originatingApp: 'securitySolution:case',
+          // originatingPath: `${location.pathname}${location.search}`,
+        }
+      );
+    }
+  }, [
+    attributes,
+    endDate,
+    location.pathname,
+    location.search,
+    navigateToPrefilledEditor,
+    startDate,
+  ]);
+
   return (
     <Container>
       {attributes ? (
@@ -69,26 +96,8 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
                 <EuiButton
                   iconType="lensApp"
                   fullWidth={false}
-                  isDisabled={!canUseEditor() || attributes === null}
-                  onClick={() => {
-                    if (attributes) {
-                      navigateToPrefilledEditor(
-                        {
-                          id: '',
-                          timeRange: {
-                            from: startDate ?? 'now-5d',
-                            to: endDate ?? 'now',
-                            mode: startDate ? 'absolute' : 'relative',
-                          },
-                          attributes,
-                        },
-                        {
-                          originatingApp: 'securitySolution:case',
-                          originatingPath: `${location.pathname}${location.search}`,
-                        }
-                      );
-                    }
-                  }}
+                  isDisabled={!canUseEditor() || !attributes}
+                  onClick={handleClick}
                 >
                   {`Open in Lens`}
                 </EuiButton>
@@ -103,12 +112,11 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
               id=""
               style={{ height: LENS_VISUALIZATION_HEIGHT }}
               timeRange={{
-                from: startDate ?? 'now-5d',
+                from: startDate ?? 'now-7d',
                 to: endDate ?? 'now',
                 mode: startDate ? 'absolute' : 'relative',
               }}
               attributes={attributes}
-              onBrushEnd={onBrushEnd}
             />
           ) : null}
           <LensChartTooltipFix />

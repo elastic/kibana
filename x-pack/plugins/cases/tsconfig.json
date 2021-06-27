@@ -17,6 +17,7 @@
     { "path": "../../../src/core/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json
+    { "path": "../lens/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
 

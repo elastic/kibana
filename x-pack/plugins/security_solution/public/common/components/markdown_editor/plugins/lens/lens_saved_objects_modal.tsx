@@ -5,14 +5,31 @@
  * 2.0.
  */
 
-import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+import {
+  EuiModal,
+  EuiModalProps,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
 import React from 'react';
 
-import { SavedObjectFinderUi } from '../../../../../../../../../src/plugins/saved_objects/public';
+import {
+  SavedObjectFinderUi,
+  SavedObjectFinderUiProps,
+} from '../../../../../../../../../src/plugins/saved_objects/public';
 import { useKibana } from '../../../../lib/kibana';
 import { ModalContainer } from './modal_container';
 
-const LensSavedObjectsModalComponent = ({ onClose, onChoose }) => {
+interface LensSavedObjectsModalProps {
+  onClose: EuiModalProps['onClose'];
+  onChoose: SavedObjectFinderUiProps['onChoose'];
+}
+
+const LensSavedObjectsModalComponent: React.FC<LensSavedObjectsModalProps> = ({
+  onClose,
+  onChoose,
+}) => {
   const { savedObjects, uiSettings } = useKibana().services;
 
   return (

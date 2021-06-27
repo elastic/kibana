@@ -15,7 +15,7 @@ import type {
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
 export const getLensAttributes = (
-  defaultIndexPattern: IndexPattern
+  defaultIndexPattern: IndexPattern | null
 ): TypedLensByValueInput['attributes'] => {
   const dataLayer: PersistedIndexPatternLayer = {
     columnOrder: ['col1', 'col2'],
@@ -35,7 +35,7 @@ export const getLensAttributes = (
         operationType: 'date_histogram',
         params: { interval: 'auto' },
         scale: 'interval',
-        sourceField: defaultIndexPattern.timeFieldName!,
+        sourceField: defaultIndexPattern?.timeFieldName!,
       },
     },
   };
@@ -64,12 +64,12 @@ export const getLensAttributes = (
     title: '',
     references: [
       {
-        id: defaultIndexPattern.id!,
+        id: defaultIndexPattern?.id!,
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: defaultIndexPattern.id!,
+        id: defaultIndexPattern?.id!,
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },

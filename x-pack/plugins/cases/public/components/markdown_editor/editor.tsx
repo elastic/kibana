@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHandle } from 'react';
+import React, {
+  memo,
+  forwardRef,
+  useCallback,
+  useRef,
+  useState,
+  useImperativeHandle,
+  ElementRef,
+} from 'react';
 import { PluggableList } from 'unified';
 import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
 import { useCasesLensIntegrationContext } from '../lens_context/use_lens_context';
 
@@ -23,26 +32,38 @@ interface MarkdownEditorProps {
   value: string;
 }
 
-const MarkdownEditorComponent = forwardRef(
-  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }: MarkdownEditorProps, ref) => {
+type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
+
+export interface MarkdownEditorRef {
+  textarea: HTMLTextAreaElement | null;
+  replaceNode: ContextShape['replaceNode'];
+  toolbar: HTMLDivElement | null;
+}
+
+const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
+  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }, ref) => {
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse = useCallback((err, { messages }) => {
       setMarkdownErrorMessages(err ? [err] : messages);
     }, []);
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
     const CasesLensIntegrationContextProvider = useCasesLensIntegrationContext()?.editor_context
-      .Provider;
-    const editorRef = useRef(null);
+      ?.Provider;
+    const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
-    console.error('useRef', ref?.current);
-
+    // @ts-expect-error update types
     useImperativeHandle(ref, () => {
-      console.error('reft', ref, editorRef);
+      console.error('reft2222', ref, editorRef);
+
+      if (!editorRef.current) {
+        return null;
+      }
+
+      const editorNode = editorRef.current?.textarea?.closest('.euiMarkdownEditor');
+
       return {
         ...editorRef.current,
-        toolbar: editorRef.current.textarea
-          .closest('.euiMarkdownEditor')
-          .querySelector('.euiMarkdownEditorToolbar'),
+        toolbar: editorNode?.querySelector('.euiMarkdownEditorToolbar'),
       };
     });
 

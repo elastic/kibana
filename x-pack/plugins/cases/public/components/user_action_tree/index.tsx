@@ -23,7 +23,7 @@ import * as i18n from './translations';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser, useKibana } from '../../common/lib/kibana';
-import { AddComment, AddCommentRefObject } from '../add_comment';
+import { AddComment } from '../add_comment';
 import {
   ActionConnector,
   AlertCommentRequestRt,
@@ -112,6 +112,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
   `}
 `;
 
+const DESCRIPTION_ID = 'description';
 const NEW_ID = 'newComment';
 
 export const UserActionTree = React.memo(
@@ -205,7 +206,7 @@ export const UserActionTree = React.memo(
       (quote: string) => {
         const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
 
-        if (commentRefs.current && commentRefs.current[NEW_ID]) {
+        if (commentRefs.current[NEW_ID]) {
           commentRefs.current[NEW_ID].addQuote(`> ${addCarrots} \n`);
         }
 
@@ -222,12 +223,27 @@ export const UserActionTree = React.memo(
       [fetchUserActions, updateCase]
     );
 
+    const MarkdownDescription = useMemo(
+      () => (
+        <UserActionMarkdown
+          id={DESCRIPTION_ID}
+          content={caseData.description}
+          isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
+          onSaveContent={(content: string) => {
+            onUpdateField({ key: DESCRIPTION_ID, value: content });
+          }}
+          onChangeEditable={handleManageMarkdownEditId}
+        />
+      ),
+      [caseData.description, handleManageMarkdownEditId, manageMarkdownEditIds, onUpdateField]
+    );
+
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
-          ref={(element) => (commentRefs.current[NEW_ID] = element)}
           caseId={caseId}
           userCanCrud={userCanCrud}
+          ref={(element) => (commentRefs.current[NEW_ID] = element)}
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
@@ -246,253 +262,305 @@ export const UserActionTree = React.memo(
       }
     }, [commentId, initLoading, isLoadingUserActions, isLoadingIds, handleOutlineComment]);
 
+    const descriptionCommentListObj: EuiCommentProps = useMemo(
+      () => ({
+        username: (
+          <UserActionUsername
+            username={caseData.createdBy.username}
+            fullName={caseData.createdBy.fullName}
+          />
+        ),
+        event: i18n.ADDED_DESCRIPTION,
+        'data-test-subj': 'description-action',
+        timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
+        children: MarkdownDescription,
+        timelineIcon: (
+          <UserActionAvatar
+            username={caseData.createdBy.username}
+            fullName={caseData.createdBy.fullName}
+          />
+        ),
+        className: classNames({
+          isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
+        }),
+        actions: (
+          <UserActionContentToolbar
+            getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+            id={DESCRIPTION_ID}
+            editLabel={i18n.EDIT_DESCRIPTION}
+            quoteLabel={i18n.QUOTE}
+            isLoading={isLoadingDescription}
+            onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
+            onQuote={handleManageQuote.bind(null, caseData.description)}
+            userCanCrud={userCanCrud}
+          />
+        ),
+      }),
+      [
+        MarkdownDescription,
+        caseData,
+        getCaseDetailHrefWithCommentId,
+        handleManageMarkdownEditId,
+        handleManageQuote,
+        isLoadingDescription,
+        userCanCrud,
+        manageMarkdownEditIds,
+      ]
+    );
+
     const userActions: EuiCommentProps[] = useMemo(
       () =>
-        caseUserActions.reduce<EuiCommentProps[]>((comments, action, index) => {
-          // Comment creation
-          if (action.commentId != null && action.action === 'create') {
-            const comment = caseData.comments.find((c) => c.id === action.commentId);
+        caseUserActions.reduce<EuiCommentProps[]>(
+          (comments, action, index) => {
+            // Comment creation
+            if (action.commentId != null && action.action === 'create') {
+              const comment = caseData.comments.find((c) => c.id === action.commentId);
+              if (
+                comment != null &&
+                isRight(ContextTypeUserRt.decode(comment)) &&
+                comment.type === CommentType.user
+              ) {
+                return [
+                  ...comments,
+                  {
+                    username: (
+                      <UserActionUsername
+                        username={comment.createdBy.username}
+                        fullName={comment.createdBy.fullName}
+                      />
+                    ),
+                    'data-test-subj': `comment-create-action-${comment.id}`,
+                    timestamp: (
+                      <UserActionTimestamp
+                        createdAt={comment.createdAt}
+                        updatedAt={comment.updatedAt}
+                      />
+                    ),
+                    className: classNames('userAction__comment', {
+                      outlined: comment.id === selectedOutlineCommentId,
+                      isEdit: manageMarkdownEditIds.includes(comment.id),
+                    }),
+                    children: (
+                      <UserActionMarkdown
+                        ref={(element) => (commentRefs.current[comment.id] = element)}
+                        id={comment.id}
+                        content={comment.comment}
+                        isEditable={manageMarkdownEditIds.includes(comment.id)}
+                        onChangeEditable={handleManageMarkdownEditId}
+                        onSaveContent={handleSaveComment.bind(null, {
+                          id: comment.id,
+                          version: comment.version,
+                        })}
+                      />
+                    ),
+                    timelineIcon: (
+                      <UserActionAvatar
+                        username={comment.createdBy.username}
+                        fullName={comment.createdBy.fullName}
+                      />
+                    ),
+                    actions: (
+                      <UserActionContentToolbar
+                        getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+                        id={comment.id}
+                        editLabel={i18n.EDIT_COMMENT}
+                        quoteLabel={i18n.QUOTE}
+                        isLoading={isLoadingIds.includes(comment.id)}
+                        onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
+                        onQuote={handleManageQuote.bind(null, comment.comment)}
+                        userCanCrud={userCanCrud}
+                      />
+                    ),
+                  },
+                ];
+              } else if (
+                comment != null &&
+                isRight(AlertCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.alert
+              ) {
+                // TODO: clean this up
+                const alertId = Array.isArray(comment.alertId)
+                  ? comment.alertId.length > 0
+                    ? comment.alertId[0]
+                    : ''
+                  : comment.alertId;
+
+                const alertIndex = Array.isArray(comment.index)
+                  ? comment.index.length > 0
+                    ? comment.index[0]
+                    : ''
+                  : comment.index;
+
+                if (isEmpty(alertId)) {
+                  return comments;
+                }
+
+                const ruleId =
+                  comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? null;
+                const ruleName =
+                  comment?.rule?.name ?? manualAlertsData[alertId]?.signal?.rule?.name?.[0] ?? null;
+
+                return [
+                  ...comments,
+                  ...(getRuleDetailsHref != null
+                    ? [
+                        getAlertAttachment({
+                          action,
+                          alertId,
+                          getCaseDetailHrefWithCommentId,
+                          getRuleDetailsHref,
+                          index: alertIndex,
+                          loadingAlertData,
+                          onRuleDetailsClick,
+                          ruleId,
+                          ruleName,
+                          onShowAlertDetails,
+                        }),
+                      ]
+                    : []),
+                ];
+              } else if (comment != null && comment.type === CommentType.generatedAlert) {
+                // TODO: clean this up
+                const alertIds = Array.isArray(comment.alertId)
+                  ? comment.alertId
+                  : [comment.alertId];
+
+                if (isEmpty(alertIds)) {
+                  return comments;
+                }
+
+                return [
+                  ...comments,
+                  ...(getRuleDetailsHref != null
+                    ? [
+                        getGeneratedAlertsAttachment({
+                          action,
+                          alertIds,
+                          getCaseDetailHrefWithCommentId,
+                          getRuleDetailsHref,
+                          onRuleDetailsClick,
+                          renderInvestigateInTimelineActionComponent,
+                          ruleId: comment.rule?.id ?? '',
+                          ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
+                        }),
+                      ]
+                    : []),
+                ];
+              }
+            }
+
+            // Connectors
+            if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
+              const label = getConnectorLabelTitle({ action, connectors });
+              return [
+                ...comments,
+                getUpdateAction({
+                  action,
+                  label,
+                  getCaseDetailHrefWithCommentId,
+                  handleOutlineComment,
+                }),
+              ];
+            }
+
+            // Pushed information
+            if (action.actionField.length === 1 && action.actionField[0] === 'pushed') {
+              const parsedValue = parseString(`${action.newValue}`);
+              const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
+                caseServices,
+                parsedValue,
+                index
+              );
+
+              const label = getPushedServiceLabelTitle(action, firstPush);
+
+              const showTopFooter =
+                action.action === 'push-to-service' &&
+                index === caseServices[parsedConnectorId]?.lastPushIndex;
+
+              const showBottomFooter =
+                action.action === 'push-to-service' &&
+                index === caseServices[parsedConnectorId]?.lastPushIndex &&
+                caseServices[parsedConnectorId].hasDataToPush;
+
+              let footers: EuiCommentProps[] = [];
+
+              if (showTopFooter) {
+                footers = [
+                  ...footers,
+                  {
+                    username: '',
+                    type: 'update',
+                    event: i18n.ALREADY_PUSHED_TO_SERVICE(`${parsedConnectorName}`),
+                    timelineIcon: 'sortUp',
+                    'data-test-subj': 'top-footer',
+                  },
+                ];
+              }
+
+              if (showBottomFooter) {
+                footers = [
+                  ...footers,
+                  {
+                    username: '',
+                    type: 'update',
+                    event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${parsedConnectorName}`),
+                    timelineIcon: 'sortDown',
+                    'data-test-subj': 'bottom-footer',
+                  },
+                ];
+              }
+
+              return [
+                ...comments,
+                getUpdateAction({
+                  action,
+                  label,
+                  getCaseDetailHrefWithCommentId,
+                  handleOutlineComment,
+                }),
+                ...footers,
+              ];
+            }
+
+            // title, description, comment updates, tags
             if (
-              comment != null &&
-              isRight(ContextTypeUserRt.decode(comment)) &&
-              comment.type === CommentType.user
+              action.actionField.length === 1 &&
+              ['title', 'description', 'comment', 'tags', 'status'].includes(action.actionField[0])
             ) {
-              return [
-                ...comments,
-                {
-                  username: (
-                    <UserActionUsername
-                      username={comment.createdBy.username}
-                      fullName={comment.createdBy.fullName}
-                    />
-                  ),
-                  'data-test-subj': `comment-create-action-${comment.id}`,
-                  timestamp: (
-                    <UserActionTimestamp
-                      createdAt={comment.createdAt}
-                      updatedAt={comment.updatedAt}
-                    />
-                  ),
-                  className: classNames('userAction__comment', {
-                    outlined: comment.id === selectedOutlineCommentId,
-                    isEdit: manageMarkdownEditIds.includes(comment.id),
-                  }),
-                  children: (
-                    <UserActionMarkdown
-                      ref={(element) => (commentRefs.current[comment.id] = element)}
-                      id={comment.id}
-                      content={comment.comment}
-                      isEditable={manageMarkdownEditIds.includes(comment.id)}
-                      onChangeEditable={handleManageMarkdownEditId}
-                      onSaveContent={handleSaveComment.bind(null, {
-                        id: comment.id,
-                        version: comment.version,
-                      })}
-                    />
-                  ),
-                  timelineIcon: (
-                    <UserActionAvatar
-                      username={comment.createdBy.username}
-                      fullName={comment.createdBy.fullName}
-                    />
-                  ),
-                  actions: (
-                    <UserActionContentToolbar
-                      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-                      id={comment.id}
-                      editLabel={i18n.EDIT_COMMENT}
-                      quoteLabel={i18n.QUOTE}
-                      isLoading={isLoadingIds.includes(comment.id)}
-                      onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-                      onQuote={handleManageQuote.bind(null, comment.comment)}
-                      userCanCrud={userCanCrud}
-                    />
-                  ),
-                },
-              ];
-            } else if (
-              comment != null &&
-              isRight(AlertCommentRequestRt.decode(comment)) &&
-              comment.type === CommentType.alert
-            ) {
-              // TODO: clean this up
-              const alertId = Array.isArray(comment.alertId)
-                ? comment.alertId.length > 0
-                  ? comment.alertId[0]
-                  : ''
-                : comment.alertId;
-
-              const alertIndex = Array.isArray(comment.index)
-                ? comment.index.length > 0
-                  ? comment.index[0]
-                  : ''
-                : comment.index;
-
-              if (isEmpty(alertId)) {
-                return comments;
-              }
-
-              const ruleId =
-                comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? null;
-              const ruleName =
-                comment?.rule?.name ?? manualAlertsData[alertId]?.signal?.rule?.name?.[0] ?? null;
+              const myField = action.actionField[0];
+              const label: string | JSX.Element = getLabelTitle({
+                action,
+                field: myField,
+              });
 
               return [
                 ...comments,
-                ...(getRuleDetailsHref != null
-                  ? [
-                      getAlertAttachment({
-                        action,
-                        alertId,
-                        getCaseDetailHrefWithCommentId,
-                        getRuleDetailsHref,
-                        index: alertIndex,
-                        loadingAlertData,
-                        onRuleDetailsClick,
-                        ruleId,
-                        ruleName,
-                        onShowAlertDetails,
-                      }),
-                    ]
-                  : []),
-              ];
-            } else if (comment != null && comment.type === CommentType.generatedAlert) {
-              // TODO: clean this up
-              const alertIds = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-
-              if (isEmpty(alertIds)) {
-                return comments;
-              }
-
-              return [
-                ...comments,
-                ...(getRuleDetailsHref != null
-                  ? [
-                      getGeneratedAlertsAttachment({
-                        action,
-                        alertIds,
-                        getCaseDetailHrefWithCommentId,
-                        getRuleDetailsHref,
-                        onRuleDetailsClick,
-                        renderInvestigateInTimelineActionComponent,
-                        ruleId: comment.rule?.id ?? '',
-                        ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
-                      }),
-                    ]
-                  : []),
-              ];
-            }
-          }
-
-          // Connectors
-          if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
-            const label = getConnectorLabelTitle({ action, connectors });
-            return [
-              ...comments,
-              getUpdateAction({
-                action,
-                label,
-                getCaseDetailHrefWithCommentId,
-                handleOutlineComment,
-              }),
-            ];
-          }
-
-          // Pushed information
-          if (action.actionField.length === 1 && action.actionField[0] === 'pushed') {
-            const parsedValue = parseString(`${action.newValue}`);
-            const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
-              caseServices,
-              parsedValue,
-              index
-            );
-
-            const label = getPushedServiceLabelTitle(action, firstPush);
-
-            const showTopFooter =
-              action.action === 'push-to-service' &&
-              index === caseServices[parsedConnectorId]?.lastPushIndex;
-
-            const showBottomFooter =
-              action.action === 'push-to-service' &&
-              index === caseServices[parsedConnectorId]?.lastPushIndex &&
-              caseServices[parsedConnectorId].hasDataToPush;
-
-            let footers: EuiCommentProps[] = [];
-
-            if (showTopFooter) {
-              footers = [
-                ...footers,
-                {
-                  username: '',
-                  type: 'update',
-                  event: i18n.ALREADY_PUSHED_TO_SERVICE(`${parsedConnectorName}`),
-                  timelineIcon: 'sortUp',
-                  'data-test-subj': 'top-footer',
-                },
+                getUpdateAction({
+                  action,
+                  label,
+                  getCaseDetailHrefWithCommentId,
+                  handleOutlineComment,
+                }),
               ];
             }
 
-            if (showBottomFooter) {
-              footers = [
-                ...footers,
-                {
-                  username: '',
-                  type: 'update',
-                  event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${parsedConnectorName}`),
-                  timelineIcon: 'sortDown',
-                  'data-test-subj': 'bottom-footer',
-                },
-              ];
-            }
-
-            return [
-              ...comments,
-              getUpdateAction({
-                action,
-                label,
-                getCaseDetailHrefWithCommentId,
-                handleOutlineComment,
-              }),
-              ...footers,
-            ];
-          }
-
-          // title, description, comment updates, tags
-          if (
-            action.actionField.length === 1 &&
-            ['title', 'description', 'comment', 'tags', 'status'].includes(action.actionField[0])
-          ) {
-            const myField = action.actionField[0];
-            const label: string | JSX.Element = getLabelTitle({
-              action,
-              field: myField,
-            });
-
-            return [
-              ...comments,
-              getUpdateAction({
-                action,
-                label,
-                getCaseDetailHrefWithCommentId,
-                handleOutlineComment,
-              }),
-            ];
-          }
-
-          return comments;
-        }, []),
+            return comments;
+          },
+          [descriptionCommentListObj]
+        ),
       [
         caseUserActions,
+        descriptionCommentListObj,
         caseData.comments,
         selectedOutlineCommentId,
         manageMarkdownEditIds,
         handleManageMarkdownEditId,
         handleSaveComment,
         getCaseDetailHrefWithCommentId,
-        userCanCrud,
         isLoadingIds,
         handleManageQuote,
+        userCanCrud,
         manualAlertsData,
         getRuleDetailsHref,
         loadingAlertData,
@@ -527,7 +595,7 @@ export const UserActionTree = React.memo(
     const comments = [...userActions, ...bottomActions];
 
     useEffect(() => {
-      console.error('commentDraft', storage.get('xpack.cases.commentDraft'));
+      // console.error('commentDraft', storage.get('xpack.cases.commentDraft'));
       const incomingEmbeddablePackage = embeddable
         .getStateTransfer()
         .getIncomingEmbeddablePackage('securitySolution:case');
@@ -535,13 +603,14 @@ export const UserActionTree = React.memo(
       if (storage.get('xpack.cases.commentDraft')) {
         try {
           draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+          // eslint-disable-next-line no-empty
         } catch (e) {}
       }
 
-      console.error('incomingEmbeddablePackage', incomingEmbeddablePackage, draftComment);
+      // console.error('incomingEmbeddablePackage', incomingEmbeddablePackage, draftComment);
 
-      if (true || incomingEmbeddablePackage) {
-        console.error('incomingEmbeddablePackage', incomingEmbeddablePackage);
+      if (incomingEmbeddablePackage) {
+        // console.error('incomingEmbeddablePackage', incomingEmbeddablePackage);
 
         if (draftComment) {
           if (!draftComment.commentId) {
@@ -578,7 +647,7 @@ export const UserActionTree = React.memo(
       }
     }, [embeddable, manageMarkdownEditIds, storage]);
 
-    console.error('markdownEditorRefs', commentRefs.current);
+    // console.error('markdownEditorRefs', commentRefs.current);
 
     return (
       <>

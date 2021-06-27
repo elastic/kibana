@@ -18,5 +18,6 @@ export interface EmbeddableEditorState
 |  --- | --- | --- |
 |  [embeddableId](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.embeddableid.md) | <code>string</code> |  |
 |  [originatingApp](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.originatingapp.md) | <code>string</code> |  |
+|  [originatingPath](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.originatingpath.md) | <code>string</code> |  |
 |  [valueInput](./kibana-plugin-plugins-embeddable-public.embeddableeditorstate.valueinput.md) | <code>EmbeddableInput</code> |  |
 
