@@ -16,13 +16,6 @@ export function extractTimeFields(
 ): TimestampOption[] {
   const dateFields = fields.filter((field) => field.type === 'date');
 
-  // todo - display somewhere
-  /*
-  const label = i18n.translate('indexPatternEditor.createIndexPattern.stepTime.noTimeFieldsLabel', {
-    defaultMessage: "The indices which match this index pattern don't contain any time fields.",
-  });
-  */
-
   if (dateFields.length === 0) {
     return [];
   }

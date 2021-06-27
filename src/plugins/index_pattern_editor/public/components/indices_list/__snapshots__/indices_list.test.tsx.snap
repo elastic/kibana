@@ -47,7 +47,7 @@ exports[`IndicesList should change pages 1`] = `
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
-              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              id="indexPatternEditor.pagingLabel"
               values={
                 Object {
                   "perPage": 1,
@@ -140,7 +140,7 @@ exports[`IndicesList should change per page 1`] = `
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
-              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              id="indexPatternEditor.pagingLabel"
               values={
                 Object {
                   "perPage": 1,
@@ -255,7 +255,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
-              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              id="indexPatternEditor.pagingLabel"
               values={
                 Object {
                   "perPage": 10,
@@ -356,7 +356,7 @@ exports[`IndicesList should render normally 1`] = `
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
-              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              id="indexPatternEditor.pagingLabel"
               values={
                 Object {
                   "perPage": 10,
@@ -521,7 +521,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
           >
             <FormattedMessage
               defaultMessage="Rows per page: {perPage}"
-              id="indexPatternManagement.createIndexPattern.step.pagingLabel"
+              id="indexPatternEditor.pagingLabel"
               values={
                 Object {
                   "perPage": 10,

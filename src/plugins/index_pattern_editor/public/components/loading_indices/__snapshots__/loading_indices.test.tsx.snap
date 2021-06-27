@@ -18,7 +18,7 @@ exports[`LoadingIndices should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="Looking for matching indices…"
-          id="indexPatternManagement.createIndexPattern.step.loadingHeader"
+          id="indexPatternEditor.loadingHeader"
           values={Object {}}
         />
       </h3>

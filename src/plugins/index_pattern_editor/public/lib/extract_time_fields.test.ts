@@ -15,9 +15,7 @@ describe('extractTimeFields', () => {
       { type: 'text', name: 'name' },
     ];
 
-    expect(extractTimeFields(fields)).toEqual([
-      { display: `The indices which match this index pattern don't contain any time fields.` },
-    ]);
+    expect(extractTimeFields(fields)).toEqual([]);
   });
 
   it('should add extra options', () => {
@@ -25,8 +23,7 @@ describe('extractTimeFields', () => {
 
     expect(extractTimeFields(fields)).toEqual([
       { display: '@timestamp', fieldName: '@timestamp' },
-      { isDisabled: true, display: '───', fieldName: '' },
-      { display: `I don't want to use the time filter`, fieldName: undefined },
+      { display: `--- I don't want to use the time filter ---`, fieldName: '' },
     ]);
   });
 });
