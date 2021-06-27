@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { first } from 'rxjs/operators';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -135,7 +136,11 @@ export const UserActionTree = React.memo(
     userCanCrud,
   }: UserActionTreeProps) => {
     const commentRefs = useRef<Record<string, any>>({});
-    const { embeddable, storage } = useKibana().services;
+    const {
+      application: { currentAppId$ },
+      embeddable,
+      storage,
+    } = useKibana().services;
     const { detailName: caseId, commentId, subCaseId } = useParams<{
       detailName: string;
       commentId?: string;
@@ -146,6 +151,7 @@ export const UserActionTree = React.memo(
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
+    const [currentAppId, setCurrentAppId] = useState<string | null>(null);
     const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
@@ -597,18 +603,31 @@ export const UserActionTree = React.memo(
     const comments = [...userActions, ...bottomActions];
 
     useEffect(() => {
-      const incomingEmbeddablePackage = embeddable
-        .getStateTransfer()
-        .getIncomingEmbeddablePackage('securitySolution:case');
-      let draftComment;
-      if (storage.get('xpack.cases.commentDraft')) {
-        try {
-          draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
+      const getCurrentAppId = async () => {
+        const appId = await currentAppId$.pipe(first()).toPromise();
+        setCurrentAppId(appId);
+      };
+      getCurrentAppId();
+    }, [currentAppId$]);
+
+    useEffect(() => {
+      let incomingEmbeddablePackage;
+
+      if (currentAppId) {
+        incomingEmbeddablePackage = embeddable
+          ?.getStateTransfer()
+          .getIncomingEmbeddablePackage(currentAppId);
       }
 
       if (incomingEmbeddablePackage) {
+        let draftComment;
+        if (storage.get('xpack.cases.commentDraft')) {
+          try {
+            draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+            // eslint-disable-next-line no-empty
+          } catch (e) {}
+        }
+
         if (draftComment) {
           if (!draftComment.commentId) {
             if (commentRefs.current && commentRefs.current[NEW_ID]) {
@@ -643,7 +662,7 @@ export const UserActionTree = React.memo(
           }
         }
       }
-    }, [embeddable, manageMarkdownEditIds, storage]);
+    }, [currentAppId, embeddable, manageMarkdownEditIds, storage]);
 
     return (
       <>

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import { first } from 'rxjs/operators';
+import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
@@ -44,10 +45,10 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
 }) => {
   const location = useLocation();
   const {
-    EmbeddableComponent,
-    navigateToPrefilledEditor,
-    canUseEditor,
-  } = useKibana().services.lens;
+    application: { currentAppId$ },
+    lens: { EmbeddableComponent, navigateToPrefilledEditor, canUseEditor },
+  } = useKibana().services;
+  const [currentAppId, setCurrentAppId] = useState<string | undefined>(undefined);
 
   const handleClick = useCallback(() => {
     const options = viewMode
@@ -55,7 +56,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
           openInNewTab: true,
         }
       : {
-          originatingApp: 'securitySolution:case',
+          originatingApp: currentAppId,
           originatingPath: `${location.pathname}${location.search}`,
         };
 
@@ -75,6 +76,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     }
   }, [
     attributes,
+    currentAppId,
     endDate,
     location.pathname,
     location.search,
@@ -82,6 +84,14 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     startDate,
     viewMode,
   ]);
+
+  useEffect(() => {
+    const getCurrentAppId = async () => {
+      const appId = await currentAppId$.pipe(first()).toPromise();
+      setCurrentAppId(appId);
+    };
+    getCurrentAppId();
+  }, [currentAppId$]);
 
   return (
     <Container>

@@ -26,6 +26,7 @@ const onCommentPosted = jest.fn();
 const postComment = jest.fn();
 
 const addCommentProps: AddCommentProps = {
+  id: 'newComment',
   caseId: '1234',
   userCanCrud: true,
   onCommentSaving,

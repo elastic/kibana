@@ -18,7 +18,6 @@ import { FunctionComponent } from 'react';
 import rehype2react from 'rehype-react';
 import { Plugin, PluggableList } from 'unified';
 import * as timelineMarkdownPlugin from './timeline';
-import * as lensMarkdownPlugin from './lens';
 
 export const { uiPlugins, parsingPlugins, processingPlugins } = {
   uiPlugins: getDefaultEuiMarkdownUiPlugins(),
@@ -28,7 +27,7 @@ export const { uiPlugins, parsingPlugins, processingPlugins } = {
     [
       typeof rehype2react,
       Parameters<typeof rehype2react>[0] & {
-        components: { a: FunctionComponent<EuiLinkAnchorProps>; timeline: unknown; lens: unknown };
+        components: { a: FunctionComponent<EuiLinkAnchorProps>; timeline: unknown };
       }
     ],
     ...PluggableList
@@ -36,11 +35,8 @@ export const { uiPlugins, parsingPlugins, processingPlugins } = {
 };
 
 uiPlugins.push(timelineMarkdownPlugin.plugin);
-uiPlugins.push(lensMarkdownPlugin.plugin);
 
 parsingPlugins.push(timelineMarkdownPlugin.parser);
-parsingPlugins.push(lensMarkdownPlugin.parser);
 
 // This line of code is TS-compatible and it will break if [1][1] change in the future.
 processingPlugins[1][1].components.timeline = timelineMarkdownPlugin.renderer;
-processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;

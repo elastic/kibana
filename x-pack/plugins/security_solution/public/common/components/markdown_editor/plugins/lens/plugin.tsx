@@ -6,7 +6,6 @@
  */
 
 import { first } from 'rxjs/operators';
-
 import {
   EuiFieldText,
   EuiModalBody,
@@ -62,7 +61,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   onCancel,
   onSave,
 }) => {
-  const srvics = useKibana();
   const location = useLocation();
   const {
     application: { currentAppId$ },
@@ -77,7 +75,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     },
   } = useKibana().services;
 
-  const currentAppId = useRef(null);
+  const [currentAppId, setCurrentAppId] = useState<string | undefined>(undefined);
 
   const [editMode, setEditMode] = useState(!!node);
   const [lensEmbeddableAttributes, setLensEmbeddableAttributes] = useState(
@@ -94,8 +92,6 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   const commentEditorContext = useContext(CommentEditorContext);
   const markdownContext = useContext(EuiMarkdownContext);
 
-  // console.error('contextcontextcontext', commentEditorContext);
-
   const handleTitleChange = useCallback((e) => {
     setLensTitle(e.target.value);
   }, []);
@@ -109,7 +105,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       } catch (e) {}
     }
 
-    if (!node && draftComment) {
+    if (currentAppId) {
+      // clears Lens incoming state
+      embeddable?.getStateTransfer().getIncomingEmbeddablePackage(currentAppId, true);
+    }
+
+    if (!node && draftComment.position) {
       markdownContext.replaceNode(
         draftComment.position,
         `!{lens${JSON.stringify({
@@ -119,6 +120,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           attributes: lensEmbeddableAttributes,
         })}}`
       );
+
       onCancel();
       return;
     }
@@ -138,14 +140,16 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     }
   }, [
     storage,
+    currentAppId,
     node,
     lensEmbeddableAttributes,
+    embeddable,
     markdownContext,
-    onCancel,
-    onSave,
     startDate,
     endDate,
     lensTitle,
+    onCancel,
+    onSave,
   ]);
 
   const originatingPath = useMemo(() => `${location.pathname}${location.search}`, [
@@ -168,14 +172,14 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       {
         id: '',
         timeRange: {
-          from: (lensEmbeddableAttributes && startDate) ?? 'now-5d',
+          from: (lensEmbeddableAttributes && startDate) ?? 'now-7d',
           to: (lensEmbeddableAttributes && endDate) ?? 'now',
           mode: lensEmbeddableAttributes ? 'absolute' : 'relative',
         },
         attributes: lensEmbeddableAttributes ?? getLensAttributes(await indexPatterns.getDefault()),
       },
       {
-        originatingApp: 'securitySolution:case',
+        originatingApp: currentAppId!,
         originatingPath,
       }
     );
@@ -190,12 +194,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     startDate,
     endDate,
     indexPatterns,
+    currentAppId,
     originatingPath,
   ]);
 
   const handleChooseLensSO = useCallback(
     (savedObjectId, savedObjectType, fullName, savedObject) => {
-      console.error('apya', savedObjectId, savedObjectType, fullName, savedObject);
       setLensEmbeddableAttributes({
         ...savedObject.attributes,
         title: '',
@@ -209,9 +213,21 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   const handleCloseLensSOModal = useCallback(() => setShowLensSavedObjectsModal(false), []);
 
   useEffect(() => {
-    const incomingEmbeddablePackage = embeddable
-      .getStateTransfer()
-      .getIncomingEmbeddablePackage('securitySolution:case', true) as LensIncomingEmbeddablePackage;
+    const getCurrentAppId = async () => {
+      const appId = await currentAppId$.pipe(first()).toPromise();
+      setCurrentAppId(appId);
+    };
+    getCurrentAppId();
+  }, [currentAppId$]);
+
+  useEffect(() => {
+    let incomingEmbeddablePackage;
+
+    if (currentAppId) {
+      incomingEmbeddablePackage = embeddable
+        ?.getStateTransfer()
+        .getIncomingEmbeddablePackage(currentAppId) as LensIncomingEmbeddablePackage;
+    }
 
     if (
       incomingEmbeddablePackage?.type === 'lens' &&
@@ -236,21 +252,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         // eslint-disable-next-line no-empty
       } catch (e) {}
     }
-
-    // console.error('stoargesgeet', storage.get('xpack.cases.commentDraft'));
-  }, [embeddable, storage, timefilter]);
-
-  useEffect(() => {
-    const getCurrentAppId = async () => {
-      const appId = await currentAppId$.pipe(first()).toPromise();
-      currentAppId.current = appId;
-    };
-    getCurrentAppId();
-  }, [currentAppId$]);
-
-  // console.error('markdownContext', markdownContext);
-
-  // console.error('lensEmbeddableAttributes', lensEmbeddableAttributes);
+  }, [embeddable, storage, timefilter, currentAppId]);
 
   return (
     <>
