@@ -21,6 +21,11 @@ interface ExceptionOverflowDisplayProps {
   formatUrl: FormatUrl;
 }
 
+interface OverflowListComponentProps {
+  rule: Rule;
+  index: number;
+}
+
 const ExceptionOverflowWrapper = styled(EuiBadgeGroup)`
   width: 100%;
 `;
@@ -47,44 +52,37 @@ const ExceptionOverflowDisplayComponent = ({
 }: ExceptionOverflowDisplayProps) => {
   const [isExceptionOverflowPopoverOpen, setIsExceptionOverflowPopoverOpen] = useState(false);
 
+  const OverflowListComponent = ({ rule: { id, name }, index }: OverflowListComponentProps) => {
+    return (
+      <Spacer key={id}>
+        <LinkAnchor
+          key={id}
+          data-test-subj="ruleName"
+          onClick={(ev: { preventDefault: () => void }) => {
+            ev.preventDefault();
+            navigateToUrl(formatUrl(getRuleDetailsUrl(id)));
+          }}
+          href={formatUrl(getRuleDetailsUrl(id))}
+        >
+          {name}
+        </LinkAnchor>
+        {index !== rules.length - 1 ? ', ' : ''}
+      </Spacer>
+    );
+  };
+
   return (
     <>
       {rules.length <= 2 ? (
         <ExceptionOverflowWrapper data-test-subj="rules">
-          {rules.map(({ name, id }, index: number) => (
-            <Spacer key={id}>
-              <LinkAnchor
-                key={id}
-                data-test-subj="ruleName"
-                onClick={(ev: { preventDefault: () => void }) => {
-                  ev.preventDefault();
-                  navigateToUrl(formatUrl(getRuleDetailsUrl(id)));
-                }}
-                href={formatUrl(getRuleDetailsUrl(id))}
-              >
-                {name}
-              </LinkAnchor>
-              {index !== rules.length - 1 ? ', ' : ''}
-            </Spacer>
+          {rules.map((rule, index: number) => (
+            <OverflowListComponent rule={rule} index={index} />
           ))}
         </ExceptionOverflowWrapper>
       ) : (
         <ExceptionOverflowWrapper data-test-subj="rules">
-          {rules.slice(0, 2).map(({ name, id }, index: number) => (
-            <Spacer key={id}>
-              <LinkAnchor
-                key={id}
-                data-test-subj="ruleName"
-                onClick={(ev: { preventDefault: () => void }) => {
-                  ev.preventDefault();
-                  navigateToUrl(formatUrl(getRuleDetailsUrl(id)));
-                }}
-                href={formatUrl(getRuleDetailsUrl(id))}
-              >
-                {name}
-              </LinkAnchor>
-              {index !== rules.length - 1 ? ', ' : ''}
-            </Spacer>
+          {rules.slice(0, 2).map((rule, index: number) => (
+            <OverflowListComponent rule={rule} index={index} />
           ))}
 
           <EuiPopover
@@ -105,21 +103,8 @@ const ExceptionOverflowDisplayComponent = ({
             repositionOnScroll
           >
             <ExceptionOverflowPopoverWrapper>
-              {rules.map(({ name, id }, index: number) => (
-                <Spacer key={id}>
-                  <LinkAnchor
-                    key={id}
-                    data-test-subj="ruleName"
-                    onClick={(ev: { preventDefault: () => void }) => {
-                      ev.preventDefault();
-                      navigateToUrl(formatUrl(getRuleDetailsUrl(id)));
-                    }}
-                    href={formatUrl(getRuleDetailsUrl(id))}
-                  >
-                    {name}
-                  </LinkAnchor>
-                  {index !== rules.length - 1 ? ', ' : ''}
-                </Spacer>
+              {rules.map((rule, index: number) => (
+                <OverflowListComponent rule={rule} index={index} />
               ))}
             </ExceptionOverflowPopoverWrapper>
           </EuiPopover>
