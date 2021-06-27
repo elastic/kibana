@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { first } from 'rxjs/operators';
+
 import {
   EuiFieldText,
   EuiModalBody,
@@ -60,8 +62,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   onCancel,
   onSave,
 }) => {
+  const srvics = useKibana();
   const location = useLocation();
   const {
+    application: { currentAppId$ },
     embeddable,
     lens,
     storage,
@@ -73,6 +77,9 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     },
   } = useKibana().services;
 
+  const currentAppId = useRef(null);
+
+  const [editMode, setEditMode] = useState(!!node);
   const [lensEmbeddableAttributes, setLensEmbeddableAttributes] = useState(
     node?.attributes ?? null
   );
@@ -102,7 +109,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       } catch (e) {}
     }
 
-    if (node) {
+    if (!node && draftComment) {
       markdownContext.replaceNode(
         draftComment.position,
         `!{lens${JSON.stringify({
@@ -188,7 +195,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
   const handleChooseLensSO = useCallback(
     (savedObjectId, savedObjectType, fullName, savedObject) => {
-      // console.error('apya', savedObjectId, savedObjectType, fullName, savedObject);
+      console.error('apya', savedObjectId, savedObjectType, fullName, savedObject);
       setLensEmbeddableAttributes({
         ...savedObject.attributes,
         title: '',
@@ -225,12 +232,21 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         if (draftComment.title) {
           setLensTitle(draftComment.title);
         }
+        setEditMode(true);
         // eslint-disable-next-line no-empty
       } catch (e) {}
     }
 
     // console.error('stoargesgeet', storage.get('xpack.cases.commentDraft'));
   }, [embeddable, storage, timefilter]);
+
+  useEffect(() => {
+    const getCurrentAppId = async () => {
+      const appId = await currentAppId$.pipe(first()).toPromise();
+      currentAppId.current = appId;
+    };
+    getCurrentAppId();
+  }, [currentAppId$]);
 
   // console.error('markdownContext', markdownContext);
 
@@ -302,7 +318,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
           <EuiButton onClick={handleAdd} fill disabled={!lensEmbeddableAttributes || !lensTitle}>
-            {'Add to a Case'}
+            {editMode ? 'Update' : 'Add to a Case'}
           </EuiButton>
         </EuiModalFooter>
       </ModalContainer>

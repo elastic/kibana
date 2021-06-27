@@ -49,11 +49,16 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     canUseEditor,
   } = useKibana().services.lens;
 
-  // console.error('loaa', location);
-
-  // console.error('sss', attributes, canUseEditor());
-
   const handleClick = useCallback(() => {
+    const options = viewMode
+      ? {
+          openInNewTab: true,
+        }
+      : {
+          originatingApp: 'securitySolution:case',
+          originatingPath: `${location.pathname}${location.search}`,
+        };
+
     if (attributes) {
       navigateToPrefilledEditor(
         {
@@ -65,11 +70,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
           },
           attributes,
         },
-        {
-          openInNewTab: true,
-          // originatingApp: 'securitySolution:case',
-          // originatingPath: `${location.pathname}${location.search}`,
-        }
+        options
       );
     }
   }, [
@@ -79,6 +80,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
     location.search,
     navigateToPrefilledEditor,
     startDate,
+    viewMode,
   ]);
 
   return (

@@ -36,6 +36,7 @@ export interface AddCommentRefObject {
 }
 
 export interface AddCommentProps {
+  id: string;
   caseId: string;
   userCanCrud?: boolean;
   onCommentSaving?: () => void;
@@ -47,7 +48,7 @@ export interface AddCommentProps {
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
     (
-      { caseId, userCanCrud, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
+      { id, caseId, userCanCrud, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
       ref
     ) => {
       const editorRef = useRef();
@@ -110,6 +111,7 @@ export const AddComment = React.memo(
                 component={MarkdownEditorForm}
                 componentProps={{
                   ref: editorRef,
+                  id,
                   idAria: 'caseComment',
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',

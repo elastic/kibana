@@ -49,7 +49,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {
-      console.error('reft2222', ref, editorRef);
+      // console.error('reft2222', ref, editorRef);
 
       if (!editorRef.current) {
         return null;

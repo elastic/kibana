@@ -226,6 +226,7 @@ export const UserActionTree = React.memo(
     const MarkdownDescription = useMemo(
       () => (
         <UserActionMarkdown
+          ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
           id={DESCRIPTION_ID}
           content={caseData.description}
           isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
@@ -241,6 +242,7 @@ export const UserActionTree = React.memo(
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
+          id={NEW_ID}
           caseId={caseId}
           userCanCrud={userCanCrud}
           ref={(element) => (commentRefs.current[NEW_ID] = element)}
@@ -595,7 +597,6 @@ export const UserActionTree = React.memo(
     const comments = [...userActions, ...bottomActions];
 
     useEffect(() => {
-      // console.error('commentDraft', storage.get('xpack.cases.commentDraft'));
       const incomingEmbeddablePackage = embeddable
         .getStateTransfer()
         .getIncomingEmbeddablePackage('securitySolution:case');
@@ -607,19 +608,16 @@ export const UserActionTree = React.memo(
         } catch (e) {}
       }
 
-      // console.error('incomingEmbeddablePackage', incomingEmbeddablePackage, draftComment);
-
       if (incomingEmbeddablePackage) {
-        // console.error('incomingEmbeddablePackage', incomingEmbeddablePackage);
-
         if (draftComment) {
           if (!draftComment.commentId) {
             if (commentRefs.current && commentRefs.current[NEW_ID]) {
               commentRefs.current[NEW_ID].setComment(draftComment.comment);
-              const buttons = commentRefs.current[NEW_ID].toolbar?.querySelector(
+              const buttons = commentRefs.current[NEW_ID].editor.toolbar?.querySelector(
                 '[aria-label="Insert lens link"]'
               );
-              buttons.click();
+              buttons?.click();
+              return;
             }
           }
 
@@ -646,8 +644,6 @@ export const UserActionTree = React.memo(
         }
       }
     }, [embeddable, manageMarkdownEditIds, storage]);
-
-    // console.error('markdownEditorRefs', commentRefs.current);
 
     return (
       <>
