@@ -44,8 +44,9 @@ describe('handleNestedFilter', function () {
   });
 
   it('should return filter untouched if it does not target a field from the given index pattern', () => {
-    const field = { ...getField('extension'), name: 'notarealfield' };
-    const filter = buildPhraseFilter(field, 'jpg', indexPattern);
+    const field = getField('extension');
+    field!.name = 'notarealfield';
+    const filter = buildPhraseFilter(field!, 'jpg', indexPattern);
     const result = handleNestedFilter(filter, indexPattern);
     expect(result).toBe(filter);
   });
