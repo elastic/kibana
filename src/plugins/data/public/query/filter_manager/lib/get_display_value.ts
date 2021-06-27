@@ -32,7 +32,9 @@ export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexP
   if (typeof value === 'function') {
     const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
     const valueFormatter = getValueFormatter(indexPattern, key);
-    return value(valueFormatter);
+    // TODO: distinguish between FilterMeta which is serializable to mapped FilterMeta
+    // Where value can be a function.
+    return (value as any)(valueFormatter);
   } else {
     return value || '';
   }

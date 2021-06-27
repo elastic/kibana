@@ -23,9 +23,10 @@ describe('getDisplayValueFromFilter', () => {
   });
 
   it('calls the value function if proivided', () => {
+    // The type of value currently doesn't match how it's used. Refactor needed.
     phraseFilter.meta.value = jest.fn((x) => {
       return 'abc';
-    });
+    }) as any;
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
     expect(displayValue).toBe('abc');
     expect(phraseFilter.meta.value).toHaveBeenCalledWith(undefined);
@@ -35,7 +36,7 @@ describe('getDisplayValueFromFilter', () => {
     stubIndexPattern.getFormatterForField = jest.fn().mockReturnValue('banana');
     phraseFilter.meta.value = jest.fn((x) => {
       return x + 'abc';
-    });
+    }) as any;
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);
     expect(stubIndexPattern.getFormatterForField).toHaveBeenCalledTimes(1);
     expect(phraseFilter.meta.value).toHaveBeenCalledWith('banana');

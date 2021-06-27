@@ -6,13 +6,13 @@
  */
 
 import {
-  TIMELINE_BOTTOM_BAR_CONTAINER,
   TIMELINE_EVENT,
   TIMELINE_EVENTS_COUNT_NEXT_PAGE,
   TIMELINE_EVENTS_COUNT_PER_PAGE,
   TIMELINE_EVENTS_COUNT_PER_PAGE_BTN,
   TIMELINE_EVENTS_COUNT_PER_PAGE_OPTION,
   TIMELINE_EVENTS_COUNT_PREV_PAGE,
+  TIMELINE_FLYOUT,
 } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
 
@@ -51,10 +51,10 @@ describe('Pagination', () => {
 
   it('should be able to go to next / previous page', () => {
     cy.intercept('POST', '/internal/bsearch').as('refetch');
-    cy.get(`${TIMELINE_BOTTOM_BAR_CONTAINER} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
+    cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_NEXT_PAGE}`).first().click();
     cy.wait('@refetch').its('response.statusCode').should('eq', 200);
 
-    cy.get(`${TIMELINE_BOTTOM_BAR_CONTAINER} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
+    cy.get(`${TIMELINE_FLYOUT} ${TIMELINE_EVENTS_COUNT_PREV_PAGE}`).first().click();
     cy.wait('@refetch').its('response.statusCode').should('eq', 200);
   });
 });
