@@ -200,7 +200,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
     });
 
     if (!config) {
-      logger.info(
+      logger.debug(
         `[Central configuration] Config was not found for ${service.name}/${service.environment}`
       );
       throw Boom.notFound();
@@ -210,7 +210,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       (markAsAppliedByAgent || etag === config._source.etag) &&
       !config._source.applied_by_agent;
 
-    logger.info(
+    logger.debug(
       `[Central configuration] Config was found for:
         service.name = ${service.name},
         service.environment = ${service.environment},
