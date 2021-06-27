@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, FieldBase, LatLon } from '../../..';
+import { IndexPatternBase, KueryNode, LatLon } from '../../..';
 
 export function buildNodeParams(fieldName: string, params: any) {
   params = _.pick(params, 'topLeft', 'bottomRight');

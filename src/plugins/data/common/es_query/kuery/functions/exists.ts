@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import * as literal from '../node_types/literal';
 import { KueryNode, FieldBase, IndexPatternBase } from '../../..';
 

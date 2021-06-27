@@ -8,8 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { FieldBase } from '../../index_patterns';
-import { IndexPatternBase } from '..';
+import { FieldBase, IndexPatternBase } from '..';
 
 export type PhraseFilterMeta = FilterMeta & {
   params?: {

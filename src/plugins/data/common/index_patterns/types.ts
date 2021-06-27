@@ -32,6 +32,7 @@ export interface RuntimeField {
  */
 export interface IIndexPattern extends IndexPatternBase {
   title: string;
+  fields: IFieldType[];
   /**
    * Type is used for identifying rollup indices, otherwise left undefined
    */

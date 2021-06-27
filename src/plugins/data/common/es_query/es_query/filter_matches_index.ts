@@ -7,7 +7,7 @@
  */
 
 import { Filter } from '../filters';
-import { FieldBase, IndexPatternBase } from './types';
+import { IndexPatternBase } from './types';
 
 /*
  * TODO: We should base this on something better than `filter.meta.key`. We should probably modify

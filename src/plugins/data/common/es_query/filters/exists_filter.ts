@@ -7,8 +7,7 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { FieldBase } from '../../index_patterns';
-import { IndexPatternBase } from '..';
+import { FieldBase, IndexPatternBase } from '..';
 
 export type ExistsFilterMeta = FilterMeta;
 

@@ -8,7 +8,7 @@
 
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, FieldBase, LatLon } from '../../..';
+import { IndexPatternBase, KueryNode, LatLon } from '../../..';
 import { LiteralTypeBuildNode } from '../node_types/types';
 
 export function buildNodeParams(fieldName: string, points: LatLon[]) {

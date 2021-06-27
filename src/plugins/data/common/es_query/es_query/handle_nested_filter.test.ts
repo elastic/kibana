@@ -9,7 +9,7 @@
 import { handleNestedFilter } from './handle_nested_filter';
 import { fields } from '../../index_patterns/mocks';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { IndexPatternBase, FieldBase } from './types';
+import { IndexPatternBase } from './types';
 
 describe('handleNestedFilter', function () {
   const indexPattern: IndexPatternBase = {
