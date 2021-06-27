@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/eslint/module_migration
 import { InjectedIntl as _InjectedIntl, InjectedIntlProps as _InjectedIntlProps } from 'react-intl';
 export type { InjectedIntl, InjectedIntlProps } from 'react-intl';
 
