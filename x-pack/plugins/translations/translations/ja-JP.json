@@ -13551,7 +13551,6 @@
     "xpack.maps.visTypeAlias.description": "マップを作成し、複数のレイヤーとインデックスを使用して、スタイルを設定します。",
     "xpack.maps.visTypeAlias.title": "マップ",
     "xpack.ml.accessDenied.description": "ML プラグインへのアクセスパーミッションがありません",
-    "xpack.ml.accessDenied.label": "パーミッションがありません",
     "xpack.ml.accessDeniedLabel": "アクセスが拒否されました",
     "xpack.ml.accessDeniedTabLabel": "アクセス拒否",
     "xpack.ml.actions.applyEntityFieldsFiltersTitle": "値でフィルター",
