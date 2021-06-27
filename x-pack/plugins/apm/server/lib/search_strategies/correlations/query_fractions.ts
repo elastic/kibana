@@ -37,7 +37,7 @@ export const fetchTransactionDurationFractions = async (
   esClient: ElasticsearchClient,
   params: SearchServiceParams,
   ranges: estypes.AggregationsAggregationRange[]
-): Promise<number[]> => {
+): Promise<{ fractions: number[]; totalDocCount: number }> => {
   const resp = await esClient.search(
     getTransactionDurationRangesRequest(params, ranges)
   );
@@ -57,5 +57,11 @@ export const fetchTransactionDurationFractions = async (
   }, 0);
 
   // Compute (doc count per bucket/total doc count)
-  return buckets.map((bucket) => bucket.doc_count / totalDocCount);
+  return {
+    fractions: [
+      0,
+      ...buckets.map((bucket) => bucket.doc_count / totalDocCount),
+    ],
+    totalDocCount,
+  };
 };

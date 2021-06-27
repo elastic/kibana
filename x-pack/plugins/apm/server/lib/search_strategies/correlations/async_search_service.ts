@@ -117,10 +117,10 @@ export const asyncSearchServiceProvider = (
         return;
       }
 
-      const {
-        fieldCandidates,
-        totalHits,
-      } = await fetchTransactionDurationFieldCandidates(esClient, params);
+      const { fieldCandidates } = await fetchTransactionDurationFieldCandidates(
+        esClient,
+        params
+      );
 
       progress.loadedFieldCanditates = 1;
 
@@ -140,11 +140,10 @@ export const asyncSearchServiceProvider = (
         percentiles
       );
 
-      const fractions = await fetchTransactionDurationFractions(
-        esClient,
-        params,
-        ranges
-      );
+      const {
+        fractions,
+        totalDocCount,
+      } = await fetchTransactionDurationFractions(esClient, params, ranges);
 
       async function* fetchTransactionDurationHistograms() {
         for (const item of shuffle(fieldValuePairs)) {
@@ -165,7 +164,7 @@ export const asyncSearchServiceProvider = (
               expectations,
               ranges,
               fractions,
-              totalHits,
+              totalDocCount,
               item.field,
               item.value
             );

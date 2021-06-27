@@ -43,7 +43,7 @@ export const getTransactionDurationCorrelationRequest = (
   expectations: number[],
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
-  totalHits: number,
+  totalDocCount: number,
   fieldName?: string,
   fieldValue?: string
 ): estypes.SearchRequest => {
@@ -55,7 +55,7 @@ export const getTransactionDurationCorrelationRequest = (
       count_correlation: {
         indicator: {
           expectations,
-          doc_count: totalHits,
+          doc_count: totalDocCount,
         },
       },
     },
@@ -78,6 +78,7 @@ export const getTransactionDurationCorrelationRequest = (
       // KS test p value = ks_test.less
       ks_test: {
         bucket_count_ks_test: {
+          fractions,
           buckets_path: 'latency_ranges>_count',
           alternative: ['less', 'greater', 'two_sided'],
         },
@@ -96,7 +97,7 @@ export const fetchTransactionDurationCorrelation = async (
   expectations: number[],
   ranges: estypes.AggregationsAggregationRange[],
   fractions: number[],
-  totalHits: number,
+  totalDocCount: number,
   fieldName?: string,
   fieldValue?: string
 ): Promise<{
@@ -110,7 +111,7 @@ export const fetchTransactionDurationCorrelation = async (
       expectations,
       ranges,
       fractions,
-      totalHits,
+      totalDocCount,
       fieldName,
       fieldValue
     )
