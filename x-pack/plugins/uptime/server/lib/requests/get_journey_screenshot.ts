@@ -12,17 +12,19 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import {
   RefResult,
   RefResultType,
-  Screenshot,
-  ScreenshotType,
-} from '../../../common/runtime_types';
+  FullScreenshot,
+  FullScreenshotType,
+} from '../../../common/runtime_types/ping/synthetics';
 
 const ResultWrapperType = t.array(
   t.type({
-    _source: t.union([RefResultType, ScreenshotType]),
+    _source: t.union([RefResultType, FullScreenshotType]),
   })
 );
 
-export type ScreenshotReturnTypesUnion = ((Screenshot | RefResult) & { totalSteps: number }) | null;
+export type ScreenshotReturnTypesUnion =
+  | ((FullScreenshot | RefResult) & { totalSteps: number })
+  | null;
 
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
   { checkGroup: string; stepIndex: number },

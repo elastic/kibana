@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JourneyStep } from '../../../common/runtime_types';
+import { JourneyStep } from '../../../common/runtime_types/ping/synthetics';
 import { getJourneySteps, formatSyntheticEvents } from './get_journey_steps';
 import { getUptimeESMockClient } from './helper';
 
@@ -109,8 +109,8 @@ describe('getJourneySteps request module', () => {
     it('formats ES result', async () => {
       const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
 
-      mockEsClient.search.mockResolvedValueOnce(data as any);
-      const result: any = await getJourneySteps({
+      mockEsClient.search.mockResolvedValueOnce(data);
+      const result: JourneyStep[] = await getJourneySteps({
         uptimeEsClient,
         checkGroup: '2bf952dc-64b5-11eb-8b3b-42010a84000d',
       });
@@ -164,7 +164,7 @@ describe('getJourneySteps request module', () => {
           step['@timestamp']
         );
         expect(['o6myXncBFt2V8m6r6z-r', 'IjqzXncBn2sjqrYxYoCG']).toContain(step._id);
-        expect(step.synthetics.screenshotExists).toBeDefined();
+        expect(step.synthetics.isFullScreenshot).toBeDefined();
       });
     });
 
@@ -173,9 +173,9 @@ describe('getJourneySteps request module', () => {
 
       data.body.hits.hits[0]._source.synthetics.type = 'step/screenshot';
       data.body.hits.hits[0]._source.synthetics.step.index = 2;
-      mockEsClient.search.mockResolvedValueOnce(data as any);
+      mockEsClient.search.mockResolvedValueOnce(data);
 
-      const result: any = await getJourneySteps({
+      const result: JourneyStep[] = await getJourneySteps({
         uptimeEsClient,
         checkGroup: '2bf952dc-64b5-11eb-8b3b-42010a84000d',
         syntheticEventTypes: ['stderr', 'step/end'],
@@ -196,7 +196,7 @@ describe('getJourneySteps request module', () => {
       `);
 
       expect(result).toHaveLength(1);
-      expect(result[0].synthetics.screenshotExists).toBe(true);
+      expect(result[0].synthetics.isFullScreenshot).toBe(true);
     });
   });
 });

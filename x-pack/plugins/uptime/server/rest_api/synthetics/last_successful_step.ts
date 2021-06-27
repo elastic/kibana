@@ -6,9 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  isRefResult,
+  isFullScreenshot,
+  JourneyStep,
+} from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
-import { isRefResult, isScreenshot } from '../../../common/runtime_types/ping/synthetics';
 
 export const createLastSuccessfulStepRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -24,7 +28,7 @@ export const createLastSuccessfulStepRoute: UMRestApiRouteFactory = (libs: UMSer
   handler: async ({ uptimeEsClient, request, response }) => {
     const { timestamp, monitorId, stepIndex } = request.query;
 
-    const step = await libs.requests.getStepLastSuccessfulStep({
+    const step: JourneyStep | null = await libs.requests.getStepLastSuccessfulStep({
       uptimeEsClient,
       monitorId,
       stepIndex,
@@ -49,13 +53,8 @@ export const createLastSuccessfulStepRoute: UMRestApiRouteFactory = (libs: UMSer
       return response.ok({ body: step });
     }
 
-    if (isRefResult(screenshot)) {
-      step.synthetics.isScreenshotRef = true;
-      step.synthetics.screenshotExists = false;
-    } else if (isScreenshot(screenshot)) {
-      step.synthetics.isScreenshotRef = false;
-      step.synthetics.screenshotExists = true;
-    }
+    step.synthetics.isScreenshotRef = isRefResult(screenshot);
+    step.synthetics.isFullScreenshot = isFullScreenshot(screenshot);
 
     return response.ok({
       body: step,

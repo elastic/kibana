@@ -6,7 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRefResult, isScreenshot, ScreenshotBlockDoc } from '../../../common/runtime_types';
+import {
+  isRefResult,
+  isFullScreenshot,
+  ScreenshotBlockDoc,
+} from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';
@@ -46,7 +50,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       return response.customError({ body: { message: e }, statusCode: 500 });
     }
 
-    if (isScreenshot(result)) {
+    if (isFullScreenshot(result)) {
       if (!result.synthetics.blob) {
         return response.notFound();
       }

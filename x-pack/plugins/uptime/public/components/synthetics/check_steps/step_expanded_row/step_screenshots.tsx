@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { StepScreenshotDisplay } from '../../step_screenshot_display';
-import { JourneyStep } from '../../../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../../../common/runtime_types/ping/synthetics';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useFetcher } from '../../../../../../observability/public';
 import { fetchLastSuccessfulStep } from '../../../../state/api/journey';
@@ -30,7 +30,7 @@ interface Props {
 export const StepScreenshots = ({ step }: Props) => {
   const isSucceeded = step.synthetics?.payload?.status === 'succeeded';
 
-  const { data: lastSuccessfulStep } = useFetcher(() => {
+  const { data } = useFetcher(() => {
     if (!isSucceeded) {
       return fetchLastSuccessfulStep({
         timestamp: step['@timestamp'],
@@ -39,6 +39,7 @@ export const StepScreenshots = ({ step }: Props) => {
       });
     }
   }, [step._id, step['@timestamp']]);
+  const lastSuccessfulStep: JourneyStep | undefined = data;
 
   return (
     <EuiFlexGroup>
@@ -60,7 +61,7 @@ export const StepScreenshots = ({ step }: Props) => {
         <StepScreenshotDisplay
           checkGroup={step.monitor.check_group}
           isScreenshotRef={!!step.synthetics?.isScreenshotRef}
-          isScreenshotBlob={!!step.synthetics?.screenshotExists}
+          isScreenshotBlob={!!step.synthetics?.isFullScreenshot}
           stepIndex={step.synthetics?.step?.index}
           stepName={step.synthetics?.step?.name}
           lazyLoad={false}
@@ -74,7 +75,7 @@ export const StepScreenshots = ({ step }: Props) => {
           <StepScreenshotDisplay
             checkGroup={lastSuccessfulStep.monitor.check_group}
             isScreenshotRef={!!lastSuccessfulStep.synthetics?.isScreenshotRef}
-            isScreenshotBlob={!!lastSuccessfulStep.synthetics?.screenshotExists}
+            isScreenshotBlob={!!lastSuccessfulStep.synthetics?.isFullScreenshot}
             stepIndex={lastSuccessfulStep.synthetics?.step?.index}
             stepName={lastSuccessfulStep.synthetics?.step?.name}
             lazyLoad={false}

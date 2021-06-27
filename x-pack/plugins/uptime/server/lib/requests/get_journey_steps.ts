@@ -10,7 +10,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { JourneyStepType, JourneyStep } from '../../../common/runtime_types';
+import { JourneyStepType, JourneyStep } from '../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroup: string;
@@ -107,7 +107,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<
     timestamp: rest['@timestamp'],
     synthetics: {
       ...rest.synthetics,
-      screenshotExists: screenshotIndexList.some((i) => i === rest?.synthetics?.step?.index),
+      isFullScreenshot: screenshotIndexList.some((i) => i === rest?.synthetics?.step?.index),
       isScreenshotRef: refIndexList.some((i) => i === rest?.synthetics?.step?.index),
     },
   }));

@@ -7,18 +7,18 @@
 
 import {
   isRefResult,
-  isScreenshot,
+  isFullScreenshot,
   isScreenshotRef,
   isScreenshotImageBlob,
   RefResult,
-  Screenshot,
+  FullScreenshot,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from './synthetics';
 
 describe('synthetics runtime types', () => {
   let refResult: RefResult;
-  let screenshot: Screenshot;
+  let fullScreenshot: FullScreenshot;
   let screenshotImageBlob: ScreenshotImageBlob;
   let screenshotRef: ScreenshotRefImageData;
 
@@ -58,7 +58,7 @@ describe('synthetics runtime types', () => {
       },
     };
 
-    screenshot = {
+    fullScreenshot = {
       synthetics: {
         blob: 'image data',
         blob_mime: 'image/jpeg',
@@ -106,7 +106,7 @@ describe('synthetics runtime types', () => {
     });
 
     it('fails objects that do not correspond to the type', () => {
-      expect(isRefResult(screenshot)).toBe(false);
+      expect(isRefResult(fullScreenshot)).toBe(false);
       expect(isRefResult(screenshotRef)).toBe(false);
       expect(isRefResult(screenshotImageBlob)).toBe(false);
     });
@@ -114,13 +114,13 @@ describe('synthetics runtime types', () => {
 
   describe('isScreenshot', () => {
     it('identifies screenshot objects correctly', () => {
-      expect(isScreenshot(screenshot)).toBe(true);
+      expect(isFullScreenshot(fullScreenshot)).toBe(true);
     });
 
     it('fails objects that do not correspond to the type', () => {
-      expect(isScreenshot(refResult)).toBe(false);
-      expect(isScreenshot(screenshotRef)).toBe(false);
-      expect(isScreenshot(screenshotImageBlob)).toBe(false);
+      expect(isFullScreenshot(refResult)).toBe(false);
+      expect(isFullScreenshot(screenshotRef)).toBe(false);
+      expect(isFullScreenshot(screenshotImageBlob)).toBe(false);
     });
   });
 
@@ -132,7 +132,7 @@ describe('synthetics runtime types', () => {
     it('fails objects that do not correspond to the type', () => {
       expect(isScreenshotImageBlob(refResult)).toBe(false);
       expect(isScreenshotImageBlob(screenshotRef)).toBe(false);
-      expect(isScreenshotImageBlob(screenshot)).toBe(false);
+      expect(isScreenshotImageBlob(fullScreenshot)).toBe(false);
     });
   });
 
@@ -143,7 +143,7 @@ describe('synthetics runtime types', () => {
 
     it('fails objects that do not correspond to the type', () => {
       expect(isScreenshotRef(refResult)).toBe(false);
-      expect(isScreenshotRef(screenshot)).toBe(false);
+      expect(isScreenshotRef(fullScreenshot)).toBe(false);
       expect(isScreenshotRef(screenshotImageBlob)).toBe(false);
     });
   });
