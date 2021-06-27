@@ -36,6 +36,7 @@ interface OAuthAuthorizeValues {
   dataLoading: boolean;
   buttonLoading: boolean;
   cachedPreAuth: OAuthPreAuthorization;
+  hasError: boolean;
 }
 
 interface OAuthAuthorizeActions {
@@ -44,6 +45,7 @@ interface OAuthAuthorizeActions {
   allowOAuthAuthorization(): void;
   denyOAuthAuthorization(): void;
   setButtonNotLoading(): void;
+  setHasError(): void;
 }
 
 export const oauthAuthorizeRoute = '/api/workplace_search/oauth/authorize';
@@ -56,12 +58,14 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
     allowOAuthAuthorization: null,
     denyOAuthAuthorization: null,
     setButtonNotLoading: null,
+    setHasError: null,
   },
   reducers: {
     dataLoading: [
       true,
       {
         setServerProps: () => false,
+        setHasError: () => false,
       },
     ],
     cachedPreAuth: [
@@ -76,6 +80,12 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
         setButtonNotLoading: () => false,
         allowOAuthAuthorization: () => true,
         denyOAuthAuthorization: () => true,
+      },
+    ],
+    hasError: [
+      false,
+      {
+        setHasError: () => true,
       },
     ],
   },
@@ -95,6 +105,7 @@ export const OAuthAuthorizeLogic = kea<MakeLogicType<OAuthAuthorizeValues, OAuth
         }
       } catch (e) {
         flashAPIErrors(e);
+        actions.setHasError();
       }
     },
     denyOAuthAuthorization: async () => {

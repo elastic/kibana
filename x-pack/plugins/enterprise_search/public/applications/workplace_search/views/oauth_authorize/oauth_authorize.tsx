@@ -52,7 +52,7 @@ export const OAuthAuthorize: React.FC = () => {
     OAuthAuthorizeLogic
   );
 
-  const { buttonLoading, dataLoading, cachedPreAuth } = useValues(OAuthAuthorizeLogic);
+  const { buttonLoading, dataLoading, cachedPreAuth, hasError } = useValues(OAuthAuthorizeLogic);
 
   useEffect(() => {
     initializeOAuthPreAuth(search);
@@ -60,7 +60,7 @@ export const OAuthAuthorize: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const showHttpRedirectUriWarning = cachedPreAuth.redirectUri.startsWith('http:');
+  const showHttpRedirectUriWarning = cachedPreAuth.redirectUri?.startsWith('http:');
 
   const httpRedirectUriWarning = (
     <>
@@ -79,7 +79,7 @@ export const OAuthAuthorize: React.FC = () => {
     }
   };
 
-  const scopeListItems = cachedPreAuth.scopes.map((scope) => {
+  const scopeListItems = cachedPreAuth?.scopes?.map((scope) => {
     const scopeDesc = scopeDescription(scope);
 
     if (scopeDesc) {
@@ -99,12 +99,34 @@ export const OAuthAuthorize: React.FC = () => {
     }
   });
 
+  const authorizationDetails = (
+    <>
+      <EuiSpacer />
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.authorizationDescription"
+            defaultMessage="Authorize {strongClientName} to use your account?"
+            values={{
+              strongClientName: <strong>{cachedPreAuth.clientName}</strong>,
+            }}
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer />
+      {showHttpRedirectUriWarning && httpRedirectUriWarning}
+      <EuiCallOut title={SCOPES_LEAD_IN_MESSAGE} iconType="iInCircle">
+        <ul>{scopeListItems}</ul>
+      </EuiCallOut>
+    </>
+  );
+
   return (
     <EuiPage restrictWidth>
       <EuiPageBody>
         <FlashMessages />
         <EuiSpacer />
-        <EuiPanel paddingSize="l" style={{ maxWidth: 500, margin: '40px auto' }}>
+        <EuiPanel paddingSize="l" style={{ maxWidth: 500, margin: '40px auto' }} grow={false}>
           <EuiHeaderSection>
             <EuiHeaderSectionItem>
               <EuiHeaderLogo iconType="logoWorkplaceSearch" />
@@ -117,29 +139,16 @@ export const OAuthAuthorize: React.FC = () => {
           <EuiTitle>
             <h2>{AUTHORIZATION_REQUIRED_TITLE}</h2>
           </EuiTitle>
-          <EuiSpacer />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.authorizationDescription"
-                defaultMessage="Authorize {strongClientName} to use your account?"
-                values={{
-                  strongClientName: <strong>{cachedPreAuth.clientName}</strong>,
-                }}
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          {showHttpRedirectUriWarning && httpRedirectUriWarning}
-          <EuiCallOut title={SCOPES_LEAD_IN_MESSAGE} iconType="iInCircle">
-            <ul>{scopeListItems}</ul>
-          </EuiCallOut>
-
+          {!hasError && authorizationDetails}
           <EuiSpacer />
 
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiButton color="danger" onClick={denyOAuthAuthorization} disabled={buttonLoading}>
+              <EuiButton
+                color="danger"
+                onClick={denyOAuthAuthorization}
+                disabled={buttonLoading || hasError}
+              >
                 {DENY_BUTTON_LABEL}
               </EuiButton>
             </EuiFlexItem>
@@ -148,7 +157,7 @@ export const OAuthAuthorize: React.FC = () => {
                 color="primary"
                 fill
                 onClick={allowOAuthAuthorization}
-                disabled={buttonLoading}
+                disabled={buttonLoading || hasError}
               >
                 {AUTHORIZE_BUTTON_LABEL}
               </EuiButton>
