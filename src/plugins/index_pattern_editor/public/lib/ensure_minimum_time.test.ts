@@ -17,8 +17,8 @@ describe('ensureMinimumTime', () => {
   });
 
   it('resolves multiple promises', async (done) => {
-    const promiseA = new Promise((resolve) => resolve('a'));
-    const promiseB = new Promise((resolve) => resolve('b'));
+    const promiseA = new Promise<string>((resolve) => resolve('a'));
+    const promiseB = new Promise<string>((resolve) => resolve('b'));
     const [a, b] = await ensureMinimumTime([promiseA, promiseB], 0);
     expect(a).toBe('a');
     expect(b).toBe('b');
