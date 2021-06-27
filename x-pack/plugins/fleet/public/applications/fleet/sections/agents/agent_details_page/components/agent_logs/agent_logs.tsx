@@ -9,7 +9,6 @@ import url from 'url';
 import { stringify } from 'querystring';
 
 import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
-import type { FunctionComponent } from 'react';
 import styled from 'styled-components';
 import { encode } from 'rison-node';
 import {
@@ -66,7 +65,7 @@ export interface AgentLogsState {
 
 export const AgentLogsUrlStateHelper = createStateContainerReactHelpers();
 
-const AgentPolicyLogsNotEnabledCallout: FunctionComponent<{ agentPolicy: AgentPolicy }> = ({
+const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: AgentPolicy }> = ({
   agentPolicy,
 }) => {
   const { getHref } = useLink();
@@ -108,7 +107,7 @@ const AgentPolicyLogsNotEnabledCallout: FunctionComponent<{ agentPolicy: AgentPo
   );
 };
 
-export const AgentLogsUI: FunctionComponent<AgentLogsProps> = memo(
+export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
   ({ agent, agentPolicy, state }) => {
     const { data, application, http } = useStartServices();
     const { update: updateState } = AgentLogsUrlStateHelper.useTransitions();
