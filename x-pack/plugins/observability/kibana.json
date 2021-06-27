@@ -26,6 +26,7 @@
   "requiredBundles": [
     "data",
     "kibanaReact",
-    "kibanaUtils"
+    "kibanaUtils",
+    "savedObjects"
   ]
 }

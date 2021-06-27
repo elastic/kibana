@@ -151,7 +151,6 @@ export const UserActionTree = React.memo(
     const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
-    const [currentAppId, setCurrentAppId] = useState<string | null>(null);
     const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
@@ -603,45 +602,31 @@ export const UserActionTree = React.memo(
     const comments = [...userActions, ...bottomActions];
 
     useEffect(() => {
-      const getCurrentAppId = async () => {
-        const appId = await currentAppId$.pipe(first()).toPromise();
-        setCurrentAppId(appId);
-      };
-      getCurrentAppId();
-    }, [currentAppId$]);
+      const setInitialLensComment = async () => {
+        const currentAppId = await currentAppId$.pipe(first()).toPromise();
 
-    useEffect(() => {
-      let incomingEmbeddablePackage;
-
-      if (currentAppId) {
-        incomingEmbeddablePackage = embeddable
-          ?.getStateTransfer()
-          .getIncomingEmbeddablePackage(currentAppId);
-      }
-
-      if (incomingEmbeddablePackage) {
-        let draftComment;
-        if (storage.get('xpack.cases.commentDraft')) {
-          try {
-            draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
-            // eslint-disable-next-line no-empty
-          } catch (e) {}
+        if (!currentAppId) {
+          return;
         }
 
-        if (draftComment) {
-          if (!draftComment.commentId) {
-            if (commentRefs.current && commentRefs.current[NEW_ID]) {
-              commentRefs.current[NEW_ID].setComment(draftComment.comment);
-              const buttons = commentRefs.current[NEW_ID].editor.toolbar?.querySelector(
-                '[aria-label="Insert lens link"]'
-              );
-              buttons?.click();
-              return;
-            }
+        const incomingEmbeddablePackage = embeddable
+          ?.getStateTransfer()
+          .getIncomingEmbeddablePackage(currentAppId);
+
+        if (incomingEmbeddablePackage) {
+          let draftComment;
+          if (storage.get('xpack.cases.commentDraft')) {
+            try {
+              draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+              // eslint-disable-next-line no-empty
+            } catch (e) {}
           }
 
-          if (draftComment.commentId) {
-            if (!manageMarkdownEditIds.includes(draftComment.commentId)) {
+          if (draftComment?.commentId) {
+            if (
+              ![NEW_ID, DESCRIPTION_ID].includes(draftComment.commentId) &&
+              !manageMarkdownEditIds.includes(draftComment.commentId)
+            ) {
               setManageMarkdownEditIds([draftComment.commentId]);
             }
 
@@ -661,8 +646,9 @@ export const UserActionTree = React.memo(
             }
           }
         }
-      }
-    }, [currentAppId, embeddable, manageMarkdownEditIds, storage]);
+      };
+      setInitialLensComment();
+    }, [currentAppId$, embeddable, manageMarkdownEditIds, storage]);
 
     return (
       <>

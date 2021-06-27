@@ -52,7 +52,9 @@ describe('ExploratoryViewHeader', function () {
           to: 'now',
         },
       },
-      true
+      {
+        openInNewTab: true,
+      }
     );
   });
 });

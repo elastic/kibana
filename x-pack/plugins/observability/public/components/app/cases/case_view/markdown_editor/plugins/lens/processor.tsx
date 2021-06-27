@@ -11,9 +11,9 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elast
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 
-import { createGlobalStyle } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { TypedLensByValueInput } from '../../../../../../../lens/public';
-import { useKibana } from '../../../../lib/kibana';
+import { createGlobalStyle } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { TypedLensByValueInput } from '../../../../../../../../../lens/public';
+import { useKibana } from '../../../../../../../utils/kibana_react';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
 const Container = styled.div`
@@ -36,6 +36,7 @@ interface LensMarkDownRendererProps {
   viewMode?: boolean | undefined;
 }
 
+// eslint-disable-next-line react/function-component-definition
 const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
   attributes,
   title,
