@@ -27,6 +27,7 @@ import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { queryFieldValidation } from '../../common/validations';
 import { fieldValidators } from '../../shared_imports';
 import { SavedQueryFlyout } from '../../saved_queries';
+import { useErrorToast } from '../../common/hooks/use_error_toast';
 
 const FORM_ID = 'liveQueryForm';
 
@@ -38,11 +39,9 @@ interface LiveQueryFormProps {
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, onSuccess }) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
   const [showSavedQueryFlyout, setShowSavedQueryFlyout] = useState(false);
+  const setErrorToast = useErrorToast();
 
   const handleShowSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(true), []);
   const handleCloseSaveQueryFlout = useCallback(() => setShowSavedQueryFlyout(false), []);
@@ -60,13 +59,19 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
         body: JSON.stringify(payload),
       }),
     {
-      onSuccess,
+      onSuccess: () => {
+        setErrorToast();
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
       onError: (error) => {
-        // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error);
       },
     }
   );
+
+  const expirationDate = useMemo(() => new Date(data?.actions[0].expiration), [data?.actions]);
 
   const formSchema = {
     query: {
@@ -193,7 +198,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
           defaultMessage: 'Check results',
         }),
         children: actionId ? (
-          <ResultTabs actionId={actionId} agentIds={agentIds} isLive={true} />
+          <ResultTabs
+            actionId={actionId}
+            expirationDate={expirationDate}
+            agentIds={agentIds}
+            isLive={true}
+          />
         ) : null,
         status: resultsStatus,
       },
@@ -206,6 +216,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, on
       queryComponentProps,
       queryStatus,
       queryValueProvided,
+      expirationDate,
       resultsStatus,
       submit,
     ]

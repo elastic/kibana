@@ -36,7 +36,7 @@ export const initialValues = {
   [ConfigKeys.RESPONSE_STATUS_CHECK]: [],
   [ConfigKeys.REQUEST_BODY_CHECK]: {
     value: '',
-    type: Mode.TEXT,
+    type: Mode.PLAINTEXT,
   },
   [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
   [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
