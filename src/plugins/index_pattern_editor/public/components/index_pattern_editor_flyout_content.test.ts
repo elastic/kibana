@@ -8,27 +8,17 @@
 import { act } from 'react-dom/test-utils';
 
 import '../test_utils/setup_environment';
-import { registerTestBed, TestBed, noop, docLinks, getCommonActions } from '../test_utils';
-
-import { FieldEditor } from './field_editor';
-import { FieldEditorFlyoutContent, Props } from './field_editor_flyout_content';
+import { registerTestBed, TestBed, noop, getCommonActions } from '../test_utils';
+import { IndexPatternEditorFlyoutContent, Props } from './index_pattern_editor_flyout_content';
 
 const defaultProps: Props = {
   onSave: noop,
   onCancel: noop,
-  docLinks,
-  FieldEditor,
-  indexPattern: { fields: [] } as any,
-  uiSettings: {} as any,
-  fieldFormats: {} as any,
-  fieldFormatEditors: {} as any,
-  fieldTypeToProcess: 'runtime',
-  runtimeFieldValidator: () => Promise.resolve(null),
-  isSavingField: false,
+  existingIndexPatterns: [],
 };
 
 const setup = (props: Props = defaultProps) => {
-  const testBed = registerTestBed(FieldEditorFlyoutContent, {
+  const testBed = registerTestBed(IndexPatternEditorFlyoutContent, {
     memoryRouter: { wrapComponent: false },
   })(props) as TestBed;
 
@@ -42,7 +32,7 @@ const setup = (props: Props = defaultProps) => {
   };
 };
 
-describe('<FieldEditorFlyoutContent />', () => {
+describe('<IndexPatternEditorFlyoutContent />', () => {
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -66,7 +56,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       },
     };
 
-    const { find } = setup({ ...defaultProps, field });
+    const { find } = setup({ ...defaultProps });
 
     expect(find('flyoutTitle').text()).toBe(`Edit field 'foo'`);
     expect(find('nameField.input').props().value).toBe(field.name);
@@ -82,7 +72,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     };
     const onSave: jest.Mock<Props['onSave']> = jest.fn();
 
-    const { find } = setup({ ...defaultProps, onSave, field });
+    const { find } = setup({ ...defaultProps, onSave });
 
     await act(async () => {
       find('fieldSaveButton').simulate('click');
