@@ -12,7 +12,7 @@ import uuid from 'uuid/v4';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { IUiSettingsClient } from 'kibana/public';
 import {
@@ -56,6 +56,7 @@ interface TimeseriesEditorState {
   extractedIndexPatterns: IndexPatternValue[];
   model: TimeseriesVisParams;
   visFields?: VisFields;
+  hideCallout: boolean;
 }
 
 export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditorState> {
@@ -71,6 +72,9 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       autoApply: true,
       dirty: false,
       defaultIndex: null,
+      hideCallout:
+        this.props.vis.params.use_kibana_indexes ||
+        Boolean(this.localStorage.get('CALLOUT_HIDDEN')),
       model: {
         // we should set default value for 'time_range_mode' in model so that when user save visualization
         // we set right mode in savedObject
@@ -164,8 +168,15 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.visDataSubject.next(visData);
   };
 
+  dismissNotice = () => {
+    this.localStorage.set('CALLOUT_HIDDEN', true);
+    this.setState({
+      hideCallout: true,
+    });
+  };
+
   render() {
-    const { model, visFields } = this.state;
+    const { model, visFields, hideCallout } = this.state;
     const indexPatternModeLink = getCoreStart().docLinks.links.visualize.tsvbIndexPatternMode;
 
     if (!visFields) {
@@ -184,26 +195,48 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       >
         <DefaultIndexPatternContext.Provider value={this.state.defaultIndex}>
           <div className="tvbEditor" data-test-subj="tvbVisEditor">
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="visTypeTimeseries.visEditorVisualization.indexPatternMode.message"
-                  defaultMessage="Introduced on 7.13.0, TSVB supports a new mode of creating charts, the index pattern mode. Check it out {indexPatternModeLink}."
-                  values={{
-                    indexPatternModeLink: (
-                      <EuiLink href={indexPatternModeLink} target="_blank" external>
-                        <FormattedMessage
-                          id="visTypeTimeseries.visEditorVisualization.indexPatternMode.link"
-                          defaultMessage="here."
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              }
-              iconType="pin"
-              size="s"
-            />
+            {!hideCallout && (
+              <EuiCallOut
+                title={
+                  <FormattedMessage
+                    id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationTitle"
+                    defaultMessage="New: Index pattern mode"
+                  />
+                }
+                iconType="cheer"
+                size="s"
+              >
+                <p>
+                  <FormattedMessage
+                    id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationMessage"
+                    defaultMessage="Introduced on 7.13.0, TSVB supports a new mode of creating charts, the index pattern mode. Check it out {indexPatternModeLink}."
+                    values={{
+                      indexPatternModeLink: (
+                        <EuiLink href={indexPatternModeLink} target="_blank" external>
+                          <FormattedMessage
+                            id="visTypeTimeseries.visEditorVisualization.indexPatternMode.link"
+                            defaultMessage="here."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+                <EuiFlexGroup gutterSize="none">
+                  <EuiButton
+                    size="s"
+                    onClick={() => {
+                      this.dismissNotice();
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.homeIntegration.tutorialDirectory.dismissNoticeButtonText"
+                      defaultMessage="Dismiss message"
+                    />
+                  </EuiButton>
+                </EuiFlexGroup>
+              </EuiCallOut>
+            )}
             <div className="tvbEditor--hideForReporting">
               <VisPicker currentVisType={model.type} onChange={this.handleChange} />
             </div>
