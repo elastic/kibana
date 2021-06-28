@@ -30,6 +30,8 @@ export default function ({ getService }) {
       const jsonTile = new VectorTile(new Protobuf(resp.body));
       const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
       expect(layer.length).to.be(3); // 2 docs + the metadata feature
+
+      // 1st doc
       const feature = layer.feature(0);
       expect(feature.type).to.be(1);
       expect(feature.extent).to.be(4096);
@@ -42,6 +44,27 @@ export default function ({ getService }) {
         ['machine.os.raw']: 'ios',
       });
       expect(feature.loadGeometry()).to.eql([[{ x: 44, y: 2382 }]]);
+
+      // Metadata feature
+      const metadataFeature = layer.feature(2);
+      expect(metadataFeature.type).to.be(3);
+      expect(metadataFeature.extent).to.be(4096);
+      expect(metadataFeature.id).to.be(undefined);
+      expect(metadataFeature.properties).to.eql({
+        __kbn_feature_count__: 2,
+        __kbn_is_tile_complete__: true,
+        __kbn_metadata_feature__: true,
+        __kbn_vector_shape_type_counts__: '{"POINT":2,"LINE":0,"POLYGON":0}',
+      });
+      expect(metadataFeature.loadGeometry()).to.eql([
+        [
+          { x: 0, y: 4096 },
+          { x: 0, y: 0 },
+          { x: 4096, y: 0 },
+          { x: 4096, y: 4096 },
+          { x: 0, y: 4096 },
+        ],
+      ]);
     });
 
     it('should return vector tile containing bounds when count exceeds size', async () => {
