@@ -11,9 +11,9 @@ import { stringify } from 'querystring';
 import React, { lazy } from 'react';
 import { encode } from 'rison-node';
 
-import { CustomAssetsAccordion } from './applications/integrations/sections/epm/screens/detail/assets/custom_assets_accordion';
-import type { CustomAssetsAccordionProps } from './applications/integrations/sections/epm/screens/detail/assets/custom_assets_accordion';
 import type { PackageAssetsComponent } from './types';
+import { CustomAssetsAccordion } from './components/custom_assets_accordion';
+import type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 
 export const LazyCustomLogsAssetsComponent = lazy<PackageAssetsComponent>(async () => {
   // Filter to only custom logs, which by default appear in the "generic" dataset

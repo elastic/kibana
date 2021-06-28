@@ -60,6 +60,7 @@ import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/vie
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { TimelineState } from '../../timelines/public';
+import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -212,6 +213,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         package: 'endpoint',
         view: 'package-detail-custom',
         component: getLazyEndpointPackageCustomExtension(core, plugins),
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-detail-assets',
+        component: LazyEndpointCustomAssetsExtension,
       });
     }
     licenseService.start(plugins.licensing.license$);
