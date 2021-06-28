@@ -7,4 +7,4 @@
 
 export * from '../../../layouts';
 
-export { DefaultLayout } from './default';
+export { DefaultLayout, DefaultPageTitle } from './default';

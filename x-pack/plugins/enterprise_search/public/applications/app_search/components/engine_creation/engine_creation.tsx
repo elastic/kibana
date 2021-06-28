@@ -22,6 +22,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
+import { ENGINES_TITLE } from '../engines';
 import { AppSearchPageTemplate } from '../layout';
 
 import {
@@ -43,7 +44,7 @@ export const EngineCreation: React.FC = () => {
 
   return (
     <AppSearchPageTemplate
-      pageChrome={[ENGINE_CREATION_TITLE]}
+      pageChrome={[ENGINES_TITLE, ENGINE_CREATION_TITLE]}
       pageHeader={{ pageTitle: ENGINE_CREATION_TITLE }}
       data-test-subj="EngineCreation"
     >

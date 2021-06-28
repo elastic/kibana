@@ -542,8 +542,15 @@ function checkXAccessorCompatibility(
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
   const errors = [];
-  const hasDateHistogramSet = state.layers.some(checkIntervalOperation('date', datasourceLayers));
-  const hasNumberHistogram = state.layers.some(checkIntervalOperation('number', datasourceLayers));
+  const hasDateHistogramSet = state.layers.some(
+    checkScaleOperation('interval', 'date', datasourceLayers)
+  );
+  const hasNumberHistogram = state.layers.some(
+    checkScaleOperation('interval', 'number', datasourceLayers)
+  );
+  const hasOrdinalAxis = state.layers.some(
+    checkScaleOperation('ordinal', undefined, datasourceLayers)
+  );
   if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
     errors.push({
       shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
@@ -560,11 +567,28 @@ function checkXAccessorCompatibility(
       }),
     });
   }
+  if (state.layers.length > 1 && (hasDateHistogramSet || hasNumberHistogram) && hasOrdinalAxis) {
+    errors.push({
+      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
+        defaultMessage: `Wrong data type for {axis}.`,
+        values: {
+          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        },
+      }),
+      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong', {
+        defaultMessage: `Data type mismatch for the {axis}, use a different function.`,
+        values: {
+          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        },
+      }),
+    });
+  }
   return errors;
 }
 
-function checkIntervalOperation(
-  dataType: 'date' | 'number',
+function checkScaleOperation(
+  scaleType: 'ordinal' | 'interval' | 'ratio',
+  dataType: 'date' | 'number' | 'string' | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
   return (layer: XYLayerConfig) => {
@@ -573,6 +597,8 @@ function checkIntervalOperation(
       return false;
     }
     const operation = datasourceAPI?.getOperationForColumnId(layer.xAccessor);
-    return Boolean(operation?.dataType === dataType && operation.scale === 'interval');
+    return Boolean(
+      operation && (!dataType || operation.dataType === dataType) && operation.scale === scaleType
+    );
   };
 }
