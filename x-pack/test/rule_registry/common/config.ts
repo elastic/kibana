@@ -59,7 +59,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       servers,
       services,
       junit: {
-        reportName: 'X-Pack Case API Integration Tests',
+        reportName: 'X-Pack Rule Registry Alerts Client API Integration Tests',
       },
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),

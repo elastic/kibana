@@ -45,7 +45,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile, getService }: FtrProviderContext): void => {
-  describe('rules security and spaces enabled: basic', function () {
+  describe('rules security and spaces enabled: trial', function () {
     // Fastest ciGroup for the moment.
     this.tags('ciGroup5');
 
@@ -121,7 +121,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       );
     });
 
-    // Basic
+    // Trial
     loadTestFile(require.resolve('./get_alerts'));
     loadTestFile(require.resolve('./update_alert'));
   });

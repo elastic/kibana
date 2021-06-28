@@ -63,12 +63,24 @@ export default ({ getService }: FtrProviderContext) => {
 
       it(`${obsMinReadAlertsAllSpacesAll.username} should be able to update the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
-        await supertestWithoutAuth
+        const res = await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsMinReadAlertsAllSpacesAll.username, obsMinReadAlertsAllSpacesAll.password)
           .set('kbn-xsrf', 'true')
           .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
           .expect(200);
+        expect(res.body).to.eql({
+          success: true,
+          alerts: {
+            _index: '.alerts-observability-apm',
+            _id: 'NoxgpHkBqbdrfX07MqXV',
+            _version: 2,
+            result: 'updated',
+            _shards: { total: 2, successful: 1, failed: 0 },
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        });
       });
 
       it(`${obsMinReadAlertsAll.username} should be able to update the APM alert in ${SPACE1}`, async () => {

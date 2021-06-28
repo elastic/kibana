@@ -67,28 +67,13 @@ describe('update()', () => {
     esClientMock.update.mockResolvedValueOnce(
       elasticsearchClientMock.createApiResponse({
         body: {
-          _primary_term: 2,
-          result: 'updated',
-          _seq_no: 1,
-          _shards: {
-            failed: 0,
-            successful: 1,
-            total: 1,
-          },
-          _version: 1,
           _index: '.alerts-observability-apm',
           _id: 'NoxgpHkBqbdrfX07MqXV',
-          get: {
-            found: true,
-            _seq_no: 1,
-            _primary_term: 2,
-            _source: {
-              'rule.id': 'apm.error_rate',
-              message: 'hello world 1',
-              'kibana.rac.alert.owner': 'apm',
-              'kibana.rac.alert.status': 'closed',
-            },
-          },
+          _version: 2,
+          result: 'updated',
+          _shards: { total: 2, successful: 1, failed: 0 },
+          _seq_no: 1,
+          _primary_term: 1,
         },
       })
     );
@@ -99,10 +84,17 @@ describe('update()', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "kibana.rac.alert.owner": "apm",
-        "kibana.rac.alert.status": "closed",
-        "message": "hello world 1",
-        "rule.id": "apm.error_rate",
+        "_id": "NoxgpHkBqbdrfX07MqXV",
+        "_index": ".alerts-observability-apm",
+        "_primary_term": 1,
+        "_seq_no": 1,
+        "_shards": Object {
+          "failed": 0,
+          "successful": 1,
+          "total": 2,
+        },
+        "_version": 2,
+        "result": "updated",
       }
     `);
     expect(esClientMock.update).toHaveBeenCalledTimes(1);
@@ -158,28 +150,13 @@ describe('update()', () => {
     esClientMock.update.mockResolvedValueOnce(
       elasticsearchClientMock.createApiResponse({
         body: {
-          _primary_term: 2,
-          result: 'updated',
-          _seq_no: 1,
-          _shards: {
-            failed: 0,
-            successful: 1,
-            total: 1,
-          },
-          _version: 1,
           _index: '.alerts-observability-apm',
           _id: 'NoxgpHkBqbdrfX07MqXV',
-          get: {
-            found: true,
-            _seq_no: 1,
-            _primary_term: 2,
-            _source: {
-              'rule.id': 'apm.error_rate',
-              message: 'hello world 1',
-              'kibana.rac.alert.owner': 'apm',
-              'kibana.rac.alert.status': 'closed',
-            },
-          },
+          _version: 2,
+          result: 'updated',
+          _shards: { total: 2, successful: 1, failed: 0 },
+          _seq_no: 1,
+          _primary_term: 1,
         },
       })
     );
@@ -319,28 +296,13 @@ describe('update()', () => {
       esClientMock.update.mockResolvedValueOnce(
         elasticsearchClientMock.createApiResponse({
           body: {
-            _primary_term: 2,
-            result: 'updated',
-            _seq_no: 1,
-            _shards: {
-              failed: 0,
-              successful: 1,
-              total: 1,
-            },
-            _version: 1,
             _index: '.alerts-observability-apm',
             _id: 'NoxgpHkBqbdrfX07MqXV',
-            get: {
-              found: true,
-              _seq_no: 1,
-              _primary_term: 2,
-              _source: {
-                'rule.id': 'apm.error_rate',
-                message: 'hello world 1',
-                'kibana.rac.alert.owner': 'apm',
-                'kibana.rac.alert.status': 'closed',
-              },
-            },
+            _version: 2,
+            result: 'updated',
+            _shards: { total: 2, successful: 1, failed: 0 },
+            _seq_no: 1,
+            _primary_term: 1,
           },
         })
       );
@@ -362,10 +324,17 @@ describe('update()', () => {
       });
       expect(result).toMatchInlineSnapshot(`
         Object {
-          "kibana.rac.alert.owner": "apm",
-          "kibana.rac.alert.status": "closed",
-          "message": "hello world 1",
-          "rule.id": "apm.error_rate",
+          "_id": "NoxgpHkBqbdrfX07MqXV",
+          "_index": ".alerts-observability-apm",
+          "_primary_term": 1,
+          "_seq_no": 1,
+          "_shards": Object {
+            "failed": 0,
+            "successful": 1,
+            "total": 2,
+          },
+          "_version": 2,
+          "result": "updated",
         }
       `);
     });
