@@ -20,7 +20,7 @@ import { InitialAppData } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic } from './shared/flash_messages';
+import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
@@ -71,6 +71,7 @@ export const renderApp = (
       <Provider store={store}>
         <Router history={params.history}>
           <App {...initialData} />
+          <Toasts />
         </Router>
       </Provider>
     </I18nProvider>,
