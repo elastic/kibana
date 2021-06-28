@@ -538,7 +538,6 @@
     "core.ui.chrome.headerGlobalNav.helpMenuTitle": "ヘルプ",
     "core.ui.chrome.headerGlobalNav.helpMenuVersion": "v {version}",
     "core.ui.chrome.headerGlobalNav.logoAriaLabel": "Elastic ロゴ",
-    "core.ui.EmptyRecentlyViewed": "最近閲覧したアイテムはありません",
     "core.ui.enterpriseSearchNavList.label": "エンタープライズサーチ",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage": "{advancedSettingsLink}で{storeInSessionStorageParam}オプションを有効にするか、オンスクリーンビジュアルを簡素化してください。",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage.advancedSettingsLinkText": "高度な設定",

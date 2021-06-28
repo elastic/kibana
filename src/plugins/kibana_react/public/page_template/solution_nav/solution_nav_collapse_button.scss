@@ -22,7 +22,7 @@
   }
 
   .kbnPageTemplate__pageSideBar:hover & {
-    transition-delay: 2s;
+    transition-delay: $euiAnimSpeedSlow;
   }
 }
 

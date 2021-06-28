@@ -19,6 +19,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -330,7 +331,10 @@ export function CollapsibleNav({
         <span />
         <EuiCollapsibleNavGroup>
           <EuiButton fill fullWidth iconType="plusInCircleFilled">
-            Add Data
+            <FormattedMessage
+              id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
+              defaultMessage="Add Data"
+            />
           </EuiButton>
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
