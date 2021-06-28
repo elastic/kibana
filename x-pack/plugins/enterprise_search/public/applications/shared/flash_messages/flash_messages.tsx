@@ -15,14 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FLASH_MESSAGE_TYPES, DEFAULT_TOAST_TIMEOUT } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-export const FlashMessages: React.FC = ({ children }) => (
-  <>
-    <Callouts>{children}</Callouts>
-    <Toasts />
-  </>
-);
-
-export const Callouts: React.FC = ({ children }) => {
+export const FlashMessages: React.FC = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
 
   return (
@@ -51,6 +44,11 @@ export const Callouts: React.FC = ({ children }) => {
   );
 };
 
+/*
+ * NOTE: Toasts are rendered at the highest app level (@see public/applications/index.tsx)
+ * so that they don't rerender/reset their timers when navigating between pages,
+ * and also to prevent z-index issues with flyouts and modals
+ */
 export const Toasts: React.FC = () => {
   const { toastMessages } = useValues(FlashMessagesLogic);
   const { dismissToastMessage } = useActions(FlashMessagesLogic);
