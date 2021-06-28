@@ -69,6 +69,7 @@ type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
 
 // eslint-disable-next-line no-console
 const logError = console.error;
+let isRequestingEndpointPackageInfo = false;
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
@@ -594,7 +595,8 @@ async function getEndpointPackageInfo(
   dispatch: Dispatch<ServerReturnedEndpointPackageInfo>,
   coreStart: CoreStart
 ) {
-  if (endpointPackageInfo(state)) return;
+  if (endpointPackageInfo(state) || isRequestingEndpointPackageInfo) return;
+  isRequestingEndpointPackageInfo = true;
 
   try {
     const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
@@ -605,6 +607,8 @@ async function getEndpointPackageInfo(
   } catch (error) {
     // Ignore Errors, since this should not hinder the user's ability to use the UI
     logError(error);
+  } finally {
+    isRequestingEndpointPackageInfo = false;
   }
 }
 
