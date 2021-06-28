@@ -274,6 +274,11 @@ export async function getTile({
             [KBN_METADATA_FEATURE]: true,
             [KBN_IS_TILE_COMPLETE]: false,
             [KBN_FEATURE_COUNT]: 0,
+            [KBN_VECTOR_SHAPE_TYPE_COUNTS]: {
+              [VECTOR_SHAPE_TYPE.POINT]: 0,
+              [VECTOR_SHAPE_TYPE.LINE]: 0,
+              [VECTOR_SHAPE_TYPE.POLYGON]: 0,
+            },
           },
           geometry: esBboxToGeoJsonPolygon(
             // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
@@ -329,7 +334,6 @@ export async function getTile({
           [KBN_VECTOR_SHAPE_TYPE_COUNTS]: counts,
           [KBN_FEATURE_COUNT]: features.length,
         },
-        // todo - constrain to actual features
         geometry: esBboxToGeoJsonPolygon(tileToESBbox(x, y, z), tileToESBbox(x, y, z)),
       };
 

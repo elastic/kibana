@@ -130,7 +130,7 @@ export class TiledVectorLayer extends VectorLayer {
             defaultMessage: `Layer shows incomplete results`,
           })
         : null,
-      areResultsTrimmed: !isIncomplete,
+      areResultsTrimmed: isIncomplete,
     };
   }
 
