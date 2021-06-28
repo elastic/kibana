@@ -14,39 +14,38 @@ import { FieldRecord } from './table';
 import { TableActions } from './table_cell_actions';
 import { TableFieldValue } from './table_cell_value';
 
-export const DOC_VIEW_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
-  {
-    field: 'action',
-    className: 'kbnDocViewer__tableActionsCell',
-    width: '108px',
-    name: (
-      <EuiText size="xs">
-        <strong>
-          <FormattedMessage
-            id="discover.fieldChooser.discoverField.actions"
-            defaultMessage="Actions"
-          />
-        </strong>
-      </EuiText>
-    ),
-    render: (
-      { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
-      { field: { fieldName, fieldMapping } }: FieldRecord
-    ) => {
-      return (
-        onFilter && (
-          <TableActions
-            isActive={isActive}
-            fieldName={fieldName}
-            fieldMapping={fieldMapping}
-            flattenedField={flattenedField}
-            onFilter={onFilter}
-            onToggleColumn={onToggleColumn}
-          />
-        )
-      );
-    },
+export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecord> = {
+  field: 'action',
+  className: 'kbnDocViewer__tableActionsCell',
+  width: '108px',
+  name: (
+    <EuiText size="xs">
+      <strong>
+        <FormattedMessage
+          id="discover.fieldChooser.discoverField.actions"
+          defaultMessage="Actions"
+        />
+      </strong>
+    </EuiText>
+  ),
+  render: (
+    { flattenedField, isActive, onFilter, onToggleColumn }: FieldRecord['action'],
+    { field: { fieldName, fieldMapping } }: FieldRecord
+  ) => {
+    return (
+      <TableActions
+        isActive={isActive}
+        fieldName={fieldName}
+        fieldMapping={fieldMapping}
+        flattenedField={flattenedField}
+        onFilter={onFilter!}
+        onToggleColumn={onToggleColumn}
+      />
+    );
   },
+};
+
+export const MAIN_COLUMNS: Array<EuiBasicTableColumn<FieldRecord>> = [
   {
     field: 'field',
     className: 'kbnDocViewer__tableFieldNameCell',

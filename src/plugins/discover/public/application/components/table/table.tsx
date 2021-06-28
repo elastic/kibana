@@ -17,7 +17,7 @@ import {
   ElasticSearchHit,
   DocViewRenderProps,
 } from '../../doc_views/doc_views_types';
-import { DOC_VIEW_COLUMNS } from './table_columns';
+import { ACTIONS_COLUMN, MAIN_COLUMNS } from './table_columns';
 
 export interface DocViewerTableProps {
   columns?: string[];
@@ -61,6 +61,10 @@ export const DocViewerTable = ({
   ]);
 
   const formattedHit = useMemo(() => indexPattern?.formatHit(hit, 'html'), [hit, indexPattern]);
+
+  const tableColumns = useMemo(() => {
+    return filter ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
+  }, [filter]);
 
   const onToggleColumn = useCallback(
     (field: string) => {
@@ -128,7 +132,7 @@ export const DocViewerTable = ({
     <EuiInMemoryTable
       className="kbnDocViewer__table"
       items={items}
-      columns={DOC_VIEW_COLUMNS}
+      columns={tableColumns}
       rowProps={onSetRowProps}
       pagination={false}
       responsive={false}
