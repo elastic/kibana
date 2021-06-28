@@ -34,7 +34,7 @@ and Task Manager <<task-manager-diagnosing-root-cause,diagnostics endpoints>>.
 
 [float]
 [[alerting-managment-detail]]
-=== View the list of rules and connectors
+=== Using rules and connectors list for the current state and finding issues
 *Rules and Connectors* in *Stack Management* lists the rules and connectors available in the space you’re currently in. When you click a rule name, you are navigated to the <<rule-details,details page>> for the rule, where you can see currently active alerts. 
 The start date on this page indicates when a rule is triggered, and for what alerts. In addition, the duration of the condition indicates how long the instance is active.
 
@@ -64,7 +64,7 @@ curl -X POST -k \
  -d '{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}'
 --------------------------------------------------
 
-In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which can be easier to use, but must be updated for the new APIs.
+Experimental[] In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which can be easier to use, but must be updated for the new APIs.
 CLI tools to list create, edit, and delete alerts (rules) and actions (connectors) are available in https://github.com/pmuellr/kbn-action[kbn-action], which you can install as follows:
 [source, txt]
 --------------------------------------------------

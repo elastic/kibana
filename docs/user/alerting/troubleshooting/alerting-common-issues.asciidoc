@@ -24,7 +24,7 @@ For more details, see <<task-manager-health-scheduled-tasks-small-schedule-inter
 
 [float]
 [[scheduled-rules-run-late]]
-==== Rules run late
+==== Rules with the inconsistent cadence
 
 *Problem*
 
