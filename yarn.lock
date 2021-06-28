@@ -2648,6 +2648,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/es-query@link:bazel-bin/packages/kbn-es-query":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es@link:bazel-bin/packages/kbn-es":
   version "0.0.0"
   uid ""

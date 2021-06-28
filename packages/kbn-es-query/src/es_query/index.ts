@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getEsQueryConfig } from './get_es_query_config';
-export { Filter, FilterStateStore, FILTERS } from '@kbn/es-query';
+export { buildEsQuery, EsQueryConfig } from './build_es_query';
+export { buildQueryFromFilters } from './from_filters';
+export { luceneStringToDsl } from './lucene_string_to_dsl';
+export { decorateQuery } from './decorate_query';
+export { IndexPatternBase, FieldBase, IFieldSubType } from './types';

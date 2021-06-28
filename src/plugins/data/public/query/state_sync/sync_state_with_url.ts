@@ -14,7 +14,7 @@ import {
 import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
 import { QueryState } from './types';
-import { FilterStateStore } from '../../../common/es_query/filters';
+import { FilterStateStore } from '../../../common';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 

@@ -6,5 +6,17 @@
  * Side Public License, v 1.
  */
 
-export { getEsQueryConfig } from './get_es_query_config';
-export { Filter, FilterStateStore, FILTERS } from '@kbn/es-query';
+import { Filter, FilterMeta } from './types';
+
+export interface MatchAllFilterMeta extends FilterMeta {
+  field: any;
+  formattedValue: string;
+}
+
+export type MatchAllFilter = Filter & {
+  meta: MatchAllFilterMeta;
+  match_all: any;
+};
+
+export const isMatchAllFilter = (filter: any): filter is MatchAllFilter =>
+  filter && filter.match_all;

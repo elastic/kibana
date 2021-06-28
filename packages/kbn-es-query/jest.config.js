@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getEsQueryConfig } from './get_es_query_config';
-export { Filter, FilterStateStore, FILTERS } from '@kbn/es-query';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-es-query'],
+};

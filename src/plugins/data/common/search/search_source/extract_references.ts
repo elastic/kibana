@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectReference } from 'src/core/types';
-import { Filter } from '../../es_query/filters';
+import { Filter } from '@kbn/es-query';
 import { SearchSourceFields } from './types';
 
 export const extractReferences = (

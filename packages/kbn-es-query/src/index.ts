@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { getEsQueryConfig } from './get_es_query_config';
-export { Filter, FilterStateStore, FILTERS } from '@kbn/es-query';
+export * from './es_query';
+export * from './filters';
+export * from './kuery';

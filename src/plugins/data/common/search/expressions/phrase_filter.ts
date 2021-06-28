@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { buildFilter, FILTERS } from '@kbn/es-query';
 import { KibanaField, KibanaFilter } from './kibana_context_type';
-import { buildFilter, FILTERS } from '../../es_query/filters';
 import { IndexPattern } from '../../index_patterns/index_patterns';
 
 interface Arguments {
