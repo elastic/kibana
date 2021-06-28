@@ -190,7 +190,7 @@ related to moving a *TSVB* visualization from one space to another. It should be
 variants of this problem due to the fact that the used index pattern is not exported correctly.
 
 *Workaround* +
-You should export the used index patterns separately
+You should export the used index patterns separately.
 ====
 
 [float]
