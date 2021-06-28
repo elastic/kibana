@@ -470,6 +470,7 @@
     "@kbn/plugin-generator": "link:bazel-bin/packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:bazel-bin/packages/kbn-plugin-helpers",
     "@kbn/pm": "link:packages/kbn-pm",
+    "@kbn/spec-to-console": "link:bazel-bin/packages/kbn-spec-to-console",
     "@kbn/storybook": "link:bazel-bin/packages/kbn-storybook",
     "@kbn/telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",
