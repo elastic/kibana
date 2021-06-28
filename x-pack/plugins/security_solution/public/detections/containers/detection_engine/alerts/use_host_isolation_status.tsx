@@ -44,6 +44,10 @@ export const useHostIsolationStatus = ({
           setAgentStatus(metadataResponse.host_status);
         }
       } catch (error) {
+        // don't show self-aborted requests errors to the user
+        if (error.name === 'AbortError') {
+          return;
+        }
         addError(error.message, { title: ISOLATION_STATUS_FAILURE });
       }
       if (isMounted) {
