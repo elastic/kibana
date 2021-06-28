@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
-import { DataSeries } from '../types';
+import { SeriesConfig } from '../types';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
@@ -19,7 +19,7 @@ import { SeriesActions } from './columns/series_actions';
 import { ChartEditOptions } from './chart_edit_options';
 
 interface EditItem {
-  seriesConfig: DataSeries;
+  seriesConfig: SeriesConfig;
   id: string;
 }
 
@@ -48,10 +48,10 @@ export function SeriesEditor() {
       width: '15%',
       render: (seriesId: string, { seriesConfig, id }: EditItem) => (
         <SeriesFilter
-          defaultFilters={seriesConfig.defaultFilters}
+          filterFields={seriesConfig.filterFields}
           seriesId={id}
-          series={seriesConfig}
-          filters={seriesConfig.filters}
+          seriesConfig={seriesConfig}
+          baseFilters={seriesConfig.baseFilters}
         />
       ),
     },
@@ -64,8 +64,8 @@ export function SeriesEditor() {
       render: (seriesId: string, { seriesConfig, id }: EditItem) => (
         <ChartEditOptions
           seriesId={id}
-          breakdowns={seriesConfig.breakdowns}
-          series={seriesConfig}
+          breakdownFields={seriesConfig.breakdownFields}
+          seriesConfig={seriesConfig}
         />
       ),
     },
@@ -123,7 +123,7 @@ export function SeriesEditor() {
         rowHeader="firstName"
         columns={columns}
         noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.seriesNotFound', {
-          defaultMessage: 'No series found, please add a series.',
+          defaultMessage: 'No series found. Please add a series.',
         })}
         cellProps={{
           style: {
