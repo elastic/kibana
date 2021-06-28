@@ -59,6 +59,7 @@ export const RoleMapping: React.FC = () => {
     selectedAuthProviders,
     roleMapping,
     roleMappingErrors,
+    formLoading,
   } = useValues(RoleMappingsLogic);
 
   const isNew = !roleMapping;
@@ -69,6 +70,7 @@ export const RoleMapping: React.FC = () => {
   return (
     <RoleMappingFlyout
       disabled={attributeValueInvalid || !hasGroupAssignment}
+      formLoading={formLoading}
       isNew={isNew}
       closeUsersAndRolesFlyout={closeUsersAndRolesFlyout}
       handleSaveMapping={handleSaveMapping}

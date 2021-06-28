@@ -8,6 +8,7 @@
 
 ```typescript
 readonly links: {
+        readonly settings: string;
         readonly canvas: {
             readonly guide: string;
         };

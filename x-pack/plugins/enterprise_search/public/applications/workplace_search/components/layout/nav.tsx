@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiSideNavItemType } from '@elastic/eui';
 
-import { EuiSideNavItemType, EuiSpacer } from '@elastic/eui';
-
-import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { generateNavLink, SideNav, SideNavLink } from '../../../shared/layout';
+import { generateNavLink } from '../../../shared/layout';
 import { NAV } from '../../constants';
 import {
   SOURCES_PATH,
@@ -68,37 +65,3 @@ export const useWorkplaceSearchNav = () => {
   // to cause all our navItems to properly render as nav links.
   return [{ id: '', name: '', items: navItems }];
 };
-
-// TODO: Delete below once fully migrated to KibanaPageTemplate
-
-interface Props {
-  sourcesSubNav?: React.ReactNode;
-  groupsSubNav?: React.ReactNode;
-  settingsSubNav?: React.ReactNode;
-}
-
-export const WorkplaceSearchNav: React.FC<Props> = ({
-  sourcesSubNav,
-  groupsSubNav,
-  settingsSubNav,
-}) => (
-  <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
-    <SideNavLink to="/" isRoot>
-      {NAV.OVERVIEW}
-    </SideNavLink>
-    <SideNavLink to={SOURCES_PATH} subNav={sourcesSubNav}>
-      {NAV.SOURCES}
-    </SideNavLink>
-    <SideNavLink to={GROUPS_PATH} subNav={groupsSubNav}>
-      {NAV.GROUPS}
-    </SideNavLink>
-    <SideNavLink shouldShowActiveForSubroutes to={USERS_AND_ROLES_PATH}>
-      {NAV.ROLE_MAPPINGS}
-    </SideNavLink>
-    <SideNavLink to={SECURITY_PATH}>{NAV.SECURITY}</SideNavLink>
-    <SideNavLink subNav={settingsSubNav} to={ORG_SETTINGS_PATH}>
-      {NAV.SETTINGS}
-    </SideNavLink>
-    <EuiSpacer />
-  </SideNav>
-);
