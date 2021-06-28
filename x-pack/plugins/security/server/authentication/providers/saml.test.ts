@@ -1186,7 +1186,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+        body: { query_string: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
       });
     });
 
@@ -1286,7 +1286,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+        body: { query_string: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
       });
     });
 
@@ -1305,7 +1305,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+        body: { query_string: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
       });
     });
 
@@ -1324,7 +1324,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/_security/saml/invalidate',
-        body: { queryString: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
+        body: { query_string: 'SAMLRequest=xxx%20yyy', realm: 'test-realm' },
       });
     });
 
