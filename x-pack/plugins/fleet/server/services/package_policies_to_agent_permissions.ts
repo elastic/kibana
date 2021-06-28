@@ -57,6 +57,7 @@ export async function storedPackagePoliciesToAgentPermissions(
       }
 
       let dataStreamsForPermissions: DataStreamMeta[];
+      let wildcardSuffix = false;
 
       switch (pkg.name) {
         case 'endpoint':
@@ -78,6 +79,7 @@ export async function storedPackagePoliciesToAgentPermissions(
           //   `packagePolicy.inputs`, so we will use _all_ data_streams from
           //   the package.
           dataStreamsForPermissions = pkg.data_streams;
+          wildcardSuffix = true;
           break;
 
         default:
@@ -121,7 +123,7 @@ export async function storedPackagePoliciesToAgentPermissions(
         packagePolicy.name,
         {
           indices: dataStreamsForPermissions.map((ds) =>
-            getDataStreamPermissions(ds, packagePolicy.namespace)
+            getDataStreamPermissions(ds, packagePolicy.namespace, wildcardSuffix)
           ),
         },
       ];
@@ -139,7 +141,11 @@ interface DataStreamMeta {
   permissions?: RegistryDataStreamPermissions;
 }
 
-export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: string = '*') {
+export function getDataStreamPermissions(
+  dataStream: DataStreamMeta,
+  namespace: string = '*',
+  wildcardSuffix: boolean = false
+) {
   let index = `${dataStream.type}-${dataStream.dataset}`;
 
   if (dataStream.dataset_is_prefix) {
@@ -152,8 +158,8 @@ export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: 
 
   index += `-${namespace}`;
 
-  // Integrations may append a date to the end of the index.
-  if (namespace !== '*') {
+  // Some integrations append a date to the end of the index.
+  if (wildcardSuffix) {
     index += '*';
   }
 
