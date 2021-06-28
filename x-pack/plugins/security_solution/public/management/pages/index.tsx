@@ -13,7 +13,6 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_ROOT_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from '../common/constants';
 import { TrackApplicationView } from '../../../../../../src/plugins/usage_collection/public';
@@ -21,7 +20,7 @@ import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
-import { SecurityPageName } from '../../../common/constants';
+import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { EventFiltersContainer } from './event_filters';
@@ -86,7 +85,7 @@ export const ManagementContainer = memo(() => {
         </TrackApplicationView>
       </Route>
 
-      <Route path={MANAGEMENT_ROUTING_ROOT_PATH} exact>
+      <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>
       <Route path="*" component={NotFoundPage} />

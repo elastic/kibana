@@ -65,8 +65,8 @@ const HeaderSection = styled(EuiPageHeaderSection)`
 HeaderSection.displayName = 'HeaderSection';
 
 interface BackOptions {
-  href: LinkIconProps['href'];
   text: LinkIconProps['children'];
+  href?: LinkIconProps['href'];
   dataTestSubj?: string;
   pageId: SiemNavTabKey;
 }
