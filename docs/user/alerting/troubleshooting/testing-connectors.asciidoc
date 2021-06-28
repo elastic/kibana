@@ -3,11 +3,11 @@
 === Test connectors
 
 
-By using Kibana Management UI you can test you newly created Connector by getting to the Test tab of Connector Edit flyout, by clicking "Save & test" button on Create flyout:
+By using Kibana Management UI you can test a newly created Connector by navigating to the Test tab of Connector Edit flyout or by clicking "Save & test" button on Create flyout:
 [role="screenshot"]
 image::user/alerting/images/connector-save-and-test.png[Rule management page with the errors banner]
 
-or by direct opnening the proper connector Edit flyout:
+or by directly opening the proper connector Edit flyout:
 [role="screenshot"]
 image::user/alerting/images/email-connector-test.png[Rule management page with the errors banner]
 
@@ -43,7 +43,7 @@ $ kbn-action ls
     }
 ]
 --------------------------------------------------
-and the execute this:
+and then execute this:
 
 [source,console]
 --------------------------------------------------
