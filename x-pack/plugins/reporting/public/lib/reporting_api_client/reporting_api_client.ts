@@ -14,7 +14,7 @@ import {
   API_LIST_URL,
   API_GET_ILM_POLICY_STATUS,
   REPORTING_MANAGEMENT_HOME,
-} from '../../common/constants';
+} from '../../../common/constants';
 import {
   DownloadReportFn,
   JobId,
@@ -23,8 +23,8 @@ import {
   ReportDocument,
   ReportSource,
   IlmPolicyStatusResponse,
-} from '../../common/types';
-import { add } from '../notifier/job_completion_notifications';
+} from '../../../common/types';
+import { add } from '../../notifier/job_completion_notifications';
 
 export interface JobQueueEntry {
   _id: string;

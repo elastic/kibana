@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { ILicense } from '../../../licensing/public';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
 import { ReportListing } from './report_listing';
 
@@ -26,13 +26,15 @@ export async function mountManagementSection(
 ) {
   render(
     <I18nProvider>
-      <ReportListing
-        toasts={coreSetup.notifications.toasts}
-        license$={license$}
-        pollConfig={pollConfig}
-        redirect={coreStart.application.navigateToApp}
-        apiClient={apiClient}
-      />
+      <InternalApiClientClientProvider http={coreSetup.http}>
+        <ReportListing
+          toasts={coreSetup.notifications.toasts}
+          license$={license$}
+          pollConfig={pollConfig}
+          redirect={coreStart.application.navigateToApp}
+          apiClient={apiClient}
+        />
+      </InternalApiClientClientProvider>
     </I18nProvider>,
     params.element
   );
