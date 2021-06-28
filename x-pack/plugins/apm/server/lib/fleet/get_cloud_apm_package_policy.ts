@@ -20,11 +20,17 @@ export async function getCloudAgentPolicy({
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
   savedObjectsClient: SavedObjectsClientContract;
 }) {
-  const cloudAgentPolicy = await fleetPluginStart.agentPolicyService.get(
-    savedObjectsClient,
-    POLICY_ELASTIC_AGENT_ON_CLOUD
-  );
-  return cloudAgentPolicy;
+  try {
+    return await fleetPluginStart.agentPolicyService.get(
+      savedObjectsClient,
+      POLICY_ELASTIC_AGENT_ON_CLOUD
+    );
+  } catch (error) {
+    if (error?.output.statusCode === 404) {
+      return;
+    }
+    throw error;
+  }
 }
 
 export function getApmPackagePolicy(agentPolicy: Maybe<AgentPolicy>) {
