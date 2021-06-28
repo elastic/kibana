@@ -74,7 +74,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
                 <EuiFlexItem key={title}>
                   <EuiCard
                     description={subtitle}
-                    display="plain"
+                    display="transparent"
                     icon={<EuiIcon color="text" size="l" type={icon} />}
                     layout="horizontal"
                     paddingSize="none"

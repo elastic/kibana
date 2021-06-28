@@ -136,7 +136,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       publicUrl: undefined,
       readOnlyMode: false,
       ilmEnabled: false,
-      isFederatedAuth: false,
       configuredLimits: {
         appSearch: {
           engine: {
