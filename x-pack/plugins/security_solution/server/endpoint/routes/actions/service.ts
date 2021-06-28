@@ -49,16 +49,6 @@ const getShouldClauses = ({
           },
         }
       );
-    } else {
-      // only when `action_data` field is present (not indexed)
-      // `started_at` appears along with `action_data`
-      clause.bool.must.push({
-        // @ts-expect-error
-        // this is a valid clause, yet not in TS
-        exists: {
-          field: 'started_at',
-        },
-      });
     }
     return clause;
   });
