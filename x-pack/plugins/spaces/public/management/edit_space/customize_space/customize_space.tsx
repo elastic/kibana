@@ -6,24 +6,32 @@
  */
 
 import {
+  EuiAvatar,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import type { ChangeEvent } from 'react';
-import React, { Component } from 'react';
+import React, { Component, lazy, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
-import { getSpaceColor, getSpaceInitials } from '../../../space_avatar';
+import { getSpaceAvatarComponent, getSpaceColor, getSpaceInitials } from '../../../space_avatar';
 import type { SpaceValidator } from '../../lib';
 import { toSpaceIdentifier } from '../../lib';
 import type { FormValues } from '../manage_space_page';
 import { SectionPanel } from '../section_panel';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   validator: SpaceValidator;
@@ -44,8 +52,8 @@ export class CustomizeSpace extends Component<Props, State> {
   };
 
   public render() {
-    const { validator, editingExistingSpace } = this.props;
-    const { name = '', description = '' } = this.props.space;
+    const { validator, editingExistingSpace, space } = this.props;
+    const { name = '', description = '' } = space;
     const panelTitle = i18n.translate('xpack.spaces.management.manageSpacePage.generalTitle', {
       defaultMessage: 'General',
     });
@@ -155,9 +163,48 @@ export class CustomizeSpace extends Component<Props, State> {
               </h3>
             </EuiTitle>
           }
-          description={i18n.translate('xpack.spaces.management.manageSpacePage.avatarDescription', {
-            defaultMessage: 'Choose how your space avatar appears across Kibana.',
-          })}
+          description={
+            <>
+              <p>
+                {i18n.translate('xpack.spaces.management.manageSpacePage.avatarDescription', {
+                  defaultMessage: 'Choose how your space avatar appears across Kibana.',
+                })}
+              </p>
+              {space.avatarType === 'image' && space.imageUrl ? (
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <LazySpaceAvatar
+                    space={{
+                      ...space,
+                      initials: undefined,
+                      name: undefined,
+                    }}
+                    size="xl"
+                  />
+                </Suspense>
+              ) : space.avatarType !== 'image' && (space.name || space.initials) ? (
+                <Suspense fallback={<EuiLoadingSpinner />}>
+                  <LazySpaceAvatar
+                    space={{
+                      ...space,
+                      imageUrl: undefined,
+                    }}
+                    size="xl"
+                  />
+                </Suspense>
+              ) : (
+                <EuiAvatar
+                  type="space"
+                  name="?"
+                  size="xl"
+                  color={null}
+                  style={{
+                    background: euiThemeVars.euiColorLightShade,
+                    color: euiThemeVars.euiTextSubduedColor,
+                  }}
+                />
+              )}
+            </>
+          }
           fullWidth
         >
           <CustomizeSpaceAvatar

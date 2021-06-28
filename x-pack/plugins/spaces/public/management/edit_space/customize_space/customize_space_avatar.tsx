@@ -7,6 +7,7 @@
 
 import {
   EuiAvatar,
+  EuiButtonGroup,
   EuiColorPicker,
   EuiFieldText,
   EuiFilePicker,
@@ -17,6 +18,7 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiLoadingSpinner,
+  EuiRadioGroup,
   EuiSpacer,
 } from '@elastic/eui';
 import type { ChangeEvent, FunctionComponent } from 'react';
@@ -117,174 +119,120 @@ export class CustomizeSpaceAvatar extends Component<Props> {
           aria-owns="avatar_type_initials avatar_type_image"
           fullWidth
         >
-          <EuiKeyPadMenu>
-            <EuiKeyPadMenuItem
-              label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsLabel', {
-                defaultMessage: 'Initials',
-              })}
-              role="radio"
-              id="avatar_type_initials"
-              aria-checked={space.avatarType !== 'image'}
-              onClick={() =>
-                this.props.onChange({
-                  ...space,
-                  avatarType: 'initials',
-                })
-              }
-              style={{
-                border:
-                  space.avatarType !== 'image'
-                    ? `1px solid ${euiThemeVars.euiLinkColor}`
-                    : `1px solid ${euiThemeVars.euiBorderColor}`,
-                color: space.avatarType !== 'image' ? euiThemeVars.euiLinkColor : undefined,
-              }}
-            >
-              <InitialsIcon />
-            </EuiKeyPadMenuItem>
-            <EuiKeyPadMenuItem
-              label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageLabel', {
-                defaultMessage: 'Image',
-              })}
-              role="radio"
-              id="avatar_type_image"
-              aria-checked={space.avatarType === 'image'}
-              onClick={() =>
-                this.props.onChange({
-                  ...space,
-                  avatarType: 'image',
-                })
-              }
-              style={{
-                marginLeft: euiThemeVars.spacerSizes.s,
-                border:
-                  space.avatarType === 'image'
-                    ? `1px solid ${euiThemeVars.euiLinkColor}`
-                    : `1px solid ${euiThemeVars.euiBorderColor}`,
-                color: space.avatarType === 'image' ? euiThemeVars.euiLinkColor : undefined,
-              }}
-            >
-              <EuiIcon type="image" size="l" />
-            </EuiKeyPadMenuItem>
-          </EuiKeyPadMenu>
+          <EuiButtonGroup
+            legend=""
+            options={[
+              {
+                id: `initials`,
+                label: i18n.translate(
+                  'xpack.spaces.management.customizeSpaceAvatar.initialsLabel',
+                  {
+                    defaultMessage: 'Initials',
+                  }
+                ),
+              },
+              {
+                id: `image`,
+                label: i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageLabel', {
+                  defaultMessage: 'Image',
+                }),
+              },
+            ]}
+            idSelected={space.avatarType ?? 'initials'}
+            onChange={(avatarType) =>
+              this.props.onChange({
+                ...space,
+                avatarType: avatarType as FormValues['avatarType'],
+              })
+            }
+          />
+          {/* <EuiRadioGroup
+            options={[
+              {
+                id: `initials`,
+                label: i18n.translate(
+                  'xpack.spaces.management.customizeSpaceAvatar.initialsLabel',
+                  {
+                    defaultMessage: 'Initials',
+                  }
+                ),
+              },
+              {
+                id: `image`,
+                label: i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageLabel', {
+                  defaultMessage: 'Image',
+                }),
+              },
+            ]}
+            idSelected={space.avatarType ?? 'initials'}
+            onChange={(avatarType) =>
+              this.props.onChange({
+                ...space,
+                avatarType: avatarType as FormValues['avatarType'],
+              })
+            }
+          /> */}
         </EuiFormRow>
-        <EuiFormRow fullWidth>
-          <EuiFlexGroup gutterSize="m">
-            {space.avatarType !== 'image' ? (
-              <>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label={i18n.translate(
-                      'xpack.spaces.management.customizeSpaceAvatar.initialsLabel',
-                      {
-                        defaultMessage: 'Initials',
-                      }
-                    )}
-                    helpText={i18n.translate(
-                      'xpack.spaces.management.customizeSpaceAvatar.initialsHelpText',
-                      {
-                        defaultMessage: 'Enter up to two characters.',
-                      }
-                    )}
-                    {...this.props.validator.validateAvatarInitials(space)}
-                    fullWidth
-                  >
-                    <EuiFieldText
-                      data-test-subj="spaceLetterInitial"
-                      name="spaceInitials"
-                      value={space.initials ?? ''}
-                      onChange={this.onInitialsChange}
-                      isInvalid={this.props.validator.validateAvatarInitials(space).isInvalid}
-                      fullWidth
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    label={i18n.translate(
-                      'xpack.spaces.management.customizeSpaceAvatar.colorLabel',
-                      {
-                        defaultMessage: 'Color',
-                      }
-                    )}
-                    {...this.props.validator.validateAvatarColor(space)}
-                    fullWidth
-                  >
-                    <EuiColorPicker
-                      color={space.color ?? ''}
-                      onChange={this.onColorChange}
-                      isInvalid={this.props.validator.validateAvatarColor(space).isInvalid}
-                      fullWidth
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-              </>
-            ) : (
-              <EuiFlexItem>
-                <EuiFormRow
-                  label={i18n.translate(
-                    'xpack.spaces.management.customizeSpaceAvatar.imageUrlLabel',
-                    {
-                      defaultMessage: 'Image',
-                    }
-                  )}
-                  {...this.props.validator.validateAvatarImage(space)}
-                  fullWidth
-                >
-                  <EuiFilePicker
-                    display="default"
-                    data-test-subj="uploadCustomImageFile"
-                    initialPromptText={i18n.translate(
-                      'xpack.spaces.management.customizeSpaceAvatar.imageUrlPromptText',
-                      {
-                        defaultMessage: 'Select image file',
-                      }
-                    )}
-                    onChange={this.onFileUpload}
-                    accept={imageTypes.join(',')}
-                    isInvalid={this.props.validator.validateAvatarImage(space).isInvalid}
-                    fullWidth
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
+        {space.avatarType !== 'image' ? (
+          <EuiFormRow
+            label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.initialsLabel', {
+              defaultMessage: 'Initials',
+            })}
+            helpText={i18n.translate(
+              'xpack.spaces.management.customizeSpaceAvatar.initialsHelpText',
+              {
+                defaultMessage: 'Enter up to two characters.',
+              }
             )}
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="m" />
-              <EuiSpacer size="xs" />
-              {space.avatarType === 'image' && space.imageUrl ? (
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <LazySpaceAvatar
-                    space={{
-                      ...space,
-                      initials: undefined,
-                      name: undefined,
-                    }}
-                    size="l"
-                  />
-                </Suspense>
-              ) : space.avatarType !== 'image' && (space.name || space.initials) ? (
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <LazySpaceAvatar
-                    space={{
-                      ...space,
-                      imageUrl: undefined,
-                    }}
-                    size="l"
-                  />
-                </Suspense>
-              ) : (
-                <EuiAvatar
-                  type="space"
-                  name="?"
-                  size="l"
-                  color={null}
-                  style={{
-                    background: euiThemeVars.euiColorLightShade,
-                    color: euiThemeVars.euiTextSubduedColor,
-                  }}
-                />
+            {...this.props.validator.validateAvatarInitials(space)}
+            fullWidth
+          >
+            <EuiFieldText
+              data-test-subj="spaceLetterInitial"
+              name="spaceInitials"
+              value={space.initials ?? ''}
+              onChange={this.onInitialsChange}
+              isInvalid={this.props.validator.validateAvatarInitials(space).isInvalid}
+              fullWidth
+            />
+          </EuiFormRow>
+        ) : (
+          <EuiFormRow
+            label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.imageUrlLabel', {
+              defaultMessage: 'Image',
+            })}
+            {...this.props.validator.validateAvatarImage(space)}
+            fullWidth
+          >
+            <EuiFilePicker
+              display="default"
+              data-test-subj="uploadCustomImageFile"
+              initialPromptText={i18n.translate(
+                'xpack.spaces.management.customizeSpaceAvatar.imageUrlPromptText',
+                {
+                  defaultMessage: 'Select image file',
+                }
               )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              onChange={this.onFileUpload}
+              accept={imageTypes.join(',')}
+              isInvalid={this.props.validator.validateAvatarImage(space).isInvalid}
+              fullWidth
+            />
+          </EuiFormRow>
+        )}
+        <EuiFormRow
+          label={i18n.translate('xpack.spaces.management.customizeSpaceAvatar.colorLabel', {
+            defaultMessage: 'Background color',
+          })}
+          {...this.props.validator.validateAvatarColor(space)}
+          fullWidth
+        >
+          <EuiColorPicker
+            color={space.color ?? ''}
+            onChange={this.onColorChange}
+            isInvalid={this.props.validator.validateAvatarColor(space).isInvalid}
+            fullWidth
+          />
         </EuiFormRow>
       </form>
     );
