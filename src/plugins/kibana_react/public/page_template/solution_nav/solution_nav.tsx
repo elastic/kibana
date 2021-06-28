@@ -86,10 +86,10 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
    * Create the titles
    */
   const titleText = (
-    <>
+    <Fragment>
       {solutionAvatar}
       <strong>{name}</strong>
-    </>
+    </Fragment>
   );
   const mobileTitleText = (
     <FormattedMessage
@@ -114,10 +114,10 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
         className={sideNavClasses}
         heading={titleText}
         mobileTitle={
-          <>
+          <Fragment>
             {solutionAvatar}
             {mobileTitleText}
-          </>
+          </Fragment>
         }
         toggleOpenOnMobile={toggleOpenOnMobile}
         isOpenOnMobile={isSideNavOpenOnMobile}
@@ -128,7 +128,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   }
 
   return (
-    <>
+    <Fragment>
       {isSmallerBreakpoint && sideNav}
       {isMediumBreakpoint && (
         <Fragment>
@@ -159,6 +159,6 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
           />
         </Fragment>
       )}
-    </>
+    </Fragment>
   );
 };
