@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Attempt to Disable Syslog Service",
-  "query": "event.category:process and event.type:(start or process_started) and ((process.name:service and process.args:stop) or (process.name:chkconfig and process.args:off) or (process.name:systemctl and process.args:(disable or stop or kill))) and process.args:(syslog or rsyslog or \"syslog-ng\")",
+  "query": "event.category:process and event.type:(start or process_started) and\n  ((process.name:service and process.args:stop) or\n     (process.name:chkconfig and process.args:off) or\n     (process.name:systemctl and process.args:(disable or stop or kill)))\n  and process.args:(syslog or rsyslog or \"syslog-ng\")\n",
   "risk_score": 47,
   "rule_id": "2f8a1226-5720-437d-9c20-e0029deb6194",
   "severity": "medium",

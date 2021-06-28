@@ -6,7 +6,10 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
-import { GetStoppedPartitionResult } from '../../../../common/types/results';
+import {
+  GetStoppedPartitionResult,
+  GetDatafeedResultsChartDataResult,
+} from '../../../../common/types/results';
 import { HttpService } from '../http_service';
 import { basePath } from './index';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
@@ -148,7 +151,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       start,
       end,
     });
-    return httpService.http<any>({
+    return httpService.http<GetDatafeedResultsChartDataResult>({
       path: `${basePath()}/results/datafeed_results_chart`,
       method: 'POST',
       body,

@@ -30,16 +30,17 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
   const freshDataTimestamp = state.listView.freshDataTimestamp;
   const currentPage = state.listView.listResourceState;
   const location = state.location;
+  const forceRefresh = state.forceRefresh;
   return (
     Boolean(state.active) &&
-    isOutdatedResourceState(currentPage, (data) => {
-      return (
-        data.pageIndex === location.page_index &&
-        data.pageSize === location.page_size &&
-        data.timestamp >= freshDataTimestamp &&
-        data.filter === location.filter
-      );
-    })
+    (forceRefresh ||
+      isOutdatedResourceState(currentPage, (data) => {
+        return (
+          data.pageIndex === location.page_index &&
+          data.pageSize === location.page_size &&
+          data.timestamp >= freshDataTimestamp
+        );
+      }))
   );
 };
 

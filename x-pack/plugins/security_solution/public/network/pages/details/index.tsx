@@ -28,7 +28,7 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { FlowTargetSelectConnected } from '../../components/flow_target_select_connected';
 import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../common/components/search_bar';
-import { WrapperPage } from '../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useNetworkDetails } from '../../containers/details';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
@@ -128,7 +128,7 @@ const NetworkDetailsComponent: React.FC = () => {
             <SiemSearchBar indexPattern={indexPattern} id="global" />
           </FiltersGlobal>
 
-          <WrapperPage>
+          <SecuritySolutionPageWrapper>
             <HeaderPage
               border
               data-test-subj="network-details-headline"
@@ -289,14 +289,14 @@ const NetworkDetailsComponent: React.FC = () => {
               hideHistogramIfEmpty={true}
               AnomaliesTableComponent={AnomaliesNetworkTable}
             />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <HeaderPage border title={ip} />
 
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
 
       <SpyRoute pageName={SecurityPageName.network} />
