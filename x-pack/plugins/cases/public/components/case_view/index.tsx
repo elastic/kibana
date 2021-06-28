@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObject } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -16,11 +16,19 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector, Ecs } from '../../../common';
+import {
+  CaseStatuses,
+  CaseAttributes,
+  CaseType,
+  Case,
+  CaseConnector,
+  Ecs,
+  CaseViewRefreshPropInterface,
+} from '../../../common';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
-import { useGetCase } from '../../containers/use_get_case';
+import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
@@ -42,6 +50,7 @@ import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
+
 export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation;
@@ -54,12 +63,18 @@ export interface CaseViewComponentProps {
   subCaseId?: string;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
+  /**
+   * A React `Ref` that Exposes data refresh callbacks.
+   * **NOTE**: Do not hold on to the `.current` object, as it could become stale
+   */
+  refreshRef?: MutableRefObject<CaseViewRefreshPropInterface>;
 }
 
 export interface CaseViewProps extends CaseViewComponentProps {
   onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
 }
+
 export interface OnUpdateFields {
   key: keyof Case;
   value: Case[keyof Case];
@@ -78,13 +93,14 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
 
 const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
   margin-left: 48px;
+
   &.euiHorizontalRule--full {
     width: calc(100% - 48px);
   }
 `;
 
 export interface CaseComponentProps extends CaseViewComponentProps {
-  fetchCase: () => void;
+  fetchCase: UseGetCase['fetchCase'];
   caseData: Case;
   updateCase: (newCase: Case) => void;
 }
@@ -105,6 +121,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     updateCase,
     useFetchAlertData,
     userCanCrud,
+    refreshRef,
   }) => {
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
@@ -123,6 +140,51 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       caseId,
       subCaseId,
     });
+
+    // Set `refreshRef` if needed
+    useEffect(() => {
+      let isStale = false;
+
+      if (refreshRef) {
+        refreshRef.current = {
+          refreshCase: async () => {
+            // Do nothing if component (or instance of this render cycle) is stale
+            if (isStale) {
+              return;
+            }
+
+            await fetchCase();
+          },
+          refreshUserActionsAndComments: async () => {
+            // Do nothing if component (or instance of this render cycle) is stale
+            // -- OR --
+            // it is already loading
+            if (isStale || isLoadingUserActions) {
+              return;
+            }
+
+            await Promise.all([
+              fetchCase(true),
+              fetchCaseUserActions(caseId, caseData.connector.id, subCaseId),
+            ]);
+          },
+        };
+
+        return () => {
+          isStale = true;
+          refreshRef.current = null;
+        };
+      }
+    }, [
+      caseData.connector.id,
+      caseId,
+      fetchCase,
+      fetchCaseUserActions,
+      isLoadingUserActions,
+      refreshRef,
+      subCaseId,
+      updateCase,
+    ]);
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -491,6 +553,7 @@ export const CaseView = React.memo(
     timelineIntegration,
     useFetchAlertData,
     userCanCrud,
+    refreshRef,
   }: CaseViewProps) => {
     const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
     if (isError) {
@@ -528,6 +591,7 @@ export const CaseView = React.memo(
               updateCase={updateCase}
               useFetchAlertData={useFetchAlertData}
               userCanCrud={userCanCrud}
+              refreshRef={refreshRef}
             />
           </OwnerProvider>
         </CasesTimelineIntegrationProvider>
