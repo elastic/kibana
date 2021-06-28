@@ -7,12 +7,12 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
-import { primaryNavigationItems } from '../../../../app/home/home_navigations';
+import { navTabGroups } from '../../../../app/home/home_navigations';
 import { APP_ID } from '../../../../../common/constants';
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
-import { useKibana } from '../../../lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
 import { NavTab } from '../types';
 
 export const usePrimaryNavigationItems = ({
@@ -50,12 +50,42 @@ export const usePrimaryNavigationItems = ({
     [getUrlForApp, navigateToApp, selectedTabId, urlStateProps]
   );
 
+  const navItemsToDisplay = usePrimaryNavigationItemsToDisplay(navTabs);
+
   return useMemo(
     () =>
-      primaryNavigationItems.map((item) => ({
+      navItemsToDisplay.map((item) => ({
         ...item,
         items: item.items.map((t: NavTab) => getSideNav(t)),
       })),
-    [getSideNav]
+    [getSideNav, navItemsToDisplay]
   );
 };
+
+function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
+  const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
+
+  return [
+    {
+      id: APP_ID,
+      name: '',
+      items: [navTabs.overview],
+    },
+    {
+      ...navTabGroups.detect,
+      items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
+    },
+    {
+      ...navTabGroups.explore,
+      items: [navTabs.hosts, navTabs.network],
+    },
+    {
+      ...navTabGroups.investigate,
+      items: hasCasesReadPermissions ? [navTabs.timelines, navTabs.case] : [navTabs.timelines],
+    },
+    {
+      ...navTabGroups.manage,
+      items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
+    },
+  ];
+}

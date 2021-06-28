@@ -6,15 +6,13 @@
  */
 
 import { useEffect } from 'react';
-import { pickBy } from 'lodash/fp';
 import { usePrimaryNavigation } from './use_primary_navigation';
-import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana';
 import { setBreadcrumbs } from '../breadcrumbs';
 import { makeMapStateToProps } from '../../url_state/helpers';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { navTabs } from '../../../../app/home/home_navigations';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { SecurityPageName } from '../../../../../common/constants';
 
 /**
  * @description - This hook provides the structure necessary by the KibanaPageTemplate for rendering the primary security_solution side navigation.
@@ -69,20 +67,10 @@ export const useSecuritySolutionNavigation = () => {
     navigateToUrl,
   ]);
 
-  const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
-
-  // build a list of tabs to exclude
-  const tabsToExclude = new Set<string>([
-    ...(!hasCasesReadPermissions ? [SecurityPageName.case] : []),
-  ]);
-
-  // include the tab if it is not in the set of excluded ones
-  const tabsToDisplay = pickBy((_, key) => !tabsToExclude.has(key), navTabs);
-
   return usePrimaryNavigation({
     query: urlState.query,
     filters: urlState.filters,
-    navTabs: tabsToDisplay,
+    navTabs,
     pageName,
     sourcerer: urlState.sourcerer,
     savedQuery: urlState.savedQuery,

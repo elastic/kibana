@@ -241,7 +241,7 @@ describe('useSecuritySolutionNavigation', () => {
           useSecuritySolutionNavigation()
         );
 
-        const caseNavItem = (result.current?.items || [])[0].items?.find(
+        const caseNavItem = (result.current?.items || [])[3].items?.find(
           (item) => item['data-test-subj'] === 'navigation-case'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
@@ -254,7 +254,7 @@ describe('useSecuritySolutionNavigation', () => {
             "isSelected": false,
             "name": "Cases",
             "onClick": [Function],
-          },
+          }
         `);
       });
 
@@ -268,7 +268,7 @@ describe('useSecuritySolutionNavigation', () => {
           useSecuritySolutionNavigation()
         );
 
-        const caseNavItem = (result.current?.items || [])[0].items?.find(
+        const caseNavItem = (result.current?.items || [])[3].items?.find(
           (item) => item['data-test-subj'] === 'navigation-case'
         );
         expect(caseNavItem).toBeFalsy();
