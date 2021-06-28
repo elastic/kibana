@@ -23,7 +23,7 @@ describe('CurationsLogic', () => {
   const { mount } = new LogicMounter(CurationsLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const MOCK_CURATIONS_RESPONSE = {
     meta: {
@@ -154,7 +154,7 @@ describe('CurationsLogic', () => {
           '/api/app_search/engines/some-engine/curations/some-curation-id'
         );
         expect(CurationsLogic.actions.loadCurations).toHaveBeenCalled();
-        expect(setSuccessMessage).toHaveBeenCalledWith('Successfully removed curation.');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Your curation was deleted');
       });
 
       it('handles errors', async () => {
