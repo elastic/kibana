@@ -45,7 +45,6 @@ SRC_DEPS = [
   "@npm//babel-loader",
   "@npm//compression-webpack-plugin",
   "@npm//core-js",
-  "@npm//css-minimizer-webpack-plugin",
   "@npm//css-loader",
   "@npm//fflate",
   "@npm//jquery",

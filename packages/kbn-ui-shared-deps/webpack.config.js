@@ -9,7 +9,7 @@
 const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+// const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 const CompressionPlugin = require('compression-webpack-plugin');
@@ -109,17 +109,17 @@ module.exports = {
 
   optimization: {
     minimizer: [
-      new CssMinimizerPlugin({
-        parallel: false,
-        minimizerOptions: {
-          preset: [
-            'default',
-            {
-              discardComments: false,
-            },
-          ],
-        },
-      }),
+      // new CssMinimizerPlugin({
+      //   parallel: false,
+      //   minimizerOptions: {
+      //     preset: [
+      //       'default',
+      //       {
+      //         discardComments: false,
+      //       },
+      //     ],
+      //   },
+      // }),
       new TerserPlugin({
         cache: false,
         sourceMap: false,
