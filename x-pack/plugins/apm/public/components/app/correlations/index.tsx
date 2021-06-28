@@ -96,7 +96,7 @@ export function Correlations() {
     const properties: IStickyProperty[] = [];
     if (serviceName !== undefined && nextEnvironment !== undefined) {
       properties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
+        label: i18n.translate('xpack.apm.correlations.serviceLabel', {
           defaultMessage: 'Service',
         }),
         fieldName: SERVICE_NAME,
@@ -106,7 +106,7 @@ export function Correlations() {
     }
     if (urlParams.transactionName) {
       properties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.transactionLabel', {
+        label: i18n.translate('xpack.apm.correlations.transactionLabel', {
           defaultMessage: 'Transaction',
         }),
         fieldName: TRANSACTION_NAME,
@@ -116,7 +116,7 @@ export function Correlations() {
     }
     if (urlParams.environment) {
       properties.push({
-        label: i18n.translate('xpack.apm.transactionDetails.environmentLabel', {
+        label: i18n.translate('xpack.apm.correlations.environmentLabel', {
           defaultMessage: 'Environment',
         }),
         fieldName: SERVICE_ENVIRONMENT,

@@ -20,8 +20,8 @@ import type { AlertingPlugin } from '../../alerting/server';
 import type { ActionsPlugin } from '../../actions/server';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import type {
-  PluginSetup as PluginSetupData,
-  PluginStart as PluginStartData,
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
 
 export interface LicenseCheckResult {
@@ -46,7 +46,7 @@ export interface SavedObjectsRouteDeps {
 
 export interface PluginsSetup {
   cloud: CloudSetup;
-  data: PluginSetupData;
+  data: DataPluginSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
@@ -58,7 +58,7 @@ export interface PluginsSetup {
 }
 
 export interface PluginsStart {
-  data: PluginStartData;
+  data: DataPluginStart;
   spaces?: SpacesPluginStart;
 }
 

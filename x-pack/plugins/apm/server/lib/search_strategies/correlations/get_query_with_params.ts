@@ -13,10 +13,7 @@ import {
   TRANSACTION_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import type { SearchServiceParams } from '../../../../common/search_strategies/correlations/types';
-import {
-  environmentQuery as getEnvironmentQuery,
-  rangeQuery as getRangeQuery,
-} from '../../../utils/queries';
+import { environmentQuery as getEnvironmentQuery } from '../../../utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
 const getPercentileThresholdValueQuery = (
@@ -40,6 +37,22 @@ export const getTermsQuery = (
   fieldValue: string | undefined
 ) => {
   return fieldName && fieldValue ? [{ term: { [fieldName]: fieldValue } }] : [];
+};
+
+const getRangeQuery = (
+  start?: string,
+  end?: string
+): estypes.QueryDslQueryContainer[] => {
+  return [
+    {
+      range: {
+        '@timestamp': {
+          ...(start !== undefined ? { gte: start } : {}),
+          ...(end !== undefined ? { lte: end } : {}),
+        },
+      },
+    },
+  ];
 };
 
 interface QueryParams {

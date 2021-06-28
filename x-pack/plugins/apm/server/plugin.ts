@@ -237,13 +237,12 @@ export class APMPlugin
     });
 
     // search strategies for async partial search results
-    core.getStartServices().then(() => {
+    if (plugins.data?.search?.registerSearchStrategy !== undefined) {
       plugins.data.search.registerSearchStrategy(
         'apmCorrelationsSearchStrategy',
         apmCorrelationsSearchStrategyProvider()
       );
-    });
-
+    }
     return {
       config$: mergedConfig$,
       getApmIndices: boundGetApmIndices,

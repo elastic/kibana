@@ -19,8 +19,8 @@ export function alertStatusQuery(status: AlertStatus) {
 }
 
 export function rangeQuery(
-  start?: number | string,
-  end?: number | string,
+  start?: number,
+  end?: number,
   field = '@timestamp'
 ): estypes.QueryDslQueryContainer[] {
   return [
@@ -29,9 +29,7 @@ export function rangeQuery(
         [field]: {
           gte: start,
           lte: end,
-          ...(typeof start === 'number' || typeof end === 'number'
-            ? { format: 'epoch_millis' }
-            : {}),
+          format: 'epoch_millis',
         },
       },
     },

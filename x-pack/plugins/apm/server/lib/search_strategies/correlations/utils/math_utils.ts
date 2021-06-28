@@ -39,8 +39,6 @@ export const isHistogramRoughlyEqual = (
 
 /** Round numeric to the nearest 5
  * E.g. if roundBy = 5, results will be 11 -> 10, 14 -> 10, 16 -> 20
- * @param n
- * @param roundBy
  */
 export const roundToNearest = (n: number, roundBy = 5) => {
   return Math.ceil((n + 1) / roundBy) * roundBy;
@@ -48,9 +46,6 @@ export const roundToNearest = (n: number, roundBy = 5) => {
 
 /**
  * Create a rough stringified version of the histogram
- * @param histogram
- * @param significantFraction
- * @param numBinsToSample
  */
 export const hashHistogram = (
   histogram: HistogramItem[],
