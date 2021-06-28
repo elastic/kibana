@@ -58,10 +58,7 @@ export const fetchTransactionDurationFractions = async (
 
   // Compute (doc count per bucket/total doc count)
   return {
-    fractions: [
-      0,
-      ...buckets.map((bucket) => bucket.doc_count / totalDocCount),
-    ],
+    fractions: buckets.map((bucket) => bucket.doc_count / totalDocCount),
     totalDocCount,
   };
 };

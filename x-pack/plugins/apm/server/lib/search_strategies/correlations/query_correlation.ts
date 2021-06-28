@@ -31,6 +31,7 @@ interface BucketCorrelation {
   function: {
     count_correlation: {
       indicator: {
+        fractions: number[];
         expectations: number[];
         doc_count: number;
       };
@@ -54,6 +55,7 @@ export const getTransactionDurationCorrelationRequest = (
     function: {
       count_correlation: {
         indicator: {
+          fractions,
           expectations,
           doc_count: totalDocCount,
         },
@@ -78,7 +80,8 @@ export const getTransactionDurationCorrelationRequest = (
       // KS test p value = ks_test.less
       ks_test: {
         bucket_count_ks_test: {
-          fractions,
+          // Remove 0 after https://github.com/elastic/elasticsearch/pull/74624 is merged
+          fractions: [0, ...fractions],
           buckets_path: 'latency_ranges>_count',
           alternative: ['less', 'greater', 'two_sided'],
         },
