@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
 import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
 jest.mock('../lib/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: (a: any) => a,
+  versionCheckHandlerWrapper: <P, Q, B>(handler: RequestHandler<P, Q, B>) => handler,
 }));
 
 const JOB_ID = 'job_id';
@@ -163,7 +163,7 @@ describe('ML snapshots APIs', () => {
   });
 
   describe('GET /api/upgrade_assistant/ml_snapshots/:jobId/:snapshotId', () => {
-    it('returns idle status if saved object does not exist', async () => {
+    it('returns "idle" status if saved object does not exist', async () => {
       (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
         .getModelSnapshots as jest.Mock).mockResolvedValue({
         body: {
@@ -205,6 +205,160 @@ describe('ML snapshots APIs', () => {
         nodeId: undefined,
         snapshotId: SNAPSHOT_ID,
         status: 'idle',
+      });
+    });
+
+    it('returns "in_progress" status if snapshot upgrade is in progress', async () => {
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+        .getModelSnapshots as jest.Mock).mockResolvedValue({
+        body: {
+          count: 1,
+          model_snapshots: [
+            {
+              job_id: JOB_ID,
+              min_version: '6.4.0',
+              timestamp: 1575402237000,
+              description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
+              snapshot_id: SNAPSHOT_ID,
+              snapshot_doc_count: 1,
+              model_size_stats: {},
+              latest_record_time_stamp: 1576971072000,
+              latest_result_time_stamp: 1576965600000,
+              retain: false,
+            },
+          ],
+        },
+      });
+
+      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+        total: 1,
+        saved_objects: [
+          {
+            attributes: {
+              nodeId: NODE_ID,
+              jobId: JOB_ID,
+              snapshotId: SNAPSHOT_ID,
+            },
+          },
+        ],
+      });
+
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.tasks
+        .list as jest.Mock).mockResolvedValue({
+        body: {
+          nodes: {
+            [NODE_ID]: {
+              tasks: {
+                [`${NODE_ID}:12345`]: {
+                  description: `job-snapshot-upgrade-${JOB_ID}-${SNAPSHOT_ID}`,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_snapshots/{jobId}/{snapshotId}',
+      })(
+        routeHandlerContextMock,
+        createRequestMock({
+          params: {
+            snapshotId: SNAPSHOT_ID,
+            jobId: JOB_ID,
+          },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        jobId: JOB_ID,
+        nodeId: NODE_ID,
+        snapshotId: SNAPSHOT_ID,
+        status: 'in_progress',
+      });
+    });
+
+    it('returns "complete" status if snapshot upgrade has completed', async () => {
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
+        .getModelSnapshots as jest.Mock).mockResolvedValue({
+        body: {
+          count: 1,
+          model_snapshots: [
+            {
+              job_id: JOB_ID,
+              min_version: '6.4.0',
+              timestamp: 1575402237000,
+              description: 'State persisted due to job close at 2019-12-03T19:43:57+0000',
+              snapshot_id: SNAPSHOT_ID,
+              snapshot_doc_count: 1,
+              model_size_stats: {},
+              latest_record_time_stamp: 1576971072000,
+              latest_result_time_stamp: 1576965600000,
+              retain: false,
+            },
+          ],
+        },
+      });
+
+      (routeHandlerContextMock.core.savedObjects.client.find as jest.Mock).mockResolvedValue({
+        total: 1,
+        saved_objects: [
+          {
+            attributes: {
+              nodeId: NODE_ID,
+              jobId: JOB_ID,
+              snapshotId: SNAPSHOT_ID,
+            },
+          },
+        ],
+      });
+
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.tasks
+        .list as jest.Mock).mockResolvedValue({
+        body: {
+          nodes: {
+            [NODE_ID]: {
+              tasks: {},
+            },
+          },
+        },
+      });
+
+      (routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.migration
+        .deprecations as jest.Mock).mockResolvedValue({
+        body: {
+          cluster_settings: [],
+          ml_settings: [],
+          node_settings: [],
+          index_settings: {},
+        },
+      });
+
+      (routeHandlerContextMock.core.savedObjects.client.delete as jest.Mock).mockResolvedValue({});
+
+      const resp = await routeDependencies.router.getHandler({
+        method: 'get',
+        pathPattern: '/api/upgrade_assistant/ml_snapshots/{jobId}/{snapshotId}',
+      })(
+        routeHandlerContextMock,
+        createRequestMock({
+          params: {
+            snapshotId: SNAPSHOT_ID,
+            jobId: JOB_ID,
+          },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(resp.status).toEqual(200);
+      expect(resp.payload).toEqual({
+        jobId: JOB_ID,
+        nodeId: NODE_ID,
+        snapshotId: SNAPSHOT_ID,
+        status: 'complete',
       });
     });
   });

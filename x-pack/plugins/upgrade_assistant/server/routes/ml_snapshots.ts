@@ -67,6 +67,13 @@ const verifySnapshotUpgrade = async (
       return /model snapshot/.test(deprecation.message);
     });
 
+    // If there are no ML deprecations, we assume the deprecation was resolved successfully
+    if (typeof mlSnapshotDeprecations === 'undefined' || mlSnapshotDeprecations.length === 0) {
+      return {
+        isSuccessful: true,
+      };
+    }
+
     const isSuccessful = Boolean(
       mlSnapshotDeprecations.find((snapshotDeprecation) => {
         const regex = /(?<=\[).*?(?=\])/g;
