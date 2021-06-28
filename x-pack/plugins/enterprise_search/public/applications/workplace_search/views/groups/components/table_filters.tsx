@@ -12,7 +12,6 @@ import { useActions, useValues } from 'kea';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AppLogic } from '../../../app_logic';
 import { GroupsLogic } from '../groups_logic';
 
 import { TableFilterSourcesDropdown } from './table_filter_sources_dropdown';
@@ -28,7 +27,6 @@ const FILTER_GROUPS_PLACEHOLDER = i18n.translate(
 export const TableFilters: React.FC = () => {
   const { setFilterValue } = useActions(GroupsLogic);
   const { filterValue } = useValues(GroupsLogic);
-  const { isFederatedAuth } = useValues(AppLogic);
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => setFilterValue(e.target.value);
 
@@ -47,11 +45,9 @@ export const TableFilters: React.FC = () => {
           <EuiFlexItem className="user-groups-filters__filter-sources">
             <TableFilterSourcesDropdown />
           </EuiFlexItem>
-          {!isFederatedAuth && (
-            <EuiFlexItem>
-              <TableFilterUsersDropdown />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem>
+            <TableFilterUsersDropdown />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
