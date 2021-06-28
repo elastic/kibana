@@ -386,11 +386,7 @@ export const getActionAttachment = ({
     isEdit: manageMarkdownEditIds.includes(comment.id),
   }),
   event: (
-    <HostIsolationCommentEvent
-      type={comment.actions.type}
-      hostId={comment.actions.endpointId}
-      hostName={comment.actions.hostname}
-    />
+    <HostIsolationCommentEvent type={comment.actions.type} endpoints={comment.actions.targets} />
   ),
   'data-test-subj': 'endpoint-action',
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,

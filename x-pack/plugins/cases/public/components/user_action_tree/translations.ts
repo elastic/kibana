@@ -64,3 +64,9 @@ export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost',
 export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
   defaultMessage: 'released host',
 });
+
+export const OTHER_ENDPOINTS = (endpoints: number): string =>
+  i18n.translate('xpack.cases.caseView.otherEndpoints', {
+    values: { endpoints },
+    defaultMessage: ` and {endpoints} {endpoints, one {other} plural, other {others}`,
+  });
