@@ -31,6 +31,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
     });
     return !hasImportPermission;
   },
+  isBeta: true,
   icon: DrawLayerIcon,
   prerequisiteSteps: [
     {
