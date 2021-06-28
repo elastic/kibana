@@ -22,8 +22,8 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
   const retry = getService('retry');
 
   return {
-    async sectionHeadingText() {
-      return await testSubjects.getVisibleText('sectionHeading');
+    async pageHeaderText() {
+      return await testSubjects.getVisibleText('ilmPageHeader');
     },
     async createPolicyButton() {
       return await testSubjects.find('createPolicyButton');

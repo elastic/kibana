@@ -14,7 +14,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexLifecycleManagement']);
   const log = getService('log');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
   const esClient = getService('es');
 
   describe('Home page', function () {
@@ -27,8 +26,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Loads the app', async () => {
-      await log.debug('Checking for section header');
-      const headerText = await pageObjects.indexLifecycleManagement.sectionHeadingText();
+      await log.debug('Checking for page header');
+      const headerText = await pageObjects.indexLifecycleManagement.pageHeaderText();
       expect(headerText).to.be('Index Lifecycle Policies');
 
       const createPolicyButton = await pageObjects.indexLifecycleManagement.createPolicyButton();
@@ -45,7 +44,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await retry.waitFor('navigation back to home page.', async () => {
-        return (await testSubjects.getVisibleText('sectionHeading')) === 'Index Lifecycle Policies';
+        return (
+          (await pageObjects.indexLifecycleManagement.pageHeaderText()) ===
+          'Index Lifecycle Policies'
+        );
       });
 
       await pageObjects.indexLifecycleManagement.increasePolicyListPageSize();
