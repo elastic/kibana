@@ -48,7 +48,6 @@ import {
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
-  getServices,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { registerFeature } from './register_feature';
@@ -474,7 +473,6 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
-      getServices().kibanaLegacy.loadFontAwesome();
       const { getInnerAngularModuleEmbeddable } = await import(
         './application/angular/get_inner_angular'
       );
