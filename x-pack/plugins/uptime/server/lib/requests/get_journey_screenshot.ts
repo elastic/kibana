@@ -5,22 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { isRight } from 'fp-ts/lib/Either';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  RefResult,
-  RefResultType,
-  FullScreenshot,
-  FullScreenshotType,
-} from '../../../common/runtime_types/ping/synthetics';
+import { RefResult, FullScreenshot } from '../../../common/runtime_types/ping/synthetics';
 
-const ResultWrapperType = t.array(
-  t.type({
-    _source: t.union([RefResultType, FullScreenshotType]),
-  })
-);
+interface ResultType {
+  _source: RefResult | FullScreenshot;
+}
 
 export type ScreenshotReturnTypesUnion =
   | ((FullScreenshot | RefResult) & { totalSteps: number })
@@ -60,16 +51,6 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
           image: {
             top_hits: {
               size: 1,
-              _source: [
-                '@timestamp',
-                'monitor.check_group',
-                'screenshot_ref',
-                'synthetics.package_version',
-                'synthetics.step',
-                'synthetics.type',
-                'synthetics.blob',
-                'synthetics.blob_mime',
-              ],
             },
           },
         },
@@ -79,17 +60,8 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
 
   const result = await uptimeEsClient.search({ body });
 
-  const decoded = ResultWrapperType.decode(result.body.aggregations?.step.image.hits.hits ?? null);
-
-  if (!isRight(decoded)) throw Error('Error parsing journey screenshot type. Malformed data.');
-
-  const screenshotsOrRefs = decoded.right;
-
-  if (screenshotsOrRefs.length > 1) {
-    throw Error(
-      'Error parsing journey screenshot type. There should only be one screenshot per step.'
-    );
-  }
+  const screenshotsOrRefs =
+    (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;
 
   if (screenshotsOrRefs.length === 0) return null;
 

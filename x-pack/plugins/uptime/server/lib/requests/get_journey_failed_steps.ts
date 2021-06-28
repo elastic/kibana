@@ -6,10 +6,9 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { isRight } from 'fp-ts/lib/Either';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { JourneyStepType, JourneyStep } from '../../../common/runtime_types';
+import { JourneyStep } from '../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyStepsParams {
   checkGroups: string[];
@@ -54,13 +53,7 @@ export const getJourneyFailedSteps: UMElasticsearchQueryFn<
   const { body: result } = await uptimeEsClient.search({ body: params });
 
   return result.hits.hits.map(({ _id, _source }) => {
-    const decoded = JourneyStepType.decode(Object.assign({ _id }, _source));
-    if (!isRight(decoded)) {
-      throw Error(
-        'Unable to parse data for failed journey steps. Invalid format or missing fields.'
-      );
-    }
-    const { right: step } = decoded;
+    const step = Object.assign({ _id }, _source) as JourneyStep;
     return {
       ...step,
       timestamp: step['@timestamp'],
