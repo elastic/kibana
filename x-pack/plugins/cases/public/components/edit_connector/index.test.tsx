@@ -34,7 +34,6 @@ const caseServices = {
 const defaultProps: EditConnectorProps = {
   caseData: basicCase,
   caseServices,
-  caseFields: null,
   configureCasesNavigation: {
     href: 'blah',
     onClick: jest.fn(),
@@ -45,7 +44,6 @@ const defaultProps: EditConnectorProps = {
   isLoading: false,
   isValidConnector: true,
   onSubmit,
-  selectedConnector: 'none',
   updateCase,
   userActions: caseUserActions,
   userCanCrud: true,
@@ -148,7 +146,7 @@ describe('EditConnector ', () => {
       wrapper.update();
       expect(formHookMock.setFieldValue).toBeCalledWith(
         'connectorId',
-        defaultProps.selectedConnector
+        defaultProps.caseData.connector.id
       );
     });
   });
