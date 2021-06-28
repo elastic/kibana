@@ -39,13 +39,11 @@ const allRulesTabs = [
     id: AllRulesTabs.rules,
     name: i18n.RULES_TAB,
     disabled: false,
-    href: '/rules',
   },
   {
     id: AllRulesTabs.monitoring,
     name: i18n.MONITORING_TAB,
     disabled: false,
-    href: '/rules/monitoring',
   },
 ];
 /**

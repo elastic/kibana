@@ -61,8 +61,6 @@ export const SAVED_OBJECTS_MANAGEMENT_FEATURE_ID = 'Saved Objects Management';
 export const DEFAULT_INDICATOR_SOURCE_PATH = 'threatintel.indicator';
 export const INDICATOR_DESTINATION_PATH = 'threat.indicator';
 
-export const DETECTIONS = 'detections';
-
 export enum SecurityPageName {
   overview = 'overview',
   detections = 'detections',
@@ -75,6 +73,7 @@ export enum SecurityPageName {
   case = 'case',
   administration = 'administration',
   endpoints = 'endpoints',
+  policies = 'policies',
   trustedApps = 'trusted_apps',
   eventFilters = 'event_filters',
 }

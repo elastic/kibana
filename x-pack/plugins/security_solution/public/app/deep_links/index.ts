@@ -18,6 +18,7 @@ import {
 } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
+  DETECT,
   ALERTS,
   RULES,
   EXCEPTIONS,
@@ -28,7 +29,6 @@ import {
   ADMINISTRATION,
 } from '../translations';
 import {
-  APP_ICON_SOLUTION,
   OVERVIEW_PATH,
   ALERTS_PATH,
   RULES_PATH,
@@ -54,20 +54,17 @@ export const topDeepLinks: AppDeepLink[] = [
       }),
     ],
     order: 9000,
-    euiIconType: APP_ICON_SOLUTION,
   },
   {
     id: SecurityPageName.detections,
-    title: ALERTS,
+    title: DETECT,
     path: ALERTS_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [
-      i18n.translate('xpack.securitySolution.search.detections', {
-        defaultMessage: 'Detections',
+      i18n.translate('xpack.securitySolution.search.detect', {
+        defaultMessage: 'Detect',
       }),
     ],
-    order: 9001,
-    euiIconType: APP_ICON_SOLUTION,
   },
   {
     id: SecurityPageName.hosts,
@@ -80,7 +77,6 @@ export const topDeepLinks: AppDeepLink[] = [
       }),
     ],
     order: 9002,
-    euiIconType: APP_ICON_SOLUTION,
   },
   {
     id: SecurityPageName.network,
@@ -93,7 +89,6 @@ export const topDeepLinks: AppDeepLink[] = [
       }),
     ],
     order: 9003,
-    euiIconType: APP_ICON_SOLUTION,
   },
   {
     id: SecurityPageName.timelines,
@@ -105,8 +100,7 @@ export const topDeepLinks: AppDeepLink[] = [
         defaultMessage: 'Timelines',
       }),
     ],
-    order: 9002,
-    euiIconType: APP_ICON_SOLUTION,
+    order: 9004,
   },
   {
     id: SecurityPageName.case,
@@ -118,8 +112,7 @@ export const topDeepLinks: AppDeepLink[] = [
         defaultMessage: 'Cases',
       }),
     ],
-    order: 9002,
-    euiIconType: APP_ICON_SOLUTION,
+    order: 9005,
   },
   {
     id: SecurityPageName.administration,
@@ -131,8 +124,6 @@ export const topDeepLinks: AppDeepLink[] = [
         defaultMessage: 'Administration',
       }),
     ],
-    order: 9004,
-    euiIconType: APP_ICON_SOLUTION,
   },
 ];
 
@@ -154,7 +145,6 @@ const nestedDeepLinks: SecurityDeepLinks = {
         ],
         searchable: true,
         order: 9001,
-        euiIconType: APP_ICON_SOLUTION,
       },
       {
         id: SecurityPageName.rules,
@@ -167,8 +157,6 @@ const nestedDeepLinks: SecurityDeepLinks = {
           }),
         ],
         searchable: true,
-        order: 9001,
-        euiIconType: APP_ICON_SOLUTION,
       },
       {
         id: SecurityPageName.exceptions,
@@ -181,7 +169,6 @@ const nestedDeepLinks: SecurityDeepLinks = {
           }),
         ],
         searchable: true,
-        order: 9001,
       },
     ],
   },
@@ -306,6 +293,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         title: i18n.translate('xpack.securitySolution.search.administration.endpoints', {
           defaultMessage: 'Endpoints',
         }),
+        order: 9006,
         path: ENDPOINTS_PATH,
       },
       {
@@ -343,15 +331,14 @@ export function getDeepLinks(
     .map((deepLink) => {
       const deepLinkId = deepLink.id as SecurityDeepLinkName;
       const subPluginDeepLinks = nestedDeepLinks[deepLinkId];
-      const baseDeepLinks = [...subPluginDeepLinks.base];
-      if (isPremiumLicense(licenseType)) {
-        const premiumDeepLinks = subPluginDeepLinks && subPluginDeepLinks.premium;
-        if (premiumDeepLinks !== undefined) {
-          return {
-            ...deepLink,
-            deepLinks: [...baseDeepLinks, ...premiumDeepLinks],
-          };
-        }
+      const baseDeepLinks = Array.isArray(subPluginDeepLinks.base)
+        ? [...subPluginDeepLinks.base]
+        : [];
+      if (isPremiumLicense(licenseType) && subPluginDeepLinks?.premium) {
+        return {
+          ...deepLink,
+          deepLinks: [...baseDeepLinks, ...subPluginDeepLinks.premium],
+        };
       }
       return {
         ...deepLink,
@@ -362,11 +349,10 @@ export function getDeepLinks(
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {
   return (
-    licenseType !== undefined &&
-    (licenseType === 'gold' ||
-      licenseType === 'platinum' ||
-      licenseType === 'enterprise' ||
-      licenseType === 'trial')
+    licenseType === 'gold' ||
+    licenseType === 'platinum' ||
+    licenseType === 'enterprise' ||
+    licenseType === 'trial'
   );
 }
 

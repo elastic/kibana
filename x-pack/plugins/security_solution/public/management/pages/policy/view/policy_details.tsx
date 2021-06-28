@@ -206,7 +206,6 @@ export const PolicyDetails = React.memo(() => {
                   defaultMessage: 'Back to endpoint hosts',
                 }
               ),
-              href: '',
               pageId: SecurityPageName.endpoints,
               dataTestSubj: 'policyDetailsBackLink',
             }}

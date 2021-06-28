@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
 import { navTabGroups } from '../../../../app/home/home_navigations';
 import { APP_ID } from '../../../../../common/constants';
-import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
 import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
@@ -31,7 +30,6 @@ export const usePrimaryNavigationItems = ({
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
         navigateToApp(APP_ID, { deepLinkId: id, path: urlSearch });
-        track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
       };
 
       const appHref = getUrlForApp(APP_ID, { deepLinkId: id, path: urlSearch });

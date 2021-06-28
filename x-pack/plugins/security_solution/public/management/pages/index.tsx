@@ -13,14 +13,14 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_ROOT_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from '../common/constants';
+import { TrackApplicationView } from '../../../../../../src/plugins/usage_collection/public';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
-import { SecurityPageName } from '../../../common/constants';
+import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { EventFiltersContainer } from './event_filters';
@@ -64,12 +64,28 @@ export const ManagementContainer = memo(() => {
 
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppsContainer} />
-      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
+      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}>
+        <TrackApplicationView viewId={SecurityPageName.endpoints}>
+          <EndpointsContainer />
+        </TrackApplicationView>
+      </Route>
+      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH}>
+        <TrackApplicationView viewId={SecurityPageName.policies}>
+          <PolicyContainer />
+        </TrackApplicationView>
+      </Route>
+      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}>
+        <TrackApplicationView viewId={SecurityPageName.trustedApps}>
+          <TrustedAppsContainer />
+        </TrackApplicationView>
+      </Route>
+      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}>
+        <TrackApplicationView viewId={SecurityPageName.eventFilters}>
+          <EventFiltersContainer />
+        </TrackApplicationView>
+      </Route>
 
-      <Route path={MANAGEMENT_ROUTING_ROOT_PATH} exact>
+      <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>
       <Route path="*" component={NotFoundPage} />

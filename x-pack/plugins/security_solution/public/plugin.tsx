@@ -42,6 +42,7 @@ import {
   DEFAULT_INDEX_KEY,
   DETECTION_ENGINE_INDEX_URL,
   DEFAULT_ALERTS_INDEX,
+  APP_ICON_SOLUTION,
 } from '../common/constants';
 
 import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
@@ -145,8 +146,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       navLinkStatus: AppNavLinkStatus.hidden,
+      searchable: true,
       defaultPath: OVERVIEW_PATH,
       updater$: this.appUpdater$,
+      euiIconType: APP_ICON_SOLUTION,
       deepLinks: getDeepLinks(),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
