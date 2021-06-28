@@ -272,7 +272,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDescription"
-                defaultMessage="You've reached the maximum number of snapshots. To view all of your snapshots, use {docLink}."
+                defaultMessage="You've reached the maximum number of viewable snapshots. To view all of your snapshots, use {docLink}."
                 values={{
                   docLink: (
                     <EuiLink
