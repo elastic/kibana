@@ -9,7 +9,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Auditd Max Failed Login Attempts",
-  "query": "event.module:auditd and event.action:\"failed-log-in-too-many-times-to\"",
+  "query": "event.module:auditd and event.action:\"failed-log-in-too-many-times-to\"\n",
   "references": [
     "https://github.com/linux-pam/linux-pam/blob/0adbaeb273da1d45213134aa271e95987103281c/modules/pam_faillock/pam_faillock.c#L574"
   ],

@@ -8,7 +8,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IFieldType } from '../../index_patterns';
+import { IndexPatternBase } from '..';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -83,17 +84,14 @@ export const getRangeFilterField = (filter: RangeFilter) => {
 };
 
 const formatValue = (field: IFieldType, params: any[]) =>
-  map(params, (val: any, key: string) => get(operators, key) + format(field, val)).join(' ');
-
-const format = (field: IFieldType, value: any) =>
-  field && field.format && field.format.convert ? field.format.convert(value) : value;
+  map(params, (val: any, key: string) => get(operators, key) + val).join(' ');
 
 // Creates a filter where the value for the given field is in the given range
 // params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
 export const buildRangeFilter = (
   field: IFieldType,
   params: RangeFilterParams,
-  indexPattern: IIndexPattern,
+  indexPattern: IndexPatternBase,
   formattedValue?: string
 ): RangeFilter => {
   const filter: any = { meta: { index: indexPattern.id, params: {} } };

@@ -21,6 +21,7 @@ import {
   EuiCheckboxGroup,
   EuiButton,
   EuiLink,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -158,6 +159,10 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
       </EuiFormRow>
     );
   });
+  const unenrollmentTimeoutText = i18n.translate(
+    'xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel',
+    { defaultMessage: 'Unenrollment timeout' }
+  );
 
   const advancedOptionsContent = (
     <>
@@ -296,6 +301,27 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             });
           }}
         />
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={<h4>{unenrollmentTimeoutText}</h4>}
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription"
+            defaultMessage="An optional timeout in seconds. If provided, an agent will automatically unenroll after being gone for this period of time."
+          />
+        }
+      >
+        <EuiFormRow fullWidth>
+          <EuiFieldNumber
+            fullWidth
+            value={agentPolicy.unenroll_timeout}
+            min={1}
+            onChange={(e) => updateAgentPolicy({ unenroll_timeout: Number(e.target.value) })}
+            isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+            onBlur={() => setTouchedFields({ ...touchedFields, unenroll_timeout: true })}
+            placeholder={unenrollmentTimeoutText}
+          />
+        </EuiFormRow>
       </EuiDescribedFormGroup>
       {isEditing &&
       'id' in agentPolicy &&

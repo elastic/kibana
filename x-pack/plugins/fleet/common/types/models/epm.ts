@@ -14,6 +14,7 @@ import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
+  monitoringTypes,
   installationStatuses,
 } from '../../constants';
 import type { ValueOf } from '../../types';
@@ -92,7 +93,7 @@ export enum ElasticsearchAssetType {
 }
 
 export type DataType = typeof dataTypes;
-
+export type MonitoringType = typeof monitoringTypes;
 export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type ArchivePackage = PackageSpecManifest &

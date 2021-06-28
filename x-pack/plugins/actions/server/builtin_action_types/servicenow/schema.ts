@@ -24,14 +24,6 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
   ExternalIncidentServiceSecretConfiguration
 );
 
-export const ExecutorSubActionSchema = schema.oneOf([
-  schema.literal('getFields'),
-  schema.literal('getIncident'),
-  schema.literal('pushToService'),
-  schema.literal('handshake'),
-  schema.literal('getChoices'),
-]);
-
 const CommentsSchema = schema.nullable(
   schema.arrayOf(
     schema.object({
