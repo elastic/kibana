@@ -1,49 +1,3 @@
-
-{
-  "attributes": {
-    "fields": "[]",
-    "title": "delete_me"
-  },
-  "coreMigrationVersion": "8.0.0",
-  "id": "idThatDoesNotExitForESGeoGridSource",
-  "migrationVersion": {
-    "index-pattern": "7.11.0"
-  },
-  "references": [],
-  "type": "index-pattern",
-  "version": "WzM3LDJd"
-}
-
-{
-  "attributes": {
-    "fields": "[]",
-    "title": "delete_me"
-  },
-  "coreMigrationVersion": "8.0.0",
-  "id": "idThatDoesNotExitForESSearchSource",
-  "migrationVersion": {
-    "index-pattern": "7.11.0"
-  },
-  "references": [],
-  "type": "index-pattern",
-  "version": "WzM3LDJd"
-}
-
-{
-  "attributes": {
-    "fields": "[]",
-    "title": "delete_me"
-  },
-  "coreMigrationVersion": "8.0.0",
-  "id": "idThatDoesNotExitForESJoinSource",
-  "migrationVersion": {
-    "index-pattern": "7.11.0"
-  },
-  "references": [],
-  "type": "index-pattern",
-  "version": "WzM3LDJd"
-}
-
 {
   "attributes": {
     "fields": "[]",
@@ -790,6 +744,50 @@
   ],
   "type": "map",
   "version": "WzQ0LDJd"
+}
+
+{
+  "attributes": {
+    "description": "Ok responses for jpg files",
+    "filters": [
+      {
+        "$state": {
+          "store": "appState"
+        },
+        "meta": {
+          "alias": null,
+          "disabled": false,
+          "index": "b15b1d40-a8bb-11e9-98cf-2bb06ef63e0b",
+          "key": "extension.raw",
+          "negate": false,
+          "params": {
+            "query": "jpg"
+          },
+          "type": "phrase",
+          "value": "jpg"
+        },
+        "query": {
+          "match": {
+            "extension.raw": {
+              "query": "jpg",
+              "type": "phrase"
+            }
+          }
+        }
+      }
+    ],
+    "query": {
+      "language": "kuery",
+      "query": "response:200"
+    },
+    "title": "OKJpgs"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "OKJpgs",
+  "references": [],
+  "type": "query",
+  "updated_at": "2019-07-17T17:54:26.378Z",
+  "version": "WzY5LDJd"
 }
 
 {
