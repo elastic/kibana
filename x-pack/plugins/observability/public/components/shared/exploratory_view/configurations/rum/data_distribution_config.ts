@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, RECORDS_FIELD } from '../constants';
+import { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -39,13 +39,13 @@ import {
   WEB_APPLICATION_LABEL,
 } from '../constants/labels';
 
-export function getRumDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     reportType: 'data-distribution',
     defaultSeriesType: 'line',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: 'performance.metric',
+      sourceField: REPORT_METRIC_FIELD,
     },
     yAxisColumns: [
       {
@@ -54,7 +54,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): DataSer
       },
     ],
     hasOperationType: false,
-    defaultFilters: [
+    filterFields: [
       {
         field: TRANSACTION_URL,
         isNegated: false,
@@ -67,34 +67,22 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): DataSer
         nested: USER_AGENT_VERSION,
       },
     ],
-    breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
-    reportDefinitions: [
+    breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
+    metricOptions: [
+      { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
       {
-        field: SERVICE_NAME,
-        required: true,
+        label: BACKEND_TIME_LABEL,
+        id: TRANSACTION_TIME_TO_FIRST_BYTE,
+        field: TRANSACTION_TIME_TO_FIRST_BYTE,
       },
-      {
-        field: SERVICE_ENVIRONMENT,
-      },
-      {
-        field: 'performance.metric',
-        custom: true,
-        options: [
-          { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
-          {
-            label: BACKEND_TIME_LABEL,
-            id: TRANSACTION_TIME_TO_FIRST_BYTE,
-            field: TRANSACTION_TIME_TO_FIRST_BYTE,
-          },
-          { label: FCP_LABEL, id: FCP_FIELD, field: FCP_FIELD },
-          { label: TBT_LABEL, id: TBT_FIELD, field: TBT_FIELD },
-          { label: LCP_LABEL, id: LCP_FIELD, field: LCP_FIELD },
-          { label: FID_LABEL, id: FID_FIELD, field: FID_FIELD },
-          { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
-        ],
-      },
+      { label: FCP_LABEL, id: FCP_FIELD, field: FCP_FIELD },
+      { label: TBT_LABEL, id: TBT_FIELD, field: TBT_FIELD },
+      { label: LCP_LABEL, id: LCP_FIELD, field: LCP_FIELD },
+      { label: FID_LABEL, id: FID_FIELD, field: FID_FIELD },
+      { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
     ],
-    filters: [
+    baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
