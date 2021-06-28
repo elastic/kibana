@@ -12,6 +12,7 @@ import { Feature } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
+  getEditState,
   getLayerById,
   getLayerList,
   getLayerListRaw,
@@ -482,6 +483,11 @@ function removeLayerFromLayerList(layerId: string) {
       type: REMOVE_LAYER,
       id: layerId,
     });
+    // Clean up draw state if needed
+    const editState = getEditState(getState());
+    if (layerId === editState?.layerId) {
+      dispatch(setDrawMode(DRAW_MODE.NONE));
+    }
   };
 }
 
