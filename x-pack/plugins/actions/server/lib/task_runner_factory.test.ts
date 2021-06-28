@@ -133,6 +133,9 @@ test('executes the task by calling the executor with proper parameters', async (
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
@@ -255,6 +258,9 @@ test('uses API key when provided', async () => {
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
@@ -300,6 +306,9 @@ test('uses relatedSavedObjects when provided', async () => {
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 });
 
@@ -323,7 +332,6 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
   });
 
   await taskRunner.run();
-
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
@@ -334,6 +342,9 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 });
 
@@ -363,6 +374,9 @@ test(`doesn't use API key when not provided`, async () => {
     request: expect.objectContaining({
       headers: {},
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
