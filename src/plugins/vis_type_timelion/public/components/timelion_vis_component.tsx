@@ -18,6 +18,7 @@ import {
   LegendPositionConfig,
   LayoutDirection,
 } from '@elastic/charts';
+import { EuiTitle } from '@elastic/eui';
 
 import { useKibana } from '../../../kibana_react/public';
 
@@ -174,7 +175,11 @@ const TimelionVisComponent = ({
 
   return (
     <div className="timelionChart">
-      <div className="timelionChart__topTitle">{title}</div>
+      {title && (
+        <EuiTitle className="timelionChart__topTitle" size="xxxs">
+          <h4>{title}</h4>
+        </EuiTitle>
+      )}
       <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
         <Settings
           onBrushEnd={brushEndListener}
