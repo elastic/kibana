@@ -12,7 +12,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '.',
   roots: ['<rootDir>/src', '<rootDir>/packages'],
-  testMatch: ['**/migrationsv2/integration_tests**/*.test.{js,mjs,ts,tsx}'],
+  testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
   testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),
