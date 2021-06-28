@@ -79,24 +79,23 @@ export const OAuthAuthorize: React.FC = () => {
     }
   };
 
-  const scopeListItems = cachedPreAuth?.scopes?.map((scope) => {
+  const scopeListItems = cachedPreAuth?.scopes?.map((scope, i) => {
     const scopeDesc = scopeDescription(scope);
+    const unknownScopeDesc = (
+      <FormattedMessage
+        id="xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.unknownScopeDescription"
+        defaultMessage="{unknownAction} your data"
+        values={{
+          unknownAction: scope,
+        }}
+      />
+    );
 
-    if (scopeDesc) {
-      return <li>{scopeDesc}</li>;
-    } else {
-      return (
-        <li>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.workplaceSearch.oauthAuthorize.unknownScopeDescription"
-            defaultMessage="{unknownAction} your data"
-            values={{
-              unknownAction: scope,
-            }}
-          />
-        </li>
-      );
-    }
+    return (
+      <li key={i} data-test-subj="ScopeDescription">
+        {scopeDesc || unknownScopeDesc}
+      </li>
+    );
   });
 
   const authorizationDetails = (
