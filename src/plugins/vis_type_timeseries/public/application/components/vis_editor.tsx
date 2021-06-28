@@ -230,7 +230,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
                     }}
                   >
                     <FormattedMessage
-                      id="xpack.fleet.homeIntegration.tutorialDirectory.dismissNoticeButtonText"
+                      id="visTypeTimeseries.visEditorVisualization.indexPatternMode.dismissNoticeButtonText"
                       defaultMessage="Dismiss message"
                     />
                   </EuiButton>
