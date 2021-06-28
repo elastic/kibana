@@ -57,16 +57,6 @@ export function monitoringClustersProvider($injector) {
       }
     }
 
-    // async function ensureAlertsEnabled() {
-    //   try {
-    //     return $http.post('../api/monitoring/v1/alerts/enable', {});
-    //   } catch (err) {
-    //     const Private = $injector.get('Private');
-    //     const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
-    //     return ajaxErrorHandlers(err);
-    //   }
-    // }
-
     async function ensureMetricbeatEnabled() {
       if (Legacy.shims.isCloud) {
         return;
