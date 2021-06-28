@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_PERCENTAGE_FIELD } from '../constants';
+import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -45,7 +45,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
     defaultSeriesType: 'line',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: 'performance.metric',
+      sourceField: REPORT_METRIC_FIELD,
     },
     yAxisColumns: [
       {
@@ -68,31 +68,19 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
       },
     ],
     breakdownFields: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
-    reportDefinitions: [
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
+    metricOptions: [
+      { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
       {
-        field: SERVICE_NAME,
-        required: true,
+        label: BACKEND_TIME_LABEL,
+        id: TRANSACTION_TIME_TO_FIRST_BYTE,
+        field: TRANSACTION_TIME_TO_FIRST_BYTE,
       },
-      {
-        field: SERVICE_ENVIRONMENT,
-      },
-      {
-        field: 'performance.metric',
-        custom: true,
-        options: [
-          { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
-          {
-            label: BACKEND_TIME_LABEL,
-            id: TRANSACTION_TIME_TO_FIRST_BYTE,
-            field: TRANSACTION_TIME_TO_FIRST_BYTE,
-          },
-          { label: FCP_LABEL, id: FCP_FIELD, field: FCP_FIELD },
-          { label: TBT_LABEL, id: TBT_FIELD, field: TBT_FIELD },
-          { label: LCP_LABEL, id: LCP_FIELD, field: LCP_FIELD },
-          { label: FID_LABEL, id: FID_FIELD, field: FID_FIELD },
-          { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
-        ],
-      },
+      { label: FCP_LABEL, id: FCP_FIELD, field: FCP_FIELD },
+      { label: TBT_LABEL, id: TBT_FIELD, field: TBT_FIELD },
+      { label: LCP_LABEL, id: LCP_FIELD, field: LCP_FIELD },
+      { label: FID_LABEL, id: FID_FIELD, field: FID_FIELD },
+      { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
     ],
     baseFilters: [
       ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),

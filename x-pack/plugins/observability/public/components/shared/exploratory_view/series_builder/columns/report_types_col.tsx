@@ -77,8 +77,7 @@ export function ReportTypesCol({ seriesId, reportTypes }: Props) {
                 setSeries(seriesId, {
                   ...restSeries,
                   reportType,
-                  operationType: undefined,
-                  reportDefinitions: {},
+                  selectedMetricField: undefined,
                   time: restSeries?.time ?? DEFAULT_TIME,
                 });
               }

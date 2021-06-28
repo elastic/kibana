@@ -142,7 +142,7 @@ export function SeriesBuilder({
           return loading ? (
             LOADING_VIEW
           ) : reportType ? (
-            <ReportDefinitionCol seriesId={seriesId} dataViewSeries={seriesConfig} />
+            <ReportDefinitionCol seriesId={seriesId} seriesConfig={seriesConfig} />
           ) : (
             SELECT_REPORT_TYPE
           );

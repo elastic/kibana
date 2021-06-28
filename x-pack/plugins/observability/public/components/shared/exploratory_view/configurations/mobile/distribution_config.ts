@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD } from '../constants';
+import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
@@ -25,7 +25,7 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
     defaultSeriesType: 'bar',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
-      sourceField: 'performance.metric',
+      sourceField: REPORT_METRIC_FIELD,
     },
     yAxisColumns: [
       {
@@ -43,38 +43,25 @@ export function getMobileKPIDistributionConfig({ indexPattern }: ConfigProps): S
       ...MobileFields,
       [SERVICE_NAME]: MOBILE_APP,
     },
-    reportDefinitions: [
+    definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
+    metricOptions: [
       {
-        field: SERVICE_NAME,
-        required: true,
+        label: RESPONSE_LATENCY,
+        field: TRANSACTION_DURATION,
+        id: TRANSACTION_DURATION,
+        columnType: OPERATION_COLUMN,
       },
       {
-        field: SERVICE_ENVIRONMENT,
-        required: true,
+        label: MEMORY_USAGE,
+        field: METRIC_SYSTEM_MEMORY_USAGE,
+        id: METRIC_SYSTEM_MEMORY_USAGE,
+        columnType: OPERATION_COLUMN,
       },
       {
-        field: 'performance.metric',
-        custom: true,
-        options: [
-          {
-            label: RESPONSE_LATENCY,
-            field: TRANSACTION_DURATION,
-            id: TRANSACTION_DURATION,
-            columnType: OPERATION_COLUMN,
-          },
-          {
-            label: MEMORY_USAGE,
-            field: METRIC_SYSTEM_MEMORY_USAGE,
-            id: METRIC_SYSTEM_MEMORY_USAGE,
-            columnType: OPERATION_COLUMN,
-          },
-          {
-            label: CPU_USAGE,
-            field: METRIC_SYSTEM_CPU_USAGE,
-            id: METRIC_SYSTEM_CPU_USAGE,
-            columnType: OPERATION_COLUMN,
-          },
-        ],
+        label: CPU_USAGE,
+        field: METRIC_SYSTEM_CPU_USAGE,
+        id: METRIC_SYSTEM_CPU_USAGE,
+        columnType: OPERATION_COLUMN,
       },
     ],
   };

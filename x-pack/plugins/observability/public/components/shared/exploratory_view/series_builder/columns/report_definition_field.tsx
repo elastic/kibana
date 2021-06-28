@@ -33,7 +33,7 @@ export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange 
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
-  const { labels, baseFilters, reportDefinitions } = seriesConfig;
+  const { labels, baseFilters, definitionFields } = seriesConfig;
 
   const queryFilters = useMemo(() => {
     const filtersN: ESFilter[] = [];
@@ -48,8 +48,8 @@ export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange 
     });
 
     if (!isEmpty(selectedReportDefinitions)) {
-      reportDefinitions.forEach(({ field: fieldT, custom }) => {
-        if (!custom && indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
+      definitionFields.forEach((fieldT) => {
+        if (indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
           const values = selectedReportDefinitions?.[fieldT];
           const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
           filtersN.push(valueFilter.query);

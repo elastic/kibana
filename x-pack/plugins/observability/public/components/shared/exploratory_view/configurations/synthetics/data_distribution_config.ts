@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_PERCENTAGE_FIELD } from '../constants';
+import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 import { MONITORS_DURATION_LABEL, PINGS_LABEL } from '../constants/labels';
 
@@ -19,7 +19,7 @@ export function getSyntheticsDistributionConfig({
     defaultSeriesType: series?.seriesType || 'line',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: 'performance.metric',
+      sourceField: REPORT_METRIC_FIELD,
     },
     yAxisColumns: [
       {
@@ -38,20 +38,9 @@ export function getSyntheticsDistributionConfig({
       'url.port',
     ],
     baseFilters: [...buildExistsFilter('summary.up', indexPattern)],
-    reportDefinitions: [
-      {
-        field: 'monitor.name',
-      },
-      {
-        field: 'url.full',
-      },
-      {
-        field: 'performance.metric',
-        custom: true,
-        options: [
-          { label: 'Monitor duration', id: 'monitor.duration.us', field: 'monitor.duration.us' },
-        ],
-      },
+    definitionFields: ['monitor.name', 'url.full'],
+    metricOptions: [
+      { label: 'Monitor duration', id: 'monitor.duration.us', field: 'monitor.duration.us' },
     ],
     labels: { ...FieldLabels, 'monitor.duration.us': MONITORS_DURATION_LABEL },
   };

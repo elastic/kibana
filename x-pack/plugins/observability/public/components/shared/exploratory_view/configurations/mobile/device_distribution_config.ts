@@ -39,11 +39,6 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
       ...MobileFields,
       [SERVICE_NAME]: MOBILE_APP,
     },
-    reportDefinitions: [
-      {
-        field: SERVICE_NAME,
-        required: true,
-      },
-    ],
+    definitionFields: [SERVICE_NAME],
   };
 }

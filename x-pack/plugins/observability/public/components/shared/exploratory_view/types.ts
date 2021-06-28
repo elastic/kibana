@@ -37,19 +37,14 @@ export interface ColumnFilter {
   query: string;
 }
 
-export interface ReportDefinition {
-  field: string;
-  required?: boolean;
-  custom?: boolean;
-  options?: Array<{
-    id: string;
-    field?: string;
-    label: string;
-    description?: string;
-    columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
-    columnFilters?: ColumnFilter[];
-    timeScale?: string;
-  }>;
+export interface MetricOption {
+  id: string;
+  field?: string;
+  label: string;
+  description?: string;
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
+  columnFilters?: ColumnFilter[];
+  timeScale?: string;
 }
 
 export interface SeriesConfig {
@@ -61,7 +56,8 @@ export interface SeriesConfig {
   filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
   baseFilters?: PersistableFilter[] | ExistsFilter[];
-  reportDefinitions: ReportDefinition[];
+  definitionFields: string[];
+  metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
@@ -84,6 +80,7 @@ export interface SeriesUrl {
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
+  selectedMetricField?: string;
   isNew?: boolean;
 }
 

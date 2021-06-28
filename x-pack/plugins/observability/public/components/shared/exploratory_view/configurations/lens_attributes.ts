@@ -34,6 +34,7 @@ import {
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
   TERMS_COLUMN,
+  REPORT_METRIC_FIELD,
   RECORDS_FIELD,
   RECORDS_PERCENTAGE_FIELD,
 } from './constants';
@@ -55,43 +56,35 @@ function buildNumberColumn(sourceField: string) {
   };
 }
 
-export const parseCustomFieldName = (
-  sourceField: string,
-  seriesConfig: SeriesConfig,
-  selectedDefinitions: URLReportDefinition
-) => {
-  let fieldName = sourceField;
+export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricField?: string) => {
   let columnType;
   let columnFilters;
   let timeScale;
   let columnLabel;
 
-  const rdf = seriesConfig.reportDefinitions ?? [];
+  const metricOptions = seriesConfig.metricOptions ?? [];
 
-  const customField = rdf.find(({ field }) => field === fieldName);
-
-  if (customField) {
-    if (selectedDefinitions[fieldName]) {
-      fieldName = selectedDefinitions[fieldName][0];
-      if (customField?.options) {
-        const currField = customField?.options?.find(
-          ({ field, id }) => field === fieldName || id === fieldName
-        );
-        columnType = currField?.columnType;
-        columnFilters = currField?.columnFilters;
-        timeScale = currField?.timeScale;
-        columnLabel = currField?.label;
-      }
-    } else if (customField.options?.[0].field || customField.options?.[0].id) {
-      fieldName = customField.options?.[0].field || customField.options?.[0].id;
-      columnType = customField.options?.[0].columnType;
-      columnFilters = customField.options?.[0].columnFilters;
-      timeScale = customField.options?.[0].timeScale;
-      columnLabel = customField.options?.[0].label;
+  if (selectedMetricField) {
+    if (metricOptions) {
+      const currField = metricOptions.find(
+        ({ field, id }) => field === selectedMetricField || id === selectedMetricField
+      );
+      columnType = currField?.columnType;
+      columnFilters = currField?.columnFilters;
+      timeScale = currField?.timeScale;
+      columnLabel = currField?.label;
     }
+  } else if (metricOptions?.[0].field || metricOptions?.[0].id) {
+    const firstMetricOption = metricOptions?.[0];
+
+    selectedMetricField = firstMetricOption.field || firstMetricOption.id;
+    columnType = firstMetricOption.columnType;
+    columnFilters = firstMetricOption.columnFilters;
+    timeScale = firstMetricOption.timeScale;
+    columnLabel = firstMetricOption.label;
   }
 
-  return { fieldName, columnType, columnFilters, timeScale, columnLabel };
+  return { fieldName: selectedMetricField!, columnType, columnFilters, timeScale, columnLabel };
 };
 
 export interface LayerConfig {
@@ -103,6 +96,7 @@ export interface LayerConfig {
   reportDefinitions: URLReportDefinition;
   time: { to: string; from: string };
   indexPattern: IndexPattern;
+  selectedMetricField?: string;
 }
 
 export class LensAttributes {
@@ -341,6 +335,7 @@ export class LensAttributes {
       timeScale,
       columnFilters,
     } = this.getFieldMeta(sourceField, layerConfig);
+
     const { type: fieldType } = fieldMeta ?? {};
 
     if (columnType === TERMS_COLUMN) {
@@ -394,20 +389,18 @@ export class LensAttributes {
   }
 
   getFieldMeta(sourceField: string, layerConfig: LayerConfig) {
-    const {
-      fieldName,
-      columnType,
-      columnLabel,
-      columnFilters,
-      timeScale,
-    } = this.getCustomFieldName({
-      sourceField,
-      layerConfig,
-    });
+    if (sourceField === REPORT_METRIC_FIELD) {
+      const { fieldName, columnType, columnLabel, columnFilters, timeScale } = parseCustomFieldName(
+        layerConfig.seriesConfig,
+        layerConfig.selectedMetricField
+      );
+      const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
+      return { fieldMeta, fieldName, columnType, columnLabel, columnFilters, timeScale };
+    } else {
+      const fieldMeta = layerConfig.indexPattern.getFieldByName(sourceField);
 
-    const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName);
-
-    return { fieldMeta, fieldName, columnType, columnLabel, columnFilters, timeScale };
+      return { fieldMeta, fieldName: sourceField };
+    }
   }
 
   getMainYAxis(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
