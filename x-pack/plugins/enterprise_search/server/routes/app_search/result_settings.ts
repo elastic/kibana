@@ -53,7 +53,7 @@ export function registerResultSettingsRoutes({
       },
     }),
     enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/sample_response_search',
+      path: '/as/engines/:engineName/dashboard_search',
     })
   );
 }
