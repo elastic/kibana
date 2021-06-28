@@ -21,23 +21,14 @@ import React, { Fragment } from 'react';
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
 import { EmptyThreatDetailsView } from './empty_threat_details_view';
-import {
-  FIRSTSEEN,
-  EVENT_URL,
-  EVENT_REFERENCE,
-  MATCHED_ID,
-  MATCHED_FIELD,
-  MATCHED_ATOMIC,
-  MATCHED_TYPE,
-  PROVIDER,
-} from '../../../../../common/cti/constants';
+import { FIRSTSEEN, EVENT_URL, EVENT_REFERENCE } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import {
   getShimmedIndicatorValue,
-  getEnrichmentValue,
   isInvestigationTimeEnrichment,
+  getEnrichmentIdentifiers,
 } from './helpers';
 import * as i18n from './translations';
 import { EnrichmentIcon } from './enrichment_icon';
@@ -150,14 +141,10 @@ const ThreatDetailsViewComponent: React.FC<{
     <>
       <EuiSpacer size="m" />
       {sortedEnrichments.map((enrichment, index) => {
-        const key = getEnrichmentValue(enrichment, MATCHED_ID);
-        const field = getEnrichmentValue(enrichment, MATCHED_FIELD);
-        const value = getEnrichmentValue(enrichment, MATCHED_ATOMIC);
-        const type = getEnrichmentValue(enrichment, MATCHED_TYPE);
-        const provider = getShimmedIndicatorValue(enrichment, PROVIDER);
+        const { id, field, provider, type, value } = getEnrichmentIdentifiers(enrichment);
 
         return (
-          <Fragment key={key}>
+          <Fragment key={id}>
             <ThreatDetailsHeader field={field} provider={provider} value={value} type={type} />
             <StyledEuiInMemoryTable
               columns={columns}

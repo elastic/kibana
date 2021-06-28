@@ -12,13 +12,16 @@ import {
 } from '../../../../../common/constants';
 import {
   ENRICHMENT_TYPES,
+  MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_ID,
   MATCHED_TYPE,
+  PROVIDER,
 } from '../../../../../common/cti/constants';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import {
   CtiEnrichment,
+  CtiEnrichmentIdentifiers,
   EventFields,
   isValidEventField,
 } from '../../../../../common/search_strategy/security_solution/cti';
@@ -74,11 +77,19 @@ export const getShimmedIndicatorValue = (enrichment: CtiEnrichment, field: strin
   getEnrichmentValue(enrichment, field) ||
   getEnrichmentValue(enrichment, `${DEFAULT_INDICATOR_SOURCE_PATH}.${field}`);
 
+export const getEnrichmentIdentifiers = (enrichment: CtiEnrichment): CtiEnrichmentIdentifiers => ({
+  id: getEnrichmentValue(enrichment, MATCHED_ID),
+  field: getEnrichmentValue(enrichment, MATCHED_FIELD),
+  value: getEnrichmentValue(enrichment, MATCHED_ATOMIC),
+  type: getEnrichmentValue(enrichment, MATCHED_TYPE),
+  provider: getShimmedIndicatorValue(enrichment, PROVIDER),
+});
+
 const buildEnrichmentId = (enrichment: CtiEnrichment): string => {
-  const matchedId = getEnrichmentValue(enrichment, MATCHED_ID);
-  const matchedField = getEnrichmentValue(enrichment, MATCHED_FIELD);
-  return `${matchedId}${matchedField}`;
+  const { id, field } = getEnrichmentIdentifiers(enrichment);
+  return `${id}${field}`;
 };
+
 /**
  * This function receives an array of enrichments and removes
  * investigation-time enrichments if that exact indicator already exists

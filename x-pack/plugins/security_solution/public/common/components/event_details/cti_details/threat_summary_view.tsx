@@ -12,14 +12,8 @@ import { EuiBasicTableColumn, EuiText, EuiTitle } from '@elastic/eui';
 import * as i18n from './translations';
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
-import {
-  MATCHED_ATOMIC,
-  MATCHED_FIELD,
-  MATCHED_TYPE,
-  PROVIDER,
-} from '../../../../../common/cti/constants';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
-import { getEnrichmentValue, getShimmedIndicatorValue } from './helpers';
+import { getEnrichmentIdentifiers } from './helpers';
 import { EnrichmentIcon } from './enrichment_icon';
 
 export interface ThreatSummaryItem {
@@ -103,10 +97,7 @@ const buildThreatSummaryItems = (
   eventId: string
 ) => {
   return enrichments.map((enrichment, index) => {
-    const field = getEnrichmentValue(enrichment, MATCHED_FIELD);
-    const value = getEnrichmentValue(enrichment, MATCHED_ATOMIC);
-    const type = getEnrichmentValue(enrichment, MATCHED_TYPE);
-    const provider = getShimmedIndicatorValue(enrichment, PROVIDER);
+    const { field, type, value, provider } = getEnrichmentIdentifiers(enrichment);
 
     return {
       title: {
