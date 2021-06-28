@@ -53,34 +53,4 @@ describe('getJourneyScreenshotBlocks', () => {
       ]
     `);
   });
-
-  it('throws error for malformed data', async () => {
-    let exception: unknown;
-    try {
-      await getJourneyScreenshotBlocks({
-        uptimeEsClient: mockSearchResult([
-          {
-            _id: 'hash1',
-            _source: {
-              foo: 'bar',
-            },
-          },
-          {
-            _id: 'hash2',
-            _source: {
-              foo: 'bar',
-            },
-          },
-        ]),
-        blockIds: ['hash1', 'hash2'],
-      });
-    } catch (e: unknown) {
-      exception = e;
-    } finally {
-      expect(exception).toBeDefined();
-      expect(exception).toMatchInlineSnapshot(
-        `[Error: Error parsing journey screenshot blocks. Malformed data.]`
-      );
-    }
-  });
 });

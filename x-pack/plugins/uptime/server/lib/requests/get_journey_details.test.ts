@@ -101,21 +101,4 @@ describe('getJourneyDetails', () => {
       await getJourneyDetails({ uptimeEsClient: mockSearchResult([]), checkGroup: 'check_group' })
     ).toBe(null);
   });
-
-  it('throws an error for malformed data', async () => {
-    let exception: unknown;
-    try {
-      await getJourneyDetails({
-        uptimeEsClient: mockSearchResult({ _id: 'id', _source: { foo: 'bar' } }),
-        checkGroup: '85946468-d385-11eb-8848-acde48001122',
-      });
-    } catch (e: unknown) {
-      exception = e;
-    } finally {
-      expect(exception).toBeDefined();
-      expect(exception).toMatchInlineSnapshot(
-        `[Error: Could not process journey step for check group 85946468-d385-11eb-8848-acde48001122, malformed data]`
-      );
-    }
-  });
 });

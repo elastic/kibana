@@ -130,38 +130,4 @@ describe('getJourneyScreenshot', () => {
       }
     `);
   });
-
-  it('throws for malformed data', async () => {
-    let exception: unknown;
-    try {
-      await getJourneyScreenshot({
-        uptimeEsClient: mockSearchResult([], {
-          // @ts-expect-error incorrect data format
-          step: { image: { hits: { hits: [{ foo: 'bar' }] } } },
-        }),
-        checkGroup: 'checkGroup',
-        stepIndex: 0,
-      });
-    } catch (e: unknown) {
-      exception = e;
-    } finally {
-      expect(exception).toBeDefined();
-      expect(exception).toMatchInlineSnapshot(
-        `[Error: Error parsing journey screenshot type. Malformed data.]`
-      );
-    }
-  });
-
-  it('returns null for empty set', async () => {
-    expect(
-      await getJourneyScreenshot({
-        uptimeEsClient: mockSearchResult([], {
-          // @ts-expect-error incomplete search result
-          step: { image: { hits: { hits: [] } } },
-        }),
-        checkGroup: 'checkGroup',
-        stepIndex: 0,
-      })
-    ).toBeNull();
-  });
 });

@@ -87,21 +87,4 @@ describe('getJourneyFailedSteps', () => {
       ]
     `);
   });
-
-  it('throws when returned data is malformed', async () => {
-    let exception: unknown;
-    try {
-      await getJourneyFailedSteps({
-        uptimeEsClient: mockSearchResult({ foo: 'bar' }),
-        checkGroups: [],
-      });
-    } catch (e: unknown) {
-      exception = e;
-    } finally {
-      expect(exception).toBeDefined();
-      expect(exception).toMatchInlineSnapshot(
-        `[Error: Unable to parse data for failed journey steps. Invalid format or missing fields.]`
-      );
-    }
-  });
 });
