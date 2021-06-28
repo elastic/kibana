@@ -34,7 +34,7 @@ import { AccountSettings } from './views/account_settings';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { ErrorState } from './views/error_state';
-import { GroupsRouter } from './views/groups';\
+import { GroupsRouter } from './views/groups';
 import { OAuthAuthorize } from './views/oauth_authorize';
 import { NotFound } from './views/not_found';
 import { Overview } from './views/overview';
@@ -107,7 +107,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
             <SearchAuthorize />
           </Route>
           <Route>
-            <NotFound isOrganization={false} />
+            <NotFound />
           </Route>
         </Switch>
       </Route>
