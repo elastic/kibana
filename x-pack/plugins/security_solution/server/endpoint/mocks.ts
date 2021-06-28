@@ -31,6 +31,7 @@ import { MetadataRequestContext } from './routes/metadata/handlers';
 import { LicenseService } from '../../common/license';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
+import { createCasesClientMock } from '../../../cases/server';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -88,7 +89,9 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     exceptionListsClient: listMock.getExceptionListClient(),
     packagePolicyService: createPackagePolicyServiceMock(),
     cases: {
-      getCasesClientWithRequest: jest.fn(),
+      getCasesClientWithRequest: jest.fn(async () => {
+        return createCasesClientMock();
+      }),
     },
   };
 };
