@@ -37,34 +37,6 @@ export const ROLE_MAPPINGS_ENGINE_ACCESS_HEADING = i18n.translate(
   }
 );
 
-export const ROLE_MAPPINGS_RESET_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappingsResetButton',
-  {
-    defaultMessage: 'Reset mappings',
-  }
-);
-
-export const ROLE_MAPPINGS_RESET_CONFIRM_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappingsResetConfirmTitle',
-  {
-    defaultMessage: 'Are you sure you want to reset role mappings?',
-  }
-);
-
-export const ROLE_MAPPINGS_RESET_CONFIRM_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappingsResetConfirmButton',
-  {
-    defaultMessage: 'Reset role mappings',
-  }
-);
-
-export const ROLE_MAPPINGS_RESET_CANCEL_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappingsResetCancelButton',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
-
 export const DEV_ROLE_TYPE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.DEV_ROLE_TYPE_DESCRIPTION',
   {
