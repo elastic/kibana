@@ -39,6 +39,10 @@ const createSetupContract = (): ManagementSetup => ({
     getUrl: jest.fn(),
     useUrl: jest.fn(),
     navigate: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
+    telemetry: jest.fn(),
+    migrations: {},
   },
 });
 
