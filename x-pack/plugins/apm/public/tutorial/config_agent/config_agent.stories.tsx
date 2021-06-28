@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/function-component-definition */
-
 import { Story } from '@storybook/react';
 import { HttpStart } from 'kibana/public';
 import React from 'react';
