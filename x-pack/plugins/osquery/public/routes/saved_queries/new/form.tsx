@@ -21,7 +21,15 @@ import { Form } from '../../../shared_imports';
 import { SavedQueryForm } from '../../../saved_queries/form';
 import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_form';
 
-const NewSavedQueryFormComponent = ({ defaultValue, handleSubmit }) => {
+interface NewSavedQueryFormProps {
+  defaultValue?: unknown;
+  handleSubmit: () => Promise<void>;
+}
+
+const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
+  defaultValue,
+  handleSubmit,
+}) => {
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
   const { form } = useSavedQueryForm({

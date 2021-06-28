@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import field from 'src/plugins/advanced_settings/public/management_app/components/field';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
 import { PlatformIcon } from './platforms/platform_icon';
 
@@ -33,7 +32,6 @@ export const PlatformCheckBoxGroupField = ({
   idAria,
   ...rest
 }: Props) => {
-  console.error('field', field);
   const options = useMemo(
     () => [
       {
@@ -121,7 +119,7 @@ export const PlatformCheckBoxGroupField = ({
         return acc;
       }, {} as Record<string, boolean>)
     );
-  }, [field.value]);
+  }, [field.value, options]);
 
   return (
     <EuiFormRow

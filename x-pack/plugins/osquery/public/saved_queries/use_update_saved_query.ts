@@ -12,8 +12,8 @@ import { useKibana } from '../common/lib/kibana';
 import { savedQuerySavedObjectType } from '../../common/types';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
-
-export const SAVED_QUERIES_ID = 'savedQueryList';
+import { SAVED_QUERIES_ID } from './constants';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseUpdateSavedQueryProps {
   savedQueryId: string;
@@ -27,12 +27,18 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
     security,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useMutation(
     async (payload) => {
       const currentUser = await security.authc.getCurrentUser();
 
+      if (!currentUser) {
+        throw new Error('CurrentUser is missing');
+      }
+
       return savedObjects.client.update(savedQuerySavedObjectType, savedQueryId, {
+        // @ts-expect-error update types
         ...payload,
         updated_by: currentUser.username,
         updated_at: new Date(Date.now()).toISOString(),
@@ -41,7 +47,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
     {
       onError: (error) => {
         // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
       onSuccess: (payload) => {
         queryClient.invalidateQueries(SAVED_QUERIES_ID);

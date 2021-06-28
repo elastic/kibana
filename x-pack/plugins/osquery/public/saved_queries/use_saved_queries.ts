@@ -9,8 +9,7 @@ import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
 import { savedQuerySavedObjectType } from '../../common/types';
-
-export const SAVED_QUERIES_ID = 'savedQueryList';
+import { SAVED_QUERIES_ID } from './constants';
 
 export const useSavedQueries = ({
   isLive = false,
@@ -23,14 +22,21 @@ export const useSavedQueries = ({
 
   return useQuery(
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
-    async () => {
-      return savedObjects.client.find({
+    async () =>
+      savedObjects.client.find<{
+        id: string;
+        description?: string;
+        query: string;
+        updated_at: string;
+        updated_by: string;
+        created_at: string;
+        created_by: string;
+      }>({
         type: savedQuerySavedObjectType,
         page: pageIndex + 1,
         perPage: pageSize,
         sortField,
-      });
-    },
+      }),
     {
       keepPreviousData: true,
       // Refetch the data every 10 seconds

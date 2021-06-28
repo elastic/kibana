@@ -6,14 +6,23 @@
  */
 
 import { find } from 'lodash/fp';
-import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiText } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import { SimpleSavedObject } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useSavedQueries } from './use_saved_queries';
 
 interface SavedQueriesDropdownProps {
   disabled?: boolean;
-  onChange: (value: string) => void;
+  onChange: (
+    value: SimpleSavedObject<{
+      id: string;
+      description?: string | undefined;
+      query: string;
+    }>['attributes']
+  ) => void;
 }
 
 const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
@@ -35,16 +44,16 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
     })) ?? [];
 
   const handleSavedQueryChange = useCallback(
-    (selectedOptions) => {
+    (newSelectedOptions) => {
       const selectedSavedQuery = find(
-        ['attributes.id', selectedOptions[0].value.id],
+        ['attributes.id', newSelectedOptions[0].value.id],
         data?.savedObjects
       );
 
       if (selectedSavedQuery) {
         onChange(selectedSavedQuery.attributes);
       }
-      setSelectedOptions(selectedOptions);
+      setSelectedOptions(newSelectedOptions);
     },
     [data?.savedObjects, onChange]
   );
@@ -65,10 +74,21 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   );
 
   return (
-    <EuiFormRow label="Build from a saved query (optional)" fullWidth>
+    <EuiFormRow
+      label={
+        <FormattedMessage
+          id="xpack.osquery.savedQueries.dropdown.searchFieldLabel"
+          defaultMessage="Build from a saved query (optional)"
+        />
+      }
+      fullWidth
+    >
       <EuiComboBox
+        isDisabled={disabled}
         fullWidth
-        placeholder="Select a single option"
+        placeholder={i18n.translate('xpack.osquery.savedQueries.dropdown.searchFieldPlaceholder', {
+          defaultMessage: 'Search for saved queries',
+        })}
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         singleSelection={{ asPlainText: true }}
         options={queryOptions}

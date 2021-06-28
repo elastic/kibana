@@ -17,7 +17,7 @@ const SAVED_QUERY_FORM_ID = 'savedQueryForm';
 
 interface UseSavedQueryFormProps {
   defaultValue?: unknown;
-  handleSubmit: () => Promise<void>;
+  handleSubmit: (payload: unknown) => Promise<void>;
 }
 
 export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryFormProps) =>
@@ -32,20 +32,23 @@ export const useSavedQueryForm = ({ defaultValue, handleSubmit }: UseSavedQueryF
     defaultValue,
     serializer: (payload) =>
       produce(payload, (draft) => {
+        // @ts-expect-error update types
         if (draft.platform?.split(',').length === 3) {
           // if all platforms are checked then use undefined
+          // @ts-expect-error update types
           delete draft.platform;
         }
         if (isArray(draft.version)) {
           if (!draft.version.length) {
+            // @ts-expect-error update types
             delete draft.version;
           } else {
-            // @ts-expect-error update types
             draft.version = draft.version[0];
           }
         }
         return draft;
       }),
+    // @ts-expect-error update types
     deserializer: (payload) => {
       if (!payload) return {} as ScheduledQueryGroupFormData;
 

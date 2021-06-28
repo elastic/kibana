@@ -12,8 +12,8 @@ import { useKibana } from '../common/lib/kibana';
 import { savedQuerySavedObjectType } from '../../common/types';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
-
-export const SAVED_QUERIES_ID = 'savedQueryList';
+import { SAVED_QUERIES_ID } from './constants';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseDeleteSavedQueryProps {
   savedQueryId: string;
@@ -26,11 +26,12 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
     savedObjects,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useMutation(() => savedObjects.client.delete(savedQuerySavedObjectType, savedQueryId), {
     onError: (error) => {
       // @ts-expect-error update types
-      toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+      setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(SAVED_QUERIES_ID);

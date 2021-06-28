@@ -77,7 +77,7 @@ const SavedQueriesPageComponent = () => {
 
   const renderEditAction = useCallback(
     (item: SavedObject<{ name: string }>) => (
-      <EditButton savedQueryId={item.id} savedQueryName={item.name} />
+      <EditButton savedQueryId={item.id} savedQueryName={item.attributes.name} />
     ),
     []
   );
@@ -115,7 +115,7 @@ const SavedQueriesPageComponent = () => {
       {
         field: 'attributes.updated_at',
         name: 'Last updated at',
-        sortable: (item) =>
+        sortable: (item: SavedObject<{ updated_at: string }>) =>
           item.attributes.updated_at ? Date.parse(item.attributes.updated_at) : 0,
         truncateText: true,
         render: renderUpdatedAt,
@@ -201,6 +201,7 @@ const SavedQueriesPageComponent = () => {
         <EuiInMemoryTable
           items={data?.savedObjects}
           itemId="id"
+          // @ts-expect-error update types
           columns={columns}
           pagination={pagination}
           // @ts-expect-error update types

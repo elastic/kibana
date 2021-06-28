@@ -14,6 +14,7 @@ import { ActionResultsSummary } from '../../../action_results/action_results_sum
 interface ResultTabsProps {
   actionId: string;
   agentIds?: string[];
+  expirationDate: Date;
   isLive?: boolean;
   startDate?: string;
   endDate?: string;
@@ -23,6 +24,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   actionId,
   agentIds,
   endDate,
+  expirationDate,
   isLive,
   startDate,
 }) => {
@@ -34,7 +36,12 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         content: (
           <>
             <EuiSpacer />
-            <ActionResultsSummary actionId={actionId} agentIds={agentIds} isLive={isLive} />
+            <ActionResultsSummary
+              actionId={actionId}
+              agentIds={agentIds}
+              expirationDate={expirationDate}
+              isLive={isLive}
+            />
           </>
         ),
       },
@@ -55,7 +62,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ),
       },
     ],
-    [actionId, agentIds, endDate, isLive, startDate]
+    [actionId, agentIds, endDate, expirationDate, isLive, startDate]
   );
 
   return (

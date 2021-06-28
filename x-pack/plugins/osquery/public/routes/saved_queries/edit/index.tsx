@@ -33,8 +33,6 @@ const EditSavedQueryPageComponent = () => {
   const updateSavedQueryMutation = useUpdateSavedQuery({ savedQueryId });
   const deleteSavedQueryMutation = useDeleteSavedQuery({ savedQueryId });
 
-  console.error('savedQueryDetails', savedQueryDetails);
-
   useBreadcrumbs('saved_query_edit', { savedQueryId: savedQueryDetails?.attributes?.id ?? '' });
 
   const handleCloseDeleteConfirmationModal = useCallback(() => {
@@ -46,10 +44,10 @@ const EditSavedQueryPageComponent = () => {
   }, []);
 
   const handleDeleteConfirmClick = useCallback(() => {
-    deleteSavedQueryMutation.mutate().then(() => {
+    deleteSavedQueryMutation.mutateAsync().then(() => {
       handleCloseDeleteConfirmationModal();
     });
-  }, [deleteSavedQueryMutation]);
+  }, [deleteSavedQueryMutation, handleCloseDeleteConfirmationModal]);
 
   const LeftColumn = useMemo(
     () => (
@@ -67,7 +65,7 @@ const EditSavedQueryPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.editSavedQuery.pageTitle"
-                defaultMessage={`Edit "{savedQueryId}"`}
+                defaultMessage='Edit "{savedQueryId}"'
                 // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
                 values={{
                   savedQueryId: savedQueryDetails?.attributes?.id ?? '',
@@ -101,7 +99,8 @@ const EditSavedQueryPageComponent = () => {
       {!isLoading && !isEmpty(savedQueryDetails) && (
         <EditSavedQueryForm
           defaultValue={savedQueryDetails?.attributes}
-          handleSubmit={updateSavedQueryMutation.mutate}
+          // @ts-expect-error update types
+          handleSubmit={updateSavedQueryMutation.mutateAsync}
         />
       )}
       {isDeleteModalVisible ? (

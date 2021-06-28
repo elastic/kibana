@@ -20,7 +20,7 @@ const NewSavedQueryPageComponent = () => {
   useBreadcrumbs('saved_query_new');
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
-  const createSavedQueryMutation = useCreateSavedQuery();
+  const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: true });
 
   const LeftColumn = useMemo(
     () => (
@@ -51,7 +51,10 @@ const NewSavedQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <NewSavedQueryForm handleSubmit={createSavedQueryMutation.mutate} />
+      {
+        // @ts-expect-error update types
+        <NewSavedQueryForm handleSubmit={createSavedQueryMutation.mutateAsync} />
+      }
     </WithHeaderLayout>
   );
 };

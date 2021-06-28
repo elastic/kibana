@@ -11,6 +11,7 @@ import { PLUGIN_ID } from '../../common';
 import { useKibana } from '../common/lib/kibana';
 import { savedQuerySavedObjectType } from '../../common/types';
 import { pagePathGetters } from '../common/page_paths';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export const SAVED_QUERY_ID = 'savedQuery';
 
@@ -22,18 +23,22 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
   const {
     application: { navigateToApp },
     savedObjects,
-    notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     [SAVED_QUERY_ID, { savedQueryId }],
-    async () => savedObjects.client.get(savedQuerySavedObjectType, savedQueryId),
+    async () =>
+      savedObjects.client.get<{
+        id: string;
+        description?: string;
+        query: string;
+      }>(savedQuerySavedObjectType, savedQueryId),
     {
       keepPreviousData: true,
       onSuccess: (data) => {
-        console.error('useSavedQuery', data);
         if (data.error) {
-          toasts.addError(data.error, {
+          setErrorToast(data.error, {
             title: data.error.error,
             toastMessage: data.error.message,
           });
@@ -42,7 +47,7 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
       },
       onError: (error) => {
         // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
     }
   );

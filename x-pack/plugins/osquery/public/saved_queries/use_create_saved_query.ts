@@ -12,10 +12,14 @@ import { useKibana } from '../common/lib/kibana';
 import { savedQuerySavedObjectType } from '../../common/types';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
+import { SAVED_QUERIES_ID } from './constants';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
-export const SAVED_QUERIES_ID = 'savedQueryList';
+interface UseCreateSavedQueryProps {
+  withRedirect?: boolean;
+}
 
-export const useCreateSavedQuery = () => {
+export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) => {
   const queryClient = useQueryClient();
   const {
     application: { navigateToApp },
@@ -23,13 +27,18 @@ export const useCreateSavedQuery = () => {
     security,
     notifications: { toasts },
   } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useMutation(
     async (payload) => {
-      console.error('payload', payload);
       const currentUser = await security.authc.getCurrentUser();
 
+      if (!currentUser) {
+        throw new Error('CurrentUser is missing');
+      }
+
       return savedObjects.client.create(savedQuerySavedObjectType, {
+        // @ts-expect-error update types
         ...payload,
         created_by: currentUser.username,
         created_at: new Date(Date.now()).toISOString(),
@@ -40,11 +49,13 @@ export const useCreateSavedQuery = () => {
     {
       onError: (error) => {
         // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error, { title: error.body.error, toastMessage: error.body.message });
       },
       onSuccess: (payload) => {
         queryClient.invalidateQueries(SAVED_QUERIES_ID);
-        navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
+        if (withRedirect) {
+          navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
+        }
         toasts.addSuccess(
           i18n.translate('xpack.osquery.newSavedQuery.successToastMessageText', {
             defaultMessage: 'Successfully saved "{savedQueryId}" query',

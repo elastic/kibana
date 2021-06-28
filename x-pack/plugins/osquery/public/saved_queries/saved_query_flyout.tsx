@@ -26,17 +26,15 @@ import { SavedQueryForm } from './form';
 import { useCreateSavedQuery } from './use_create_saved_query';
 
 interface AddQueryFlyoutProps {
-  defaultValue: any;
+  defaultValue: unknown;
   onClose: () => void;
 }
 
 const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue, onClose }) => {
-  const createSavedQueryMutation = useCreateSavedQuery();
+  const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const handleSubmit = useCallback(
-    (payload) => {
-      createSavedQueryMutation.mutateAsync(payload).then(() => onClose());
-    },
+    (payload) => createSavedQueryMutation.mutateAsync(payload).then(() => onClose()),
     [createSavedQueryMutation, onClose]
   );
 
