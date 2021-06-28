@@ -27,7 +27,7 @@ export function getApmPackagePolicyDefinition(
         vars: getApmPackageInputVars(apmServerSchema),
       },
     ],
-    package: { name: APM_PACKAGE_NAME, version: '0.2.0', title: 'Elastic APM' },
+    package: { name: APM_PACKAGE_NAME, version: '0.3.0', title: 'Elastic APM' },
   };
 }
 
@@ -60,10 +60,19 @@ export const apmConfigMapping: Record<
     name: 'host',
     type: 'text',
   },
+  'apm-server.url': {
+    name: 'url',
+    type: 'text',
+  },
   'apm-server.secret_token': {
     name: 'secret_token',
     type: 'text',
   },
+  // TODO: should check for the existence of this config
+  // 'apm-server.api_key': {
+  //   name: 'api_key_enabled',
+  //   type: 'bool',
+  // },
   'apm-server.rum.enabled': {
     name: 'enable_rum',
     type: 'bool',
@@ -84,12 +93,20 @@ export const apmConfigMapping: Record<
     name: 'rum_allow_headers',
     type: 'text',
   },
+  'apm-server.rum.response_headers': {
+    name: 'rum_response_headers',
+    type: 'yaml',
+  },
   'apm-server.rum.event_rate.limit': {
     name: 'rum_event_rate_limit',
     type: 'integer',
   },
   'apm-server.rum.event_rate.lru_size': {
     name: 'rum_event_rate_lru_size',
+    type: 'integer',
+  },
+  'apm-server.api_key.limit': {
+    name: 'api_key_limit',
     type: 'integer',
   },
   'apm-server.max_event_size': {
@@ -123,6 +140,10 @@ export const apmConfigMapping: Record<
   'apm-server.max_connections': {
     name: 'max_connections',
     type: 'integer',
+  },
+  'apm-server.response_headers': {
+    name: 'response_headers',
+    type: 'yaml',
   },
   'apm-server.expvar.enabled': {
     name: 'expvar_enabled',
