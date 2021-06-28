@@ -70,7 +70,10 @@ export const createMockEndpointAppContextService = (
 export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<EndpointAppContextServiceStartContract> => {
   const factory = new AppClientFactory();
   const config = createMockConfig();
+  const casesClientMock = createCasesClientMock();
+
   factory.setup({ getSpaceId: () => 'mockSpace', config });
+
   return {
     agentService: createMockAgentService(),
     packageService: createMockPackageService(),
@@ -89,9 +92,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     exceptionListsClient: listMock.getExceptionListClient(),
     packagePolicyService: createPackagePolicyServiceMock(),
     cases: {
-      getCasesClientWithRequest: jest.fn(async () => {
-        return createCasesClientMock();
-      }),
+      getCasesClientWithRequest: jest.fn(async () => casesClientMock),
     },
   };
 };
