@@ -126,7 +126,7 @@ export function Correlations() {
     }
 
     return properties;
-  }, [serviceName, urlParams]);
+  }, [serviceName, urlParams.environment, urlParams.transactionName]);
 
   return (
     <>

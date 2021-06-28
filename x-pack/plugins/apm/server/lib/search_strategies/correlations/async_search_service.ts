@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { shuffle } from 'lodash';
-import { range } from 'lodash';
+import { shuffle, range } from 'lodash';
 import type { ElasticsearchClient } from 'src/core/server';
 import { fetchTransactionDurationFieldCandidates } from './query_field_candidates';
 import { fetchTransactionDurationFieldValuePairs } from './query_field_value_pairs';

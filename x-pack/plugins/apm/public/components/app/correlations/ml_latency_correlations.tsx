@@ -9,7 +9,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import {
   EuiIcon,
-  EuiLink,
   EuiBasicTableColumn,
   EuiButton,
   EuiFlexGroup,
@@ -34,7 +33,7 @@ import {
   SelectedSignificantTerm,
 } from './correlations_table';
 import { useCorrelations } from './use_correlations';
-import { createHref, push } from '../../shared/Links/url_helpers';
+import { push } from '../../shared/Links/url_helpers';
 import { useUiTracker } from '../../../../../observability/public';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 
@@ -95,15 +94,16 @@ export function MlLatencyCorrelations({ onClose }: Props) {
     [originalOverallHistogram]
   );
 
-  // cancel any running async partial request when unmounting the component
-  // we want this effect to execute exactly once after the component mounts
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => cancelFetch, []);
-
   // start fetching on load
   // we want this effect to execute exactly once after the component mounts
   useEffect(() => {
     startFetch();
+
+    return () => {
+      // cancel any running async partial request when unmounting the component
+      // we want this effect to execute exactly once after the component mounts
+      cancelFetch();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -166,8 +166,8 @@ export function MlLatencyCorrelations({ onClose }: Props) {
             </>
           </EuiToolTip>
         ),
-        render: (_: any, term: MlCorrelationsTerms) => {
-          return <div>{asPreciseDecimal(term.correlation, 2)}</div>;
+        render: (correlation: number) => {
+          return <div>{asPreciseDecimal(correlation, 2)}</div>;
         },
       },
       {
@@ -183,8 +183,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
           'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldValueLabel',
           { defaultMessage: 'Field value' }
         ),
-        render: (_: any, term: MlCorrelationsTerms) =>
-          String(term.fieldValue).slice(0, 50),
+        render: (fieldValue: string) => String(fieldValue).slice(0, 50),
       },
       {
         field: 'duplicatedFields',
@@ -192,18 +191,18 @@ export function MlLatencyCorrelations({ onClose }: Props) {
           'xpack.apm.correlations.latencyCorrelations.correlationsTable.duplicatesLabel',
           { defaultMessage: 'Duplicates' }
         ),
-        render: (_: any, term: MlCorrelationsTerms) => {
+        render: (duplicatedFields: string[]) => {
           return (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {Array.isArray(term?.duplicatedFields)
-                ? term.duplicatedFields.map((f) => (
+            <EuiFlexGroup direction="column">
+              {Array.isArray(duplicatedFields)
+                ? duplicatedFields.map((f) => (
                     <>
                       <div>{f}</div>
                       <EuiSpacer size={'s'} />
                     </>
                   ))
                 : null}
-            </div>
+            </EuiFlexGroup>
           );
         },
       },
@@ -261,35 +260,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
           'xpack.apm.correlations.latencyCorrelations.correlationsTable.actionsLabel',
           { defaultMessage: 'Filter' }
         ),
-        render: (_: any, term: MlCorrelationsTerms) => {
-          return (
-            <>
-              <EuiLink
-                href={createHref(history, {
-                  query: {
-                    kuery: `${term.fieldName}:"${encodeURIComponent(
-                      term.fieldValue
-                    )}"`,
-                  },
-                })}
-              >
-                <EuiIcon type="magnifyWithPlus" />
-              </EuiLink>
-              &nbsp;/&nbsp;
-              <EuiLink
-                href={createHref(history, {
-                  query: {
-                    kuery: `not ${term.fieldName}:"${encodeURIComponent(
-                      term.fieldValue
-                    )}"`,
-                  },
-                })}
-              >
-                <EuiIcon type="magnifyWithMinus" />
-              </EuiLink>
-            </>
-          );
-        },
       },
     ],
     [history, onClose, trackApmEvent]

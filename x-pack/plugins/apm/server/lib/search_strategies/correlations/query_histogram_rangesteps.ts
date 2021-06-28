@@ -50,7 +50,7 @@ export const fetchTransactionDurationHistogramRangesteps = async (
   }
 
   const steps = 100;
-  const min = 1; // (resp.body.aggregations.transaction_duration_min as estypes.ValueAggregate).value;
+  const min = 1;
   const max =
     (resp.body.aggregations
       .transaction_duration_max as estypes.AggregationsValueAggregate).value *
