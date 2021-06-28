@@ -1,4 +1,5 @@
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@npm//@babel/cli:index.bzl", "babel")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
 PKG_BASE_NAME = "kbn-test"
@@ -84,6 +85,24 @@ TYPES_DEPS = [
 ]
 
 DEPS = SRC_DEPS + TYPES_DEPS
+
+babel(
+  name = "target",
+  data = DEPS + [
+      ":srcs",
+      ".babelrc",
+  ],
+  output_dir = True,
+  # the following arg paths includes $(execpath) as babel runs on the sandbox root
+  args = [
+      "./%s/src" % package_name(),
+      "--config-file",
+      "./%s/.babelrc" % package_name(),
+      "--out-dir",
+      "$(@D)",
+      "--quiet"
+  ],
+)
 
 ts_config(
   name = "tsconfig",
