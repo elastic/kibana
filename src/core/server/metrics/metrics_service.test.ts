@@ -17,6 +17,7 @@ import { loggingSystemMock } from '../logging/logging_system.mock';
 import { take } from 'rxjs/operators';
 
 const testInterval = 100;
+const testEventLoopDelayThreshold = 50;
 
 const dummyMetrics = { metricA: 'value', metricB: 'otherValue' };
 
@@ -30,7 +31,10 @@ describe('MetricsService', () => {
     jest.useFakeTimers();
 
     const configService = configServiceMock.create({
-      atPath: { interval: moment.duration(testInterval) },
+      atPath: {
+        interval: moment.duration(testInterval),
+        eventLoopDelayThreshold: moment.duration(testEventLoopDelayThreshold),
+      },
     });
     const coreContext = mockCoreContext.create({ logger, configService });
     metricsService = new MetricsService(coreContext);
@@ -211,6 +215,43 @@ describe('MetricsService', () => {
               "uptime": undefined,
             },
           },
+        ]
+      `);
+    });
+
+    it('warns when process.event_loop_delay exceeds threshold', async () => {
+      const firstMetrics = {
+        process: {
+          event_loop_delay: 30,
+        },
+      };
+      const secondMetrics = {
+        process: {
+          event_loop_delay: 100,
+        },
+      };
+
+      const opsLogger = logger.get('metrics', 'ops');
+
+      mockOpsCollector.collect
+        .mockResolvedValueOnce(firstMetrics)
+        .mockResolvedValueOnce(secondMetrics);
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
+
+      const nextEmission = async () => {
+        jest.advanceTimersByTime(testInterval);
+        const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
+        await new Promise((resolve) => process.nextTick(resolve));
+        return emission;
+      };
+
+      await nextEmission();
+      const opsLogs = loggingSystemMock.collect(opsLogger).warn;
+      expect(opsLogs.length).toEqual(1);
+      expect(opsLogs[0]).toMatchInlineSnapshot(`
+        Array [
+          "Event loop delay threshold exceeded 50ms. Recieved 100.000",
         ]
       `);
     });

@@ -15,7 +15,7 @@ import { InternalHttpServiceSetup } from '../http';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart, OpsMetrics } from './types';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { opsConfig, OpsConfigType } from './ops_config';
-import { getEcsOpsMetricsLog } from './logging';
+import { getEcsOpsMetricsLog, getEventLoopThresholdLog } from './logging';
 
 interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -37,26 +37,32 @@ export class MetricsService
   }
 
   public async setup({ http }: MetricsServiceSetupDeps): Promise<InternalMetricsServiceSetup> {
-    const config = await this.coreContext.configService
+    const {
+      cGroupOverrides,
+      interval,
+      eventLoopDelayThreshold,
+    } = await this.coreContext.configService
       .atPath<OpsConfigType>(opsConfig.path)
       .pipe(first())
       .toPromise();
 
+    const thresholdMs = eventLoopDelayThreshold.asMilliseconds();
+
     this.metricsCollector = new OpsMetricsCollector(http.server, {
       logger: this.logger,
-      ...config.cGroupOverrides,
+      ...cGroupOverrides,
     });
 
-    await this.refreshMetrics();
+    await this.refreshMetrics(thresholdMs);
 
     this.collectInterval = setInterval(() => {
-      this.refreshMetrics();
-    }, config.interval.asMilliseconds());
+      this.refreshMetrics(thresholdMs);
+    }, interval.asMilliseconds());
 
     const metricsObservable = this.metrics$.asObservable();
 
     this.service = {
-      collectionInterval: config.interval.asMilliseconds(),
+      collectionInterval: interval.asMilliseconds(),
       getOpsMetrics$: () => metricsObservable,
     };
 
@@ -71,10 +77,15 @@ export class MetricsService
     return this.service;
   }
 
-  private async refreshMetrics() {
+  private async refreshMetrics(thresholdMs: number) {
     const metrics = await this.metricsCollector!.collect();
     const { message, meta } = getEcsOpsMetricsLog(metrics);
+    const { message: eventLoopThresholdMessage } = getEventLoopThresholdLog(metrics, thresholdMs);
+
     this.opsMetricsLogger.debug(message!, meta);
+    if (eventLoopThresholdMessage) {
+      this.opsMetricsLogger.warn(eventLoopThresholdMessage);
+    }
     this.metricsCollector!.reset();
     this.metrics$.next(metrics);
   }
