@@ -73,6 +73,7 @@ export enum SecurityPageName {
   case = 'case',
   administration = 'administration',
   endpoints = 'endpoints',
+  policies = 'policies',
   trustedApps = 'trusted_apps',
   eventFilters = 'event_filters',
 }
