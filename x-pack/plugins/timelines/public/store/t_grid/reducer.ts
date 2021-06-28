@@ -49,6 +49,22 @@ export const initialTGridState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
 };
 
+function dumbDebugger(state, id, isLoading) {
+  console.log('timeline by id: ', state.timelineById[id]);
+  const newState = {
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isLoading,
+      },
+    },
+  };
+  console.log('newState: ', newState);
+  return newState;
+}
+
 /** The reducer for all timeline actions  */
 export const tGridReducer = reducerWithInitialState(initialTGridState)
   .case(upsertColumn, (state, { column, id, index }) => ({
@@ -154,14 +170,7 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
     },
   }))
   .case(updateIsLoading, (state, { id, isLoading }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        isLoading,
-      },
-    },
+    ...dumbDebugger(state, id, isLoading),
   }))
   .case(updateColumns, (state, { id, columns }) => ({
     ...state,

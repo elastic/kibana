@@ -82,7 +82,6 @@ export const EventColumnView = React.memo<Props>(
           .join(' '),
       [columnHeaders, data]
     );
-
     const leadingActionCells = useMemo(
       () =>
         leadingControlColumns ? leadingControlColumns.map((column) => column.rowCellRender) : [],
