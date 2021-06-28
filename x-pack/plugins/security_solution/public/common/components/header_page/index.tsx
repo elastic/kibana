@@ -55,6 +55,14 @@ const Badge = (styled(EuiBadge)`
 ` as unknown) as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
+const HeaderSection = styled(EuiPageHeaderSection)`
+  // Without  min-width: 0, as a flex child, it wouldn't shrink properly
+  // and could overflow its parent.
+  min-width: 0;
+  max-width: 100%;
+`;
+HeaderSection.displayName = 'HeaderSection';
+
 interface BackOptions {
   href: LinkIconProps['href'];
   text: LinkIconProps['children'];
@@ -105,7 +113,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   return (
     <>
       <EuiPageHeader alignItems="center" bottomBorder={border}>
-        <EuiPageHeaderSection>
+        <HeaderSection>
           {backOptions && (
             <LinkBack>
               <LinkIcon
@@ -132,7 +140,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
           {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
           {border && isLoading && <EuiProgress size="xs" color="accent" />}
-        </EuiPageHeaderSection>
+        </HeaderSection>
 
         {children && (
           <EuiPageHeaderSection data-test-subj="header-page-supplements">

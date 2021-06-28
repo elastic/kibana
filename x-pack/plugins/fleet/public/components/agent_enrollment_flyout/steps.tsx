@@ -49,14 +49,16 @@ export const DownloadStep = () => {
 
 export const AgentPolicySelectionStep = ({
   agentPolicies,
-  setSelectedAPIKeyId,
   setSelectedPolicyId,
-  setIsFleetServerPolicySelected,
+  selectedApiKeyId,
+  setSelectedAPIKeyId,
   excludeFleetServer,
+  setIsFleetServerPolicySelected,
 }: {
   agentPolicies?: AgentPolicy[];
-  setSelectedAPIKeyId?: (key?: string) => void;
   setSelectedPolicyId?: (policyId?: string) => void;
+  selectedApiKeyId?: string;
+  setSelectedAPIKeyId?: (key?: string) => void;
   setIsFleetServerPolicySelected?: (selected: boolean) => void;
   excludeFleetServer?: boolean;
 }) => {
@@ -99,6 +101,7 @@ export const AgentPolicySelectionStep = ({
       <EnrollmentStepAgentPolicy
         agentPolicies={regularAgentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
+        selectedApiKeyId={selectedApiKeyId}
         onKeyChange={setSelectedAPIKeyId}
         onAgentPolicyChange={onAgentPolicyChange}
         excludeFleetServer={excludeFleetServer}
@@ -109,9 +112,11 @@ export const AgentPolicySelectionStep = ({
 
 export const AgentEnrollmentKeySelectionStep = ({
   agentPolicy,
+  selectedApiKeyId,
   setSelectedAPIKeyId,
 }: {
   agentPolicy: AgentPolicy;
+  selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
 }) => {
   return {
@@ -132,6 +137,7 @@ export const AgentEnrollmentKeySelectionStep = ({
         <EuiSpacer size="l" />
         <AdvancedAgentAuthenticationSettings
           agentPolicyId={agentPolicy.id}
+          selectedApiKeyId={selectedApiKeyId}
           onKeyChange={setSelectedAPIKeyId}
         />
       </>

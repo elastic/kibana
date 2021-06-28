@@ -29,7 +29,7 @@ import { ParamEditorProps } from '../../index';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {
-  LensMathSuggestion,
+  LensMathSuggestions,
   SUGGESTION_TYPE,
   suggest,
   getSuggestion,
@@ -329,7 +329,7 @@ export function FormulaEditor({
       context: monaco.languages.CompletionContext
     ) => {
       const innerText = model.getValue();
-      let aSuggestions: { list: LensMathSuggestion[]; type: SUGGESTION_TYPE } = {
+      let aSuggestions: LensMathSuggestions = {
         list: [],
         type: SUGGESTION_TYPE.FIELD,
       };
@@ -367,7 +367,13 @@ export function FormulaEditor({
 
       return {
         suggestions: aSuggestions.list.map((s) =>
-          getSuggestion(s, aSuggestions.type, visibleOperationsMap, context.triggerCharacter)
+          getSuggestion(
+            s,
+            aSuggestions.type,
+            visibleOperationsMap,
+            context.triggerCharacter,
+            aSuggestions.range
+          )
         ),
       };
     },
@@ -579,7 +585,6 @@ export function FormulaEditor({
             <div className="lnsFormula__editorHeader">
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem className="lnsFormula__editorHeaderGroup">
-                  {/* TODO: Replace `bolt` with `wordWrap` icon (after latest EUI is deployed) and hook up button to enable/disable word wrapping. */}
                   <EuiToolTip
                     content={
                       isWordWrapped
@@ -593,7 +598,7 @@ export function FormulaEditor({
                     position="top"
                   >
                     <EuiButtonIcon
-                      iconType="bolt"
+                      iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
                       display={!isWordWrapped ? 'fill' : undefined}
                       color={'text'}
                       aria-label={
@@ -719,7 +724,7 @@ export function FormulaEditor({
                         color="text"
                         onClick={() => setIsHelpOpen(!isHelpOpen)}
                       >
-                        <EuiIcon type="help" />
+                        <EuiIcon type="documentation" />
                         <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
                       </EuiLink>
                     </EuiToolTip>
@@ -741,7 +746,7 @@ export function FormulaEditor({
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
                             onClick={() => setIsHelpOpen(!isHelpOpen)}
-                            iconType="help"
+                            iconType="documentation"
                             color="text"
                             size="s"
                             aria-label={i18n.translate(
