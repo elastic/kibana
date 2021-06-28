@@ -20,8 +20,6 @@ import { emsBoundariesLayerWizardConfig } from '../sources/ems_file_source';
 // @ts-ignore
 import { emsBaseMapLayerWizardConfig } from '../sources/ems_tms_source';
 // @ts-ignore
-import { kibanaRegionMapLayerWizardConfig } from '../sources/kibana_regionmap_source';
-// @ts-ignore
 import { kibanaBasemapLayerWizardConfig } from '../sources/kibana_tilemap_source';
 import { tmsLayerWizardConfig } from '../sources/xyz_tms_source';
 // @ts-ignore
@@ -58,8 +56,6 @@ export function registerLayerWizards() {
   registerLayerWizard(emsBoundariesLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(emsBaseMapLayerWizardConfig);
-  // @ts-ignore
-  registerLayerWizard(kibanaRegionMapLayerWizardConfig);
   // @ts-ignore
   registerLayerWizard(kibanaBasemapLayerWizardConfig);
   registerLayerWizard(tmsLayerWizardConfig);

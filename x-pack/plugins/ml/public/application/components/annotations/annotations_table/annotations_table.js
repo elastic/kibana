@@ -51,7 +51,7 @@ import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../common/constants/
 import { PLUGIN_ID } from '../../../../../common/constants/app';
 import { timeFormatter } from '../../../../../common/util/date_utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
-import { DatafeedModal } from '../../../jobs/jobs_list/components/datafeed_modal';
+import { DatafeedChartFlyout } from '../../../jobs/jobs_list/components/datafeed_chart_flyout';
 
 const CURRENT_SERIES = 'current_series';
 /**
@@ -79,7 +79,7 @@ class AnnotationsTableUI extends Component {
         this.props.jobs[0] !== undefined
           ? this.props.jobs[0].job_id
           : undefined,
-      datafeedModalVisible: false,
+      datafeedFlyoutVisible: false,
       datafeedEnd: null,
     };
     this.sorting = {
@@ -509,7 +509,7 @@ class AnnotationsTableUI extends Component {
               iconType="visAreaStacked"
               onClick={() =>
                 this.setState({
-                  datafeedModalVisible: true,
+                  datafeedFlyoutVisible: true,
                   datafeedEnd: annotation.end_timestamp,
                 })
               }
@@ -727,11 +727,11 @@ class AnnotationsTableUI extends Component {
           search={search}
           rowProps={getRowProps}
         />
-        {this.state.jobId && this.state.datafeedModalVisible && this.state.datafeedEnd ? (
-          <DatafeedModal
+        {this.state.jobId && this.state.datafeedFlyoutVisible && this.state.datafeedEnd ? (
+          <DatafeedChartFlyout
             onClose={() => {
               this.setState({
-                datafeedModalVisible: false,
+                datafeedFlyoutVisible: false,
               });
             }}
             end={this.state.datafeedEnd}

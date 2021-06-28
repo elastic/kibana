@@ -12,4 +12,5 @@
  * More docs and examples can be found here https://github.com/yahoo/react-intl/wiki/API#injection-api
  */
 
+// eslint-disable-next-line @kbn/eslint/module_migration
 export { injectIntl as injectI18n } from 'react-intl';

@@ -12,7 +12,7 @@ import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
 import { useMessagesStorage } from '../../../../hooks/use_messages_storage';
-import { OBSERVABILITY } from '../../../../../common/const';
+import { observabilityAppId } from '../../../../../common';
 
 export * from './helpers';
 
@@ -35,7 +35,7 @@ interface CalloutVisibility {
 function CaseCallOutComponent({ title, messages = [] }: CaseCallOutProps) {
   const { getMessages, addMessage } = useMessagesStorage();
 
-  const caseMessages = useMemo(() => getMessages(OBSERVABILITY), [getMessages]);
+  const caseMessages = useMemo(() => getMessages(observabilityAppId), [getMessages]);
   const dismissedCallouts = useMemo(
     () =>
       caseMessages.reduce<CalloutVisibility>(
@@ -53,7 +53,7 @@ function CaseCallOutComponent({ title, messages = [] }: CaseCallOutProps) {
     (id, type) => {
       setCalloutVisibility((prevState) => ({ ...prevState, [id]: false }));
       if (type === 'primary') {
-        addMessage(OBSERVABILITY, id);
+        addMessage(observabilityAppId, id);
       }
     },
     [setCalloutVisibility, addMessage]

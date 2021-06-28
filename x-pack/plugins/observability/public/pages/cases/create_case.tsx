@@ -10,12 +10,12 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from '../../components/app/cases/translations';
 import { Create } from '../../components/app/cases/create';
-import { CASES_APP_ID } from '../../components/app/cases/constants';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { casesBreadcrumbs, getCaseUrl, useFormatUrl } from './links';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { observabilityAppId } from '../../../common';
 
 const ButtonEmpty = styled(EuiButtonEmpty)`
   display: block;
@@ -28,7 +28,7 @@ export const CreateCasePage = React.memo(() => {
     application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
 
-  const casesUrl = getUrlForApp(CASES_APP_ID);
+  const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
   const goTo = useCallback(
     async (ev) => {
       ev.preventDefault();
@@ -37,7 +37,7 @@ export const CreateCasePage = React.memo(() => {
     [casesUrl, navigateToUrl]
   );
 
-  const { formatUrl } = useFormatUrl(CASES_APP_ID);
+  const { formatUrl } = useFormatUrl();
   const href = formatUrl(getCaseUrl());
   useBreadcrumbs([{ ...casesBreadcrumbs.cases, href }, casesBreadcrumbs.create]);
 
