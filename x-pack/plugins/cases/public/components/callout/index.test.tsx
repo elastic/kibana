@@ -37,7 +37,6 @@ describe('CaseCallOut ', () => {
       { id: 'message-two', title: 'title', description: <p>{'for real'}</p> },
     ],
     onEditClick: jest.fn(),
-    title: 'hey title',
   };
 
   it('renders a callout correctly', () => {
