@@ -490,7 +490,7 @@ export class IndexPatternsService {
   migrate(indexPattern: IndexPattern, newTitle: string) {
     return this.savedObjectsClient
       .update<IndexPatternAttributes>(
-        savedObjectType,
+        INDEX_PATTERN_SAVED_OBJECT_TYPE,
         indexPattern.id!,
         {
           title: newTitle,
