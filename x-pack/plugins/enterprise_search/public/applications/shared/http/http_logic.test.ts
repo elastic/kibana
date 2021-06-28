@@ -109,13 +109,24 @@ describe('HttpLogic', () => {
           expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalledWith(false);
         });
 
-        it('does not handle errors for non-Enterprise Search API calls', async () => {
-          const httpResponse = {
-            response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
-          };
-          await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
+        describe('isEnterpriseSearchApi check', () => {
+          let httpResponse: any;
 
-          expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
+          afterEach(async () => {
+            // Should always re-reject the promise and not call setErrorConnecting
+            await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
+            expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
+          });
+
+          it('does not handle non-Enterprise Search API calls', async () => {
+            httpResponse = {
+              response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
+            };
+          });
+
+          it('does not handle invalid responses', async () => {
+            httpResponse = {};
+          });
         });
       });
 
@@ -145,13 +156,24 @@ describe('HttpLogic', () => {
           expect(HttpLogic.actions.setReadOnlyMode).toHaveBeenCalledWith(false);
         });
 
-        it('does not handle headers for non-Enterprise Search API calls', async () => {
-          const httpResponse = {
-            response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
-          };
-          await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+        describe('isEnterpriseSearchApi check', () => {
+          let httpResponse: any;
 
-          expect(HttpLogic.actions.setReadOnlyMode).not.toHaveBeenCalled();
+          afterEach(async () => {
+            // Should always resolve the promise and not call setReadOnlyMode
+            await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+            expect(HttpLogic.actions.setReadOnlyMode).not.toHaveBeenCalled();
+          });
+
+          it('does not handle non-Enterprise Search API calls', async () => {
+            httpResponse = {
+              response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
+            };
+          });
+
+          it('does not handle invalid responses', async () => {
+            httpResponse = {};
+          });
         });
       });
     });

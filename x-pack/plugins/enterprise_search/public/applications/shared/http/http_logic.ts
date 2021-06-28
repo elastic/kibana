@@ -125,6 +125,8 @@ export const mountHttpLogic = (props: HttpLogicProps) => {
  * Small helper that checks whether or not an http call is for an Enterprise Search API
  */
 const isEnterpriseSearchApi = (httpResponse: HttpResponse) => {
-  const { url } = httpResponse.response!;
+  if (!httpResponse.response) return false; // Typically this means Kibana has stopped working, in which case we short-circuit early to prevent errors
+
+  const { url } = httpResponse.response;
   return url.includes('/api/app_search/') || url.includes('/api/workplace_search/');
 };
