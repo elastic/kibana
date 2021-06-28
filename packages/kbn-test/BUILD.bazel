@@ -100,8 +100,8 @@ babel(
       "./%s/babel.config.js" % package_name(),
       "--out-dir",
       "$(@D)",
-      '--extensions',
-      '.ts,.js,.tsx'
+      "--extensions",
+      ".ts,.js,.tsx",
       "--quiet"
   ],
 )
