@@ -120,13 +120,13 @@ const getTitleConfig = ({
 
   const validations = [
     ...titleFieldConfig.validations,
-    createTitlesNotAllowedValidator(namesNotAllowed),
     // note this is responsible for triggering the state update for the selected source list.
     rollupIndexPatternValidator({
       rollupIndicesCapabilities,
       refreshMatchedIndices,
       isRollup,
     }),
+    createTitlesNotAllowedValidator(namesNotAllowed),
   ];
 
   // Add validation to not allow duplicates

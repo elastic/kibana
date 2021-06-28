@@ -139,10 +139,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;
 
-  // load all data sources
+  // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
     getIndices(http, () => [], '*', allowHidden).then((dataSources) => {
       setAllSources(dataSources);
+      const matchedSet = getMatchedIndices(dataSources, [], [], allowHidden);
+      setMatchedIndices(matchedSet);
       setIsLoadingSources(false);
     });
     getIndices(http, () => [], '*:*', false).then((dataSources) =>
