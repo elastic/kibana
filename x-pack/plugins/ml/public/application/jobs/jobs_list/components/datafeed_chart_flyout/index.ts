@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DatafeedModal } from './datafeed_modal';
+export { DatafeedChartFlyout } from './datafeed_chart_flyout';
