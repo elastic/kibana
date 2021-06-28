@@ -140,7 +140,7 @@ export const EnableAlertsModal: React.FC<{}> = () => {
         </EuiButtonEmpty>
 
         <EuiButton onClick={confirmButtonClick} fill data-test-subj="alerts-modal-button">
-          Ok
+          <FormattedMessage id="xpack.monitoring.alerts.modal.confirm" defaultMessage="Ok" />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
