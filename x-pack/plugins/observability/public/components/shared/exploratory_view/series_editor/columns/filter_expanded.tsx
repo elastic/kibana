@@ -14,7 +14,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { map } from 'lodash';
 import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { DataSeries, UrlFilter } from '../../types';
+import { SeriesConfig, UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
 import { useValuesList } from '../../../../../hooks/use_values_list';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
@@ -29,7 +29,7 @@ interface Props {
   isNegated?: boolean;
   goBack: () => void;
   nestedField?: string;
-  filters: DataSeries['filters'];
+  filters: SeriesConfig['baseFilters'];
 }
 
 export function FilterExpanded({
