@@ -102,20 +102,6 @@ export const OptionsListControl = ({ twoLine, title, options }: OptionsListContr
             {item.label}
           </EuiFilterSelectItem>
         ))}
-        {/* <div className="euiFilterSelect__note">
-          <div className="euiFilterSelect__noteContent">
-            <EuiLoadingChart size="m" />
-            <EuiSpacer size="xs" />
-            <p>Loading filters</p>
-          </div>
-        </div> */}
-        {/* <div className="euiFilterSelect__note">
-          <div className="euiFilterSelect__noteContent">
-            <EuiIcon type="minusInCircle" />
-            <EuiSpacer size="xs" />
-            <p>No filters found</p>
-          </div>
-        </div> */}
       </div>
     </EuiPopover>
   );
