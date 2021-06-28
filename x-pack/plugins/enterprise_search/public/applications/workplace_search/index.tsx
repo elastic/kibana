@@ -107,7 +107,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
             <SearchAuthorize />
           </Route>
           <Route>
-            <NotFound />
+            <NotFound isOrganization={false} />
           </Route>
         </Switch>
       </Route>
@@ -127,7 +127,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <SettingsRouter />
       </Route>
       <Route>
-        <NotFound isOrganization={false} />
+        <NotFound />
       </Route>
     </Switch>
   );
