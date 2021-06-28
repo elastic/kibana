@@ -45,10 +45,10 @@ export const renderApp = (
   const unmountKibanaLogic = mountKibanaLogic({
     config,
     charts: plugins.charts,
-    cloud: plugins.cloud || {},
+    cloud: plugins.cloud,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
-    security: plugins.security || {},
+    security: plugins.security,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
     setChromeIsVisible: core.chrome.setIsVisible,
     setDocTitle: core.chrome.docTitle.change,
