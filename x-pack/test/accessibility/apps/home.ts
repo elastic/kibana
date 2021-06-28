@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const toasts = getService('toasts');
 
   describe('Kibana Home', () => {
     before(async () => {
@@ -29,6 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('toggle side nav meets a11y requirements', async () => {
       await testSubjects.click('toggleNavButton');
+      await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
     });
 

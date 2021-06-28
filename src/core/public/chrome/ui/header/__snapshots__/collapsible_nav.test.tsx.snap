@@ -1986,7 +1986,15 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             <span
                               className="euiButton__text"
                             >
-                              Add Data
+                              <FormattedMessage
+                                defaultMessage="Add Data"
+                                id="core.ui.primaryNavSection.addDataBtn"
+                                values={Object {}}
+                              >
+                                <span>
+                                  Add Data
+                                </span>
+                              </FormattedMessage>
                             </span>
                           </span>
                         </EuiButtonContent>
