@@ -316,15 +316,14 @@ export function getDeepLinks(licenseType?: LicenseType): AppDeepLink[] {
   return topDeepLinks.map((deepLink) => {
     const deepLinkId = deepLink.id as SecurityDeepLinkName;
     const subPluginDeepLinks = nestedDeepLinks[deepLinkId];
-    const baseDeepLinks = [...subPluginDeepLinks.base];
-    if (isPremiumLicense(licenseType)) {
-      const premiumDeepLinks = subPluginDeepLinks && subPluginDeepLinks.premium;
-      if (premiumDeepLinks !== undefined) {
-        return {
-          ...deepLink,
-          deepLinks: [...baseDeepLinks, ...premiumDeepLinks],
-        };
-      }
+    const baseDeepLinks = Array.isArray(subPluginDeepLinks.base)
+      ? [...subPluginDeepLinks.base]
+      : [];
+    if (isPremiumLicense(licenseType) && subPluginDeepLinks?.premium) {
+      return {
+        ...deepLink,
+        deepLinks: [...baseDeepLinks, ...subPluginDeepLinks.premium],
+      };
     }
     return {
       ...deepLink,
@@ -335,10 +334,9 @@ export function getDeepLinks(licenseType?: LicenseType): AppDeepLink[] {
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {
   return (
-    licenseType !== undefined &&
-    (licenseType === 'gold' ||
-      licenseType === 'platinum' ||
-      licenseType === 'enterprise' ||
-      licenseType === 'trial')
+    licenseType === 'gold' ||
+    licenseType === 'platinum' ||
+    licenseType === 'enterprise' ||
+    licenseType === 'trial'
   );
 }
