@@ -17,7 +17,7 @@ import * as i18n from './translations';
 import { Case, CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { CasesNavigation } from '../links';
-import { ErrorMessage } from '../callout/types';
+import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from '../callout/types';
 
 export interface UsePushToService {
   caseId: string;
@@ -119,8 +119,8 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
-          id: 'closed-case-push-error',
-          title: i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE,
+          id: CLOSED_CASE_PUSH_ERROR_ID,
+          title: '',
           description: (
             <FormattedMessage
               defaultMessage="Closed cases cannot be sent to external systems. Reopen the case if you want to open or update it in an external system."
@@ -198,7 +198,6 @@ export const usePushToService = ({
             hasConnectors={connectors.length > 0}
             messages={errorsMsg}
             onEditClick={onEditClick}
-            title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE}
           />
         ) : null,
     }),

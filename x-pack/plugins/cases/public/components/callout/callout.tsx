@@ -7,9 +7,9 @@
 
 import { EuiCallOut, EuiButton, EuiDescriptionList } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 
-import { ErrorMessage } from './types';
+import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './types';
 import * as i18n from './translations';
 
 export interface CallOutProps {
@@ -20,33 +20,43 @@ export interface CallOutProps {
   ) => void;
   id: string;
   messages: ErrorMessage[];
-  title: string;
   type: NonNullable<ErrorMessage['errorType']>;
 }
 
-const CallOutComponent = ({ handleButtonClick, id, messages, title, type }: CallOutProps) => {
+const CallOutComponent = ({ handleButtonClick, id, messages, type }: CallOutProps) => {
   const handleCallOut = useCallback((e) => handleButtonClick(e, id, type), [
     handleButtonClick,
     id,
     type,
   ]);
 
+  const isCaseClosed = useMemo(
+    () => messages.map((m) => m.id).includes(CLOSED_CASE_PUSH_ERROR_ID),
+    [messages]
+  );
+
   return !isEmpty(messages) ? (
     <EuiCallOut
-      title={title}
+      title={
+        isCaseClosed
+          ? i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE
+          : i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE
+      }
       color={type}
       iconType="gear"
       data-test-subj={`case-callout-${id}`}
       size="s"
     >
       <EuiDescriptionList data-test-subj={`callout-messages-${id}`} listItems={messages} />
-      <EuiButton
-        data-test-subj={`callout-onclick-${id}`}
-        color={type === 'success' ? 'secondary' : type}
-        onClick={handleCallOut}
-      >
-        {i18n.ADD_CONNECTOR}
-      </EuiButton>
+      {!isCaseClosed && (
+        <EuiButton
+          data-test-subj={`callout-onclick-${id}`}
+          color={type === 'success' ? 'secondary' : type}
+          onClick={handleCallOut}
+        >
+          {i18n.ADD_CONNECTOR}
+        </EuiButton>
+      )}
     </EuiCallOut>
   ) : null;
 };

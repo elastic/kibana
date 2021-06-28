@@ -7,12 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
-  'xpack.cases.caseView.errorsPushServiceCallOutTitle',
-  {
-    defaultMessage: 'Select an external connector',
-  }
-);
 export const PUSH_THIRD = (thirdParty: string) => {
   if (thirdParty === 'none') {
     return i18n.translate('xpack.cases.caseView.pushThirdPartyIncident', {
@@ -61,13 +55,6 @@ export const CONFIGURE_CONNECTOR = i18n.translate(
   {
     defaultMessage:
       'To open and update cases in external systems, you must select an external incident management system for this case.',
-  }
-);
-
-export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE = i18n.translate(
-  'xpack.cases.caseView.pushToServiceDisableBecauseCaseClosedTitle',
-  {
-    defaultMessage: 'Reopen the case',
   }
 );
 

@@ -17,6 +17,7 @@ import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock } from '../../containers/configure/mock';
 import { ConnectorTypes } from '../../../common/api/connectors';
+import { CLOSED_CASE_PUSH_ERROR_ID } from '../callout/types';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -269,7 +270,7 @@ describe('usePushToService', () => {
       await waitForNextUpdate();
       const errorsMsg = result.current.pushCallouts?.props.messages;
       expect(errorsMsg).toHaveLength(1);
-      expect(errorsMsg[0].id).toEqual('closed-case-push-error');
+      expect(errorsMsg[0].id).toEqual(CLOSED_CASE_PUSH_ERROR_ID);
     });
   });
 

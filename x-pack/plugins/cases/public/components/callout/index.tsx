@@ -20,7 +20,6 @@ export interface CaseCallOutProps {
   hasConnectors: boolean;
   messages?: ErrorMessage[];
   onEditClick: () => void;
-  title: string;
 }
 
 type GroupByTypeMessages = {
@@ -33,7 +32,6 @@ const CaseCallOutComponent = ({
   configureCasesNavigation,
   hasConnectors,
   onEditClick,
-  title,
   messages = [],
 }: CaseCallOutProps) => {
   const handleCallOut = useCallback(
@@ -78,7 +76,6 @@ const CaseCallOutComponent = ({
                 handleButtonClick={handleCallOut}
                 id={id}
                 messages={groupedByTypeErrorMessages[type].messages}
-                title={title}
                 type={type}
               />
               <EuiSpacer />

@@ -9,13 +9,14 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { CallOut, CallOutProps } from './callout';
+import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
+import { TestProviders } from '../../common/mock';
 
 describe('Callout', () => {
   const handleButtonClick = jest.fn();
   const defaultProps: CallOutProps = {
     id: 'md5-hex',
     type: 'primary',
-    title: 'a tittle',
     messages: [
       {
         id: 'generic-error',
@@ -72,6 +73,27 @@ describe('Callout', () => {
       wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).first().prop('className') ??
       '';
     expect(className.includes('euiButton--danger')).toBeTruthy();
+  });
+
+  it('does not show the button when case is closed error is present', () => {
+    const props = {
+      ...defaultProps,
+      messages: [
+        {
+          id: CLOSED_CASE_PUSH_ERROR_ID,
+          title: 'message-one',
+          description: <p>{'error'}</p>,
+        },
+      ],
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <CallOut {...props} />
+      </TestProviders>
+    );
+    expect(wrapper.find(`button[data-test-subj="callout-onclick-md5-hex"]`).exists()).toEqual(
+      false
+    );
   });
 
   // use this for storage if we ever want to bring that back

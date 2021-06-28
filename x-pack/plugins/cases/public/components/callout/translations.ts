@@ -10,3 +10,16 @@ import { i18n } from '@kbn/i18n';
 export const ADD_CONNECTOR = i18n.translate('xpack.cases.addConnector.title', {
   defaultMessage: 'Add connector',
 });
+
+export const PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE = i18n.translate(
+  'xpack.cases.caseView.pushToServiceDisableBecauseCaseClosedTitle',
+  {
+    defaultMessage: 'Reopen the case',
+  }
+);
+export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
+  'xpack.cases.caseView.errorsPushServiceCallOutTitle',
+  {
+    defaultMessage: 'Select an external connector',
+  }
+);
