@@ -41,11 +41,6 @@ export const buildPhrasesFilter = (
   const type = FILTERS.PHRASES;
   const key = field.name;
 
-  const format = (f: IFieldType, value: any) =>
-    f && f.format && f.format.convert ? f.format.convert(value) : value;
-
-  const value = params.map((v: any) => format(field, v)).join(', ');
-
   let should;
   if (field.scripted) {
     should = params.map((v: any) => ({
@@ -60,7 +55,7 @@ export const buildPhrasesFilter = (
   }
 
   return {
-    meta: { index, type, key, value, params },
+    meta: { index, type, key, params },
     query: {
       bool: {
         should,

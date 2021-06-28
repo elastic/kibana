@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { IUiSettingsClient } from 'kibana/public';
@@ -47,8 +47,21 @@ export function DiscoverChart({
   stateContainer: GetStateReturn;
   timefield?: string;
 }) {
+  const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
+    element: null,
+    moveFocus: false,
+  });
+
+  useEffect(() => {
+    if (chartRef.current.moveFocus && chartRef.current.element) {
+      chartRef.current.element.focus();
+    }
+  }, [state.hideChart]);
+
   const toggleHideChart = useCallback(() => {
-    stateContainer.setAppState({ hideChart: !state.hideChart });
+    const newHideChart = !state.hideChart;
+    stateContainer.setAppState({ hideChart: newHideChart });
+    chartRef.current.moveFocus = !newHideChart;
   }, [state, stateContainer]);
 
   const onChangeInterval = useCallback(
@@ -102,9 +115,7 @@ export function DiscoverChart({
               <EuiButtonEmpty
                 size="xs"
                 iconType={!state.hideChart ? 'eyeClosed' : 'eye'}
-                onClick={() => {
-                  toggleHideChart();
-                }}
+                onClick={toggleHideChart}
                 data-test-subj="discoverChartToggle"
               >
                 {!state.hideChart
@@ -122,6 +133,8 @@ export function DiscoverChart({
       {!state.hideChart && chartData && (
         <EuiFlexItem grow={false}>
           <section
+            ref={(element) => (chartRef.current.element = element)}
+            tabIndex={-1}
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
