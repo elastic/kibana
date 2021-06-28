@@ -12,7 +12,7 @@ import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 
 const osTypeBasedOnAgentType = (data?: Ecs) => {
   if (data?.agent?.type?.includes('endpoint')) {
-    return (data?.host?.os?.name || ['windows']).map(String.prototype.toLowerCase);
+    return (data?.host?.os?.name || ['windows']).map((name) => name.toLowerCase());
   } else {
     return data?.host?.os?.family ?? ['windows'];
   }
