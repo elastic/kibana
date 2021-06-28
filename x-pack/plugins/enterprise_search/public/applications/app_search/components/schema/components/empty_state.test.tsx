@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { setMockValues } from '../../../../__mocks__/kea_logic';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+
+import { SchemaAddFieldModal } from '../../../../shared/schema';
 
 import { EmptyState } from './';
 
@@ -23,5 +27,12 @@ describe('EmptyState', () => {
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
       expect.stringContaining('#indexing-documents-guide-schema')
     );
+  });
+
+  it('renders a modal that lets a user add a new schema field', () => {
+    setMockValues({ isModalOpen: true });
+    const wrapper = shallow(<EmptyState />);
+
+    expect(wrapper.find(SchemaAddFieldModal)).toHaveLength(1);
   });
 });

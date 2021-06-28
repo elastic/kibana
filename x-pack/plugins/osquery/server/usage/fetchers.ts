@@ -56,6 +56,7 @@ export async function getPolicyLevelUsage(
       },
     },
     index: '.fleet-agents',
+    ignore_unavailable: true,
   });
   const policied = agentResponse.body.aggregations?.policied as AggregationsSingleBucketAggregate;
   if (policied && typeof policied.doc_count === 'number') {
@@ -118,6 +119,7 @@ export async function getLiveQueryUsage(
       },
     },
     index: '.fleet-actions',
+    ignore_unavailable: true,
   });
   const result: LiveQueryUsage = {
     session: await getRouteMetric(soClient, 'live_query'),
@@ -226,6 +228,7 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
       },
     },
     index: METRICS_INDICES,
+    ignore_unavailable: true,
   });
 
   return extractBeatUsageMetrics(metricResponse);

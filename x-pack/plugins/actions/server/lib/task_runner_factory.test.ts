@@ -126,12 +126,16 @@ test('executes the task by calling the executor with proper parameters', async (
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
+    relatedSavedObjects: [],
     request: expect.objectContaining({
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
@@ -247,12 +251,16 @@ test('uses API key when provided', async () => {
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
+    relatedSavedObjects: [],
     request: expect.objectContaining({
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
@@ -260,6 +268,84 @@ test('uses API key when provided', async () => {
     executeParams.request,
     '/s/test'
   );
+});
+
+test('uses relatedSavedObjects when provided', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      relatedSavedObjects: [{ id: 'some-id', type: 'some-type' }],
+    },
+    references: [],
+  });
+
+  await taskRunner.run();
+
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    params: { baz: true },
+    relatedSavedObjects: [
+      {
+        id: 'some-id',
+        type: 'some-type',
+      },
+    ],
+    request: expect.objectContaining({
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
+  });
+});
+
+test('sanitizes invalid relatedSavedObjects when provided', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      params: { baz: true },
+      apiKey: Buffer.from('123:abc').toString('base64'),
+      relatedSavedObjects: [{ Xid: 'some-id', type: 'some-type' }],
+    },
+    references: [],
+  });
+
+  await taskRunner.run();
+  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+    actionId: '2',
+    params: { baz: true },
+    relatedSavedObjects: [],
+    request: expect.objectContaining({
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
+  });
 });
 
 test(`doesn't use API key when not provided`, async () => {
@@ -284,9 +370,13 @@ test(`doesn't use API key when not provided`, async () => {
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '2',
     params: { baz: true },
+    relatedSavedObjects: [],
     request: expect.objectContaining({
       headers: {},
     }),
+    taskInfo: {
+      scheduled: new Date(),
+    },
   });
 
   const [executeParams] = mockedActionExecutor.execute.mock.calls[0];

@@ -8,7 +8,7 @@
 
 import './discover_field.scss';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -27,7 +28,174 @@ import { FieldIcon, FieldButton } from '../../../../../../../kibana_react/public
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
 import { getFieldTypeName } from './lib/get_field_type_name';
-import { DiscoverFieldDetailsFooter } from './discover_field_details_footer';
+import { DiscoverFieldVisualize } from './discover_field_visualize';
+
+function wrapOnDot(str?: string) {
+  // u200B is a non-width white-space character, which allows
+  // the browser to efficiently word-wrap right after the dot
+  // without us having to draw a lot of extra DOM elements, etc
+  return str ? str.replace(/\./g, '.\u200B') : '';
+}
+
+const FieldInfoIcon: React.FC = memo(() => (
+  <EuiToolTip
+    position="bottom"
+    content={i18n.translate('discover.field.mappingConflict', {
+      defaultMessage:
+        'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
+        'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
+    })}
+  >
+    <EuiIcon
+      tabIndex={0}
+      type="alert"
+      title={i18n.translate('discover.field.mappingConflict.title', {
+        defaultMessage: 'Mapping Conflict',
+      })}
+      size="s"
+    />
+  </EuiToolTip>
+));
+
+const DiscoverFieldTypeIcon: React.FC<{ field: IndexPatternField }> = memo(({ field }) => (
+  <FieldIcon type={field.type} label={getFieldTypeName(field.type)} scripted={field.scripted} />
+));
+
+const FieldName: React.FC<{ field: IndexPatternField }> = memo(({ field }) => {
+  const title =
+    field.displayName !== field.name
+      ? i18n.translate('discover.field.title', {
+          defaultMessage: '{fieldName} ({fieldDisplayName})',
+          values: {
+            fieldName: field.name,
+            fieldDisplayName: field.displayName,
+          },
+        })
+      : field.displayName;
+
+  return (
+    <span data-test-subj={`field-${field.name}`} title={title} className="dscSidebarField__name">
+      {wrapOnDot(field.displayName)}
+    </span>
+  );
+});
+
+interface ActionButtonProps {
+  field: IndexPatternField;
+  isSelected?: boolean;
+  alwaysShow: boolean;
+  toggleDisplay: (field: IndexPatternField) => void;
+}
+
+const ActionButton: React.FC<ActionButtonProps> = memo(
+  ({ field, isSelected, alwaysShow, toggleDisplay }) => {
+    const actionBtnClassName = classNames('dscSidebarItem__action', {
+      ['dscSidebarItem__mobile']: alwaysShow,
+    });
+    if (field.name === '_source') {
+      return null;
+    }
+    if (!isSelected) {
+      return (
+        <EuiToolTip
+          delay="long"
+          content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
+            defaultMessage: 'Add field as column',
+          })}
+        >
+          <EuiButtonIcon
+            iconType="plusInCircleFilled"
+            className={actionBtnClassName}
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              if (ev.type === 'click') {
+                ev.currentTarget.focus();
+              }
+              ev.preventDefault();
+              ev.stopPropagation();
+              toggleDisplay(field);
+            }}
+            data-test-subj={`fieldToggle-${field.name}`}
+            aria-label={i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
+              defaultMessage: 'Add {field} to table',
+              values: { field: field.name },
+            })}
+          />
+        </EuiToolTip>
+      );
+    } else {
+      return (
+        <EuiToolTip
+          delay="long"
+          content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
+            defaultMessage: 'Remove field from table',
+          })}
+        >
+          <EuiButtonIcon
+            color="danger"
+            iconType="cross"
+            className={actionBtnClassName}
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
+              if (ev.type === 'click') {
+                ev.currentTarget.focus();
+              }
+              ev.preventDefault();
+              ev.stopPropagation();
+              toggleDisplay(field);
+            }}
+            data-test-subj={`fieldToggle-${field.name}`}
+            aria-label={i18n.translate(
+              'discover.fieldChooser.discoverField.removeButtonAriaLabel',
+              {
+                defaultMessage: 'Remove {field} from table',
+                values: { field: field.name },
+              }
+            )}
+          />
+        </EuiToolTip>
+      );
+    }
+  }
+);
+
+interface MultiFieldsProps {
+  multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
+  toggleDisplay: (field: IndexPatternField) => void;
+  alwaysShowActionButton: boolean;
+}
+
+const MultiFields: React.FC<MultiFieldsProps> = memo(
+  ({ multiFields, toggleDisplay, alwaysShowActionButton }) => (
+    <React.Fragment>
+      <EuiTitle size="xxxs">
+        <h5>
+          {i18n.translate('discover.fieldChooser.discoverField.multiFields', {
+            defaultMessage: 'Multi fields',
+          })}
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      {multiFields.map((entry) => (
+        <FieldButton
+          size="s"
+          className="dscSidebarItem dscSidebarItem--multi"
+          isActive={false}
+          dataTestSubj={`field-${entry.field.name}-showDetails`}
+          fieldIcon={<DiscoverFieldTypeIcon field={entry.field} />}
+          fieldAction={
+            <ActionButton
+              field={entry.field}
+              isSelected={entry.isSelected}
+              alwaysShow={alwaysShowActionButton}
+              toggleDisplay={toggleDisplay}
+            />
+          }
+          fieldName={<FieldName field={entry.field} />}
+          key={entry.field.name}
+        />
+      ))}
+    </React.Fragment>
+  )
+);
 
 export interface DiscoverFieldProps {
   /**
@@ -85,7 +253,7 @@ export interface DiscoverFieldProps {
   onDeleteField?: (fieldName: string) => void;
 }
 
-export function DiscoverField({
+function DiscoverFieldComponent({
   alwaysShowActionButton = false,
   field,
   indexPattern,
@@ -99,133 +267,24 @@ export function DiscoverField({
   onEditField,
   onDeleteField,
 }: DiscoverFieldProps) {
-  const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
-    defaultMessage: 'Add {field} to table',
-    values: { field: field.name },
-  });
-  const removeLabelAria = i18n.translate(
-    'discover.fieldChooser.discoverField.removeButtonAriaLabel',
-    {
-      defaultMessage: 'Remove {field} from table',
-      values: { field: field.name },
-    }
-  );
-
   const [infoIsOpen, setOpen] = useState(false);
 
-  const toggleDisplay = (f: IndexPatternField, isSelected: boolean) => {
-    if (isSelected) {
-      onRemoveField(f.name);
-    } else {
-      onAddField(f.name);
-    }
-  };
+  const toggleDisplay = useCallback(
+    (f: IndexPatternField) => {
+      if (selected) {
+        onRemoveField(f.name);
+      } else {
+        onAddField(f.name);
+      }
+    },
+    [onAddField, onRemoveField, selected]
+  );
 
-  function togglePopover() {
+  const togglePopover = useCallback(() => {
     setOpen(!infoIsOpen);
-  }
+  }, [infoIsOpen]);
 
-  function wrapOnDot(str?: string) {
-    // u200B is a non-width white-space character, which allows
-    // the browser to efficiently word-wrap right after the dot
-    // without us having to draw a lot of extra DOM elements, etc
-    return str ? str.replace(/\./g, '.\u200B') : '';
-  }
-
-  const getDscFieldIcon = (indexPatternField: IndexPatternField) => {
-    return (
-      <FieldIcon
-        type={indexPatternField.type}
-        label={getFieldTypeName(indexPatternField.type)}
-        scripted={indexPatternField.scripted}
-      />
-    );
-  };
-
-  const dscFieldIcon = getDscFieldIcon(field);
-
-  const getTitle = (indexPatternField: IndexPatternField) => {
-    return indexPatternField.displayName !== indexPatternField.name
-      ? i18n.translate('discover.field.title', {
-          defaultMessage: '{fieldName} ({fieldDisplayName})',
-          values: {
-            fieldName: indexPatternField.name,
-            fieldDisplayName: indexPatternField.displayName,
-          },
-        })
-      : indexPatternField.displayName;
-  };
-
-  const getFieldName = (indexPatternField: IndexPatternField) => {
-    return (
-      <span
-        data-test-subj={`field-${indexPatternField.name}`}
-        title={getTitle(indexPatternField)}
-        className="dscSidebarField__name"
-      >
-        {wrapOnDot(indexPatternField.displayName)}
-      </span>
-    );
-  };
-  const fieldName = getFieldName(field);
-
-  const actionBtnClassName = classNames('dscSidebarItem__action', {
-    ['dscSidebarItem__mobile']: alwaysShowActionButton,
-  });
-  const getActionButton = (f: IndexPatternField, isSelected?: boolean) => {
-    if (f.name !== '_source' && !isSelected) {
-      return (
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-            defaultMessage: 'Add field as column',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="plusInCircleFilled"
-            className={actionBtnClassName}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-              toggleDisplay(f, false);
-            }}
-            data-test-subj={`fieldToggle-${f.name}`}
-            aria-label={addLabelAria}
-          />
-        </EuiToolTip>
-      );
-    } else if (f.name !== '_source' && isSelected) {
-      return (
-        <EuiToolTip
-          delay="long"
-          content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
-            defaultMessage: 'Remove field from table',
-          })}
-        >
-          <EuiButtonIcon
-            color="danger"
-            iconType="cross"
-            className={actionBtnClassName}
-            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
-              if (ev.type === 'click') {
-                ev.currentTarget.focus();
-              }
-              ev.preventDefault();
-              ev.stopPropagation();
-              toggleDisplay(f, isSelected);
-            }}
-            data-test-subj={`fieldToggle-${f.name}`}
-            aria-label={removeLabelAria}
-          />
-        </EuiToolTip>
-      );
-    }
-  };
-
-  const actionButton = getActionButton(field, selected);
+  const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
 
   if (field.type === '_source') {
     return (
@@ -233,70 +292,19 @@ export function DiscoverField({
         size="s"
         className="dscSidebarItem"
         dataTestSubj={`field-${field.name}-showDetails`}
-        fieldIcon={dscFieldIcon}
-        fieldAction={actionButton}
-        fieldName={fieldName}
+        fieldIcon={<DiscoverFieldTypeIcon field={field} />}
+        fieldAction={
+          <ActionButton
+            field={field}
+            isSelected={selected}
+            alwaysShow={alwaysShowActionButton}
+            toggleDisplay={toggleDisplay}
+          />
+        }
+        fieldName={<FieldName field={field} />}
       />
     );
   }
-
-  const getFieldInfoIcon = () => {
-    if (field.type !== 'conflict') {
-      return null;
-    }
-    return (
-      <EuiToolTip
-        position="bottom"
-        content={i18n.translate('discover.field.mappingConflict', {
-          defaultMessage:
-            'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
-            'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
-        })}
-      >
-        <EuiIcon
-          tabIndex={0}
-          type="alert"
-          title={i18n.translate('discover.field.mappingConflict.title', {
-            defaultMessage: 'Mapping Conflict',
-          })}
-          size="s"
-        />
-      </EuiToolTip>
-    );
-  };
-
-  const fieldInfoIcon = getFieldInfoIcon();
-
-  const shouldRenderMultiFields = !!multiFields;
-  const renderMultiFields = () => {
-    if (!multiFields) {
-      return null;
-    }
-    return (
-      <React.Fragment>
-        <EuiTitle size="xxxs">
-          <h5>
-            {i18n.translate('discover.fieldChooser.discoverField.multiFields', {
-              defaultMessage: 'Multi fields',
-            })}
-          </h5>
-        </EuiTitle>
-        {multiFields.map((entry) => (
-          <FieldButton
-            size="s"
-            className="dscSidebarItem dscSidebarItem--multi"
-            isActive={false}
-            onClick={() => {}}
-            dataTestSubj={`field-${entry.field.name}-showDetails`}
-            fieldIcon={getDscFieldIcon(entry.field)}
-            fieldAction={getActionButton(entry.field, entry.isSelected)}
-            fieldName={getFieldName(entry.field)}
-            key={entry.field.name}
-          />
-        ))}
-      </React.Fragment>
-    );
-  };
 
   const isRuntimeField = Boolean(indexPattern.getFieldByName(field.name)?.runtimeField);
   const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
@@ -334,9 +342,7 @@ export function DiscoverField({
             >
               <EuiButtonIcon
                 onClick={() => {
-                  if (onDeleteField) {
-                    onDeleteField(field.name);
-                  }
+                  onDeleteField?.(field.name);
                 }}
                 iconType="trash"
                 data-test-subj={`discoverFieldListPanelDelete-${field.name}`}
@@ -352,6 +358,8 @@ export function DiscoverField({
     </EuiPopoverTitle>
   );
 
+  const details = getDetails(field);
+
   return (
     <EuiPopover
       display="block"
@@ -360,14 +368,19 @@ export function DiscoverField({
           size="s"
           className="dscSidebarItem"
           isActive={infoIsOpen}
-          onClick={() => {
-            togglePopover();
-          }}
+          onClick={togglePopover}
           dataTestSubj={`field-${field.name}-showDetails`}
-          fieldIcon={dscFieldIcon}
-          fieldAction={actionButton}
-          fieldName={fieldName}
-          fieldInfoIcon={fieldInfoIcon}
+          fieldIcon={<DiscoverFieldTypeIcon field={field} />}
+          fieldAction={
+            <ActionButton
+              field={field}
+              isSelected={selected}
+              alwaysShow={alwaysShowActionButton}
+              toggleDisplay={toggleDisplay}
+            />
+          }
+          fieldName={<FieldName field={field} />}
+          fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
         />
       }
       isOpen={infoIsOpen}
@@ -384,26 +397,34 @@ export function DiscoverField({
         </h5>
       </EuiTitle>
       {infoIsOpen && (
-        <DiscoverFieldDetails
-          indexPattern={indexPattern}
-          field={field}
-          details={getDetails(field)}
-          onAddFilter={onAddFilter}
-          trackUiMetric={trackUiMetric}
-          showFooter={!shouldRenderMultiFields}
-        />
-      )}
-      {shouldRenderMultiFields ? (
         <>
-          {renderMultiFields()}
-          <DiscoverFieldDetailsFooter
+          <DiscoverFieldDetails
             indexPattern={indexPattern}
             field={field}
-            details={getDetails(field)}
+            details={details}
             onAddFilter={onAddFilter}
           />
+          {multiFields && (
+            <>
+              <EuiSpacer size="m" />
+              <MultiFields
+                multiFields={multiFields}
+                alwaysShowActionButton={alwaysShowActionButton}
+                toggleDisplay={toggleDisplay}
+              />
+            </>
+          )}
+          <DiscoverFieldVisualize
+            field={field}
+            indexPattern={indexPattern}
+            multiFields={rawMultiFields}
+            trackUiMetric={trackUiMetric}
+            details={details}
+          />
         </>
-      ) : null}
+      )}
     </EuiPopover>
   );
 }
+
+export const DiscoverField = memo(DiscoverFieldComponent);
