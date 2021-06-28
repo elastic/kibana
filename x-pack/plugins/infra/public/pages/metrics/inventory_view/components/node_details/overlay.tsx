@@ -119,7 +119,7 @@ export const NodeContextPopover = ({
                       >
                         <FormattedMessage
                           id="xpack.infra.infra.nodeDetails.createAlertLink"
-                          defaultMessage="Create alert"
+                          defaultMessage="Create inventory rule"
                         />
                       </EuiButtonEmpty>
                     </EuiFlexItem>

@@ -141,7 +141,10 @@ export const MetricsAlertDropdown = () => {
             iconType={'arrowDown'}
             onClick={openPopover}
           >
-            <FormattedMessage id="xpack.infra.alerting.alertsButton" defaultMessage="Alerts" />
+            <FormattedMessage
+              id="xpack.infra.alerting.alertsButton"
+              defaultMessage="Alerts and rules"
+            />
           </EuiButtonEmpty>
         }
         isOpen={popoverOpen}
