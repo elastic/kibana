@@ -98,6 +98,10 @@ export class DrawTooltip extends Component<Props, State> {
       instructions = i18n.translate('xpack.maps.drawTooltip.pointInstructions', {
         defaultMessage: 'Click to create point.',
       });
+    } else if (this.props.drawShape === DRAW_SHAPE.DELETE) {
+      instructions = i18n.translate('xpack.maps.drawTooltip.deleteInstructions', {
+        defaultMessage: 'Click feature to delete.',
+      });
     } else {
       // unknown draw type, tooltip not needed
       return null;

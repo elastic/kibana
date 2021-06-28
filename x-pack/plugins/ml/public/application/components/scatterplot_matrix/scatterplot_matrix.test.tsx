@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 

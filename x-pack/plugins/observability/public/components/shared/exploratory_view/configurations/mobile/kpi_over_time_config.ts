@@ -72,18 +72,6 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
             columnType: OPERATION_COLUMN,
           },
           {
-            label: MEMORY_USAGE,
-            field: METRIC_SYSTEM_MEMORY_USAGE,
-            id: METRIC_SYSTEM_MEMORY_USAGE,
-            columnType: OPERATION_COLUMN,
-          },
-          {
-            label: CPU_USAGE,
-            field: METRIC_SYSTEM_CPU_USAGE,
-            id: METRIC_SYSTEM_CPU_USAGE,
-            columnType: OPERATION_COLUMN,
-          },
-          {
             field: RECORDS_FIELD,
             id: RECORDS_FIELD,
             label: TRANSACTIONS_PER_MINUTE,
@@ -94,6 +82,18 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): DataSeries {
               },
             ],
             timeScale: 'm',
+          },
+          {
+            label: MEMORY_USAGE,
+            field: METRIC_SYSTEM_MEMORY_USAGE,
+            id: METRIC_SYSTEM_MEMORY_USAGE,
+            columnType: OPERATION_COLUMN,
+          },
+          {
+            label: CPU_USAGE,
+            field: METRIC_SYSTEM_CPU_USAGE,
+            id: METRIC_SYSTEM_CPU_USAGE,
+            columnType: OPERATION_COLUMN,
           },
         ],
       },

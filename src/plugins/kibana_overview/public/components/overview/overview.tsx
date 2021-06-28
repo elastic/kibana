@@ -23,8 +23,9 @@ import { CoreStart } from 'kibana/public';
 import {
   RedirectAppLinks,
   useKibana,
+  KibanaPageTemplate,
+  overviewPageActions,
   OverviewPageFooter,
-  OverviewPageHeader,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { FetchResult } from '../../../../../../src/plugins/newsfeed/public';
 import {
@@ -116,147 +117,149 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
 
   return (
-    <main aria-labelledby="kbnOverviewPageHeader__title" className="kbnOverviewWrapper">
-      <OverviewPageHeader
-        addBasePath={addBasePath}
-        hideToolbar={isNewKibanaInstance}
-        iconType="logoKibana"
-        title={<FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />}
-      />
+    <KibanaPageTemplate
+      pageHeader={{
+        iconType: 'logoKibana',
+        pageTitle: <FormattedMessage defaultMessage="Kibana" id="kibanaOverview.header.title" />,
+        rightSideItems: overviewPageActions({
+          addBasePath,
+          application,
+          hidden: isNewKibanaInstance,
+        }),
+      }}
+      template="empty"
+    >
+      {isNewKibanaInstance ? (
+        <GettingStarted addBasePath={addBasePath} isDarkTheme={IS_DARK_THEME} apps={kibanaApps} />
+      ) : (
+        <>
+          <section aria-labelledby="kbnOverviewApps__title" className="kbnOverviewApps">
+            <EuiScreenReaderOnly>
+              <h2 id="kbnOverviewApps__title">
+                <FormattedMessage
+                  id="kibanaOverview.apps.title"
+                  defaultMessage="Explore these apps"
+                />
+              </h2>
+            </EuiScreenReaderOnly>
 
-      <div className="kbnOverviewContent">
-        {isNewKibanaInstance ? (
-          <GettingStarted addBasePath={addBasePath} isDarkTheme={IS_DARK_THEME} apps={kibanaApps} />
-        ) : (
-          <>
-            <section aria-labelledby="kbnOverviewApps__title" className="kbnOverviewApps">
-              <EuiScreenReaderOnly>
-                <h2 id="kbnOverviewApps__title">
-                  <FormattedMessage
-                    id="kibanaOverview.apps.title"
-                    defaultMessage="Explore these apps"
-                  />
-                </h2>
-              </EuiScreenReaderOnly>
-
-              {mainApps.length ? (
-                <>
-                  <EuiFlexGroup
-                    className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-                    justifyContent="center"
-                  >
-                    {mainApps.map(renderAppCard)}
-                  </EuiFlexGroup>
-
-                  <EuiSpacer size="l" />
-                </>
-              ) : null}
-
-              {remainingApps.length ? (
+            {mainApps.length ? (
+              <>
                 <EuiFlexGroup
-                  className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
+                  className="kbnOverviewApps__group kbnOverviewApps__group--primary"
                   justifyContent="center"
                 >
-                  {remainingApps.map(renderAppCard)}
+                  {mainApps.map(renderAppCard)}
                 </EuiFlexGroup>
-              ) : null}
-            </section>
 
-            <EuiHorizontalRule aria-hidden="true" margin="xl" />
+                <EuiSpacer size="l" />
+              </>
+            ) : null}
 
-            <EuiFlexGroup
-              alignItems="flexStart"
-              className={`kbnOverviewSupplements ${
-                newsFetchResult && newsFetchResult.feedItems.length
-                  ? 'kbnOverviewSupplements--hasNews'
-                  : 'kbnOverviewSupplements--noNews'
-              }`}
-            >
-              {newsFetchResult && newsFetchResult.feedItems.length ? (
-                <EuiFlexItem grow={1}>
-                  <NewsFeed newsFetchResult={newsFetchResult} />
-                </EuiFlexItem>
-              ) : null}
+            {remainingApps.length ? (
+              <EuiFlexGroup
+                className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
+                justifyContent="center"
+              >
+                {remainingApps.map(renderAppCard)}
+              </EuiFlexGroup>
+            ) : null}
+          </section>
 
-              <EuiFlexItem grow={3}>
-                {solutions.length ? (
-                  <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
-                    <EuiTitle size="s">
-                      <h2 id="kbnOverviewMore__title">
-                        <FormattedMessage
-                          id="kibanaOverview.more.title"
-                          defaultMessage="Do more with Elastic"
-                        />
-                      </h2>
-                    </EuiTitle>
+          <EuiHorizontalRule aria-hidden="true" margin="xl" />
 
-                    <EuiSpacer size="m" />
-
-                    <EuiFlexGroup className="kbnOverviewMore__content">
-                      {solutions.map(({ id, title, description, icon, path }) => (
-                        <EuiFlexItem className="kbnOverviewMore__item" key={id}>
-                          <RedirectAppLinks application={application}>
-                            <EuiCard
-                              className={`kbnOverviewSolution ${id}`}
-                              description={description ? description : ''}
-                              href={addBasePath(path)}
-                              icon={
-                                <EuiToken
-                                  className="kbnOverviewSolution__icon"
-                                  fill="light"
-                                  iconType={icon}
-                                  shape="circle"
-                                  size="l"
-                                />
-                              }
-                              image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
-                              title={title}
-                              titleElement="h3"
-                              titleSize="xs"
-                              onClick={() => {
-                                trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
-                              }}
-                            />
-                          </RedirectAppLinks>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </section>
-                ) : (
-                  <EuiFlexGroup
-                    className={`kbnOverviewData ${
-                      addDataFeatures.length === 1 && manageDataFeatures.length === 1
-                        ? 'kbnOverviewData--compressed'
-                        : 'kbnOverviewData--expanded'
-                    }`}
-                  >
-                    <EuiFlexItem>
-                      <AddData addBasePath={addBasePath} features={addDataFeatures} />
-                    </EuiFlexItem>
-
-                    <EuiFlexItem>
-                      <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
+          <EuiFlexGroup
+            alignItems="flexStart"
+            className={`kbnOverviewSupplements ${
+              newsFetchResult && newsFetchResult.feedItems.length
+                ? 'kbnOverviewSupplements--hasNews'
+                : 'kbnOverviewSupplements--noNews'
+            }`}
+          >
+            {newsFetchResult && newsFetchResult.feedItems.length ? (
+              <EuiFlexItem grow={1}>
+                <NewsFeed newsFetchResult={newsFetchResult} />
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
+            ) : null}
 
-        <EuiHorizontalRule margin="xl" aria-hidden="true" />
+            <EuiFlexItem grow={3}>
+              {solutions.length ? (
+                <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
+                  <EuiTitle size="s">
+                    <h2 id="kbnOverviewMore__title">
+                      <FormattedMessage
+                        id="kibanaOverview.more.title"
+                        defaultMessage="Do more with Elastic"
+                      />
+                    </h2>
+                  </EuiTitle>
 
-        <OverviewPageFooter
-          addBasePath={addBasePath}
-          path={PLUGIN_PATH}
-          onSetDefaultRoute={() => {
-            trackUiMetric(METRIC_TYPE.CLICK, 'set_kibana_overview_as_default_route');
-          }}
-          onChangeDefaultRoute={() => {
-            trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
-          }}
-        />
-      </div>
-    </main>
+                  <EuiSpacer size="m" />
+
+                  <EuiFlexGroup className="kbnOverviewMore__content">
+                    {solutions.map(({ id, title, description, icon, path }) => (
+                      <EuiFlexItem className="kbnOverviewMore__item" key={id}>
+                        <RedirectAppLinks application={application}>
+                          <EuiCard
+                            className={`kbnOverviewSolution ${id}`}
+                            description={description ? description : ''}
+                            href={addBasePath(path)}
+                            icon={
+                              <EuiToken
+                                className="kbnOverviewSolution__icon"
+                                fill="light"
+                                iconType={icon}
+                                shape="circle"
+                                size="l"
+                              />
+                            }
+                            image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
+                            title={title}
+                            titleElement="h3"
+                            titleSize="xs"
+                            onClick={() => {
+                              trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
+                            }}
+                          />
+                        </RedirectAppLinks>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </section>
+              ) : (
+                <EuiFlexGroup
+                  className={`kbnOverviewData ${
+                    addDataFeatures.length === 1 && manageDataFeatures.length === 1
+                      ? 'kbnOverviewData--compressed'
+                      : 'kbnOverviewData--expanded'
+                  }`}
+                >
+                  <EuiFlexItem>
+                    <AddData addBasePath={addBasePath} features={addDataFeatures} />
+                  </EuiFlexItem>
+
+                  <EuiFlexItem>
+                    <ManageData addBasePath={addBasePath} features={manageDataFeatures} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+
+      <EuiHorizontalRule margin="xl" aria-hidden="true" />
+
+      <OverviewPageFooter
+        addBasePath={addBasePath}
+        path={PLUGIN_PATH}
+        onSetDefaultRoute={() => {
+          trackUiMetric(METRIC_TYPE.CLICK, 'set_kibana_overview_as_default_route');
+        }}
+        onChangeDefaultRoute={() => {
+          trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
+        }}
+      />
+    </KibanaPageTemplate>
   );
 };
