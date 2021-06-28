@@ -15,15 +15,27 @@ jest.mock('../../hooks/use_request', () => {
 });
 
 jest.mock(
-  '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page/components',
+  '../../applications/fleet/sections/agents/agent_requirements_page/components/fleet_server_on_prem_instructions',
   () => {
     const module = jest.requireActual(
-      '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page/components'
+      '../../applications/fleet/sections/agents/agent_requirements_page/components/fleet_server_on_prem_instructions'
+    );
+    return {
+      ...module,
+      useFleetServerInstructions: jest.fn(),
+    };
+  }
+);
+
+jest.mock(
+  '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page',
+  () => {
+    const module = jest.requireActual(
+      '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page'
     );
     return {
       ...module,
       FleetServerRequirementPage: jest.fn(),
-      useFleetServerInstructions: jest.fn(),
     };
   }
 );

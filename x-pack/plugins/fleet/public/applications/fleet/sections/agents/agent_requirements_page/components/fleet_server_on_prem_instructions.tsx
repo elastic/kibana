@@ -482,7 +482,7 @@ const AddFleetServerHostStep = ({
               color="success"
               title={
                 <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
+                  id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle"
                   defaultMessage="Added Fleet Server host"
                 />
               }
