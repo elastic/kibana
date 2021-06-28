@@ -24,10 +24,6 @@ import {
 } from '../../../../../common/search_strategy/security_solution/cti';
 import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
 
-const isEventDetailsItem = (
-  item: TimelineEventsDetailsItem[] | null
-): item is TimelineEventsDetailsItem[] => !!item;
-
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
   type === ENRICHMENT_TYPES.InvestigationTime;
 
@@ -44,16 +40,18 @@ export const parseExistingEnrichments = (
   const { originalValue } = threatIndicatorField;
   const enrichmentStrings = Array.isArray(originalValue) ? originalValue : [originalValue];
 
-  return enrichmentStrings
-    .map((enrichmentString) => {
+  return enrichmentStrings.reduce<TimelineEventsDetailsItem[][]>(
+    (enrichments, enrichmentString) => {
       try {
-        const enrichment = JSON.parse(enrichmentString);
-        return getDataFromSourceHits(enrichment);
+        const enrichment = getDataFromSourceHits(JSON.parse(enrichmentString));
+        enrichments.push(enrichment);
       } catch (e) {
-        return null;
+        // omit failed parse
       }
-    })
-    .filter(isEventDetailsItem);
+      return enrichments;
+    },
+    []
+  );
 };
 
 export const timelineDataToEnrichment = (data: TimelineEventsDetailsItem[]): CtiEnrichment =>
