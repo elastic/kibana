@@ -7,7 +7,7 @@
  */
 import './solution_nav.scss';
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -43,8 +43,7 @@ export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
 
 const negativeTabIndex = (items: Array<EuiSideNavItemType<{}>>) => {
   return items.map((item) => {
-    // TODO need EUI support
-    // @ts-ignore
+    // @ts-ignore-next-line Can be removed on close of https://github.com/elastic/eui/issues/4925
     item.tabIndex = -1;
     item.items = item.items && negativeTabIndex(item.items);
     return item;
@@ -132,7 +131,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
     <>
       {isSmallerBreakpoint && sideNav}
       {isMediumBreakpoint && (
-        <>
+        <Fragment>
           {isSideNavOpenOnMobile && (
             <EuiFlyout
               ownFocus={false}
@@ -149,7 +148,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
             isCollapsed={true}
             onClick={toggleOpenOnMobile}
           />
-        </>
+        </Fragment>
       )}
       {isLargerBreakpoint && (
         <>
