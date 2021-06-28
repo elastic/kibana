@@ -8,7 +8,6 @@
 
 /** @internal */
 export interface KibanaExecutionContext {
-  readonly requestId: string;
   /**
    * Kibana application initated an operation.
    * Can be narrowed to an enum later.
