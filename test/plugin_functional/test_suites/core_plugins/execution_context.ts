@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import expect from '@kbn/expect';
+import { PluginFunctionalProviderContext } from '../../services';
+import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
+
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+  describe('execution context', function () {
+    describe('passed for a client-side operation', () => {
+      const PageObjects = getPageObjects(['common']);
+      const browser = getService('browser');
+
+      before(async () => {
+        await PageObjects.common.navigateToApp('home');
+      });
+
+      it('manually created context', async () => {
+        expect(
+          await browser.execute(async () => {
+            const coreStart = window._coreProvider.start.core;
+
+            const context = coreStart.executionContext.create({
+              type: 'execution_context_app',
+              name: 'Execution context app',
+              id: '42',
+              description: 'a request initiated by Execution context app',
+            });
+
+            const result = await coreStart.http.get('/execution_context/pass', {
+              context,
+            });
+
+            return result['x-opaque-id'];
+          })
+        ).to.be('kibana:execution_context_app:42');
+      });
+    });
+  });
+}
