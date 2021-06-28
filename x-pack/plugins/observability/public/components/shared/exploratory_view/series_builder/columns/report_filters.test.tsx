@@ -21,7 +21,7 @@ describe('Series Builder ReportFilters', function () {
   });
 
   it('should render properly', function () {
-    render(<ReportFilters dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    render(<ReportFilters seriesConfig={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Add filter');
   });
