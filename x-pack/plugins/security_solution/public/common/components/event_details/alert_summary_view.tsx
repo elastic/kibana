@@ -71,7 +71,7 @@ const defaultAlertSummaryFields: AlertSummaryField[] = [
   { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
-function getEventFieldsToDisplay(alertCode?: EventCode): AlertSummaryField[] {
+function getEventFieldsToDisplay(alertCode?: string): AlertSummaryField[] {
   switch (alertCode) {
     // memory protection fields
     case EventCode.MALICIOUS_THREAD:
