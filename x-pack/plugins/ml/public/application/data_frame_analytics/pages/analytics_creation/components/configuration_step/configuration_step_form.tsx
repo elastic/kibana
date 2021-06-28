@@ -274,7 +274,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         (field) => field.is_included === true && field.is_required === false
       );
 
-      // Do we need depVarIsRuntimeField for runtime field support? Do we need to update includes when depVar changes?
       const formStateUpdated = {
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
         ...(depVarIsRuntimeField || jobTypeChanged || depVarNotIncluded
