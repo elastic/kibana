@@ -26,8 +26,6 @@ import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal';
 
-const REFRESH_INTERVAL_MS = 30000;
-
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
 
@@ -49,25 +47,6 @@ export const AgentsApp: React.FunctionComponent = () => {
       setFleetServerModalVisible(true);
     }
   }, [settings.data]);
-
-  useEffect(() => {
-    if (
-      !agents.enabled ||
-      fleetStatus.isLoading ||
-      !fleetStatus.missingRequirements ||
-      !fleetStatus.missingRequirements.includes('fleet_server')
-    ) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      fleetStatus.refresh();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [fleetStatus, agents.enabled]);
 
   if (!agents.enabled) return null;
   if (!fleetStatus.missingRequirements && fleetStatus.isLoading) {

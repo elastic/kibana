@@ -15,10 +15,10 @@ jest.mock('../../hooks/use_request', () => {
 });
 
 jest.mock(
-  '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page',
+  '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page/components',
   () => {
     const module = jest.requireActual(
-      '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page'
+      '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page/components'
     );
     return {
       ...module,

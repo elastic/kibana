@@ -15,11 +15,11 @@ import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } fr
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
-  FleetServerRequirementPage,
   ServiceTokenStep,
   FleetServerCommandStep,
   useFleetServerInstructions,
-} from '../../applications/fleet/sections/agents/agent_requirements_page';
+} from '../../applications/fleet/sections/agents/agent_requirements_page/components';
+import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
 import {
   DownloadStep,
