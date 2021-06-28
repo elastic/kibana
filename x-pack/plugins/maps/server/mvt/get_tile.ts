@@ -319,23 +319,23 @@ export async function getTile({
           props[FEATURE_ID_PROPERTY_NAME] = features[i].id;
         }
       }
+
+      const counts = countVectorShapeTypes(features);
+      const metadataFeature = {
+        type: 'Feature',
+        properties: {
+          [KBN_METADATA_FEATURE]: true,
+          [KBN_IS_TILE_COMPLETE]: true,
+          [KBN_VECTOR_SHAPE_TYPE_COUNTS]: counts,
+          [KBN_FEATURE_COUNT]: features.length,
+        },
+        // todo - constrain to actual features
+        geometry: esBboxToGeoJsonPolygon(tileToESBbox(x, y, z), tileToESBbox(x, y, z)),
+      };
+
+      // @ts-expect-error
+      features.push(metadataFeature);
     }
-
-    const counts = countVectorShapeTypes(features);
-    const metadataFeature = {
-      type: 'Feature',
-      properties: {
-        [KBN_METADATA_FEATURE]: true,
-        [KBN_IS_TILE_COMPLETE]: true,
-        [KBN_VECTOR_SHAPE_TYPE_COUNTS]: counts,
-        [KBN_FEATURE_COUNT]: features.length,
-      },
-      // todo - constrain to actual features
-      geometry: esBboxToGeoJsonPolygon(tileToESBbox(x, y, z), tileToESBbox(x, y, z)),
-    };
-
-    // @ts-expect-error
-    features.push(metadataFeature);
 
     const featureCollection: FeatureCollection = {
       features,

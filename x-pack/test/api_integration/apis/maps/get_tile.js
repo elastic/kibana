@@ -83,17 +83,18 @@ export default function ({ getService }) {
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
       const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
-      expect(layer.length).to.be(2);
-      const feature = layer.feature(0);
-      expect(feature.type).to.be(3);
-      expect(feature.extent).to.be(4096);
-      expect(feature.id).to.be(undefined);
-      expect(feature.properties).to.eql({
+      expect(layer.length).to.be(1);
+
+      const metadataFeature = layer.feature(0);
+      expect(metadataFeature.type).to.be(3);
+      expect(metadataFeature.extent).to.be(4096);
+      expect(metadataFeature.id).to.be(undefined);
+      expect(metadataFeature.properties).to.eql({
         __kbn_metadata_feature__: true,
         __kbn_feature_count__: 0,
         __kbn_is_tile_complete__: false,
       });
-      expect(feature.loadGeometry()).to.eql([
+      expect(metadataFeature.loadGeometry()).to.eql([
         [
           { x: 44, y: 2382 },
           { x: 44, y: 1913 },
