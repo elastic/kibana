@@ -13,14 +13,17 @@ import {
   EuiPageHeaderProps,
   EuiTitle,
   EuiBetaBadge,
-  EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { ApmMainTemplate } from './apm_main_template';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
-import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
+import {
+  isJavaAgentName,
+  isRumAgentName,
+  isIosAgent,
+} from '../../../../common/agent_name';
 import { ServiceIcons } from '../../shared/service_icons';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -118,11 +121,11 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
   const { rangeTo, rangeFrom, environment } = urlParams;
   const basepath = services.http?.basePath.get();
 
-  if (isRumAgentName(agentName)) {
-    const uxExploratoryViewLink = createExploratoryViewUrl(
+  if (isRumAgentName(agentName) || isIosAgent(agentName)) {
+    const href = createExploratoryViewUrl(
       {
         'apm-series': {
-          dataType: 'mobile',
+          dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
           time: { from: rangeFrom, to: rangeTo },
           reportType: 'kpi-over-time',
           reportDefintion: {
@@ -136,7 +139,7 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
     );
 
     return (
-      <EuiButtonEmpty href={uxExploratoryViewLink} iconType="visBarVertical">
+      <EuiButtonEmpty href={href} iconType="visBarVertical">
         {i18n.translate('xpack.apm.analyzeDataButton.label', {
           defaultMessage: 'Analyze data',
         })}
