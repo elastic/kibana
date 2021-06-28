@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { SchemaType } from '../../../shared/schema/types';
 import { ApiTokenTypes } from '../credentials/constants';
 
 import { EngineTypes } from './types';
@@ -16,8 +21,9 @@ import { EngineTypes } from './types';
 import { EngineLogic } from './';
 
 describe('EngineLogic', () => {
-  const { mount } = new LogicMounter(EngineLogic);
+  const { mount, unmount } = new LogicMounter(EngineLogic);
   const { http } = mockHttpValues;
+  const { flashErrorToast } = mockFlashMessageHelpers;
 
   const mockEngineData = {
     name: 'some-engine',
@@ -34,7 +40,7 @@ describe('EngineLogic', () => {
     sample: false,
     isMeta: false,
     invalidBoosts: false,
-    schema: {},
+    schema: { test: SchemaType.Text },
     apiTokens: [],
     apiKey: 'some-key',
   };
@@ -43,6 +49,8 @@ describe('EngineLogic', () => {
     dataLoading: true,
     engine: {},
     engineName: '',
+    isEngineEmpty: true,
+    isEngineSchemaEmpty: true,
     isMetaEngine: false,
     isSampleEngine: false,
     hasSchemaErrors: false,
@@ -50,6 +58,14 @@ describe('EngineLogic', () => {
     hasUnconfirmedSchemaFields: false,
     engineNotFound: false,
     searchKey: '',
+    intervalId: null,
+  };
+
+  const DEFAULT_VALUES_WITH_ENGINE = {
+    ...DEFAULT_VALUES,
+    engine: mockEngineData,
+    isEngineEmpty: false,
+    isEngineSchemaEmpty: false,
   };
 
   beforeEach(() => {
@@ -69,7 +85,7 @@ describe('EngineLogic', () => {
           EngineLogic.actions.setEngineData(mockEngineData);
 
           expect(EngineLogic.values).toEqual({
-            ...DEFAULT_VALUES,
+            ...DEFAULT_VALUES_WITH_ENGINE,
             engine: mockEngineData,
             dataLoading: false,
           });
@@ -154,6 +170,34 @@ describe('EngineLogic', () => {
         });
       });
     });
+
+    describe('onPollStart', () => {
+      it('should set intervalId', () => {
+        mount({ intervalId: null });
+        EngineLogic.actions.onPollStart(123);
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          intervalId: 123,
+        });
+      });
+
+      describe('onPollStop', () => {
+        // Note: This does have to be a separate action following stopPolling(), rather
+        // than using stopPolling: () => null as a reducer. If you do that, then the ID
+        // gets cleared before the actual poll interval does & the poll interval never clears :doh:
+
+        it('should reset intervalId', () => {
+          mount({ intervalId: 123 });
+          EngineLogic.actions.onPollStop();
+
+          expect(EngineLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            intervalId: null,
+          });
+        });
+      });
+    });
   });
 
   describe('listeners', () => {
@@ -170,28 +214,156 @@ describe('EngineLogic', () => {
         expect(EngineLogic.actions.setEngineData).toHaveBeenCalledWith(mockEngineData);
       });
 
-      it('handles errors', async () => {
+      it('handles 4xx errors', async () => {
         mount();
         jest.spyOn(EngineLogic.actions, 'setEngineNotFound');
-        http.get.mockReturnValue(Promise.reject('An error occured'));
+        http.get.mockReturnValue(Promise.reject({ response: { status: 404 } }));
 
         EngineLogic.actions.initializeEngine();
         await nextTick();
 
         expect(EngineLogic.actions.setEngineNotFound).toHaveBeenCalledWith(true);
       });
+
+      it('handles 5xx errors', async () => {
+        mount();
+        http.get.mockReturnValue(Promise.reject('An error occured'));
+
+        EngineLogic.actions.initializeEngine();
+        await nextTick();
+
+        expect(flashErrorToast).toHaveBeenCalledWith('Could not fetch engine data', {
+          text: expect.stringContaining('Please check your connection'),
+          toastLifeTimeMs: 3750,
+        });
+      });
+    });
+
+    describe('pollEmptyEngine', () => {
+      beforeEach(() => jest.useFakeTimers());
+      afterEach(() => jest.clearAllTimers());
+      afterAll(() => jest.useRealTimers());
+
+      it('starts a poll', () => {
+        mount();
+        jest.spyOn(global, 'setInterval');
+        jest.spyOn(EngineLogic.actions, 'onPollStart');
+
+        EngineLogic.actions.pollEmptyEngine();
+
+        expect(global.setInterval).toHaveBeenCalled();
+        expect(EngineLogic.actions.onPollStart).toHaveBeenCalled();
+      });
+
+      it('polls for engine data if the current engine is empty', () => {
+        mount({ engine: {} });
+        jest.spyOn(EngineLogic.actions, 'initializeEngine');
+
+        EngineLogic.actions.pollEmptyEngine();
+
+        jest.advanceTimersByTime(5000);
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalledTimes(1);
+        jest.advanceTimersByTime(5000);
+        expect(EngineLogic.actions.initializeEngine).toHaveBeenCalledTimes(2);
+      });
+
+      it('cancels the poll if the current engine changed from empty to non-empty', () => {
+        mount({ engine: mockEngineData });
+        jest.spyOn(EngineLogic.actions, 'stopPolling');
+        jest.spyOn(EngineLogic.actions, 'initializeEngine');
+
+        EngineLogic.actions.pollEmptyEngine();
+
+        jest.advanceTimersByTime(5000);
+        expect(EngineLogic.actions.stopPolling).toHaveBeenCalled();
+        expect(EngineLogic.actions.initializeEngine).not.toHaveBeenCalled();
+      });
+
+      it('does not create new polls if one already exists', () => {
+        jest.spyOn(global, 'setInterval');
+        mount({ intervalId: 123 });
+
+        EngineLogic.actions.pollEmptyEngine();
+
+        expect(global.setInterval).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('stopPolling', () => {
+      it('clears the poll interval and unsets the intervalId', () => {
+        jest.spyOn(global, 'clearInterval');
+        mount({ intervalId: 123 });
+
+        EngineLogic.actions.stopPolling();
+
+        expect(global.clearInterval).toHaveBeenCalledWith(123);
+        expect(EngineLogic.values.intervalId).toEqual(null);
+      });
+
+      it('does not clearInterval if a poll has not been started', () => {
+        jest.spyOn(global, 'clearInterval');
+        mount({ intervalId: null });
+
+        EngineLogic.actions.stopPolling();
+
+        expect(global.clearInterval).not.toHaveBeenCalled();
+      });
     });
   });
 
   describe('selectors', () => {
-    describe('isSampleEngine', () => {
-      it('should be set based on engine.sample', () => {
-        const mockSampleEngine = { ...mockEngineData, sample: true };
-        mount({ engine: mockSampleEngine });
+    describe('isEngineEmpty', () => {
+      it('returns true if the engine contains no documents', () => {
+        const engine = { ...mockEngineData, document_count: 0 };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
+          isEngineEmpty: true,
+        });
+      });
+
+      it('returns true if the engine is not yet initialized', () => {
+        mount({ engine: {} });
 
         expect(EngineLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          engine: mockSampleEngine,
+          isEngineEmpty: true,
+        });
+      });
+    });
+
+    describe('isEngineSchemaEmpty', () => {
+      it('returns true if the engine schema contains no fields', () => {
+        const engine = { ...mockEngineData, schema: {} };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
+          isEngineSchemaEmpty: true,
+        });
+      });
+
+      it('returns true if the engine is not yet initialized', () => {
+        mount({ engine: {} });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          isEngineSchemaEmpty: true,
+        });
+      });
+    });
+
+    describe('isSampleEngine', () => {
+      it('should be set based on engine.sample', () => {
+        const engine = { ...mockEngineData, sample: true };
+        mount({ engine });
+
+        expect(EngineLogic.values).toEqual({
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           isSampleEngine: true,
         });
       });
@@ -199,12 +371,12 @@ describe('EngineLogic', () => {
 
     describe('isMetaEngine', () => {
       it('should be set based on engine.type', () => {
-        const mockMetaEngine = { ...mockEngineData, type: EngineTypes.meta };
-        mount({ engine: mockMetaEngine });
+        const engine = { ...mockEngineData, type: EngineTypes.meta };
+        mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          engine: mockMetaEngine,
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           isMetaEngine: true,
         });
       });
@@ -212,17 +384,17 @@ describe('EngineLogic', () => {
 
     describe('hasSchemaErrors', () => {
       it('should be set based on engine.activeReindexJob.numDocumentsWithErrors', () => {
-        const mockSchemaEngine = {
+        const engine = {
           ...mockEngineData,
           activeReindexJob: {
             numDocumentsWithErrors: 10,
           },
         };
-        mount({ engine: mockSchemaEngine });
+        mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          engine: mockSchemaEngine,
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           hasSchemaErrors: true,
         });
       });
@@ -230,7 +402,7 @@ describe('EngineLogic', () => {
 
     describe('hasSchemaConflicts', () => {
       it('should be set based on engine.schemaConflicts', () => {
-        const mockSchemaEngine = {
+        const engine = {
           ...mockEngineData,
           schemaConflicts: {
             someSchemaField: {
@@ -241,11 +413,11 @@ describe('EngineLogic', () => {
             },
           },
         };
-        mount({ engine: mockSchemaEngine });
+        mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          engine: mockSchemaEngine,
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           hasSchemaConflicts: true,
         });
       });
@@ -253,15 +425,15 @@ describe('EngineLogic', () => {
 
     describe('hasUnconfirmedSchemaFields', () => {
       it('should be set based on engine.unconfirmedFields', () => {
-        const mockUnconfirmedFieldsEngine = {
+        const engine = {
           ...mockEngineData,
           unconfirmedFields: ['new_field_1', 'new_field_2'],
         };
-        mount({ engine: mockUnconfirmedFieldsEngine });
+        mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          engine: mockUnconfirmedFieldsEngine,
+          ...DEFAULT_VALUES_WITH_ENGINE,
+          engine,
           hasUnconfirmedSchemaFields: true,
         });
       });
@@ -292,7 +464,7 @@ describe('EngineLogic', () => {
         mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
           searchKey: 'search-123xyz',
         });
@@ -312,11 +484,22 @@ describe('EngineLogic', () => {
         mount({ engine });
 
         expect(EngineLogic.values).toEqual({
-          ...DEFAULT_VALUES,
+          ...DEFAULT_VALUES_WITH_ENGINE,
           engine,
           searchKey: '',
         });
       });
+    });
+  });
+
+  describe('events', () => {
+    it('calls stopPolling before unmount', () => {
+      mount();
+      // Has to be a const to check state after unmount
+      const stopPollingSpy = jest.spyOn(EngineLogic.actions, 'stopPolling');
+
+      unmount();
+      expect(stopPollingSpy).toHaveBeenCalled();
     });
   });
 });

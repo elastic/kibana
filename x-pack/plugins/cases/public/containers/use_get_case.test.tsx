@@ -89,6 +89,19 @@ describe('useGetCase', () => {
     });
   });
 
+  it('set isLoading to false when refetching case "silent"ly', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<string, UseGetCase>(() =>
+        useGetCase(basicCase.id)
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      result.current.fetchCase(true);
+
+      expect(result.current.isLoading).toBe(false);
+    });
+  });
+
   it('unhappy path', async () => {
     const spyOnGetCase = jest.spyOn(api, 'getCase');
     spyOnGetCase.mockImplementation(() => {

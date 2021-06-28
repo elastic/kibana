@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Bash Shell Profile Modification",
-  "query": "event.category:file and event.type:change and process.name:(* and not (sudo or vim or zsh or env or nano or bash or Terminal or xpcproxy or login or cat or cp or launchctl or java)) and not process.executable:(/Applications/* or /private/var/folders/* or /usr/local/*) and file.path:(/private/etc/rc.local or /etc/rc.local or /home/*/.profile or /home/*/.profile1 or /home/*/.bash_profile or /home/*/.bash_profile1 or /home/*/.bashrc or /Users/*/.bash_profile or /Users/*/.zshenv)",
+  "query": "event.category:file and event.type:change and\n  process.name:(* and not (sudo or\n                           vim or\n                           zsh or\n                           env or\n                           nano or\n                           bash or\n                           Terminal or\n                           xpcproxy or\n                           login or\n                           cat or\n                           cp or\n                           launchctl or\n                           java)) and\n  not process.executable:(/Applications/* or /private/var/folders/* or /usr/local/*) and\n  file.path:(/private/etc/rc.local or\n             /etc/rc.local or\n             /home/*/.profile or\n             /home/*/.profile1 or\n             /home/*/.bash_profile or\n             /home/*/.bash_profile1 or\n             /home/*/.bashrc or\n             /Users/*/.bash_profile or\n             /Users/*/.zshenv)\n",
   "references": [
     "https://www.anomali.com/blog/pulling-linux-rabbit-rabbot-malware-out-of-a-hat"
   ],

@@ -15,12 +15,19 @@ export const renderApp = ({
   element,
   history,
   onAppLeave,
+  setHeaderActionMenu,
   services,
   store,
   SubPluginRoutes,
 }: RenderAppProps): (() => void) => {
   render(
-    <SecurityApp history={history} onAppLeave={onAppLeave} services={services} store={store}>
+    <SecurityApp
+      history={history}
+      onAppLeave={onAppLeave}
+      services={services}
+      setHeaderActionMenu={setHeaderActionMenu}
+      store={store}
+    >
       <SubPluginRoutes />
     </SecurityApp>,
     element

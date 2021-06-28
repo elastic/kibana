@@ -487,6 +487,7 @@ export interface DocLinksStart {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly settings: string;
         readonly canvas: {
             readonly guide: string;
         };
@@ -585,6 +586,7 @@ export interface DocLinksStart {
         };
         readonly search: {
             readonly sessions: string;
+            readonly sessionLimits: string;
         };
         readonly indexPatterns: {
             readonly introduction: string;
@@ -1631,6 +1633,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:166:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
