@@ -44,7 +44,10 @@ image::maps/images/sample_data_ecommerce.png[]
 === Animate spatial temporal data
 Data comes to life with animation. Hard to detect patterns in static data pop out with movement. Use timeslider to animate your data and gain deeper insights.
 
-This animated map shows portland buses over a period of 15 minutes. The routes come alive as the bus locations update over time.
+This animated map shows Portland buses over a period of 15 minutes. The routes come alive as the bus locations update with time.
+
+[role="screenshot"]
+image::maps/images/timeslider.gif[]
 
 [float]
 === Upload GeoJSON
