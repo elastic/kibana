@@ -149,24 +149,28 @@ And see the errors for the rules you might provide the next search query:
 {
   "event": {
     "provider": "alerting", 
-    "start": "2020-03-31T04:27:30.392Z", "end": "2020-03-31T04:27:30.393Z", "duration": 1000000
+    "start": "2020-03-31T04:27:30.392Z",
+    "end": "2020-03-31T04:27:30.393Z",
+    "duration": 1000000
   },
   "kibana": {
     "namespace": "default",
     "saved_objects": [
-      { "rel" : "primary", "type" : "alert", 
+      {
+        "rel" : "primary",
+        "type" : "alert", 
       	"id" : "30d856c0-b14b-11eb-9a7c-9df284da9f99"
       }
     ],
   },
   "message": "alert executed: .index-threshold:30d856c0-b14b-11eb-9a7c-9df284da9f99: 'test'",
-"error" : {
+    "error" : {
             "message" : "Saved object [action/ef0e2530-b14a-11eb-9a7c-9df284da9f99] not found"
           },
 }
 --------------------------------------------------
 
-You can also query the event log for failures, which should return more specific details about alerts which failed by targeting the event.outcome:
+You can also query the event log for failures, which should return more specific details about rules which failed by targeting the event.outcome:
 
 [source, txt]
 --------------------------------------------------
