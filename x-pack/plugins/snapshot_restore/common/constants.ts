@@ -70,4 +70,4 @@ export const TIME_UNITS: { [key: string]: 'd' | 'h' | 'm' | 's' } = {
  * [Temporary workaround] In order to prevent an unusable UI for users with a large number of snapshots,
  * we set a hard-coded limit on the number of snapshots we return from the ES snapshots API
  */
-export const SNAPSHOT_LIST_MAX_SIZE = 500;
+export const SNAPSHOT_LIST_MAX_SIZE = 1000;

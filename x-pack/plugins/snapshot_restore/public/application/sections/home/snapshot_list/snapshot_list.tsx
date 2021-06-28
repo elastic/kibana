@@ -264,6 +264,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             <EuiCallOut
               color="warning"
               iconType="help"
+              data-test-subj="maxSnapshotsWarning"
               title={i18n.translate(
                 'xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedTitle',
                 { defaultMessage: 'Snapshot list may be incomplete' }
@@ -271,7 +272,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDescription"
-                defaultMessage="You've reached the maximum number of snapshots that can be displayed. To manage all of your snapshots, use {docLink}."
+                defaultMessage="You have reached the maximum number of snapshots that can be displayed. To manage all of your snapshots, use {docLink}."
                 values={{
                   docLink: (
                     <EuiLink

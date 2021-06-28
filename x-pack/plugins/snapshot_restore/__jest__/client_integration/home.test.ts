@@ -33,6 +33,16 @@ jest.mock('@kbn/i18n/react', () => {
   };
 });
 
+jest.mock('../../common/constants', () => {
+  const original = jest.requireActual('../../common/constants');
+
+  return {
+    ...original,
+    // Mocking this value to a lower number in order to more easily trigger the max snapshots warning in the tests
+    SNAPSHOT_LIST_MAX_SIZE: 2,
+  };
+});
+
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
   array.map((value) => {
     if (!value.trim) {
@@ -461,7 +471,6 @@ describe('<SnapshotRestoreHome />', () => {
         httpRequestsMockHelpers.setLoadSnapshotsResponse({
           snapshots,
           repositories: [REPOSITORY_NAME],
-          errors: {},
         });
 
         testBed = await setup();
@@ -492,6 +501,15 @@ describe('<SnapshotRestoreHome />', () => {
             '',
           ]);
         });
+      });
+
+      test('should show a warning if the number of snapshots exceeded the limit', () => {
+        // We have mocked the SNAPSHOT_LIST_MAX_SIZE to 2, so the warning should display
+        const { find, exists } = testBed;
+        expect(exists('maxSnapshotsWarning')).toBe(true);
+        expect(find('maxSnapshotsWarning').text()).toContain(
+          'You have reached the maximum number of snapshots that can be displayed.'
+        );
       });
 
       test('each row should have a link to the repository', async () => {
