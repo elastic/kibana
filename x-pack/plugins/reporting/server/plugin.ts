@@ -11,7 +11,7 @@ import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
-import { createQueueFactory, LevelLogger, ReportingStore } from './lib';
+import { LevelLogger, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -47,7 +47,7 @@ export class ReportingPlugin
     });
 
     const { http } = core;
-    const { screenshotMode, features, licensing, security, spaces } = plugins;
+    const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
 
     const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
@@ -60,6 +60,7 @@ export class ReportingPlugin
       router,
       security,
       spaces,
+      taskManager,
       logger: this.logger,
     });
 
@@ -95,21 +96,15 @@ export class ReportingPlugin
 
       const browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
       const store = new ReportingStore(reportingCore, this.logger);
-      const esqueue = await createQueueFactory(
-        reportingCore,
-        store,
-        this.logger,
-        core.elasticsearch.client.asInternalUser
-      ); // starts polling for pending jobs
 
-      reportingCore.pluginStart({
+      await reportingCore.pluginStart({
         browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
         store,
         esClient: core.elasticsearch.client,
         data: plugins.data,
-        esqueue,
+        taskManager: plugins.taskManager,
         logger: this.logger,
       });
 

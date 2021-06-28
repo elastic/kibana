@@ -17,7 +17,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { rgba } from 'polished';
-import { AppDataType, DataSeries, ReportViewType, SeriesUrl } from '../types';
+import { AppDataType, SeriesConfig, ReportViewType, SeriesUrl } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';
@@ -66,7 +66,7 @@ export const ReportTypes: Record<AppDataType, ReportTypeItem[]> = {
 interface BuilderItem {
   id: string;
   series: SeriesUrl;
-  seriesConfig?: DataSeries;
+  seriesConfig?: SeriesConfig;
 }
 
 export function SeriesBuilder({
@@ -142,7 +142,7 @@ export function SeriesBuilder({
           return loading ? (
             LOADING_VIEW
           ) : reportType ? (
-            <ReportDefinitionCol seriesId={seriesId} dataViewSeries={seriesConfig} />
+            <ReportDefinitionCol seriesId={seriesId} seriesConfig={seriesConfig} />
           ) : (
             SELECT_REPORT_TYPE
           );
@@ -159,7 +159,7 @@ export function SeriesBuilder({
       field: 'id',
       render: (seriesId: string, { series: { reportType }, seriesConfig }: BuilderItem) =>
         reportType && seriesConfig ? (
-          <ReportFilters seriesId={seriesId} dataViewSeries={seriesConfig} />
+          <ReportFilters seriesId={seriesId} seriesConfig={seriesConfig} />
         ) : null,
     },
     {
@@ -170,7 +170,7 @@ export function SeriesBuilder({
       field: 'id',
       render: (seriesId: string, { series: { reportType }, seriesConfig }: BuilderItem) =>
         reportType && seriesConfig ? (
-          <ReportBreakdowns seriesId={seriesId} dataViewSeries={seriesConfig} />
+          <ReportBreakdowns seriesId={seriesId} seriesConfig={seriesConfig} />
         ) : null,
     },
     ...(multiSeries
@@ -299,12 +299,5 @@ export const SELECT_REPORT_TYPE = i18n.translate(
   'xpack.observability.expView.seriesBuilder.selectReportType',
   {
     defaultMessage: 'No report type selected',
-  }
-);
-
-export const SELECT_DATA_TYPE = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.selectDataType',
-  {
-    defaultMessage: 'No data type selected',
   }
 );

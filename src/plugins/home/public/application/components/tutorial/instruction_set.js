@@ -186,6 +186,7 @@ class InstructionSetUi extends React.Component {
           textPre={instruction.textPre}
           textPost={instruction.textPost}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
+          customComponentName={instruction.customComponentName}
         />
       );
       return {
@@ -282,6 +283,7 @@ const statusCheckConfigShape = PropTypes.shape({
   title: PropTypes.string,
   text: PropTypes.string,
   btnLabel: PropTypes.string,
+  customStatusCheck: PropTypes.string,
 });
 
 InstructionSetUi.propTypes = {

@@ -81,6 +81,7 @@ yarn kbn watch-bazel
 - @kbn/eslint-plugin-eslint
 - @kbn/expect
 - @kbn/i18n
+- @kbn/interpreter
 - @kbn/io-ts-utils
 - @kbn/legacy-logging
 - @kbn/logging
@@ -102,6 +103,7 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
 - @kbn/server-route-repository
+- @kbn/spec-to-console
 - @kbn/std
 - @kbn/storybook
 - @kbn/telemetry-utils
