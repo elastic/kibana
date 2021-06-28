@@ -127,6 +127,10 @@ Below is a document in the expected structure, with descriptions of the fields:
   // Custom fields that are not part of ECS.
   kibana: {
     server_uuid: "UUID of kibana server, for diagnosing multi-Kibana scenarios",
+    task: {
+      scheduled: "ISO date of when the task for this event was supposed to start",
+      schedule_delay: "delay in nanoseconds between when this task was supposed to start and when it actually started",
+    },
     alerting: {
       instance_id: "alert instance id, for relevant documents",
       action_group_id: "alert action group, for relevant documents",

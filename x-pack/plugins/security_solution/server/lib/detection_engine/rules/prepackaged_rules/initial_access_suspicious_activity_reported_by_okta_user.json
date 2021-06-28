@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "Suspicious Activity Reported by Okta User",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:user.account.report_suspicious_activity_by_enduser",
+  "query": "event.dataset:okta.system and event.action:user.account.report_suspicious_activity_by_enduser\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
