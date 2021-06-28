@@ -70,7 +70,7 @@ export class CountAggField implements IESAggField {
   }
 
   supportsFieldMeta(): boolean {
-    return true;
+    return false;
   }
 
   getBucketCount() {
@@ -94,7 +94,7 @@ export class CountAggField implements IESAggField {
   }
 
   supportsAutoDomain(): boolean {
-    return this._canReadFromGeoJson ? true : this.supportsFieldMeta();
+    return true;
   }
 
   canReadFromGeoJson(): boolean {
