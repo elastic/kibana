@@ -56,6 +56,7 @@ const instructionSchema = schema.object({
   textPre: schema.maybe(schema.string()),
   commands: schema.maybe(schema.arrayOf(schema.string())),
   textPost: schema.maybe(schema.string()),
+  customComponentName: schema.maybe(schema.string()),
 });
 export type Instruction = TypeOf<typeof instructionSchema>;
 
@@ -100,7 +101,7 @@ const instructionsSchema = schema.object({
   instructionSets: schema.arrayOf(instructionSetSchema),
   params: schema.maybe(schema.arrayOf(paramSchema)),
 });
-export type InstructionsSchema = TypeOf<typeof instructionSchema>;
+export type InstructionsSchema = TypeOf<typeof instructionsSchema>;
 
 const tutorialIdRegExp = /^[a-zA-Z0-9-]+$/;
 export const tutorialSchema = schema.object({
@@ -152,6 +153,7 @@ export const tutorialSchema = schema.object({
   // saved objects used by data module.
   savedObjects: schema.maybe(schema.arrayOf(schema.any())),
   savedObjectsInstallMsg: schema.maybe(schema.string()),
+  customStatusCheckName: schema.maybe(schema.string()),
 });
 
 export type TutorialSchema = TypeOf<typeof tutorialSchema>;
