@@ -85,7 +85,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
 
   const rowClass = classNames({ 'source-row--error': hasError });
 
-  const fixLink = (
+  const reauthenticateLink = (
     <EuiLinkTo
       to={getSourcesPath(
         `${ADD_SOURCE_PATH}/${serviceType}/reauthenticate?sourceId=${id}`,
@@ -157,7 +157,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
       )}
       <EuiTableRowCell align="right">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-          {showReauthenticate && <EuiFlexItem grow={false}>{fixLink}</EuiFlexItem>}
+          {showReauthenticate && <EuiFlexItem grow={false}>{reauthenticateLink}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             {showDetails && (
               <EuiLinkTo
