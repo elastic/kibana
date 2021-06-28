@@ -508,7 +508,7 @@ describe('<SnapshotRestoreHome />', () => {
         const { find, exists } = testBed;
         expect(exists('maxSnapshotsWarning')).toBe(true);
         expect(find('maxSnapshotsWarning').text()).toContain(
-          'You have reached the maximum number of snapshots that can be displayed.'
+          'Cannot show the full list of snapshots'
         );
       });
 
