@@ -51,7 +51,11 @@ export const initialData: CaseUserActionsState = {
 };
 
 export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
+  fetchCaseUserActions: (
+    caseId: string,
+    caseConnectorId: string,
+    subCaseId?: string
+  ) => Promise<void>;
 }
 
 const getExternalService = (value: string): CaseExternalService | null =>
