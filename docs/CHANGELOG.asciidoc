@@ -186,7 +186,7 @@ or unenrollment hangs indefinitely. https://github.com/elastic/fleet-server/issu
 ====
 *Details*  +
 This issue was reported at https://github.com/elastic/kibana/issues/103059[#103059] and was originally 
-related to moving a TSVB visualization from one space to another. It should be noted that there may be different 
+related to moving a *TSVB* visualization from one space to another. It should be noted that there may be different 
 variants of this problem due to the fact that the used index pattern is not exported correctly.
 
 *Workaround* +
