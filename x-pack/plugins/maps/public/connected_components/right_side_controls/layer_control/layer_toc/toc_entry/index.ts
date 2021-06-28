@@ -29,7 +29,7 @@ import {
   hideTOCDetails,
   showTOCDetails,
   toggleLayerVisible,
-  setDrawMode,
+  setDrawMode, updateDrawState,
 } from '../../../../../actions';
 import { DRAW_MODE } from '../../../../../../common';
 
@@ -66,6 +66,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(toggleLayerVisible(layerId));
     },
     cancelEditing: () => {
+      dispatch(updateDrawState(null));
       dispatch(setDrawMode(DRAW_MODE.NONE));
     },
   };
