@@ -8,11 +8,24 @@
 import React, { FC } from 'react';
 import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { CanvasVariable } from '../../../types';
 
-import { ComponentStrings } from '../../../i18n';
-const { VarConfigVarValueField: strings } = ComponentStrings;
+const strings = {
+  getBooleanOptionsLegend: () =>
+    i18n.translate('xpack.canvas.varConfigVarValueField.booleanOptionsLegend', {
+      defaultMessage: 'Boolean value',
+    }),
+  getFalseOption: () =>
+    i18n.translate('xpack.canvas.varConfigVarValueField.falseOption', {
+      defaultMessage: 'False',
+    }),
+  getTrueOption: () =>
+    i18n.translate('xpack.canvas.varConfigVarValueField.trueOption', {
+      defaultMessage: 'True',
+    }),
+};
 
 interface Props {
   type: CanvasVariable['type'];

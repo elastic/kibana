@@ -32,7 +32,8 @@ export default function ({ getService }) {
 
   const { addPolicyToIndex } = registerIndexHelpers({ supertest });
 
-  describe('policies', () => {
+  // failing ES promotion https://github.com/elastic/kibana/issues/103364
+  describe.skip('policies', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
