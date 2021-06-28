@@ -25,7 +25,7 @@ import {
 } from './solution_nav_avatar';
 import { KibanaPageTemplateSolutionNavCollapseButton } from './solution_nav_collapse_button';
 
-export type KibanaPageTemplateSolutionNavProps = Partial<EuiSideNavProps> & {
+export type KibanaPageTemplateSolutionNavProps = EuiSideNavProps<{}> & {
   /**
    * Name of the solution, i.e. "Observability"
    */
