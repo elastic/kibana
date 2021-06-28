@@ -1379,6 +1379,9 @@ export interface IKibanaSearchResponse<RawResponse = any> {
 // @public (undocumented)
 export type IMetricAggType = MetricAggType;
 
+// @public (undocumented)
+export const INDEX_PATTERN_SAVED_OBJECT_TYPE = "index-pattern";
+
 // Warning: (ae-missing-release-tag) "IndexPattern" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)

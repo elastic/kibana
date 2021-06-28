@@ -487,6 +487,7 @@ export interface DocLinksStart {
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
     readonly links: {
+        readonly settings: string;
         readonly canvas: {
             readonly guide: string;
         };

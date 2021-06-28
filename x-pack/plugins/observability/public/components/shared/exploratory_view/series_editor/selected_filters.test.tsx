@@ -24,7 +24,9 @@ describe('SelectedFilters', function () {
   it('should render properly', async function () {
     const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
 
-    render(<SelectedFilters seriesId={'series-id'} series={dataViewSeries} />, { initSeries });
+    render(<SelectedFilters seriesId={'series-id'} seriesConfig={dataViewSeries} />, {
+      initSeries,
+    });
 
     await waitFor(() => {
       screen.getByText('Chrome');

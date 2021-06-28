@@ -96,3 +96,5 @@ export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
 export const FILTER_RECORDS = 'FILTER_RECORDS';
 export const TERMS_COLUMN = 'TERMS_COLUMN';
 export const OPERATION_COLUMN = 'operation';
+
+export const REPORT_METRIC_FIELD = 'REPORT_METRIC_FIELD';
