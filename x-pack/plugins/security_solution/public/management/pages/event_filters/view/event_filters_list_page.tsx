@@ -177,9 +177,13 @@ export const EventFiltersListPage = memo(() => {
     [navigateCallback]
   );
 
-  const handleOnSearch = useCallback((query: string) => navigateCallback({ filter: query }), [
-    navigateCallback,
-  ]);
+  const handleOnSearch = useCallback(
+    (query: string) => {
+      dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
+      navigateCallback({ filter: query });
+    },
+    [navigateCallback, dispatch]
+  );
 
   return (
     <AdministrationListPage

@@ -8,27 +8,25 @@
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
-import { ReportDefinition } from '../types';
+import { SeriesConfig } from '../types';
 
 interface Props {
-  field: string;
   seriesId: string;
   defaultValue?: string;
-  options: ReportDefinition['options'];
+  options: SeriesConfig['metricOptions'];
 }
 
-export function CustomReportField({ field, seriesId, options: opts }: Props) {
+export function ReportMetricOptions({ seriesId, options: opts }: Props) {
   const { getSeries, setSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
 
-  const { reportDefinitions: rtd = {} } = series;
-
   const onChange = (value: string) => {
-    setSeries(seriesId, { ...series, reportDefinitions: { ...rtd, [field]: [value] } });
+    setSeries(seriesId, {
+      ...series,
+      selectedMetricField: value,
+    });
   };
-
-  const { reportDefinitions } = series;
 
   const options = opts ?? [];
 
@@ -41,7 +39,7 @@ export function CustomReportField({ field, seriesId, options: opts }: Props) {
         value: fd || id,
         inputDisplay: label,
       }))}
-      valueOfSelected={reportDefinitions?.[field]?.[0] || options?.[0].field || options?.[0].id}
+      valueOfSelected={series.selectedMetricField || options?.[0].field || options?.[0].id}
       onChange={(value) => onChange(value)}
     />
   );
