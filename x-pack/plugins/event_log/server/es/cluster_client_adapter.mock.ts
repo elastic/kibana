@@ -12,6 +12,7 @@ const createClusterClientMock = () => {
     indexDocument: jest.fn(),
     indexDocuments: jest.fn(),
     doesIlmPolicyExist: jest.fn(),
+    unlinkIlmPolicyFromOutdatedIndices: jest.fn(),
     createIlmPolicy: jest.fn(),
     doesIndexTemplateExist: jest.fn(),
     createIndexTemplate: jest.fn(),

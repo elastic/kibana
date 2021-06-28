@@ -13,10 +13,11 @@ describe('initializeEs', () => {
 
   beforeEach(() => {
     esContext = contextMock.create();
+    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue({ exists: false });
   });
 
   test(`should create ILM policy if it doesn't exist`, async () => {
-    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue(false);
+    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue({ exists: false });
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
@@ -24,11 +25,31 @@ describe('initializeEs', () => {
   });
 
   test(`shouldn't create ILM policy if it exists`, async () => {
-    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue(true);
+    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue({ exists: true, linkedIndices: [] });
 
     await initializeEs(esContext);
     expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
     expect(esContext.esAdapter.createIlmPolicy).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.unlinkIlmPolicyFromOutdatedIndices).not.toHaveBeenCalled();
+  });
+
+  test(`should unlink indices if ILM policy exists and is link to outdated indices`, async () => {
+    esContext.esAdapter.doesIlmPolicyExist.mockResolvedValue({
+      exists: true,
+      linkedIndices: [
+        '.kibana-event-log-8.0.0-0001',
+        '.kibana-event-log-8.0.0-0002',
+        '.kibana-event-log-7.14.0-0001',
+        '.kibana-event-log-7.13.2-0002',
+      ],
+    });
+    await initializeEs(esContext);
+    expect(esContext.esAdapter.doesIlmPolicyExist).toHaveBeenCalled();
+    expect(esContext.esAdapter.createIlmPolicy).not.toHaveBeenCalled();
+    expect(esContext.esAdapter.unlinkIlmPolicyFromOutdatedIndices).toHaveBeenCalledWith([
+      '.kibana-event-log-7.14.0-0001',
+      '.kibana-event-log-7.13.2-0002',
+    ]);
   });
 
   test(`should create index template if it doesn't exist`, async () => {

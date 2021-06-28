@@ -157,6 +157,24 @@ describe('buffering documents', () => {
   });
 });
 
+describe('unlinkIlmPolicyFromOutdatedIndices', () => {
+  test('should call cluster with proper arguments', async () => {
+    await clusterClientAdapter.unlinkIlmPolicyFromOutdatedIndices(['index_1', 'another_index']);
+    expect(clusterClient.transport.request).toHaveBeenCalledWith({
+      method: 'POST',
+      path: 'index_1,another_index/_ilm/remove',
+    });
+  });
+
+  test('should log error when call cluster client throws', async () => {
+    clusterClient.transport.request.mockRejectedValue(new Error('Fail'));
+    await clusterClientAdapter.unlinkIlmPolicyFromOutdatedIndices(['index_1', 'another_index']);
+    expect(logger.error).toHaveBeenCalledWith(
+      'error unlinking ilm policy from indexes: "index_1,another_index" - Fail'
+    );
+  });
+});
+
 describe('doesIlmPolicyExist', () => {
   // ElasticsearchError can be a bit random in shape, we need an any here
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -173,7 +191,9 @@ describe('doesIlmPolicyExist', () => {
 
   test('should return false when 404 error is returned by Elasticsearch', async () => {
     clusterClient.transport.request.mockRejectedValue(notFoundError);
-    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual(false);
+    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual({
+      exists: false,
+    });
   });
 
   test('should throw error when error is not 404', async () => {
@@ -184,7 +204,17 @@ describe('doesIlmPolicyExist', () => {
   });
 
   test('should return true when no error is thrown', async () => {
-    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual(true);
+    const linkedIndices = ['index_1', 'another_index'];
+    clusterClient.transport.request.mockResolvedValue(
+      asApiResponse({
+        success: true,
+        foo: { in_use_by: { indices: linkedIndices } },
+      })
+    );
+    await expect(clusterClientAdapter.doesIlmPolicyExist('foo')).resolves.toEqual({
+      exists: true,
+      linkedIndices,
+    });
   });
 });
 
