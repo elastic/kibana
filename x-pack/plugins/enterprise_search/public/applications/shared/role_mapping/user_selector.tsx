@@ -9,6 +9,7 @@ import React from 'react';
 
 import {
   EuiFieldText,
+  EuiLink,
   EuiRadio,
   EuiFormRow,
   EuiSelect,
@@ -21,6 +22,9 @@ import { ElasticsearchUser } from '../../shared/types';
 import { Role as WSRole } from '../../workplace_search/types';
 
 import { USERNAME_LABEL, EMAIL_LABEL } from '../constants';
+import { docLinks } from '../doc_links';
+
+const SMTP_URL = `${docLinks.enterpriseSearchBase}/mailer-configuration.html`;
 
 import {
   NEW_USER_LABEL,
@@ -28,12 +32,15 @@ import {
   USERNAME_NO_USERS_TEXT,
   REQUIRED_LABEL,
   ROLE_LABEL,
+  SMTP_CALLOUT_LABEL,
+  SMTP_LINK_LABEL,
 } from './constants';
 
 type SharedRole = WSRole | ASRole;
 
 interface Props {
   isNewUser: boolean;
+  smtpSettingsPresent: boolean;
   userFormUserIsExisting: boolean;
   elasticsearchUsers: ElasticsearchUser[];
   elasticsearchUser: ElasticsearchUser;
@@ -48,6 +55,7 @@ interface Props {
 
 export const UserSelector: React.FC<Props> = ({
   isNewUser,
+  smtpSettingsPresent,
   userFormUserIsExisting,
   elasticsearchUsers,
   elasticsearchUser,
@@ -66,6 +74,14 @@ export const UserSelector: React.FC<Props> = ({
   }));
   const hasElasticsearchUsers = elasticsearchUsers.length > 0;
   const showNewUserExistingUserControls = userFormUserIsExisting && hasElasticsearchUsers;
+  const smptHelpText = !smtpSettingsPresent && (
+    <>
+      {SMTP_CALLOUT_LABEL}{' '}
+      <EuiLink href={SMTP_URL} target="_blank">
+        {SMTP_LINK_LABEL}
+      </EuiLink>
+    </>
+  );
 
   const roleSelect = (
     <EuiFormRow label={ROLE_LABEL}>
@@ -80,7 +96,7 @@ export const UserSelector: React.FC<Props> = ({
   );
 
   const emailInput = (
-    <EuiFormRow label={EMAIL_LABEL}>
+    <EuiFormRow label={EMAIL_LABEL} helpText={smptHelpText}>
       <EuiFieldText
         name={EMAIL_LABEL}
         data-test-subj="EmailInput"

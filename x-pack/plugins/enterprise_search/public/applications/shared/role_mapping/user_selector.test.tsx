@@ -34,6 +34,7 @@ describe('UserSelector', () => {
 
   const props = {
     isNewUser: true,
+    smtpSettingsPresent: false,
     userFormUserIsExisting: true,
     elasticsearchUsers,
     elasticsearchUser: elasticsearchUsers[0],
@@ -101,7 +102,7 @@ describe('UserSelector', () => {
         {...props}
         userFormUserIsExisting={false}
         elasticsearchUsers={[]}
-        elasticsearchUser={{ email: '', username: '' }}
+        elasticsearchUser={{ email: '', username: '', enabled: true }}
       />
     );
 

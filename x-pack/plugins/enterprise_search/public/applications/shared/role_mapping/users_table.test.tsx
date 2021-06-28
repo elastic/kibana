@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow, mount } from 'enzyme';
 
-import { EuiInMemoryTable, EuiTextColor } from '@elastic/eui';
+import { EuiInMemoryTable, EuiTextColor, EuiBadge } from '@elastic/eui';
 
 import { engines } from '../../app_search/__mocks__/engines.mock';
 
@@ -27,6 +27,7 @@ describe('UsersTable', () => {
     singleUserRoleMappings: [wsSingleUserRoleMapping],
     initializeSingleUserRoleMapping,
     handleDeleteMapping,
+    enabled: true,
   };
 
   it('renders', () => {
@@ -55,6 +56,7 @@ describe('UsersTable', () => {
       elasticsearchUser: {
         email: null,
         username: 'foo',
+        enabled: true,
       },
     };
     const wrapper = mount(<UsersTable {...props} singleUserRoleMappings={[userWithNoEmail]} />);
@@ -96,5 +98,21 @@ describe('UsersTable', () => {
     expect(wrapper.find('[data-test-subj="AccessItems"]').prop('children')).toEqual(
       `${engines[0].name}, ${engines[1].name} + 1`
     );
+  });
+
+  it('renders deactivatedBadge', () => {
+    const disabledUser = {
+      ...wsSingleUserRoleMapping,
+      elasticsearchUser: {
+        email: 'email@user.com',
+        username: 'foo',
+        enabled: false,
+      },
+      invitation: null,
+    };
+    const wrapper = mount(<UsersTable {...props} singleUserRoleMappings={[disabledUser]} />);
+    const cell = wrapper.find('[data-test-subj="UsernameCell"]');
+
+    expect(cell.find(EuiBadge)).toHaveLength(1);
   });
 });

@@ -36,6 +36,7 @@ export interface Props {
   removeLayer: (layerId: string) => void;
   supportsFitToBounds: boolean;
   toggleVisible: (layerId: string) => void;
+  editModeActiveForLayer: boolean;
 }
 
 interface State {
@@ -170,7 +171,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
                 defaultMessage:
                   'Edit features only supported for document layers without clustering, joins, or time filtering',
               }),
-          disabled: !this.state.isFeatureEditingEnabled,
+          disabled: !this.state.isFeatureEditingEnabled || this.props.editModeActiveForLayer,
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (this.props.layer.getSource() as ESSearchSource).getSupportedShapeTypes();
