@@ -23,7 +23,7 @@ interface Props {
 }
 
 export const UserInvitationCallout: React.FC<Props> = ({ isNew, invitationCode, urlPrefix }) => {
-  const link = urlPrefix + invitationCode;
+  const link = `${urlPrefix}/invitations/${invitationCode}`;
   const label = isNew ? NEW_INVITATION_LABEL : EXISTING_INVITATION_LABEL;
 
   return (
