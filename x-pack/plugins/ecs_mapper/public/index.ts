@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EcsMapperUIPlugin } from './plugin';
+import { EcsMapperPlugin } from './plugin';
 
 export function plugin() {
-  return new EcsMapperUIPlugin();
+  return new EcsMapperPlugin();
 }

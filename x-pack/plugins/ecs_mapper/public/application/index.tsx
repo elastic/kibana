@@ -7,20 +7,21 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpStart as Http, ToastsSetup } from 'kibana/public';
 
 import { LicenseStatus } from '../../common';
+import { EcsMapperMainUi } from './components/main';
 
 interface AppDependencies {
   el: HTMLElement;
-  http: Http;
   I18nContext: any;
-  notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
 }
 
 export const renderApp = ({ el, I18nContext }: AppDependencies) => {
-  render(<I18nContext>Placeholder for ECS Mapper</I18nContext>, el);
+  render(<I18nContext>
+      <EcsMapperMainUi/>
+    </I18nContext>, 
+    el);
 
   return () => unmountComponentAtNode(el);
 };
