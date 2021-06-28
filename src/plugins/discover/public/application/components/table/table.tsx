@@ -95,8 +95,7 @@ export function DocViewTable({
           .filter((field) => {
             const parent = childParentFieldsMap[field];
             return (
-              !fieldsWithParents.includes(field) ||
-              (parent && !Object.keys(flattened).includes(parent))
+              !fieldsWithParents.includes(field) || (parent && !flattened.hasOwnProperty(parent))
             );
           })
           .sort((fieldA, fieldB) => {
