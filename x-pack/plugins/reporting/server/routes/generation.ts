@@ -12,9 +12,9 @@ import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
 import { enqueueJobFactory } from '../lib/enqueue_job';
-import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerLegacy } from './legacy';
+import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
 import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
@@ -49,7 +49,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       const enqueueJob = enqueueJobFactory(reporting, logger);
       const report = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
-      // return the queue's job information
+      // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(reporting);
 
       return res.ok({

@@ -9,12 +9,12 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiComboBox, EuiFieldText } from '@elastic/eui';
+import { EuiComboBox, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { AttributeName } from '../types';
 
 import { AttributeSelector } from './attribute_selector';
-import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
+import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_OPTION_LABEL, REQUIRED_LABEL } from './constants';
 
 const handleAttributeSelectorChange = jest.fn();
 const handleAttributeValueChange = jest.fn();
@@ -165,6 +165,13 @@ describe('AttributeSelector', () => {
         'kbn_saml',
         baseProps.elasticsearchRoles[0]
       );
+    });
+
+    it('shows helpText when attributeValueInvalid', () => {
+      const wrapper = shallow(<AttributeSelector {...baseProps} attributeValueInvalid />);
+      const formRow = wrapper.find(EuiFormRow).at(2);
+
+      expect(formRow.prop('helpText')).toEqual(REQUIRED_LABEL);
     });
   });
 });

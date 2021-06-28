@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { USERNAME_LABEL, EMAIL_LABEL } from '../constants';
 
@@ -19,6 +19,8 @@ interface Props {
   roleType: string;
 }
 
+const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
+
 export const UserAddedInfo: React.FC<Props> = ({ username, email, roleType }) => (
   <>
     <EuiText size="s">
@@ -29,7 +31,7 @@ export const UserAddedInfo: React.FC<Props> = ({ username, email, roleType }) =>
     <EuiText size="s">
       <strong>{EMAIL_LABEL}</strong>
     </EuiText>
-    <EuiText size="s">{email}</EuiText>
+    <EuiText size="s">{email || noItemsPlaceholder}</EuiText>
     <EuiSpacer />
     <EuiText size="s">
       <strong>{ROLE_LABEL}</strong>
