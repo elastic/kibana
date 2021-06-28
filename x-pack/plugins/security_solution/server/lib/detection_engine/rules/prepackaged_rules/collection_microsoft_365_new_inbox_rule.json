@@ -17,7 +17,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft 365 New Inbox Rule Created",
   "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"New-InboxRule\" and event.outcome:success",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"New-InboxRule\" and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/microsoft-365/security/office-365-security/responding-to-a-compromised-email-account?view=o365-worldwide",
     "https://docs.microsoft.com/en-us/powershell/module/exchange/new-inboxrule?view=exchange-ps",
