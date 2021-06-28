@@ -6,6 +6,7 @@
  */
 
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import moment from 'moment';
 
 const SIZE = 1000;
@@ -266,6 +267,38 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
     return jobMessages;
   }
 
+  // Sets 'cleared' to true for messages in the last 24hrs and adds message for clear action
+  // 'from' is 24hrs ago
+  async function clearJobAuditMessages(jobSavedObjectService, { jobId, start, end }) {
+    console.log('------- ABOUT TO FETCH MESSAGES -----', jobId, start, end);
+    const messages = await getJobAuditMessages(jobSavedObjectService, { jobId, start, end });
+    const latestMessage = messages[messages.length - 1];
+    console.log('------- LATEST MESSAGE -----', JSON.stringify(latestMessage, null, 2));
+    // eslint-disable-next-line
+    const newClearedMessage = {
+      job_id: jobId,
+      job_type: 'anomaly_detection',
+      level: MESSAGE_LEVEL.INFO,
+      message: "Cleared all jobs for the last 24hrs'",
+      timestamp: new Date().getTime(),
+    };
+
+    const params = {
+      index: ML_NOTIFICATION_INDEX_PATTERN,
+      body: latestMessage,
+      refresh: 'wait_for',
+    };
+
+    if (typeof latestMessage._id !== 'undefined') {
+      params.id = latestMessage._id;
+      delete params.body._id;
+    }
+
+    const { body } = await asInternalUser.index(params);
+    console.log('---- BODY ------', JSON.stringify(body, null, 2));
+    return body;
+  }
+
   function levelToText(level) {
     return Object.keys(LEVEL)[Object.values(LEVEL).indexOf(level)];
   }
@@ -273,5 +306,6 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
   return {
     getJobAuditMessages,
     getAuditMessagesSummary,
+    clearJobAuditMessages,
   };
 }

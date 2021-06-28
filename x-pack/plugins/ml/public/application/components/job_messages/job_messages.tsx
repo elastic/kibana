@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
+import moment from 'moment';
 
 import {
   EuiBasicTableColumn,
   EuiSpacer,
   EuiInMemoryTable,
+  EuiButton,
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
@@ -22,8 +24,11 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { JobMessage } from '../../../../common/types/audit_message';
 import { JobIcon } from '../job_message_icon';
 import { timeFormatter } from '../../../../common/util/date_utils';
+import { useToastNotificationService } from '../../services/toast_notification_service';
+import { useMlKibana } from '../../../application/contexts/kibana';
 
 interface JobMessagesProps {
+  jobId: string;
   messages: JobMessage[];
   loading: boolean;
   error: string;
@@ -36,12 +41,26 @@ interface JobMessagesProps {
  * and data frame analytics jobs.
  */
 export const JobMessages: FC<JobMessagesProps> = ({
+  jobId,
   messages,
   loading,
   error,
   refreshMessage,
   actionHandler,
 }) => {
+  const [isClearing, setIsClearing] = useState<boolean>(false);
+  const toastNotificationService = useToastNotificationService();
+
+  const {
+    services: {
+      mlServices: {
+        mlApiServices: {
+          jobs: { clearJobAuditMessages },
+        },
+      },
+    },
+  } = useMlKibana();
+
   const columns: Array<EuiBasicTableColumn<JobMessage>> = [
     {
       name: refreshMessage ? (
@@ -59,8 +78,8 @@ export const JobMessages: FC<JobMessagesProps> = ({
           />
         </EuiToolTip>
       ) : (
-        ''
-      ),
+          ''
+        ),
       render: (message: JobMessage) => <JobIcon message={message} />,
       width: `${theme.euiSizeL}`,
     },
@@ -130,9 +149,44 @@ export const JobMessages: FC<JobMessagesProps> = ({
     },
   };
 
+  // latest timestamp of message - 24hrs
+  const clearMessages = async () => {
+    setIsClearing(true);
+    const nowMoment = moment(new Date().getTime());
+    // @ts-ignore
+    const twentyFourHoursAgo = nowMoment.subtract(24, 'hours').valueOf();
+    const start = '';
+    const end = '';
+    try {
+      await clearJobAuditMessages(jobId, start, end);
+      setIsClearing(false);
+    } catch (e) {
+      setIsClearing(false);
+      toastNotificationService.displayErrorToast(
+        e,
+        i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle', {
+          defaultMessage: 'Error clearning job message warnings and errors',
+        })
+      );
+    }
+  };
+  // TODO: if index is .ml-notifications or .ml-notifications-0001 then disable
+  const disabled = false;
+  // TODO: add tooltip explaining it clears for last 24hrs
   return (
     <>
       <EuiSpacer size="s" />
+      <EuiButton
+        isLoading={isClearing}
+        isDisabled={disabled}
+        onClick={clearMessages}
+        data-test-subj="mlJobMessagesClearButton"
+      >
+        <FormattedMessage
+          id="xpack.ml.jobMessages.clearMessagesLabel"
+          defaultMessage="Clear messages"
+        />
+      </EuiButton>
       <EuiInMemoryTable
         className="job-messages-table"
         items={messages}

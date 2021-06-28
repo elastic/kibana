@@ -52,6 +52,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
 
     return (
       <JobMessages
+        jobId={jobId}
         refreshMessage={refreshMessage}
         messages={messages}
         loading={isLoading}
