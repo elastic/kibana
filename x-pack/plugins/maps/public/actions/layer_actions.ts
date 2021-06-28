@@ -602,7 +602,7 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: Feature[]) 
       return;
     }
 
-    await dispatch({
+    dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
       propName: '__metaFromTiles',

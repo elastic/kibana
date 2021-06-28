@@ -283,6 +283,21 @@ export class TiledVectorLayer extends VectorLayer {
       filter: ['==', ['get', KBN_METADATA_FEATURE], true],
     });
 
+    const parsedProperties: Feature[] = mbFeatures.map((mbFeature: Feature) => {
+      const properties: Record<string, unknown> = {};
+      for (const key in mbFeature.properties) {
+        if (mbFeature.properties.hasOwnProperty(key)) {
+          properties[key] = JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
+        }
+      }
+      return {
+        type: 'Feature',
+        id: mbFeature.id,
+        geometry: mbFeature.geometry,
+        properties: parsedProperties,
+      };
+    });
+
     return mbFeatures as Feature[];
   }
 
