@@ -32,6 +32,10 @@
 
 .mapTocEntry-isInEditingMode {
   background-color: tintOrShade($euiColorPrimary, 90%, 70%) !important;
+
+  &__row {
+    margin-left: $euiSizeL;
+  }
 }
 
 .mapTocEntry-isDragging {
