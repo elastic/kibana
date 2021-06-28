@@ -151,13 +151,13 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
         </Fragment>
       )}
       {isLargerBreakpoint && (
-        <>
+        <Fragment>
           {sideNav}
           <KibanaPageTemplateSolutionNavCollapseButton
             isCollapsed={!isOpenOnDesktop}
             onClick={onCollapse}
           />
-        </>
+        </Fragment>
       )}
     </>
   );
