@@ -108,8 +108,10 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     uiMetricService.trackUiMetric(UIM_SNAPSHOT_LIST_LOAD);
   }, [uiMetricService]);
 
+  let content;
+
   if (isLoading) {
-    return (
+    content = (
       <PageLoading>
         <span data-test-subj="snapshotListEmpty">
           <FormattedMessage
@@ -119,10 +121,8 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         </span>
       </PageLoading>
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    content = (
       <PageError
         title={
           <FormattedMessage
@@ -133,16 +133,9 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         error={error as Error}
       />
     );
-  }
-
-  if (Object.keys(errors).length && repositories.length === 0) {
-    return (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-      >
+  } else if (Object.keys(errors).length && repositories.length === 0) {
+    content = (
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -174,10 +167,8 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         />
       </EuiPageContent>
     );
-  }
-
-  if (repositories.length === 0) {
-    return (
+  } else if (repositories.length === 0) {
+    content = (
       <EuiPageContent
         hasShadow={false}
         paddingSize="none"
@@ -222,10 +213,8 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         />
       </EuiPageContent>
     );
-  }
-
-  if (snapshots.length === 0) {
-    return (
+  } else if (snapshots.length === 0) {
+    content = (
       <EuiPageContent
         hasShadow={false}
         paddingSize="none"
@@ -328,41 +317,57 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         />
       </EuiPageContent>
     );
+  } else {
+    const repositoryErrorsWarning = Object.keys(errors).length ? (
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryWarningTitle"
+              defaultMessage="Some repositories contain errors"
+            />
+          }
+          color="warning"
+          iconType="alert"
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryWarningDescription"
+            defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
+            values={{
+              repositoryLink: (
+                <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryWarningLinkText"
+                    defaultMessage="Repositories"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer />
+      </Fragment>
+    ) : null;
+
+    content = (
+      <section data-test-subj="snapshotList">
+        {repositoryErrorsWarning}
+
+        <SnapshotTable
+          snapshots={snapshots}
+          repositories={repositories}
+          reload={reload}
+          openSnapshotDetailsUrl={openSnapshotDetailsUrl}
+          onSnapshotDeleted={onSnapshotDeleted}
+          repositoryFilter={filteredRepository}
+          policyFilter={filteredPolicy}
+        />
+      </section>
+    );
   }
 
-  const repositoryErrorsWarning = Object.keys(errors).length ? (
-    <Fragment>
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryWarningTitle"
-            defaultMessage="Some repositories contain errors"
-          />
-        }
-        color="warning"
-        iconType="alert"
-      >
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryWarningDescription"
-          defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
-          values={{
-            repositoryLink: (
-              <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryWarningLinkText"
-                  defaultMessage="Repositories"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
-      <EuiSpacer />
-    </Fragment>
-  ) : null;
-
   return (
-    <section data-test-subj="snapshotList">
+    <>
       {repositoryName && snapshotId ? (
         <SnapshotDetails
           repositoryName={repositoryName}
@@ -371,18 +376,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           onSnapshotDeleted={onSnapshotDeleted}
         />
       ) : null}
-
-      {repositoryErrorsWarning}
-
-      <SnapshotTable
-        snapshots={snapshots}
-        repositories={repositories}
-        reload={reload}
-        openSnapshotDetailsUrl={openSnapshotDetailsUrl}
-        onSnapshotDeleted={onSnapshotDeleted}
-        repositoryFilter={filteredRepository}
-        policyFilter={filteredPolicy}
-      />
-    </section>
+      {content}
+    </>
   );
 };

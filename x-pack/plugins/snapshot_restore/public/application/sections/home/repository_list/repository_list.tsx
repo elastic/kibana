@@ -67,8 +67,10 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     uiMetricService.trackUiMetric(UIM_REPOSITORY_LIST_LOAD);
   }, [uiMetricService]);
 
+  let content;
+
   if (isLoading) {
-    return (
+    content = (
       <PageLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryList.loadingRepositoriesDescription"
@@ -76,10 +78,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         />
       </PageLoading>
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    content = (
       <PageError
         title={
           <FormattedMessage
@@ -90,10 +90,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         error={error as Error}
       />
     );
-  }
-
-  if (repositories && repositories.length === 0) {
-    return (
+  } else if (repositories && repositories.length === 0) {
+    content = (
       <EuiPageContent
         hasShadow={false}
         paddingSize="none"
@@ -137,10 +135,22 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         />
       </EuiPageContent>
     );
+  } else {
+    content = (
+      <section data-test-subj="repositoryList">
+        <RepositoryTable
+          repositories={repositories || []}
+          managedRepository={managedRepository?.name}
+          reload={reload}
+          openRepositoryDetailsUrl={openRepositoryDetailsUrl}
+          onRepositoryDeleted={onRepositoryDeleted}
+        />
+      </section>
+    );
   }
 
   return (
-    <section data-test-subj="repositoryList">
+    <>
       {repositoryName ? (
         <RepositoryDetails
           repositoryName={repositoryName}
@@ -148,14 +158,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           onRepositoryDeleted={onRepositoryDeleted}
         />
       ) : null}
-
-      <RepositoryTable
-        repositories={repositories || []}
-        managedRepository={managedRepository?.name}
-        reload={reload}
-        openRepositoryDetailsUrl={openRepositoryDetailsUrl}
-        onRepositoryDeleted={onRepositoryDeleted}
-      />
-    </section>
+      {content}
+    </>
   );
 };

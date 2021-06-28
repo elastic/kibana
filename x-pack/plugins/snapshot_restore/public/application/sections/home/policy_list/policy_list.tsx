@@ -85,8 +85,10 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     uiMetricService.trackUiMetric(UIM_POLICY_LIST_LOAD);
   }, [uiMetricService]);
 
+  let content: JSX.Element;
+
   if (isLoading) {
-    return (
+    content = (
       <PageLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.policyList.loadingPoliciesDescription"
@@ -94,10 +96,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         />
       </PageLoading>
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    content = (
       <PageError
         title={
           <FormattedMessage
@@ -108,10 +108,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         error={error as Error}
       />
     );
-  }
-
-  if (policies && policies.length === 0) {
-    return (
+  } else if (policies && policies.length === 0) {
+    content = (
       <EuiPageContent
         hasShadow={false}
         paddingSize="none"
@@ -155,17 +153,59 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         />
       </EuiPageContent>
     );
-  }
+  } else {
+    const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
+    const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
+    const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
 
-  const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
-  const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
-  const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
+    content = (
+      <section data-test-subj="policyList">
+        {hasDuplicateSchedules ? (
+          <Fragment>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyScheduleWarningTitle"
+                  defaultMessage="Two or more policies have the same schedule"
+                />
+              }
+              color="warning"
+              iconType="alert"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyScheduleWarningDescription"
+                defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit or delete the policies."
+              />
+            </EuiCallOut>
+            <EuiSpacer />
+          </Fragment>
+        ) : null}
+
+        {hasRetention ? (
+          <PolicyRetentionSchedule
+            retentionSettings={retentionSettings}
+            onRetentionScheduleUpdated={reloadRetentionSettings}
+            isLoading={isLoadingRetentionSettings}
+            error={retentionSettingsError}
+          />
+        ) : null}
+
+        <PolicyTable
+          policies={policies || []}
+          reload={reload}
+          openPolicyDetailsUrl={openPolicyDetailsUrl}
+          onPolicyDeleted={onPolicyDeleted}
+          onPolicyExecuted={onPolicyExecuted}
+        />
+      </section>
+    );
+  }
 
   return (
     <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
-          <section data-test-subj="policyList">
+          <>
             {policyName ? (
               <PolicyDetails
                 policyName={policyName}
@@ -174,44 +214,8 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
                 onPolicyExecuted={onPolicyExecuted}
               />
             ) : null}
-            {hasDuplicateSchedules ? (
-              <Fragment>
-                <EuiCallOut
-                  title={
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.policyScheduleWarningTitle"
-                      defaultMessage="Two or more policies have the same schedule"
-                    />
-                  }
-                  color="warning"
-                  iconType="alert"
-                >
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.policyScheduleWarningDescription"
-                    defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit or delete the policies."
-                  />
-                </EuiCallOut>
-                <EuiSpacer />
-              </Fragment>
-            ) : null}
-
-            {hasRetention ? (
-              <PolicyRetentionSchedule
-                retentionSettings={retentionSettings}
-                onRetentionScheduleUpdated={reloadRetentionSettings}
-                isLoading={isLoadingRetentionSettings}
-                error={retentionSettingsError}
-              />
-            ) : null}
-
-            <PolicyTable
-              policies={policies || []}
-              reload={reload}
-              openPolicyDetailsUrl={openPolicyDetailsUrl}
-              onPolicyDeleted={onPolicyDeleted}
-              onPolicyExecuted={onPolicyExecuted}
-            />
-          </section>
+            {content}
+          </>
         ) : (
           <NotAuthorizedSection
             title={
