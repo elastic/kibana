@@ -70,11 +70,6 @@ const chartTheme: PartialTheme = {
   },
 };
 
-// Default axis to start at 0 for latency correlations chart
-const xAxisDomain = {
-  min: 0,
-};
-
 interface CorrelationsChartProps {
   field?: string;
   value?: string;
@@ -156,7 +151,6 @@ export function CorrelationsChart({
           theme={chartTheme}
           showLegend
           legendPosition={Position.Bottom}
-          xDomain={xAxisDomain}
         />
         <LineAnnotation
           id="annotation_1"
