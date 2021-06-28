@@ -58,7 +58,7 @@ export default function ({ getService }) {
 
       const jsonTile = new VectorTile(new Protobuf(resp.body));
       const layer = jsonTile.layers[MVT_SOURCE_LAYER_NAME];
-      expect(layer.length).to.be(2);
+      expect(layer.length).to.be(3);
 
       const gridFeature = layer.feature(0);
       expect(gridFeature.type).to.be(3);
@@ -75,7 +75,7 @@ export default function ({ getService }) {
         ],
       ]);
 
-      const clusterFeature = layer.feature(1);
+      const clusterFeature = layer.feature(2);
       expect(clusterFeature.type).to.be(1);
       expect(clusterFeature.extent).to.be(4096);
       expect(clusterFeature.id).to.be(undefined);
