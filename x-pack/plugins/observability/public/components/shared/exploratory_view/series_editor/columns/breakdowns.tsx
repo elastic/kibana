@@ -10,15 +10,15 @@ import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { USE_BREAK_DOWN_COLUMN } from '../../configurations/constants';
-import { DataSeries } from '../../types';
+import { SeriesConfig } from '../../types';
 
 interface Props {
   seriesId: string;
   breakdowns: string[];
-  reportViewConfig: DataSeries;
+  seriesConfig: SeriesConfig;
 }
 
-export function Breakdowns({ reportViewConfig, seriesId, breakdowns = [] }: Props) {
+export function Breakdowns({ seriesConfig, seriesId, breakdowns = [] }: Props) {
   const { setSeries, getSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
@@ -40,11 +40,11 @@ export function Breakdowns({ reportViewConfig, seriesId, breakdowns = [] }: Prop
     }
   };
 
-  const hasUseBreakdownColumn = reportViewConfig.xAxisColumn.sourceField === USE_BREAK_DOWN_COLUMN;
+  const hasUseBreakdownColumn = seriesConfig.xAxisColumn.sourceField === USE_BREAK_DOWN_COLUMN;
 
   const items = breakdowns.map((breakdown) => ({
     id: breakdown,
-    label: reportViewConfig.labels[breakdown],
+    label: seriesConfig.labels[breakdown],
   }));
 
   if (!hasUseBreakdownColumn) {

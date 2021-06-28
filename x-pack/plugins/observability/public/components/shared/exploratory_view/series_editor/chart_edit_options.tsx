@@ -8,22 +8,22 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Breakdowns } from './columns/breakdowns';
-import { DataSeries } from '../types';
+import { SeriesConfig } from '../types';
 import { ChartOptions } from './columns/chart_options';
 
 interface Props {
-  series: DataSeries;
+  seriesConfig: SeriesConfig;
   seriesId: string;
-  breakdowns: string[];
+  breakdownFields: string[];
 }
-export function ChartEditOptions({ series, seriesId, breakdowns }: Props) {
+export function ChartEditOptions({ seriesConfig, seriesId, breakdownFields }: Props) {
   return (
     <EuiFlexGroup wrap>
       <EuiFlexItem>
-        <Breakdowns seriesId={seriesId} breakdowns={breakdowns} reportViewConfig={series} />
+        <Breakdowns seriesId={seriesId} breakdowns={breakdownFields} seriesConfig={seriesConfig} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <ChartOptions series={series} seriesId={seriesId} />
+        <ChartOptions seriesConfig={seriesConfig} seriesId={seriesId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
