@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
-import { reject, isUndefined, isNumber } from 'lodash';
+import { get, reject, isUndefined, isNumber } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
 import util from 'util';
@@ -24,6 +24,11 @@ export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 export interface Doc {
   index: string;
   body: IEvent;
+}
+
+export interface IlmPolicyResponse {
+  exists: boolean;
+  linkedIndices?: string[];
 }
 
 type Wait = () => Promise<boolean>;
@@ -120,19 +125,38 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     }
   }
 
-  public async doesIlmPolicyExist(policyName: string): Promise<boolean> {
+  public async unlinkIlmPolicyFromOutdatedIndices(outdatedLinkedIndices: string[]): Promise<void> {
+    const indexTargets = (outdatedLinkedIndices ?? []).join(',');
+    const request = {
+      method: 'PUT',
+      path: `${indexTargets}/_ilm/remove`,
+    };
+    try {
+      const esClient = await this.elasticsearchClientPromise;
+      await esClient.transport.request(request);
+    } catch (err) {
+      this.logger.error(
+        `error unlinking ilm policy from indexes: "${indexTargets}" - ${err.message}`
+      );
+    }
+  }
+
+  public async doesIlmPolicyExist(policyName: string): Promise<IlmPolicyResponse> {
     const request = {
       method: 'GET',
       path: `/_ilm/policy/${policyName}`,
     };
     try {
       const esClient = await this.elasticsearchClientPromise;
-      await esClient.transport.request(request);
+      const response = await esClient.transport.request(request);
+      return {
+        exists: true,
+        linkedIndices: get(response, `body.${policyName}.in_use_by.indices`, []),
+      };
     } catch (err) {
-      if (err.statusCode === 404) return false;
+      if (err.statusCode === 404) return { exists: false };
       throw new Error(`error checking existance of ilm policy: ${err.message}`);
     }
-    return true;
   }
 
   public async createIlmPolicy(policyName: string, policy: Record<string, unknown>): Promise<void> {

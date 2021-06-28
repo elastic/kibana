@@ -36,7 +36,7 @@ class EsInitializationSteps {
   }
 
   async createIlmPolicyIfNotExists(): Promise<void> {
-    const exists = await this.esContext.esAdapter.doesIlmPolicyExist(
+    const { exists, linkedIndices } = await this.esContext.esAdapter.doesIlmPolicyExist(
       this.esContext.esNames.ilmPolicy
     );
     if (!exists) {
@@ -44,6 +44,13 @@ class EsInitializationSteps {
         this.esContext.esNames.ilmPolicy,
         getIlmPolicy()
       );
+    } else {
+      const outdatedLinkedIndices = (linkedIndices ?? []).filter(
+        (indexName: string) => !indexName.startsWith(this.esContext.esNames.alias)
+      );
+      if (outdatedLinkedIndices.length > 0) {
+        await this.esContext.esAdapter.unlinkIlmPolicyFromOutdatedIndices(outdatedLinkedIndices);
+      }
     }
   }
 
