@@ -26,6 +26,8 @@ import { RelevanceTuningLogic } from '../../relevance_tuning_logic';
 
 import { STEP_DESCRIPTIONS } from './constants';
 
+import './precision_slider.scss';
+
 export const PrecisionSlider: React.FC = () => {
   const {
     searchSettings: { precision },
@@ -109,11 +111,7 @@ export const PrecisionSlider: React.FC = () => {
         {stepDescription && (
           <>
             <EuiSpacer size="s" />
-            <EuiPanel
-              color="subdued"
-              data-test-subj="StepDescription"
-              style={{ minHeight: '4.7143rem' }}
-            >
+            <EuiPanel className="stepDescription" color="subdued" data-test-subj="StepDescription">
               {stepDescription}
             </EuiPanel>
           </>
