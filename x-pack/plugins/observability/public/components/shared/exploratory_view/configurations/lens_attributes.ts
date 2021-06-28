@@ -419,12 +419,12 @@ export class LensAttributes {
     });
   }
 
-  getChildYAxises(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
+  getChildYAxises(layerConfig: LayerConfig, layerId?: string, columnFilter?: string) {
     const lensColumns: Record<string, FieldBasedIndexPatternColumn | SumIndexPatternColumn> = {};
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
     const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
 
-    if (mainSourceField === RECORDS_PERCENTAGE_FIELD) {
+    if (mainSourceField === RECORDS_PERCENTAGE_FIELD && layerId) {
       return getDistributionInPercentageColumn({ label: mainLabel, layerId, columnFilter })
         .supportingColumns;
     }
@@ -608,7 +608,7 @@ export class LensAttributes {
       layers: this.layerConfigs.map((layerConfig, index) => ({
         accessors: [
           `y-axis-column-layer${index}`,
-          // ...Object.keys(this.getChildYAxises(layerConfig)),
+          ...Object.keys(this.getChildYAxises(layerConfig)),
         ],
         layerId: `layer${index}`,
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
@@ -624,8 +624,6 @@ export class LensAttributes {
         : {}),
     };
   }
-
-  parseFilters() {}
 
   getJSON(): TypedLensByValueInput['attributes'] {
     const uniqueIndexPatternsIds = Array.from(
