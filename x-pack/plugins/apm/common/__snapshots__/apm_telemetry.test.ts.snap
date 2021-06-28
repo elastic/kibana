@@ -978,6 +978,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                             }
                           }
                         },
+                        "host": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
                         "processor_events": {
                           "properties": {
                             "took": {

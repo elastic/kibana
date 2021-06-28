@@ -133,6 +133,7 @@ export interface APMUsage {
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
+    | 'host'
     | 'processor_events'
     | 'agent_configuration'
     | 'services'

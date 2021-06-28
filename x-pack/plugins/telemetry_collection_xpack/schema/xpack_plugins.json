@@ -1566,6 +1566,17 @@
                 }
               }
             },
+            "host": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
             "processor_events": {
               "properties": {
                 "took": {

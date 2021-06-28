@@ -186,6 +186,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
   tasks: {
     aggregated_transactions: { took: { ms: long } },
     cloud: { took: { ms: long } },
+    host: { took: { ms: long } },
     processor_events: { took: { ms: long } },
     agent_configuration: { took: { ms: long } },
     services: { took: { ms: long } },
