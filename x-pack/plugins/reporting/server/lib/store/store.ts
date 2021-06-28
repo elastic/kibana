@@ -12,13 +12,13 @@ import { ReportingCore } from '../../';
 import { JobStatus } from '../../../common/types';
 
 import { ILM_POLICY_NAME } from '../../../common/constants';
-import { ReportingIlmPolicyManager } from './reporting_ilm_policy_manager';
 
 import { ReportTaskParams } from '../tasks';
 
 import { MIGRATION_VERSION, Report, ReportDocument, ReportSource } from './report';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
+import { IlmPolicyManager } from './ilm_policy_manager';
 
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance
@@ -95,7 +95,7 @@ export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
-  private reportingIlmPolicyManager?: ReportingIlmPolicyManager;
+  private ilmPolicyManager?: IlmPolicyManager;
 
   constructor(private reportingCore: ReportingCore, private logger: LevelLogger) {
     const config = reportingCore.getConfig();
@@ -113,13 +113,13 @@ export class ReportingStore {
     return this.client;
   }
 
-  private async getReportingIlmPolicyManager() {
-    if (!this.reportingIlmPolicyManager) {
+  private async getIlmPolicyManager() {
+    if (!this.ilmPolicyManager) {
       const client = await this.getClient();
-      this.reportingIlmPolicyManager = ReportingIlmPolicyManager.create({ client });
+      this.ilmPolicyManager = IlmPolicyManager.create({ client });
     }
 
-    return this.reportingIlmPolicyManager;
+    return this.ilmPolicyManager;
   }
 
   private async createIndex(indexName: string) {
@@ -199,14 +199,14 @@ export class ReportingStore {
    * configured for storage of reports.
    */
   public async start() {
-    const reportingIlmPolicyManager = await this.getReportingIlmPolicyManager();
+    const ilmPolicyManager = await this.getIlmPolicyManager();
     try {
-      if (await reportingIlmPolicyManager.doesIlmPolicyExist()) {
+      if (await ilmPolicyManager.doesIlmPolicyExist()) {
         this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
         return;
       }
       this.logger.info(`Creating ILM policy for managing reporting indices: ${ILM_POLICY_NAME}`);
-      await reportingIlmPolicyManager.createIlmPolicy();
+      await ilmPolicyManager.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
       this.logger.error(e.body.error);

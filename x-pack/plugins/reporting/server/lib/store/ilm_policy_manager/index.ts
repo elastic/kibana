@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { ReportDocument } from '../../../common/types';
-export { Report } from './report';
-export { ReportingStore } from './store';
+export { reportingIlmPolicy } from './constants';
 export { IlmPolicyManager } from './ilm_policy_manager';

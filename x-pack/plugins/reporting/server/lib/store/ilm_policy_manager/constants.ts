@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export { ReportDocument } from '../../../common/types';
-export { Report } from './report';
-export { ReportingStore } from './store';
-export { IlmPolicyManager } from './ilm_policy_manager';
+import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/api/types';
+
+export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
+  policy: {
+    phases: {
+      hot: {
+        actions: {},
+      },
+    },
+  },
+};

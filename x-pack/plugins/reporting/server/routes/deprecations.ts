@@ -14,7 +14,7 @@ import {
 import { IlmPolicyStatusResponse } from '../../common/types';
 import { deprecations } from '../lib/deprecations';
 import { ReportingCore } from '../core';
-import { ReportingIlmPolicyManager, LevelLogger as Logger } from '../lib';
+import { IlmPolicyManager, LevelLogger as Logger } from '../lib';
 
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
@@ -33,7 +33,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       req,
       res
     ) => {
-      const reportingIlmPolicyManager = ReportingIlmPolicyManager.create({
+      const ilmPolicyManager = IlmPolicyManager.create({
         client: scopedClient.asCurrentUser,
       });
 
@@ -48,8 +48,8 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       try {
         let status: IlmPolicyStatusResponse['status'];
 
-        if (!(await reportingIlmPolicyManager.doesIlmPolicyExist())) {
-          status = 'reporting-policy-not-found';
+        if (!(await ilmPolicyManager.doesIlmPolicyExist())) {
+          status = 'not-found';
         } else if (await shouldMigrateIndices()) {
           status = 'indices-migration-needed';
         } else {
@@ -79,12 +79,12 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       req,
       res
     ) => {
-      const reportingIlmPolicyManager = ReportingIlmPolicyManager.create({
+      const scopedIlmPolicyManager = IlmPolicyManager.create({
         client: scopedClient.asCurrentUser,
       });
 
       try {
-        await reportingIlmPolicyManager.createIlmPolicy();
+        await scopedIlmPolicyManager.createIlmPolicy();
         return res.ok();
       } catch (e) {
         return res.customError({ statusCode: e?.statusCode ?? 500, body: { message: e.message } });

@@ -6,29 +6,20 @@
  */
 
 import type { ElasticsearchClient } from 'src/core/server';
-import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/api/types';
-import { ILM_POLICY_NAME } from '../../../common/constants';
+import { ILM_POLICY_NAME } from '../../../../common/constants';
 
-export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
-  policy: {
-    phases: {
-      hot: {
-        actions: {},
-      },
-    },
-  },
-};
+import { reportingIlmPolicy } from './constants';
 
 /**
  * Responsible for detecting and provisioning the reporting ILM policy.
  *
  * Uses the provided {@link ElasticsearchClient} to scope request privileges.
  */
-export class ReportingIlmPolicyManager {
+export class IlmPolicyManager {
   constructor(private readonly client: ElasticsearchClient) {}
 
   public static create(opts: { client: ElasticsearchClient }) {
-    return new ReportingIlmPolicyManager(opts.client);
+    return new IlmPolicyManager(opts.client);
   }
 
   public async doesIlmPolicyExist(): Promise<boolean> {
