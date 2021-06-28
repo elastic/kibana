@@ -17,7 +17,6 @@ import {
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
-import { useHistory } from 'react-router-dom';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { AutoDownload } from '../../../../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../../../../common/lib/kibana';
@@ -58,8 +57,7 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
 };
 
 export const ExceptionListsTable = React.memo(() => {
-  const { formatUrl } = useFormatUrl(SecurityPageName.exceptions);
-  const history = useHistory();
+  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const [{ loading: userInfoLoading, canUserCRUD }] = useUserData();
   const hasPermissions = userHasPermissions(canUserCRUD);
 
@@ -67,7 +65,7 @@ export const ExceptionListsTable = React.memo(() => {
   const loading = userInfoLoading || listsConfigLoading;
 
   const {
-    services: { http, notifications, timelines },
+    services: { http, notifications, timelines, application },
   } = useKibana();
   const { exportExceptionList, deleteExceptionList } = useApi(http);
 
@@ -93,6 +91,7 @@ export const ExceptionListsTable = React.memo(() => {
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+  const { navigateToUrl } = application;
   const { addError } = useAppToasts();
 
   const handleDeleteSuccess = useCallback(
@@ -203,8 +202,8 @@ export const ExceptionListsTable = React.memo(() => {
   );
 
   const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {
-    return getAllExceptionListsColumns(handleExport, handleDelete, history, formatUrl);
-  }, [handleExport, handleDelete, history, formatUrl]);
+    return getAllExceptionListsColumns(handleExport, handleDelete, formatUrl, navigateToUrl);
+  }, [handleExport, handleDelete, formatUrl, navigateToUrl]);
 
   const handleRefresh = useCallback((): void => {
     if (refreshExceptions != null) {
