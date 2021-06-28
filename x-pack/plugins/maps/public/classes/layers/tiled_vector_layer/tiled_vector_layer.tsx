@@ -278,6 +278,8 @@ export class TiledVectorLayer extends VectorLayer {
       return null;
     }
 
+    // querySourceFeatures can return duplicated features when features cross tile boundaries.
+    // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
     const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
       sourceLayer: sourceMeta.layerName,
       filter: ['==', ['get', KBN_METADATA_FEATURE], true],
