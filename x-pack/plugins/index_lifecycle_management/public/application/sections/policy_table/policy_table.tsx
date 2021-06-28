@@ -150,13 +150,12 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 
       <EuiPageHeader
         pageTitle={
-          <span data-test-subj="sectionHeading">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-              defaultMessage="Index Lifecycle Policies"
-            />
-          </span>
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
+            defaultMessage="Index Lifecycle Policies"
+          />
         }
+        data-test-subj="ilmPageHeader"
         description={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"

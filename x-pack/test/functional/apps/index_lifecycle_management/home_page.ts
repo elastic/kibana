@@ -36,13 +36,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Create new policy with all Phases', async () => {
-      await pageObjects.indexLifecycleManagement.createNewPolicyAndSave(
+      await pageObjects.indexLifecycleManagement.createNewPolicyAndSave({
         policyName,
-        true,
-        true,
-        true,
-        true
-      );
+        warmEnabled: true,
+        coldEnabled: true,
+        frozenEnabled: true,
+        deleteEnabled: true,
+      });
 
       await retry.waitFor('navigation back to home page.', async () => {
         return (await testSubjects.getVisibleText('sectionHeading')) === 'Index Lifecycle Policies';

@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async () => {
       await retry.waitFor('ILM app', async () => {
         await common.navigateToApp('indexLifecycleManagement');
-        return testSubjects.exists('sectionHeading');
+        return testSubjects.exists('ilmPageHeader');
       });
     });
 
@@ -93,7 +93,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // Fill out form after enabling all phases and take snapshot.
-        await indexLifecycleManagement.fillNewPolicyForm('testPolicy', true, true, true, true);
+        await indexLifecycleManagement.fillNewPolicyForm({
+          policyName: 'testPolicy',
+          warmEnabled: true,
+          coldEnabled: true,
+          frozenEnabled: true,
+          deleteEnabled: true,
+        });
         await a11y.testAppSnapshot();
       });
 
@@ -101,7 +107,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const link = await findPolicyLinkInListView(POLICY_NAME);
         await link.click();
         await retry.waitFor('ILM edit form', async () => {
-          return testSubjects.exists('policyTitle');
+          return (
+            (await testSubjects.getVisibleText('policyTitle')) === `Edit policy ${POLICY_NAME}`
+          );
         });
         await a11y.testAppSnapshot();
       });
