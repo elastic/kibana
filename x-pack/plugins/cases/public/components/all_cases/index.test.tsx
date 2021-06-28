@@ -363,6 +363,7 @@ describe('AllCasesGeneric', () => {
         filterStatus: CaseStatuses.open,
         handleIsLoading: jest.fn(),
         showActions: false,
+        userCanCrud: true,
       })
     );
     await waitFor(() => {
