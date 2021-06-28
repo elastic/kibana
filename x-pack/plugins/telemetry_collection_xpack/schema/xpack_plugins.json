@@ -31,10 +31,10 @@
             "__index": {
               "type": "long"
             },
-            "__swimlane": {
+            "__pagerduty": {
               "type": "long"
             },
-            "__pagerduty": {
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -71,10 +71,10 @@
             "__index": {
               "type": "long"
             },
-            "__swimlane": {
+            "__pagerduty": {
               "type": "long"
             },
-            "__pagerduty": {
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -1256,6 +1256,20 @@
               "type": "array",
               "items": {
                 "type": "keyword"
+              }
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "platform": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                }
               }
             }
           }

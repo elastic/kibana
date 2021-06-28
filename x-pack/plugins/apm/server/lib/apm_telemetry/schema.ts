@@ -135,6 +135,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     provider: { type: 'array', items: { type: 'keyword' } },
     region: { type: 'array', items: { type: 'keyword' } },
   },
+  host: { os: { platform: { type: 'array', items: { type: 'keyword' } } } },
   counts: {
     transaction: timeframeMapSchema,
     span: timeframeMapSchema,

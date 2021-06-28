@@ -52,6 +52,7 @@ export interface APMUsage {
     provider: string[];
     region: string[];
   };
+  host: { os: { platform: string[] } };
   counts: {
     transaction: TimeframeMap;
     span: TimeframeMap;
