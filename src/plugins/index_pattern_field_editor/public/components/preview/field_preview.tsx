@@ -106,6 +106,7 @@ export const FieldPreview = () => {
                   <div ref={resizeRef} style={{ flex: 1 }}>
                     <PreviewFieldList
                       height={fieldListHeight}
+                      clearSearch={() => setSearchValue('')}
                       searchValue={searchValue}
                       // We add a key to force rerender the virtual list whenever the window height changes
                       key={fieldListHeight}

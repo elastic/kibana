@@ -9,7 +9,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import VirtualList from 'react-tiny-virtual-list';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
 
 import { useFieldEditorContext } from '../../field_editor_context';
 import {
@@ -31,6 +31,7 @@ export type DocumentField = FieldPreview & {
 
 interface Props {
   height: number;
+  clearSearch: () => void;
   searchValue?: string;
 }
 
@@ -48,7 +49,7 @@ function fuzzyMatch(searchValue: string, text: string) {
   return regex.test(text);
 }
 
-export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) => {
+export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchValue = '' }) => {
   const { indexPattern } = useFieldEditorContext();
   const {
     currentDocument: { value: currentDocument },
@@ -119,6 +120,9 @@ export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) 
     };
   }, [fieldListWithPinnedFields, showAllFields, searchValue]);
 
+  const hasSearchValue = searchValue.trim() !== '';
+  const isEmptySearchResultVisible = hasSearchValue && totalFields === 0;
+
   // "height" corresponds to the total height of the flex item that occupies the remaining
   // vertical space up to the bottom of the flyout panel. We don't want to give that height
   // to the virtual list because it would mean that the "Show more" button would be pinned to the
@@ -139,6 +143,38 @@ export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) 
       };
     });
   }, []);
+
+  const renderEmptyResult = () => {
+    return (
+      <>
+        <EuiSpacer />
+        <EuiEmptyPrompt
+          iconType="search"
+          title={
+            <h3>
+              {i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.searchResult.emptyPromptTitle',
+                {
+                  defaultMessage: 'No fields match your search',
+                }
+              )}
+            </h3>
+          }
+          actions={
+            <EuiButton onClick={clearSearch}>
+              {i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.searchResult.emptyPrompt.clearSearchButtonLabel',
+                {
+                  defaultMessage: 'Clear search',
+                }
+              )}
+            </EuiButton>
+          }
+          data-test-subj="emptySearchResult"
+        />
+      </>
+    );
+  };
 
   const renderToggleFieldsButton = () =>
     totalFields <= INITIAL_MAX_NUMBER_OF_FIELDS ? null : (
@@ -161,23 +197,31 @@ export const PreviewFieldList: React.FC<Props> = ({ height, searchValue = '' }) 
 
   return (
     <div className="indexPatternFieldEditor__previewFieldList">
-      <VirtualList
-        style={{ overflowX: 'hidden' }}
-        width="100%"
-        height={listHeight}
-        itemCount={filteredFields.length}
-        itemSize={ITEM_HEIGHT}
-        overscanCount={4}
-        renderItem={({ index, style }) => {
-          const field = filteredFields[index];
+      {isEmptySearchResultVisible ? (
+        renderEmptyResult()
+      ) : (
+        <VirtualList
+          style={{ overflowX: 'hidden' }}
+          width="100%"
+          height={listHeight}
+          itemCount={filteredFields.length}
+          itemSize={ITEM_HEIGHT}
+          overscanCount={4}
+          renderItem={({ index, style }) => {
+            const field = filteredFields[index];
 
-          return (
-            <div key={field.key} style={style}>
-              <PreviewListItem key={field.key} field={field} toggleIsPinned={toggleIsPinnedField} />
-            </div>
-          );
-        }}
-      />
+            return (
+              <div key={field.key} style={style}>
+                <PreviewListItem
+                  key={field.key}
+                  field={field}
+                  toggleIsPinned={toggleIsPinnedField}
+                />
+              </div>
+            );
+          }}
+        />
+      )}
 
       {renderToggleFieldsButton()}
     </div>
