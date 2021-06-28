@@ -151,7 +151,7 @@ export const VisualizeListing = () => {
       <FormattedMessage
         data-test-subj="visualize-dashboard-flow-prompt"
         id="visualize.visualizeListingDashboardFlowDescription"
-        defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
+        defaultMessage="Building a dashboard? Create and add your visualizations right from the {dashboardApp}."
         values={{
           dashboardApp: (
             <EuiLink

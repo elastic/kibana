@@ -463,7 +463,7 @@ export const noItemsStrings = {
     }),
   getReadonlyBody: () =>
     i18n.translate('dashboard.listing.readonlyNoItemsBody', {
-      defaultMessage: `There aren't any dashboards in this space available to you. If you think this is in error, please contact your administrator.`,
+      defaultMessage: `There are no available dashboards. To change your permissions to view the dashboards in this space, contact your administrator.`,
     }),
   getReadEditTitle: () =>
     i18n.translate('dashboard.listing.createNewDashboard.title', {
