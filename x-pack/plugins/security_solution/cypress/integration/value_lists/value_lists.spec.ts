@@ -32,7 +32,7 @@ import {
   VALUE_LISTS_MODAL_ACTIVATOR,
 } from '../../screens/lists';
 
-describe.skip('value lists', () => {
+describe('value lists', () => {
   describe('management modal', () => {
     beforeEach(() => {
       loginAndWaitForPageWithoutDateRange(ALERTS_URL);

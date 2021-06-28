@@ -58,7 +58,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
-  it('navigates to the Detections page', () => {
+  it('navigates to the Alerts page', () => {
     navigateFromHeaderTo(DETECTIONS);
     cy.url().should('include', ALERTS_URL);
   });
