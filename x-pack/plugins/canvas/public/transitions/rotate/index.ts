@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './rotate.scss';
-
 import { TransitionStrings } from '../../../i18n';
 
 const { rotate: strings } = TransitionStrings;

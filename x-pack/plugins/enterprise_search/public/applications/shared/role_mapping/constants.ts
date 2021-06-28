@@ -91,13 +91,6 @@ export const ATTRIBUTE_VALUE_LABEL = i18n.translate(
   }
 );
 
-export const ATTRIBUTE_VALUE_ERROR = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.attributeValueError',
-  {
-    defaultMessage: 'Attribute value is required',
-  }
-);
-
 export const REMOVE_ROLE_MAPPING_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.removeRoleMappingTitle',
   {
@@ -373,6 +366,13 @@ export const UPDATE_USER_DESCRIPTION = i18n.translate(
   }
 );
 
+export const DEACTIVATED_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.deactivatedLabel',
+  {
+    defaultMessage: 'Deactivated',
+  }
+);
+
 export const INVITATION_PENDING_LABEL = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.invitationPendingLabel',
   {
@@ -422,3 +422,29 @@ export const AUTH_PROVIDER_TOOLTIP = i18n.translate(
       'Provider-specific role mapping is still applied, but configuration is now deprecated.',
   }
 );
+
+export const DEACTIVATED_USER_CALLOUT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.deactivatedUserCalloutLabel',
+  {
+    defaultMessage: 'User deactivated',
+  }
+);
+
+export const DEACTIVATED_USER_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.deactivatedUserCalloutDescription',
+  {
+    defaultMessage:
+      'This user is not currently active, and access has been temporarily revoked. Users can be re-activated via the User Management area of the Kibana console.',
+  }
+);
+
+export const SMTP_CALLOUT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.smtpCalloutLabel',
+  {
+    defaultMessage: 'Personalized invitations will be automatically sent when an Enterprise Search',
+  }
+);
+
+export const SMTP_LINK_LABEL = i18n.translate('xpack.enterpriseSearch.roleMapping.smtpLinkLabel', {
+  defaultMessage: 'SMTP configuration is provided',
+});
