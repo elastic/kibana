@@ -9,4 +9,4 @@ export * from './reporting_api_client';
 
 export * from './hooks';
 
-export { InternalApiClientClientProvider } from './context';
+export { InternalApiClientClientProvider, useInternalApiClient } from './context';

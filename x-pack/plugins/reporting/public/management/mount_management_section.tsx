@@ -13,6 +13,7 @@ import { CoreSetup, CoreStart } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { ILicense } from '../../../licensing/public';
 import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
+import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
 import { ReportListing } from './report_listing';
 
@@ -26,14 +27,16 @@ export async function mountManagementSection(
 ) {
   render(
     <I18nProvider>
-      <InternalApiClientClientProvider http={coreSetup.http}>
-        <ReportListing
-          toasts={coreSetup.notifications.toasts}
-          license$={license$}
-          pollConfig={pollConfig}
-          redirect={coreStart.application.navigateToApp}
-          apiClient={apiClient}
-        />
+      <InternalApiClientClientProvider http={coreSetup.http} apiClient={apiClient}>
+        <IlmPolicyStatusContextProvider>
+          <ReportListing
+            toasts={coreSetup.notifications.toasts}
+            license$={license$}
+            pollConfig={pollConfig}
+            redirect={coreStart.application.navigateToApp}
+            apiClient={apiClient}
+          />
+        </IlmPolicyStatusContextProvider>
       </InternalApiClientClientProvider>
     </I18nProvider>,
     params.element

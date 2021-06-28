@@ -166,5 +166,5 @@ type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
 export interface IlmPolicyStatusResponse {
-  status: 'not-found' | 'indices-migration-needed' | 'ok';
+  status: 'migration-needed' | 'ok';
 }

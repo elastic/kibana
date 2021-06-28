@@ -9,18 +9,21 @@ import type { HttpSetup } from 'src/core/public';
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext } from 'react';
 
+import type { ReportingAPIClient } from './reporting_api_client';
+
 interface ContextValue {
   http: HttpSetup;
+  apiClient: ReportingAPIClient;
 }
 
 const InternalApiClientContext = createContext<undefined | ContextValue>(undefined);
 
-export const InternalApiClientClientProvider: FunctionComponent<{ http: HttpSetup }> = ({
-  http,
-  children,
-}) => {
+export const InternalApiClientClientProvider: FunctionComponent<{
+  http: HttpSetup;
+  apiClient: ReportingAPIClient;
+}> = ({ http, apiClient, children }) => {
   return (
-    <InternalApiClientContext.Provider value={{ http }}>
+    <InternalApiClientContext.Provider value={{ http, apiClient }}>
       {children}
     </InternalApiClientContext.Provider>
   );

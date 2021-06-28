@@ -9,12 +9,18 @@ import type {
   IndicesIndexSettings,
 } from '@elastic/elasticsearch/api/types';
 import { ILM_POLICY_NAME } from '../../../common/constants';
+import { IlmPolicyManager } from '../../lib/store/ilm_policy_manager';
 import type { DeprecationsDependencies } from './types';
 
 export const shouldMigrateIndices = async ({
   reportingCore,
   elasticsearchClient,
 }: DeprecationsDependencies) => {
+  const ilmPolicyManager = IlmPolicyManager.create({ client: elasticsearchClient });
+  if (!(await ilmPolicyManager.doesIlmPolicyExist())) {
+    return true;
+  }
+
   const store = await reportingCore.getStore();
   const indexPattern = store.getReportingIndexPattern();
 
@@ -22,12 +28,13 @@ export const shouldMigrateIndices = async ({
     index: indexPattern,
   });
 
-  const hasUnmanagedIndices = Object.values(reportingIndicesSettings).some(
-    (settings) =>
+  const hasUnmanagedIndices = Object.values(reportingIndicesSettings).some((settings) => {
+    return (
       (settings?.settings as IndicesIndexStatePrefixedSettings)?.index?.lifecycle?.name !==
-        ILM_POLICY_NAME ||
+        ILM_POLICY_NAME &&
       (settings?.settings as IndicesIndexSettings)?.['index.lifecycle']?.name !== ILM_POLICY_NAME
-  );
+    );
+  });
 
   return hasUnmanagedIndices;
 };

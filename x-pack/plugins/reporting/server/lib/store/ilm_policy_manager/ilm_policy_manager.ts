@@ -35,7 +35,7 @@ export class IlmPolicyManager {
   }
 
   /**
-   * Create the Reporting ILM policy.
+   * Create the Reporting ILM policy
    */
   public async createIlmPolicy(): Promise<void> {
     await this.client.ilm.putLifecycle({

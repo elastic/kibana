@@ -13,6 +13,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  EuiButtonEmpty,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -27,9 +29,12 @@ import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
+import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
 import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
 import { ReportDiagnostic } from './report_diagnostic';
+
+import { MigrateIlmPolicy } from './migrate_ilm_policy';
 
 export interface Job {
   id: string;
@@ -56,6 +61,7 @@ export interface Props {
   pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
   toasts: ToastsSetup;
+  ilmPolicyContextValue: UseIlmPolicyStatusReturn;
 }
 
 interface State {
@@ -132,6 +138,7 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
+    const { ilmPolicyContextValue } = this.props;
     return (
       <>
         <EuiPageHeader
@@ -146,11 +153,22 @@ class ReportListingUi extends Component<Props, State> {
           }
         />
 
+        <MigrateIlmPolicy toasts={this.props.toasts} />
+
         <EuiSpacer size={'l'} />
         {this.renderTable()}
 
         <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            {ilmPolicyContextValue.isLoading ? (
+              <EuiLoadingSpinner />
+            ) : (
+              <EuiButtonEmpty size="xs" href="#">
+                View ILM policy
+              </EuiButtonEmpty>
+            )}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ReportDiagnostic apiClient={this.props.apiClient} />
           </EuiFlexItem>
@@ -530,4 +548,9 @@ class ReportListingUi extends Component<Props, State> {
   }
 }
 
-export const ReportListing = injectI18n(ReportListingUi);
+const PrivateReportListing = injectI18n(ReportListingUi);
+
+export const ReportListing = (props: Props) => {
+  const ilmPolicyStatusValue = useIlmPolicyStatus();
+  return <PrivateReportListing {...props} ilmPolicyContextValue={ilmPolicyStatusValue} />;
+};

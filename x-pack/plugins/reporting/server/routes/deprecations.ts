@@ -8,7 +8,6 @@ import { errors } from '@elastic/elasticsearch';
 import {
   API_MIGRATE_ILM_POLICY_URL,
   API_GET_ILM_POLICY_STATUS,
-  API_CREATE_ILM_POLICY_URL,
   ILM_POLICY_NAME,
 } from '../../common/constants';
 import { IlmPolicyStatusResponse } from '../../common/types';
@@ -33,10 +32,6 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       req,
       res
     ) => {
-      const ilmPolicyManager = IlmPolicyManager.create({
-        client: scopedClient.asCurrentUser,
-      });
-
       const shouldMigrateIndices = () => {
         return deprecations.shouldMigrateIndices({
           reportingCore: reporting,
@@ -48,10 +43,8 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       try {
         let status: IlmPolicyStatusResponse['status'];
 
-        if (!(await ilmPolicyManager.doesIlmPolicyExist())) {
-          status = 'not-found';
-        } else if (await shouldMigrateIndices()) {
-          status = 'indices-migration-needed';
+        if (await shouldMigrateIndices()) {
+          status = 'migration-needed';
         } else {
           status = 'ok';
         }
@@ -59,33 +52,6 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
           status,
         };
         return res.ok({ body: response });
-      } catch (e) {
-        return res.customError({ statusCode: e?.statusCode ?? 500, body: { message: e.message } });
-      }
-    }
-  );
-
-  router.post(
-    {
-      path: API_CREATE_ILM_POLICY_URL,
-      validate: false,
-    },
-    async (
-      {
-        core: {
-          elasticsearch: { client: scopedClient },
-        },
-      },
-      req,
-      res
-    ) => {
-      const scopedIlmPolicyManager = IlmPolicyManager.create({
-        client: scopedClient.asCurrentUser,
-      });
-
-      try {
-        await scopedIlmPolicyManager.createIlmPolicy();
-        return res.ok();
       } catch (e) {
         return res.customError({ statusCode: e?.statusCode ?? 500, body: { message: e.message } });
       }
@@ -100,8 +66,23 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         client: { asCurrentUser: client },
       } = elasticsearch;
 
+      const scopedIlmPolicyManager = IlmPolicyManager.create({
+        client,
+      });
+
+      // First we ensure that the reporting ILM policy exists in the cluster
+      try {
+        // We don't want to overwrite an existing reporting policy because it may contain alterations made by users
+        if (!(await scopedIlmPolicyManager.doesIlmPolicyExist())) {
+          await scopedIlmPolicyManager.createIlmPolicy();
+        }
+      } catch (e) {
+        return res.customError({ statusCode: e?.statusCode ?? 500, body: { message: e.message } });
+      }
+
       const indexPattern = store.getReportingIndexPattern();
 
+      // Second we migrate all of the existing indices to be managed by the reporting ILM policy
       try {
         await client.indices.putSettings({
           index: indexPattern,

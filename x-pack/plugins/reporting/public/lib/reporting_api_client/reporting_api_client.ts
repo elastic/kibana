@@ -12,7 +12,7 @@ import {
   API_BASE_GENERATE,
   API_BASE_URL,
   API_LIST_URL,
-  API_GET_ILM_POLICY_STATUS,
+  API_MIGRATE_ILM_POLICY_URL,
   REPORTING_MANAGEMENT_HOME,
 } from '../../../common/constants';
 import {
@@ -170,7 +170,7 @@ export class ReportingAPIClient {
       asSystemRequest: true,
     });
 
-  public checkIlmPolicyStatus = (): Promise<IlmPolicyStatusResponse> => {
-    return this.http.get(`${API_GET_ILM_POLICY_STATUS}`);
+  public migrateReportingIndicesIlmPolicy = (): Promise<void> => {
+    return this.http.put(`${API_MIGRATE_ILM_POLICY_URL}`);
   };
 }
