@@ -10,12 +10,16 @@ import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash';
 
 import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
+import {
+  DEFAULT_CTI_SOURCE_INDEX,
+  DEFAULT_EVENT_ENRICHMENT_FROM,
+  DEFAULT_EVENT_ENRICHMENT_TO,
+} from '../../../../../common/cti/constants';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { inputsActions } from '../../../store/actions';
 import * as i18n from './translations';
 import { useEventEnrichment } from '.';
-import { DEFAULT_CTI_SOURCE_INDEX } from '../../../../../common/cti/constants';
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
@@ -24,7 +28,10 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
   const kibana = useKibana();
   const dispatch = useDispatch();
-  const [{ from, to }, setRange] = useState({ from: 'now-30d', to: 'now' });
+  const [{ from, to }, setRange] = useState({
+    from: DEFAULT_EVENT_ENRICHMENT_FROM,
+    to: DEFAULT_EVENT_ENRICHMENT_TO,
+  });
   const { error, loading, result, start } = useEventEnrichment();
 
   const deleteQuery = useCallback(() => {

@@ -57,6 +57,9 @@ export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
   'registry.path': 'threatintel.indicator.registry.path',
 };
 
+export const DEFAULT_EVENT_ENRICHMENT_FROM = 'now-30d';
+export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
+
 export const CTI_DEFAULT_SOURCES = [
   'Abuse URL',
   'Abuse Malware',
