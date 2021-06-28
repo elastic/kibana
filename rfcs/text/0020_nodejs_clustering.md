@@ -624,18 +624,16 @@ Task Manager requirements.
 
 ## 6.3 Summary of breaking changes
 
-### 6.3.1 instanceUUID
+### 6.3.1 `/stats` API & metrics service
 
-Depending on whether we are able to identify any cases where a shared uuid would be problematic, we may have to change
-the server.uuid configuration property when clustering mode is enabled, which would be a breaking change.
+Currently the only breaking change we have identified is for the `/stats` API.
 
-At this point, we have not identified any places where this is strictly necessary.
+The `process` memory usage reported doesn't really make sense in a multi-process Kibana, and
+even though we have a plan to aggregate this data as a temporary solution (see 6.1.4), this
+could still lead to confusion for users as it doesn't paint a clear picture of the state of the system.
 
-### 6.3.2 `/stats` API & metrics service
-
-The `process` memory usage reported here doesn't really make sense in a multi-process Kibana.
-One option to consider is breaking the API by deprecating `process`, or turning it into a list of
-process stats reported from each worker. This is an open question still.
+Our plan is to deprecate the `process` field, and later remove it or change the structure
+to better support a multi-process Kibana.
 
 # 7. Drawbacks
 
