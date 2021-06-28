@@ -6,30 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { SharePluginStart } from '../../../src/plugins/share/public';
+import { SharePluginSetup, SharePluginStart } from '../../../src/plugins/share/public';
 import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
+
+interface SetupDeps {
+  developerExamples: DeveloperExamplesSetup;
+  share: SharePluginSetup;
+}
 
 interface StartDeps {
   share: SharePluginStart;
 }
 
-interface SetupDeps {
-  developerExamples: DeveloperExamplesSetup;
-}
-
-export class AccessLinksExplorerPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { developerExamples }: SetupDeps) {
+export class LocatorExplorerPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, { developerExamples, share }: SetupDeps) {
     core.application.register({
-      id: 'urlGeneratorsExplorer',
-      title: 'Access links explorer',
+      id: 'locatorExplorer',
+      title: 'Locator explorer',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const depsStart = (await core.getStartServices())[1];
         const { renderApp } = await import('./app');
         return renderApp(
           {
-            getLinkGenerator: depsStart.share.urlGenerators.getUrlGenerator,
+            share,
           },
           params
         );
@@ -37,18 +37,18 @@ export class AccessLinksExplorerPlugin implements Plugin<void, void, SetupDeps, 
     });
 
     developerExamples.register({
-      title: 'Url generators',
-      description: `Url generators offer are a backward compatible safe way to persist a URL in a saved object.
-       Store the url generator id and state, instead of the href string. When the link is recreated at run time, the service
+      title: 'URL locators',
+      description: `Locators offer are a backward compatible safe way to persist a URL in a saved object.
+       Store the locator ID and params, instead of the href string. When the link is recreated at run time, the service
        will run the state through any necessary migrations. Registrators can change their URL structure
        without breaking these links stored in saved objects.
       `,
-      appId: 'urlGeneratorsExplorer',
+      appId: 'locatorExplorer',
       links: [
         {
           label: 'README',
           href:
-            'https://github.com/elastic/kibana/blob/master/src/plugins/share/public/url_generators/README.md',
+            'https://github.com/elastic/kibana/blob/master/src/plugins/share/common/url_service/locators/README.md',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
