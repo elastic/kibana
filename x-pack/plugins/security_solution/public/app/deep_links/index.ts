@@ -54,7 +54,7 @@ export const topDeepLinks: AppDeepLink[] = [
     id: SecurityPageName.detections,
     title: ALERTS,
     path: ALERTS_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
+    navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [
       i18n.translate('xpack.securitySolution.search.detections', {
         defaultMessage: 'Detections',
@@ -119,7 +119,7 @@ export const topDeepLinks: AppDeepLink[] = [
     id: SecurityPageName.administration,
     title: ADMINISTRATION,
     path: ENDPOINTS_PATH,
-    navLinkStatus: AppNavLinkStatus.visible,
+    navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [
       i18n.translate('xpack.securitySolution.search.administration', {
         defaultMessage: 'Administration',
@@ -140,7 +140,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
         id: SecurityPageName.alerts,
         title: ALERTS,
         path: ALERTS_PATH,
-        navLinkStatus: AppNavLinkStatus.hidden,
+        navLinkStatus: AppNavLinkStatus.visible,
         keywords: [
           i18n.translate('xpack.securitySolution.search.alerts', {
             defaultMessage: 'Alerts',
@@ -296,6 +296,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
     base: [
       {
         id: SecurityPageName.endpoints,
+        navLinkStatus: AppNavLinkStatus.visible,
         title: i18n.translate('xpack.securitySolution.search.administration.endpoints', {
           defaultMessage: 'Endpoints',
         }),
