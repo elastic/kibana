@@ -19,13 +19,6 @@ export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network
   defaultMessage: 'Network',
 });
 
-export const DETECTION_ENGINE = i18n.translate(
-  'xpack.securitySolution.navigation.detectionEngine',
-  {
-    defaultMessage: 'Detections',
-  }
-);
-
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
 });
