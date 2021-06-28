@@ -1,10 +1,12 @@
 {
-  "id": "urlGeneratorsExamples",
+  "id": "locatorExamples",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
   "requiredPlugins": ["share"],
   "optionalPlugins": [],
-  "extraPublicDirs": ["public/url_generator"]
+  "extraPublicDirs": [
+    "public/locator"
+  ]
 }

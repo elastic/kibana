@@ -8,9 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-
 import { EuiPage } from '@elastic/eui';
-
 import { EuiButton } from '@elastic/eui';
 import { EuiPageBody } from '@elastic/eui';
 import { EuiPageContent } from '@elastic/eui';
@@ -21,44 +19,54 @@ import { EuiFieldText } from '@elastic/eui';
 import { EuiPageHeader } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
-import { UrlGeneratorsService } from '../../../src/plugins/share/public';
+import { SharePluginSetup } from '../../../src/plugins/share/public';
 import {
-  HELLO_URL_GENERATOR,
-  HELLO_URL_GENERATOR_V1,
-} from '../../url_generators_examples/public/url_generator';
+  HelloLocatorV1Params,
+  HelloLocatorV2Params,
+  HELLO_LOCATOR,
+} from '../../locator_examples/public';
 
 interface Props {
-  getLinkGenerator: UrlGeneratorsService['getUrlGenerator'];
+  share: SharePluginSetup;
 }
 
 interface MigratedLink {
-  isDeprecated: boolean;
   linkText: string;
   link: string;
+  version: string;
 }
 
-const ActionsExplorer = ({ getLinkGenerator }: Props) => {
+const ActionsExplorer = ({ share }: Props) => {
   const [migratedLinks, setMigratedLinks] = useState([] as MigratedLink[]);
   const [buildingLinks, setBuildingLinks] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+
   /**
    * Lets pretend we grabbed these links from a persistent store, like a saved object.
-   * Some of these links were created with older versions of the hello link generator.
-   * They use deprecated generator ids.
+   * Some of these links were created with older versions of the hello locator.
    */
-  const [persistedLinks, setPersistedLinks] = useState([
+  const [persistedLinks, setPersistedLinks] = useState<
+    Array<{
+      id: string;
+      version: string;
+      linkText: string;
+      params: HelloLocatorV1Params | HelloLocatorV2Params;
+    }>
+  >([
     {
-      id: HELLO_URL_GENERATOR_V1,
+      id: HELLO_LOCATOR,
+      version: '0.0.1',
       linkText: 'Say hello to Mary',
-      state: {
+      params: {
         name: 'Mary',
       },
     },
     {
-      id: HELLO_URL_GENERATOR,
+      id: HELLO_LOCATOR,
+      version: '0.0.2',
       linkText: 'Say hello to George',
-      state: {
+      params: {
         firstName: 'George',
         lastName: 'Washington',
       },
@@ -71,30 +79,38 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
     const updateLinks = async () => {
       const updatedLinks = await Promise.all(
         persistedLinks.map(async (savedLink) => {
-          const generator = getLinkGenerator(savedLink.id);
-          const link = await generator.createUrl(savedLink.state);
+          const locator = share.url.locators.get(savedLink.id);
+          if (!locator) return;
+          let params: HelloLocatorV1Params | HelloLocatorV2Params = savedLink.params;
+          if (savedLink.version === '0.0.1') {
+            const migration = locator.migrations['0.0.2'];
+            if (migration) {
+              params = migration(params) as HelloLocatorV2Params;
+            }
+          }
+          const link = await locator.getUrl(params, { absolute: false });
           return {
-            isDeprecated: generator.isDeprecated,
             linkText: savedLink.linkText,
             link,
-          };
+            version: savedLink.version,
+          } as MigratedLink;
         })
       );
-      setMigratedLinks(updatedLinks);
+      setMigratedLinks(updatedLinks as MigratedLink[]);
       setBuildingLinks(false);
     };
 
     updateLinks();
-  }, [getLinkGenerator, persistedLinks]);
+  }, [share, persistedLinks]);
 
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader>Access links explorer</EuiPageHeader>
+        <EuiPageHeader>Locator explorer</EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody>
             <EuiText>
-              <p>Create new links using the most recent version of a url generator.</p>
+              <p>Create new links using the most recent version of a locator.</p>
             </EuiText>
             <EuiFieldText
               prepend="First name"
@@ -108,8 +124,9 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
                 setPersistedLinks([
                   ...persistedLinks,
                   {
-                    id: HELLO_URL_GENERATOR,
-                    state: { firstName, lastName },
+                    id: HELLO_LOCATOR,
+                    version: '0.0.2',
+                    params: { firstName, lastName },
                     linkText: `Say hello to ${firstName} ${lastName}`,
                   },
                 ])
@@ -122,10 +139,10 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
             <EuiText>
               <p>
                 Existing links retrieved from storage. The links that were generated from legacy
-                generators are in red. This can be useful for developers to know they will have to
+                locators are in red. This can be useful for developers to know they will have to
                 migrate persisted state or in a future version of Kibana, these links may no longer
-                work. They still work now because legacy url generators must provide a state
-                migration function.
+                work. They still work now because legacy locators must provide state migration
+                functions.
               </p>
             </EuiText>
             {buildingLinks ? (
@@ -134,7 +151,7 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
               migratedLinks.map((link) => (
                 <React.Fragment>
                   <EuiLink
-                    color={link.isDeprecated ? 'danger' : 'primary'}
+                    color={link.version !== '0.0.2' ? 'danger' : 'primary'}
                     data-test-subj="linkToHelloPage"
                     href={link.link}
                     target="_blank"
