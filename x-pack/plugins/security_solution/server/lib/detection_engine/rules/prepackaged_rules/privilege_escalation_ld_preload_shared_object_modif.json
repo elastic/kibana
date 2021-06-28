@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Modification of Dynamic Linker Preload Shared Object",
-  "query": "event.category:file and not event.type:deletion and file.path:/etc/ld.so.preload",
+  "query": "event.category:file and not event.type:deletion and file.path:/etc/ld.so.preload\n",
   "references": [
     "https://www.anomali.com/blog/rocke-evolves-its-arsenal-with-a-new-malware-family-written-in-golang"
   ],

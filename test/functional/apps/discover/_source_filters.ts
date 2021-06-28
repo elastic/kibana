@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
 
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.load('test/functional/fixtures/es_archiver/visualize_source-filters');
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
 
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -41,6 +40,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // After hiding the time picker, we need to wait for
       // the refresh button to hide before clicking the share button
       await PageObjects.common.sleep(1000);
+    });
+
+    after(async () => {
+      await kibanaServer.importExport.unload(
+        'test/functional/fixtures/kbn_archiver/visualize.json'
+      );
     });
 
     it('should not get the field referer', async function () {

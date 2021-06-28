@@ -40,10 +40,11 @@ export function ActionMenuContent(): React.ReactElement {
 
   const syntheticExploratoryViewLink = createExploratoryViewUrl(
     {
-      'synthetics-series': {
+      'synthetics-series': ({
         dataType: 'synthetics',
+        isNew: true,
         time: { from: dateRangeStart, to: dateRangeEnd },
-      } as SeriesUrl,
+      } as unknown) as SeriesUrl,
     },
     basePath
   );

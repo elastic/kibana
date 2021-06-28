@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential DNS Tunneling via Iodine",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:(iodine or iodined)",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:(iodine or iodined)\n",
   "references": [
     "https://code.kryo.se/iodine/"
   ],

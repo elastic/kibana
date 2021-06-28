@@ -25,7 +25,7 @@ import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { MapSettings } from '../../reducers/map';
-import { Goto, MapCenterAndZoom } from '../../../common/descriptor_types';
+import { Goto, MapCenterAndZoom, Timeslice } from '../../../common/descriptor_types';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
@@ -68,13 +68,12 @@ export interface Props {
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
+  timeslice?: Timeslice;
   featureModeActive: boolean;
   filterModeActive: boolean;
 }
 
 interface State {
-  prevLayerList: ILayer[] | undefined;
-  hasSyncedLayerList: boolean;
   mbMap: MapboxMap | undefined;
 }
 
@@ -83,26 +82,14 @@ export class MBMap extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
   private _prevDisableInteractive?: boolean;
+  private _prevLayerList?: ILayer[];
+  private _prevTimeslice?: Timeslice;
   private _navigationControl = new mapboxgl.NavigationControl({ showCompass: false });
   private _tileStatusTracker?: TileStatusTracker;
 
   state: State = {
-    prevLayerList: undefined,
-    hasSyncedLayerList: false,
     mbMap: undefined,
   };
-
-  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    const nextLayerList = nextProps.layerList;
-    if (nextLayerList !== prevState.prevLayerList) {
-      return {
-        prevLayerList: nextLayerList,
-        hasSyncedLayerList: false,
-      };
-    }
-
-    return null;
-  }
 
   componentDidMount() {
     this._initializeMap();
@@ -110,11 +97,8 @@ export class MBMap extends Component<Props, State> {
   }
 
   componentDidUpdate() {
-    if (this.state.mbMap) {
-      // do not debounce syncing of map-state
-      this._syncMbMapWithMapState();
-      this._debouncedSync();
-    }
+    this._syncMbMapWithMapState(); // do not debounce syncing of map-state
+    this._debouncedSync();
   }
 
   componentWillUnmount() {
@@ -134,16 +118,13 @@ export class MBMap extends Component<Props, State> {
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
-      if (!this.state.hasSyncedLayerList) {
-        this.setState(
-          {
-            hasSyncedLayerList: true,
-          },
-          () => {
-            this._syncMbMapWithLayerList();
-            this._syncMbMapWithInspector();
-          }
-        );
+      const hasLayerListChanged = this._prevLayerList !== this.props.layerList; // Comparing re-select memoized instance so no deep equals needed
+      const hasTimesliceChanged = !_.isEqual(this._prevTimeslice, this.props.timeslice);
+      if (hasLayerListChanged || hasTimesliceChanged) {
+        this._prevLayerList = this.props.layerList;
+        this._prevTimeslice = this.props.timeslice;
+        this._syncMbMapWithLayerList();
+        this._syncMbMapWithInspector();
       }
       this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
       this._syncSettings();
@@ -346,7 +327,9 @@ export class MBMap extends Component<Props, State> {
       this.props.layerList,
       this.props.spatialFiltersLayer
     );
-    this.props.layerList.forEach((layer) => layer.syncLayerWithMB(this.state.mbMap!));
+    this.props.layerList.forEach((layer) =>
+      layer.syncLayerWithMB(this.state.mbMap!, this.props.timeslice)
+    );
     syncLayerOrder(this.state.mbMap, this.props.spatialFiltersLayer, this.props.layerList);
   };
 
