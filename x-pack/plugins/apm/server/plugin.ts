@@ -200,6 +200,10 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
+    const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
+      'apm'
+    );
+
     registerRoutes({
       core: {
         setup: core,
@@ -210,6 +214,7 @@ export class APMPlugin
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
       plugins: resourcePlugins,
+      telemetryUsageCounter,
     });
 
     const boundGetApmIndices = async () =>
