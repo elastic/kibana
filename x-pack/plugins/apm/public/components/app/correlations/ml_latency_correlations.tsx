@@ -191,27 +191,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
         render: (fieldValue: string) => String(fieldValue).slice(0, 50),
       },
       {
-        field: 'duplicatedFields',
-        name: i18n.translate(
-          'xpack.apm.correlations.latencyCorrelations.correlationsTable.duplicatesLabel',
-          { defaultMessage: 'Duplicates' }
-        ),
-        render: (duplicatedFields: string[]) => {
-          return (
-            <EuiFlexGroup direction="column">
-              {Array.isArray(duplicatedFields)
-                ? duplicatedFields.map((f) => (
-                    <>
-                      <div>{f}</div>
-                      <EuiSpacer size={'s'} />
-                    </>
-                  ))
-                : null}
-            </EuiFlexGroup>
-          );
-        },
-      },
-      {
         width: '100px',
         actions: [
           {
