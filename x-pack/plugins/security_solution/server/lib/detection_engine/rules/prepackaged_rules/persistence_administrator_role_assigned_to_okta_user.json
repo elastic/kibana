@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "Administrator Role Assigned to an Okta User",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:user.account.privilege.grant",
+  "query": "event.dataset:okta.system and event.action:user.account.privilege.grant\n",
   "references": [
     "https://help.okta.com/en/prod/Content/Topics/Security/administrators-admin-comparison.htm",
     "https://developer.okta.com/docs/reference/api/system-log/",

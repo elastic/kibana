@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Halfbaked Command and Control Beacon",
   "note": "## Threat intel\n\nThis activity has been observed in FIN7 campaigns.",
-  "query": "event.category:(network OR network_traffic) AND network.protocol:http AND network.transport:tcp AND url.full:/http:\\/\\/[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}\\/cd/ AND destination.port:(53 OR 80 OR 8080 OR 443)",
+  "query": "event.category:(network OR network_traffic) AND network.protocol:http AND\n  network.transport:tcp AND url.full:/http:\\/\\/[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}\\/cd/ AND\n  destination.port:(53 OR 80 OR 8080 OR 443)\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2017/04/fin7-phishing-lnk.html",
     "https://attack.mitre.org/software/S0151/"
