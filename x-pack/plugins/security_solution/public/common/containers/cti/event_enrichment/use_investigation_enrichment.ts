@@ -15,6 +15,7 @@ import { useKibana } from '../../../lib/kibana';
 import { inputsActions } from '../../../store/actions';
 import * as i18n from './translations';
 import { useEventEnrichment } from '.';
+import { DEFAULT_CTI_SOURCE_INDEX } from '../../../../../common/cti/constants';
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
@@ -60,9 +61,9 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
       start({
         data: kibana.services.data,
         timerange: { from, to, interval: '' },
-        defaultIndex: ['filebeat-*'], // TODO do we apply the current sources here?
+        defaultIndex: DEFAULT_CTI_SOURCE_INDEX,
         eventFields,
-        filterQuery: '', // TODO do we apply the current filters here?
+        filterQuery: '',
       });
     }
   }, [from, start, kibana.services.data, to, eventFields]);
