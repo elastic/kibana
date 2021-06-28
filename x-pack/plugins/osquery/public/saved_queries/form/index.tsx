@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../scheduled_query_groups/queries/constants';
 import { PlatformCheckBoxGroupField } from '../../scheduled_query_groups/queries/platform_checkbox_group_field';
@@ -22,6 +23,25 @@ const SavedQueryFormComponent = () => (
     <CommonUseField path="description" />
     <EuiSpacer />
     <UseField path="query" component={CodeEditorField} />
+    <EuiSpacer size="xl" />
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.osquery.savedQueries.form.scheduledQueryGroupConfigSection.title"
+              defaultMessage="Scheduled query group configuration"
+            />
+          </h5>
+        </EuiTitle>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.osquery.savedQueries.form.scheduledQueryGroupConfigSection.description"
+            defaultMessage="The options listed below are optional and are only applied when the query is assigned to a scheduled query group."
+          />
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
     <EuiSpacer />
     <EuiFlexGroup>
       <EuiFlexItem>

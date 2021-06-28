@@ -8,6 +8,7 @@
 import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
+import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { FieldHook } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
@@ -40,7 +41,9 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disa
       <>
         <SavedQueriesDropdown disabled={disabled} onChange={handleSavedQueryChange} />
         <EuiSpacer />
-        <OsqueryEditor defaultValue={value} disabled={disabled} onChange={handleEditorChange} />
+        <EuiFormRow fullWidth labelAppend={<OsquerySchemaLink />}>
+          <OsqueryEditor defaultValue={value} disabled={disabled} onChange={handleEditorChange} />
+        </EuiFormRow>
       </>
     </EuiFormRow>
   );

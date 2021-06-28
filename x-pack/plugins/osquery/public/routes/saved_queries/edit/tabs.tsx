@@ -31,21 +31,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   const tabs = useMemo(
     () => [
       {
-        id: 'status',
-        name: 'Status',
-        content: (
-          <>
-            <EuiSpacer />
-            <ActionResultsSummary
-              actionId={actionId}
-              agentIds={agentIds}
-              expirationDate={expirationDate}
-              isLive={isLive}
-            />
-          </>
-        ),
-      },
-      {
         id: 'results',
         name: 'Results',
         content: (
@@ -57,6 +42,21 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
               isLive={isLive}
               startDate={startDate}
               endDate={endDate}
+            />
+          </>
+        ),
+      },
+      {
+        id: 'status',
+        name: 'Status',
+        content: (
+          <>
+            <EuiSpacer />
+            <ActionResultsSummary
+              actionId={actionId}
+              agentIds={agentIds}
+              expirationDate={expirationDate}
+              isLive={isLive}
             />
           </>
         ),

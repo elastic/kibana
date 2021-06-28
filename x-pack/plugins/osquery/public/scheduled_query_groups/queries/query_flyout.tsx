@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiDescribedFormGroup,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -127,7 +128,10 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             <EuiSpacer />
             <CommonUseField path="query" component={CodeEditorField} />
             <EuiSpacer />
-            <EuiFlexGroup>
+            <EuiDescribedFormGroup
+              title={<h3>Set heading level based on context</h3>}
+              description={'Will be wrapped in a small, subdued EuiText block.'}
+            >
               <EuiFlexItem>
                 <CommonUseField
                   path="interval"
@@ -156,7 +160,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   euiFieldProps={{ disabled: !isFieldSupported }}
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </EuiDescribedFormGroup>
             <EuiSpacer />
           </Form>
           {!isFieldSupported ? (
