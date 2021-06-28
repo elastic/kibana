@@ -76,12 +76,9 @@ const ScheduledQueryGroupsTableComponent = () => {
       },
       {
         field: 'created_by',
-        name: i18n.translate(
-          'xpack.osquery.scheduledQueryGroups.table.numberOfQueriesColumnTitle',
-          {
-            defaultMessage: 'Created by',
-          }
-        ),
+        name: i18n.translate('xpack.osquery.scheduledQueryGroups.table.createdByColumnTitle', {
+          defaultMessage: 'Created by',
+        }),
         sortable: true,
         truncateText: true,
       },
