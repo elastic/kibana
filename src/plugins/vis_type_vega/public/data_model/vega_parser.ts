@@ -248,6 +248,24 @@ The URL is an identifier only. Kibana and your browser will never access this UR
         this._compileWithAutosize();
       } else {
         this.useResize = false;
+        if (
+          normalized.autosize &&
+          typeof normalized.autosize !== 'string' &&
+          normalized.autosize.type === 'none'
+        ) {
+          this._onWarning(
+            i18n.translate('visTypeVega.vegaParser.widthAndHeightParamsAreRequired', {
+              defaultMessage:
+                'Nothing is rendered when {autoSizeParam} is set to {noneParam} while using faceted or repeated {vegaLiteParam} specs. To fix, remove {autoSizeParam} or use {vegaParam}.',
+              values: {
+                autoSizeParam: '"autosize"',
+                noneParam: '"none"',
+                vegaLiteParam: 'Vega-Lite',
+                vegaParam: 'Vega',
+              },
+            })
+          );
+        }
       }
     }
     this.vlspec = this.spec;
