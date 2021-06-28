@@ -97,3 +97,7 @@ export const SERVICENOW_LINK_ARIA = i18n.translate('xpack.cases.caseTable.servic
 export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
   defaultMessage: 'Status',
 });
+
+export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
+  defaultMessage: 'Change status',
+});
