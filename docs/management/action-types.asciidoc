@@ -43,6 +43,10 @@ a| <<slack-action-type, Slack>>
 
 | Send a message to a Slack channel or user.
 
+a| <<swimlane-action-type, Swimlane>>
+
+| Create an incident in Swimlane.
+
 a| <<webhook-action-type, Webhook>>
 
 | Send a request to a web service.

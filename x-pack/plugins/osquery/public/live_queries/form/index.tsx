@@ -19,6 +19,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../queries/edit/tabs';
 import { queryFieldValidation } from '../../common/validations';
 import { fieldValidators } from '../../shared_imports';
+import { useErrorToast } from '../../common/hooks/use_error_toast';
 
 const FORM_ID = 'liveQueryForm';
 
@@ -35,10 +36,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   // onSubmit,
   onSuccess,
 }) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
+
+  const setErrorToast = useErrorToast();
 
   const {
     data,
@@ -53,13 +53,19 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         body: JSON.stringify(payload),
       }),
     {
-      onSuccess,
+      onSuccess: () => {
+        setErrorToast();
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
       onError: (error) => {
-        // @ts-expect-error update types
-        toasts.addError(error, { title: error.body.error, toastMessage: error.body.message });
+        setErrorToast(error);
       },
     }
   );
+
+  const expirationDate = useMemo(() => new Date(data?.actions[0].expiration), [data?.actions]);
 
   const formSchema = {
     query: {
@@ -173,7 +179,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           defaultMessage: 'Check results',
         }),
         children: actionId ? (
-          <ResultTabs actionId={actionId} agentIds={agentIds} isLive={true} />
+          <ResultTabs
+            actionId={actionId}
+            expirationDate={expirationDate}
+            agentIds={agentIds}
+            isLive={true}
+          />
         ) : null,
         status: resultsStatus,
       },
@@ -185,6 +196,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       queryComponentProps,
       queryStatus,
       queryValueProvided,
+      expirationDate,
       resultsStatus,
       submit,
     ]

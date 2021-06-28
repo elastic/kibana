@@ -29,7 +29,6 @@ import { SecurityPageName } from '../../../../common/constants';
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch
 ): DispatchSetInitialStateFromUrl => ({
-  detailName,
   filterManager,
   indexPattern,
   pageName,

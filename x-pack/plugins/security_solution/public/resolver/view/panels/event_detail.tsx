@@ -60,7 +60,7 @@ export const EventDetail = memo(function EventDetail({
   const event = useSelector(selectors.currentRelatedEventData);
 
   return isLoading ? (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelLoading />
     </StyledPanel>
   ) : event ? (
@@ -71,7 +71,7 @@ export const EventDetail = memo(function EventDetail({
       eventType={eventType}
     />
   ) : (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <PanelContentError translatedErrorMessage={eventDetailRequestError} />
     </StyledPanel>
   );
@@ -105,7 +105,7 @@ const EventDetailContents = memo(function ({
   const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
 
   return (
-    <StyledPanel data-test-subj="resolver:panel:event-detail">
+    <StyledPanel hasBorder data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
         nodeID={nodeID}
         nodeName={nodeName}

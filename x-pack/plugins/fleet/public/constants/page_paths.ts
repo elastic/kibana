@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { stringify } from 'query-string';
+
 export type StaticPage =
   | 'base'
   | 'overview'
@@ -19,6 +21,7 @@ export type StaticPage =
 export type DynamicPage =
   | 'integration_details_overview'
   | 'integration_details_policies'
+  | 'integration_details_assets'
   | 'integration_details_settings'
   | 'integration_details_custom'
   | 'integration_policy_edit'
@@ -51,6 +54,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
+  // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
   add_integration_from_policy: '/policies/:policyId/add-integration',
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',
@@ -66,6 +70,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
+  integration_details_assets: '/detail/:pkgkey/assets',
   integration_details_settings: '/detail/:pkgkey/settings',
   integration_details_custom: '/detail/:pkgkey/custom',
   integration_policy_edit: '/edit-integration/:packagePolicyId',
@@ -86,9 +91,13 @@ export const pagePathGetters: {
     INTEGRATIONS_BASE_PATH,
     `/detail/${pkgkey}/overview${integration ? `?integration=${integration}` : ''}`,
   ],
-  integration_details_policies: ({ pkgkey, integration }) => [
+  integration_details_policies: ({ pkgkey, integration, addAgentToPolicyId }) => {
+    const qs = stringify({ integration, addAgentToPolicyId });
+    return [INTEGRATIONS_BASE_PATH, `/detail/${pkgkey}/policies${qs ? `?${qs}` : ''}`];
+  },
+  integration_details_assets: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
-    `/detail/${pkgkey}/policies${integration ? `?integration=${integration}` : ''}`,
+    `/detail/${pkgkey}/assets${integration ? `?integration=${integration}` : ''}`,
   ],
   integration_details_settings: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,
@@ -108,6 +117,7 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
+  // TODO: This might need to be removed because we do not have a way to pick an integration in line anymore
   add_integration_from_policy: ({ policyId }) => [
     FLEET_BASE_PATH,
     `/policies/${policyId}/add-integration`,

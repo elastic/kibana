@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '../../../../../../../typings/elasticsearch';
+import { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import {
   SERVICE_ENVIRONMENT,
