@@ -50,73 +50,71 @@ export const PrecisionSlider: React.FC = () => {
         </h2>
       </EuiTitle>
       <EuiSpacer />
-      <EuiPanel hasShadow={false} paddingSize="none">
-        <EuiText color="subdued">
+      <EuiText color="subdued">
+        {i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.description',
+          {
+            defaultMessage: 'Fine tune the precision vs. recall settings on your engine.',
+          }
+        )}{' '}
+        <EuiLink
+          data-test-subj="documentationLink"
+          href={`${DOCS_PREFIX}/precision-tuning.html`}
+          target="_blank"
+        >
           {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.description',
+            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.learnMore.link',
             {
-              defaultMessage: 'Fine tune the precision vs. recall settings on your engine.',
+              defaultMessage: 'Learn more.',
             }
-          )}{' '}
-          <EuiLink
-            data-test-subj="documentationLink"
-            href={`${DOCS_PREFIX}/precision-tuning.html`}
-            target="_blank"
-          >
+          )}
+        </EuiLink>
+      </EuiText>
+      <EuiSpacer />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <strong>
             {i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.learnMore.link',
+              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.recall.label',
               {
-                defaultMessage: 'Learn more.',
+                defaultMessage: 'Recall',
               }
             )}
-          </EuiLink>
-        </EuiText>
-        <EuiSpacer />
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <strong>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.recall.label',
-                {
-                  defaultMessage: 'Recall',
-                }
-              )}
-            </strong>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <strong>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.precision.label',
-                {
-                  defaultMessage: 'Precision',
-                }
-              )}
-            </strong>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiRange
-          data-test-subj="PrecisionRange"
-          value={precision}
-          onChange={(e) => {
-            updatePrecision(parseInt((e.target as HTMLInputElement).value, 10));
-          }}
-          min={1}
-          max={11}
-          step={1}
-          showRange
-          showTicks
-          fullWidth
-        />
-        {stepDescription && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiPanel className="stepDescription" color="subdued" data-test-subj="StepDescription">
-              {stepDescription}
-            </EuiPanel>
-          </>
-        )}
-      </EuiPanel>
+          </strong>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <strong>
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.precision.label',
+              {
+                defaultMessage: 'Precision',
+              }
+            )}
+          </strong>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiRange
+        data-test-subj="PrecisionRange"
+        value={precision}
+        onChange={(e) => {
+          updatePrecision(parseInt((e.target as HTMLInputElement).value, 10));
+        }}
+        min={1}
+        max={11}
+        step={1}
+        showRange
+        showTicks
+        fullWidth
+      />
+      {stepDescription && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiPanel className="stepDescription" color="subdued" data-test-subj="StepDescription">
+            {stepDescription}
+          </EuiPanel>
+        </>
+      )}
     </>
   );
 };
