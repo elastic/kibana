@@ -121,10 +121,12 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
 }) => {
   const [imageData, setImageData] = React.useState<string | undefined>(imgSrc || undefined);
 
-  // for legacy screenshots, when a new image arrives, we must overwrite it
-  if (imgSrc && imgSrc !== imageData) {
-    setImageData(imgSrc);
-  }
+  React.useEffect(() => {
+    // for legacy screenshots, when a new image arrives, we must overwrite it
+    if (imgSrc && imgSrc !== imageData) {
+      setImageData(imgSrc);
+    }
+  }, [imgSrc, imageData]);
 
   const setImageDataCallback = React.useCallback(
     (newImageData: string | undefined) => setImageData(newImageData),
