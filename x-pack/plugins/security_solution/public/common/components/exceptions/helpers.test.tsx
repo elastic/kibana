@@ -87,17 +87,6 @@ const mockLinuxEndpointFields = [
     aggregatable: false,
     readFromDocValues: false,
   },
-  {
-    name: 'file.Ext.code_signature.status',
-    type: 'string',
-    esTypes: ['text'],
-    count: 0,
-    scripted: false,
-    searchable: true,
-    aggregatable: false,
-    readFromDocValues: false,
-    subType: { nested: { path: 'file.Ext.code_signature' } },
-  },
 ];
 
 export const getEndpointField = (name: string) =>
