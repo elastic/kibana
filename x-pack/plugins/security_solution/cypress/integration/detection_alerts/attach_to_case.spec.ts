@@ -44,7 +44,7 @@ describe('Alerts timeline', () => {
     });
 
     it('should not allow user with read only privileges to attach alerts to cases', () => {
-      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('be.disabled');
+      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).should('not.exist');
     });
   });
 

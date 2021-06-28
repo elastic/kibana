@@ -141,7 +141,7 @@ exports[`should render entity by expression with aggregatable field options for 
             value="FlightNum"
           >
             <button
-              className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--columns euiExpression--secondary"
+              className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--columns euiExpression--success"
               data-test-subj="selectIndexExpression"
               onClick={[Function]}
             >
