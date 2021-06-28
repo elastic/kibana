@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export interface ErrorMessage {
-  id: string;
-  title: string;
-  description: JSX.Element;
-  errorType?: 'primary' | 'success' | 'warning' | 'danger';
-}
+export { DatafeedChartFlyout } from './datafeed_chart_flyout';
