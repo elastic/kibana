@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { indexPatterns, newThreatIndicatorRule } from '../../objects/rule';
+import { newThreatIndicatorRule } from '../../objects/rule';
 import { cleanKibana, reload } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -21,14 +21,8 @@ import {
 } from '../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../screens/rule_details';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import {
-  expandFirstAlert,
-  goToManageAlertsDetectionRules,
-  investigateFirstAlertInTimeline,
-  waitForAlertsIndexToBeCreated,
-  waitForAlertsPanelToBeLoaded,
-} from '../../tasks/alerts';
-import { createCustomRuleActivated, createCustomIndicatorRule } from '../../tasks/api_calls/rules';
+import { expandFirstAlert, goToManageAlertsDetectionRules } from '../../tasks/alerts';
+import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import {
   openJsonView,
   openThreatIndicatorDetails,
@@ -37,23 +31,6 @@ import {
 
 import { DETECTIONS_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
-
-// describe('CTI enrichments', () => {
-//   beforeEach(() => {
-//     cleanKibana();
-//     esArchiverLoad('unmapped_fields');
-//     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-//     waitForAlertsPanelToBeLoaded();
-//     waitForAlertsIndexToBeCreated();
-//     // createCustomRuleActivated(unmappedRule);
-//     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-//     waitForAlertsPanelToBeLoaded();
-//     expandFirstAlert();
-//   });
-
-//   it('displays enrichments from indicator match rules and from investigation time');
-//   it('displays investigation time enrichments from a longer time range');
-// });
 
 describe('CTI Enrichment', () => {
   before(() => {
@@ -117,29 +94,6 @@ describe('CTI Enrichment', () => {
     });
   });
 
-  it('Displays a summary of matched fields on the Alerts Summary tab', () => {
-    const expectedMatches = [
-      {
-        field: 'myhash.mysha256',
-        value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-      },
-    ];
-
-    expandFirstAlert();
-
-    cy.get(THREAT_SUMMARY_VIEW).within(() => {
-      cy.get(TABLE_ROWS).should('have.length', expectedMatches.length);
-      expectedMatches.forEach((row, index) => {
-        cy.get(TABLE_ROWS)
-          .eq(index)
-          .within(() => {
-            cy.get(TITLE).should('have.text', row.field);
-            cy.get(THREAT_CONTENT).should('have.text', row.value);
-          });
-      });
-    });
-  });
-
   it('Displays threat indicator details on the threat intel tab', () => {
     const expectedThreatIndicatorData = [
       { field: 'event.category', value: 'threat' },
@@ -197,6 +151,42 @@ describe('CTI Enrichment', () => {
             cy.get(TABLE_CELL).eq(0).should('have.text', row.field);
             cy.get(TABLE_CELL).eq(1).should('have.text', row.value);
           });
+      });
+    });
+  });
+
+  describe('with additional indicators', () => {
+    before(() => {
+      esArchiverLoad('threat_indicator2');
+    });
+
+    after(() => {
+      esArchiverUnload('threat_indicator2');
+    });
+
+    it('Displays matched fields from both indicator match rules and investigation time enrichments on Alerts Summary tab', () => {
+      const indicatorMatchRuleEnrichment = {
+        field: 'myhash.mysha256',
+        value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+      };
+      const investigationTimeEnrichment = {
+        field: 'myhash.mysha256',
+        value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+      };
+      const expectedMatches = [indicatorMatchRuleEnrichment, investigationTimeEnrichment];
+
+      expandFirstAlert();
+
+      cy.get(THREAT_SUMMARY_VIEW).within(() => {
+        cy.get(TABLE_ROWS).should('have.length', expectedMatches.length);
+        expectedMatches.forEach((row, index) => {
+          cy.get(TABLE_ROWS)
+            .eq(index)
+            .within(() => {
+              cy.get(TITLE).should('have.text', row.field);
+              cy.get(THREAT_CONTENT).should('have.text', row.value);
+            });
+        });
       });
     });
   });
