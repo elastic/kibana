@@ -43,6 +43,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
     return <NewVectorLayerEditor {...renderWizardArguments} />;
   },
+  showFeatureEditTools: true,
   title: i18n.translate('xpack.maps.newVectorLayerWizard.title', {
     defaultMessage: 'Create new layer',
   }),

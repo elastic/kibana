@@ -26,7 +26,7 @@ import {
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getLayerById,
-  getEditState,
+  getEditState, getSelectedLayerId,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -339,6 +339,19 @@ export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
         drawShape: shapeToDraw,
       },
     });
+  };
+}
+
+export function setSelectedLayerToEditLayer() {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layerId = getSelectedLayerId(getState());
+    if (!layerId) {
+      return;
+    }
+    dispatch(updateEditLayer(layerId));
   };
 }
 
