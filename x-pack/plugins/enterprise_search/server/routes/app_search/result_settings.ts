@@ -42,18 +42,4 @@ export function registerResultSettingsRoutes({
       path: '/as/engines/:engineName/result_settings',
     })
   );
-
-  router.post(
-    skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/sample_response_search',
-      validate: {
-        params: schema.object({
-          engineName: schema.string(),
-        }),
-      },
-    }),
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/sample_response_search',
-    })
-  );
 }
