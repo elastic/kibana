@@ -12,7 +12,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 
 const TEST_INDEX = 'logs-log.log-test';
 
-const FINAL_PIPELINE_ID = '.fleet_final_pipeline';
+const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
 let pkgKey: string;
 
@@ -43,7 +43,6 @@ export default function (providerContext: FtrProviderContext) {
       const { body: getPackagesRes } = await supertest.get(
         `/api/fleet/epm/packages?experimental=true`
       );
-
       const logPackage = getPackagesRes.response.find((p: any) => p.name === 'log');
       if (!logPackage) {
         throw new Error('No log package');
@@ -85,12 +84,11 @@ export default function (providerContext: FtrProviderContext) {
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes.body).to.have.property(FINAL_PIPELINE_ID);
-
       const res = await es.indices.getIndexTemplate({ name: 'logs-log.log' });
       expect(res.body.index_templates.length).to.be(1);
-      expect(
-        res.body.index_templates[0]?.index_template?.template?.settings?.index?.final_pipeline
-      ).to.be(FINAL_PIPELINE_ID);
+      expect(res.body.index_templates[0]?.index_template?.composed_of).to.contain(
+        '.fleet_component_template-1'
+      );
     });
 
     it('For a doc written without api key should write the correct api key status', async () => {
@@ -112,14 +110,14 @@ export default function (providerContext: FtrProviderContext) {
       // @ts-expect-error
       const event = doc._source.event;
 
-      expect(event.agent_id_status).to.be('no_api_key');
+      expect(event.agent_id_status).to.be('auth_metadata_missing');
       expect(event).to.have.property('ingested');
     });
 
     const scenarios = [
       {
         name: 'API key without metadata',
-        expectedStatus: 'missing_metadata',
+        expectedStatus: 'auth_metadata_missing',
         event: { agent: { id: 'agent1' } },
       },
       {
@@ -134,7 +132,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         name: 'API key with agent id metadata and no agent id in event',
-        expectedStatus: 'missing_metadata',
+        expectedStatus: 'missing',
         apiKey: {
           metadata: {
             agent_id: 'agent1',
@@ -143,7 +141,7 @@ export default function (providerContext: FtrProviderContext) {
       },
       {
         name: 'API key with agent id metadata and tampered agent id in event',
-        expectedStatus: 'agent_id_mismatch',
+        expectedStatus: 'mismatch',
         apiKey: {
           metadata: {
             agent_id: 'agent2',

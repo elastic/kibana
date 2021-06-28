@@ -6,7 +6,7 @@
  */
 import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import {
   EuiBetaBadge,
@@ -31,12 +31,7 @@ import {
   useBreadcrumbs,
   useStartServices,
 } from '../../../../hooks';
-import {
-  PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
-  INTEGRATIONS_ROUTING_PATHS,
-  pagePathGetters,
-} from '../../../../constants';
+import { PLUGIN_ID, INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import {
   useCapabilities,
   useGetPackageInfoByKey,
@@ -44,11 +39,7 @@ import {
   useAgentPolicyContext,
 } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type {
-  CreatePackagePolicyRouteState,
-  DetailViewPanelName,
-  PackageInfo,
-} from '../../../../types';
+import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
@@ -56,6 +47,7 @@ import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
 import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
+import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
 import { SettingsPage } from './settings';
@@ -88,8 +80,7 @@ export function Detail() {
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
-  const history = useHistory();
-  const { pathname, search, hash } = useLocation();
+  const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
@@ -211,66 +202,19 @@ export function Detail() {
     (ev) => {
       ev.preventDefault();
 
-      // The object below, given to `createHref` is explicitly accessing keys of `location` in order
-      // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
-      const currentPath = history.createHref({
-        pathname,
-        search,
-        hash,
-      });
-
       const path = pagePathGetters.add_integration_to_policy({
         pkgkey,
         ...(integration ? { integration } : {}),
         ...(agentPolicyIdFromContext ? { agentPolicyId: agentPolicyIdFromContext } : {}),
       })[1];
 
-      let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
-        CreatePackagePolicyRouteState['onCancelNavigateTo'];
-
-      if (agentPolicyIdFromContext) {
-        redirectToPath = [
-          PLUGIN_ID,
-          {
-            path: `#${
-              pagePathGetters.policy_details({
-                policyId: agentPolicyIdFromContext,
-              })[1]
-            }`,
-          },
-        ];
-      } else {
-        redirectToPath = [
-          INTEGRATIONS_PLUGIN_ID,
-          {
-            path: currentPath,
-          },
-        ];
-      }
-
-      const redirectBackRouteState: CreatePackagePolicyRouteState = {
-        onSaveNavigateTo: redirectToPath,
-        onCancelNavigateTo: redirectToPath,
-        onCancelUrl: currentPath,
-      };
-
       services.application.navigateToApp(PLUGIN_ID, {
         // Necessary because of Fleet's HashRouter. Can be changed when
         // https://github.com/elastic/kibana/issues/96134 is resolved
         path: `#${path}`,
-        state: redirectBackRouteState,
       });
     },
-    [
-      history,
-      hash,
-      pathname,
-      search,
-      pkgkey,
-      integration,
-      services.application,
-      agentPolicyIdFromContext,
-    ]
+    [pkgkey, integration, services.application, agentPolicyIdFromContext]
   );
 
   const headerRightContent = useMemo(
@@ -408,6 +352,24 @@ export function Detail() {
       });
     }
 
+    if (packageInstallStatus === InstallStatus.installed && packageInfo.assets) {
+      tabs.push({
+        id: 'assets',
+        name: (
+          <FormattedMessage
+            id="xpack.fleet.epm.packageDetailsNav.packageAssetsLinkText"
+            defaultMessage="Assets"
+          />
+        ),
+        isSelected: panel === 'assets',
+        'data-test-subj': `tab-assets`,
+        href: getHref('integration_details_assets', {
+          pkgkey: packageInfoKey,
+          ...(integration ? { integration } : {}),
+        }),
+      });
+    }
+
     tabs.push({
       id: 'settings',
       name: (
@@ -475,6 +437,9 @@ export function Detail() {
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
             <SettingsPage packageInfo={packageInfo} />
+          </Route>
+          <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
+            <AssetsPage packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
             <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />

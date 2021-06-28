@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import '../../../__mocks__/shallow_useeffect.mock';
-
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
-import { mockLocation, mockUseParams } from '../../../__mocks__/react_router';
+import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { Loading } from '../../../shared/loading';
-import { NAV } from '../../constants';
+import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
 
 import { DisplaySettingsRouter } from './components/display_settings';
 import { Overview } from './components/overview';
@@ -37,6 +33,7 @@ describe('SourceRouter', () => {
   const mockValues = {
     contentSource,
     dataLoading: false,
+    isOrganization: true,
   };
 
   beforeEach(() => {
@@ -50,11 +47,41 @@ describe('SourceRouter', () => {
     }));
   });
 
-  it('returns Loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<SourceRouter />);
+  describe('mount/unmount events', () => {
+    it('fetches & initializes source data on mount', () => {
+      shallow(<SourceRouter />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+      expect(initializeSource).toHaveBeenCalledWith(contentSource.id);
+    });
+
+    it('resets state on unmount', () => {
+      shallow(<SourceRouter />);
+      unmountHandler();
+
+      expect(resetSourceState).toHaveBeenCalled();
+    });
+  });
+
+  describe('loading state when fetching source data', () => {
+    // NOTE: The early page isLoading returns are required to prevent a flash of a completely empty
+    // page (instead of preserving the layout/side nav while loading). We also cannot let the code
+    // fall through to the router because some routes are conditionally rendered based on isCustomSource.
+
+    it('returns an empty loading Workplace Search page on organization views', () => {
+      setMockValues({ ...mockValues, dataLoading: true, isOrganization: true });
+      const wrapper = shallow(<SourceRouter />);
+
+      expect(wrapper.type()).toEqual(WorkplaceSearchPageTemplate);
+      expect(wrapper.prop('isLoading')).toEqual(true);
+    });
+
+    it('returns an empty loading personal dashboard page when not on an organization view', () => {
+      setMockValues({ ...mockValues, dataLoading: true, isOrganization: false });
+      const wrapper = shallow(<SourceRouter />);
+
+      expect(wrapper.type()).toEqual(PersonalDashboardLayout);
+      expect(wrapper.prop('isLoading')).toEqual(true);
+    });
   });
 
   it('renders source routes (standard)', () => {
@@ -63,8 +90,7 @@ describe('SourceRouter', () => {
     expect(wrapper.find(Overview)).toHaveLength(1);
     expect(wrapper.find(SourceSettings)).toHaveLength(1);
     expect(wrapper.find(SourceContent)).toHaveLength(1);
-    expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(3);
+    expect(wrapper.find(Route)).toHaveLength(4);
   });
 
   it('renders source routes (custom)', () => {
@@ -74,57 +100,6 @@ describe('SourceRouter', () => {
     expect(wrapper.find(DisplaySettingsRouter)).toHaveLength(1);
     expect(wrapper.find(Schema)).toHaveLength(1);
     expect(wrapper.find(SchemaChangeErrors)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(6);
-  });
-
-  it('handles breadcrumbs while loading (standard)', () => {
-    setMockValues({
-      ...mockValues,
-      contentSource: {},
-    });
-
-    const loadingBreadcrumbs = ['Sources', '...'];
-
-    const wrapper = shallow(<SourceRouter />);
-
-    const overviewBreadCrumb = wrapper.find(SetPageChrome).at(0);
-    const contentBreadCrumb = wrapper.find(SetPageChrome).at(1);
-    const settingsBreadCrumb = wrapper.find(SetPageChrome).at(2);
-
-    expect(overviewBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs]);
-    expect(contentBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.CONTENT]);
-    expect(settingsBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.SETTINGS]);
-  });
-
-  it('handles breadcrumbs while loading (custom)', () => {
-    setMockValues({
-      ...mockValues,
-      contentSource: { serviceType: 'custom' },
-    });
-
-    const loadingBreadcrumbs = ['Sources', '...'];
-
-    const wrapper = shallow(<SourceRouter />);
-
-    const schemaBreadCrumb = wrapper.find(SetPageChrome).at(2);
-    const schemaErrorsBreadCrumb = wrapper.find(SetPageChrome).at(3);
-    const displaySettingsBreadCrumb = wrapper.find(SetPageChrome).at(4);
-
-    expect(schemaBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.SCHEMA]);
-    expect(schemaErrorsBreadCrumb.prop('trail')).toEqual([...loadingBreadcrumbs, NAV.SCHEMA]);
-    expect(displaySettingsBreadCrumb.prop('trail')).toEqual([
-      ...loadingBreadcrumbs,
-      NAV.DISPLAY_SETTINGS,
-    ]);
-  });
-
-  describe('reset state', () => {
-    it('resets state when leaving source tree', () => {
-      mockLocation.pathname = '/home';
-      shallow(<SourceRouter />);
-      unmountHandler();
-
-      expect(resetSourceState).toHaveBeenCalled();
-    });
+    expect(wrapper.find(Route)).toHaveLength(7);
   });
 });

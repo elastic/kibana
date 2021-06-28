@@ -39,7 +39,7 @@ import {
   getTabs,
   logStacktraceTab,
 } from './ErrorTabs';
-import { ExceptionStacktrace } from './ExceptionStacktrace';
+import { ExceptionStacktrace } from './exception_stacktrace';
 
 const HeaderContainer = euiStyled.div`
   display: flex;
@@ -85,7 +85,7 @@ export function DetailView({ errorGroup, urlParams }: Props) {
   const status = error.http?.response?.status_code;
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <HeaderContainer>
         <EuiTitle size="s">
           <h3>
