@@ -61,6 +61,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
     isFederatedSource,
     errorReason,
     allowsReauth,
+    activities,
   },
   onSearchableToggle,
   isOrganization,
@@ -72,7 +73,8 @@ export const SourceRow: React.FC<SourceRowProps> = ({
     isOrganization &&
     hasError &&
     allowsReauth &&
-    errorReason?.startsWith(CREDENTIALS_REFRESH_NEEDED_PREFIX);
+    errorReason?.startsWith(CREDENTIALS_REFRESH_NEEDED_PREFIX) &&
+    activities[0]?.status?.toLowerCase() === statuses.ERROR;
 
   const rowClass = classNames({ 'source-row--error': hasError });
 
