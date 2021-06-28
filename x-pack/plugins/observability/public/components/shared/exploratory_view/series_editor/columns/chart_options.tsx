@@ -7,22 +7,25 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DataSeries } from '../../types';
+import { SeriesConfig } from '../../types';
 import { OperationTypeSelect } from '../../series_builder/columns/operation_type_select';
 import { SeriesChartTypesSelect } from '../../series_builder/columns/chart_types';
 
 interface Props {
-  series: DataSeries;
+  seriesConfig: SeriesConfig;
   seriesId: string;
 }
 
-export function ChartOptions({ series, seriesId }: Props) {
+export function ChartOptions({ seriesConfig, seriesId }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s" justifyContent="center">
       <EuiFlexItem grow={false}>
-        <SeriesChartTypesSelect seriesId={seriesId} defaultChartType={series.seriesTypes[0]} />
+        <SeriesChartTypesSelect
+          seriesId={seriesId}
+          defaultChartType={seriesConfig.seriesTypes[0]}
+        />
       </EuiFlexItem>
-      {series.hasOperationType && (
+      {seriesConfig.hasOperationType && (
         <EuiFlexItem grow={false}>
           <OperationTypeSelect seriesId={seriesId} />
         </EuiFlexItem>
