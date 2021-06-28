@@ -53,18 +53,16 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   );
 
   return (
-    <>
-      <EuiPopover
-        anchorPosition="downLeft"
-        button={popOverButton}
-        closePopover={closePopover}
-        data-test-subj="case-view-status-dropdown"
-        id="caseStatusPopover"
-        isOpen={isPopoverOpen}
-      >
-        <EuiContextMenuPanel items={panelItems} />
-      </EuiPopover>
-    </>
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={popOverButton}
+      closePopover={closePopover}
+      data-test-subj="case-view-status-dropdown"
+      id="caseStatusPopover"
+      isOpen={isPopoverOpen}
+    >
+      <EuiContextMenuPanel items={panelItems} />
+    </EuiPopover>
   );
 };
 

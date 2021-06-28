@@ -119,6 +119,7 @@ describe('AllCasesGeneric', () => {
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
     showActions: true,
+    userCanCrud: true,
   };
 
   beforeEach(() => {
