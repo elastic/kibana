@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export * from './cidr';
+export * from './cidr_to_ast';
 export * from './date_range';
 export * from './date_range_to_ast';
 export * from './extended_bounds';

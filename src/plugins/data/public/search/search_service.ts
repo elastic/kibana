@@ -32,6 +32,7 @@ import {
   fieldFunction,
   numericalRangeFunction,
   rangeFunction,
+  cidrFunction,
   dateRangeFunction,
   existsFilterFunction,
   rangeFilterFunction,
@@ -119,6 +120,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
+    expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);
     expressions.registerFunction(extendedBoundsFunction);
     expressions.registerFunction(ipRangeFunction);
