@@ -17,6 +17,7 @@ export interface WorkpadFindResponse {
 export interface TemplateFindResponse {
   templates: CanvasTemplate[];
 }
+
 export interface CanvasWorkpadService {
   get: (id: string) => Promise<CanvasWorkpad>;
   create: (workpad: CanvasWorkpad) => Promise<CanvasWorkpad>;

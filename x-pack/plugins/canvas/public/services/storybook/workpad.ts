@@ -90,7 +90,6 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({
     return Promise.resolve(getDefaultWorkpad());
   },
   find: (term: string) => {
-    debugger;
     action('workpadService.find')(term);
     return (workpadCount ? findSomeWorkpads(workpadCount, useStaticData) : findNoWorkpads())(term);
   },
