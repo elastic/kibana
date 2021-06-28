@@ -7,7 +7,7 @@
 
 import { LensPlugin } from './plugin';
 
-export {
+export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './editor_frame_service/embeddable/embeddable_component';
