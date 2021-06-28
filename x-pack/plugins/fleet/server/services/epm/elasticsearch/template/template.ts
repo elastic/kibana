@@ -150,6 +150,12 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
             fieldProps.fields = generateMultiFields(field.multi_fields);
           }
           break;
+        case 'constant_keyword':
+          fieldProps.type = field.type;
+          if (field.value) {
+            fieldProps.value = field.value;
+          }
+          break;
         case 'object':
           fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
           break;
