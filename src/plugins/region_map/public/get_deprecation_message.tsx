@@ -8,8 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { UrlGeneratorContract } from 'src/plugins/share/public';
-import { getCoreService, getQueryService, getShareService } from './kibana_services';
+import { getQueryService, getShareService } from './kibana_services';
 import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
@@ -25,24 +24,16 @@ function getEmsLayerId(id: string | number, layerId: string) {
 }
 
 export function getDeprecationMessage(vis: Vis) {
-  let mapsRegionMapUrlGenerator:
-    | UrlGeneratorContract<'MAPS_APP_REGION_MAP_URL_GENERATOR'>
-    | undefined;
-  try {
-    mapsRegionMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
-      'MAPS_APP_REGION_MAP_URL_GENERATOR'
-    );
-  } catch (error) {
-    // ignore error thrown when url generator is not available
-  }
-
   const title = i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' });
 
   async function onClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
 
+    const locator = getShareService().url.locators.get('MAPS_APP_REGION_MAP_LOCATOR');
+    if (!locator) return;
+
     const query = getQueryService();
-    const createUrlParams: { [key: string]: any } = {
+    const params: { [key: string]: any } = {
       label: vis.title ? vis.title : title,
       emsLayerId: vis.params.selectedLayer.isEMS
         ? getEmsLayerId(vis.params.selectedLayer.id, vis.params.selectedLayer.layerId)
@@ -59,23 +50,22 @@ export function getDeprecationMessage(vis: Vis) {
 
     const bucketAggs = vis.data?.aggs?.byType('buckets');
     if (bucketAggs?.length && bucketAggs[0].type.dslName === 'terms') {
-      createUrlParams.termsFieldName = bucketAggs[0].getField()?.name;
-      createUrlParams.termsSize = bucketAggs[0].getParam('size');
+      params.termsFieldName = bucketAggs[0].getField()?.name;
+      params.termsSize = bucketAggs[0].getParam('size');
     }
 
     const metricAggs = vis.data?.aggs?.byType('metrics');
     if (metricAggs?.length) {
-      createUrlParams.metricAgg = metricAggs[0].type.dslName;
-      createUrlParams.metricFieldName = metricAggs[0].getField()?.name;
+      params.metricAgg = metricAggs[0].type.dslName;
+      params.metricFieldName = metricAggs[0].getField()?.name;
     }
 
-    const url = await mapsRegionMapUrlGenerator!.createUrl(createUrlParams);
-    getCoreService().application.navigateToUrl(url);
+    locator.navigate(params);
   }
 
   return (
     <LegacyMapDeprecationMessage
-      isMapsAvailable={!!mapsRegionMapUrlGenerator}
+      isMapsAvailable={!!getShareService().url.locators.get('MAPS_APP_REGION_MAP_LOCATOR')}
       onClick={onClick}
       visualizationLabel={title}
     />

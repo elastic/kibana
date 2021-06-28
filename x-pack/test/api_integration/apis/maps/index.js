@@ -17,6 +17,7 @@ export default function ({ loadTestFile, getService }) {
     describe('', () => {
       loadTestFile(require.resolve('./get_indexes_matching_pattern'));
       loadTestFile(require.resolve('./create_doc_source'));
+      loadTestFile(require.resolve('./delete_feature'));
       loadTestFile(require.resolve('./index_data'));
       loadTestFile(require.resolve('./fonts_api'));
       loadTestFile(require.resolve('./index_settings'));

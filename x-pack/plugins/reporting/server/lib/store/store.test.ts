@@ -13,7 +13,7 @@ import {
   createMockLevelLogger,
   createMockReportingCore,
 } from '../../test_helpers';
-import { Report } from './report';
+import { Report, ReportDocument } from './report';
 import { ReportingStore } from './store';
 
 describe('ReportingStore', () => {
@@ -174,11 +174,75 @@ describe('ReportingStore', () => {
     });
   });
 
+  it('findReport gets a report from ES and returns a Report object', async () => {
+    // setup
+    const mockReport: ReportDocument = {
+      _id: '1234-foo-78',
+      _index: '.reporting-test-17409',
+      _primary_term: 1234,
+      _seq_no: 5678,
+      _source: {
+        kibana_name: 'test',
+        kibana_id: 'test123',
+        migration_version: 'X.0.0',
+        created_at: 'some time',
+        created_by: 'some security person',
+        jobtype: 'csv',
+        status: 'pending',
+        meta: { testMeta: 'meta' } as any,
+        payload: { testPayload: 'payload' } as any,
+        browser_type: 'browser type string',
+        attempts: 0,
+        max_attempts: 1,
+        timeout: 30000,
+        output: null,
+      },
+    };
+    mockEsClient.get.mockResolvedValue({ body: mockReport } as any);
+    const store = new ReportingStore(mockCore, mockLogger);
+    const report = new Report({
+      ...mockReport,
+      ...mockReport._source,
+    });
+
+    expect(await store.findReportFromTask(report.toReportTaskJSON())).toMatchInlineSnapshot(`
+      Report {
+        "_id": "1234-foo-78",
+        "_index": ".reporting-test-17409",
+        "_primary_term": 1234,
+        "_seq_no": 5678,
+        "attempts": 0,
+        "browser_type": "browser type string",
+        "completed_at": undefined,
+        "created_at": "some time",
+        "created_by": "some security person",
+        "jobtype": "csv",
+        "kibana_id": undefined,
+        "kibana_name": undefined,
+        "max_attempts": 1,
+        "meta": Object {
+          "testMeta": "meta",
+        },
+        "migration_version": "7.14.0",
+        "output": null,
+        "payload": Object {
+          "testPayload": "payload",
+        },
+        "process_expiration": undefined,
+        "started_at": undefined,
+        "status": "pending",
+        "timeout": 30000,
+      }
+    `);
+  });
+
   it('setReportClaimed sets the status of a record to processing', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new Report({
       _id: 'id-of-processing',
       _index: '.reporting-test-index-12345',
+      _seq_no: 42,
+      _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
@@ -194,23 +258,12 @@ describe('ReportingStore', () => {
 
     await store.setReportClaimed(report, { testDoc: 'test' } as any);
 
-    const [updateCall] = mockEsClient.update.mock.calls;
-    expect(updateCall).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "body": Object {
-            "doc": Object {
-              "status": "processing",
-              "testDoc": "test",
-            },
-          },
-          "id": "id-of-processing",
-          "if_primary_term": undefined,
-          "if_seq_no": undefined,
-          "index": ".reporting-test-index-12345",
-        },
-      ]
-    `);
+    const [[updateCall]] = mockEsClient.update.mock.calls;
+    const response = updateCall.body?.doc as Report;
+    expect(response.migration_version).toBe(`7.14.0`);
+    expect(response.status).toBe(`processing`);
+    expect(updateCall.if_seq_no).toBe(42);
+    expect(updateCall.if_primary_term).toBe(10002);
   });
 
   it('setReportFailed sets the status of a record to failed', async () => {
@@ -218,6 +271,8 @@ describe('ReportingStore', () => {
     const report = new Report({
       _id: 'id-of-failure',
       _index: '.reporting-test-index-12345',
+      _seq_no: 43,
+      _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
@@ -233,23 +288,12 @@ describe('ReportingStore', () => {
 
     await store.setReportFailed(report, { errors: 'yes' } as any);
 
-    const [updateCall] = mockEsClient.update.mock.calls;
-    expect(updateCall).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "body": Object {
-            "doc": Object {
-              "errors": "yes",
-              "status": "failed",
-            },
-          },
-          "id": "id-of-failure",
-          "if_primary_term": undefined,
-          "if_seq_no": undefined,
-          "index": ".reporting-test-index-12345",
-        },
-      ]
-    `);
+    const [[updateCall]] = mockEsClient.update.mock.calls;
+    const response = updateCall.body?.doc as Report;
+    expect(response.migration_version).toBe(`7.14.0`);
+    expect(response.status).toBe(`failed`);
+    expect(updateCall.if_seq_no).toBe(43);
+    expect(updateCall.if_primary_term).toBe(10002);
   });
 
   it('setReportCompleted sets the status of a record to completed', async () => {
@@ -257,6 +301,8 @@ describe('ReportingStore', () => {
     const report = new Report({
       _id: 'vastly-great-report-id',
       _index: '.reporting-test-index-12345',
+      _seq_no: 44,
+      _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
@@ -272,30 +318,21 @@ describe('ReportingStore', () => {
 
     await store.setReportCompleted(report, { certainly_completed: 'yes' } as any);
 
-    const [updateCall] = mockEsClient.update.mock.calls;
-    expect(updateCall).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "body": Object {
-            "doc": Object {
-              "certainly_completed": "yes",
-              "status": "completed",
-            },
-          },
-          "id": "vastly-great-report-id",
-          "if_primary_term": undefined,
-          "if_seq_no": undefined,
-          "index": ".reporting-test-index-12345",
-        },
-      ]
-    `);
+    const [[updateCall]] = mockEsClient.update.mock.calls;
+    const response = updateCall.body?.doc as Report;
+    expect(response.migration_version).toBe(`7.14.0`);
+    expect(response.status).toBe(`completed`);
+    expect(updateCall.if_seq_no).toBe(44);
+    expect(updateCall.if_primary_term).toBe(10002);
   });
 
-  it('setReportCompleted sets the status of a record to completed_with_warnings', async () => {
+  it('sets the status of a record to completed_with_warnings', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new Report({
       _id: 'vastly-great-report-id',
       _index: '.reporting-test-index-12345',
+      _seq_no: 45,
+      _primary_term: 10002,
       jobtype: 'test-report',
       created_by: 'created_by_test_string',
       browser_type: 'browser_type_test_string',
@@ -316,27 +353,52 @@ describe('ReportingStore', () => {
       },
     } as any);
 
-    const [updateCall] = mockEsClient.update.mock.calls;
-    expect(updateCall).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "body": Object {
-            "doc": Object {
-              "certainly_completed": "pretty_much",
-              "output": Object {
-                "warnings": Array [
-                  "those pants don't go with that shirt",
-                ],
-              },
-              "status": "completed_with_warnings",
-            },
-          },
-          "id": "vastly-great-report-id",
-          "if_primary_term": undefined,
-          "if_seq_no": undefined,
-          "index": ".reporting-test-index-12345",
-        },
-      ]
+    const [[updateCall]] = mockEsClient.update.mock.calls;
+    const response = updateCall.body?.doc as Report;
+
+    expect(response.migration_version).toBe(`7.14.0`);
+    expect(response.status).toBe(`completed_with_warnings`);
+    expect(updateCall.if_seq_no).toBe(45);
+    expect(updateCall.if_primary_term).toBe(10002);
+    expect(response.output).toMatchInlineSnapshot(`
+      Object {
+        "warnings": Array [
+          "those pants don't go with that shirt",
+        ],
+      }
     `);
+  });
+
+  it('prepareReportForRetry resets the expiration and status on the report document', async () => {
+    const store = new ReportingStore(mockCore, mockLogger);
+    const report = new Report({
+      _id: 'pretty-good-report-id',
+      _index: '.reporting-test-index-94058763',
+      _seq_no: 46,
+      _primary_term: 10002,
+      jobtype: 'test-report-2',
+      created_by: 'created_by_test_string',
+      browser_type: 'browser_type_test_string',
+      status: 'processing',
+      process_expiration: '2002',
+      max_attempts: 3,
+      payload: {
+        title: 'test report',
+        headers: 'rp_test_headers',
+        objectType: 'testOt',
+        browserTimezone: 'utc',
+      },
+      timeout: 30000,
+    });
+
+    await store.prepareReportForRetry(report);
+
+    const [[updateCall]] = mockEsClient.update.mock.calls;
+    const response = updateCall.body?.doc as Report;
+
+    expect(response.migration_version).toBe(`7.14.0`);
+    expect(response.status).toBe(`pending`);
+    expect(updateCall.if_seq_no).toBe(46);
+    expect(updateCall.if_primary_term).toBe(10002);
   });
 });
