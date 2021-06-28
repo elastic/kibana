@@ -23,12 +23,6 @@ import {
   observabilityMinimalReadSpacesAll,
   observabilityOnlyAlertsRead,
   observabilityOnlyAlertsReadSpacesAll,
-  observabilityMinReadAlertsAll,
-  observabilityMinReadAlertsAllSpacesAll,
-  observabilityMinimalAll,
-  observabilityMinimalAllSpacesAll,
-  observabilityOnlyAlertsAll,
-  observabilityOnlyAlertsAllSpacesAll,
 } from './roles';
 import { User } from './types';
 
