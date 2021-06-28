@@ -77,10 +77,14 @@ const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
 
 // eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (
-  object: RouteSpyState & TabNavigationProps,
+  objectParam: RouteSpyState & TabNavigationProps,
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
-  const spyState: RouteSpyState = omit('navTabs', object);
+  const spyState: RouteSpyState = omit('navTabs', objectParam);
+
+  // Sets `timeline.isOpen` to false in the state to avoid reopening the timeline on breadcrumb click. https://github.com/elastic/kibana/issues/100322
+  const object = { ...objectParam, timeline: { ...objectParam.timeline, isOpen: false } };
+
   const overviewPath = getUrlForApp(APP_ID, { deepLinkId: SecurityPageName.overview });
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
