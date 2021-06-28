@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await fieldEditor.save();
   };
 
-  describe.skip('discover integration with runtime fields editor', function describeIndexTests() {
+  describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('test/functional/fixtures/es_archiver/discover');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -104,7 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // flaky https://github.com/elastic/kibana/issues/100966
     it('doc view includes runtime fields', async function () {
       // navigate to doc view
       const table = await PageObjects.discover.getDocTable();
@@ -121,10 +120,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[idxToClick].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
-      const runtimeFieldsRow = await testSubjects.exists('tableDocViewRow-discover runtimefield');
-      expect(runtimeFieldsRow).to.be(true);
+      await retry.waitFor('doc viewer is displayed with runtime field', async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        if (!hasDocHit) {
+          // Maybe loading has not completed
+          throw new Error('test subject doc-hit is not yet displayed');
+        }
+        const runtimeFieldsRow = await testSubjects.exists('tableDocViewRow-discover runtimefield');
+
+        return hasDocHit && runtimeFieldsRow;
+      });
     });
   });
 }

@@ -14,7 +14,6 @@ interface UserActionPropertyActionsProps {
   id: string;
   editLabel: string;
   quoteLabel: string;
-  disabled: boolean;
   isLoading: boolean;
   onEdit: (id: string) => void;
   onQuote: (id: string) => void;
@@ -24,7 +23,6 @@ const UserActionPropertyActionsComponent = ({
   id,
   editLabel,
   quoteLabel,
-  disabled,
   isLoading,
   onEdit,
   onQuote,
@@ -32,22 +30,21 @@ const UserActionPropertyActionsComponent = ({
   const onEditClick = useCallback(() => onEdit(id), [id, onEdit]);
   const onQuoteClick = useCallback(() => onQuote(id), [id, onQuote]);
 
-  const propertyActions = useMemo(() => {
-    return [
+  const propertyActions = useMemo(
+    () => [
       {
-        disabled,
         iconType: 'pencil',
         label: editLabel,
         onClick: onEditClick,
       },
       {
-        disabled,
         iconType: 'quote',
         label: quoteLabel,
         onClick: onQuoteClick,
       },
-    ];
-  }, [disabled, editLabel, quoteLabel, onEditClick, onQuoteClick]);
+    ],
+    [editLabel, quoteLabel, onEditClick, onQuoteClick]
+  );
   return (
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="user-action-title-loading" />}

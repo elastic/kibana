@@ -1083,6 +1083,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1102,6 +1103,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1380,6 +1382,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1394,6 +1397,7 @@ describe('utils', () => {
         searchAfterTimes: ['123'],
         success: false,
         warning: true,
+        warningMessages: ['test warning'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
@@ -1404,6 +1408,7 @@ describe('utils', () => {
         searchAfterTimes: ['123'],
         success: false,
         warning: true,
+        warningMessages: ['test warning'],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1423,6 +1428,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1440,6 +1446,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(merged).toEqual(expected);
     });
@@ -1494,6 +1501,7 @@ describe('utils', () => {
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
           success: true,
+          warningMessages: ['warning1'],
         }),
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
@@ -1503,6 +1511,8 @@ describe('utils', () => {
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
           success: true,
+          warningMessages: ['warning2'],
+          warning: true,
         }),
       ]);
       const expected: SearchAfterAndBulkCreateReturnType = {
@@ -1513,7 +1523,8 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
-        warning: false,
+        warning: true,
+        warningMessages: ['warning1', 'warning2'],
       };
       expect(merged).toEqual(expected);
     });

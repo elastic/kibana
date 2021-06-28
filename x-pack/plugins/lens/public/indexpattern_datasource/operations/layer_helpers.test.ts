@@ -25,6 +25,7 @@ import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
+import { TinymathAST } from 'packages/kbn-tinymath';
 
 jest.mock('../operations');
 jest.mock('../../id_generator');
@@ -105,28 +106,34 @@ describe('state_helpers', () => {
       const source = {
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'moving_average(sum(bytes), window=5)',
+        label: '5 + moving_average(sum(bytes), window=5)',
         operationType: 'formula' as const,
         params: {
-          formula: 'moving_average(sum(bytes), window=5)',
+          formula: '5 + moving_average(sum(bytes), window=5)',
           isFormulaBroken: false,
         },
-        references: ['formulaX1'],
+        references: ['formulaX2'],
       };
       const math = {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'formulaX2',
         operationType: 'math' as const,
-        params: { tinymathAst: 'formulaX2' },
-        references: ['formulaX2'],
+        label: 'Part of 5 + moving_average(sum(bytes), window=5)',
+        references: ['formulaX1'],
+        params: {
+          tinymathAst: {
+            type: 'function',
+            name: 'add',
+            args: [5, 'formulaX1'],
+          } as TinymathAST,
+        },
       };
       const sum = {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'formulaX0',
+        label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         operationType: 'sum' as const,
         scale: 'ratio' as const,
         sourceField: 'bytes',
@@ -135,7 +142,7 @@ describe('state_helpers', () => {
         customLabel: true,
         dataType: 'number' as const,
         isBucketed: false,
-        label: 'formulaX2',
+        label: 'Part of 5 + moving_average(sum(bytes), window=5)',
         operationType: 'moving_average' as const,
         params: { window: 5 },
         references: ['formulaX0'],
@@ -148,14 +155,8 @@ describe('state_helpers', () => {
             columns: {
               source,
               formulaX0: sum,
-              formulaX1: math,
-              formulaX2: movingAvg,
-              formulaX3: {
-                ...math,
-                label: 'formulaX3',
-                references: ['formulaX2'],
-                params: { tinymathAst: 'formulaX2' },
-              },
+              formulaX1: movingAvg,
+              formulaX2: math,
             },
           },
           targetId: 'copy',
@@ -171,42 +172,34 @@ describe('state_helpers', () => {
           'formulaX0',
           'formulaX1',
           'formulaX2',
-          'formulaX3',
           'copyX0',
           'copyX1',
           'copyX2',
-          'copyX3',
           'copy',
         ],
         columns: {
           source,
           formulaX0: sum,
-          formulaX1: math,
-          formulaX2: movingAvg,
-          formulaX3: {
-            ...math,
-            label: 'formulaX3',
-            references: ['formulaX2'],
-            params: { tinymathAst: 'formulaX2' },
-          },
-          copy: expect.objectContaining({ ...source, references: ['copyX3'] }),
-          copyX0: expect.objectContaining({ ...sum, label: 'copyX0' }),
+          formulaX1: movingAvg,
+          formulaX2: math,
+          copy: expect.objectContaining({ ...source, references: ['copyX2'] }),
+          copyX0: expect.objectContaining({
+            ...sum,
+          }),
           copyX1: expect.objectContaining({
-            ...math,
-            label: 'copyX1',
+            ...movingAvg,
             references: ['copyX0'],
-            params: { tinymathAst: 'copyX0' },
           }),
           copyX2: expect.objectContaining({
-            ...movingAvg,
-            label: 'copyX2',
-            references: ['copyX1'],
-          }),
-          copyX3: expect.objectContaining({
             ...math,
-            label: 'copyX3',
-            references: ['copyX2'],
-            params: { tinymathAst: 'copyX2' },
+            references: ['copyX1'],
+            params: {
+              tinymathAst: expect.objectContaining({
+                type: 'function',
+                name: 'add',
+                args: [5, 'copyX1'],
+              } as TinymathAST),
+            },
           }),
         },
       });
@@ -583,6 +576,46 @@ describe('state_helpers', () => {
           visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
+    });
+
+    it('should inherit filters from the incomplete column when passed', () => {
+      expect(
+        insertNewColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Date histogram of timestamp',
+                dataType: 'date',
+                isBucketed: true,
+
+                // Private
+                operationType: 'date_histogram',
+                sourceField: 'timestamp',
+                params: {
+                  interval: 'h',
+                },
+              },
+            },
+          },
+          columnId: 'col2',
+          indexPattern,
+          op: 'average',
+          field: indexPattern.fields[2],
+          visualizationGroups: [],
+          incompleteParams: { filter: { language: 'kuery', query: '' }, timeShift: '3d' },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: expect.objectContaining({
+            col2: expect.objectContaining({
+              filter: { language: 'kuery', query: '' },
+              timeShift: '3d',
+            }),
+          }),
+        })
+      );
     });
 
     describe('inserting a new reference', () => {
@@ -1797,12 +1830,14 @@ describe('state_helpers', () => {
 
       it('should promote the inner references when switching away from reference to field-based operation (case a2)', () => {
         const expectedCol = {
-          label: 'Count of records',
+          label: 'Count of records -3h',
           dataType: 'number' as const,
           isBucketed: false,
 
           operationType: 'count' as const,
           sourceField: 'Records',
+          filter: { language: 'kuery', query: 'bytes > 4000' },
+          timeShift: '3h',
         };
         const layer: IndexPatternLayer = {
           indexPatternId: '1',
@@ -1817,6 +1852,8 @@ describe('state_helpers', () => {
               // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: ['col1'],
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
             },
           },
         };
@@ -1845,6 +1882,8 @@ describe('state_helpers', () => {
           isBucketed: false,
           sourceField: 'bytes',
           operationType: 'average' as const,
+          filter: { language: 'kuery', query: 'bytes > 4000' },
+          timeShift: '3h',
         };
 
         const layer: IndexPatternLayer = {
@@ -1858,6 +1897,8 @@ describe('state_helpers', () => {
               isBucketed: false,
               operationType: 'differences',
               references: ['metric'],
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
             },
           },
         };
@@ -1875,6 +1916,54 @@ describe('state_helpers', () => {
             ref: expect.objectContaining({ ...expectedColumn, operationType: 'sum' }),
           })
         );
+      });
+
+      it('should keep state and set incomplete column on incompatible switch', () => {
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['metric', 'ref'],
+          columns: {
+            metric: {
+              dataType: 'number' as const,
+              isBucketed: false,
+              sourceField: 'source',
+              operationType: 'unique_count' as const,
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
+              label: 'Cardinality',
+              customLabel: true,
+            },
+            ref: {
+              label: 'Reference',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'differences',
+              references: ['metric'],
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
+            },
+          },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'ref',
+          op: 'sum',
+          visualizationGroups: [],
+        });
+        expect(result.columnOrder).toEqual(layer.columnOrder);
+        expect(result.columns).toEqual(layer.columns);
+        expect(result.incompleteColumns).toEqual({
+          ref: {
+            operationType: 'sum',
+            filter: {
+              language: 'kuery',
+              query: 'bytes > 4000',
+            },
+            timeScale: undefined,
+            timeShift: '3h',
+          },
+        });
       });
     });
 

@@ -87,69 +87,70 @@ async function getConnectionData({
 }
 
 async function getServicesData(options: IEnvOptions) {
-  return withApmSpan('get_service_stats_for_service_map', async () => {
-    const { environment, setup, searchAggregatedTransactions } = options;
+  const { environment, setup, searchAggregatedTransactions } = options;
 
-    const projection = getServicesProjection({
-      setup,
-      searchAggregatedTransactions,
+  const projection = getServicesProjection({
+    setup,
+    searchAggregatedTransactions,
+  });
+
+  let filter = [
+    ...projection.body.query.bool.filter,
+    ...environmentQuery(environment),
+  ];
+
+  if (options.serviceName) {
+    filter = filter.concat({
+      term: {
+        [SERVICE_NAME]: options.serviceName,
+      },
     });
+  }
 
-    let filter = [
-      ...projection.body.query.bool.filter,
-      ...environmentQuery(environment),
-    ];
-
-    if (options.serviceName) {
-      filter = filter.concat({
-        term: {
-          [SERVICE_NAME]: options.serviceName,
+  const params = mergeProjection(projection, {
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          ...projection.body.query.bool,
+          filter,
         },
-      });
-    }
-
-    const params = mergeProjection(projection, {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            ...projection.body.query.bool,
-            filter,
+      },
+      aggs: {
+        services: {
+          terms: {
+            field: projection.body.aggs.services.terms.field,
+            size: 500,
           },
-        },
-        aggs: {
-          services: {
-            terms: {
-              field: projection.body.aggs.services.terms.field,
-              size: 500,
-            },
-            aggs: {
-              agent_name: {
-                terms: {
-                  field: AGENT_NAME,
-                },
+          aggs: {
+            agent_name: {
+              terms: {
+                field: AGENT_NAME,
               },
             },
           },
         },
       },
-    });
-
-    const { apmEventClient } = setup;
-
-    const response = await apmEventClient.search(params);
-
-    return (
-      response.aggregations?.services.buckets.map((bucket) => {
-        return {
-          [SERVICE_NAME]: bucket.key as string,
-          [AGENT_NAME]:
-            (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-          [SERVICE_ENVIRONMENT]: options.environment || null,
-        };
-      }) || []
-    );
+    },
   });
+
+  const { apmEventClient } = setup;
+
+  const response = await apmEventClient.search(
+    'get_service_stats_for_service_map',
+    params
+  );
+
+  return (
+    response.aggregations?.services.buckets.map((bucket) => {
+      return {
+        [SERVICE_NAME]: bucket.key as string,
+        [AGENT_NAME]:
+          (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
+        [SERVICE_ENVIRONMENT]: options.environment || null,
+      };
+    }) || []
+  );
 }
 
 export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;

@@ -274,35 +274,6 @@ describe('signal_rule_alert_type', () => {
       expect(ruleStatusService.error).toHaveBeenCalledTimes(0);
     });
 
-    it("should set refresh to 'wait_for' when actions are present", async () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
-      ruleAlert.actions = [
-        {
-          actionTypeId: '.slack',
-          params: {
-            message:
-              'Rule generated {{state.signals_count}} signals\n\n{{context.rule.name}}\n{{{context.results_link}}}',
-          },
-          group: 'default',
-          id: '99403909-ca9b-49ba-9d7a-7e5320e68d05',
-        },
-      ];
-
-      alertServices.savedObjectsClient.get.mockResolvedValue({
-        id: 'id',
-        type: 'type',
-        references: [],
-        attributes: ruleAlert,
-      });
-      await alert.executor(payload);
-      expect((queryExecutor as jest.Mock).mock.calls[0][0].refresh).toEqual('wait_for');
-    });
-
-    it('should set refresh to false when actions are not present', async () => {
-      await alert.executor(payload);
-      expect((queryExecutor as jest.Mock).mock.calls[0][0].refresh).toEqual(false);
-    });
-
     it('should call scheduleActions if signalsCount was greater than 0 and rule has actions defined', async () => {
       const ruleAlert = getAlertMock(getQueryRuleParams());
       ruleAlert.actions = [
@@ -462,6 +433,7 @@ describe('signal_rule_alert_type', () => {
         lastLookBackDate: null,
         createdSignalsCount: 0,
         createdSignals: [],
+        warningMessages: [],
         errors: ['Error that bubbled up.'],
       };
       (queryExecutor as jest.Mock).mockResolvedValue(result);

@@ -20,10 +20,12 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
+import { ViewMode } from '../../../../src/plugins/embeddable/public';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
+  LensEmbeddableInput,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
 
@@ -112,12 +114,15 @@ export const App = (props: {
 }) => {
   const [color, setColor] = useState('green');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
+  const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
   const [time, setTime] = useState({
     from: 'now-5d',
     to: 'now',
   });
+
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -172,12 +177,24 @@ export const App = (props: {
                         setColor(newColor);
                       }}
                     >
-                      Edit
+                      Edit in Lens
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      aria-label="Save visualization into library or embed directly into any dashboard"
+                      isDisabled={!getLensAttributes(props.defaultIndexPattern, color)}
+                      onClick={() => {
+                        setIsSaveModalVisible(true);
+                      }}
+                    >
+                      Save Visualization
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <LensComponent
                   id=""
+                  withActions
                   style={{ height: 500 }}
                   timeRange={time}
                   attributes={getLensAttributes(props.defaultIndexPattern, color)}
@@ -196,7 +213,21 @@ export const App = (props: {
                   onTableRowClick={(_data) => {
                     // call back event for on table row click event
                   }}
+                  viewMode={ViewMode.VIEW}
                 />
+                {isSaveModalVisible && (
+                  <LensSaveModalComponent
+                    initialInput={
+                      (getLensAttributes(
+                        props.defaultIndexPattern,
+                        color
+                      ) as unknown) as LensEmbeddableInput
+                    }
+                    isVisible={isSaveModalVisible}
+                    onSave={() => {}}
+                    onClose={() => setIsSaveModalVisible(false)}
+                  />
+                )}
               </>
             ) : (
               <p>This demo only works if your default index pattern is set and time based</p>

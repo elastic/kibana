@@ -16,16 +16,18 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { FilterExpanded } from './filter_expanded';
-import { DataSeries } from '../../types';
+import { SeriesConfig } from '../../types';
 import { FieldLabels } from '../../configurations/constants/constants';
 import { SelectedFilters } from '../selected_filters';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
 interface Props {
   seriesId: string;
-  defaultFilters: DataSeries['defaultFilters'];
-  series: DataSeries;
+  filterFields: SeriesConfig['filterFields'];
+  baseFilters: SeriesConfig['baseFilters'];
+  seriesConfig: SeriesConfig;
   isNew?: boolean;
+  labels?: Record<string, string>;
 }
 
 export interface Field {
@@ -35,21 +37,28 @@ export interface Field {
   isNegated?: boolean;
 }
 
-export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: Props) {
+export function SeriesFilter({
+  seriesConfig,
+  isNew,
+  seriesId,
+  filterFields = [],
+  baseFilters,
+  labels,
+}: Props) {
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 
   const [selectedField, setSelectedField] = useState<Field | undefined>();
 
-  const options: Field[] = defaultFilters.map((field) => {
+  const options: Field[] = filterFields.map((field) => {
     if (typeof field === 'string') {
-      return { label: FieldLabels[field], field };
+      return { label: labels?.[field] ?? FieldLabels[field], field };
     }
 
     return {
       field: field.field,
       nested: field.nested,
       isNegated: field.isNegated,
-      label: FieldLabels[field.field],
+      label: labels?.[field.field] ?? FieldLabels[field.field],
     };
   });
 
@@ -102,6 +111,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       goBack={() => {
         setSelectedField(undefined);
       }}
+      filters={baseFilters}
     />
   ) : null;
 
@@ -112,7 +122,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
 
   return (
     <EuiFlexGroup wrap direction="column" gutterSize="xs" alignItems="flexStart">
-      <SelectedFilters seriesId={seriesId} series={series} isNew={isNew} />
+      <SelectedFilters seriesId={seriesId} seriesConfig={seriesConfig} isNew={isNew} />
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={button}
