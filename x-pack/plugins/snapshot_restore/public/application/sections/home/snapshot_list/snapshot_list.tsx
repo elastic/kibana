@@ -267,7 +267,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
               data-test-subj="maxSnapshotsWarning"
               title={i18n.translate(
                 'xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedTitle',
-                { defaultMessage: 'Snapshot list may be incomplete' }
+                { defaultMessage: 'Cannot show the full list of snapshots' }
               )}
             >
               <FormattedMessage
