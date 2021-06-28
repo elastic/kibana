@@ -93,8 +93,34 @@ export function registerRoleMappingRoute({
   );
 }
 
+export function registerUserRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/app_search/single_user_role_mapping',
+      validate: {
+        body: schema.object({
+          roleMapping: schema.object({
+            engines: schema.arrayOf(schema.string()),
+            roleType: schema.string(),
+            accessAllEngines: schema.boolean(),
+            id: schema.maybe(schema.string()),
+          }),
+          elasticsearchUser: schema.object({
+            username: schema.string(),
+            email: schema.string(),
+          }),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/role_mappings/upsert_single_user_role_mapping',
+    })
+  );
+}
+
 export const registerRoleMappingsRoutes = (dependencies: RouteDependencies) => {
   registerEnableRoleMappingsRoute(dependencies);
   registerRoleMappingsRoute(dependencies);
   registerRoleMappingRoute(dependencies);
+  registerUserRoute(dependencies);
 };

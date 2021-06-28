@@ -12,12 +12,11 @@ import { useQuery } from 'react-query';
 import { GetPackagesResponse, epmRouteService } from '../../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { useKibana } from '../lib/kibana';
+import { useErrorToast } from './use_error_toast';
 
 export const useOsqueryIntegration = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     'integrations',
@@ -31,7 +30,7 @@ export const useOsqueryIntegration = () => {
       select: ({ response }: GetPackagesResponse) =>
         find(['name', OSQUERY_INTEGRATION_NAME], response),
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
             defaultMessage: 'Error while fetching osquery integration',
           }),
