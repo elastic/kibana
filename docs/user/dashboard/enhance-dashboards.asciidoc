@@ -8,7 +8,7 @@ To make your dashboard look the way you want, use the editing options.
 [[add-controls]]
 === Add controls
 
-To filter the data on your dashboard in real-time, add a *Controls* panel.
+To filter the data on your dashboard in real-time, add a *Controls* panel or use a map panel to <<maps-map-extent-filter, filter you dashboard by map extent>>.
 
 {kib} supports two types of *Controls*:
 
