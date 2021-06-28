@@ -190,11 +190,6 @@ export const SW_RETRIEVE_CONFIGURATION_LABEL = i18n.translate(
   { defaultMessage: 'Configure Fields' }
 );
 
-export const SW_CONFIGURE_API_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.configureAPILabel',
-  { defaultMessage: 'Configure API' }
-);
-
 export const SW_CONNECTOR_TYPE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.connectorType',
   {
@@ -273,10 +268,31 @@ export const SW_REQUIRED_ALERT_ID = i18n.translate(
   }
 );
 
-export const SW_ALERT_SOURCE_TOOLTIP = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceTooltip',
+export const SW_REQUIRED_MAPPING_CONFIGURATION = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredMapping',
   {
-    defaultMessage: 'The index of the alert. Use {index} in Detections.',
-    values: { index: '{{context.rule.output_index}}' },
+    defaultMessage: 'Field configuration is required.',
+  }
+);
+
+export const SW_BACK = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.prevStep',
+  {
+    defaultMessage: 'Back',
+  }
+);
+
+export const SW_NEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.nextStep',
+  {
+    defaultMessage: 'Next',
+  }
+);
+
+export const SW_FIELDS_BUTTON_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.nextStepHelpText',
+  {
+    defaultMessage:
+      'If field mappings are not configured, Swimlane connector type will be set to all.',
   }
 );
