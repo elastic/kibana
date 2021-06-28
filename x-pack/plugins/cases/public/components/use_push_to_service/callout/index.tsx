@@ -6,18 +6,20 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { memo, useCallback, useState, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 
-import { useMessagesStorage } from '../../containers/use_messages_storage';
 import { CallOut } from './callout';
 import { ErrorMessage } from './types';
 import { createCalloutId } from './helpers';
+import { CasesNavigation } from '../../links';
 
 export * from './helpers';
 
 export interface CaseCallOutProps {
-  title: string;
+  configureCasesNavigation: CasesNavigation;
+  hasConnectors: boolean;
   messages?: ErrorMessage[];
+  onEditClick: () => void;
 }
 
 type GroupByTypeMessages = {
@@ -26,36 +28,23 @@ type GroupByTypeMessages = {
     messages: ErrorMessage[];
   };
 };
-
-interface CalloutVisibility {
-  [index: string]: boolean;
-}
-
-const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
-  const { getMessages, addMessage } = useMessagesStorage();
-
-  const caseMessages = useMemo(() => getMessages('case'), [getMessages]);
-  const dismissedCallouts = useMemo(
-    () =>
-      caseMessages.reduce<CalloutVisibility>(
-        (acc, id) => ({
-          ...acc,
-          [id]: false,
-        }),
-        {}
-      ),
-    [caseMessages]
-  );
-
-  const [calloutVisibility, setCalloutVisibility] = useState(dismissedCallouts);
+const CaseCallOutComponent = ({
+  configureCasesNavigation,
+  hasConnectors,
+  onEditClick,
+  messages = [],
+}: CaseCallOutProps) => {
   const handleCallOut = useCallback(
-    (id, type) => {
-      setCalloutVisibility((prevState) => ({ ...prevState, [id]: false }));
-      if (type === 'primary') {
-        addMessage('case', id);
+    (e) => {
+      // if theres connectors open dropdown editor
+      // if no connectors, redirect to create case page
+      if (hasConnectors) {
+        onEditClick();
+      } else {
+        configureCasesNavigation.onClick(e);
       }
     },
-    [setCalloutVisibility, addMessage]
+    [hasConnectors, onEditClick, configureCasesNavigation]
   );
 
   const groupedByTypeErrorMessages = useMemo(
@@ -84,12 +73,10 @@ const CaseCallOutComponent = ({ title, messages = [] }: CaseCallOutProps) => {
           return (
             <React.Fragment key={id}>
               <CallOut
+                handleButtonClick={handleCallOut}
                 id={id}
-                type={type}
-                title={title}
                 messages={groupedByTypeErrorMessages[type].messages}
-                showCallOut={calloutVisibility[id] ?? true}
-                handleDismissCallout={handleCallOut}
+                type={type}
               />
               <EuiSpacer />
             </React.Fragment>

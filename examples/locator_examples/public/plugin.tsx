@@ -8,44 +8,27 @@
 
 import { SharePluginStart, SharePluginSetup } from '../../../src/plugins/share/public';
 import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
-import {
-  HelloLinkGeneratorState,
-  createHelloPageLinkGenerator,
-  LegacyHelloLinkGeneratorState,
-  HELLO_URL_GENERATOR_V1,
-  HELLO_URL_GENERATOR,
-  helloPageLinkGeneratorV1,
-} from './url_generator';
+import { HelloLocator, HelloLocatorDefinition } from './locator';
 
-declare module '../../../src/plugins/share/public' {
-  export interface UrlGeneratorStateMapping {
-    [HELLO_URL_GENERATOR_V1]: LegacyHelloLinkGeneratorState;
-    [HELLO_URL_GENERATOR]: HelloLinkGeneratorState;
-  }
+interface SetupDeps {
+  share: SharePluginSetup;
 }
 
 interface StartDeps {
   share: SharePluginStart;
 }
 
-interface SetupDeps {
-  share: SharePluginSetup;
+export interface LocatorExamplesSetup {
+  locator: HelloLocator;
 }
 
-const APP_ID = 'urlGeneratorsExamples';
-
-export class AccessLinksExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { share: { urlGenerators } }: SetupDeps) {
-    urlGenerators.registerUrlGenerator(
-      createHelloPageLinkGenerator(async () => ({
-        appBasePath: (await core.getStartServices())[0].application.getUrlForApp(APP_ID),
-      }))
-    );
-
-    urlGenerators.registerUrlGenerator(helloPageLinkGeneratorV1);
+export class LocatorExamplesPlugin
+  implements Plugin<LocatorExamplesSetup, void, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
+    const locator = plugins.share.url.locators.create(new HelloLocatorDefinition());
 
     core.application.register({
-      id: APP_ID,
+      id: 'locatorExamples',
       title: 'Access links examples',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
@@ -58,6 +41,10 @@ export class AccessLinksExamplesPlugin implements Plugin<void, void, SetupDeps, 
         );
       },
     });
+
+    return {
+      locator,
+    };
   }
 
   public start() {}

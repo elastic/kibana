@@ -18,10 +18,10 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 
 import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
-import { ActionConnector, ConnectorTypeFields } from '../../../common';
+import { ActionConnector, Case, ConnectorTypeFields } from '../../../common';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { CaseUserActions } from '../../containers/types';
@@ -29,22 +29,30 @@ import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
+import { usePushToService } from '../use_push_to_service';
+import { CasesNavigation } from '../links';
+import { CaseServices } from '../../containers/use_get_case_user_actions';
 
 export interface EditConnectorProps {
-  caseFields: ConnectorTypeFields['fields'];
+  caseData: Case;
+  caseServices: CaseServices;
+  configureCasesNavigation: CasesNavigation;
+  connectorName: string;
   connectors: ActionConnector[];
+  hasDataToPush: boolean;
+  hideConnectorServiceNowSir?: boolean;
   isLoading: boolean;
+  isValidConnector: boolean;
   onSubmit: (
     connectorId: string,
     connectorFields: ConnectorTypeFields['fields'],
     onError: () => void,
     onSuccess: () => void
   ) => void;
-  selectedConnector: string;
+  permissionsError?: string;
+  updateCase: (newCase: Case) => void;
   userActions: CaseUserActions[];
   userCanCrud?: boolean;
-  hideConnectorServiceNowSir?: boolean;
-  permissionsError?: string;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -103,16 +111,23 @@ const initialState = {
 
 export const EditConnector = React.memo(
   ({
-    caseFields,
+    caseData,
+    caseServices,
+    configureCasesNavigation,
+    connectorName,
     connectors,
-    userCanCrud = true,
+    hasDataToPush,
     hideConnectorServiceNowSir = false,
     isLoading,
+    isValidConnector,
     onSubmit,
-    selectedConnector,
-    userActions,
     permissionsError,
+    updateCase,
+    userActions,
+    userCanCrud = true,
   }: EditConnectorProps) => {
+    const caseFields = caseData.connector.fields;
+    const selectedConnector = caseData.connector.id;
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
       options: { stripEmptyFields: false },
@@ -210,17 +225,22 @@ export const EditConnector = React.memo(
       connectors,
     });
 
-    /**
-     * if this evaluates to true it means that the connector was likely deleted because the case connector was set to something
-     * other than none but we don't find it in the list of connectors returned from the actions plugin
-     */
-    const connectorFromCaseMissing = currentConnector == null && selectedConnector !== 'none';
-
-    /**
-     * True if the chosen connector from the form was the "none" connector or no connector was in the case. The
-     * currentConnector will be null initially and after the form initializes if the case connector is "none"
-     */
-    const connectorUndefinedOrNone = currentConnector == null || currentConnector?.id === 'none';
+    const { pushButton, pushCallouts } = usePushToService({
+      configureCasesNavigation,
+      connector: {
+        ...caseData.connector,
+        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
+      },
+      caseServices,
+      caseId: caseData.id,
+      caseStatus: caseData.status,
+      connectors,
+      hasDataToPush,
+      onEditClick,
+      updateCase,
+      userCanCrud,
+      isValidConnector,
+    });
 
     return (
       <EuiText>
@@ -242,6 +262,9 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup data-test-subj="edit-connectors" direction="column">
+          {!isLoading && !editConnector && pushCallouts && permissionsError == null && (
+            <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
+          )}
           <DisappearingFlexItem $isHidden={!editConnector}>
             <Form form={form}>
               <EuiFlexGroup gutterSize="none" direction="row">
@@ -267,20 +290,10 @@ export const EditConnector = React.memo(
             </Form>
           </DisappearingFlexItem>
           <EuiFlexItem data-test-subj="edit-connector-fields-form-flex-item">
-            {!editConnector && permissionsError ? (
+            {!editConnector && permissionsError && (
               <EuiText data-test-subj="edit-connector-permissions-error-msg" size="s">
                 <span>{permissionsError}</span>
               </EuiText>
-            ) : (
-              // if we're not editing the connectors and the connector specified in the case was found and the connector
-              // is undefined or explicitly set to none
-              !editConnector &&
-              !connectorFromCaseMissing &&
-              connectorUndefinedOrNone && (
-                <EuiText data-test-subj="edit-connector-no-connectors-msg" size="s">
-                  <span>{i18n.NO_CONNECTOR}</span>
-                </EuiText>
-              )
             )}
             <ConnectorFieldsForm
               connector={currentConnector}
@@ -315,6 +328,11 @@ export const EditConnector = React.memo(
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {pushCallouts == null && !isLoading && !editConnector && (
+            <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
+              <span>{pushButton}</span>
             </EuiFlexItem>
           )}
         </MyFlexGroup>
