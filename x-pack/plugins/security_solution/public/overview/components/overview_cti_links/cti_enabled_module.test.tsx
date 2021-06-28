@@ -55,7 +55,7 @@ describe('CtiEnabledModule', () => {
       </Provider>
     );
 
-    expect(wrapper.find('[data-test-subj="cti-with-events"]').length).toEqual(1);
+    expect(wrapper.exists('[data-test-subj="cti-with-events"]')).toBe(true);
   });
 
   it('renders CtiWithNoEvents when there are no events', () => {
@@ -70,7 +70,7 @@ describe('CtiEnabledModule', () => {
       </Provider>
     );
 
-    expect(wrapper.exists('[data-test-subj="cti-with-events"]')).toBe(true);
+    expect(wrapper.exists('[data-test-subj="cti-with-no-events"]')).toBe(true);
   });
 
   it('renders null while event counts are loading', () => {
