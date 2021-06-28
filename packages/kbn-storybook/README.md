@@ -5,6 +5,7 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
 - [Kibana Storybook](#kibana-storybook)
   - [Setup Instructions](#setup-instructions)
   - [Customizing configuration](#customizing-configuration)
+  - [EUI theme decorator](#eui-theme-decorator)
 
 ## Setup Instructions
 
@@ -39,3 +40,5 @@ This package provides ability to add [Storybook](https://storybook.js.org/) to a
 
 The `defaultConfig` object provided by the @kbn/storybook package should be all you need to get running, but you can
 override this in your .storybook/main.js. Using [Storybook's configuration options](https://storybook.js.org/docs/react/configure/overview).
+
+## EUI theme decorator
