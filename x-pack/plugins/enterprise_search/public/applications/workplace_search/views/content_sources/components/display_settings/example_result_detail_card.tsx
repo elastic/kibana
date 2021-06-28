@@ -70,7 +70,11 @@ export const ExampleResultDetailCard: React.FC = () => {
             const dateValue = getAsLocalDateTimeString(value);
 
             return (
-              <div className="example-result-detail-card__field" key={index}>
+              <div
+                className="example-result-detail-card__field"
+                key={index}
+                data-test-subj="DetailField"
+              >
                 <EuiTitle size="xs">
                   <h4>{label}</h4>
                 </EuiTitle>
