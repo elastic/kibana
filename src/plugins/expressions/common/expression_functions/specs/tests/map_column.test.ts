@@ -10,7 +10,7 @@ import { of, Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { Datatable } from '../../../expression_types';
 import { mapColumn, MapColumnArguments } from '../map_column';
-import { emptyTable, functionWrapper, testTable } from './utils';
+import { emptyTable, functionWrapper, testTable, tableWithNulls } from './utils';
 
 const pricePlusTwo = (datatable: Datatable) => of(datatable.rows[0].price + 2);
 
@@ -219,7 +219,7 @@ describe('mapColumn', () => {
     });
   });
 
-  it('should correctly infer the type fromt he first row if the references column for meta information does not exists', () => {
+  it('should correctly infer the type from the first row if the references column for meta information does not exists', () => {
     testScheduler.run(({ expectObservable }) => {
       expectObservable(
         runFn(
@@ -230,6 +230,31 @@ describe('mapColumn', () => {
         expect.objectContaining({
           type: 'datatable',
           columns: [
+            expect.objectContaining({
+              id: 'value',
+              name: 'value',
+              meta: expect.objectContaining({ type: 'number' }),
+            }),
+          ],
+        }),
+      ]);
+    });
+  });
+
+  it('should correctly infer the type from the first non-null row', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(tableWithNulls, {
+          id: 'value',
+          name: 'value',
+          expression: pricePlusTwo,
+          onError: 'null',
+        })
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: [
+            ...tableWithNulls.columns,
             expect.objectContaining({
               id: 'value',
               name: 'value',

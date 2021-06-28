@@ -10,7 +10,7 @@ import { Observable, defer, of, zip } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
-import { Datatable, DatatableColumn, getType } from '../../expression_types';
+import { Datatable, DatatableColumn, DatatableColumnType, getType } from '../../expression_types';
 
 export interface MapColumnArguments {
   id?: string | null;
@@ -103,7 +103,16 @@ export const mapColumn: ExpressionFunctionDefinition<
 
       return rows$.pipe<Datatable>(
         map((rows) => {
-          const type = getType(rows[0]?.[id]);
+          let type: DatatableColumnType = 'null';
+          if (rows.length) {
+            for (const row of rows) {
+              const rowType = getType(row[id]);
+              if (rowType !== 'null') {
+                type = rowType;
+                break;
+              }
+            }
+          }
           const newColumn: DatatableColumn = {
             id,
             name: args.name,

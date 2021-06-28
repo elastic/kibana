@@ -7,7 +7,7 @@
  */
 
 import { mathColumn } from '../math_column';
-import { functionWrapper, testTable } from './utils';
+import { functionWrapper, testTable, tableWithNulls } from './utils';
 
 describe('mathColumn', () => {
   const fn = functionWrapper(mathColumn);
@@ -94,5 +94,23 @@ describe('mathColumn', () => {
       name: 'name',
       meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
     });
+  });
+
+  it('should correctly infer the type from the first non-null row', () => {
+    expect(
+      fn(tableWithNulls, { id: 'value', name: 'value', expression: 'price + 2', onError: 'null' })
+    ).toEqual(
+      expect.objectContaining({
+        type: 'datatable',
+        columns: [
+          ...tableWithNulls.columns,
+          expect.objectContaining({
+            id: 'value',
+            name: 'value',
+            meta: expect.objectContaining({ type: 'number' }),
+          }),
+        ],
+      })
+    );
   });
 });
