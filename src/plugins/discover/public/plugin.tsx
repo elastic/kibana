@@ -37,7 +37,7 @@ import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
-import { JsonCodeEditor } from './application/components/json_code_editor/json_code_editor';
+
 import {
   setDocViewsRegistry,
   setUrlTracker,
@@ -59,10 +59,12 @@ import {
   DiscoverUrlGenerator,
   SEARCH_SESSION_ID_QUERY_PARAM,
 } from './url_generator';
+import { DiscoverAppLocatorDefinition, DiscoverAppLocator } from './locator';
 import { SearchEmbeddableFactory } from './application/embeddable';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { replaceUrlHashQuery } from '../../kibana_utils/public/';
 import { IndexPatternFieldEditorStart } from '../../../plugins/index_pattern_field_editor/public';
+import { SourceViewer } from './application/components/source_viewer/source_viewer';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -82,17 +84,27 @@ export interface DiscoverSetup {
      */
     addDocView(docViewRaw: DocViewInput | DocViewInputFn): void;
   };
-}
-
-export interface DiscoverStart {
-  savedSearchLoader: SavedObjectLoader;
 
   /**
-   * `share` plugin URL generator for Discover app. Use it to generate links into
-   * Discover application, example:
+   * `share` plugin URL locator for Discover app. Use it to generate links into
+   * Discover application, for example, navigate:
    *
    * ```ts
-   * const url = await plugins.discover.urlGenerator.createUrl({
+   * await plugins.discover.locator.navigate({
+   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   timeRange: {
+   *     to: 'now',
+   *     from: 'now-15m',
+   *     mode: 'relative',
+   *   },
+   * });
+   * ```
+   *
+   * Generate a location:
+   *
+   * ```ts
+   * const location = await plugins.discover.locator.getLocation({
    *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
    *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
    *   timeRange: {
@@ -103,7 +115,48 @@ export interface DiscoverStart {
    * });
    * ```
    */
+  readonly locator: undefined | DiscoverAppLocator;
+}
+
+export interface DiscoverStart {
+  savedSearchLoader: SavedObjectLoader;
+
+  /**
+   * @deprecated Use URL locator instead. URL generaotr will be removed.
+   */
   readonly urlGenerator: undefined | UrlGeneratorContract<'DISCOVER_APP_URL_GENERATOR'>;
+
+  /**
+   * `share` plugin URL locator for Discover app. Use it to generate links into
+   * Discover application, for example, navigate:
+   *
+   * ```ts
+   * await plugins.discover.locator.navigate({
+   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   timeRange: {
+   *     to: 'now',
+   *     from: 'now-15m',
+   *     mode: 'relative',
+   *   },
+   * });
+   * ```
+   *
+   * Generate a location:
+   *
+   * ```ts
+   * const location = await plugins.discover.locator.getLocation({
+   *   savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',
+   *   indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',
+   *   timeRange: {
+   *     to: 'now',
+   *     from: 'now-15m',
+   *     mode: 'relative',
+   *   },
+   * });
+   * ```
+   */
+  readonly locator: undefined | DiscoverAppLocator;
 }
 
 /**
@@ -155,7 +208,12 @@ export class DiscoverPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private servicesInitialized: boolean = false;
   private innerAngularInitialized: boolean = false;
+
+  /**
+   * @deprecated
+   */
   private urlGenerator?: DiscoverStart['urlGenerator'];
+  private locator?: DiscoverAppLocator;
 
   /**
    * why are those functions public? they are needed for some mocha tests
@@ -179,6 +237,14 @@ export class DiscoverPlugin
       );
     }
 
+    if (plugins.share) {
+      this.locator = plugins.share.url.locators.create(
+        new DiscoverAppLocatorDefinition({
+          useHash: core.uiSettings.get('state:storeInSessionStorage'),
+        })
+      );
+    }
+
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
@@ -193,8 +259,14 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      component: ({ hit }) => <JsonCodeEditor json={hit as any} hasLineNumbers />,
+      component: ({ hit, indexPattern }) => (
+        <SourceViewer
+          index={hit._index}
+          id={hit._id}
+          indexPatternId={indexPattern?.id || ''}
+          hasLineNumbers
+        />
+      ),
     });
 
     const {
@@ -273,6 +345,7 @@ export class DiscoverPlugin
 
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
+
         const { renderApp } = await import('./application/application');
         params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
@@ -316,6 +389,7 @@ export class DiscoverPlugin
       docViews: {
         addDocView: this.docViewsRegistry.addDocView.bind(this.docViewsRegistry),
       },
+      locator: this.locator,
     };
   }
 
@@ -360,6 +434,7 @@ export class DiscoverPlugin
 
     return {
       urlGenerator: this.urlGenerator,
+      locator: this.locator,
       savedSearchLoader: createSavedSearchesLoader({
         savedObjectsClient: core.savedObjects.client,
         savedObjects: plugins.savedObjects,

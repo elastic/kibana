@@ -14,6 +14,8 @@ import { TestProviders } from '../../../../../../common/mock';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {

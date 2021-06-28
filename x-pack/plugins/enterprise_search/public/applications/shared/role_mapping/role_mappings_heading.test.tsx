@@ -15,7 +15,13 @@ import { RoleMappingsHeading } from './role_mappings_heading';
 
 describe('RoleMappingsHeading', () => {
   it('renders ', () => {
-    const wrapper = shallow(<RoleMappingsHeading productName="App Search" onClick={jest.fn()} />);
+    const wrapper = shallow(
+      <RoleMappingsHeading
+        docsLink="http://elastic.co"
+        productName="App Search"
+        onClick={jest.fn()}
+      />
+    );
 
     expect(wrapper.find(EuiTitle)).toHaveLength(1);
     expect(wrapper.find(EuiText)).toHaveLength(1);
