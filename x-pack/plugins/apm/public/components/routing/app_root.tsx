@@ -24,7 +24,7 @@ import {
 } from '../../context/apm_plugin/apm_plugin_context';
 import { LicenseProvider } from '../../context/license/license_context';
 import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useApmBreadcrumbs } from '../../hooks/use_apm_breadcrumbs';
 import { ApmPluginStartDeps } from '../../plugin';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { ApmHeaderActionMenu } from '../shared/apm_header_action_menu';
@@ -79,7 +79,7 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
-  useBreadcrumbs(apmRouteConfig);
+  useApmBreadcrumbs(apmRouteConfig);
   const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
 
   return (

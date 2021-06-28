@@ -103,6 +103,7 @@ export default async function ({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'visualization:visualize:legacyChartsLibrary': true,
+        'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
