@@ -137,7 +137,7 @@ exports[`after fetch hideWriteControls 1`] = `
       <EuiEmptyPrompt
         body={
           <p>
-            There aren't any dashboards in this space available to you. If you think this is in error, please contact your administrator.
+            There are no available dashboards. To change your permissions to view the dashboards in this space, contact your administrator.
           </p>
         }
         iconType="glasses"
