@@ -37,7 +37,7 @@ const CaseCallOutComponent = ({
   const handleCallOut = useCallback(
     (e) => {
       // if theres connectors open dropdown editor
-      // if no connectors, redirect to crete case page
+      // if no connectors, redirect to create case page
       if (hasConnectors) {
         onEditClick();
       } else {

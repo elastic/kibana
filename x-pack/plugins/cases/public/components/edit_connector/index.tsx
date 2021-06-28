@@ -35,7 +35,6 @@ import { CaseServices } from '../../containers/use_get_case_user_actions';
 
 export interface EditConnectorProps {
   caseData: Case;
-  caseFields: ConnectorTypeFields['fields'];
   caseServices: CaseServices;
   configureCasesNavigation: CasesNavigation;
   connectorName: string;
@@ -51,7 +50,6 @@ export interface EditConnectorProps {
     onSuccess: () => void
   ) => void;
   permissionsError?: string;
-  selectedConnector: string;
   updateCase: (newCase: Case) => void;
   userActions: CaseUserActions[];
   userCanCrud?: boolean;
@@ -114,7 +112,6 @@ const initialState = {
 export const EditConnector = React.memo(
   ({
     caseData,
-    caseFields,
     caseServices,
     configureCasesNavigation,
     connectorName,
@@ -125,11 +122,12 @@ export const EditConnector = React.memo(
     isValidConnector,
     onSubmit,
     permissionsError,
-    selectedConnector,
     updateCase,
     userActions,
     userCanCrud = true,
   }: EditConnectorProps) => {
+    const caseFields = caseData.connector.fields;
+    const selectedConnector = caseData.connector.id;
     const { form } = useForm({
       defaultValue: { connectorId: selectedConnector },
       options: { stripEmptyFields: false },
@@ -264,7 +262,7 @@ export const EditConnector = React.memo(
         </MyFlexGroup>
         <EuiHorizontalRule margin="xs" />
         <MyFlexGroup data-test-subj="edit-connectors" direction="column">
-          {!isLoading && !editConnector && pushCallouts && (
+          {!isLoading && !editConnector && pushCallouts && permissionsError == null && (
             <EuiFlexItem data-test-subj="push-callouts">{pushCallouts}</EuiFlexItem>
           )}
           <DisappearingFlexItem $isHidden={!editConnector}>

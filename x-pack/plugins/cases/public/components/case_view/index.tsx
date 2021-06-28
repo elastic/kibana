@@ -413,7 +413,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 />
                 <EditConnector
                   caseData={caseData}
-                  caseFields={caseData.connector.fields}
                   caseServices={caseServices}
                   configureCasesNavigation={configureCasesNavigation}
                   connectorName={connectorName}
@@ -426,7 +425,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   isValidConnector={isLoadingConnectors ? true : isValidConnector}
                   onSubmit={onSubmitConnector}
                   permissionsError={permissionsError}
-                  selectedConnector={caseData.connector.id}
                   updateCase={handleUpdateCase}
                   userActions={caseUserActions}
                   userCanCrud={userCanCrud}
