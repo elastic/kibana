@@ -160,9 +160,7 @@ export const useFetchIndex = (
                 const stringifyIndices = response.indicesExist.sort().join();
 
                 previousIndexesName.current = response.indicesExist;
-                setLoading((prevValue) => {
-                  return false;
-                });
+                setLoading(false);
 
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
