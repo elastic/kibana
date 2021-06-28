@@ -23,7 +23,7 @@ export type EventFields = Record<string, unknown>;
 
 export interface CtiEventEnrichmentStrategyResponse extends IEsSearchResponse {
   enrichments: CtiEnrichment[];
-  inspect: Inspect | null;
+  inspect: Inspect;
   totalCount: number;
 }
 

@@ -37,7 +37,7 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
           inputId: 'global',
           id: QUERY_ID,
           inspect: {
-            dsl: result.inspect?.dsl ?? [],
+            dsl: result.inspect.dsl,
             response: [JSON.stringify(result.rawResponse, null, 2)],
           },
           loading,
