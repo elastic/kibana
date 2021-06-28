@@ -94,7 +94,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplate
   );
   const mobileTitleText = (
     <FormattedMessage
-      id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
+      id="kibana-react.solutionNav.mobileTitleText"
       defaultMessage="{solutionName} Menu"
       values={{ solutionName: name || 'Navigation' }}
     />
