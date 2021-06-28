@@ -20,7 +20,7 @@ import { InitialAppData } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
-import { mountFlashMessagesLogic } from './shared/flash_messages';
+import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
@@ -45,10 +45,10 @@ export const renderApp = (
   const unmountKibanaLogic = mountKibanaLogic({
     config,
     charts: plugins.charts,
-    cloud: plugins.cloud || {},
+    cloud: plugins.cloud,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
-    security: plugins.security || {},
+    security: plugins.security,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
     setChromeIsVisible: core.chrome.setIsVisible,
     setDocTitle: core.chrome.docTitle.change,
@@ -71,6 +71,7 @@ export const renderApp = (
       <Provider store={store}>
         <Router history={params.history}>
           <App {...initialData} />
+          <Toasts />
         </Router>
       </Provider>
     </I18nProvider>,

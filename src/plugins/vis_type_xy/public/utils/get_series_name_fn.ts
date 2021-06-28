@@ -8,20 +8,9 @@
 
 import { memoize } from 'lodash';
 
-import { i18n } from '@kbn/i18n';
 import { XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 
 import { VisConfig } from '../types';
-
-const emptyTextLabel = i18n.translate('visTypeXy.emptyTextColumnValue', {
-  defaultMessage: '(empty)',
-});
-
-/**
- * Returns empty values
- */
-export const fillEmptyValue = <T extends string | number | undefined>(value: T) =>
-  value === '' ? emptyTextLabel : value;
 
 function getSplitValues(
   splitAccessors: XYChartSeriesIdentifier['splitAccessors'],
@@ -36,7 +25,7 @@ function getSplitValues(
     const split = (seriesAspects ?? []).find(({ accessor }) => accessor === key);
     splitValues.push(split?.formatter ? split?.formatter(value) : value);
   });
-  return splitValues.map(fillEmptyValue);
+  return splitValues;
 }
 
 export const getSeriesNameFn = (aspects: VisConfig['aspects'], multipleY = false) =>
