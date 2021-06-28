@@ -42,7 +42,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
   refreshMessage,
   actionHandler,
 }) => {
-  const columns: Array<EuiBasicTableColumn<any>> = [
+  const columns: Array<EuiBasicTableColumn<JobMessage>> = [
     {
       name: refreshMessage ? (
         <EuiToolTip
@@ -102,15 +102,15 @@ export const JobMessages: FC<JobMessagesProps> = ({
               <EuiToolTip
                 content={
                   <FormattedMessage
-                    id="xpack.ml.jobMessages..showInChartTooltipText"
-                    defaultMessage="Show in chart"
+                    id="xpack.ml.jobMessages.toggleInChartTooltipText"
+                    defaultMessage="Toggle in chart"
                   />
                 }
               >
                 <EuiButtonIcon
                   size="xs"
-                  aria-label={i18n.translate('xpack.ml.jobMessages.showInChartAriaLabel', {
-                    defaultMessage: 'Show in chart',
+                  aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
+                    defaultMessage: 'Toggle in chart',
                   })}
                   iconType="visAreaStacked"
                   onClick={() => actionHandler(message)}

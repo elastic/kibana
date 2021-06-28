@@ -177,7 +177,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
   return (
     <EuiPortal>
       <EuiFlyout
-        size="l"
+        size="m"
         ownFocus
         onClose={onClose.bind(null, false)}
         aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
@@ -472,18 +472,35 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
               </EuiFlexItem>
               {range !== undefined ? (
                 <EuiFlexItem grow={false}>
-                  <JobMessagesPane
-                    jobId={jobId}
-                    {...range}
-                    actionHandler={(message: JobMessage) => {
-                      const datum = setLineAnnotationHeader({
-                        dataValue: message.timestamp,
-                        details: message.message,
-                      });
+                  <EuiFlexGroup direction="column">
+                    <EuiTitle size="xs">
+                      <h4>
+                        <FormattedMessage
+                          id="xpack.ml.jobsList.datafeedChart.messagesTableTitle"
+                          defaultMessage="Job messages"
+                        />
+                      </h4>
+                    </EuiTitle>
+                    <JobMessagesPane
+                      jobId={jobId}
+                      {...range}
+                      actionHandler={function toggleChartMessage(message: JobMessage) {
+                        if (
+                          messageData.length > 0 &&
+                          messageData[0].dataValue === message.timestamp
+                        ) {
+                          setMessageData([]);
+                        } else {
+                          const datum = setLineAnnotationHeader({
+                            dataValue: message.timestamp,
+                            details: message.message,
+                          });
 
-                      setMessageData([datum]);
-                    }}
-                  />
+                          setMessageData([datum]);
+                        }
+                      }}
+                    />
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
