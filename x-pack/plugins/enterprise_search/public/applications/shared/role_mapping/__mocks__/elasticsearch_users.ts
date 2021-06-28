@@ -9,5 +9,6 @@ export const elasticsearchUsers = [
   {
     email: 'user1@user.com',
     username: 'user1',
+    enabled: true,
   },
 ];

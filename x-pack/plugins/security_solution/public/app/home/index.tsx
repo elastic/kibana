@@ -16,7 +16,7 @@ import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
 import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
+import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { isDetectionsPath } from '../../helpers';
@@ -47,7 +47,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
   // a background task solution can be built on the server side. Once a background task solution is available we
   // can remove this.
-  useUpgradeEndpointPackage();
+  useUpgradeSecurityPackages();
 
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">

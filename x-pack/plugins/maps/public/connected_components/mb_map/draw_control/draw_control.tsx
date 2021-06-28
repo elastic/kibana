@@ -13,6 +13,7 @@ import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
+import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
 import { DrawCircle, DRAW_CIRCLE_RADIUS_MB_FILTER } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
@@ -37,6 +38,7 @@ mbDrawModes[DRAW_CIRCLE] = DrawCircle;
 export interface Props {
   drawShape?: DRAW_SHAPE;
   onDraw: (event: { features: Feature[] }, drawControl?: MapboxDraw) => void;
+  onClick?: (event: MapMouseEvent, drawControl?: MapboxDraw) => void;
   mbMap: MbMap;
   enable: boolean;
   updateEditShape: (shapeToDraw: DRAW_SHAPE) => void;
@@ -68,6 +70,12 @@ export class DrawControl extends Component<Props> {
     this.props.onDraw(event, this._mbDrawControl);
   };
 
+  _onClick = (event: MapMouseEvent) => {
+    if (this.props.onClick) {
+      this.props.onClick(event, this._mbDrawControl);
+    }
+  };
+
   // debounce with zero timeout needed to allow mapbox-draw finish logic to complete
   // before _removeDrawControl is called
   _syncDrawControl = _.debounce(() => {
@@ -96,6 +104,9 @@ export class DrawControl extends Component<Props> {
     this.props.mbMap.getCanvas().style.cursor = '';
     this.props.mbMap.off('draw.modechange', this._onModeChange);
     this.props.mbMap.off('draw.create', this._onDraw);
+    if (this.props.onClick) {
+      this.props.mbMap.off('click', this._onClick);
+    }
     this.props.mbMap.removeLayer(GL_DRAW_RADIUS_LABEL_LAYER_ID);
     this.props.mbMap.removeControl(this._mbDrawControl);
     this._mbDrawControlAdded = false;
@@ -131,6 +142,9 @@ export class DrawControl extends Component<Props> {
       this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.modechange', this._onModeChange);
       this.props.mbMap.on('draw.create', this._onDraw);
+      if (this.props.onClick) {
+        this.props.mbMap.on('click', this._onClick);
+      }
     }
 
     const { DRAW_LINE_STRING, DRAW_POLYGON, DRAW_POINT, SIMPLE_SELECT } = this._mbDrawControl.modes;
