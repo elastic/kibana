@@ -59,14 +59,14 @@ container per host CPU with a single Kibana process per container).
 
 In 'classic' mode, the Kibana server is started in the main Node.js process.
 
-![image](../images/15_clustering/no-cluster-mode.png)
+![image](../images/20_clustering/no_cluster_mode.png)
 
 In clustering mode, the main Node.js process would only start the coordinator, which would then
 fork workers using Node's `cluster` API. Node's underlying socket implementation allows multiple
 processes to listen to the same ports, effectively performing http traffic balancing between the
 workers for us.
 
-![image](../images/15_clustering/cluster-mode.png)
+![image](../images/20_clustering/cluster_mode.png)
 
 The coordinator's primary responsibility is to orchestrate the workers. It would not be a 'super'
 worker handling both the job of a worker while being in charge of managing the other workers.
@@ -97,15 +97,15 @@ Intel Core i9 - 32 GB 2400 MHz DDR4), using the default configuration of the `ki
 
 #### Non-clustered mode
 
-![image](../images/15_clustering/perf-no-clustering.png)
+![image](../images/20_clustering/perf_no_clustering.png)
 
 #### Clustered mode, 2 workers
 
-![image](../images/15_clustering/perf-clustering-2-worker.png)
+![image](../images/20_clustering/perf_clustering_2_worker.png)
 
 #### Clustered mode, 4 workers
 
-![image](../images/15_clustering/perf-4-workers.png)
+![image](../images/20_clustering/perf_4_workers.png)
 
 ### 4.1.2 Analysis 
 
