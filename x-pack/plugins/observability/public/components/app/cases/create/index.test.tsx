@@ -21,7 +21,7 @@ jest.mock('../../../../utils/kibana_react');
 describe('Create case', () => {
   const mockCreateCase = jest.fn();
   const mockNavigateToUrl = jest.fn();
-  const mockCasesUrl = 'https://elastic.co/app/observability/cases';
+  const mockObservabilityUrl = 'https://elastic.co/app/observability';
   beforeEach(() => {
     jest.resetAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
@@ -29,7 +29,7 @@ describe('Create case', () => {
         cases: {
           getCreateCase: mockCreateCase,
         },
-        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockCasesUrl },
+        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockObservabilityUrl },
       },
     });
   });
@@ -53,7 +53,7 @@ describe('Create case', () => {
             onCancel();
           },
         },
-        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockCasesUrl },
+        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockObservabilityUrl },
       },
     });
     mount(
@@ -62,7 +62,9 @@ describe('Create case', () => {
       </EuiThemeProvider>
     );
 
-    await waitFor(() => expect(mockNavigateToUrl).toHaveBeenCalledWith(`${mockCasesUrl}`));
+    await waitFor(() =>
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(`${mockObservabilityUrl}/cases`)
+    );
   });
 
   it('should redirect to new case when posting the case', async () => {
@@ -73,7 +75,7 @@ describe('Create case', () => {
             onSuccess(basicCase);
           },
         },
-        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockCasesUrl },
+        application: { navigateToUrl: mockNavigateToUrl, getUrlForApp: () => mockObservabilityUrl },
       },
     });
     mount(
@@ -85,7 +87,7 @@ describe('Create case', () => {
     await waitFor(() =>
       expect(mockNavigateToUrl).toHaveBeenNthCalledWith(
         1,
-        `${mockCasesUrl}${getCaseDetailsUrl({ id: basicCase.id })}`
+        `${mockObservabilityUrl}/cases${getCaseDetailsUrl({ id: basicCase.id })}`
       )
     );
   });
