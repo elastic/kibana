@@ -36,8 +36,12 @@ export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<Kiba
     className
   );
 
-  const label = i18n.translate('kibana-react.solutionNav.collapsibleLabel', {
+  const collapseLabel = i18n.translate('kibana-react.solutionNav.collapsibleLabel', {
     defaultMessage: 'Collapse side navigation',
+  });
+
+  const openLabel = i18n.translate('kibana-react.solutionNav.openLabel', {
+    defaultMessage: 'Open side navigation',
   });
 
   return (
@@ -47,8 +51,8 @@ export const KibanaPageTemplateSolutionNavCollapseButton: FunctionComponent<Kiba
       size="s"
       display="fill"
       color="text"
-      aria-label={label}
-      title={label}
+      aria-label={isCollapsed ? openLabel : collapseLabel}
+      title={isCollapsed ? openLabel : collapseLabel}
       {...rest}
     />
   );
