@@ -15,9 +15,16 @@ import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../fleet/common/constants';
 import {
+  AGENTS_SETUP_API_ROUTES,
+  EPM_API_ROUTES,
+  SETUP_API_ROUTE,
+} from '../../../fleet/common/constants';
+import {
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
   CreateFleetSetupResponse,
+  IBulkInstallPackageHTTPError,
   PostIngestSetupResponse,
 } from '../../../fleet/common/types/rest_spec';
 import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
@@ -42,6 +49,12 @@ async function deleteIndices(indices: string[], client: Client) {
       handleErr(err);
     }
   }
+}
+
+function isFleetBulkInstallError(
+  installResponse: BulkInstallPackageInfo | IBulkInstallPackageHTTPError
+): installResponse is IBulkInstallPackageHTTPError {
+  return 'error' in installResponse && installResponse.error !== undefined;
 }
 
 async function doIngestSetup(kbnClient: KbnClient) {
@@ -71,6 +84,35 @@ async function doIngestSetup(kbnClient: KbnClient) {
     if (!setupResponse.data.isInitialized) {
       console.error(setupResponse.data);
       throw new Error('Initializing Fleet failed, existing');
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+
+  // Install/upgrade the endpoint package
+  try {
+    const installEndpointPackageResp = (await kbnClient.request({
+      path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
+      method: 'POST',
+      body: {
+        packages: ['endpoint'],
+      },
+    })) as AxiosResponse<BulkInstallPackagesResponse>;
+
+    const bulkResp = installEndpointPackageResp.data.response;
+    if (bulkResp.length <= 0) {
+      throw new Error('Installing the Endpoint package failed, response was empty, existing');
+    }
+
+    if (isFleetBulkInstallError(bulkResp[0])) {
+      if (bulkResp[0].error instanceof Error) {
+        throw new Error(
+          `Installing the Endpoint package failed: ${bulkResp[0].error.message}, exiting`
+        );
+      }
+
+      throw new Error(bulkResp[0].error);
     }
   } catch (error) {
     console.error(error);
