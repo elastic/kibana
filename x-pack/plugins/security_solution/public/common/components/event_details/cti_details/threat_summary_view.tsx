@@ -31,6 +31,7 @@ export interface ThreatSummaryItem {
     timelineId: string;
     eventId: string;
     fieldName: string | undefined;
+    index: number;
     value: string | undefined;
     provider: string | undefined;
   };
@@ -62,42 +63,46 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
   timelineId,
   eventId,
   fieldName,
+  index,
   value,
   provider,
-}) => (
-  <FlexContainer>
-    <RightMargin>
-      <FormattedFieldValue // TODO this contextId is not sufficient, at least with my test data
-        key={`alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}-key`}
-        contextId={`alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}`}
-        eventId={eventId}
-        fieldName={fieldName || 'unknown'}
-        value={value}
-      />
-    </RightMargin>
-    {provider && (
-      <>
-        <RightMargin>
-          <EuiText size="xs">
-            <em>{i18n.PROVIDER_PREPOSITION}</em>
-          </EuiText>
-        </RightMargin>
-        <RightMargin>
-          <EuiText grow={false} size="xs">
-            {provider}
-          </EuiText>
-        </RightMargin>
-      </>
-    )}
-  </FlexContainer>
-);
+}) => {
+  const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}-${index}-${provider}`;
+  return (
+    <FlexContainer>
+      <RightMargin>
+        <FormattedFieldValue
+          key={key}
+          contextId={key}
+          eventId={eventId}
+          fieldName={fieldName || 'unknown'}
+          value={value}
+        />
+      </RightMargin>
+      {provider && (
+        <>
+          <RightMargin>
+            <EuiText size="xs">
+              <em>{i18n.PROVIDER_PREPOSITION}</em>
+            </EuiText>
+          </RightMargin>
+          <RightMargin>
+            <EuiText grow={false} size="xs">
+              {provider}
+            </EuiText>
+          </RightMargin>
+        </>
+      )}
+    </FlexContainer>
+  );
+};
 
 const buildThreatSummaryItems = (
   enrichments: CtiEnrichment[],
   timelineId: string,
   eventId: string
 ) => {
-  return enrichments.map((enrichment) => {
+  return enrichments.map((enrichment, index) => {
     const field = getEnrichmentValue(enrichment, MATCHED_FIELD);
     const value = getEnrichmentValue(enrichment, MATCHED_ATOMIC);
     const type = getEnrichmentValue(enrichment, MATCHED_TYPE);
@@ -111,6 +116,7 @@ const buildThreatSummaryItems = (
       description: {
         eventId,
         fieldName: field,
+        index,
         provider,
         timelineId,
         value,
