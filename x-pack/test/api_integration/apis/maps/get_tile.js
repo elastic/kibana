@@ -93,6 +93,7 @@ export default function ({ getService }) {
         __kbn_metadata_feature__: true,
         __kbn_feature_count__: 0,
         __kbn_is_tile_complete__: false,
+        __kbn_vector_shape_type_counts__: '{"POINT":0,"LINE":0,"POLYGON":0}',
       });
       expect(metadataFeature.loadGeometry()).to.eql([
         [
