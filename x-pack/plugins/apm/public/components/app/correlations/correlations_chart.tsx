@@ -6,9 +6,6 @@
  */
 
 import React from 'react';
-
-import { max } from 'd3-array';
-
 import {
   AnnotationDomainType,
   Chart,
@@ -141,7 +138,8 @@ export function CorrelationsChart({
     { dataValue: markerValue, details: `${markerPercentile}th percentile` },
   ];
 
-  const xMax = max(overallHistogram.map((d) => d.key)) ?? 0;
+  const xMax = Math.max(...overallHistogram.map((d) => d.key)) ?? 0;
+
   const durationFormatter = getDurationFormatter(xMax);
 
   const histogram = replaceHistogramDotsWithBars(originalHistogram);
