@@ -29,7 +29,7 @@ const emptyUser = { username: '', email: '' };
 
 describe('RoleMappingsLogic', () => {
   const { http } = mockHttpValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(RoleMappingsLogic);
   const DEFAULT_VALUES = {
     attributes: [],
@@ -58,6 +58,8 @@ describe('RoleMappingsLogic', () => {
     userCreated: false,
     userFormIsNewUser: true,
     userFormUserIsExisting: true,
+    smtpSettingsPresent: false,
+    formLoading: false,
   };
 
   const mappingsServerProps = {
@@ -70,6 +72,7 @@ describe('RoleMappingsLogic', () => {
     hasAdvancedRoles: false,
     singleUserRoleMappings: [asSingleUserRoleMapping],
     elasticsearchUsers,
+    smtpSettingsPresent: false,
   };
 
   beforeEach(() => {
@@ -516,7 +519,7 @@ describe('RoleMappingsLogic', () => {
         await nextTick();
 
         expect(initializeRoleMappingsSpy).toHaveBeenCalled();
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('sends array when "accessAllEngines" is false', () => {
@@ -667,7 +670,7 @@ describe('RoleMappingsLogic', () => {
         await nextTick();
 
         expect(initializeRoleMappingsSpy).toHaveBeenCalled();
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('handles error', async () => {
