@@ -7,10 +7,10 @@
 
 import { CoreSetup } from 'kibana/public';
 import React from 'react';
-import { ReportingAPIClient } from '../..';
-import { PDF_REPORT_TYPE } from '../../../common/constants';
-import type { Props as PanelPropsScreenCapture } from '../screen_capture_panel_content';
-import { ScreenCapturePanelContent } from '../screen_capture_panel_content_lazy';
+import { ReportingAPIClient } from '../';
+import { PDF_REPORT_TYPE } from '../../common/constants';
+import type { Props as PanelPropsScreenCapture } from '../share_context_menu/screen_capture_panel_content';
+import { ScreenCapturePanelContent } from '../share_context_menu/screen_capture_panel_content_lazy';
 
 interface IncludeOnCloseFn {
   onClose: () => void;

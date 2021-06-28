@@ -9,9 +9,9 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ReportInfoButton } from './report_info_button';
 
-jest.mock('../../lib/reporting_api_client');
+jest.mock('../lib/reporting_api_client');
 
-import { ReportingAPIClient } from '../../lib/reporting_api_client';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 const httpSetup = {} as any;
 const apiClient = new ReportingAPIClient(httpSetup);

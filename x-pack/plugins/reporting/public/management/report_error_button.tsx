@@ -8,9 +8,9 @@
 import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { JOB_STATUSES } from '../../../common/constants';
-import { JobContent, ReportingAPIClient } from '../../lib/reporting_api_client';
-import { Job as ListingJob } from '../report_listing';
+import { JOB_STATUSES } from '../../common/constants';
+import { JobContent, ReportingAPIClient } from '../lib/reporting_api_client';
+import { Job as ListingJob } from './report_listing';
 
 interface Props {
   intl: InjectedIntl;
