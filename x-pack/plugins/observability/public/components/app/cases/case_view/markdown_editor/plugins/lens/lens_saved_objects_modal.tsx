@@ -12,7 +12,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useMemo } from 'react';
 
 import {
   SavedObjectFinderUi,
@@ -33,12 +35,34 @@ const LensSavedObjectsModalComponent: React.FC<LensSavedObjectsModalProps> = ({
 }) => {
   const { savedObjects, uiSettings } = useKibana().services;
 
+  const savedObjectMetaData = useMemo(
+    () => [
+      {
+        type: 'lens',
+        getIconForSavedObject: () => 'lensApp',
+        name: i18n.translate(
+          'xpack.observability.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.savedObjectType.lens',
+          {
+            defaultMessage: 'Lens',
+          }
+        ),
+        includeFields: ['*'],
+      },
+    ],
+    []
+  );
+
   return (
     <EuiModal onClose={onClose}>
       <ModalContainer>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>{'Modal title'}</h1>
+            <h1>
+              <FormattedMessage
+                id="xpack.observability.markdownEditor.plugins.lens.insertLensSavedObjectModal.modalTitle"
+                defaultMessage="Add Lens from library"
+              />
+            </h1>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
@@ -48,29 +72,12 @@ const LensSavedObjectsModalComponent: React.FC<LensSavedObjectsModalProps> = ({
             onChoose={onChoose}
             showFilter
             noItemsMessage={
-              'No matching lens found.'
-
-              // i18n.translate(
-              //   'xpack.transform.newTransform.searchSelection.notFoundLabel',
-              //   {
-              //     defaultMessage: 'No matching lens found.',
-              //   }
-              // )
+              <FormattedMessage
+                id="xpack.observability.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel"
+                defaultMessage="'No matching lens found."
+              />
             }
-            savedObjectMetaData={[
-              {
-                type: 'lens',
-                getIconForSavedObject: () => 'lensApp',
-                name: 'Lens',
-                includeFields: ['*'],
-                // i18n.translate(
-                //   'xpack.transform.newTransform.searchSelection.savedObjectType.search',
-                //   {
-                //     defaultMessage: 'Lens',
-                //   }
-                // ),
-              },
-            ]}
+            savedObjectMetaData={savedObjectMetaData}
             fixedPageSize={10}
             uiSettings={uiSettings}
             savedObjects={savedObjects}

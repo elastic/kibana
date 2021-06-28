@@ -53,6 +53,7 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
+import { DRAFT_COMMENT_STORAGE_ID } from './constants';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -615,9 +616,9 @@ export const UserActionTree = React.memo(
 
         if (incomingEmbeddablePackage) {
           let draftComment;
-          if (storage.get('xpack.cases.commentDraft')) {
+          if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
             try {
-              draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+              draftComment = JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID));
               // eslint-disable-next-line no-empty
             } catch (e) {}
           }
@@ -639,7 +640,7 @@ export const UserActionTree = React.memo(
               commentRefs.current[draftComment.commentId].setComment(draftComment.comment);
               const lensPluginButton = commentRefs.current[
                 draftComment.commentId
-              ].editor?.toolbar?.querySelector('[aria-label="Insert lens link"]');
+              ].editor?.toolbar?.querySelector(`[aria-label="${i18n.INSERT_LENS}"]`);
               if (lensPluginButton) {
                 lensPluginButton.click();
               }

@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export const ID = 'lens';
-export const PREFIX = `[`;
-export const LENS_VISUALIZATION_HEIGHT = 200;
 export const DRAFT_COMMENT_STORAGE_ID = 'xpack.cases.commentDraft';

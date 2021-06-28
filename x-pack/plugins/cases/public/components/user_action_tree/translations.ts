@@ -56,3 +56,10 @@ export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlert
 export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.label', {
   defaultMessage: 'Unknown rule',
 });
+
+export const INSERT_LENS = i18n.translate(
+  'xpack.cases.markdownEditor.plugins.lens.insertLensButtonLabel',
+  {
+    defaultMessage: 'Insert lens visualization',
+  }
+);

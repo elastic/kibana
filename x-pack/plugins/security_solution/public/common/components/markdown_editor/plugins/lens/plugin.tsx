@@ -24,14 +24,15 @@ import {
   EuiMarkdownAstNodePosition,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
 import type { TypedLensByValueInput } from '../../../../../../../lens/public';
 import { useKibana } from '../../../../lib/kibana';
 import { LensMarkDownRenderer } from './processor';
-import { ID } from './constants';
-import * as i18n from './translations';
+import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from './context';
 import { LensSavedObjectsModal } from './lens_saved_objects_modal';
 import { ModalContainer } from './modal_container';
@@ -98,9 +99,9 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
   const handleAdd = useCallback(() => {
     let draftComment;
-    if (storage.get('xpack.cases.commentDraft')) {
+    if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
       try {
-        draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+        draftComment = JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID));
         // eslint-disable-next-line no-empty
       } catch (e) {}
     }
@@ -113,7 +114,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     if (!node && draftComment.position) {
       markdownContext.replaceNode(
         draftComment.position,
-        `!{lens${JSON.stringify({
+        `!{${ID}${JSON.stringify({
           startDate,
           endDate,
           title: lensTitle,
@@ -127,7 +128,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
     if (lensEmbeddableAttributes) {
       onSave(
-        `!{lens${JSON.stringify({
+        `!{${ID}${JSON.stringify({
           startDate,
           endDate,
           title: lensTitle,
@@ -159,7 +160,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
   const handleEditInLensClick = useCallback(async () => {
     storage.set(
-      'xpack.cases.commentDraft',
+      DRAFT_COMMENT_STORAGE_ID,
       JSON.stringify({
         commentId: commentEditorContext?.editorId,
         comment: commentEditorContext?.value,
@@ -242,9 +243,9 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     }
 
     let draftComment;
-    if (storage.get('xpack.cases.commentDraft')) {
+    if (storage.get(DRAFT_COMMENT_STORAGE_ID)) {
       try {
-        draftComment = JSON.parse(storage.get('xpack.cases.commentDraft'));
+        draftComment = JSON.parse(storage.get(DRAFT_COMMENT_STORAGE_ID));
         if (draftComment.title) {
           setLensTitle(draftComment.title);
         }
@@ -259,7 +260,17 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       <ModalContainer>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            {node ? 'Edit Lens visualization' : 'Add Lens visualization'}
+            {editMode ? (
+              <FormattedMessage
+                id="xpack.securitySolution.markdownEditor.plugins.lens.editVisualizationModalTitle"
+                defaultMessage="Edit Lens visualization"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.markdownEditor.plugins.lens.addVisualizationModalTitle"
+                defaultMessage="Add Lens visualization"
+              />
+            )}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
@@ -272,7 +283,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                 iconType="lensApp"
                 fill
               >
-                {'Create visualization'}
+                <FormattedMessage
+                  id="xpack.securitySolution.markdownEditor.plugins.lens.createVisualizationButtonLabel"
+                  defaultMessage="Create visualization"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -282,7 +296,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                 iconType="folderOpen"
                 onClick={() => setShowLensSavedObjectsModal(true)}
               >
-                {'Add from library'}
+                <FormattedMessage
+                  id="xpack.securitySolution.markdownEditor.plugins.lens.addVisualizationFromLibraryButtonLabel"
+                  defaultMessage="Add Lens from library"
+                />
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -291,7 +308,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
               <EuiFlexItem>
                 <EuiFormRow label="Title">
                   <EuiFieldText
-                    placeholder="Placeholder text"
+                    placeholder={i18n.translate(
+                      'xpack.securitySolution.markdownEditor.plugins.lens.visualizationTitleFieldPlaceholder',
+                      {
+                        defaultMessage: 'Visualization title',
+                      }
+                    )}
                     value={lensTitle}
                     onChange={handleTitleChange}
                   />
@@ -304,7 +326,10 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                   isDisabled={!lens?.canUseEditor() || lensEmbeddableAttributes === null}
                   onClick={handleEditInLensClick}
                 >
-                  {`Edit in Lens`}
+                  <FormattedMessage
+                    id="xpack.securitySolution.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
+                    defaultMessage="Edit in Lens"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -320,7 +345,17 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
           <EuiButton onClick={handleAdd} fill disabled={!lensEmbeddableAttributes || !lensTitle}>
-            {editMode ? 'Update' : 'Add to a Case'}
+            {editMode ? (
+              <FormattedMessage
+                id="xpack.securitySolution.markdownEditor.plugins.lens.updateVisualizationButtonLabel"
+                defaultMessage="Update"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.securitySolution.markdownEditor.plugins.lens.addVisualizationToCaseButtonLabel"
+                defaultMessage="Add to a Case"
+              />
+            )}
           </EuiButton>
         </EuiModalFooter>
       </ModalContainer>
@@ -336,7 +371,12 @@ export const LensEditor = React.memo(LensEditorComponent);
 export const plugin: LensEuiMarkdownEditorUiPlugin = {
   name: ID,
   button: {
-    label: i18n.INSERT_LENS,
+    label: i18n.translate(
+      'xpack.securitySolution.markdownEditor.plugins.lens.insertLensButtonLabel',
+      {
+        defaultMessage: 'Insert lens visualization',
+      }
+    ),
     iconType: 'lensApp',
   },
   helpText: (
