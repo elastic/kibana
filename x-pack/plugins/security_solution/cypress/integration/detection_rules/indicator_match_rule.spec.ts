@@ -502,13 +502,13 @@ describe('indicator match', () => {
         cy.get(PROVIDER_BADGE).should('have.length', 3);
         cy.get(PROVIDER_BADGE).should(
           'have.text',
-          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "${newThreatIndicatorRule.type}"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
+          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "indicator_match_rule"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
         );
 
         cy.readFile(threatIndicatorPath).then((threatIndicator) => {
           cy.get(INDICATOR_MATCH_ROW_RENDER).should(
             'have.text',
-            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.type${newThreatIndicatorRule.type}${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
+            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.typeindicator_match_rule${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
           );
         });
       });
