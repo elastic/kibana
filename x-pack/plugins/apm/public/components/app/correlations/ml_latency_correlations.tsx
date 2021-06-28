@@ -162,7 +162,12 @@ export function MlLatencyCorrelations({ onClose }: Props) {
                   defaultMessage: 'Correlation',
                 }
               )}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" />
+              <EuiIcon
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+              />
             </>
           </EuiToolTip>
         ),
