@@ -5,49 +5,49 @@
  * 2.0.
  */
 
-import { createMapsUrlGenerator } from './url_generator';
 import { LAYER_TYPE, SOURCE_TYPES, SCALING_TYPES } from '../common/constants';
 import { esFilters } from '../../../../src/plugins/data/public';
+import { MapsAppLocatorDefinition } from './locators';
+import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
+import { LayerDescriptor } from '../common/descriptor_types';
 
-const APP_BASE_PATH: string = 'test/app/maps';
 const MAP_ID: string = '2c9c1f60-1909-11e9-919b-ffe5949a18d2';
 const LAYER_ID: string = '13823000-99b9-11ea-9eb6-d9e8adceb647';
 const INDEX_PATTERN_ID: string = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
 describe('visualize url generator', () => {
   test('creates a link to a new visualization', async () => {
-    const generator = createMapsUrlGenerator(() =>
-      Promise.resolve({
-        appBasePath: APP_BASE_PATH,
-        useHashedUrl: false,
-      })
-    );
-    const url = await generator.createUrl!({});
-    expect(url).toMatchInlineSnapshot(`"test/app/maps/map#/?_g=()&_a=()"`);
+    const locator = new MapsAppLocatorDefinition({
+      useHash: false,
+    });
+    const location = await locator.getLocation({});
+
+    expect(location).toMatchObject({
+      app: 'maps',
+      path: '/map#/?_g=()&_a=()',
+      state: {},
+    });
   });
 
   test('creates a link with global time range set up', async () => {
-    const generator = createMapsUrlGenerator(() =>
-      Promise.resolve({
-        appBasePath: APP_BASE_PATH,
-        useHashedUrl: false,
-      })
-    );
-    const url = await generator.createUrl!({
+    const locator = new MapsAppLocatorDefinition({
+      useHash: false,
+    });
+    const location = await locator.getLocation({
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
     });
-    expect(url).toMatchInlineSnapshot(
-      `"test/app/maps/map#/?_g=(time:(from:now-15m,mode:relative,to:now))&_a=()"`
-    );
+
+    expect(location).toMatchObject({
+      app: 'maps',
+      path: '/map#/?_g=(time:(from:now-15m,mode:relative,to:now))&_a=()',
+      state: {},
+    });
   });
 
   test('creates a link with initialLayers set up', async () => {
-    const generator = createMapsUrlGenerator(() =>
-      Promise.resolve({
-        appBasePath: APP_BASE_PATH,
-        useHashedUrl: false,
-      })
-    );
+    const locator = new MapsAppLocatorDefinition({
+      useHash: false,
+    });
     const initialLayers = [
       {
         id: LAYER_ID,
@@ -64,22 +64,22 @@ describe('visualize url generator', () => {
         },
       },
     ];
-    const url = await generator.createUrl!({
-      initialLayers,
+    const location = await locator.getLocation({
+      initialLayers: (initialLayers as unknown) as LayerDescriptor[] & SerializableState,
     });
-    expect(url).toMatchInlineSnapshot(
-      `"test/app/maps/map#/?_g=()&_a=()&initialLayers=(id%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CsourceDescriptor%3A(geoField%3Atest%2Cid%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CindexPatternId%3A'90943e30-9a47-11e8-b64d-95841ca0b247'%2Clabel%3A'Sample%20Data'%2CscalingType%3ALIMIT%2CtooltipProperties%3A!()%2Ctype%3AES_SEARCH)%2Ctype%3AVECTOR%2Cvisible%3A!t)"`
-    );
+
+    expect(location).toMatchObject({
+      app: 'maps',
+      path: `/map#/?_g=()&_a=()&initialLayers=(id%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CsourceDescriptor%3A(geoField%3Atest%2Cid%3A'13823000-99b9-11ea-9eb6-d9e8adceb647'%2CindexPatternId%3A'90943e30-9a47-11e8-b64d-95841ca0b247'%2Clabel%3A'Sample%20Data'%2CscalingType%3ALIMIT%2CtooltipProperties%3A!()%2Ctype%3AES_SEARCH)%2Ctype%3AVECTOR%2Cvisible%3A!t)`,
+      state: {},
+    });
   });
 
   test('creates a link with filters, time range, refresh interval and query to a saved visualization', async () => {
-    const generator = createMapsUrlGenerator(() =>
-      Promise.resolve({
-        appBasePath: APP_BASE_PATH,
-        useHashedUrl: false,
-      })
-    );
-    const url = await generator.createUrl!({
+    const locator = new MapsAppLocatorDefinition({
+      useHash: false,
+    });
+    const location = await locator.getLocation({
       timeRange: { to: 'now', from: 'now-15m', mode: 'relative' },
       refreshInterval: { pause: false, value: 300 },
       mapId: MAP_ID,
@@ -106,8 +106,11 @@ describe('visualize url generator', () => {
       ],
       query: { query: 'q2', language: 'kuery' },
     });
-    expect(url).toMatchInlineSnapshot(
-      `"test/app/maps/map#/${MAP_ID}?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),query:(language:kuery,query:q2))"`
-    );
+
+    expect(location).toMatchObject({
+      app: 'maps',
+      path: `/map#/${MAP_ID}?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),refreshInterval:(pause:!f,value:300),time:(from:now-15m,mode:relative,to:now))&_a=(filters:!((meta:(alias:!n,disabled:!f,negate:!f),query:(query:q1))),query:(language:kuery,query:q2))`,
+      state: {},
+    });
   });
 });
