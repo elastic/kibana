@@ -17,7 +17,6 @@ import {
 export interface InitialAppData {
   readOnlyMode?: boolean;
   ilmEnabled?: boolean;
-  isFederatedAuth?: boolean;
   configuredLimits?: ConfiguredLimits;
   access?: ProductAccess;
   appSearch?: AppSearchAccount;
