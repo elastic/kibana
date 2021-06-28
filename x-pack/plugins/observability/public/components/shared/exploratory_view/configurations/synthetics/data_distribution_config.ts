@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
-import { FieldLabels, RECORDS_FIELD } from '../constants';
+import { ConfigProps, SeriesConfig } from '../../types';
+import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
 import { buildExistsFilter } from '../utils';
 import { MONITORS_DURATION_LABEL, PINGS_LABEL } from '../constants/labels';
 
-export function getSyntheticsDistributionConfig({ series, indexPattern }: ConfigProps): DataSeries {
+export function getSyntheticsDistributionConfig({
+  series,
+  indexPattern,
+}: ConfigProps): SeriesConfig {
   return {
     reportType: 'data-distribution',
     defaultSeriesType: series?.seriesType || 'line',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: 'performance.metric',
+      sourceField: REPORT_METRIC_FIELD,
     },
     yAxisColumns: [
       {
@@ -25,8 +28,8 @@ export function getSyntheticsDistributionConfig({ series, indexPattern }: Config
       },
     ],
     hasOperationType: false,
-    defaultFilters: ['monitor.type', 'observer.geo.name', 'tags'],
-    breakdowns: [
+    filterFields: ['monitor.type', 'observer.geo.name', 'tags'],
+    breakdownFields: [
       'observer.geo.name',
       'monitor.name',
       'monitor.id',
@@ -34,21 +37,10 @@ export function getSyntheticsDistributionConfig({ series, indexPattern }: Config
       'tags',
       'url.port',
     ],
-    filters: [...buildExistsFilter('summary.up', indexPattern)],
-    reportDefinitions: [
-      {
-        field: 'monitor.name',
-      },
-      {
-        field: 'url.full',
-      },
-      {
-        field: 'performance.metric',
-        custom: true,
-        options: [
-          { label: 'Monitor duration', id: 'monitor.duration.us', field: 'monitor.duration.us' },
-        ],
-      },
+    baseFilters: [...buildExistsFilter('summary.up', indexPattern)],
+    definitionFields: ['monitor.name', 'url.full'],
+    metricOptions: [
+      { label: 'Monitor duration', id: 'monitor.duration.us', field: 'monitor.duration.us' },
     ],
     labels: { ...FieldLabels, 'monitor.duration.us': MONITORS_DURATION_LABEL },
   };
