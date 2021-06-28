@@ -14,12 +14,11 @@ import {
   getCreateRuleUrl,
   getEditRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import * as i18nDetections from '../translations';
 import * as i18nRules from './translations';
 import { RouteSpyState } from '../../../../common/utils/route/types';
 import { GetUrlForApp } from '../../../../common/components/navigation/types';
 import { SecurityPageName } from '../../../../app/types';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_ID, RULES_PATH } from '../../../../../common/constants';
 import { RuleStep, RuleStepsOrder } from './types';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -29,14 +28,8 @@ export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.ruleActions,
 ];
 
-const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetUrlForApp) => {
+const getRulesBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetUrlForApp) => {
   const tabPath = pathname.split('/')[1];
-
-  if (tabPath === 'alerts') {
-    return {
-      text: i18nDetections.ALERT,
-    };
-  }
 
   if (tabPath === 'rules') {
     return {
@@ -50,10 +43,10 @@ const getTabBreadcrumb = (pathname: string, search: string[], getUrlForApp: GetU
 };
 
 const isRuleCreatePage = (pathname: string) =>
-  pathname.includes('/rules') && pathname.includes('/create');
+  pathname.includes(RULES_PATH) && pathname.includes('/create');
 
 const isRuleEditPage = (pathname: string) =>
-  pathname.includes('/rules') && pathname.includes('/edit');
+  pathname.includes(RULES_PATH) && pathname.includes('/edit');
 
 export const getBreadcrumbs = (
   params: RouteSpyState,
@@ -62,10 +55,10 @@ export const getBreadcrumbs = (
 ): ChromeBreadcrumb[] => {
   let breadcrumb: ChromeBreadcrumb[] = [];
 
-  const tabBreadcrumb = getTabBreadcrumb(params.pathName, search, getUrlForApp);
+  const rulesBreadcrumb = getRulesBreadcrumb(params.pathName, search, getUrlForApp);
 
-  if (tabBreadcrumb) {
-    breadcrumb = [...breadcrumb, tabBreadcrumb];
+  if (rulesBreadcrumb) {
+    breadcrumb = [...breadcrumb, rulesBreadcrumb];
   }
 
   if (params.detailName && params.state?.ruleName) {

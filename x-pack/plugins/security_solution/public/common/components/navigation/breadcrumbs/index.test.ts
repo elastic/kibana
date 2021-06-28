@@ -73,6 +73,27 @@ const getMockObject = (
       name: 'Timelines',
       urlKey: 'timeline',
     },
+    alerts: {
+      disabled: false,
+      href: '/app/security/alerts',
+      id: 'alerts',
+      name: 'Alerts',
+      urlKey: 'alerts',
+    },
+    exceptions: {
+      disabled: false,
+      href: '/app/security/exceptions',
+      id: 'exceptions',
+      name: 'Exceptions',
+      urlKey: 'exceptions',
+    },
+    rules: {
+      disabled: false,
+      href: '/app/security/rules',
+      id: 'rules',
+      name: 'Rules',
+      urlKey: 'rules',
+    },
   },
   pageName,
   pathName,
@@ -242,7 +263,7 @@ describe('Navigation Breadcrumbs', () => {
       ]);
     });
 
-    test('should return Alerts breadcrumbs when supplied detection pathname', () => {
+    test('should return Alerts breadcrumbs when supplied alerts pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('alerts', '/alerts', undefined),
         getUrlForAppMock
@@ -251,9 +272,118 @@ describe('Navigation Breadcrumbs', () => {
         { text: 'Security', href: 'securitySolution/overview' },
         {
           text: 'Alerts',
+          href: '',
         },
       ]);
     });
+
+    test('should return Exceptions breadcrumbs when supplied exceptions pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('exceptions', '/exceptions', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: 'securitySolution/overview' },
+        {
+          text: 'Exceptions',
+          href: '',
+        },
+      ]);
+    });
+
+    test('should return Rules breadcrumbs when supplied rules pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('rules', '/rules', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: 'securitySolution/overview' },
+        {
+          text: 'Rules',
+          href:
+            "securitySolution/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+      ]);
+    });
+
+    test('should return Rules breadcrumbs when supplied rules Creation pathname', () => {
+      const breadcrumbs = getBreadcrumbsForRoute(
+        getMockObject('rules', '/rules/create', undefined),
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: 'securitySolution/overview' },
+        {
+          text: 'Rules',
+          href:
+            "securitySolution/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+        {
+          text: 'Create',
+          href:
+            "securitySolution/rules/create?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+      ]);
+    });
+
+    test('should return Rules breadcrumbs when supplied rules Details pathname', () => {
+      const mockDetailName = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
+      const mockRuleName = 'RULE_NAME';
+      const breadcrumbs = getBreadcrumbsForRoute(
+        {
+          ...getMockObject('rules', `/rules/id/${mockDetailName}`, undefined),
+          detailName: mockDetailName,
+          state: {
+            ruleName: mockRuleName,
+          },
+        },
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: 'securitySolution/overview' },
+        {
+          text: 'Rules',
+          href:
+            "securitySolution/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+        {
+          text: mockRuleName,
+          href: `securitySolution/rules/id/${mockDetailName}?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+        },
+      ]);
+    });
+
+    test('should return Rules breadcrumbs when supplied rules Edit pathname', () => {
+      const mockDetailName = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
+      const mockRuleName = 'RULE_NAME';
+      const breadcrumbs = getBreadcrumbsForRoute(
+        {
+          ...getMockObject('rules', `/rules/id/${mockDetailName}/edit`, undefined),
+          detailName: mockDetailName,
+          state: {
+            ruleName: mockRuleName,
+          },
+        },
+        getUrlForAppMock
+      );
+      expect(breadcrumbs).toEqual([
+        { text: 'Security', href: 'securitySolution/overview' },
+        {
+          text: 'Rules',
+          href:
+            "securitySolution/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
+        },
+        {
+          text: 'RULE_NAME',
+          href: `securitySolution/rules/id/${mockDetailName}?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+        },
+        {
+          text: 'Edit',
+          href: `securitySolution/rules/id/${mockDetailName}/edit?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))`,
+        },
+      ]);
+    });
+
     test('should return Cases breadcrumbs when supplied case pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('case', '/', undefined),
