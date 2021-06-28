@@ -326,7 +326,8 @@ export function getDeepLinks(
     .filter(
       (deepLink) =>
         deepLink.id !== SecurityPageName.case ||
-        (deepLink.id === SecurityPageName.case && capabilities?.siem.read_cases)
+        capabilities == null ||
+        (deepLink.id === SecurityPageName.case && capabilities.siem.read_cases === true)
     )
     .map((deepLink) => {
       const deepLinkId = deepLink.id as SecurityDeepLinkName;
@@ -334,6 +335,16 @@ export function getDeepLinks(
       const baseDeepLinks = Array.isArray(subPluginDeepLinks.base)
         ? [...subPluginDeepLinks.base]
         : [];
+      if (
+        deepLinkId === SecurityPageName.case &&
+        capabilities != null &&
+        capabilities.siem.crud_cases === false
+      ) {
+        return {
+          ...deepLink,
+          deepLinks: [],
+        };
+      }
       if (isPremiumLicense(licenseType) && subPluginDeepLinks?.premium) {
         return {
           ...deepLink,
@@ -358,13 +369,12 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
 
 export function updateGlobalNavigation({
   capabilities,
-  deepLinks,
   updater$,
 }: {
   capabilities: ApplicationStart['capabilities'];
-  deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
 }) {
+  const deepLinks = getDeepLinks(undefined, capabilities);
   const updatedDeepLinks = deepLinks.map((link) => {
     switch (link.id) {
       case 'case':

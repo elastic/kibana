@@ -228,13 +228,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           }));
         }
       });
+    } else {
+      updateGlobalNavigation({
+        capabilities: core.application.capabilities,
+        updater$: this.appUpdater$,
+      });
     }
-
-    updateGlobalNavigation({
-      capabilities: core.application.capabilities,
-      deepLinks: getDeepLinks(),
-      updater$: this.appUpdater$,
-    });
 
     return {};
   }

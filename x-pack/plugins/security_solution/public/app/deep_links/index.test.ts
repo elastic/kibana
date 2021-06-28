@@ -24,21 +24,59 @@ describe('public search functions', () => {
     });
   });
 
-  it('returns a subset of links for basic license with read_cases capabilities', () => {
+  it('returns case links for basic license with only read_cases capabilities', () => {
     const basicLicense = 'basic';
     const basicLinks = getDeepLinks(basicLicense, ({
-      siem: { read_cases: true },
+      siem: { read_cases: true, crud_cases: false },
     } as unknown) as Capabilities);
 
     expect(basicLinks.some((l) => l.id === SecurityPageName.case)).toBeTruthy();
   });
 
-  it('returns a subset of links for basic license with NO read_cases capabilities', () => {
+  it('returns case links with NO deepLinks for basic license with only read_cases capabilities', () => {
     const basicLicense = 'basic';
     const basicLinks = getDeepLinks(basicLicense, ({
-      siem: { read_cases: false },
+      siem: { read_cases: true, crud_cases: false },
+    } as unknown) as Capabilities);
+
+    expect(
+      basicLinks.find((l) => l.id === SecurityPageName.case)?.deepLinks?.length === 0
+    ).toBeTruthy();
+  });
+
+  it('returns case links with deepLinks for basic license with crud_cases capabilities', () => {
+    const basicLicense = 'basic';
+    const basicLinks = getDeepLinks(basicLicense, ({
+      siem: { read_cases: true, crud_cases: true },
+    } as unknown) as Capabilities);
+
+    expect(
+      (basicLinks.find((l) => l.id === SecurityPageName.case)?.deepLinks?.length ?? 0) > 0
+    ).toBeTruthy();
+  });
+
+  it('returns NO case links for basic license with NO read_cases capabilities', () => {
+    const basicLicense = 'basic';
+    const basicLinks = getDeepLinks(basicLicense, ({
+      siem: { read_cases: false, crud_cases: false },
     } as unknown) as Capabilities);
 
     expect(basicLinks.some((l) => l.id === SecurityPageName.case)).toBeFalsy();
+  });
+
+  it('returns case links for basic license with undefined capabilities', () => {
+    const basicLicense = 'basic';
+    const basicLinks = getDeepLinks(basicLicense, undefined);
+
+    expect(basicLinks.some((l) => l.id === SecurityPageName.case)).toBeTruthy();
+  });
+
+  it('returns case deepLinks for basic license with undefined capabilities', () => {
+    const basicLicense = 'basic';
+    const basicLinks = getDeepLinks(basicLicense, undefined);
+
+    expect(
+      (basicLinks.find((l) => l.id === SecurityPageName.case)?.deepLinks?.length ?? 0) > 0
+    ).toBeTruthy();
   });
 });
