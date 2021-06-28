@@ -15,7 +15,7 @@ image::user/alerting/images/email-connector-test.png[Rule management page with t
 image::user/alerting/images/teams-connector-test.png[Five clauses define the condition to detect]
 
 [float]
-==== Experimental[] Troubleshooting Connectors with `kbn-action` tool
+==== experimental[] Troubleshooting Connectors with `kbn-action` tool
 
 Executing an Email action via https://github.com/pmuellr/kbn-action[kbn-action]. In this example, is using a cloud deployment of the stack:
 

@@ -64,7 +64,7 @@ curl -X POST -k \
  -d '{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}'
 --------------------------------------------------
 
-Experimental[] In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which can be easier to use, but must be updated for the new APIs.
+experimental[] In addition, there is a command-line client that uses legacy Rules and Connectors APIs, which can be easier to use, but must be updated for the new APIs.
 CLI tools to list create, edit, and delete alerts (rules) and actions (connectors) are available in https://github.com/pmuellr/kbn-action[kbn-action], which you can install as follows:
 [source, txt]
 --------------------------------------------------
