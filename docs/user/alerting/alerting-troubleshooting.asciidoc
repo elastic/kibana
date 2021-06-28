@@ -37,6 +37,8 @@ and Task Manager <<task-manager-diagnosing-root-cause,diagnostics endpoints>>.
 === Using rules and connectors list for the current state and finding issues
 *Rules and Connectors* in *Stack Management* lists the rules and connectors available in the space you’re currently in. When you click a rule name, you are navigated to the <<rule-details,details page>> for the rule, where you can see currently active alerts. 
 The start date on this page indicates when a rule is triggered, and for what alerts. In addition, the duration of the condition indicates how long the instance is active.
+[role="screenshot"]
+image::images/rule-details-alerts-inactive.png[Alerting management details]
 
 [float]
 [[alerting-index-threshold-chart]]
@@ -44,7 +46,7 @@ The start date on this page indicates when a rule is triggered, and for what ale
 
 When creating or editing an index threshold rule, you see a graph of the data the rule will operate against, from some date in the past until now, updated every 5 seconds.  
 [role="screenshot"]
-image::images/rule-details-alerts-inactive.png[Index Threshold chart]
+image::images/index-threshold-chart.png[Index Threshold chart]
 
 The end date is related to the rule interval (IIRC, 30 “intervals” worth of time). You can use this view to see if the rule is getting the data you expect, and visually compare to the threshold value (a horizontal line in the graph). If the graph does not contain any lines except for the threshold line, then the rule has an issue, for example, no data is available given the specified index and fields or there is a permission error.
 Diagnosing these may be difficult - but there may be log messages for error conditions. 
@@ -54,7 +56,7 @@ Diagnosing these may be difficult - but there may be log messages for error cond
 === Use the REST APIs
 
 There is a rich set of HTTP endpoints to introspect and manage rules and connectors.
-One of the http endpoints available for actions is the POST _execute API (reference).  You can use this to “test” an action.  For instance, if you have a server log action created, you can execute it via curling the endpoint:
+One of the http endpoints available for actions is the POST <<execute-connector-api,_execute API>>.  You can use this to “test” an action.  For instance, if you have a server log action created, you can execute it via curling the endpoint:
 [source, txt]
 --------------------------------------------------
 curl -X POST -k \
