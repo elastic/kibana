@@ -9,8 +9,14 @@ import { LayerConfig, LensAttributes } from './lens_attributes';
 import { mockAppIndexPattern, mockIndexPattern } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
-import { LCP_FIELD, USER_AGENT_NAME } from './constants/elasticsearch_fieldnames';
+import {
+  LCP_FIELD,
+  TRANSACTION_DURATION,
+  USER_AGENT_NAME,
+} from './constants/elasticsearch_fieldnames';
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
+import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
+import { REPORT_METRIC_FIELD } from './constants';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -21,12 +27,12 @@ describe('Lens Attribute', () => {
     indexPattern: mockIndexPattern,
   });
 
-  reportViewConfig.filters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
+  reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
 
   let lnsAttr: LensAttributes;
 
   const layerConfig: LayerConfig = {
-    reportConfig: reportViewConfig,
+    seriesConfig: reportViewConfig,
     seriesType: 'line',
     operationType: 'count',
     indexPattern: mockIndexPattern,
@@ -40,6 +46,27 @@ describe('Lens Attribute', () => {
 
   it('should return expected json', function () {
     expect(lnsAttr.getJSON()).toEqual(sampleAttribute);
+  });
+
+  it('should return expected json for kpi report type', function () {
+    const seriesConfigKpi = getDefaultConfigs({
+      reportType: 'kpi-over-time',
+      dataType: 'ux',
+      indexPattern: mockIndexPattern,
+    });
+
+    const lnsAttrKpi = new LensAttributes([
+      {
+        seriesConfig: seriesConfigKpi,
+        seriesType: 'line',
+        operationType: 'count',
+        indexPattern: mockIndexPattern,
+        reportDefinitions: { 'service.name': ['elastic-co'] },
+        time: { from: 'now-15m', to: 'now' },
+      },
+    ]);
+
+    expect(lnsAttrKpi.getJSON()).toEqual(sampleAttributeKpi);
   });
 
   it('should return main y axis', function () {
@@ -72,7 +99,7 @@ describe('Lens Attribute', () => {
   });
 
   it('should return expected field type for custom field with default value', function () {
-    expect(JSON.stringify(lnsAttr.getFieldMeta('performance.metric', layerConfig))).toEqual(
+    expect(JSON.stringify(lnsAttr.getFieldMeta(REPORT_METRIC_FIELD, layerConfig))).toEqual(
       JSON.stringify({
         fieldMeta: {
           count: 0,
@@ -92,7 +119,7 @@ describe('Lens Attribute', () => {
 
   it('should return expected field type for custom field with passed value', function () {
     const layerConfig1: LayerConfig = {
-      reportConfig: reportViewConfig,
+      seriesConfig: reportViewConfig,
       seriesType: 'line',
       operationType: 'count',
       indexPattern: mockIndexPattern,
@@ -102,20 +129,20 @@ describe('Lens Attribute', () => {
 
     lnsAttr = new LensAttributes([layerConfig1]);
 
-    expect(JSON.stringify(lnsAttr.getFieldMeta('performance.metric', layerConfig1))).toEqual(
+    expect(JSON.stringify(lnsAttr.getFieldMeta(REPORT_METRIC_FIELD, layerConfig1))).toEqual(
       JSON.stringify({
         fieldMeta: {
           count: 0,
-          name: LCP_FIELD,
+          name: TRANSACTION_DURATION,
           type: 'number',
-          esTypes: ['scaled_float'],
+          esTypes: ['long'],
           scripted: false,
           searchable: true,
           aggregatable: true,
           readFromDocValues: true,
         },
-        fieldName: LCP_FIELD,
-        columnLabel: 'Largest contentful paint',
+        fieldName: TRANSACTION_DURATION,
+        columnLabel: 'Page load time',
       })
     );
   });
@@ -269,7 +296,7 @@ describe('Lens Attribute', () => {
   describe('Layer breakdowns', function () {
     it('should return breakdown column', function () {
       const layerConfig1: LayerConfig = {
-        reportConfig: reportViewConfig,
+        seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
         indexPattern: mockIndexPattern,
@@ -322,7 +349,7 @@ describe('Lens Attribute', () => {
           'x-axis-column-layer0': {
             dataType: 'number',
             isBucketed: true,
-            label: 'Largest contentful paint',
+            label: 'Page load time',
             operationType: 'range',
             params: {
               maxBars: 'auto',
@@ -330,7 +357,7 @@ describe('Lens Attribute', () => {
               type: 'histogram',
             },
             scale: 'interval',
-            sourceField: 'transaction.marks.agent.largestContentfulPaint',
+            sourceField: 'transaction.duration.us',
           },
           'y-axis-column-layer0': {
             dataType: 'number',
@@ -353,12 +380,12 @@ describe('Lens Attribute', () => {
 
   describe('Layer Filters', function () {
     it('should return expected filters', function () {
-      reportViewConfig.filters?.push(
+      reportViewConfig.baseFilters?.push(
         ...buildPhrasesFilter('service.name', ['elastic', 'kibana'], mockIndexPattern)
       );
 
       const layerConfig1: LayerConfig = {
-        reportConfig: reportViewConfig,
+        seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
         indexPattern: mockIndexPattern,

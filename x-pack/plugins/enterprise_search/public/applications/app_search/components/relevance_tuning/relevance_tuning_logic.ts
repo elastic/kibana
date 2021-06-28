@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
 import {
-  setSuccessMessage,
+  flashSuccessToast,
   flashAPIErrors,
   clearFlashMessages,
 } from '../../../shared/flash_messages';
@@ -24,6 +24,7 @@ import {
   RESET_CONFIRMATION_MESSAGE,
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
+  SUCCESS_CHANGES_MESSAGE,
   BOOST_TYPE_TO_EMPTY_BOOST,
 } from './constants';
 import { Boost, BoostFunction, BoostOperation, BoostType, SearchSettings } from './types';
@@ -304,7 +305,7 @@ export const RelevanceTuningLogic = kea<
         const response = await http.put(url, {
           body: JSON.stringify(removeBoostStateProps(values.searchSettings)),
         });
-        setSuccessMessage(UPDATE_SUCCESS_MESSAGE);
+        flashSuccessToast(UPDATE_SUCCESS_MESSAGE, { text: SUCCESS_CHANGES_MESSAGE });
         actions.onSearchSettingsSuccess(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -326,7 +327,7 @@ export const RelevanceTuningLogic = kea<
 
         try {
           const response = await http.post(url);
-          setSuccessMessage(DELETE_SUCCESS_MESSAGE);
+          flashSuccessToast(DELETE_SUCCESS_MESSAGE, { text: SUCCESS_CHANGES_MESSAGE });
           actions.onSearchSettingsSuccess(response);
         } catch (e) {
           flashAPIErrors(e);
