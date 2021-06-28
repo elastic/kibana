@@ -2769,6 +2769,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
+  version "0.0.0"
+  uid ""
+
 "@kbn/std@link:bazel-bin/packages/kbn-std":
   version "0.0.0"
   uid ""
