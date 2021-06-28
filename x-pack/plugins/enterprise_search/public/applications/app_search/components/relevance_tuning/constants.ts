@@ -27,16 +27,22 @@ export const RELEVANCE_TUNING_TITLE = i18n.translate(
 export const UPDATE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.messages.updateSuccess',
   {
-    defaultMessage: 'Relevance successfully tuned. The changes will impact your results shortly.',
+    defaultMessage: 'Relevance was tuned',
   }
 );
 export const DELETE_SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.messages.deleteSuccess',
   {
-    defaultMessage:
-      'Relevance has been reset to default values. The change will impact your results shortly.',
+    defaultMessage: 'Relevance was reset to default values',
   }
 );
+export const SUCCESS_CHANGES_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.messages.successDescription',
+  {
+    defaultMessage: 'The changes will impact your results shortly.',
+  }
+);
+
 export const RESET_CONFIRMATION_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.messages.resetConfirmation',
   {

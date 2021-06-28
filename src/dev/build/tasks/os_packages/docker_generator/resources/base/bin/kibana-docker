@@ -31,6 +31,17 @@ kibana_vars=(
     csp.rules
     csp.strict
     csp.warnLegacyBrowsers
+    csp.script_src
+    csp.worker_src
+    csp.style_src
+    csp.connect_src
+    csp.default_src
+    csp.font_src
+    csp.frame_src
+    csp.img_src
+    csp.frame_ancestors
+    csp.report_uri
+    csp.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     elasticsearch.customHeaders
@@ -379,7 +390,8 @@ kibana_vars=(
     xpack.task_manager.monitored_aggregated_stats_refresh_rate
     xpack.task_manager.monitored_stats_required_freshness
     xpack.task_manager.monitored_stats_running_average_window
-    xpack.task_manager.monitored_stats_warn_delayed_task_start_in_seconds
+    xpack.task_manager.monitored_stats_health_verbose_log.enabled
+    xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds
     xpack.task_manager.monitored_task_execution_thresholds
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
