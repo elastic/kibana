@@ -9,73 +9,59 @@ import { Logger } from 'kibana/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../../fleet/common';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { ActivityLog } from '../../../../common/endpoint/types';
+import { ActivityLog, EndpointAction } from '../../../../common/endpoint/types';
 
-const getShouldClauses = ({
-  indices,
+const getFilterClause = ({
+  index,
   elasticAgentId,
+  actionIds,
 }: {
-  indices: string[];
+  index: typeof AGENT_ACTIONS_INDEX | typeof AGENT_ACTIONS_RESULTS_INDEX;
   elasticAgentId: string;
+  actionIds?: string[];
 }) => {
-  return indices.map((_index) => {
-    const clause = {
-      bool: {
-        must: [
-          {
-            match: {
-              _index,
-            },
-          },
-          {
-            match: {
-              [_index === AGENT_ACTIONS_INDEX ? 'agents' : 'agent_id']: elasticAgentId,
-            },
-          },
-        ],
+  const clause: Array<{ term: { [x: string]: string } } | { terms: { [x: string]: string[] } }> = [
+    { term: { [index === AGENT_ACTIONS_INDEX ? 'agents' : 'agent_id']: elasticAgentId } },
+  ];
+
+  if (index === AGENT_ACTIONS_INDEX) {
+    clause.push(
+      { term: { input_type: 'endpoint' } },
+      { term: { type: 'INPUT_ACTION' } },
+      { term: { agents: elasticAgentId } }
+    );
+  } else if (actionIds) {
+    clause.push({
+      terms: {
+        action_id: actionIds,
       },
-    };
-    // only `endpoint` actions in the result
-    if (_index === AGENT_ACTIONS_INDEX) {
-      clause.bool.must.push(
-        {
-          match: {
-            input_type: 'endpoint',
-          },
-        },
-        {
-          match: {
-            type: 'INPUT_ACTION',
-          },
-        }
-      );
-    }
-    return clause;
-  });
+    });
+  }
+
+  return clause;
 };
 
 export const getAuditLogESQuery = ({
+  index,
   elasticAgentId,
+  actionIds,
   from,
   size,
 }: {
+  index: typeof AGENT_ACTIONS_INDEX | typeof AGENT_ACTIONS_RESULTS_INDEX;
   elasticAgentId: string;
+  actionIds?: string[];
   from: number;
   size: number;
 }): estypes.SearchRequest => {
-  const indices = [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX];
-
   return {
-    index: indices,
+    index,
     size,
     from,
     body: {
       query: {
         bool: {
-          should: getShouldClauses({
-            indices,
-            elasticAgentId,
-          }),
+          filter: getFilterClause({ index, elasticAgentId, actionIds }),
         },
       },
       sort: [
@@ -122,40 +108,58 @@ export const getAuditLogResponse = async ({
     ignore: [404],
   };
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  let result;
-  const params = getAuditLogESQuery({
-    elasticAgentId,
-    from,
-    size,
-  });
+  let actionsResult;
+  let responsesResult;
 
   try {
-    result = await esClient.search(params, options);
+    actionsResult = await esClient.search(
+      getAuditLogESQuery({
+        index: AGENT_ACTIONS_INDEX,
+        elasticAgentId,
+        from,
+        size,
+      }),
+      options
+    );
+    const actionIds = actionsResult.body.hits.hits.map(
+      (e) => (e._source as EndpointAction).action_id
+    );
+
+    responsesResult = await esClient.search(
+      getAuditLogESQuery({
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        elasticAgentId,
+        actionIds,
+        from,
+        size,
+      }),
+      options
+    );
   } catch (error) {
     logger.error(error);
     throw error;
   }
-  if (result?.statusCode !== 200) {
+  if (actionsResult?.statusCode !== 200 || responsesResult?.statusCode !== 200) {
     logger.error(`Error fetching actions log for agent_id ${elasticAgentId}`);
     throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
   }
 
-  const resultData = result.body.hits.hits.map((e) => ({
-    type: e._index.startsWith('.fleet-actions') ? 'action' : 'response',
-    item: { id: e._id, data: e._source },
-  })) as ActivityLog['data'];
-
-  const endpointActionIds = resultData
-    .filter((e) => e.type === 'action')
-    .map((e) => e.item.data.action_id);
-
-  const data = resultData.filter((e) =>
-    e.type === 'response' ? endpointActionIds.includes(e.item.data.action_id) : e
+  const sortedData = ([
+    ...actionsResult.body.hits.hits.map((e) => ({
+      type: 'action',
+      item: { id: e._id, data: e._source },
+    })),
+    ...responsesResult.body.hits.hits.map((e) => ({
+      type: 'response',
+      item: { id: e._id, data: e._source },
+    })),
+  ] as ActivityLog['data']).sort((a, b) =>
+    new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
   );
 
   return {
     page,
     pageSize,
-    data,
+    data: sortedData,
   };
 };
