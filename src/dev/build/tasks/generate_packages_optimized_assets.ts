@@ -11,6 +11,9 @@ import { promisify } from 'util';
 
 // @ts-expect-error
 import gulpPostCSS from 'gulp-postcss';
+// @ts-expect-error
+import gulpTerser from 'gulp-terser';
+import terser from 'terser';
 import vfs from 'vinyl-fs';
 
 import { Task, Build } from '../lib';
@@ -25,7 +28,37 @@ const minifyKbnUiSharedDepsCSS = async (build: Build) => {
       cwd: buildRoot,
     }),
 
-    gulpPostCSS([require('cssnano')]),
+    gulpPostCSS([
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('cssnano')({
+        preset: [
+          'default',
+          {
+            discardComments: false,
+          },
+        ],
+      }),
+    ]),
+
+    vfs.dest(buildRoot)
+  );
+};
+
+const minifyKbnUiSharedDepsJS = async (build: Build) => {
+  const buildRoot = build.resolvePath();
+
+  await asyncPipeline(
+    vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.js'], {
+      cwd: buildRoot,
+    }),
+
+    gulpTerser(
+      {
+        compress: true,
+        mangle: true,
+      },
+      terser.minify
+    ),
 
     vfs.dest(buildRoot)
   );
@@ -33,6 +66,7 @@ const minifyKbnUiSharedDepsCSS = async (build: Build) => {
 
 const generateKbnUiSharedDepsOptimizedAssets = async (build: Build) => {
   await minifyKbnUiSharedDepsCSS(build);
+  await minifyKbnUiSharedDepsJS(build);
 };
 
 export const GeneratePackagesOptimizedAssets: Task = {

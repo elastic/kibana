@@ -45,30 +45,30 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * verify, reset, and initialize the build environment
    */
   if (options.initialize) {
-    await run(Tasks.VerifyEnv);
-    await run(Tasks.Clean);
-    await run(
-      options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
-    );
-    await run(Tasks.ExtractNodeBuilds);
+    // await run(Tasks.VerifyEnv);
+    // await run(Tasks.Clean);
+    // await run(
+    //   options.downloadFreshNode ? Tasks.DownloadNodeBuilds : Tasks.VerifyExistingNodeBuilds
+    // );
+    // await run(Tasks.ExtractNodeBuilds);
   }
 
   /**
    * run platform-generic build tasks
    */
   if (options.createGenericFolders) {
-    await run(Tasks.CopySource);
-    await run(Tasks.CopyBinScripts);
-    await run(Tasks.ReplaceFavicon);
-    await run(Tasks.CreateEmptyDirsAndFiles);
-    await run(Tasks.CreateReadme);
-    await run(Tasks.BuildBazelPackages);
-    await run(Tasks.BuildPackages);
-    await run(Tasks.BuildKibanaPlatformPlugins);
-    await run(Tasks.TranspileBabel);
-    await run(Tasks.CreatePackageJson);
-    await run(Tasks.InstallDependencies);
-    await run(Tasks.CleanPackages);
+    // await run(Tasks.CopySource);
+    // await run(Tasks.CopyBinScripts);
+    // await run(Tasks.ReplaceFavicon);
+    // await run(Tasks.CreateEmptyDirsAndFiles);
+    // await run(Tasks.CreateReadme);
+    // await run(Tasks.BuildBazelPackages);
+    // await run(Tasks.BuildPackages);
+    // await run(Tasks.BuildKibanaPlatformPlugins);
+    // await run(Tasks.TranspileBabel);
+    // await run(Tasks.CreatePackageJson);
+    // await run(Tasks.InstallDependencies);
+    // await run(Tasks.CleanPackages);
     await run(Tasks.GeneratePackagesOptimizedAssets);
     // await run(Tasks.CreateNoticeFile);
     // await run(Tasks.UpdateLicenseFile);

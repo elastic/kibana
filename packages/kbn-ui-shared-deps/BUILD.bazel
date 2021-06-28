@@ -67,7 +67,6 @@ SRC_DEPS = [
   "@npm//rxjs",
   "@npm//styled-components",
   "@npm//symbol-observable",
-  "@npm//terser-webpack-plugin",
   "@npm//url-loader",
   "@npm//val-loader",
   "@npm//whatwg-fetch"
