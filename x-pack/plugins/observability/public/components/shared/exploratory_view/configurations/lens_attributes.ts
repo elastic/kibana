@@ -381,11 +381,7 @@ export class LensAttributes {
     sourceField: string;
     layerConfig: LayerConfig;
   }) {
-    return parseCustomFieldName(
-      sourceField,
-      layerConfig.seriesConfig,
-      layerConfig.reportDefinitions
-    );
+    return parseCustomFieldName(layerConfig.seriesConfig, sourceField);
   }
 
   getFieldMeta(sourceField: string, layerConfig: LayerConfig) {
