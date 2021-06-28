@@ -12,8 +12,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { SECURITY_SOLUTION_APP_ID } from './constants';
 
 interface EndpointInfo {
-  id: string;
-  name: string;
+  endpointId: string;
+  hostname: string;
 }
 
 interface Props {
@@ -22,7 +22,7 @@ interface Props {
 }
 
 const HostIsolationCommentEventComponent: React.FC<Props> = ({ type, endpoints }) => {
-  const activityLogPath = `/administration/endpoints?selected_endpoint=${endpoints[0].id}&show=activity_log`;
+  const activityLogPath = `/administration/endpoints?selected_endpoint=${endpoints[0].endpointId}&show=activity_log`;
   const { getUrlForApp, navigateToUrl } = useKibana().services.application;
   const endpointDetailsHref = getUrlForApp(SECURITY_SOLUTION_APP_ID, {
     path: activityLogPath,
@@ -42,9 +42,9 @@ const HostIsolationCommentEventComponent: React.FC<Props> = ({ type, endpoints }
       <LinkAnchor
         onClick={onLinkClick}
         href={endpointDetailsHref}
-        data-test-subj={`endpointDetails-activity-log-link-${endpoints[0].id}`}
+        data-test-subj={`endpointDetails-activity-log-link-${endpoints[0].endpointId}`}
       >
-        {endpoints[0].name}
+        {endpoints[0].hostname}
         {endpoints.length > 1 && i18n.OTHER_ENDPOINTS(endpoints.length - 1)}
       </LinkAnchor>
     </>

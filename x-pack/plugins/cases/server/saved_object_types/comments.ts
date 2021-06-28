@@ -29,8 +29,13 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       },
       actions: {
         properties: {
-          hostname: { type: 'text' },
-          endpointId: { type: 'text' },
+          targets: {
+            type: 'nested',
+            properties: {
+              hostname: { type: 'keyword' },
+              endpointId: { type: 'keyword' },
+            },
+          },
           type: { type: 'keyword' },
         },
       },

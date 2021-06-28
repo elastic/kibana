@@ -68,8 +68,12 @@ export const ActionsCommentRequestRt = rt.type({
   type: rt.literal(CommentType.actions),
   comment: rt.string,
   actions: rt.type({
-    hostname: rt.string,
-    endpointId: rt.string,
+    targets: rt.array(
+      rt.type({
+        hostname: rt.string,
+        endpointId: rt.string,
+      })
+    ),
     type: rt.string,
   }),
   owner: rt.string,

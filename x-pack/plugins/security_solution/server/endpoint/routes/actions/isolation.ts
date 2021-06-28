@@ -14,12 +14,12 @@ import { CasesByAlertId } from '../../../../../cases/common/api/cases/case';
 import { HostIsolationRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { ISOLATE_HOST_ROUTE, UNISOLATE_HOST_ROUTE } from '../../../../common/endpoint/constants';
 import { AGENT_ACTIONS_INDEX } from '../../../../../fleet/common';
-import { EndpointAction } from '../../../../common/endpoint/types';
+import { EndpointAction, HostMetadata } from '../../../../common/endpoint/types';
 import {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { getAgentIDsForEndpoints } from '../../services';
+import { getMetadataForEndpoints } from '../../services';
 import { EndpointAppContext } from '../../types';
 import { APP_ID } from '../../../../common/constants';
 import { userCanIsolate } from '../../../../common/endpoint/actions';
@@ -61,19 +61,7 @@ export const isolationRequestHandler = function (
   TypeOf<typeof HostIsolationRequestSchema.body>,
   SecuritySolutionRequestHandlerContext
 > {
-  // eslint-disable-next-line complexity
   return async (context, req, res) => {
-    if (
-      (!req.body.agent_ids || req.body.agent_ids.length === 0) &&
-      (!req.body.endpoint_ids || req.body.endpoint_ids.length === 0)
-    ) {
-      return res.badRequest({
-        body: {
-          message: 'At least one agent ID or endpoint ID is required',
-        },
-      });
-    }
-
     // only allow admin users
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     if (!userCanIsolate(user?.roles)) {
@@ -93,12 +81,8 @@ export const isolationRequestHandler = function (
       });
     }
 
-    // translate any endpoint_ids into agent_ids
-    let agentIDs = req.body.agent_ids?.slice() || [];
-    if (req.body.endpoint_ids && req.body.endpoint_ids.length > 0) {
-      const newIDs = await getAgentIDsForEndpoints(req.body.endpoint_ids, context, endpointContext);
-      agentIDs = agentIDs.concat(newIDs);
-    }
+    // fetch the Agent IDs to send the commands to
+    let agentIDs = await getMetadataForEndpoints(req.body.endpoint_ids, context, endpointContext);
     agentIDs = [...new Set(agentIDs)]; // dedupe
 
     const casesClient = await endpointContext.service.getCasesClient(req);
@@ -134,7 +118,7 @@ export const isolationRequestHandler = function (
           expiration: moment().add(2, 'weeks').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
-          agents: agentIDs,
+          agents: agentIDs.map((x: HostMetadata) => x.elastic.agent.id),
           user_id: user!.username,
           data: {
             command: isolate ? 'isolate' : 'unisolate',
@@ -168,8 +152,10 @@ export const isolationRequestHandler = function (
               type: CommentType.actions,
               comment: req.body.comment || '',
               actions: {
-                endpointId: req?.body?.endpoint_ids[0],
-                hostname: 'whatever',
+                targets: agentIDs.map((x: HostMetadata) => ({
+                  hostname: x.host.hostname,
+                  endpointId: x.agent.id,
+                })),
                 type: isolate ? 'isolate' : 'unisolate',
               },
               owner: APP_ID,
