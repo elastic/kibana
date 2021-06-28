@@ -138,7 +138,7 @@ export function useDiscoverState({
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [config, indexPatterns, appStateContainer, setState, state, refetch$, data$, reset]);
+  }, [config, indexPatterns, appStateContainer, setState, state, refetch$, reset]);
 
   const resetSavedSearch = useCallback(
     async (id?: string) => {
@@ -201,7 +201,7 @@ export function useDiscoverState({
     if (initialFetchStatus === FetchStatus.LOADING) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, indexPattern, data$]);
+  }, [initialFetchStatus, refetch$, indexPattern]);
 
   return {
     data$,
