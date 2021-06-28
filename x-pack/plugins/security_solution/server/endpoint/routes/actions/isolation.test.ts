@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandler, RouteConfig } from 'kibana/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -36,15 +36,17 @@ import {
 } from '../../../../common/endpoint/constants';
 import {
   EndpointAction,
+  HostIsolationRequestBody,
   HostIsolationResponse,
   HostMetadata,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createV2SearchResponse } from '../metadata/support/test_support';
 import { ElasticsearchAssetType } from '../../../../../fleet/common';
+import { CasesClientMock } from '../../../../../cases/server';
 
 interface CallRouteInterface {
-  body?: any;
+  body?: HostIsolationRequestBody;
   idxResponse?: any;
   searchResponse?: HostMetadata;
   mockUser?: any;
@@ -330,7 +332,70 @@ describe('Host Isolation', () => {
   });
 
   describe('Cases', () => {
-    it.todo('logs a comment to the provided case');
-    it.todo('logs a comment to any cases associated with the given alert');
+    let casesClient: CasesClientMock;
+
+    beforeEach(async () => {
+      casesClient = (await endpointAppContextService.getCasesClient(
+        {} as KibanaRequest
+      )) as CasesClientMock;
+
+      let counter = 1;
+      casesClient.cases.getCasesByAlertID.mockImplementation(async () => {
+        return [
+          {
+            id: `case-${counter++}`,
+            title: 'case',
+          },
+        ];
+      });
+    });
+
+    it('logs a comment to the provided case', async () => {
+      await callRoute(ISOLATE_HOST_ROUTE, {
+        body: { agent_ids: ['XYZ'], case_ids: ['one', 'two'] },
+      });
+
+      expect(casesClient.attachments.add).toHaveBeenCalledTimes(2);
+    });
+
+    it('logs a comment to any cases associated with the given alerts', async () => {
+      await callRoute(ISOLATE_HOST_ROUTE, {
+        body: { agent_ids: ['XYZ'], alert_ids: ['one', 'two'] },
+      });
+
+      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ caseId: 'case-1' })
+      );
+      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ caseId: 'case-2' })
+      );
+    });
+
+    it('logs a comment to any cases  provided on input along with cases associated with the given alerts', async () => {
+      await callRoute(ISOLATE_HOST_ROUTE, {
+        body: { agent_ids: ['XYZ'], case_ids: ['ONE', 'TWO', 'TWO'], alert_ids: ['one', 'two'] },
+      });
+
+      expect(casesClient.attachments.add).toHaveBeenCalledTimes(4);
+
+      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ caseId: 'ONE' })
+      );
+      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ caseId: 'TWO' })
+      );
+      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({ caseId: 'case-1' })
+      );
+      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
+        4,
+        expect.objectContaining({ caseId: 'case-2' })
+      );
+    });
   });
 });
