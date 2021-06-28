@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
+import type { IndexPatternBase } from '../es_query';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { SerializedFieldFormat } from '../../../expressions/common';
@@ -29,10 +30,8 @@ export interface RuntimeField {
  * IIndexPattern allows for an IndexPattern OR an index pattern saved object
  * Use IndexPattern or IndexPatternSpec instead
  */
-export interface IIndexPattern {
-  fields: IFieldType[];
+export interface IIndexPattern extends IndexPatternBase {
   title: string;
-  id?: string;
   /**
    * Type is used for identifying rollup indices, otherwise left undefined
    */
