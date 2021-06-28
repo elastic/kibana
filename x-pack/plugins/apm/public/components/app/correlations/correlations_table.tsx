@@ -24,7 +24,7 @@ import { ImpactBar } from '../../shared/ImpactBar';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
 
-const PAGINATION_SIZE_OPTIONS = [10, 20, 50];
+const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
   | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
@@ -70,13 +70,18 @@ export function CorrelationsTable<T extends SignificantTerm>({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  const pagination = useMemo(() => {
+  const { pagination, pageOfItems } = useMemo(() => {
+    const pageStart = pageIndex * pageSize;
+
     const itemCount = significantTerms?.length ?? 0;
     return {
-      pageIndex,
-      pageSize,
-      totalItemCount: itemCount,
-      pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+      pageOfItems: significantTerms?.slice(pageStart, pageStart + pageSize),
+      pagination: {
+        pageIndex,
+        pageSize,
+        totalItemCount: itemCount,
+        pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+      },
     };
   }, [pageIndex, pageSize, significantTerms]);
 
@@ -223,7 +228,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
 
   return (
     <EuiBasicTable
-      items={significantTerms ?? []}
+      items={pageOfItems ?? []}
       noItemsMessage={
         status === FETCH_STATUS.LOADING ? loadingText : noDataText
       }
