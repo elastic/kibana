@@ -1,10 +1,13 @@
+$timesliderWidth: 580px;
+
 .mapTimeslider {
   @include euiBottomShadowLarge;
   position: fixed;
   left: 50%;
   bottom: $euiSize;
-  transform: translateX(-50%);
-  min-width: 580px;
+  // we could center with translateX but this would impact the animation
+  margin-left: -($timesliderWidth / 2);
+  width: $timesliderWidth;
   z-index: 99999;
   background: $euiColorEmptyShade;
   padding: $euiSizeL $euiSizeXL;
@@ -55,4 +58,9 @@
 
 .mapTimeslider__playButton {
   border-radius: 50%;
+}
+
+.mapTimeslider--animation {
+  animation: headShake 1.2s ease-in-out;
+
 }

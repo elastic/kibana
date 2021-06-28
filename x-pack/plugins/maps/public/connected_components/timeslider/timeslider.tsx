@@ -166,7 +166,7 @@ class KeyedTimeslider extends Component<Props, State> {
 
   render() {
     return (
-      <div className="mapTimeslider">
+      <div className="mapTimeslider mapTimeslider--animation">
         <div className="mapTimeslider__row">
           <EuiButtonIcon
             onClick={this.props.closeTimeslider}

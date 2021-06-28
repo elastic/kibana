@@ -29,7 +29,9 @@ import {
   hideTOCDetails,
   showTOCDetails,
   toggleLayerVisible,
+  setDrawMode,
 } from '../../../../../actions';
+import { DRAW_MODE } from '../../../../../../common';
 
 function mapStateToProps(state: MapStoreState, ownProps: OwnProps): ReduxStateProps {
   const flyoutDisplay = getFlyoutDisplay(state);
@@ -62,6 +64,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     toggleVisible: (layerId: string) => {
       dispatch(toggleLayerVisible(layerId));
+    },
+    cancelEditing: () => {
+      dispatch(setDrawMode(DRAW_MODE.NONE));
     },
   };
 }
