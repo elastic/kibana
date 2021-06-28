@@ -60,16 +60,20 @@ const RecomposedScreenshotImage: React.FC<
   ScreenshotImageProps & {
     imgRef: ScreenshotRefImageData;
     setImageData: React.Dispatch<string | undefined>;
-    imageData?: string;
+    imageData: string | undefined;
   }
-> = (props) => {
-  const { imgRef, setImageData, imageData } = props;
-
+> = ({ captionContent, imageCaption, imageData, imgRef, setImageData }) => {
   // initially an undefined URL value is passed to the image display, and a loading spinner is rendered.
   // `useCompositeImage` will call `setUrl` when the image is composited, and the updated `url` will display.
   useCompositeImage(imgRef, setImageData, imageData);
 
-  return <DefaultImage {...props} />;
+  return (
+    <DefaultImage
+      captionContent={captionContent}
+      imageCaption={imageCaption}
+      imageData={imageData}
+    />
+  );
 };
 
 export interface StepImagePopoverProps {
@@ -85,11 +89,25 @@ const StepImageComponent: React.FC<
     setImageData: React.Dispatch<string | undefined>;
     imageData: string | undefined;
   }
-> = (props) => {
-  if (props.imgSrc) {
-    return <DefaultImage {...props} />;
-  } else if (props.imgRef) {
-    return <RecomposedScreenshotImage {...props} imgRef={props.imgRef} />;
+> = ({ captionContent, imageCaption, imageData, imgRef, imgSrc, setImageData }) => {
+  if (imgSrc) {
+    return (
+      <DefaultImage
+        captionContent={captionContent}
+        imageCaption={imageCaption}
+        imageData={imageData}
+      />
+    );
+  } else if (imgRef) {
+    return (
+      <RecomposedScreenshotImage
+        captionContent={captionContent}
+        imageCaption={imageCaption}
+        imageData={imageData}
+        imgRef={imgRef}
+        setImageData={setImageData}
+      />
+    );
   }
   return null;
 };
