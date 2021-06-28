@@ -164,9 +164,9 @@ And see the errors for the rules you might provide the next search query:
     ],
   },
   "message": "alert executed: .index-threshold:30d856c0-b14b-11eb-9a7c-9df284da9f99: 'test'",
-    "error" : {
-            "message" : "Saved object [action/ef0e2530-b14a-11eb-9a7c-9df284da9f99] not found"
-          },
+  "error" : {
+    "message" : "Saved object [action/ef0e2530-b14a-11eb-9a7c-9df284da9f99] not found"
+  },
 }
 --------------------------------------------------
 
@@ -180,8 +180,8 @@ GET .kibana-event-log-*/_search
 	"bool": {
   		"must": [
     		{ "match": { "event.outcome": "failure" }}
-  	]
-	}
+  	  ]
+	  }
   }
 }
 --------------------------------------------------
