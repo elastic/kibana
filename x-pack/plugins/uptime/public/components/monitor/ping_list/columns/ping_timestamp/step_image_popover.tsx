@@ -32,19 +32,19 @@ interface ScreenshotImageProps {
   imageCaption: JSX.Element;
 }
 
-const DefaultImage: React.FC<ScreenshotImageProps & { url?: string }> = ({
+const DefaultImage: React.FC<ScreenshotImageProps & { imageData?: string }> = ({
   captionContent,
   imageCaption,
-  url,
+  imageData,
 }) =>
-  url ? (
+  imageData ? (
     <StepImage
       allowFullScreen={true}
       alt={captionContent}
       caption={imageCaption}
       data-test-subj="pingTimestampImage"
       hasShadow
-      url={url}
+      url={imageData}
       size="s"
       className="syntheticsStepImage"
     />
@@ -59,17 +59,17 @@ const DefaultImage: React.FC<ScreenshotImageProps & { url?: string }> = ({
 const RecomposedScreenshotImage: React.FC<
   ScreenshotImageProps & {
     imgRef: ScreenshotRefImageData;
-    setUrl: React.Dispatch<string | undefined>;
-    url?: string;
+    setImageData: React.Dispatch<string | undefined>;
+    imageData?: string;
   }
 > = (props) => {
-  const { imgRef, setUrl, url } = props;
+  const { imgRef, setImageData, imageData } = props;
 
   // initially an undefined URL value is passed to the image display, and a loading spinner is rendered.
   // `useCompositeImage` will call `setUrl` when the image is composited, and the updated `url` will display.
-  useCompositeImage(imgRef, setUrl, url);
+  useCompositeImage(imgRef, setImageData, imageData);
 
-  return <DefaultImage {...props} url={props.url} />;
+  return <DefaultImage {...props} />;
 };
 
 export interface StepImagePopoverProps {
@@ -82,13 +82,12 @@ export interface StepImagePopoverProps {
 
 const StepImageComponent: React.FC<
   Omit<StepImagePopoverProps, 'isImagePopoverOpen'> & {
-    setUrl: React.Dispatch<string | undefined>;
-    url: string | undefined;
+    setImageData: React.Dispatch<string | undefined>;
+    imageData: string | undefined;
   }
 > = (props) => {
   if (props.imgSrc) {
-    props.setUrl(props.imgSrc);
-    return <DefaultImage {...props} url={props.url} />;
+    return <DefaultImage {...props} />;
   } else if (props.imgRef) {
     return <RecomposedScreenshotImage {...props} imgRef={props.imgRef} />;
   }
@@ -102,7 +101,11 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
   imgSrc,
   isImagePopoverOpen,
 }) => {
-  const [url, setUrl] = React.useState<string | undefined>(undefined);
+  const [imageData, setImageData] = React.useState<string | undefined>(imgSrc || undefined);
+  const setImageDataCallback = React.useCallback(
+    (newImageData: string | undefined) => setImageData(newImageData),
+    [setImageData]
+  );
   return (
     <EuiPopover
       anchorPosition="leftDown"
@@ -112,17 +115,17 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
           imageCaption={imageCaption}
           imgRef={imgRef}
           imgSrc={imgSrc}
-          setUrl={setUrl}
-          url={url}
+          setImageData={setImageDataCallback}
+          imageData={imageData}
         />
       }
       isOpen={isImagePopoverOpen}
       closePopover={() => {}}
     >
-      {url ? (
+      {imageData ? (
         <EuiImage
           alt={fullSizeImageAlt}
-          url={url}
+          url={imageData}
           style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
         />
       ) : (

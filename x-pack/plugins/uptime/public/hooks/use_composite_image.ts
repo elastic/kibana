@@ -23,13 +23,13 @@ function isNewRef(a: ScreenshotRefImageData, b: ScreenshotRefImageData): boolean
 /**
  * Assembles the data for a composite image and returns the composite to a callback.
  * @param imgRef the data and dimensions for the composite image.
- * @param onComposemageSuccess sends the composited image to this callback.
- * @param url this is the composited image value, if it is truthy the function will skip the compositing process
+ * @param onComposeImageSuccess sends the composited image to this callback.
+ * @param imageData this is the composited image value, if it is truthy the function will skip the compositing process
  */
 export const useCompositeImage = (
   imgRef: ScreenshotRefImageData,
-  onComposemageSuccess: React.Dispatch<string | undefined>,
-  url?: string
+  onComposeImageSuccess: React.Dispatch<string | undefined>,
+  imageData?: string
 ): void => {
   const [curRef, setCurRef] = React.useState<ScreenshotRefImageData>(imgRef);
 
@@ -39,17 +39,17 @@ export const useCompositeImage = (
     async function compose() {
       await composeScreenshotRef(imgRef, canvas);
       const imgData = canvas.toDataURL('image/png', 1.0);
-      onComposemageSuccess(imgData);
+      onComposeImageSuccess(imgData);
     }
 
     // if the URL is truthy it means it's already been composed, so there
     // is no need to call the function
-    if (typeof url === 'undefined' || isNewRef(imgRef, curRef)) {
+    if (typeof imageData === 'undefined' || isNewRef(imgRef, curRef)) {
       compose();
       setCurRef(imgRef);
     }
     return () => {
       canvas.parentElement?.removeChild(canvas);
     };
-  }, [imgRef, onComposemageSuccess, curRef, url]);
+  }, [imgRef, onComposeImageSuccess, curRef, imageData]);
 };
