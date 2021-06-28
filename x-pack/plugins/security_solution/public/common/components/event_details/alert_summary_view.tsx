@@ -38,12 +38,20 @@ import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
 import { LineClamp } from '../line_clamp';
 import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
+import { EventCode } from '../../../../common/ecs/event';
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
   padding: 24px 4px 4px;
 `;
 
-const defaultFields = [
+interface AlertSummaryField {
+  id: string;
+  label?: string;
+  linkField?: string;
+  fieldType?: string;
+}
+
+const defaultAlertSummaryFields: AlertSummaryField[] = [
   { id: 'signal.status' },
   { id: '@timestamp' },
   {
@@ -63,8 +71,16 @@ const defaultFields = [
   { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
-function getEventFieldsToDisplay() {
-  return defaultFields;
+function getEventFieldsToDisplay(alertCode?: EventCode): AlertSummaryField[] {
+  switch (alertCode) {
+    // memory protection fields
+    case EventCode.MALICIOUS_THREAD:
+    case EventCode.MEMORY_SIGNATURE:
+      // TODO return the actual fields
+      return [{ id: 'signal.status' }, { id: '@timestamp' }];
+    default:
+      return defaultAlertSummaryFields;
+  }
 }
 
 const getDescription = ({
@@ -100,7 +116,11 @@ const getSummaryRows = ({
     return [];
   }
 
-  const fields = getEventFieldsToDisplay();
+  const eventCodeField = data.find(
+    (item) => item.category === 'event' && item.field === 'event.code'
+  );
+  const alertCode = eventCodeField?.values?.[0];
+  const fields = getEventFieldsToDisplay(alertCode);
   return fields.reduce<SummaryRow[]>((acc, item) => {
     const field = data.find((d) => d.field === item.id);
     if (!field) {

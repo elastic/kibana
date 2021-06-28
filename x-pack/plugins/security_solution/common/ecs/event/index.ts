@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+export enum EventCode {
+  // Malware Protection alert
+  MALICIOUS_FILE = 'malicious_file',
+  // Ransomware Protection alert
+  RANSOMWARE = 'ransomware',
+  // Memory Protection alert
+  MEMORY_SIGNATURE = 'memory_signature',
+  // Memory Protection alert
+  MALICIOUS_THREAD = 'malicious_thread',
+}
+
 export interface EventEcs {
   action?: string[];
 
