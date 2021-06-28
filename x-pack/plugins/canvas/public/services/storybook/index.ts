@@ -16,8 +16,9 @@ import { providers as stubProviders } from '../stubs';
 import { workpadServiceFactory } from './workpad';
 
 export interface StorybookParams {
-  findWorkpads?: number;
-  findTemplates?: boolean;
+  hasTemplates?: boolean;
+  useStaticData?: boolean;
+  workpadCount?: number;
 }
 
 export const providers: PluginServiceProviders<CanvasPluginServices, StorybookParams> = {
@@ -26,3 +27,34 @@ export const providers: PluginServiceProviders<CanvasPluginServices, StorybookPa
 };
 
 export const pluginServices = new PluginServices<CanvasPluginServices>();
+
+export const argTypes = {
+  hasTemplates: {
+    name: 'Has templates?',
+    type: {
+      name: 'boolean',
+    },
+    defaultValue: true,
+    control: {
+      type: 'boolean',
+    },
+  },
+  useStaticData: {
+    name: 'Use static data?',
+    type: {
+      name: 'boolean',
+    },
+    defaultValue: false,
+    control: {
+      type: 'boolean',
+    },
+  },
+  workpadCount: {
+    name: 'Number of workpads',
+    type: { name: 'number' },
+    defaultValue: 5,
+    control: {
+      type: 'range',
+    },
+  },
+};

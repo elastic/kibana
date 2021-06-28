@@ -8,27 +8,21 @@
 import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 
-import { reduxDecorator, getDisableStoryshotsParameter } from '../../../../storybook';
+import { reduxDecorator } from '../../../../storybook';
+import { argTypes } from '../../../services/storybook';
 
 import { WorkpadTemplates as Component } from './workpad_templates';
 
+const { hasTemplates } = argTypes;
+
 export default {
-  title: 'Home/Tabs',
+  title: 'Home/Tabs/Workpad Templates',
   component: Component,
   argTypes: {
-    findTemplates: {
-      name: 'Has templates?',
-      type: {
-        name: 'boolean',
-      },
-      defaultValue: true,
-      control: {
-        type: 'boolean',
-      },
-    },
+    hasTemplates,
   },
   decorators: [reduxDecorator()],
-  parameters: { ...getDisableStoryshotsParameter() },
+  parameters: {},
 };
 
 export const WorkpadTemplates = () => (

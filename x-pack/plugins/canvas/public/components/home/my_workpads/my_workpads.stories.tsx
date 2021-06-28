@@ -8,25 +8,22 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import { reduxDecorator, getDisableStoryshotsParameter } from '../../../../storybook';
+import { reduxDecorator } from '../../../../storybook';
+import { argTypes } from '../../../services/storybook';
 
 import { MyWorkpads as Component } from './my_workpads';
 
+const { workpadCount, useStaticData } = argTypes;
+
 export default {
-  title: 'Home/Tabs',
+  title: 'Home/Tabs/My Workpads',
   component: Component,
   argTypes: {
-    findWorkpads: {
-      name: 'Number of workpads',
-      type: { name: 'number' },
-      defaultValue: 5,
-      control: {
-        type: 'range',
-      },
-    },
+    workpadCount,
+    useStaticData,
   },
   decorators: [reduxDecorator()],
-  parameters: { ...getDisableStoryshotsParameter() },
+  parameters: {},
 };
 
 export const MyWorkpads = () => (

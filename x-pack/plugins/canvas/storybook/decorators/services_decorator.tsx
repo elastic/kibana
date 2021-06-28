@@ -16,8 +16,13 @@ import { CanvasPluginServices } from '../../public/services';
 import { providers, StorybookParams } from '../../public/services/storybook';
 
 export const servicesContextDecorator: DecoratorFn = (story: Function, storybook) => {
+  if (process.env.JEST_WORKER_ID !== undefined) {
+    storybook.args.useStaticData = true;
+  }
+
   const registry = new PluginServiceRegistry<CanvasPluginServices, StorybookParams>(providers);
   pluginServices.setRegistry(registry.start(storybook.args));
+
   const ContextProvider = pluginServices.getContextProvider();
 
   return (

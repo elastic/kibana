@@ -7,35 +7,17 @@
 
 import React from 'react';
 
-import { reduxDecorator, getDisableStoryshotsParameter } from '../../../storybook';
+import { reduxDecorator } from '../../../storybook';
+import { argTypes } from '../../services/storybook';
 
 import { Home } from './home';
 
 export default {
   title: 'Home',
   component: Home,
-  argTypes: {
-    findWorkpads: {
-      name: 'Number of workpads',
-      type: { name: 'number' },
-      defaultValue: 5,
-      control: {
-        type: 'range',
-      },
-    },
-    findTemplates: {
-      name: 'Has templates?',
-      type: {
-        name: 'boolean',
-      },
-      defaultValue: true,
-      control: {
-        type: 'boolean',
-      },
-    },
-  },
+  argTypes,
   decorators: [reduxDecorator()],
-  parameters: { ...getDisableStoryshotsParameter() },
+  parameters: {},
 };
 
 export const HomePage = () => <Home />;

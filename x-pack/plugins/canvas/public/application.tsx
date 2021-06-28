@@ -32,7 +32,7 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, services, LegacyServicesProvider } from './services';
+import { startServices, services, LegacyServicesProvider, CanvasPluginServices } from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
 import { appUnload } from './state/actions/app';
@@ -41,7 +41,6 @@ import { appUnload } from './state/actions/app';
 import { size } from '../canvas_plugin_src/renderers/plot/plugins/size';
 // @ts-expect-error Not going to convert
 import { text } from '../canvas_plugin_src/renderers/plot/plugins/text';
-import { CanvasPluginServices } from './services';
 
 import './style/index.scss';
 
