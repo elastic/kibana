@@ -21,6 +21,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     filters,
     reportDefinitions,
     dataType,
+    selectedMetricField,
     ...restSeries
   } = series;
 
@@ -32,6 +33,7 @@ export function convertToShortUrl(series: SeriesUrl) {
     [URL_KEYS.FILTERS]: filters,
     [URL_KEYS.REPORT_DEFINITIONS]: reportDefinitions,
     [URL_KEYS.DATA_TYPE]: dataType,
+    [URL_KEYS.SELECTED_METRIC]: selectedMetricField,
     ...restSeries,
   };
 }
