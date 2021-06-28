@@ -9,8 +9,6 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiText } from '@elastic/eui';
-
 import { UserAddedInfo } from './';
 
 describe('UserAddedInfo', () => {
@@ -20,9 +18,103 @@ describe('UserAddedInfo', () => {
     roleType: 'user',
   };
 
-  it('renders', () => {
+  it('renders with email', () => {
     const wrapper = shallow(<UserAddedInfo {...props} />);
 
-    expect(wrapper.find(EuiText)).toHaveLength(6);
+    expect(wrapper).toMatchInlineSnapshot(`
+      <Fragment>
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Username
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          user1
+        </EuiText>
+        <EuiSpacer />
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Email
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          test@test.com
+        </EuiText>
+        <EuiSpacer />
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Role
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          user
+        </EuiText>
+        <EuiSpacer />
+      </Fragment>
+    `);
+  });
+
+  it('renders without email', () => {
+    const wrapper = shallow(<UserAddedInfo {...props} email="" />);
+
+    expect(wrapper).toMatchInlineSnapshot(`
+      <Fragment>
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Username
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          user1
+        </EuiText>
+        <EuiSpacer />
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Email
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          <EuiTextColor
+            color="subdued"
+          >
+            —
+          </EuiTextColor>
+        </EuiText>
+        <EuiSpacer />
+        <EuiText
+          size="s"
+        >
+          <strong>
+            Role
+          </strong>
+        </EuiText>
+        <EuiText
+          size="s"
+        >
+          user
+        </EuiText>
+        <EuiSpacer />
+      </Fragment>
+    `);
   });
 });
