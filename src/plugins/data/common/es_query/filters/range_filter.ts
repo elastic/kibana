@@ -82,7 +82,7 @@ export const getRangeFilterField = (filter: RangeFilter) => {
   return filter.range && Object.keys(filter.range)[0];
 };
 
-const formatValue = (field: FieldBase, params: any[]) =>
+const formatValue = (params: any[]) =>
   map(params, (val: any, key: string) => get(operators, key) + val).join(' ');
 
 // Creates a filter where the value for the given field is in the given range
@@ -123,7 +123,7 @@ export const buildRangeFilter = (
     filter.meta.field = field.name;
   } else if (field.scripted) {
     filter.script = getRangeScript(field, params);
-    filter.script.script.params.value = formatValue(field, filter.script.script.params);
+    filter.script.script.params.value = formatValue(filter.script.script.params);
 
     filter.meta.field = field.name;
   } else {
