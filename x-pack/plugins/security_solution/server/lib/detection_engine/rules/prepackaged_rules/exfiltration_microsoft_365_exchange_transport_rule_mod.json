@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Microsoft 365 Exchange Transport Rule Modification",
   "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:(\"Remove-TransportRule\" or \"Disable-TransportRule\") and event.outcome:success",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:(\"Remove-TransportRule\" or \"Disable-TransportRule\") and event.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/exchange/remove-transportrule?view=exchange-ps",
     "https://docs.microsoft.com/en-us/powershell/module/exchange/disable-transportrule?view=exchange-ps",

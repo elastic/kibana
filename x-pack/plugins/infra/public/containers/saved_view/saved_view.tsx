@@ -255,12 +255,21 @@ export const useSavedView = (props: Props) => {
   }, [urlState, setUrlState, currentView, defaultViewId, data]);
 
   useEffect(() => {
-    if (!currentView && !loading && data) {
+    if (!currentView && !loading && data && shouldLoadDefault) {
       const viewToSet = views.find((v) => v.id === urlState.viewId);
       if (viewToSet) setCurrentView(viewToSet);
       else loadDefaultViewIfSet();
     }
-  }, [loading, currentView, data, views, setCurrentView, loadDefaultViewIfSet, urlState.viewId]);
+  }, [
+    loading,
+    currentView,
+    data,
+    views,
+    setCurrentView,
+    loadDefaultViewIfSet,
+    urlState.viewId,
+    shouldLoadDefault,
+  ]);
 
   return {
     views,
