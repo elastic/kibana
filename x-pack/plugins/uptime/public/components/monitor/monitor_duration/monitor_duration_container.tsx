@@ -56,7 +56,7 @@ export const MonitorDuration: React.FC<MonitorIdParam> = ({ monitorId }) => {
   const exploratoryViewLink = createExploratoryViewUrl(
     {
       [`monitor-duration`]: {
-        reportType: 'kpi',
+        reportType: 'kpi-over-time',
         time: { from: dateRangeStart, to: dateRangeEnd },
         reportDefinitions: {
           'monitor.id': [monitorId] as string[],

@@ -5,11 +5,12 @@
  * 2.0.
  */
 import rison, { RisonValue } from 'rison-node';
+import type { SeriesUrl, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
-import type { SeriesUrl } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, ExistsFilter } from '../../../../../../../../src/plugins/data/public';
 import { URL_KEYS } from './constants/url_constants';
+import { PersistableFilter } from '../../../../../../lens/common';
 
 export function convertToShortUrl(series: SeriesUrl) {
   const {
@@ -51,7 +52,7 @@ export function createExploratoryViewUrl(allSeries: AllSeries, baseHref = '') {
 }
 
 export function buildPhraseFilter(field: string, value: string, indexPattern: IIndexPattern) {
-  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
     return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
   }
@@ -59,7 +60,7 @@ export function buildPhraseFilter(field: string, value: string, indexPattern: II
 }
 
 export function buildPhrasesFilter(field: string, value: string[], indexPattern: IIndexPattern) {
-  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
     return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
   }
@@ -67,9 +68,38 @@ export function buildPhrasesFilter(field: string, value: string[], indexPattern:
 }
 
 export function buildExistsFilter(field: string, indexPattern: IIndexPattern) {
-  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field);
+  const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
     return [esFilters.buildExistsFilter(fieldMeta, indexPattern)];
   }
   return [];
+}
+
+type FiltersType = PersistableFilter[] | ExistsFilter[];
+
+export function urlFilterToPersistedFilter({
+  urlFilters,
+  initFilters,
+  indexPattern,
+}: {
+  urlFilters: UrlFilter[];
+  initFilters: FiltersType;
+  indexPattern: IIndexPattern;
+}) {
+  const parsedFilters: FiltersType = initFilters ? [...initFilters] : [];
+
+  urlFilters.forEach(({ field, values = [], notValues = [] }) => {
+    if (values?.length > 0) {
+      const filter = buildPhrasesFilter(field, values, indexPattern);
+      parsedFilters.push(...filter);
+    }
+
+    if (notValues?.length > 0) {
+      const filter = buildPhrasesFilter(field, notValues, indexPattern)[0];
+      filter.meta.negate = true;
+      parsedFilters.push(filter);
+    }
+  });
+
+  return parsedFilters;
 }
