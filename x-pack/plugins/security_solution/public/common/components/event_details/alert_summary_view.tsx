@@ -182,6 +182,7 @@ const AlertSummaryViewComponent: React.FC<{
   const isEndpointAlert = useMemo(() => {
     return endpointAlertCheck({ data });
   }, [data]);
+
   const endpointId = useMemo(() => {
     const findAgentId = find({ category: 'agent', field: 'agent.id' }, data)?.values;
     return findAgentId ? findAgentId[0] : '';
@@ -193,7 +194,7 @@ const AlertSummaryViewComponent: React.FC<{
       contextId: timelineId,
       eventId,
       fieldName: 'agent.status',
-      value: agentId,
+      value: endpointId,
       linkValue: undefined,
     },
   };
