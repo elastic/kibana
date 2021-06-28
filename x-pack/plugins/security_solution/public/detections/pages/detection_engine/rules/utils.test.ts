@@ -11,7 +11,7 @@ const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: b
   `${appId}${options?.path ?? ''}`;
 
 describe('getBreadcrumbs', () => {
-  it('returns default value for incorrect params', () => {
+  it('Does not render for incorrect params', () => {
     expect(
       getBreadcrumbs(
         {
