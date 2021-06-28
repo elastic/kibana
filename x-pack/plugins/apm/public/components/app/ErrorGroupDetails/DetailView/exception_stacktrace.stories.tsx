@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import { Story } from '@storybook/react';
+import React, { ComponentProps, ComponentType } from 'react';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
-import { Exception } from '../../../../../typings/es_schemas/raw/error_raw';
-import { ExceptionStacktrace } from './ExceptionStacktrace';
+import { ExceptionStacktrace } from './exception_stacktrace';
+
+type Args = ComponentProps<typeof ExceptionStacktrace>;
 
 export default {
   title: 'app/ErrorGroupDetails/DetailView/ExceptionStacktrace',
   component: ExceptionStacktrace,
   decorators: [
-    (Story: ComponentType) => {
-      return (
-        <EuiThemeProvider>
-          <Story />
-        </EuiThemeProvider>
-      );
-    },
+    (StoryComponent: ComponentType) => (
+      <EuiThemeProvider>
+        <StoryComponent />
+      </EuiThemeProvider>
+    ),
   ],
 };
 
-export function JavaWithLongLines() {
-  const exceptions: Exception[] = [
+export const JavaWithLongLines: Story<Args> = (args) => (
+  <ExceptionStacktrace {...args} />
+);
+JavaWithLongLines.args = {
+  codeLanguage: 'java',
+  exceptions: [
     {
       stacktrace: [
         {
@@ -1734,22 +1738,23 @@ export function JavaWithLongLines() {
         'Null return value from advice does not match primitive return type for: public abstract double co.elastic.apm.opbeans.repositories.Numbers.getRevenue()',
       type: 'org.springframework.aop.AopInvocationException',
     },
-  ];
-
-  return <ExceptionStacktrace codeLanguage="java" exceptions={exceptions} />;
-}
+  ],
+};
 JavaWithLongLines.decorators = [
-  (Story: ComponentType) => {
-    return (
-      <div style={{ border: '1px dotted #aaa', width: 768 }}>
-        <Story />
-      </div>
-    );
-  },
+  (StoryComponent: ComponentType) => (
+    <div style={{ border: '1px dotted #aaa', width: 768 }}>
+      <StoryComponent />
+    </div>
+  ),
 ];
 
-export function JavaScriptWithSomeContext() {
-  const exceptions: Exception[] = [
+export const JavaScriptWithSomeContext: Story<Args> = (args) => (
+  <ExceptionStacktrace {...args} />
+);
+JavaScriptWithSomeContext.storyName = 'JavaScript With Some Context';
+JavaScriptWithSomeContext.args = {
+  codeLanguage: 'javascript',
+  exceptions: [
     {
       code: '503',
       stacktrace: [
@@ -1870,16 +1875,15 @@ export function JavaScriptWithSomeContext() {
       type: 'Error',
       message: 'Unexpected APM Server response when polling config',
     },
-  ];
+  ],
+};
 
-  return (
-    <ExceptionStacktrace codeLanguage="javascript" exceptions={exceptions} />
-  );
-}
-JavaScriptWithSomeContext.storyName = 'JavaScript With Some Context';
-
-export function RubyWithContextAndLibraryFrames() {
-  const exceptions: Exception[] = [
+export const RubyWithContextAndLibraryFrames: Story<Args> = (args) => (
+  <ExceptionStacktrace {...args} />
+);
+RubyWithContextAndLibraryFrames.args = {
+  codeLanguage: 'ruby',
+  exceptions: [
     {
       stacktrace: [
         {
@@ -2536,7 +2540,5 @@ export function RubyWithContextAndLibraryFrames() {
       message: "Couldn't find Order with 'id'=956",
       type: 'ActiveRecord::RecordNotFound',
     },
-  ];
-
-  return <ExceptionStacktrace codeLanguage="ruby" exceptions={exceptions} />;
-}
+  ],
+};
