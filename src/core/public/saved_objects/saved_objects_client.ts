@@ -16,10 +16,14 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
+  SavedObjectsResolveResponse,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
+import type { ResolvedSimpleSavedObject } from './types';
 import { HttpFetchOptions, HttpSetup } from '../http';
+
+export type { SavedObjectsResolveResponse };
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -420,6 +424,29 @@ export class SavedObjectsClient {
     });
     return request;
   }
+
+  /**
+   * Resolves a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns The resolve result for the saved object for the given type and id.
+   */
+  public resolve = <T = unknown>(
+    type: string,
+    id: string
+  ): Promise<ResolvedSimpleSavedObject<T>> => {
+    if (!type || !id) {
+      return Promise.reject(new Error('requires type and id'));
+    }
+
+    const path = `${this.getPath(['resolve'])}/${type}/${id}`;
+    const request: Promise<SavedObjectsResolveResponse<T>> = this.savedObjectsFetch(path, {});
+    return request.then(({ saved_object: object, outcome, aliasTargetId }) => {
+      const savedObject = new SimpleSavedObject<T>(this, object);
+      return { savedObject, outcome, aliasTargetId };
+    });
+  };
 
   /**
    * Updates an object

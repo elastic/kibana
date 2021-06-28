@@ -11,34 +11,42 @@ import { IRouter } from 'src/core/server';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
 
-export const registerGetRoute = (
+export const registerBulkGetRoute = (
   router: IRouter,
   managementServicePromise: Promise<ISavedObjectsManagement>
 ) => {
-  router.get(
+  router.post(
     {
-      path: '/api/kibana/management/saved_objects/{type}/{id}',
+      path: '/api/kibana/management/saved_objects/_bulk_get',
       validate: {
-        params: schema.object({
-          type: schema.string(),
-          id: schema.string(),
-        }),
+        body: schema.arrayOf(
+          schema.object({
+            type: schema.string(),
+            id: schema.string(),
+          })
+        ),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { type, id } = req.params;
       const managementService = await managementServicePromise;
       const { getClient, typeRegistry } = context.core.savedObjects;
-      const includedHiddenTypes = [type].filter(
-        (entry) => typeRegistry.isHidden(entry) && typeRegistry.isImportableAndExportable(entry)
+
+      const objects = req.body;
+      const uniqueTypes = objects.reduce((acc, { type }) => acc.add(type), new Set<string>());
+      const includedHiddenTypes = Array.from(uniqueTypes).filter(
+        (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
       );
 
       const client = getClient({ includedHiddenTypes });
-      const findResponse = await client.get<any>(type, id);
+      const response = await client.bulkGet<unknown>(objects);
+      const enhancedObjects = response.saved_objects.map((obj) => {
+        if (!obj.error) {
+          return injectMetaAttributes(obj, managementService);
+        }
+        return obj;
+      });
 
-      const enhancedSavedObject = injectMetaAttributes(findResponse, managementService);
-
-      return res.ok({ body: enhancedSavedObject });
+      return res.ok({ body: enhancedObjects });
     })
   );
 };
