@@ -73,8 +73,8 @@ function Wrapper({
     />
   );
 }
-export const Integration: Story<Args> = (_args) => {
-  return <Wrapper {..._args} />;
+export const Integration: Story<Args> = (args) => {
+  return <Wrapper {...args} />;
 };
 
 Integration.args = {

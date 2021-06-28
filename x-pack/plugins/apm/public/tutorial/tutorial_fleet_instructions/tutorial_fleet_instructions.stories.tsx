@@ -39,8 +39,8 @@ export default {
   },
 };
 
-export const Instructions: Story<Args> = (_args) => {
-  return <Wrapper {..._args} />;
+export const Instructions: Story<Args> = (args) => {
+  return <Wrapper {...args} />;
 };
 
 Instructions.args = {
