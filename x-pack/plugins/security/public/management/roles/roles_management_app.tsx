@@ -57,13 +57,7 @@ export const rolesManagementApp = Object.freeze({
           import('../users'),
         ]);
 
-        const {
-          application,
-          docLinks,
-          http,
-          i18n: i18nStart,
-          notifications,
-        } = startServices;
+        const { application, docLinks, http, i18n: i18nStart, notifications } = startServices;
 
         const rolesAPIClient = new RolesAPIClient(http);
         const RolesGridPageWithBreadcrumbs = () => {
