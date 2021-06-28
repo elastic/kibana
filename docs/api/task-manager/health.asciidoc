@@ -6,17 +6,20 @@
 
 Retrieve the health status of the {kib} Task Manager.
 
+[float]
 [[task-manager-api-health-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/task_manager/_health`
 
+[float]
 [[task-manager-api-health-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
+[float]
 [[task-manager-api-health-example]]
 ==== Example
 
