@@ -52,7 +52,7 @@ describe('oauth routes', () => {
             redirect_uri: 'https://my.domain/callback',
             scope: 'search',
             state: 'someRandomString',
-          }
+          },
         };
         mockRouter.shouldValidate(request);
       });
@@ -93,7 +93,7 @@ describe('oauth routes', () => {
             redirect_uri: 'https://my.domain/callback',
             scope: 'search',
             state: 'someRandomString',
-          }
+          },
         };
         mockRouter.shouldValidate(request);
       });
@@ -134,7 +134,7 @@ describe('oauth routes', () => {
             redirect_uri: 'https://my.domain/callback',
             scope: 'search',
             state: 'someRandomString',
-          }
+          },
         };
         mockRouter.shouldValidate(request);
       });
