@@ -8,22 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { UrlGeneratorContract } from 'src/plugins/share/public';
-import { getCoreService, getQueryService, getShareService } from './services';
+import { getQueryService, getShareService } from './services';
 import { indexPatterns } from '../../data/public';
 import { Vis } from '../../visualizations/public';
 import { LegacyMapDeprecationMessage } from '../../maps_legacy/public';
 
 export function getDeprecationMessage(vis: Vis) {
-  let mapsTileMapUrlGenerator: UrlGeneratorContract<'MAPS_APP_TILE_MAP_URL_GENERATOR'> | undefined;
-  try {
-    mapsTileMapUrlGenerator = getShareService().urlGenerators.getUrlGenerator(
-      'MAPS_APP_TILE_MAP_URL_GENERATOR'
-    );
-  } catch (error) {
-    // ignore error thrown when url generator is not available
-  }
-
   const title = i18n.translate('tileMap.vis.mapTitle', {
     defaultMessage: 'Coordinate Map',
   });
@@ -31,8 +21,11 @@ export function getDeprecationMessage(vis: Vis) {
   async function onClick(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
 
+    const locator = getShareService().url.locators.get('MAPS_APP_TILE_MAP_LOCATOR');
+    if (!locator) return;
+
     const query = getQueryService();
-    const createUrlParams: { [key: string]: any } = {
+    const params: { [key: string]: any } = {
       label: vis.title ? vis.title : title,
       mapType: vis.params.mapType,
       colorSchema: vis.params.colorSchema,
@@ -45,7 +38,7 @@ export function getDeprecationMessage(vis: Vis) {
 
     const bucketAggs = vis.data?.aggs?.byType('buckets');
     if (bucketAggs?.length && bucketAggs[0].type.dslName === 'geohash_grid') {
-      createUrlParams.geoFieldName = bucketAggs[0].getField()?.name;
+      params.geoFieldName = bucketAggs[0].getField()?.name;
     } else if (vis.data.indexPattern) {
       // attempt to default to first geo point field when geohash is not configured yet
       const geoField = vis.data.indexPattern.fields.find((field) => {
@@ -54,23 +47,22 @@ export function getDeprecationMessage(vis: Vis) {
         );
       });
       if (geoField) {
-        createUrlParams.geoFieldName = geoField.name;
+        params.geoFieldName = geoField.name;
       }
     }
 
     const metricAggs = vis.data?.aggs?.byType('metrics');
     if (metricAggs?.length) {
-      createUrlParams.metricAgg = metricAggs[0].type.dslName;
-      createUrlParams.metricFieldName = metricAggs[0].getField()?.name;
+      params.metricAgg = metricAggs[0].type.dslName;
+      params.metricFieldName = metricAggs[0].getField()?.name;
     }
 
-    const url = await mapsTileMapUrlGenerator!.createUrl(createUrlParams);
-    getCoreService().application.navigateToUrl(url);
+    locator.navigate(params);
   }
 
   return (
     <LegacyMapDeprecationMessage
-      isMapsAvailable={!!mapsTileMapUrlGenerator}
+      isMapsAvailable={!!getShareService().url.locators.get('MAPS_APP_TILE_MAP_LOCATOR')}
       onClick={onClick}
       visualizationLabel={title}
     />

@@ -8,7 +8,6 @@
 export const DEFAULT_INITIAL_APP_DATA = {
   readOnlyMode: false,
   ilmEnabled: true,
-  isFederatedAuth: false,
   configuredLimits: {
     appSearch: {
       engine: {
