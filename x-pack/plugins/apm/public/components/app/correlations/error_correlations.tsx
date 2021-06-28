@@ -248,6 +248,7 @@ function ErrorTimeseriesChart({
           yAccessors={['y']}
           data={overallData?.overall?.timeseries ?? []}
           curve={CurveType.CURVE_MONOTONE_X}
+          color={theme.eui.euiColorVis7}
         />
 
         {correlationsData && selectedSignificantTerm ? (
