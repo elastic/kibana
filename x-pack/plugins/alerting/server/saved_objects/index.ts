@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
+  SavedObjectsTypeMappingDefinition,
 } from 'kibana/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
@@ -51,7 +52,7 @@ export function setupSavedObjects(
       hidden: true,
       namespaceType: 'single',
       migrations: getMigrations(encryptedSavedObjects),
-      mappings: mappings.alert,
+      mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
       ...(config.enableImportExport
         ? {
             management: {

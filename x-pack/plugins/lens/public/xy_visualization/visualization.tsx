@@ -9,7 +9,7 @@ import React from 'react';
 import { uniq } from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -439,10 +439,15 @@ export const getXyVisualization = ({
       }
     }
     return accessorsWithArrayValues.map((label) => (
-      <>
-        <strong>{label}</strong> contains array values. Your visualization may not render as
-        expected.
-      </>
+      <FormattedMessage
+        key={label}
+        id="xpack.lens.xyVisualization.arrayValues"
+        defaultMessage="{label} contains array values. Your visualization may not render as
+        expected."
+        values={{
+          label: <strong>{label}</strong>,
+        }}
+      />
     ));
   },
 });
@@ -537,8 +542,15 @@ function checkXAccessorCompatibility(
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
   const errors = [];
-  const hasDateHistogramSet = state.layers.some(checkIntervalOperation('date', datasourceLayers));
-  const hasNumberHistogram = state.layers.some(checkIntervalOperation('number', datasourceLayers));
+  const hasDateHistogramSet = state.layers.some(
+    checkScaleOperation('interval', 'date', datasourceLayers)
+  );
+  const hasNumberHistogram = state.layers.some(
+    checkScaleOperation('interval', 'number', datasourceLayers)
+  );
+  const hasOrdinalAxis = state.layers.some(
+    checkScaleOperation('ordinal', undefined, datasourceLayers)
+  );
   if (state.layers.length > 1 && hasDateHistogramSet && hasNumberHistogram) {
     errors.push({
       shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
@@ -555,11 +567,28 @@ function checkXAccessorCompatibility(
       }),
     });
   }
+  if (state.layers.length > 1 && (hasDateHistogramSet || hasNumberHistogram) && hasOrdinalAxis) {
+    errors.push({
+      shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXShort', {
+        defaultMessage: `Wrong data type for {axis}.`,
+        values: {
+          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        },
+      }),
+      longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureXOrdinalLong', {
+        defaultMessage: `Data type mismatch for the {axis}, use a different function.`,
+        values: {
+          axis: getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) }),
+        },
+      }),
+    });
+  }
   return errors;
 }
 
-function checkIntervalOperation(
-  dataType: 'date' | 'number',
+function checkScaleOperation(
+  scaleType: 'ordinal' | 'interval' | 'ratio',
+  dataType: 'date' | 'number' | 'string' | undefined,
   datasourceLayers: Record<string, DatasourcePublicAPI>
 ) {
   return (layer: XYLayerConfig) => {
@@ -568,6 +597,8 @@ function checkIntervalOperation(
       return false;
     }
     const operation = datasourceAPI?.getOperationForColumnId(layer.xAccessor);
-    return Boolean(operation?.dataType === dataType && operation.scale === 'interval');
+    return Boolean(
+      operation && (!dataType || operation.dataType === dataType) && operation.scale === scaleType
+    );
   };
 }

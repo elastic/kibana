@@ -48,7 +48,7 @@ webpack(
   name = "target_web",
   data = DEPS + [
     ":src",
-    ":webpack.config.js",
+    "webpack.config.js",
   ],
   output_dir = True,
   args = [
@@ -87,7 +87,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":target_web", ":tsc"],
+  deps = DEPS + [":tsc", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

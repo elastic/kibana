@@ -6,7 +6,8 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { DashboardStart } from '../../../../src/plugins/dashboard/public';
@@ -54,6 +55,9 @@ import {
   EmbeddableComponentProps,
   getEmbeddableComponent,
 } from './editor_frame_service/embeddable/embeddable_component';
+import { HeatmapVisualization } from './heatmap_visualization';
+import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
+import { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -78,6 +82,8 @@ export interface LensPluginStartDependencies {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  inspector: InspectorStartContract;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface LensPublicStart {
@@ -90,6 +96,15 @@ export interface LensPublicStart {
    * @experimental
    */
   EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>;
+  /**
+   * React component which can be used to embed a Lens Visualization Save Modal Component.
+   * See `x-pack/examples/embedded_lens_example` for exemplary usage.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
   /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -119,6 +134,7 @@ export class LensPlugin {
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
+  private heatmapVisualization: HeatmapVisualization;
 
   private stopReportManager?: () => void;
 
@@ -129,6 +145,7 @@ export class LensPlugin {
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
+    this.heatmapVisualization = new HeatmapVisualization();
   }
 
   setup(
@@ -178,13 +195,9 @@ export class LensPlugin {
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
+    this.heatmapVisualization.setup(core, dependencies);
 
     visualizations.registerAlias(getLensAliasConfig());
-
-    const getByValueFeatureFlag = async () => {
-      const [, deps] = await core.getStartServices();
-      return deps.dashboard.dashboardFeatureFlagConfig;
-    };
 
     const getPresentationUtilContext = async () => {
       const [, deps] = await core.getStartServices();
@@ -210,7 +223,6 @@ export class LensPlugin {
         return mountApp(core, params, {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,
-          getByValueFeatureFlag,
           getPresentationUtilContext,
         });
       },
@@ -246,7 +258,8 @@ export class LensPlugin {
     );
 
     return {
-      EmbeddableComponent: getEmbeddableComponent(startDependencies.embeddable),
+      EmbeddableComponent: getEmbeddableComponent(core, startDependencies),
+      SaveModalComponent: getSaveModalComponent(core, startDependencies, this.attributeService!),
       navigateToPrefilledEditor: (input: LensEmbeddableInput, openInNewTab?: boolean) => {
         // for openInNewTab, we set the time range in url via getEditPath below
         if (input.timeRange && !openInNewTab) {

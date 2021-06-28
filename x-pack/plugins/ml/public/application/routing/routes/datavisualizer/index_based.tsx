@@ -14,7 +14,7 @@ import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
-import { Page } from '../../../datavisualizer/index_based';
+import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_based/index_data_visualizer';
 
 import { checkBasicLicense } from '../../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';

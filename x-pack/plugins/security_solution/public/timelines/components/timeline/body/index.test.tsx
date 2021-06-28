@@ -23,6 +23,8 @@ import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 
+jest.mock('../../../../common/lib/kibana');
+
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
@@ -255,7 +257,7 @@ describe('Body', () => {
           tabType: 'query',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -279,7 +281,7 @@ describe('Body', () => {
           tabType: 'pinned',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -303,7 +305,7 @@ describe('Body', () => {
           tabType: 'notes',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
   });

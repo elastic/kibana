@@ -39,10 +39,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('saved objects management integration', () => {
     before(async () => {
-      await esArchiver.load('so_management');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management'
+      );
     });
     after(async () => {
-      await esArchiver.unload('so_management');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management'
+      );
     });
 
     describe('navigating from the tag section', () => {

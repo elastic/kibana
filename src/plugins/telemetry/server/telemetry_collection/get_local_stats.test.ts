@@ -188,7 +188,7 @@ describe('get_local_stats', () => {
   describe('handleLocalStats', () => {
     it('returns expected object without xpack or kibana data', () => {
       const result = handleLocalStats(
-        clusterInfo as estypes.RootNodeInfoResponse,
+        clusterInfo as estypes.InfoResponse,
         clusterStatsWithNodesUsage,
         void 0,
         void 0,
@@ -205,7 +205,7 @@ describe('get_local_stats', () => {
 
     it('returns expected object with xpack', () => {
       const result = handleLocalStats(
-        clusterInfo as estypes.RootNodeInfoResponse,
+        clusterInfo as estypes.InfoResponse,
         clusterStatsWithNodesUsage,
         void 0,
         void 0,

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createNodeAllocationActions, savePolicy, setReplicas } from '../../../helpers';
+import {
+  createNodeAllocationActions,
+  createReplicasAction,
+  createSavePolicyAction,
+} from '../../../helpers';
 import { initTestBed } from '../../init_test_bed';
 
 type SetupReturn = ReturnType<typeof setupGeneralNodeAllocation>;
@@ -19,8 +23,8 @@ export const setupGeneralNodeAllocation = async () => {
     ...testBed,
     actions: {
       ...createNodeAllocationActions(testBed, 'warm'),
-      savePolicy: () => savePolicy(testBed),
-      setReplicas: (value: string) => setReplicas(testBed, 'warm', value),
+      savePolicy: createSavePolicyAction(testBed),
+      ...createReplicasAction(testBed, 'warm'),
     },
   };
 };

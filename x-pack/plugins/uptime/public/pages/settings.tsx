@@ -148,73 +148,71 @@ export const SettingsPage: React.FC = () => {
   );
 
   return (
-    <>
-      <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>{cannotEditNotice}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <div id="settings-form">
-              <EuiForm>
-                <IndicesForm
-                  loading={dss.loading}
-                  onChange={onChangeFormField}
-                  formFields={formFields}
-                  fieldErrors={fieldErrors}
-                  isDisabled={isFormDisabled}
-                />
-                <AlertDefaultsForm
-                  loading={dss.loading}
-                  formFields={formFields}
-                  onChange={onChangeFormField}
-                  fieldErrors={fieldErrors}
-                  isDisabled={isFormDisabled}
-                />
-                <CertificateExpirationForm
-                  loading={dss.loading}
-                  onChange={onChangeFormField}
-                  formFields={formFields}
-                  fieldErrors={fieldErrors}
-                  isDisabled={isFormDisabled}
-                />
+    <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>{cannotEditNotice}</EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <div id="settings-form">
+            <EuiForm>
+              <IndicesForm
+                loading={dss.loading}
+                onChange={onChangeFormField}
+                formFields={formFields}
+                fieldErrors={fieldErrors}
+                isDisabled={isFormDisabled}
+              />
+              <AlertDefaultsForm
+                loading={dss.loading}
+                formFields={formFields}
+                onChange={onChangeFormField}
+                fieldErrors={fieldErrors}
+                isDisabled={isFormDisabled}
+              />
+              <CertificateExpirationForm
+                loading={dss.loading}
+                onChange={onChangeFormField}
+                formFields={formFields}
+                fieldErrors={fieldErrors}
+                isDisabled={isFormDisabled}
+              />
 
-                <EuiSpacer size="m" />
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      data-test-subj="discardSettingsButton"
-                      isDisabled={!isFormDirty || isFormDisabled}
-                      onClick={() => {
-                        resetForm();
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="apply-settings-button"
-                      onClick={onApply}
-                      color="primary"
-                      isDisabled={!isFormDirty || !isFormValid || isFormDisabled}
-                      fill
-                    >
-                      <FormattedMessage
-                        id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
-                        defaultMessage="Apply changes"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiForm>
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="discardSettingsButton"
+                    isDisabled={!isFormDirty || isFormDisabled}
+                    onClick={() => {
+                      resetForm();
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.uptime.sourceConfiguration.discardSettingsButtonLabel"
+                      defaultMessage="Cancel"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="apply-settings-button"
+                    onClick={onApply}
+                    color="primary"
+                    isDisabled={!isFormDirty || !isFormValid || isFormDisabled}
+                    fill
+                  >
+                    <FormattedMessage
+                      id="xpack.uptime.sourceConfiguration.applySettingsButtonLabel"
+                      defaultMessage="Apply changes"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiForm>
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

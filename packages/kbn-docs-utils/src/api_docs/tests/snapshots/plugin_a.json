@@ -598,7 +598,7 @@
             "section": "def-public.ImAType",
             "text": "ImAType"
           },
-          ", e?: string | undefined) => ",
+          ", e: string | undefined) => ",
           {
             "pluginId": "pluginA",
             "scope": "public",

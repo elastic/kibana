@@ -95,7 +95,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       filter: getFilter(previousColumn, columnParams),
-      timeShift: previousColumn?.timeShift,
+      timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
@@ -115,5 +115,22 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       label: ofName(field.displayName, oldColumn.timeShift),
       sourceField: field.name,
     };
+  },
+  documentation: {
+    section: 'elasticsearch',
+    signature: i18n.translate('xpack.lens.indexPattern.cardinality.signature', {
+      defaultMessage: 'field: string',
+    }),
+    description: i18n.translate('xpack.lens.indexPattern.cardinality.documentation', {
+      defaultMessage: `
+Calculates the number of unique values of a specified field. Works for number, string, date and boolean values.
+
+Example: Calculate the number of different products:
+\`unique_count(product.name)\`
+
+Example: Calculate the number of different products from the "clothes" group:
+\`unique_count(product.name, kql='product.group=clothes')\`
+      `,
+    }),
   },
 };

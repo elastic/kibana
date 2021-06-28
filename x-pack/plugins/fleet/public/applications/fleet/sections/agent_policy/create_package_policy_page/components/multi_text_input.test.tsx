@@ -8,12 +8,12 @@
 import React from 'react';
 import { fireEvent, act } from '@testing-library/react';
 
-import { createTestRendererMock } from '../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { MultiTextInput } from './multi_text_input';
 
 function renderInput(value = ['value1']) {
-  const renderer = createTestRendererMock();
+  const renderer = createFleetTestRendererMock();
   const mockOnChange = jest.fn();
 
   const utils = renderer.render(<MultiTextInput value={value} onChange={mockOnChange} />);

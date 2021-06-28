@@ -68,6 +68,7 @@ import {
   MetaOrUndefined,
   Description,
   Enabled,
+  Id,
   IdOrUndefined,
   RuleIdOrUndefined,
   EnabledOrUndefined,
@@ -105,6 +106,7 @@ import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
+import { RuleStatusSavedObjectsClient } from '../signals/rule_status_saved_objects_client';
 
 export type RuleAlertType = Alert<RuleParams>;
 
@@ -329,8 +331,10 @@ export interface ReadRuleOptions {
 
 export interface DeleteRuleOptions {
   alertsClient: AlertsClient;
-  id: IdOrUndefined;
-  ruleId: RuleIdOrUndefined;
+  savedObjectsClient: SavedObjectsClientContract;
+  ruleStatusClient: RuleStatusSavedObjectsClient;
+  ruleStatuses: SavedObjectsFindResponse<IRuleStatusSOAttributes, unknown>;
+  id: Id;
 }
 
 export interface FindRuleOptions {

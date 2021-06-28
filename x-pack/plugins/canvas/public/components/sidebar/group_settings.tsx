@@ -7,9 +7,21 @@
 
 import React, { FunctionComponent } from 'react';
 import { EuiText } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n/components';
+import { i18n } from '@kbn/i18n';
 
-const { GroupSettings: strings } = ComponentStrings;
+const strings = {
+  getSaveGroupDescription: () =>
+    i18n.translate('xpack.canvas.groupSettings.saveGroupDescription', {
+      defaultMessage: 'Save this group as a new element to re-use it throughout your workpad.',
+    }),
+  getUngroupDescription: () =>
+    i18n.translate('xpack.canvas.groupSettings.ungroupDescription', {
+      defaultMessage: 'Ungroup ({uKey}) to edit individual element settings.',
+      values: {
+        uKey: 'U',
+      },
+    }),
+};
 
 export const GroupSettings: FunctionComponent = () => (
   <div className="canvasSidebar__panel canvasSidebar__panel--isEmpty">

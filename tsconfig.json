@@ -65,11 +65,11 @@
     { "path": "./src/plugins/vis_type_vislib/tsconfig.json" },
     { "path": "./src/plugins/vis_type_vega/tsconfig.json" },
     { "path": "./src/plugins/vis_type_xy/tsconfig.json" },
+    { "path": "./src/plugins/vis_type_pie/tsconfig.json" },
     { "path": "./src/plugins/visualizations/tsconfig.json" },
     { "path": "./src/plugins/visualize/tsconfig.json" },
     { "path": "./src/plugins/index_pattern_management/tsconfig.json" },
     { "path": "./src/plugins/index_pattern_field_editor/tsconfig.json" },
-
     { "path": "./x-pack/plugins/actions/tsconfig.json" },
     { "path": "./x-pack/plugins/alerting/tsconfig.json" },
     { "path": "./x-pack/plugins/apm/tsconfig.json" },

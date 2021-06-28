@@ -67,7 +67,7 @@ const createExecutionHandlerParams: jest.Mocked<
   >
 > = {
   actionsPlugin: mockActionsPlugin,
-  spaceId: 'default',
+  spaceId: 'test1',
   alertId: '1',
   alertName: 'name-of-alert',
   tags: ['tag-A', 'tag-B'],
@@ -130,11 +130,19 @@ test('enqueues execution per selected action', async () => {
         "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
-          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
           "contextVal": "My  goes here",
           "foo": true,
           "stateVal": "My  goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",
@@ -142,7 +150,7 @@ test('enqueues execution per selected action', async () => {
           },
           "type": "SAVED_OBJECT",
         },
-        "spaceId": "default",
+        "spaceId": "test1",
       },
     ]
   `);
@@ -154,6 +162,10 @@ test('enqueues execution per selected action', async () => {
         Object {
           "event": Object {
             "action": "execute-action",
+            "category": Array [
+              "alerts",
+            ],
+            "kind": "alert",
           },
           "kibana": Object {
             "alerting": Object {
@@ -164,16 +176,27 @@ test('enqueues execution per selected action', async () => {
             "saved_objects": Array [
               Object {
                 "id": "1",
+                "namespace": "test1",
                 "rel": "primary",
                 "type": "alert",
+                "type_id": "test",
               },
               Object {
                 "id": "1",
+                "namespace": "test1",
                 "type": "action",
+                "type_id": "test",
               },
             ],
           },
           "message": "alert: test:1: 'name-of-alert' instanceId: '2' scheduled actionGroup: 'default' action: test:1",
+          "rule": Object {
+            "category": "test",
+            "id": "1",
+            "license": "basic",
+            "name": "name-of-alert",
+            "ruleset": "alerts",
+          },
         },
       ],
     ]
@@ -181,10 +204,10 @@ test('enqueues execution per selected action', async () => {
 
   expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
     ruleId: '1',
-    spaceId: 'default',
+    spaceId: 'test1',
     actionTypeId: 'test',
     actionParams: {
-      alertVal: 'My 1 name-of-alert default tag-A,tag-B 2 goes here',
+      alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 2 goes here',
       contextVal: 'My  goes here',
       foo: true,
       stateVal: 'My  goes here',
@@ -231,7 +254,15 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
       id: '1',
       type: 'alert',
     }),
-    spaceId: 'default',
+    relatedSavedObjects: [
+      {
+        id: '1',
+        namespace: 'test1',
+        type: 'alert',
+        typeId: 'test',
+      },
+    ],
+    spaceId: 'test1',
     apiKey: createExecutionHandlerParams.apiKey,
   });
 });
@@ -306,11 +337,19 @@ test('context attribute gets parameterized', async () => {
         "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
-          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
           "contextVal": "My context-val goes here",
           "foo": true,
           "stateVal": "My  goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",
@@ -318,7 +357,7 @@ test('context attribute gets parameterized', async () => {
           },
           "type": "SAVED_OBJECT",
         },
-        "spaceId": "default",
+        "spaceId": "test1",
       },
     ]
   `);
@@ -339,11 +378,19 @@ test('state attribute gets parameterized', async () => {
         "apiKey": "MTIzOmFiYw==",
         "id": "1",
         "params": Object {
-          "alertVal": "My 1 name-of-alert default tag-A,tag-B 2 goes here",
+          "alertVal": "My 1 name-of-alert test1 tag-A,tag-B 2 goes here",
           "contextVal": "My  goes here",
           "foo": true,
           "stateVal": "My state-val goes here",
         },
+        "relatedSavedObjects": Array [
+          Object {
+            "id": "1",
+            "namespace": "test1",
+            "type": "alert",
+            "typeId": "test",
+          },
+        ],
         "source": Object {
           "source": Object {
             "id": "1",
@@ -351,7 +398,7 @@ test('state attribute gets parameterized', async () => {
           },
           "type": "SAVED_OBJECT",
         },
-        "spaceId": "default",
+        "spaceId": "test1",
       },
     ]
   `);

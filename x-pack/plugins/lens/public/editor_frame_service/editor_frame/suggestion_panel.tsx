@@ -200,15 +200,16 @@ export function SuggestionPanel({
             visualizationState: currentVisualizationState,
             activeData: frame.activeData,
           })
-            .filter((suggestion) => !suggestion.hide)
             .filter(
               ({
+                hide,
                 visualizationId,
                 visualizationState: suggestionVisualizationState,
                 datasourceState: suggestionDatasourceState,
                 datasourceId: suggetionDatasourceId,
               }) => {
                 return (
+                  !hide &&
                   validateDatasourceAndVisualization(
                     suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
                     suggestionDatasourceState,

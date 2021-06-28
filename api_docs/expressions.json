@@ -39151,7 +39151,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"boolean\" | \"string\" | \"number\" | \"null\")[]"
+                      "(\"number\" | \"boolean\" | \"string\" | \"null\")[]"
                     ],
                     "source": {
                       "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",

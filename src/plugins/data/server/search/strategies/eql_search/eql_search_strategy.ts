@@ -54,7 +54,8 @@ export const eqlSearchStrategyProvider = (
             };
         const promise = id
           ? client.get({ ...params, id }, request.options)
-          : client.search(params as EqlSearchStrategyRequest['params'], request.options);
+          : // @ts-expect-error EqlRequestParams | undefined is not assignable to EqlRequestParams
+            client.search(params as EqlSearchStrategyRequest['params'], request.options);
         const response = await shimAbortSignal(promise, options.abortSignal);
         return toEqlKibanaSearchResponse(response as ApiResponse<EqlSearchResponse>);
       };

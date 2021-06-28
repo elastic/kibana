@@ -111,7 +111,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setPopover(false);
   }, []);
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
-  const [isAddEventExceptionModalOpen, setIsAddEventExceptionModalOpen] = useState<boolean>(false);
+  const [isAddEventFilterModalOpen, setIsAddEventFilterModalOpen] = useState<boolean>(false);
   const [{ canUserCRUD, hasIndexWrite, hasIndexMaintenance, hasIndexUpdateDelete }] = useUserData();
 
   const isEndpointAlert = useMemo((): boolean => {
@@ -129,8 +129,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal(null);
   }, []);
 
-  const closeAddEventExceptionModal = useCallback((): void => {
-    setIsAddEventExceptionModalOpen(false);
+  const closeAddEventFilterModal = useCallback((): void => {
+    setIsAddEventFilterModalOpen(false);
   }, []);
 
   const onAddExceptionCancel = useCallback(() => {
@@ -364,26 +364,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [handleAddExceptionClick, canUserCRUD, hasIndexWrite]);
 
-  const handleAddEventExceptionClick = useCallback((): void => {
+  const handleAddEventFilterClick = useCallback((): void => {
     closePopover();
-    setIsAddEventExceptionModalOpen(true);
+    setIsAddEventFilterModalOpen(true);
   }, [closePopover]);
 
-  const addEventExceptionComponent = useMemo(
+  const addEventFilterComponent = useMemo(
     () => (
       <EuiContextMenuItem
-        key="add-event-exception-menu-item"
-        aria-label="Add Event Exception"
-        data-test-subj="add-event-exception-menu-item"
-        id="addEventException"
-        onClick={handleAddEventExceptionClick}
+        key="add-event-filter-menu-item"
+        aria-label="Add event filter"
+        data-test-subj="add-event-filter-menu-item"
+        id="addEventFilter"
+        onClick={handleAddEventFilterClick}
       >
-        <EuiText data-test-subj="addEventExceptionButton" size="m">
-          {i18n.ACTION_ADD_EVENT_EXCEPTION}
+        <EuiText data-test-subj="addEventFilterButton" size="m">
+          {i18n.ACTION_ADD_EVENT_FILTER}
         </EuiText>
       </EuiContextMenuItem>
     ),
-    [handleAddEventExceptionClick]
+    [handleAddEventFilterClick]
   );
 
   const statusFilters = useMemo(() => {
@@ -412,11 +412,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     () =>
       !isEvent && ruleId
         ? [...statusFilters, addEndpointExceptionComponent, addExceptionComponent]
-        : [addEventExceptionComponent],
+        : [addEventFilterComponent],
     [
       addEndpointExceptionComponent,
       addExceptionComponent,
-      addEventExceptionComponent,
+      addEventFilterComponent,
       statusFilters,
       ruleId,
       isEvent,
@@ -453,8 +453,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           onRuleChange={onRuleChange}
         />
       )}
-      {isAddEventExceptionModalOpen && ecsRowData != null && (
-        <EventFiltersModal data={ecsRowData} onCancel={closeAddEventExceptionModal} />
+      {isAddEventFilterModalOpen && ecsRowData != null && (
+        <EventFiltersModal data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
     </>
   );

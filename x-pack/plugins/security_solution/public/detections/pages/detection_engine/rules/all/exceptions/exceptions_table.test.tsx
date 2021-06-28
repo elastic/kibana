@@ -42,6 +42,9 @@ describe('ExceptionListsTable', () => {
             addError: jest.fn(),
           },
         },
+        timelines: {
+          getLastUpdated: () => null,
+        },
       },
     });
 
@@ -79,7 +82,7 @@ describe('ExceptionListsTable', () => {
       <TestProviders>
         <ExceptionListsTable
           history={mockHistory}
-          hasNoPermissions={false}
+          hasPermissions
           loading={false}
           formatUrl={jest.fn()}
         />

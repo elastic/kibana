@@ -6,6 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
+> use runtime field instead
 > 
 
 Add scripted field to field list

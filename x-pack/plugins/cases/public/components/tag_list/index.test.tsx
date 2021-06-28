@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TagList } from '.';
+import { TagList, TagListProps } from '.';
 import { getFormMock } from '../__mock__/form';
 import { TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
@@ -32,8 +32,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 const onSubmit = jest.fn();
-const defaultProps = {
-  disabled: false,
+const defaultProps: TagListProps = {
+  userCanCrud: true,
   isLoading: false,
   onSubmit,
   tags: [],
@@ -108,15 +108,13 @@ describe('TagList ', () => {
     expect(wrapper.find(`[data-test-subj="tag-pepsi"]`).last().exists()).toBeTruthy();
   });
 
-  it('Renders disabled button', () => {
-    const props = { ...defaultProps, disabled: true };
+  it('does not render when the user does not have write permissions', () => {
+    const props = { ...defaultProps, userCanCrud: false };
     const wrapper = mount(
       <TestProviders>
         <TagList {...props} />
       </TestProviders>
     );
-    expect(
-      wrapper.find(`[data-test-subj="tag-list-edit-button"]`).last().prop('disabled')
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="tag-list-edit"]`).exists()).toBeFalsy();
   });
 });

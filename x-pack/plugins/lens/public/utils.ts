@@ -7,42 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { IndexPattern, IndexPatternsContract, TimefilterContract } from 'src/plugins/data/public';
-import { LensFilterEvent } from './types';
-
-/** replaces the value `(empty) to empty string for proper filtering` */
-export const desanitizeFilterContext = (
-  context: LensFilterEvent['data']
-): LensFilterEvent['data'] => {
-  const emptyTextValue = i18n.translate('xpack.lens.indexpattern.emptyTextColumnValue', {
-    defaultMessage: '(empty)',
-  });
-  const result: LensFilterEvent['data'] = {
-    ...context,
-    data: context.data.map((point) =>
-      point.value === emptyTextValue
-        ? {
-            ...point,
-            value: '',
-            table: {
-              ...point.table,
-              rows: point.table.rows.map((row, index) =>
-                index === point.row
-                  ? {
-                      ...row,
-                      [point.table.columns[point.column].id]: '',
-                    }
-                  : row
-              ),
-            },
-          }
-        : point
-    ),
-  };
-  if (context.timeFieldName) {
-    result.timeFieldName = context.timeFieldName;
-  }
-  return result;
-};
+import { IUiSettingsClient } from 'kibana/public';
+import moment from 'moment-timezone';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -63,6 +29,7 @@ export const getResolvedDateRange = function (timefilter: TimefilterContract) {
 export function containsDynamicMath(dateMathString: string) {
   return dateMathString.includes('now');
 }
+
 export const TIME_LAG_PERCENTAGE_LIMIT = 0.02;
 
 export async function getAllIndexPatterns(
@@ -78,4 +45,13 @@ export async function getAllIndexPatterns(
     .filter((id, i) => responses[i].status === 'rejected');
   // return also the rejected ids in case we want to show something later on
   return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
+}
+
+export function getTimeZone(uiSettings: IUiSettingsClient) {
+  const configuredTimeZone = uiSettings.get('dateFormat:tz');
+  if (configuredTimeZone === 'Browser') {
+    return moment.tz.guess();
+  }
+
+  return configuredTimeZone;
 }

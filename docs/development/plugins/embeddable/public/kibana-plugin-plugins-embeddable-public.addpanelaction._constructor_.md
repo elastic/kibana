@@ -9,7 +9,7 @@ Constructs a new instance of the `AddPanelAction` class
 <b>Signature:</b>
 
 ```typescript
-constructor(getFactory: EmbeddableStart['getEmbeddableFactory'], getAllFactories: EmbeddableStart['getEmbeddableFactories'], overlays: OverlayStart, notifications: NotificationsStart, SavedObjectFinder: React.ComponentType<any>);
+constructor(getFactory: EmbeddableStart['getEmbeddableFactory'], getAllFactories: EmbeddableStart['getEmbeddableFactories'], overlays: OverlayStart, notifications: NotificationsStart, SavedObjectFinder: React.ComponentType<any>, reportUiCounter?: ((appName: string, type: import("@kbn/analytics").UiCounterMetricType, eventNames: string | string[], count?: number | undefined) => void) | undefined);
 ```
 
 ## Parameters
@@ -21,4 +21,5 @@ constructor(getFactory: EmbeddableStart['getEmbeddableFactory'], getAllFactories
 |  overlays | <code>OverlayStart</code> |  |
 |  notifications | <code>NotificationsStart</code> |  |
 |  SavedObjectFinder | <code>React.ComponentType&lt;any&gt;</code> |  |
+|  reportUiCounter | <code>((appName: string, type: import(&quot;@kbn/analytics&quot;).UiCounterMetricType, eventNames: string &#124; string[], count?: number &#124; undefined) =&gt; void) &#124; undefined</code> |  |
 

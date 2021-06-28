@@ -149,6 +149,7 @@ const getSavedObjectTypes = (
         is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },
+        unenroll_timeout: { type: 'integer' },
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
@@ -235,6 +236,7 @@ const getSavedObjectTypes = (
           enabled: false,
           properties: {
             type: { type: 'keyword' },
+            policy_template: { type: 'keyword' },
             enabled: { type: 'boolean' },
             vars: { type: 'flattened' },
             config: { type: 'flattened' },

@@ -27,7 +27,7 @@ export const renderApp = (
 ) => {
   const storage = new Storage(window.localStorage);
 
-  prepareMountElement(element);
+  prepareMountElement(element, 'infraLogsPage');
 
   ReactDOM.render(
     <LogsApp
