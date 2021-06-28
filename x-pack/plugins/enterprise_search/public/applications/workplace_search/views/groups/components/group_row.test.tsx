@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
@@ -19,10 +18,6 @@ import { GroupRow, NO_USERS_MESSAGE, NO_SOURCES_MESSAGE } from './group_row';
 import { GroupUsers } from './group_users';
 
 describe('GroupRow', () => {
-  beforeEach(() => {
-    setMockValues({ isFederatedAuth: true });
-  });
-
   it('renders', () => {
     const wrapper = shallow(<GroupRow {...groups[0]} />);
 
@@ -30,7 +25,6 @@ describe('GroupRow', () => {
   });
 
   it('renders group users', () => {
-    setMockValues({ isFederatedAuth: false });
     const wrapper = shallow(<GroupRow {...groups[0]} />);
 
     expect(wrapper.find(GroupUsers)).toHaveLength(1);
@@ -51,7 +45,6 @@ describe('GroupRow', () => {
   });
 
   it('renders empty users message when no users present', () => {
-    setMockValues({ isFederatedAuth: false });
     const wrapper = shallow(<GroupRow {...groups[0]} usersCount={0} />);
 
     expect(wrapper.find('.user-group__accounts').text()).toEqual(NO_USERS_MESSAGE);

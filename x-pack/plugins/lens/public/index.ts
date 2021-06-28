@@ -7,7 +7,10 @@
 
 import { LensPlugin } from './plugin';
 
-export { EmbeddableComponentProps, TypedLensByValueInput } from './embeddable/embeddable_component';
+export type {
+  EmbeddableComponentProps,
+  TypedLensByValueInput
+} from './embeddable/embeddable_component';
 export type {
   XYState,
   AxesSettingsConfig,

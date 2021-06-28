@@ -8,7 +8,7 @@
 
 import './discover_field.scss';
 
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -27,7 +28,7 @@ import { FieldIcon, FieldButton } from '../../../../../../../kibana_react/public
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../../../data/public';
 import { getFieldTypeName } from './lib/get_field_type_name';
-import { DiscoverFieldDetailsFooter } from './discover_field_details_footer';
+import { DiscoverFieldVisualize } from './discover_field_visualize';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -172,6 +173,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
           })}
         </h5>
       </EuiTitle>
+      <EuiSpacer size="xs" />
       {multiFields.map((entry) => (
         <FieldButton
           size="s"
@@ -281,6 +283,8 @@ function DiscoverFieldComponent({
   const togglePopover = useCallback(() => {
     setOpen(!infoIsOpen);
   }, [infoIsOpen]);
+
+  const rawMultiFields = useMemo(() => multiFields?.map((f) => f.field), [multiFields]);
 
   if (field.type === '_source') {
     return (
@@ -399,23 +403,24 @@ function DiscoverFieldComponent({
             field={field}
             details={details}
             onAddFilter={onAddFilter}
-            trackUiMetric={trackUiMetric}
           />
           {multiFields && (
-            <MultiFields
-              multiFields={multiFields}
-              alwaysShowActionButton={alwaysShowActionButton}
-              toggleDisplay={toggleDisplay}
-            />
+            <>
+              <EuiSpacer size="m" />
+              <MultiFields
+                multiFields={multiFields}
+                alwaysShowActionButton={alwaysShowActionButton}
+                toggleDisplay={toggleDisplay}
+              />
+            </>
           )}
-          {!details.error && (
-            <DiscoverFieldDetailsFooter
-              indexPattern={indexPattern}
-              field={field}
-              details={details}
-              onAddFilter={onAddFilter}
-            />
-          )}
+          <DiscoverFieldVisualize
+            field={field}
+            indexPattern={indexPattern}
+            multiFields={rawMultiFields}
+            trackUiMetric={trackUiMetric}
+            details={details}
+          />
         </>
       )}
     </EuiPopover>

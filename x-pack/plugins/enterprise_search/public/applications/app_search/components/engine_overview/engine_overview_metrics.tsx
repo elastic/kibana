@@ -36,6 +36,7 @@ export const EngineOverviewMetrics: React.FC = () => {
         }),
       }}
       isLoading={dataLoading}
+      data-test-subj="EngineOverview"
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
