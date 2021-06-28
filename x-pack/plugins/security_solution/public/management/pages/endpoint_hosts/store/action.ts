@@ -15,7 +15,6 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { GetPackagesResponse } from '../../../../../../fleet/common';
 import { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
@@ -75,10 +74,9 @@ export interface ServerCancelledPolicyItemsLoading {
   type: 'serverCancelledPolicyItemsLoading';
 }
 
-export interface ServerReturnedEndpointPackageInfo {
-  type: 'serverReturnedEndpointPackageInfo';
-  payload: GetPackagesResponse['response'][0];
-}
+export type EndpointPackageInfoStateChanged = Action<'endpointPackageInfoStateChanged'> & {
+  payload: EndpointState['endpointPackageInfo'];
+};
 
 export interface ServerReturnedEndpointNonExistingPolicies {
   type: 'serverReturnedEndpointNonExistingPolicies';
@@ -195,7 +193,7 @@ export type EndpointAction =
   | ServerCancelledEndpointListLoading
   | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
-  | ServerReturnedEndpointPackageInfo
+  | EndpointPackageInfoStateChanged
   | ServerReturnedMetadataPatterns
   | ServerFailedToReturnMetadataPatterns
   | AppRequestedEndpointList
