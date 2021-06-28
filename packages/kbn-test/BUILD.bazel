@@ -86,7 +86,7 @@ TYPES_DEPS = [
 DEPS = SRC_DEPS + TYPES_DEPS
 
 babel(
-  name = "target",
+  name = "target_node",
   data = DEPS + [
       ":srcs",
       "babel.config.js",
@@ -118,10 +118,9 @@ ts_project(
   args = ['--pretty'],
   srcs = SRCS,
   deps = DEPS,
-  allow_js = True,
   declaration = True,
   declaration_map = True,
-  declaration_dir = "target/types",
+  declaration_dir = "target_types",
   incremental = True,
   out_dir = "target",
   source_map = True,
@@ -132,7 +131,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = DEPS + [":tsc"],
+  deps = DEPS + [":target_node", ":tsc"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
