@@ -230,6 +230,7 @@ class KeyedTimeslider extends Component<Props, State> {
             max={this.state.max}
             step={1}
             ticks={this.state.ticks}
+            isDraggable
           />
         </div>
       </div>
