@@ -44,7 +44,7 @@ import {
   DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 
-import { getDeepLinks } from './app/deep_links';
+import { getDeepLinks, updateGlobalNavigation } from './app/deep_links';
 import { manageOldSiemRoutes } from './helpers';
 import {
   IndexFieldsStrategyRequest,
@@ -221,11 +221,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         if (currentLicense.type !== undefined) {
           this.appUpdater$.next(() => ({
             navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-            deepLinks: getDeepLinks(currentLicense.type),
+            deepLinks: getDeepLinks(currentLicense.type, core.application.capabilities),
           }));
         }
       });
     }
+
+    updateGlobalNavigation({
+      capabilities: core.application.capabilities,
+      deepLinks: getDeepLinks(),
+      updater$: this.appUpdater$,
+    });
+
     return {};
   }
 

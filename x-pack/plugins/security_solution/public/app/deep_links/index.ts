@@ -6,10 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Subject } from 'rxjs';
 
 import { LicenseType } from '../../../../licensing/common/types';
 import { SecurityDeepLinkName, SecurityDeepLinks, SecurityPageName } from '../types';
-import { AppDeepLink, AppNavLinkStatus } from '../../../../../../src/core/public';
+import {
+  AppDeepLink,
+  ApplicationStart,
+  AppNavLinkStatus,
+  AppUpdater,
+} from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   ALERTS,
@@ -261,7 +267,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
       },
     ],
   },
-  timelines: {
+  [SecurityPageName.timelines]: {
     base: [
       {
         id: 'timelineTemplates',
@@ -272,7 +278,7 @@ const nestedDeepLinks: SecurityDeepLinks = {
       },
     ],
   },
-  case: {
+  [SecurityPageName.case]: {
     base: [
       {
         id: 'create',
@@ -324,25 +330,34 @@ const nestedDeepLinks: SecurityDeepLinks = {
  * A function that generates the plugin deepLinks
  * @param licenseType optional string for license level, if not provided basic is assumed.
  */
-export function getDeepLinks(licenseType?: LicenseType): AppDeepLink[] {
-  return topDeepLinks.map((deepLink) => {
-    const deepLinkId = deepLink.id as SecurityDeepLinkName;
-    const subPluginDeepLinks = nestedDeepLinks[deepLinkId];
-    const baseDeepLinks = [...subPluginDeepLinks.base];
-    if (isPremiumLicense(licenseType)) {
-      const premiumDeepLinks = subPluginDeepLinks && subPluginDeepLinks.premium;
-      if (premiumDeepLinks !== undefined) {
-        return {
-          ...deepLink,
-          deepLinks: [...baseDeepLinks, ...premiumDeepLinks],
-        };
+export function getDeepLinks(
+  licenseType?: LicenseType,
+  capabilities?: ApplicationStart['capabilities']
+): AppDeepLink[] {
+  return topDeepLinks
+    .filter(
+      (deepLink) =>
+        deepLink.id !== SecurityPageName.case ||
+        (deepLink.id === SecurityPageName.case && capabilities?.siem.read_cases)
+    )
+    .map((deepLink) => {
+      const deepLinkId = deepLink.id as SecurityDeepLinkName;
+      const subPluginDeepLinks = nestedDeepLinks[deepLinkId];
+      const baseDeepLinks = [...subPluginDeepLinks.base];
+      if (isPremiumLicense(licenseType)) {
+        const premiumDeepLinks = subPluginDeepLinks && subPluginDeepLinks.premium;
+        if (premiumDeepLinks !== undefined) {
+          return {
+            ...deepLink,
+            deepLinks: [...baseDeepLinks, ...premiumDeepLinks],
+          };
+        }
       }
-    }
-    return {
-      ...deepLink,
-      deepLinks: baseDeepLinks,
-    };
-  });
+      return {
+        ...deepLink,
+        deepLinks: baseDeepLinks,
+      };
+    });
 }
 
 export function isPremiumLicense(licenseType?: LicenseType): boolean {
@@ -353,4 +368,32 @@ export function isPremiumLicense(licenseType?: LicenseType): boolean {
       licenseType === 'enterprise' ||
       licenseType === 'trial')
   );
+}
+
+export function updateGlobalNavigation({
+  capabilities,
+  deepLinks,
+  updater$,
+}: {
+  capabilities: ApplicationStart['capabilities'];
+  deepLinks: AppDeepLink[];
+  updater$: Subject<AppUpdater>;
+}) {
+  const updatedDeepLinks = deepLinks.map((link) => {
+    switch (link.id) {
+      case 'case':
+        return {
+          ...link,
+          navLinkStatus: capabilities.siem.read_cases
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.hidden,
+        };
+      default:
+        return link;
+    }
+  });
+
+  updater$.next(() => ({
+    deepLinks: updatedDeepLinks,
+  }));
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SecurityPageName } from '../../app/types';
@@ -29,13 +29,14 @@ export const CaseDetailsPage = React.memo(() => {
   }>();
   const search = useGetUrlSearch(navTabs.case);
 
-  if (userPermissions != null && !userPermissions.read) {
-    navigateToApp(APP_ID, {
-      deepLinkId: SecurityPageName.case,
-      path: getCaseUrl(search),
-    });
-    return null;
-  }
+  useEffect(() => {
+    if (userPermissions != null && !userPermissions.read) {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.case,
+        path: getCaseUrl(search),
+      });
+    }
+  }, [userPermissions, navigateToApp, search]);
 
   return caseId != null ? (
     <>
