@@ -331,10 +331,7 @@ export function CollapsibleNav({
         <span />
         <EuiCollapsibleNavGroup>
           <EuiButton fill fullWidth iconType="plusInCircleFilled">
-            <FormattedMessage
-              id="kibana-react.pageTemplate.solutionNav.mobileTitleText"
-              defaultMessage="Add Data"
-            />
+            <FormattedMessage id="core.ui.primaryNavSection.addDataBtn" defaultMessage="Add Data" />
           </EuiButton>
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
