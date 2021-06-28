@@ -9,6 +9,7 @@ export type ElasticAgentName =
   | 'go'
   | 'java'
   | 'js-base'
+  | 'iOS/swift'
   | 'rum-js'
   | 'nodejs'
   | 'python'

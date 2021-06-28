@@ -32,6 +32,7 @@ export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
 export const AGENT_NAMES: AgentName[] = [
   'dotnet',
   'go',
+  'iOS/swift',
   'java',
   'js-base',
   'nodejs',
@@ -72,4 +73,8 @@ export function normalizeAgentName(agentName: string | undefined) {
   }
 
   return agentName;
+}
+
+export function isIosAgent(agentName?: string) {
+  return agentName === 'iOS/swift';
 }

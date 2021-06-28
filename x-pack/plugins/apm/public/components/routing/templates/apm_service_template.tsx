@@ -13,8 +13,11 @@ import {
   EuiPageHeaderProps,
   EuiTitle,
   EuiBetaBadge,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { ApmMainTemplate } from './apm_main_template';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApmServiceContextProvider } from '../../../context/apm_service/apm_service_context';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
@@ -31,6 +34,10 @@ import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { Correlations } from '../../app/correlations';
 import { SearchBar } from '../../shared/search_bar';
+import {
+  createExploratoryViewUrl,
+  SeriesUrl,
+} from '../../../../../observability/public';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -54,12 +61,12 @@ interface Props {
 export function ApmServiceTemplate(props: Props) {
   return (
     <ApmServiceContextProvider>
-      <Template {...props} />
+      <TemplateWithContext {...props} />
     </ApmServiceContextProvider>
   );
 }
 
-function Template({
+function TemplateWithContext({
   children,
   serviceName,
   selectedTab,
@@ -87,6 +94,10 @@ function Template({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
+              <AnalyzeDataButton serviceName={serviceName} />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <Correlations />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -98,6 +109,42 @@ function Template({
       {children}
     </ApmMainTemplate>
   );
+}
+
+function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
+  const { agentName } = useApmServiceContext();
+  const { services } = useKibana();
+  const { urlParams } = useUrlParams();
+  const { rangeTo, rangeFrom, environment } = urlParams;
+  const basepath = services.http?.basePath.get();
+
+  if (isRumAgentName(agentName)) {
+    const uxExploratoryViewLink = createExploratoryViewUrl(
+      {
+        'apm-series': {
+          dataType: 'mobile',
+          time: { from: rangeFrom, to: rangeTo },
+          reportType: 'kpi-over-time',
+          reportDefintion: {
+            'service.name': [serviceName],
+            'service.environement': [environment],
+          },
+          operationType: 'average',
+        } as SeriesUrl,
+      },
+      basepath
+    );
+
+    return (
+      <EuiButtonEmpty href={uxExploratoryViewLink} iconType="visBarVertical">
+        {i18n.translate('xpack.apm.analyzeDataButton.label', {
+          defaultMessage: 'Analyze data',
+        })}
+      </EuiButtonEmpty>
+    );
+  }
+
+  return null;
 }
 
 function useTabs({

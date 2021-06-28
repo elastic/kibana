@@ -131,6 +131,7 @@ export function Correlations() {
   return (
     <>
       <EuiButton
+        fill
         onClick={() => {
           setIsFlyoutVisible(true);
         }}
