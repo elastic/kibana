@@ -32,7 +32,6 @@ describe('interpreter/functions#phraseFilter', () => {
             "something",
           ],
           "type": "phrases",
-          "value": "test, something",
         },
         "query": Object {
           "bool": Object {
