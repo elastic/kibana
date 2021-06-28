@@ -128,7 +128,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async unlinkIlmPolicyFromOutdatedIndices(outdatedLinkedIndices: string[]): Promise<void> {
     const indexTargets = (outdatedLinkedIndices ?? []).join(',');
     const request = {
-      method: 'PUT',
+      method: 'POST',
       path: `${indexTargets}/_ilm/remove`,
     };
     try {
