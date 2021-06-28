@@ -65,7 +65,7 @@ describe('useInsertTimeline', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith(
-      `[Test rule](/?timeline=(id:'ef579e40-jibber-jabber',isOpen:!t))`
+      `[Test rule](?timeline=(id:'ef579e40-jibber-jabber',isOpen:!t))`
     );
   });
 
@@ -73,14 +73,14 @@ describe('useInsertTimeline', () => {
     renderHook(() => useInsertTimeline('New value', onChange));
 
     expect(onChange).toHaveBeenCalledWith(
-      `New value [Test rule](/?timeline=(id:'ef579e40-jibber-jabber',isOpen:!t))`
+      `New value [Test rule](?timeline=(id:'ef579e40-jibber-jabber',isOpen:!t))`
     );
   });
 
   it('calls formatUrl with correct options', async () => {
     renderHook(() => useInsertTimeline('', onChange));
 
-    expect(formatUrl).toHaveBeenCalledWith(`/?timeline=(id:'ef579e40-jibber-jabber',isOpen:!t)`, {
+    expect(formatUrl).toHaveBeenCalledWith(`?timeline=(id:'ef579e40-jibber-jabber',isOpen:!t)`, {
       absolute: true,
       skipSearch: true,
     });
