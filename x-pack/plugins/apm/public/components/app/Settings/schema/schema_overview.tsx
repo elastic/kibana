@@ -39,6 +39,7 @@ export function SchemaOverview({
   isLoadingConfirmation,
   isDisabled,
 }: Props) {
+  const fleetCloudAgentPolicyHref = useFleetCloudAgentPolicyHref();
   if (isLoading) {
     return (
       <>
@@ -77,7 +78,7 @@ export function SchemaOverview({
               )}
               footer={
                 <div>
-                  <EuiButton href={useFleetCloudAgentPolicyHref()}>
+                  <EuiButton href={fleetCloudAgentPolicyHref}>
                     {i18n.translate(
                       'xpack.apm.settings.schema.success.viewIntegrationInFleet.buttonText',
                       { defaultMessage: 'View the APM integration in Fleet' }

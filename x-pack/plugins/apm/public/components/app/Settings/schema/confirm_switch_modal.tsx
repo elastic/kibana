@@ -30,7 +30,7 @@ export function ConfirmSwitchModal({
   isLoading,
 }: Props) {
   const [isConfirmChecked, setIsConfirmChecked] = useState(false);
-  const hasUnsupportedConfigs = unsupportedConfigs.length > 0;
+  const hasUnsupportedConfigs = !!unsupportedConfigs.length;
   return (
     <EuiConfirmModal
       title={i18n.translate('xpack.apm.settings.schema.confirm.title', {

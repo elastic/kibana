@@ -68,11 +68,10 @@ export const apmConfigMapping: Record<
     name: 'secret_token',
     type: 'text',
   },
-  // TODO: should check for the existence of this config
-  // 'apm-server.api_key': {
-  //   name: 'api_key_enabled',
-  //   type: 'bool',
-  // },
+  'apm-server.api_key.enabled': {
+    name: 'api_key_enabled',
+    type: 'bool',
+  },
   'apm-server.rum.enabled': {
     name: 'enable_rum',
     type: 'bool',

@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
+import { Maybe } from '../../../typings/common';
 import { AgentPolicy, PackagePolicy } from '../../../../fleet/common';
 import { APMPluginStartDependencies } from '../../types';
 
@@ -26,7 +27,10 @@ export async function getCloudAgentPolicy({
   return cloudAgentPolicy;
 }
 
-export function getApmPackagePolicy(agentPolicy: AgentPolicy) {
+export function getApmPackagePolicy(agentPolicy: Maybe<AgentPolicy>) {
+  if (!agentPolicy) {
+    return;
+  }
   const packagePolicies = agentPolicy.package_policies as PackagePolicy[];
   return packagePolicies.find(
     (packagePolicy) => packagePolicy?.package?.name === APM_PACKAGE_NAME
