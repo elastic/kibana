@@ -95,7 +95,6 @@ describe('Processor: Date', () => {
       component,
     } = testBed;
 
-    // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set optional parameteres
@@ -103,8 +102,6 @@ describe('Processor: Date', () => {
       find('formatsValueField.input').simulate('change', [{ label: 'ISO8601' }]);
     });
     component.update();
-
-    // Set optional parameteres
 
     // Set target field
     form.setInputValue('targetField.input', 'target_field');

@@ -153,7 +153,6 @@ type TestSubject =
   | 'targetField.input'
   | 'keepOriginalField.input'
   | 'removeIfSuccessfulField.input'
-  | 'targetFieldsField.input'
   | 'shapeSelectorField'
   | 'errorDistanceField.input'
   | 'separatorValueField.input'

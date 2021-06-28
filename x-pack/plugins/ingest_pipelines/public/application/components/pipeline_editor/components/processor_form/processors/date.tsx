@@ -102,7 +102,6 @@ export const DateProcessor: FunctionComponent = () => {
       />
 
       <TargetField
-        data-test-subj="targetFieldsField"
         helpText={
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldHelpText"
