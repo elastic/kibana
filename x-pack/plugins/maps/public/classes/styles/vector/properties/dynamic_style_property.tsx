@@ -400,7 +400,7 @@ export class DynamicStyleProperty<T>
       return null;
     }
 
-    const switchDisabled = !!this._field && !this._field.canReadFromGeoJson();
+    const switchDisabled = !!this._field && !this._field.supportsFieldMeta();
 
     return this.isCategorical() ? (
       <CategoricalDataMappingPopover<T>

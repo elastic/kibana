@@ -8,6 +8,7 @@
 import { IndexPattern } from 'src/plugins/data/public';
 import { AGG_TYPE } from '../../../../common/constants';
 import { CountAggField } from './count_agg_field';
+import { isMetricCountable } from '../../util/is_metric_countable';
 import { CountAggFieldParams } from './agg_field_types';
 import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
 import { IField } from '../field';
@@ -31,6 +32,11 @@ export class AggField extends CountAggField {
 
   isValid(): boolean {
     return !!this._esDocField;
+  }
+
+  supportsFieldMeta(): boolean {
+    // count and sum aggregations are not within field bounds so they do not support field meta.
+    return !isMetricCountable(this._getAggType());
   }
 
   canValueBeFormatted(): boolean {
