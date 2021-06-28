@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { AccessLinksExplorerPlugin } from './plugin';
+import { LocatorExplorerPlugin } from './plugin';
 
-export const plugin = () => new AccessLinksExplorerPlugin();
+export const plugin = () => new LocatorExplorerPlugin();
