@@ -24,6 +24,7 @@ import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { EventFiltersContainer } from './event_filters';
+import { getEndpointListPath } from '../common/routing';
 
 const NoPermissions = memo(() => {
   return (
@@ -69,7 +70,7 @@ export const ManagementContainer = memo(() => {
       <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
 
       <Route path={MANAGEMENT_ROUTING_ROOT_PATH} exact>
-        <Redirect to={MANAGEMENT_ROUTING_ENDPOINTS_PATH} />
+        <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>
       <Route path="*" component={NotFoundPage} />
     </Switch>
