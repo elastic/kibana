@@ -23,8 +23,6 @@ import { HttpLogic } from '../http';
 import { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
-import { appendBetaNotificationItem } from './beta';
-
 import './page_template.scss';
 
 /*
@@ -62,8 +60,6 @@ export const EnterpriseSearchPageTemplate: React.FC<PageTemplateProps> = ({
   const { readOnlyMode } = useValues(HttpLogic);
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
-
-  appendBetaNotificationItem(solutionNav);
 
   return (
     <KibanaPageTemplate
