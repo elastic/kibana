@@ -24,3 +24,5 @@ export {
 export * from './page_paths';
 
 export const INDEX_NAME = '.kibana';
+
+export const CUSTOM_LOGS_INTEGRATION_NAME = 'log';

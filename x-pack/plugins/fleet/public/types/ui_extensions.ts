@@ -97,8 +97,27 @@ export interface PackageCustomExtension {
   component: LazyExoticComponent<PackageCustomExtensionComponent>;
 }
 
+/**
+ * UI Component Extension for displaying custom views under the Assets tab for a given Integration
+ */
+export type PackageAssetsComponent = ComponentType<PackageAssetsComponentProps>;
+
+export interface PackageAssetsComponentProps {
+  /** The package key value that should be used used for URLs */
+  pkgkey: string;
+  packageInfo: PackageInfo;
+}
+
+/** Extension point registration contract for Integration details Assets view */
+export interface PackageAssetsExtension {
+  package: string;
+  view: 'package-detail-assets';
+  component: LazyExoticComponent<PackageAssetsComponent>;
+}
+
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
   | PackageCustomExtension
-  | PackagePolicyCreateExtension;
+  | PackagePolicyCreateExtension
+  | PackageAssetsExtension;
