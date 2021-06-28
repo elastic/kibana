@@ -373,18 +373,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       }
     }, [onComponentInitialized]);
 
-    const statusActionButton = useMemo<JSX.Element | null>(
-      () =>
-        caseData.type !== CaseType.collection && userCanCrud ? (
-          <StatusActionButton
-            status={caseData.status}
-            onStatusChanged={changeStatus}
-            isLoading={isLoading && updateKey === 'status'}
-          />
-        ) : null,
-      [caseData.status, caseData.type, changeStatus, isLoading, updateKey, userCanCrud]
-    );
-
     return (
       <>
         <HeaderWrapper>
@@ -443,7 +431,15 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       renderInvestigateInTimelineActionComponent={
                         timelineUi?.renderInvestigateInTimelineActionComponent
                       }
-                      statusActionButton={statusActionButton}
+                      statusActionButton={
+                        caseData.type !== CaseType.collection && userCanCrud ? (
+                          <StatusActionButton
+                            status={caseData.status}
+                            onStatusChanged={changeStatus}
+                            isLoading={isLoading && updateKey === 'status'}
+                          />
+                        ) : null
+                      }
                       updateCase={updateCase}
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
