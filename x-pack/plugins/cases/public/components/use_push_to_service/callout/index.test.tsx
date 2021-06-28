@@ -8,12 +8,12 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { useMessagesStorage } from '../../containers/use_messages_storage';
-import { TestProviders } from '../../common/mock';
+import { useMessagesStorage } from '../../../containers/use_messages_storage';
+import { TestProviders } from '../../../common/mock';
 import { createCalloutId } from './helpers';
 import { CaseCallOut, CaseCallOutProps } from '.';
 
-jest.mock('../../containers/use_messages_storage');
+jest.mock('../../../containers/use_messages_storage');
 
 const useSecurityLocalStorageMock = useMessagesStorage as jest.Mock;
 const securityLocalStorageMock = {

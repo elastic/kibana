@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash/fp';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import * as i18n from './translations';
 import { CasesNavigation, LinkButton } from '../links';
-import { ErrorMessage } from '../callout/types';
+import { ErrorMessage } from '../use_push_to_service/callout/types';
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];

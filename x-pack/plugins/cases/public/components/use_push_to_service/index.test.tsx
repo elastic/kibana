@@ -11,13 +11,12 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../common/mock';
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses, ConnectorTypes } from '../../../common';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock } from '../../containers/configure/mock';
-import { ConnectorTypes } from '../../../common/api/connectors';
-import { CLOSED_CASE_PUSH_ERROR_ID } from '../callout/types';
+import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

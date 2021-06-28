@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 
 import { CallOut, CallOutProps } from './callout';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
-import { TestProviders } from '../../common/mock';
+import { TestProviders } from '../../../common/mock';
 
 describe('Callout', () => {
   const handleButtonClick = jest.fn();
