@@ -189,11 +189,11 @@ export const useField = <T, FormType = FormData, I = T>(
       {
         formData,
         value: valueToValidate,
-        validationTypeToValidate,
+        validationTypeToValidate = VALIDATION_TYPES.FIELD,
       }: {
         formData: any;
         value: I;
-        validationTypeToValidate?: string;
+        validationTypeToValidate: string;
       },
       clearFieldErrors: FieldHook['clearErrors']
     ): ValidationError[] | Promise<ValidationError[]> => {
@@ -203,7 +203,7 @@ export const useField = <T, FormType = FormData, I = T>(
 
       // By default, for fields that have an asynchronous validation
       // we will clear the errors as soon as the field value changes.
-      clearFieldErrors([VALIDATION_TYPES.FIELD, VALIDATION_TYPES.ASYNC]);
+      clearFieldErrors([validationTypeToValidate, VALIDATION_TYPES.ASYNC]);
 
       cancelInflightValidation();
 
@@ -343,7 +343,7 @@ export const useField = <T, FormType = FormData, I = T>(
       const {
         formData = __getFormData$().value,
         value: valueToValidate = value,
-        validationType,
+        validationType = VALIDATION_TYPES.FIELD,
       } = validationData;
 
       setIsValidated(true);
