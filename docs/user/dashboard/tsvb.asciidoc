@@ -170,7 +170,7 @@ Calculating the duration between the start and end of an event is unsupported in
 [float]
 ===== How do I group on multiple fields?
   
-Grouping with multiple fields is not natively supported in *TSVB* but you could use runtime fields to achieve this.
+To group with multiple fields, create runtime fields in the index pattern you are visualizing.
 
 . Create a runtime field. Refer to <<managing-index-patterns, *Manage index patterns data fields*>> for more information.
 +
