@@ -8,7 +8,6 @@
 
 import path from 'path';
 import { unlink } from 'fs/promises';
-import Util from 'util';
 import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config/target/mocks';
