@@ -29,6 +29,7 @@ export class DocLinksService {
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
+        settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
         },
@@ -428,6 +429,7 @@ export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
+    readonly settings: string;
     readonly canvas: {
       readonly guide: string;
     };
