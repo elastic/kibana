@@ -65,12 +65,14 @@ import {
   AddToLibraryAction,
   LibraryNotificationAction,
   CopyToDashboardAction,
+  DashboardCapabilities,
 } from './application';
 import {
   createDashboardUrlGenerator,
   DASHBOARD_APP_URL_GENERATOR,
   DashboardUrlGeneratorState,
 } from './url_generator';
+import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
@@ -120,14 +122,25 @@ export interface DashboardStartDependencies {
   visualizations: VisualizationsStart;
 }
 
-export type DashboardSetup = void;
+export interface DashboardSetup {
+  locator?: DashboardAppLocator;
+}
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
   getDashboardContainerByValueRenderer: () => ReturnType<
     typeof createDashboardContainerByValueRenderer
   >;
+  /**
+   * @deprecated Use dashboard locator instead. Dashboard locator is available
+   * under `.locator` key. This dashboard URL generator will be removed soon.
+   *
+   * ```ts
+   * plugins.dashboard.locator.getLocation({ ... });
+   * ```
+   */
   dashboardUrlGenerator?: DashboardUrlGenerator;
+  locator?: DashboardAppLocator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
 }
 
@@ -141,7 +154,11 @@ export class DashboardPlugin
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
+  /**
+   * @deprecated Use locator instead.
+   */
   private dashboardUrlGenerator?: DashboardUrlGenerator;
+  private locator?: DashboardAppLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -205,14 +222,14 @@ export class DashboardPlugin
     };
 
     if (share) {
-      this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(
-        createDashboardUrlGenerator(async () => {
-          const [coreStart, , selfStart] = await core.getStartServices();
-          return {
-            appBasePath: coreStart.application.getUrlForApp('dashboards'),
-            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
-            savedDashboardLoader: selfStart.getSavedDashboardLoader(),
-          };
+      this.locator = share.url.locators.create(
+        new DashboardAppLocatorDefinition({
+          useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
+          getDashboardFilterFields: async (dashboardId: string) => {
+            const [, , selfStart] = await core.getStartServices();
+            const dashboard = await selfStart.getSavedDashboardLoader().get(dashboardId);
+            return dashboard?.searchSource?.getField('filter') ?? [];
+          },
         })
       );
     }
@@ -345,11 +362,18 @@ export class DashboardPlugin
         order: 100,
       });
     }
+
+    return {
+      locator: this.locator,
+    };
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications, overlays, application } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
+
+    const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
+      .dashboard as DashboardCapabilities;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
@@ -395,8 +419,8 @@ export class DashboardPlugin
         overlays,
         embeddable.getStateTransfer(),
         {
-          canCreateNew: Boolean(application.capabilities.dashboard.createNew),
-          canEditExisting: !Boolean(application.capabilities.dashboard.hideWriteControls),
+          canCreateNew: Boolean(dashboardCapabilities.createNew),
+          canEditExisting: Boolean(dashboardCapabilities.showWriteControls),
         },
         presentationUtil.ContextProvider
       );
@@ -426,6 +450,7 @@ export class DashboardPlugin
         });
       },
       dashboardUrlGenerator: this.dashboardUrlGenerator,
+      locator: this.locator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
     };
   }

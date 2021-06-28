@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('outlier detection creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 

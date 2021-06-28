@@ -18,23 +18,6 @@
   }
 }
 
-.privateSourcesLayout {
-  $sideBarWidth: $euiSize * 30;
-  $consoleHeaderHeight: 48px; // NOTE: Keep an eye on this for changes
-  $pageHeight: calc(100vh - #{$consoleHeaderHeight});
-
-  left: $sideBarWidth;
-  width: calc(100% - #{$sideBarWidth});
-  min-height: $pageHeight;
-
-  &__sideBar {
-    padding: 32px 40px 40px;
-    width: $sideBarWidth;
-    margin-left: -$sideBarWidth;
-    height: $pageHeight;
-  }
-}
-
 .sourcesSubNav {
   li {
     display: block;

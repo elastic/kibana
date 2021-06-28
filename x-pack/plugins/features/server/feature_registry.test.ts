@@ -1228,6 +1228,180 @@ describe('FeatureRegistry', () => {
       );
     });
 
+    it(`prevents privileges from specifying cases entries that don't exist at the root level`, () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        cases: ['bar'],
+        privileges: {
+          all: {
+            cases: {
+              all: ['foo', 'bar'],
+              read: ['baz'],
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            app: [],
+          },
+          read: {
+            cases: { read: ['foo', 'bar', 'baz'] },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            app: [],
+          },
+        },
+      };
+
+      const featureRegistry = new FeatureRegistry();
+
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature privilege test-feature.all has unknown cases entries: foo, baz"`
+      );
+    });
+
+    it(`prevents features from specifying cases entries that don't exist at the privilege level`, () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        cases: ['foo', 'bar', 'baz'],
+        privileges: {
+          all: {
+            cases: { all: ['foo'] },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            app: [],
+          },
+          read: {
+            cases: { all: ['foo'] },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+            app: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'my sub feature',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'cool-sub-feature-privilege',
+                    name: 'cool privilege',
+                    includeIn: 'none',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                    cases: { all: ['bar'] },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature test-feature specifies cases entries which are not granted to any privileges: baz"`
+      );
+    });
+
+    it(`prevents reserved privileges from specifying cases entries that don't exist at the root level`, () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        cases: ['bar'],
+        privileges: null,
+        reserved: {
+          description: 'something',
+          privileges: [
+            {
+              id: 'reserved',
+              privilege: {
+                cases: { all: ['foo', 'bar', 'baz'] },
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+                app: [],
+              },
+            },
+          ],
+        },
+      };
+
+      const featureRegistry = new FeatureRegistry();
+
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature privilege test-feature.reserved has unknown cases entries: foo, baz"`
+      );
+    });
+
+    it(`prevents features from specifying cases entries that don't exist at the reserved privilege level`, () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        cases: ['foo', 'bar', 'baz'],
+        privileges: null,
+        reserved: {
+          description: 'something',
+          privileges: [
+            {
+              id: 'reserved',
+              privilege: {
+                cases: { all: ['foo', 'bar'] },
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+                app: [],
+              },
+            },
+          ],
+        },
+      };
+
+      const featureRegistry = new FeatureRegistry();
+
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Feature test-feature specifies cases entries which are not granted to any privileges: baz"`
+      );
+    });
+
     it(`prevents privileges from specifying management sections that don't exist at the root level`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',

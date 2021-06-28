@@ -14,7 +14,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly retry = this.ctx.getService('retry');
   private readonly config = this.ctx.getService('config');
-  private readonly PageObjects = this.ctx.getPageObjects(['common']);
+  private readonly common = this.ctx.getPageObject('common');
 
   public async getCurrentlyLoadedQueryID() {
     await this.openSavedQueryManagementComponent();
@@ -93,7 +93,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   public async deleteSavedQuery(title: string) {
     await this.openSavedQueryManagementComponent();
     await this.testSubjects.click(`~delete-saved-query-${title}-button`);
-    await this.PageObjects.common.clickConfirmOnModal();
+    await this.common.clickConfirmOnModal();
   }
 
   async clearCurrentlyLoadedQuery() {

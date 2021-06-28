@@ -570,9 +570,8 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      // TODO: temporary regression
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(9);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -645,9 +644,8 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      // TODO: temporary regression, selectors will help
       // validation requires to calls this getConfiguration API
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(9);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(6);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -1124,8 +1122,7 @@ describe('editor_frame', () => {
       });
 
       // validation requires to calls this getConfiguration API
-      // TODO: why so many times?
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(10);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
@@ -1372,6 +1369,57 @@ describe('editor_frame', () => {
           state: suggestionVisState,
         })
       );
+    });
+
+    it('should avoid completely to compute suggestion when in fullscreen mode', async () => {
+      const props = {
+        ...getDefaultProps(),
+        initialContext: {
+          indexPatternId: '1',
+          fieldName: 'test',
+        },
+        visualizationMap: {
+          testVis: mockVisualization,
+        },
+        datasourceMap: {
+          testDatasource: mockDatasource,
+          testDatasource2: mockDatasource2,
+        },
+
+        ExpressionRenderer: expressionRendererMock,
+      };
+
+      const { instance: el } = await mountWithProvider(
+        <EditorFrame {...props} />,
+        props.plugins.data
+      );
+      instance = el;
+
+      expect(
+        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
+      ).not.toBeUndefined();
+
+      await act(async () => {
+        (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
+          type: 'TOGGLE_FULLSCREEN',
+        });
+      });
+
+      instance.update();
+
+      expect(instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement).toBe(false);
+
+      await act(async () => {
+        (instance.find(FrameLayout).prop('dataPanel') as ReactElement)!.props.dispatch({
+          type: 'TOGGLE_FULLSCREEN',
+        });
+      });
+
+      instance.update();
+
+      expect(
+        instance.find(FrameLayout).prop('suggestionsPanel') as ReactElement
+      ).not.toBeUndefined();
     });
   });
 

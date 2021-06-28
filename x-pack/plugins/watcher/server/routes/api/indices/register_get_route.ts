@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MultiBucketAggregate } from '@elastic/elasticsearch/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
 import { reduce, size } from 'lodash';
@@ -64,7 +64,9 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
   if (response.statusCode === 404 || !response.body.aggregations) {
     return [];
   }
-  const indices = response.body.aggregations.indices as MultiBucketAggregate<{ key: unknown }>;
+  const indices = response.body.aggregations.indices as estypes.AggregationsMultiBucketAggregate<{
+    key: unknown;
+  }>;
 
   return indices.buckets ? indices.buckets.map((bucket) => bucket.key) : [];
 }

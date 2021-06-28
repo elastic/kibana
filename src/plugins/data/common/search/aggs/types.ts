@@ -132,6 +132,7 @@ export type AggsStart = Assign<AggsCommonStart, { types: AggTypesRegistryStart }
 export interface BaseAggParams {
   json?: string;
   customLabel?: string;
+  timeShift?: string;
 }
 
 /** @internal */

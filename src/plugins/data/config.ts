@@ -15,6 +15,8 @@ export const configSchema = schema.object({
     }),
     valueSuggestions: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      terminateAfter: schema.duration({ defaultValue: 100000 }),
+      timeout: schema.duration({ defaultValue: 1000 }),
     }),
   }),
   search: schema.object({
@@ -42,9 +44,19 @@ export const searchSessionsConfigSchema = schema.object({
    */
   pageSize: schema.number({ defaultValue: 100 }),
   /**
-   * trackingInterval controls how often we track search session objects progress
+   * trackingInterval controls how often we track persisted search session objects progress
    */
   trackingInterval: schema.duration({ defaultValue: '10s' }),
+
+  /**
+   * cleanupInterval controls how often we track non-persisted search session objects for cleanup
+   */
+  cleanupInterval: schema.duration({ defaultValue: '60s' }),
+
+  /**
+   * expireInterval controls how often we track persisted search session objects for expiration
+   */
+  expireInterval: schema.duration({ defaultValue: '60m' }),
 
   /**
    * monitoringTaskTimeout controls for how long task manager waits for search session monitoring task to complete before considering it timed out,

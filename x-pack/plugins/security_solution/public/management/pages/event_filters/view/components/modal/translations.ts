@@ -25,6 +25,6 @@ export const ACTIONS_CONFIRM = i18n.translate(
 export const ACTIONS_CANCEL = i18n.translate(
   'xpack.securitySolution.eventFilter.modal.actions.cancel',
   {
-    defaultMessage: 'cancel',
+    defaultMessage: 'Cancel',
   }
 );

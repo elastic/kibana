@@ -46,7 +46,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
         }}
         query={{ query: inputVal, language: 'kuery' }}
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
-        data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
+        dataTestSubj="xpack.uptime.alerts.monitorStatus.filterBar"
         autoSubmit={true}
         disableLanguageSwitcher={true}
         isInvalid={!!(inputVal && !query)}

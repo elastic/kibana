@@ -13,20 +13,21 @@ export class DashboardAddPanelService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly flyout = this.ctx.getService('flyout');
-  private readonly PageObjects = this.ctx.getPageObjects(['header', 'common']);
+  private readonly common = this.ctx.getPageObject('common');
+  private readonly header = this.ctx.getPageObject('header');
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
     await this.testSubjects.click('dashboardAddPanelButton');
     // Give some time for the animation to complete
-    await this.PageObjects.common.sleep(500);
+    await this.common.sleep(500);
   }
 
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
     await this.testSubjects.click('dashboardAddNewPanelButton');
     // Give some time for the animation to complete
-    await this.PageObjects.common.sleep(500);
+    await this.common.sleep(500);
   }
 
   async clickQuickButton(visType: string) {
@@ -94,7 +95,7 @@ export class DashboardAddPanelService extends FtrService {
         }
 
         await embeddableRows[i].click();
-        await this.PageObjects.common.closeToast();
+        await this.common.closeToast();
         embeddableList.push(name);
       }
     });
@@ -104,7 +105,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickPagerNextButton() {
     // Clear all toasts that could hide pagination controls
-    await this.PageObjects.common.clearAllToasts();
+    await this.common.clearAllToasts();
 
     const isNext = await this.testSubjects.exists('pagination-button-next');
     if (!isNext) {
@@ -118,9 +119,9 @@ export class DashboardAddPanelService extends FtrService {
       return false;
     }
 
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     await pagerNextButton.click();
-    await this.PageObjects.header.waitUntilLoadingHasFinished();
+    await this.header.waitUntilLoadingHasFinished();
     return true;
   }
 

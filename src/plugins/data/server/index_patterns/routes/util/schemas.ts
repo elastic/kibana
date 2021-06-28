@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
+import { RUNTIME_FIELD_TYPES, RuntimeType } from '../../../../common';
 
 export const serializedFieldFormatSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -52,4 +53,24 @@ export const fieldSpecSchemaFields = {
   shortDotsEnable: schema.maybe(schema.boolean()),
 };
 
-export const fieldSpecSchema = schema.object(fieldSpecSchemaFields);
+export const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
+  // Allow and ignore unknowns to make fields transient.
+  // Because `fields` have a bunch of calculated fields
+  // this allows to retrieve an index pattern and then to re-create by using the retrieved payload
+  unknowns: 'ignore',
+});
+
+export const runtimeFieldSpecTypeSchema = schema.oneOf(
+  RUNTIME_FIELD_TYPES.map((runtimeFieldType) => schema.literal(runtimeFieldType)) as [
+    Type<RuntimeType>
+  ]
+);
+export const runtimeFieldSpec = {
+  type: runtimeFieldSpecTypeSchema,
+  script: schema.maybe(
+    schema.object({
+      source: schema.string(),
+    })
+  ),
+};
+export const runtimeFieldSpecSchema = schema.object(runtimeFieldSpec);

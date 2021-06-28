@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { setupEnvironment } from '../../helpers/setup_environment';
-import { getDefaultHotPhasePolicy } from '../constants';
 import { act } from 'react-dom/test-utils';
-import { licensingMock } from '../../../../../licensing/public/mocks';
+import { setupEnvironment } from '../../helpers';
+import { RolloverTestBed, setupRolloverTestBed } from './rollover.helpers';
 
 describe('<EditPolicy /> rollover', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: RolloverTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
@@ -20,21 +18,10 @@ describe('<EditPolicy /> rollover', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-    httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
-    httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['abc'] });
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: {},
-      nodesByAttributes: { test: ['123'] },
-      isUsingDeprecatedDataRoleConfig: false,
-    });
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup({
-        appServicesContext: {
-          license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
-        },
-      });
+      testBed = await setupRolloverTestBed();
     });
 
     const { component } = testBed;
@@ -43,14 +30,14 @@ describe('<EditPolicy /> rollover', () => {
 
   test('shows forcemerge when rollover enabled', async () => {
     const { actions } = testBed;
-    expect(actions.hot.forceMergeFieldExists()).toBeTruthy();
+    expect(actions.hot.forceMergeExists()).toBeTruthy();
   });
 
   test('hides forcemerge when rollover is disabled', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
-    expect(actions.hot.forceMergeFieldExists()).toBeFalsy();
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
+    expect(actions.hot.forceMergeExists()).toBeFalsy();
   });
 
   test('shows shrink input when rollover enabled', async () => {
@@ -60,8 +47,8 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides shrink input when rollover is disabled', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
     expect(actions.hot.shrinkExists()).toBeFalsy();
   });
 
@@ -72,16 +59,18 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hides readonly input when rollover is disabled', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
     expect(actions.hot.readonlyExists()).toBeFalsy();
   });
 
   test('hides and disables searchable snapshot field', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
-    await actions.cold.enable(true);
+
+    expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
+    await actions.togglePhase('cold');
 
     expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
   });
@@ -89,10 +78,10 @@ describe('<EditPolicy /> rollover', () => {
   test('shows rollover tip on minimum age', async () => {
     const { actions } = testBed;
 
-    await actions.warm.enable(true);
-    await actions.cold.enable(true);
-    await actions.frozen.enable(true);
-    await actions.delete.enable(true);
+    await actions.togglePhase('warm');
+    await actions.togglePhase('cold');
+    await actions.togglePhase('frozen');
+    await actions.togglePhase('delete');
 
     expect(actions.warm.hasRolloverTipOnMinAge()).toBeTruthy();
     expect(actions.cold.hasRolloverTipOnMinAge()).toBeTruthy();
@@ -102,13 +91,13 @@ describe('<EditPolicy /> rollover', () => {
 
   test('hiding rollover tip on minimum age', async () => {
     const { actions } = testBed;
-    await actions.hot.toggleDefaultRollover(false);
-    await actions.hot.toggleRollover(false);
+    await actions.rollover.toggleDefault();
+    await actions.rollover.toggle();
 
-    await actions.warm.enable(true);
-    await actions.cold.enable(true);
-    await actions.frozen.enable(true);
-    await actions.delete.enable(true);
+    await actions.togglePhase('warm');
+    await actions.togglePhase('cold');
+    await actions.togglePhase('frozen');
+    await actions.togglePhase('delete');
 
     expect(actions.warm.hasRolloverTipOnMinAge()).toBeFalsy();
     expect(actions.cold.hasRolloverTipOnMinAge()).toBeFalsy();

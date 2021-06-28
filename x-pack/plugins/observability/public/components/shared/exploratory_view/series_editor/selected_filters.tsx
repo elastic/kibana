@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useUrlStorage } from '../hooks/use_url_storage';
+import { useSeriesStorage } from '../hooks/use_series_storage';
 import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
@@ -20,7 +20,9 @@ interface Props {
   isNew?: boolean;
 }
 export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) {
-  const { series } = useUrlStorage(seriesId);
+  const { getSeries } = useSeriesStorage();
+
+  const series = getSeries(seriesId);
 
   const { reportDefinitions = {} } = series;
 
@@ -37,7 +39,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
 
   const { removeFilter } = useSeriesFilters({ seriesId });
 
-  const { indexPattern } = useAppIndexPatternContext();
+  const { indexPattern } = useAppIndexPatternContext(series.dataType);
 
   return (filters.length > 0 || definitionFilters.length > 0) && indexPattern ? (
     <EuiFlexItem>
@@ -53,6 +55,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
                   value={val}
                   removeFilter={() => removeFilter({ field, value: val, negate: false })}
                   negate={false}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             ))}
@@ -65,6 +68,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
                   value={val}
                   negate={true}
                   removeFilter={() => removeFilter({ field, value: val, negate: true })}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             ))}
@@ -85,6 +89,7 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
                   }}
                   negate={false}
                   definitionFilter={true}
+                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             ))}

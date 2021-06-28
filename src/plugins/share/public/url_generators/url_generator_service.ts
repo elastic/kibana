@@ -13,10 +13,20 @@ import { UrlGeneratorInternal } from './url_generator_internal';
 import { UrlGeneratorContract } from './url_generator_contract';
 
 export interface UrlGeneratorsStart {
+  /**
+   * @deprecated
+   *
+   * URL Generators are deprecated, use URL locators in UrlService instead.
+   */
   getUrlGenerator: <T extends UrlGeneratorId>(urlGeneratorId: T) => UrlGeneratorContract<T>;
 }
 
 export interface UrlGeneratorsSetup {
+  /**
+   * @deprecated
+   *
+   * URL Generators are deprecated, use URL locators in UrlService instead.
+   */
   registerUrlGenerator: <Id extends UrlGeneratorId>(
     generator: UrlGeneratorsDefinition<Id>
   ) => UrlGeneratorContract<Id>;

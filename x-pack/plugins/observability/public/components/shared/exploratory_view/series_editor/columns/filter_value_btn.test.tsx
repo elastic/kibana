@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { FilterValueButton } from './filter_value_btn';
-import { mockUrlStorage, mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
 import {
   USER_AGENT_NAME,
   USER_AGENT_VERSION,
@@ -75,7 +75,6 @@ describe('FilterValueButton', function () {
     });
   });
   it('should remove filter on click if already selected', async function () {
-    mockUrlStorage({});
     const { removeFilter } = mockUseSeriesFilter();
 
     render(
@@ -140,7 +139,7 @@ describe('FilterValueButton', function () {
       />
     );
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledTimes(2);
     expect(spy).toBeCalledWith(
       expect.objectContaining({
         filters: [
@@ -171,7 +170,7 @@ describe('FilterValueButton', function () {
       />
     );
 
-    expect(spy).toHaveBeenCalledTimes(2);
+    expect(spy).toHaveBeenCalledTimes(6);
     expect(spy).toBeCalledWith(
       expect.objectContaining({
         filters: [

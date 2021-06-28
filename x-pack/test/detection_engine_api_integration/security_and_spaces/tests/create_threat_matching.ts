@@ -27,6 +27,7 @@ import {
 
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
@@ -68,13 +69,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating threat match rule', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -107,13 +108,13 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest);
         await createSignalsIndex(supertest);
-        await esArchiver.load('auditbeat/hosts');
+        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
-        await esArchiver.unload('auditbeat/hosts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       });
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
@@ -201,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           signal: {
             _meta: {
-              version: 35,
+              version: SIGNALS_TEMPLATE_VERSION,
             },
             ancestors: [
               {
@@ -358,11 +359,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('indicator enrichment', () => {
         beforeEach(async () => {
-          await esArchiver.load('filebeat/threat_intel');
+          await esArchiver.load('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('filebeat/threat_intel');
+          await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
         });
 
         it('enriches signals with the single indicator that matched', async () => {

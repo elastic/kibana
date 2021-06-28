@@ -37,7 +37,7 @@ import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
 import { UntypedNormalizedAlertType } from '../alert_type_registry';
 import { alertTypeRegistryMock } from '../alert_type_registry.mock';
-import uuid from 'uuid';
+
 const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
   id: 'test',
   name: 'My test alert',
@@ -214,10 +214,10 @@ describe('Task Runner', () => {
     expect(call.rule.consumer).toBe('bar');
     expect(call.rule.enabled).toBe(true);
     expect(call.rule.schedule).toMatchInlineSnapshot(`
-    Object {
-      "interval": "10s",
-    }
-    `);
+          Object {
+            "interval": "10s",
+          }
+        `);
     expect(call.rule.createdBy).toBe('alert-creator');
     expect(call.rule.updatedBy).toBe('alert-updater');
     expect(call.rule.createdAt).toBe(mockDate);
@@ -228,25 +228,25 @@ describe('Task Runner', () => {
     expect(call.rule.ruleTypeId).toBe('test');
     expect(call.rule.ruleTypeName).toBe('My test alert');
     expect(call.rule.actions).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "actionTypeId": "action",
-        "group": "default",
-        "id": "1",
-        "params": Object {
-          "foo": true,
-        },
-      },
-      Object {
-        "actionTypeId": "action",
-        "group": "recovered",
-        "id": "2",
-        "params": Object {
-          "isResolved": true,
-        },
-      },
-    ]
-    `);
+          Array [
+            Object {
+              "actionTypeId": "action",
+              "group": "default",
+              "id": "1",
+              "params": Object {
+                "foo": true,
+              },
+            },
+            Object {
+              "actionTypeId": "action",
+              "group": "recovered",
+              "id": "2",
+              "params": Object {
+                "isResolved": true,
+              },
+            },
+          ]
+        `);
     expect(call.services.alertInstanceFactory).toBeTruthy();
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
@@ -260,28 +260,40 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "@timestamp": "1970-01-01T00:00:00.000Z",
         "event": Object {
-          "action": "execute",
-          "outcome": "success",
+          "action": "execute-start",
+          "category": Array [
+            "alerts",
+          ],
+          "kind": "alert",
         },
         "kibana": Object {
-          "alerting": Object {
-            "status": "ok",
-          },
           "saved_objects": Array [
             Object {
               "id": "1",
               "namespace": undefined,
               "rel": "primary",
               "type": "alert",
+              "type_id": "test",
             },
           ],
+          "task": Object {
+            "schedule_delay": 0,
+            "scheduled": "1970-01-01T00:00:00.000Z",
+          },
         },
-        "message": "alert executed: test:1: 'alert-name'",
+        "message": "alert execution start: \\"1\\"",
+        "rule": Object {
+          "category": "test",
+          "id": "1",
+          "license": "basic",
+          "ruleset": "alerts",
+        },
       }
     `);
 
@@ -343,6 +355,14 @@ describe('Task Runner', () => {
           "params": Object {
             "foo": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -368,10 +388,44 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+      '@timestamp': '1970-01-01T00:00:00.000Z',
+      event: {
+        action: 'execute-start',
+        category: ['alerts'],
+        kind: 'alert',
+      },
+      kibana: {
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+            type_id: 'test',
+          },
+        ],
+      },
+      message: `alert execution start: "1"`,
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        ruleset: 'alerts',
+      },
+    });
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
       event: {
         action: 'new-instance',
+        category: ['alerts'],
+        kind: 'alert',
+        duration: 0,
+        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
         alerting: {
@@ -385,36 +439,50 @@ describe('Task Runner', () => {
             namespace: undefined,
             rel: 'primary',
             type: 'alert',
+            type_id: 'test',
           },
         ],
       },
       message: "test:1: 'alert-name' created new instance: '1'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
-    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
       event: {
         action: 'active-instance',
+        category: ['alerts'],
+        duration: 0,
+        kind: 'alert',
+        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
-        alerting: {
-          instance_id: '1',
-          action_group_id: 'default',
-          action_subgroup: 'subDefault',
-        },
+        alerting: { action_group_id: 'default', action_subgroup: 'subDefault', instance_id: '1' },
         saved_objects: [
-          {
-            id: '1',
-            namespace: undefined,
-            rel: 'primary',
-            type: 'alert',
-          },
+          { id: '1', namespace: undefined, rel: 'primary', type: 'alert', type_id: 'test' },
         ],
       },
       message:
         "test:1: 'alert-name' active instance: '1' in actionGroup(subgroup): 'default(subDefault)'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
-    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
       event: {
         action: 'execute-action',
+        category: ['alerts'],
+        kind: 'alert',
       },
       kibana: {
         alerting: {
@@ -428,26 +496,37 @@ describe('Task Runner', () => {
             namespace: undefined,
             rel: 'primary',
             type: 'alert',
+            type_id: 'test',
           },
           {
             id: '1',
             namespace: undefined,
             type: 'action',
+            type_id: 'action',
           },
         ],
       },
       message:
         "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup(subgroup): 'default(subDefault)' action: action:1",
-    });
-    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
-      '@timestamp': '1970-01-01T00:00:00.000Z',
-      event: {
-        action: 'execute',
-        outcome: 'success',
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
       },
+    });
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(5, {
+      '@timestamp': '1970-01-01T00:00:00.000Z',
+      event: { action: 'execute', category: ['alerts'], kind: 'alert', outcome: 'success' },
       kibana: {
         alerting: {
           status: 'active',
+        },
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
         },
         saved_objects: [
           {
@@ -455,10 +534,18 @@ describe('Task Runner', () => {
             namespace: undefined,
             rel: 'primary',
             type: 'alert',
+            type_id: 'test',
           },
         ],
       },
       message: "alert executed: test:1: 'alert-name'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        ruleset: 'alerts',
+      },
     });
   });
 
@@ -515,10 +602,45 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
     expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+      '@timestamp': '1970-01-01T00:00:00.000Z',
+      event: {
+        action: 'execute-start',
+        category: ['alerts'],
+        kind: 'alert',
+      },
+      kibana: {
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+            type_id: 'test',
+          },
+        ],
+      },
+      message: `alert execution start: \"1\"`,
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        ruleset: 'alerts',
+      },
+    });
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
       event: {
         action: 'new-instance',
+        category: ['alerts'],
+        kind: 'alert',
+        duration: 0,
+        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
         alerting: {
@@ -531,14 +653,27 @@ describe('Task Runner', () => {
             namespace: undefined,
             rel: 'primary',
             type: 'alert',
+            type_id: 'test',
           },
         ],
       },
       message: "test:1: 'alert-name' created new instance: '1'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
-    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
       event: {
         action: 'active-instance',
+        category: ['alerts'],
+        kind: 'alert',
+        duration: 0,
+        start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
         alerting: {
@@ -551,31 +686,54 @@ describe('Task Runner', () => {
             namespace: undefined,
             rel: 'primary',
             type: 'alert',
+            type_id: 'test',
           },
         ],
       },
       message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        namespace: undefined,
+        ruleset: 'alerts',
+      },
     });
-    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(4, {
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute',
+        category: ['alerts'],
+        kind: 'alert',
         outcome: 'success',
       },
       kibana: {
         alerting: {
           status: 'active',
         },
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
+        },
         saved_objects: [
           {
             id: '1',
             namespace: undefined,
             rel: 'primary',
             type: 'alert',
+            type_id: 'test',
           },
         ],
       },
       message: "alert executed: test:1: 'alert-name'",
+      rule: {
+        category: 'test',
+        id: '1',
+        license: 'basic',
+        name: 'alert-name',
+        ruleset: 'alerts',
+      },
     });
   });
 
@@ -660,7 +818,11 @@ describe('Task Runner', () => {
               meta: {
                 lastScheduledActions: { date: '1970-01-01T00:00:00.000Z', group: 'default' },
               },
-              state: { bar: false },
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 86400000000000,
+              },
             },
           },
         },
@@ -683,13 +845,54 @@ describe('Task Runner', () => {
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 86400000000000,
+              "kind": "alert",
+              "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
               "alerting": Object {
@@ -702,10 +905,18 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -713,6 +924,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -725,10 +940,22 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -899,6 +1126,14 @@ describe('Task Runner', () => {
           "params": Object {
             "foo": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -912,13 +1147,54 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
             "event": Object {
               "action": "new-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 0,
+              "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "alerting": Object {
@@ -931,16 +1207,30 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
             },
             "message": "test:1: 'alert-name' created new instance: '1'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 0,
+              "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
             },
             "kibana": Object {
               "alerting": Object {
@@ -953,16 +1243,28 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "execute-action",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
             },
             "kibana": Object {
               "alerting": Object {
@@ -976,15 +1278,24 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
                 Object {
                   "id": "1",
                   "namespace": undefined,
                   "type": "action",
+                  "type_id": "action",
                 },
               ],
             },
             "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -992,6 +1303,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -1004,10 +1319,22 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1038,8 +1365,22 @@ describe('Task Runner', () => {
         state: {
           ...mockedTaskInstance.state,
           alertInstances: {
-            '1': { meta: {}, state: { bar: false } },
-            '2': { meta: {}, state: { bar: false } },
+            '1': {
+              meta: {},
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 80000000000,
+              },
+            },
+            '2': {
+              meta: {},
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
+              },
+            },
           },
         },
       },
@@ -1056,21 +1397,23 @@ describe('Task Runner', () => {
     });
     const runnerResult = await taskRunner.run();
     expect(runnerResult.state.alertInstances).toMatchInlineSnapshot(`
-      Object {
-        "1": Object {
-          "meta": Object {
-            "lastScheduledActions": Object {
-              "date": 1970-01-01T00:00:00.000Z,
-              "group": "default",
-              "subgroup": undefined,
+        Object {
+          "1": Object {
+            "meta": Object {
+              "lastScheduledActions": Object {
+                "date": 1970-01-01T00:00:00.000Z,
+                "group": "default",
+                "subgroup": undefined,
+              },
+            },
+            "state": Object {
+              "bar": false,
+              "duration": 86400000000000,
+              "start": "1969-12-31T00:00:00.000Z",
             },
           },
-          "state": Object {
-            "bar": false,
-          },
-        },
-      }
-    `);
+        }
+        `);
 
     const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(4);
@@ -1089,7 +1432,240 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 64800000000000,
+              "end": "1970-01-01T00:00:00.000Z",
+              "kind": "alert",
+              "start": "1969-12-31T06:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 86400000000000,
+              "kind": "alert",
+              "start": "1969-12-31T00:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute-action",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "recovered",
+                "action_subgroup": undefined,
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+                Object {
+                  "id": "2",
+                  "namespace": undefined,
+                  "type": "action",
+                  "type_id": "action",
+                },
+              ],
+            },
+            "message": "alert: test:1: 'alert-name' instanceId: '2' scheduled actionGroup: 'recovered' action: action:2",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "execute-action",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "action_subgroup": undefined,
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "type": "action",
+                  "type_id": "action",
+                },
+              ],
+            },
+            "message": "alert: test:1: 'alert-name' instanceId: '1' scheduled actionGroup: 'default' action: action:1",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "active",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+      ]
+    `);
+
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -1099,6 +1675,14 @@ describe('Task Runner', () => {
           "params": Object {
             "isResolved": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -1113,7 +1697,7 @@ describe('Task Runner', () => {
   });
 
   test('should skip alertInstances which werent active on the previous execution', async () => {
-    const alertId = uuid.v4();
+    const alertId = 'e558aaad-fd81-46d2-96fc-3bd8fc3dc03f';
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
 
@@ -1186,7 +1770,7 @@ describe('Task Runner', () => {
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
     expect(actionsClient.enqueueExecution.mock.calls[1][0].id).toEqual('1');
     expect(actionsClient.enqueueExecution.mock.calls[0][0].id).toEqual('2');
@@ -1281,7 +1865,7 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(5);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -1291,6 +1875,14 @@ describe('Task Runner', () => {
           "params": Object {
             "isResolved": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -1328,11 +1920,19 @@ describe('Task Runner', () => {
           alertInstances: {
             '1': {
               meta: { lastScheduledActions: { group: 'default', date } },
-              state: { bar: false },
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 80000000000,
+              },
             },
             '2': {
               meta: { lastScheduledActions: { group: 'default', date } },
-              state: { bar: false },
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
+              },
             },
           },
         },
@@ -1361,19 +1961,63 @@ describe('Task Runner', () => {
           },
           "state": Object {
             "bar": false,
+            "duration": 86400000000000,
+            "start": "1969-12-31T00:00:00.000Z",
           },
         },
       }
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
             "event": Object {
               "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 64800000000000,
+              "end": "1970-01-01T00:00:00.000Z",
+              "kind": "alert",
+              "start": "1969-12-31T06:00:00.000Z",
             },
             "kibana": Object {
               "alerting": Object {
@@ -1386,16 +2030,30 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
             },
             "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
           Object {
             "event": Object {
               "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 86400000000000,
+              "kind": "alert",
+              "start": "1969-12-31T00:00:00.000Z",
             },
             "kibana": Object {
               "alerting": Object {
@@ -1408,10 +2066,18 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
             },
             "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
         Array [
@@ -1419,6 +2085,10 @@ describe('Task Runner', () => {
             "@timestamp": "1970-01-01T00:00:00.000Z",
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "success",
             },
             "kibana": Object {
@@ -1431,10 +2101,22 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1617,9 +2299,44 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
         Array [
           Object {
             "@timestamp": "1970-01-01T00:00:00.000Z",
@@ -1628,6 +2345,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "execute",
             },
@@ -1641,10 +2362,21 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution failure: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1676,9 +2408,44 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
         Array [
           Object {
             "@timestamp": "1970-01-01T00:00:00.000Z",
@@ -1687,6 +2454,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "decrypt",
             },
@@ -1700,10 +2471,21 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1743,9 +2525,44 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
         Array [
           Object {
             "@timestamp": "1970-01-01T00:00:00.000Z",
@@ -1754,6 +2571,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "license",
             },
@@ -1767,10 +2588,21 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1810,9 +2642,44 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
         Array [
           Object {
             "@timestamp": "1970-01-01T00:00:00.000Z",
@@ -1821,6 +2688,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "unknown",
             },
@@ -1834,10 +2705,21 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -1876,9 +2758,44 @@ describe('Task Runner', () => {
     `);
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
-    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
         Array [
           Object {
             "@timestamp": "1970-01-01T00:00:00.000Z",
@@ -1887,6 +2804,10 @@ describe('Task Runner', () => {
             },
             "event": Object {
               "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
               "outcome": "failure",
               "reason": "read",
             },
@@ -1900,10 +2821,21 @@ describe('Task Runner', () => {
                   "namespace": undefined,
                   "rel": "primary",
                   "type": "alert",
+                  "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "test:1: execution failed",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
           },
         ],
       ]
@@ -2011,9 +2943,1141 @@ describe('Task Runner', () => {
       references: [],
     });
 
+    const logger = taskRunnerFactoryInitializerParams.logger;
     return taskRunner.run().catch((ex) => {
       expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Executing Alert "1" has resulted in Error: Saved object [alert/1] not found`
+      );
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).nthCalledWith(
+        1,
+        `Unable to execute rule "1" because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
+      );
       expect(isUnrecoverableError(ex)).toBeTruthy();
     });
+  });
+
+  test('correctly logs warning when Alert Task Runner throws due to failing to fetch the alert in a space', async () => {
+    alertsClient.get.mockImplementation(() => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        params: {
+          ...mockedTaskInstance.params,
+          spaceId: 'test space',
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const logger = taskRunnerFactoryInitializerParams.logger;
+    return taskRunner.run().catch((ex) => {
+      expect(ex).toMatchInlineSnapshot(`[Error: Saved object [alert/1] not found]`);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Executing Alert "1" has resulted in Error: Saved object [alert/1] not found`
+      );
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).nthCalledWith(
+        1,
+        `Unable to execute rule "1" in the "test space" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`
+      );
+    });
+  });
+
+  test('start time is logged for new alerts', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertInstanceFactory('2').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {},
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+      actions: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(6);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "new-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 0,
+              "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' created new instance: '1'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "new-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 0,
+              "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' created new instance: '2'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 0,
+              "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 0,
+              "kind": "alert",
+              "start": "1970-01-01T00:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "active",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('duration is updated for active alerts when alert state contains start time', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertInstanceFactory('2').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {},
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 80000000000,
+              },
+            },
+            '2': {
+              meta: {},
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
+              },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+      actions: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 86400000000000,
+              "kind": "alert",
+              "start": "1969-12-31T00:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 64800000000000,
+              "kind": "alert",
+              "start": "1969-12-31T06:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "active",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('duration is not calculated for active alerts when alert state does not contain start time', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+        executorServices.alertInstanceFactory('2').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {},
+              state: { bar: false },
+            },
+            '2': {
+              meta: {},
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+      actions: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "active-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "action_group_id": "default",
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' active instance: '2' in actionGroup: 'default'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "active",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('end is logged for active alerts when alert state contains start time and alert recovers', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(async () => {});
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {},
+              state: {
+                bar: false,
+                start: '1969-12-31T00:00:00.000Z',
+                duration: 80000000000,
+              },
+            },
+            '2': {
+              meta: {},
+              state: {
+                bar: false,
+                start: '1969-12-31T06:00:00.000Z',
+                duration: 70000000000,
+              },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+      actions: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 86400000000000,
+              "end": "1970-01-01T00:00:00.000Z",
+              "kind": "alert",
+              "start": "1969-12-31T00:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' instance '1' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "duration": 64800000000000,
+              "end": "1970-01-01T00:00:00.000Z",
+              "kind": "alert",
+              "start": "1969-12-31T06:00:00.000Z",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "ok",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('end calculation is skipped for active alerts when alert state does not contain start time and alert recovers', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string
+      >) => {}
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {},
+              state: { bar: false },
+            },
+            '2': {
+              meta: {},
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyWhen: 'onActionGroupChange',
+      actions: [],
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(4);
+    expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute-start",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert execution start: \\"1\\"",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "1",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' instance '1' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "event": Object {
+              "action": "recovered-instance",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "instance_id": "2",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+            },
+            "message": "test:1: 'alert-name' instance '2' has recovered",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "event": Object {
+              "action": "execute",
+              "category": Array [
+                "alerts",
+              ],
+              "kind": "alert",
+              "outcome": "success",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "ok",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                  "type_id": "test",
+                },
+              ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
+            },
+            "message": "alert executed: test:1: 'alert-name'",
+            "rule": Object {
+              "category": "test",
+              "id": "1",
+              "license": "basic",
+              "name": "alert-name",
+              "ruleset": "alerts",
+            },
+          },
+        ],
+      ]
+    `);
   });
 });

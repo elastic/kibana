@@ -63,35 +63,62 @@ export function LayerPanels(
     () => (datasourceId: string, newState: unknown) => {
       dispatch({
         type: 'UPDATE_DATASOURCE_STATE',
-        updater: () => newState,
+        updater: (prevState: unknown) =>
+          typeof newState === 'function' ? newState(prevState) : newState,
         datasourceId,
         clearStagedPreview: false,
       });
     },
     [dispatch]
   );
+  const updateDatasourceAsync = useMemo(
+    () => (datasourceId: string, newState: unknown) => {
+      // React will synchronously update if this is triggered from a third party component,
+      // which we don't want. The timeout lets user interaction have priority, then React updates.
+      setTimeout(() => {
+        updateDatasource(datasourceId, newState);
+      }, 0);
+    },
+    [updateDatasource]
+  );
   const updateAll = useMemo(
     () => (datasourceId: string, newDatasourceState: unknown, newVisualizationState: unknown) => {
-      dispatch({
-        type: 'UPDATE_STATE',
-        subType: 'UPDATE_ALL_STATES',
-        updater: (prevState) => {
-          return {
-            ...prevState,
-            datasourceStates: {
-              ...prevState.datasourceStates,
-              [datasourceId]: {
-                state: newDatasourceState,
-                isLoading: false,
+      // React will synchronously update if this is triggered from a third party component,
+      // which we don't want. The timeout lets user interaction have priority, then React updates.
+      setTimeout(() => {
+        dispatch({
+          type: 'UPDATE_STATE',
+          subType: 'UPDATE_ALL_STATES',
+          updater: (prevState) => {
+            const updatedDatasourceState =
+              typeof newDatasourceState === 'function'
+                ? newDatasourceState(prevState.datasourceStates[datasourceId].state)
+                : newDatasourceState;
+            return {
+              ...prevState,
+              datasourceStates: {
+                ...prevState.datasourceStates,
+                [datasourceId]: {
+                  state: updatedDatasourceState,
+                  isLoading: false,
+                },
               },
-            },
-            visualization: {
-              ...prevState.visualization,
-              state: newVisualizationState,
-            },
-            stagedPreview: undefined,
-          };
-        },
+              visualization: {
+                ...prevState.visualization,
+                state: newVisualizationState,
+              },
+              stagedPreview: undefined,
+            };
+          },
+        });
+      }, 0);
+    },
+    [dispatch]
+  );
+  const toggleFullscreen = useMemo(
+    () => () => {
+      dispatch({
+        type: 'TOGGLE_FULLSCREEN',
       });
     },
     [dispatch]
@@ -113,6 +140,7 @@ export function LayerPanels(
             visualizationState={visualizationState}
             updateVisualization={setVisualizationState}
             updateDatasource={updateDatasource}
+            updateDatasourceAsync={updateDatasourceAsync}
             updateAll={updateAll}
             isOnlyLayer={layerIds.length === 1}
             onRemoveLayer={() => {
@@ -130,6 +158,7 @@ export function LayerPanels(
               });
               removeLayerRef(layerId);
             }}
+            toggleFullscreen={toggleFullscreen}
           />
         ) : null
       )}

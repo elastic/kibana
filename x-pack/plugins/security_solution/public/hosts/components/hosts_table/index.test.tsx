@@ -23,6 +23,8 @@ import { HostsTableType } from '../../../hosts/store/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
+
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../common/components/search_bar', () => ({
@@ -94,9 +96,7 @@ describe('Hosts Table', () => {
           sortField: 'lastSeen',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-          'Last seen Click to sort in ascending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Last seen ');
         expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
       });
 
@@ -111,9 +111,7 @@ describe('Hosts Table', () => {
           sortField: 'hostName',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-          'Host nameClick to sort in descending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Host name');
       });
     });
   });

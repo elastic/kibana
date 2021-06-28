@@ -69,7 +69,9 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       if (
         !(
           isEsSearchResponseWithAggregations(response) &&
-          isMultiBucketAggregate<estypes.KeyedBucketKeys>(response.aggregations.field_values)
+          isMultiBucketAggregate<estypes.AggregationsKeyedBucketKeys>(
+            response.aggregations.field_values
+          )
         )
       ) {
         toastNotifications.addWarning(

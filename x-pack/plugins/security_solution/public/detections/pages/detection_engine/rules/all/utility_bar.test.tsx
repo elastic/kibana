@@ -22,7 +22,7 @@ describe('AllRules', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -44,7 +44,7 @@ describe('AllRules', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -67,7 +67,7 @@ describe('AllRules', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -86,7 +86,7 @@ describe('AllRules', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions
+          canBulkEdit={false}
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -106,7 +106,7 @@ describe('AllRules', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={mockRefresh}
           paginationTotal={4}
           numberSelectedItems={1}
@@ -128,7 +128,7 @@ describe('AllRules', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <AllRulesUtilityBar
-          userHasNoPermissions={false}
+          canBulkEdit
           onRefresh={jest.fn()}
           paginationTotal={4}
           numberSelectedItems={1}

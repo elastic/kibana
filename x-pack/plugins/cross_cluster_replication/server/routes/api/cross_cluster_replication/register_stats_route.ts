@@ -15,7 +15,7 @@ import { RouteDependencies } from '../../../types';
 export const registerStatsRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
@@ -23,20 +23,19 @@ export const registerStatsRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = context.core.elasticsearch;
+
       try {
         const {
-          auto_follow_stats: autoFollowStats,
-        } = await context.crossClusterReplication!.client.callAsCurrentUser('ccr.stats');
+          body: { auto_follow_stats: autoFollowStats },
+        } = await client.asCurrentUser.ccr.stats();
 
         return response.ok({
+          // @ts-expect-error Once #98266 is merged, test this again.
           body: deserializeAutoFollowStats(autoFollowStats),
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        throw err;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

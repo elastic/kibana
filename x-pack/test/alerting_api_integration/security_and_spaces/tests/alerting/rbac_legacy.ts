@@ -14,7 +14,7 @@ import { setupSpacesAndUsers } from '..';
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -35,7 +35,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esTestIndexTool.destroy();
-      await esArchiver.load('alerts_legacy');
+      await esArchiver.load('x-pack/test/functional/es_archives/alerts_legacy');
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
       await setupSpacesAndUsers(getService);
@@ -44,7 +44,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      await esArchiver.unload('alerts_legacy');
+      await esArchiver.unload('x-pack/test/functional/es_archives/alerts_legacy');
     });
 
     for (const scenario of UserAtSpaceScenarios) {
@@ -204,11 +204,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
             // ensure the alert still runs and that it can schedule actions
             const numberOfAlertExecutions = (
               await esTestIndexTool.search('alert:test.always-firing', reference)
-            ).hits.total.value;
+            ).body.hits.total.value;
 
             const numberOfActionExecutions = (
               await esTestIndexTool.search('action:test.index-record', reference)
-            ).hits.total.value;
+            ).body.hits.total.value;
 
             // wait for alert to execute and for its action to be scheduled and run
             await retry.try(async () => {
@@ -222,8 +222,10 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference
               );
 
-              expect(alertSearchResult.hits.total.value).to.be.greaterThan(numberOfAlertExecutions);
-              expect(actionSearchResult.hits.total.value).to.be.greaterThan(
+              expect(alertSearchResult.body.hits.total.value).to.be.greaterThan(
+                numberOfAlertExecutions
+              );
+              expect(actionSearchResult.body.hits.total.value).to.be.greaterThan(
                 numberOfActionExecutions
               );
             });

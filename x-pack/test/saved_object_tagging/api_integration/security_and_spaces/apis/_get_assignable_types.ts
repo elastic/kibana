@@ -16,11 +16,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET /internal/saved_objects_tagging/assignments/_assignable_types', () => {
     before(async () => {
-      await esArchiver.load('rbac_tags');
+      await esArchiver.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('rbac_tags');
+      await esArchiver.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags'
+      );
     });
 
     const assignablePerUser = {

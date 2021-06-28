@@ -6,14 +6,14 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { TestBed } from '@kbn/test/jest';
 
 import { licensingMock } from '../../../../../licensing/public/mocks';
-import { setupEnvironment } from '../../helpers/setup_environment';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
-import { getDefaultHotPhasePolicy } from '../constants';
+import { setupEnvironment } from '../../helpers';
+import { initTestBed } from '../init_test_bed';
 
 describe('<EditPolicy /> frozen phase', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: TestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -26,46 +26,22 @@ describe('<EditPolicy /> frozen phase', () => {
   });
 
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-    httpRequestsMockHelpers.setListNodes({
-      nodesByRoles: { data: ['node1'] },
-      nodesByAttributes: { 'attribute:true': ['node1'] },
-      isUsingDeprecatedDataRoleConfig: true,
-    });
-    httpRequestsMockHelpers.setNodesDetails('attribute:true', [
-      { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
-    ]);
-    httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+    httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await initTestBed();
     });
 
     const { component } = testBed;
     component.update();
   });
 
-  test('shows timing only when enabled', async () => {
-    const { actions, exists } = testBed;
-
-    expect(exists('frozen-phase')).toBe(true);
-    expect(actions.frozen.hasMinAgeInput()).toBeFalsy();
-    await actions.frozen.enable(true);
-    expect(actions.frozen.hasMinAgeInput()).toBeTruthy();
-  });
-
   describe('on non-enterprise license', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
-      httpRequestsMockHelpers.setListNodes({
-        isUsingDeprecatedDataRoleConfig: false,
-        nodesByAttributes: { test: ['123'] },
-        nodesByRoles: { data: ['123'] },
-      });
-      httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['my-repo'] });
+      httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
-        testBed = await setup({
+        testBed = await initTestBed({
           appServicesContext: {
             license: licensingMock.createLicense({ license: { type: 'basic' } }),
           },

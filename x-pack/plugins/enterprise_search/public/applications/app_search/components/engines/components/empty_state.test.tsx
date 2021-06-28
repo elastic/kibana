@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/kea.mock';
-import { setMockValues, mockTelemetryActions } from '../../../../__mocks__';
+import { setMockValues, mockTelemetryActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -54,7 +53,7 @@ describe('EmptyState', () => {
       });
 
       it('sends a user to engine creation', () => {
-        expect(button.prop('to')).toEqual('/engine_creation');
+        expect(button.prop('to')).toEqual('/engines/new');
       });
     });
   });

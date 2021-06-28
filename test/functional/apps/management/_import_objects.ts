@@ -27,14 +27,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        await esArchiver.load('management');
+        await esArchiver.load('test/functional/fixtures/es_archiver/management');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('management');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/management');
       });
 
       it('should import saved objects', async function () {
@@ -213,14 +213,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('.json file', () => {
       beforeEach(async function () {
-        await esArchiver.load('saved_objects_imports');
+        await esArchiver.load('test/functional/fixtures/es_archiver/saved_objects_imports');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('saved_objects_imports');
+        await esArchiver.unload('test/functional/fixtures/es_archiver/saved_objects_imports');
       });
 
       it('should import saved objects', async function () {
@@ -419,14 +419,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'index-pattern-test-1'
         );
 
-        await testSubjects.click('pagination-button-next');
+        const flyout = await testSubjects.find('importSavedObjectsFlyout');
+
+        await (await flyout.findByTestSubject('pagination-button-next')).click();
 
         await PageObjects.savedObjects.setOverriddenIndexPatternValue(
           'missing-index-pattern-7',
           'index-pattern-test-2'
         );
 
-        await testSubjects.click('pagination-button-previous');
+        await (await flyout.findByTestSubject('pagination-button-previous')).click();
 
         const selectedIdForMissingIndexPattern1 = await testSubjects.getAttribute(
           'managementChangeIndexSelection-missing-index-pattern-1',
@@ -435,7 +437,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(selectedIdForMissingIndexPattern1).to.eql('f1e4c910-a2e6-11e7-bb30-233be9be6a20');
 
-        await testSubjects.click('pagination-button-next');
+        await (await flyout.findByTestSubject('pagination-button-next')).click();
 
         const selectedIdForMissingIndexPattern7 = await testSubjects.getAttribute(
           'managementChangeIndexSelection-missing-index-pattern-7',

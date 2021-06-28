@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { IIndexPattern, IFieldType } from '../../index_patterns';
+import { IFieldType } from '../../index_patterns';
+import { IndexPatternBase } from '..';
 
 export type PhraseFilterMeta = FilterMeta & {
   params?: {
@@ -23,7 +24,7 @@ export type PhraseFilter = Filter & {
   script?: {
     script: {
       source?: any;
-      lang?: string;
+      lang?: estypes.ScriptLanguage;
       params: any;
     };
   };
@@ -60,7 +61,7 @@ export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue =>
 export const buildPhraseFilter = (
   field: IFieldType,
   value: any,
-  indexPattern: IIndexPattern
+  indexPattern: IndexPatternBase
 ): PhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 

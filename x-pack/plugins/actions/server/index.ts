@@ -47,7 +47,6 @@ export type {
   TeamsActionTypeId,
   TeamsActionParams,
 } from './builtin_action_types';
-
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export { asSavedObjectExecutionSource, asHttpRequestExecutionSource } from './lib';
@@ -64,12 +63,23 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       if (
         customHostSettings.find(
           (customHostSchema: CustomHostSettings) =>
-            !!customHostSchema.tls && !!customHostSchema.tls.rejectUnauthorized
+            !!customHostSchema.ssl && !!customHostSchema.ssl.rejectUnauthorized
         )
       ) {
         addDeprecation({
           message:
-            '`xpack.actions.customHostSettings[<index>].tls.rejectUnauthorized` is deprecated. Use `xpack.actions.customHostSettings[<index>].tls.verificationMode` instead, with the setting `verificationMode:full` eql to `rejectUnauthorized:true`, and `verificationMode:none` eql to `rejectUnauthorized:false`.',
+            `"xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" is deprecated.` +
+            `Use "xpack.actions.customHostSettings[<index>].ssl.verificationMode" instead, ` +
+            `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
+            `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "xpack.actions.customHostSettings[<index>].ssl.rejectUnauthorized" from your kibana configs.`,
+              `Use "xpack.actions.customHostSettings[<index>].ssl.verificationMode" ` +
+                `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
+                `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
+            ],
+          },
         });
       }
     },
@@ -77,7 +87,17 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       if (!!settings?.xpack?.actions?.rejectUnauthorized) {
         addDeprecation({
           message:
-            '`xpack.actions.rejectUnauthorized` is deprecated. Use `xpack.actions.verificationMode` instead, with the setting `verificationMode:full` eql to `rejectUnauthorized:true`, and `verificationMode:none` eql to `rejectUnauthorized:false`.',
+            `"xpack.actions.rejectUnauthorized" is deprecated. Use "xpack.actions.verificationMode" instead, ` +
+            `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
+            `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "xpack.actions.rejectUnauthorized" from your kibana configs.`,
+              `Use "xpack.actions.verificationMode" ` +
+                `with the setting "verificationMode:full" eql to "rejectUnauthorized:true", ` +
+                `and "verificationMode:none" eql to "rejectUnauthorized:false".`,
+            ],
+          },
         });
       }
     },
@@ -85,7 +105,17 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
       if (!!settings?.xpack?.actions?.proxyRejectUnauthorizedCertificates) {
         addDeprecation({
           message:
-            '`xpack.actions.proxyRejectUnauthorizedCertificates` is deprecated. Use `xpack.actions.proxyVerificationMode` instead, with the setting `proxyVerificationMode:full` eql to `rejectUnauthorized:true`, and `proxyVerificationMode:none` eql to `rejectUnauthorized:false`.',
+            `"xpack.actions.proxyRejectUnauthorizedCertificates" is deprecated. Use "xpack.actions.proxyVerificationMode" instead, ` +
+            `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
+            `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
+          correctiveActions: {
+            manualSteps: [
+              `Remove "xpack.actions.proxyRejectUnauthorizedCertificates" from your kibana configs.`,
+              `Use "xpack.actions.proxyVerificationMode" ` +
+                `with the setting "proxyVerificationMode:full" eql to "rejectUnauthorized:true",` +
+                `and "proxyVerificationMode:none" eql to "rejectUnauthorized:false".`,
+            ],
+          },
         });
       }
     },

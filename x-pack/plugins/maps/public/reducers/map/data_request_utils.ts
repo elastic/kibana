@@ -38,7 +38,7 @@ export function startDataRequest(
 export function updateSourceDataRequest(
   state: MapState,
   layerId: string,
-  newData?: object
+  newData: object
 ): MapState {
   const dataRequest = getDataRequest(state, layerId, SOURCE_DATA_REQUEST_ID);
   return dataRequest ? setDataRequest(state, layerId, { ...dataRequest, data: newData }) : state;

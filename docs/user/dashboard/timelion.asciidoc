@@ -4,7 +4,7 @@
 To use *Timelion*, you define a graph by chaining functions together, using the *Timelion*-specific syntax. 
 The syntax enables some features that classical point series charts don't offer, such as pulling data from different indices or data sources into one graph.
 
-deprecated::[7.0.0,"*Timelion* is still supported. The *Timelion app* is deprecated in 7.0, replaced by dashboard features. In the last 7.x minor version and later, the *Timelion app* is removed from {kib}. To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard. For information on how to migrate *Timelion app* worksheets, refer to the link:https://www.elastic.co/guide/en/kibana/7.10/release-notes-7.10.0.html#deprecation-v7.10.0[7.10.0 Release Notes]."]
+deprecated::[7.0.0,"*Timelion* is still supported. The *Timelion app* is deprecated in 7.0, replaced by dashboard features. In 7.16 and later, the *Timelion app* is removed from {kib}. To prepare for the removal of *Timelion app*, you must migrate *Timelion app* worksheets to a dashboard. For information on how to migrate *Timelion app* worksheets, refer to the link:https://www.elastic.co/guide/en/kibana/7.10/release-notes-7.10.0.html#deprecation-v7.10.0[7.10.0 Release Notes]."]
 
 [float]
 ==== Timelion expressions

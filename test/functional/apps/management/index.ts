@@ -13,12 +13,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('management', function () {
     before(async () => {
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.loadIfNeeded('makelogs');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
     });
 
     after(async () => {
-      await esArchiver.unload('makelogs');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
     });
 
     describe('', function () {

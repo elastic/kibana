@@ -9,7 +9,6 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import '../../common/mock/match_media';
-import { Router, mockHistory } from '../__mock__/router';
 import { CaseComponent, CaseComponentProps, CaseView } from '.';
 import {
   basicCase,
@@ -28,18 +27,25 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { CaseType, ConnectorTypes } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
 
+const mockId = basicCase.id;
+jest.mock('react-router-dom', () => ({
+  useParams: () => ({ detailName: mockId }),
+}));
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_action_tree/user_action_timestamp');
+jest.mock('../../common/lib/kibana');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const alertsHit = [
   {
@@ -160,14 +166,16 @@ describe('CaseView ', () => {
       pushCaseToExternalService,
     }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.servicenow',
+      iconClass: 'logoSecurity',
+    });
   });
 
   it('should render CaseComponent', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
+        <CaseComponent {...caseProps} />
       </TestProviders>
     );
 
@@ -223,9 +231,7 @@ describe('CaseView ', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseClosedProps} />
-        </Router>
+        <CaseComponent {...caseClosedProps} />
       </TestProviders>
     );
 
@@ -242,9 +248,7 @@ describe('CaseView ', () => {
   it('should update status', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
+        <CaseComponent {...caseProps} />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-view-status-dropdown"] button').first().simulate('click');
@@ -269,9 +273,7 @@ describe('CaseView ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
+        <CaseComponent {...caseProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -292,9 +294,7 @@ describe('CaseView ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
+        <CaseComponent {...caseProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -323,9 +323,7 @@ describe('CaseView ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
+        <CaseComponent {...caseProps} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -343,9 +341,7 @@ describe('CaseView ', () => {
   it('should update title', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
+        <CaseComponent {...caseProps} />
       </TestProviders>
     );
     const newTitle = 'The new title';
@@ -372,9 +368,7 @@ describe('CaseView ', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...{ ...caseProps, updateCase }} />
-        </Router>
+        <CaseComponent {...{ ...caseProps, updateCase }} />
       </TestProviders>
     );
 
@@ -397,34 +391,32 @@ describe('CaseView ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseView
-            {...{
-              allCasesNavigation: {
-                href: 'all-cases-href',
-                onClick: jest.fn(),
-              },
-              caseDetailsNavigation: {
-                href: 'case-details-href',
-                onClick: jest.fn(),
-              },
-              caseId: '1234',
-              configureCasesNavigation: {
-                href: 'configure-cases-href',
-                onClick: jest.fn(),
-              },
-              getCaseDetailHrefWithCommentId: jest.fn(),
-              onComponentInitialized: jest.fn(),
-              ruleDetailsNavigation: {
-                href: jest.fn(),
-                onClick: jest.fn(),
-              },
-              showAlertDetails: jest.fn(),
-              useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-              userCanCrud: true,
-            }}
-          />
-        </Router>
+        <CaseView
+          {...{
+            allCasesNavigation: {
+              href: 'all-cases-href',
+              onClick: jest.fn(),
+            },
+            caseDetailsNavigation: {
+              href: 'case-details-href',
+              onClick: jest.fn(),
+            },
+            caseId: '1234',
+            configureCasesNavigation: {
+              href: 'configure-cases-href',
+              onClick: jest.fn(),
+            },
+            getCaseDetailHrefWithCommentId: jest.fn(),
+            onComponentInitialized: jest.fn(),
+            ruleDetailsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
+            showAlertDetails: jest.fn(),
+            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+            userCanCrud: true,
+          }}
+        />
       </TestProviders>
     );
     await waitFor(() => {
@@ -439,34 +431,32 @@ describe('CaseView ', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseView
-            {...{
-              allCasesNavigation: {
-                href: 'all-cases-href',
-                onClick: jest.fn(),
-              },
-              caseDetailsNavigation: {
-                href: 'case-details-href',
-                onClick: jest.fn(),
-              },
-              caseId: '1234',
-              configureCasesNavigation: {
-                href: 'configure-cases-href',
-                onClick: jest.fn(),
-              },
-              getCaseDetailHrefWithCommentId: jest.fn(),
-              onComponentInitialized: jest.fn(),
-              ruleDetailsNavigation: {
-                href: jest.fn(),
-                onClick: jest.fn(),
-              },
-              showAlertDetails: jest.fn(),
-              useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-              userCanCrud: true,
-            }}
-          />
-        </Router>
+        <CaseView
+          {...{
+            allCasesNavigation: {
+              href: 'all-cases-href',
+              onClick: jest.fn(),
+            },
+            caseDetailsNavigation: {
+              href: 'case-details-href',
+              onClick: jest.fn(),
+            },
+            caseId: '1234',
+            configureCasesNavigation: {
+              href: 'configure-cases-href',
+              onClick: jest.fn(),
+            },
+            getCaseDetailHrefWithCommentId: jest.fn(),
+            onComponentInitialized: jest.fn(),
+            ruleDetailsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
+            showAlertDetails: jest.fn(),
+            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+            userCanCrud: true,
+          }}
+        />
       </TestProviders>
     );
     await waitFor(() => {
@@ -478,34 +468,32 @@ describe('CaseView ', () => {
     (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseView
-            {...{
-              allCasesNavigation: {
-                href: 'all-cases-href',
-                onClick: jest.fn(),
-              },
-              caseDetailsNavigation: {
-                href: 'case-details-href',
-                onClick: jest.fn(),
-              },
-              caseId: '1234',
-              configureCasesNavigation: {
-                href: 'configure-cases-href',
-                onClick: jest.fn(),
-              },
-              getCaseDetailHrefWithCommentId: jest.fn(),
-              onComponentInitialized: jest.fn(),
-              ruleDetailsNavigation: {
-                href: jest.fn(),
-                onClick: jest.fn(),
-              },
-              showAlertDetails: jest.fn(),
-              useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-              userCanCrud: true,
-            }}
-          />
-        </Router>
+        <CaseView
+          {...{
+            allCasesNavigation: {
+              href: 'all-cases-href',
+              onClick: jest.fn(),
+            },
+            caseDetailsNavigation: {
+              href: 'case-details-href',
+              onClick: jest.fn(),
+            },
+            caseId: '1234',
+            configureCasesNavigation: {
+              href: 'configure-cases-href',
+              onClick: jest.fn(),
+            },
+            getCaseDetailHrefWithCommentId: jest.fn(),
+            onComponentInitialized: jest.fn(),
+            ruleDetailsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
+            showAlertDetails: jest.fn(),
+            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+            userCanCrud: true,
+          }}
+        />
       </TestProviders>
     );
     await waitFor(() => {
@@ -517,34 +505,32 @@ describe('CaseView ', () => {
     (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseView
-            {...{
-              allCasesNavigation: {
-                href: 'all-cases-href',
-                onClick: jest.fn(),
-              },
-              caseDetailsNavigation: {
-                href: 'case-details-href',
-                onClick: jest.fn(),
-              },
-              caseId: '1234',
-              configureCasesNavigation: {
-                href: 'configure-cases-href',
-                onClick: jest.fn(),
-              },
-              getCaseDetailHrefWithCommentId: jest.fn(),
-              onComponentInitialized: jest.fn(),
-              ruleDetailsNavigation: {
-                href: jest.fn(),
-                onClick: jest.fn(),
-              },
-              showAlertDetails: jest.fn(),
-              useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-              userCanCrud: true,
-            }}
-          />
-        </Router>
+        <CaseView
+          {...{
+            allCasesNavigation: {
+              href: 'all-cases-href',
+              onClick: jest.fn(),
+            },
+            caseDetailsNavigation: {
+              href: 'case-details-href',
+              onClick: jest.fn(),
+            },
+            caseId: '1234',
+            configureCasesNavigation: {
+              href: 'configure-cases-href',
+              onClick: jest.fn(),
+            },
+            getCaseDetailHrefWithCommentId: jest.fn(),
+            onComponentInitialized: jest.fn(),
+            ruleDetailsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
+            showAlertDetails: jest.fn(),
+            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+            userCanCrud: true,
+          }}
+        />
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
@@ -562,15 +548,13 @@ describe('CaseView ', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent
-            {...{
-              ...caseProps,
-              updateCase,
-              caseData: { ...caseProps.caseData, connectorId: 'not-exist' },
-            }}
-          />
-        </Router>
+        <CaseComponent
+          {...{
+            ...caseProps,
+            updateCase,
+            caseData: { ...caseProps.caseData, connectorId: 'not-exist' },
+          }}
+        />
       </TestProviders>
     );
     await waitFor(() => {
@@ -588,20 +572,18 @@ describe('CaseView ', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent
-            {...caseProps}
-            caseData={{
-              ...caseProps.caseData,
-              connector: {
-                id: 'servicenow-1',
-                name: 'SN 1',
-                type: ConnectorTypes.serviceNowITSM,
-                fields: null,
-              },
-            }}
-          />
-        </Router>
+        <CaseComponent
+          {...caseProps}
+          caseData={{
+            ...caseProps.caseData,
+            connector: {
+              id: 'servicenow-1',
+              name: 'SN 1',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+          }}
+        />
       </TestProviders>
     );
     const connectorName = wrapper
@@ -626,37 +608,40 @@ describe('CaseView ', () => {
       ).toBe(connectorName);
     });
   });
+
   it('should update connector', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent
-            {...caseProps}
-            caseData={{
-              ...caseProps.caseData,
-              connector: {
-                id: 'servicenow-1',
-                name: 'SN 1',
-                type: ConnectorTypes.serviceNowITSM,
-                fields: null,
-              },
-            }}
-          />
-        </Router>
+        <CaseComponent
+          {...caseProps}
+          caseData={{
+            ...caseProps.caseData,
+            connector: {
+              id: 'servicenow-1',
+              name: 'SN 1',
+              type: ConnectorTypes.serviceNowITSM,
+              fields: null,
+            },
+          }}
+        />
       </TestProviders>
     );
 
     wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-
     wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
 
-    await waitFor(() => wrapper.update());
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
+    });
+
     wrapper.find(`button[data-test-subj="edit-connectors-submit"]`).first().simulate('click');
 
     await waitFor(() => {
-      const updateObject = updateCaseProperty.mock.calls[0][0];
+      wrapper.update();
       expect(updateCaseProperty).toHaveBeenCalledTimes(1);
+      const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('connector');
       expect(updateObject.updateValue).toEqual({
         id: 'resilient-2',
@@ -674,9 +659,7 @@ describe('CaseView ', () => {
     const onComponentInitialized = jest.fn();
     mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} onComponentInitialized={onComponentInitialized} />
-        </Router>
+        <CaseComponent {...caseProps} onComponentInitialized={onComponentInitialized} />
       </TestProviders>
     );
 
@@ -698,9 +681,7 @@ describe('CaseView ', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} useFetchAlertData={useFetchAlertData} />
-        </Router>
+        <CaseComponent {...caseProps} useFetchAlertData={useFetchAlertData} />
       </TestProviders>
     );
 
@@ -716,9 +697,7 @@ describe('CaseView ', () => {
     const showAlertDetails = jest.fn();
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} showAlertDetails={showAlertDetails} />
-        </Router>
+        <CaseComponent {...caseProps} showAlertDetails={showAlertDetails} />
       </TestProviders>
     );
 
@@ -734,9 +713,7 @@ describe('CaseView ', () => {
   it('should show the rule name', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
+        <CaseComponent {...caseProps} />
       </TestProviders>
     );
 
@@ -755,9 +732,7 @@ describe('CaseView ', () => {
   it('should update settings', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...caseProps} />
-        </Router>
+        <CaseComponent {...caseProps} />
       </TestProviders>
     );
 
@@ -779,9 +754,7 @@ describe('CaseView ', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <CaseComponent {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
-        </Router>
+        <CaseComponent {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
       </TestProviders>
     );
 
@@ -801,9 +774,7 @@ describe('CaseView ', () => {
       useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));
       const wrapper = mount(
         <TestProviders>
-          <Router history={mockHistory}>
-            <CaseComponent {...caseProps} />
-          </Router>
+          <CaseComponent {...caseProps} />
         </TestProviders>
       );
 
@@ -817,9 +788,7 @@ describe('CaseView ', () => {
       useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: true }));
       const wrapper = mount(
         <TestProviders>
-          <Router history={mockHistory}>
-            <CaseComponent {...caseProps} />
-          </Router>
+          <CaseComponent {...caseProps} />
         </TestProviders>
       );
 
@@ -834,12 +803,10 @@ describe('CaseView ', () => {
     it('it does not allow the user to update the status', async () => {
       const wrapper = mount(
         <TestProviders>
-          <Router history={mockHistory}>
-            <CaseComponent
-              {...caseProps}
-              caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-            />
-          </Router>
+          <CaseComponent
+            {...caseProps}
+            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
+          />
         </TestProviders>
       );
 
@@ -861,12 +828,10 @@ describe('CaseView ', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <Router history={mockHistory}>
-            <CaseComponent
-              {...caseProps}
-              caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-            />
-          </Router>
+          <CaseComponent
+            {...caseProps}
+            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
+          />
         </TestProviders>
       );
 
@@ -883,12 +848,10 @@ describe('CaseView ', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <Router history={mockHistory}>
-            <CaseComponent
-              {...caseProps}
-              caseData={{ ...caseProps.caseData, type: CaseType.collection }}
-            />
-          </Router>
+          <CaseComponent
+            {...caseProps}
+            caseData={{ ...caseProps.caseData, type: CaseType.collection }}
+          />
         </TestProviders>
       );
 

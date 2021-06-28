@@ -8,10 +8,20 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
-import { palettes, ColorPalette } from '../../../common/lib/palettes';
-import { ComponentStrings } from '../../../i18n';
+import { i18n } from '@kbn/i18n';
 
-const { PalettePicker: strings } = ComponentStrings;
+import { palettes, ColorPalette } from '../../../common/lib/palettes';
+
+const strings = {
+  getEmptyPaletteLabel: () =>
+    i18n.translate('xpack.canvas.palettePicker.emptyPaletteLabel', {
+      defaultMessage: 'None',
+    }),
+  getNoPaletteFoundErrorTitle: () =>
+    i18n.translate('xpack.canvas.palettePicker.noPaletteFoundErrorTitle', {
+      defaultMessage: 'Color palette not found',
+    }),
+};
 
 interface RequiredProps {
   id?: string;

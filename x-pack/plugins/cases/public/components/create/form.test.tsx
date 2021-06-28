@@ -15,11 +15,18 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/mock';
 import { schema, FormProps } from './schema';
 import { CreateCaseForm } from './form';
+import { OwnerProvider } from '../owner_context';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_configure');
+
 const useGetTagsMock = useGetTags as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
+const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -41,13 +48,18 @@ describe('CreateCaseForm', () => {
 
     globalForm = form;
 
-    return <Form form={form}>{children}</Form>;
+    return (
+      <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>
+        <Form form={form}>{children}</Form>
+      </OwnerProvider>
+    );
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
     useGetTagsMock.mockReturnValue({ tags: ['test'] });
     useConnectorsMock.mockReturnValue({ loading: false, connectors: connectorsMock });
+    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
   it('it renders with steps', async () => {

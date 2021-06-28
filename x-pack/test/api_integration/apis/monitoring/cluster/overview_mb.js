@@ -17,7 +17,7 @@ export default function ({ getService }) {
     this.tags(['skipCloud']);
 
     describe('with trial license clusters', () => {
-      const archive = 'monitoring/singlecluster_green_gold_mb';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold_mb';
       const timeRange = {
         min: '2017-08-23T21:29:35Z',
         max: '2017-08-23T21:47:25Z',

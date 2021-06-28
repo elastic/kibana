@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { History, Location } from 'history';
+import { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { SpanFlyout } from './SpanFlyout';
@@ -15,20 +15,12 @@ import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
-  location: Location;
-  toggleFlyout: ({
-    history,
-    location,
-  }: {
-    history: History;
-    location: Location;
-  }) => void;
+  toggleFlyout: ({ history }: { history: History }) => void;
 }
 
 export function WaterfallFlyout({
   waterfallItemId,
   waterfall,
-  location,
   toggleFlyout,
 }: Props) {
   const history = useHistory();
@@ -52,14 +44,14 @@ export function WaterfallFlyout({
           totalDuration={waterfall.duration}
           span={currentItem.doc}
           parentTransaction={parentTransaction}
-          onClose={() => toggleFlyout({ history, location })}
+          onClose={() => toggleFlyout({ history })}
         />
       );
     case 'transaction':
       return (
         <TransactionFlyout
           transaction={currentItem.doc}
-          onClose={() => toggleFlyout({ history, location })}
+          onClose={() => toggleFlyout({ history })}
           rootTransactionDuration={
             waterfall.rootTransaction?.transaction.duration.us
           }

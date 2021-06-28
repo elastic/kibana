@@ -10,12 +10,13 @@ import type { ElasticsearchClient } from 'kibana/server';
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
-  TemplateRef,
+  IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
+import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
 
 interface Properties {
   [key: string]: any;
@@ -41,6 +42,8 @@ const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
 
 const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
 const QUERY_DEFAULT_FIELD_LIMIT = 1024;
+
+const META_PROP_KEYS = ['metric_type', 'unit'];
 
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
@@ -84,6 +87,15 @@ export function getTemplate({
   if (pipelineName) {
     template.template.settings.index.default_pipeline = pipelineName;
   }
+  if (template.template.settings.index.final_pipeline) {
+    throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
+  }
+
+  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
+    // Add fleet global assets
+    template.composed_of = [...(template.composed_of || []), FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME];
+  }
+
   return template;
 }
 
@@ -138,6 +150,12 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
             fieldProps.fields = generateMultiFields(field.multi_fields);
           }
           break;
+        case 'constant_keyword':
+          fieldProps.type = field.type;
+          if (field.value) {
+            fieldProps.value = field.value;
+          }
+          break;
         case 'object':
           fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
           break;
@@ -162,6 +180,22 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         default:
           fieldProps.type = type;
       }
+
+      const fieldHasMetaProps = META_PROP_KEYS.some((key) => key in field);
+      if (fieldHasMetaProps) {
+        switch (type) {
+          case 'group':
+          case 'group-nested':
+            break;
+          default: {
+            const meta = {};
+            if ('metric_type' in field) Reflect.set(meta, 'metric_type', field.metric_type);
+            if ('unit' in field) Reflect.set(meta, 'unit', field.unit);
+            fieldProps.meta = meta;
+          }
+        }
+      }
+
       props[field.name] = fieldProps;
     });
   }
@@ -432,7 +466,7 @@ function getBaseTemplate(
 
 export const updateCurrentWriteIndices = async (
   esClient: ElasticsearchClient,
-  templates: TemplateRef[]
+  templates: IndexTemplateEntry[]
 ): Promise<void> => {
   if (!templates.length) return;
 
@@ -447,7 +481,7 @@ function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is Cur
 
 const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
-  templates: TemplateRef[]
+  templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
   const dataStreamPromises = templates.map((template) => {
     return getDataStreams(esClient, template);
@@ -458,7 +492,7 @@ const queryDataStreamsFromTemplates = async (
 
 const getDataStreams = async (
   esClient: ElasticsearchClient,
-  template: TemplateRef
+  template: IndexTemplateEntry
 ): Promise<CurrentDataStream[] | undefined> => {
   const { templateName, indexTemplate } = template;
   const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
@@ -503,7 +537,6 @@ const updateExistingDataStream = async ({
     await esClient.indices.putMapping({
       index: dataStreamName,
       body: mappings,
-      // @ts-expect-error @elastic/elasticsearch doesn't declare it on PutMappingRequest
       write_index_only: true,
     });
     // if update fails, rollover data stream
@@ -525,7 +558,7 @@ const updateExistingDataStream = async ({
   try {
     await esClient.indices.putSettings({
       index: dataStreamName,
-      body: { index: { default_pipeline: settings.index.default_pipeline } },
+      body: { settings: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
     throw new Error(`could not update index template settings for ${dataStreamName}`);

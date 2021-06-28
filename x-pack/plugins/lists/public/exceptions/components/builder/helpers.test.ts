@@ -1697,9 +1697,9 @@ describe('Exception builder helpers', () => {
         namespaceType: 'single',
         ruleName: 'rule name',
       });
-      const exceptions = filterExceptionItems([{ ...rest, meta }]);
+      const exceptions = filterExceptionItems([{ ...rest, entries: [getEntryMatchMock()], meta }]);
 
-      expect(exceptions).toEqual([{ ...rest, entries: [], meta: undefined }]);
+      expect(exceptions).toEqual([{ ...rest, entries: [getEntryMatchMock()], meta: undefined }]);
     });
   });
 

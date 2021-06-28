@@ -5,33 +5,87 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
 import { RumOverview } from '../RumDashboard';
 import { CsmSharedContextProvider } from './CsmSharedContext';
-import { MainFilters } from './Panels/MainFilters';
+import { WebApplicationSelect } from './Panels/WebApplicationSelect';
 import { DatePicker } from '../../shared/DatePicker';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { EnvironmentFilter } from '../../shared/EnvironmentFilter';
+import { UserPercentile } from './UserPercentile';
+import { useBreakPoints } from '../../../hooks/use_break_points';
 
 export const UX_LABEL = i18n.translate('xpack.apm.ux.title', {
   defaultMessage: 'User Experience',
 });
 
 export function RumHome() {
+  const { observability } = useApmPluginContext();
+  const PageTemplateComponent = observability.navigation.PageTemplate;
+
+  const { isSmall, isXXL } = useBreakPoints();
+
+  const envStyle = isSmall ? {} : { maxWidth: 200 };
+
   return (
     <CsmSharedContextProvider>
-      <EuiFlexGroup wrap justifyContent={'flexEnd'} responsive={true}>
+      <PageTemplateComponent
+        pageHeader={
+          isXXL
+            ? {
+                pageTitle: i18n.translate('xpack.apm.ux.overview', {
+                  defaultMessage: 'Overview',
+                }),
+                rightSideItems: [
+                  <DatePicker />,
+                  <div style={envStyle}>
+                    <EnvironmentFilter />
+                  </div>,
+                  <UserPercentile />,
+                  <WebApplicationSelect />,
+                ],
+              }
+            : { children: <PageHeader /> }
+        }
+      >
+        <RumOverview />
+      </PageTemplateComponent>
+    </CsmSharedContextProvider>
+  );
+}
+
+function PageHeader() {
+  const { isSmall } = useBreakPoints();
+
+  const envStyle = isSmall ? {} : { maxWidth: 200 };
+
+  return (
+    <div style={{ width: '100%' }}>
+      <EuiFlexGroup wrap>
         <EuiFlexItem>
           <EuiTitle>
-            <h1 className="eui-textNoWrap">{UX_LABEL}</h1>
+            <h1>{UX_LABEL}</h1>
           </EuiTitle>
         </EuiFlexItem>
-        <MainFilters />
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <DatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <RumOverview />
-    </CsmSharedContextProvider>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={false}>
+          <WebApplicationSelect />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <UserPercentile />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div style={envStyle}>
+            <EnvironmentFilter />
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 }

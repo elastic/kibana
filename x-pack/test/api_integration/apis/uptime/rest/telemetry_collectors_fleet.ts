@@ -17,7 +17,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('telemetry collectors fleet', () => {
     before('generating data', async () => {
-      await getService('esArchiver').load('uptime/blank_data_stream');
+      await getService('esArchiver').load(
+        'x-pack/test/functional/es_archives/uptime/blank_data_stream'
+      );
 
       const observer = {
         geo: {
@@ -123,7 +125,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after('unload heartbeat index', () => {
-      getService('esArchiver').unload('uptime/blank_data_stream');
+      getService('esArchiver').unload(
+        'x-pack/test/functional/es_archives/uptime/blank_data_stream'
+      );
       /**
        * Data streams aren't included in the javascript elasticsearch client in kibana yet so we
        * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which

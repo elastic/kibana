@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Query,
-  RefreshInterval,
-  TimeRange,
-} from '../../../../../src/plugins/data/common/query';
+import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
 import { ML_PAGES } from '../constants/ml_url_generator';
 import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
@@ -42,24 +38,6 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
   globalState?: MlCommonGlobalState;
   appState?: MlCommonAppState;
   [key: string]: any;
-}
-
-export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
-  searchString?: Query['query'];
-  searchQuery?: Query['query'];
-  searchQueryLanguage?: SearchQueryLanguage;
-  visibleFieldTypes?: string[];
-  visibleFieldNames?: string[];
-  samplerShardSize?: number;
-  showDistributions?: boolean;
-  showAllFields?: boolean;
-  showEmptyFields?: boolean;
-}
-
-export interface DataVisualizerFileBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
-  visibleFieldTypes?: string[];
-  visibleFieldNames?: string[];
-  showDistributions?: boolean;
 }
 
 export type MlGenericUrlState = MLPageState<

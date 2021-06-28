@@ -16,6 +16,8 @@ import { stripTrailingSlash } from '../../common/strip_slashes';
 import { InitialAppData } from '../../common/types';
 import { ConfigType } from '../index';
 
+import { entSearchHttpAgent } from './enterprise_search_http_agent';
+
 interface Params {
   request: KibanaRequest;
   config: ConfigType;
@@ -54,10 +56,13 @@ export const callEnterpriseSearchConfigAPI = async ({
 
   try {
     const enterpriseSearchUrl = encodeURI(`${config.host}${ENDPOINT}`);
-    const response = await fetch(enterpriseSearchUrl, {
+    const options = {
       headers: { Authorization: request.headers.authorization as string },
       signal: controller.signal,
-    });
+      agent: entSearchHttpAgent.getHttpAgent(),
+    };
+
+    const response = await fetch(enterpriseSearchUrl, options);
     const data = await response.json();
 
     warnMismatchedVersions(data?.version?.number, log);
@@ -70,7 +75,6 @@ export const callEnterpriseSearchConfigAPI = async ({
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,
       ilmEnabled: !!data?.settings?.ilm_enabled,
-      isFederatedAuth: !!data?.settings?.is_federated_auth, // i.e., not standard auth
       configuredLimits: {
         appSearch: {
           engine: {

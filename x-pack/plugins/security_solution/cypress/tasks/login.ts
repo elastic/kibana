@@ -67,6 +67,32 @@ export const getUrlWithRoute = (role: ROLES, route: string) => {
   return theUrl;
 };
 
+interface User {
+  username: string;
+  password: string;
+}
+
+/**
+ * Builds a URL with basic auth using the passed in user.
+ *
+ * @param user the user information to build the basic auth with
+ * @param route string route to visit
+ */
+export const constructUrlWithUser = (user: User, route: string) => {
+  const hostname = Cypress.env('hostname');
+  const username = user.username;
+  const password = user.password;
+  const protocol = Cypress.env('protocol');
+  const port = Cypress.env('configport');
+
+  const path = `${route.startsWith('/') ? '' : '/'}${route}`;
+  const strUrl = `${protocol}://${username}:${password}@${hostname}:${port}${path}`;
+  const builtUrl = new URL(strUrl);
+
+  cy.log(`origin: ${builtUrl.href}`);
+  return builtUrl.href;
+};
+
 export const getCurlScriptEnvVars = () => ({
   ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
   ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
@@ -99,6 +125,23 @@ export const deleteRoleAndUser = (role: ROLES) => {
   // delete the role
   cy.exec(`bash ${detectionsUserDeleteScriptPath}`, {
     env,
+  });
+};
+
+export const loginWithUser = (user: User) => {
+  cy.request({
+    body: {
+      providerType: 'basic',
+      providerName: 'basic',
+      currentURL: '/',
+      params: {
+        username: user.username,
+        password: user.password,
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    method: 'POST',
+    url: constructUrlWithUser(user, LOGIN_API_ENDPOINT),
   });
 };
 
@@ -215,6 +258,28 @@ const loginViaConfig = () => {
 };
 
 /**
+ * Get the configured auth details that were used to spawn cypress
+ *
+ * @returns the default Elasticsearch username and password for this environment
+ */
+export const getEnvAuth = (): User => {
+  if (credentialsProvidedByEnvironment()) {
+    return {
+      username: Cypress.env(ELASTICSEARCH_USERNAME),
+      password: Cypress.env(ELASTICSEARCH_PASSWORD),
+    };
+  } else {
+    let user: User = { username: '', password: '' };
+    cy.readFile(KIBANA_DEV_YML_PATH).then((devYml) => {
+      const config = yaml.safeLoad(devYml);
+      user = { username: config.elasticsearch.username, password: config.elasticsearch.password };
+    });
+
+    return user;
+  }
+};
+
+/**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
@@ -229,6 +294,12 @@ export const loginAndWaitForPage = (url: string, role?: ROLES) => {
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
   cy.visit(role ? getUrlWithRoute(role, url) : url);
+  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const loginWithUserAndWaitForPageWithoutDateRange = (url: string, user: User) => {
+  loginWithUser(user);
+  cy.visit(constructUrlWithUser(user, url));
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 

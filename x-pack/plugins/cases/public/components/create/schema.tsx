@@ -19,7 +19,7 @@ export const schemaTags = {
   labelAppend: OptionalFieldLabel,
 };
 
-export type FormProps = Omit<CasePostRequest, 'connector' | 'settings'> & {
+export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'owner'> & {
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;
@@ -49,7 +49,9 @@ export const schema: FormSchema<FormProps> = {
     label: i18n.CONNECTORS,
     defaultValue: 'none',
   },
-  fields: {},
+  fields: {
+    defaultValue: null,
+  },
   syncAlerts: {
     helpText: i18n.SYNC_ALERTS_HELP,
     type: FIELD_TYPES.TOGGLE,

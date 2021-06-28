@@ -13,7 +13,7 @@ import { Project } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 
 import { writePluginDocs } from '../mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
+import { ApiDeclaration, ApiStats, PluginApi, Reference, TextWithLinks, TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { groupPluginApi } from '../utils';
 import { getPluginApiMap } from '../get_plugin_api_map';
@@ -99,11 +99,23 @@ beforeAll(() => {
   const plugins: KibanaPlatformPlugin[] = [pluginA, pluginB];
 
   const { pluginApiMap } = getPluginApiMap(project, plugins, log, { collectReferences: false });
+  const pluginStats: ApiStats = {
+    missingComments: [],
+    isAnyType: [],
+    noReferences: [],
+    apiCount: 3,
+    missingExports: 0,
+  };
 
   doc = pluginApiMap.pluginA;
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
-  writePluginDocs(mdxOutputFolder, doc, log);
-  writePluginDocs(mdxOutputFolder, pluginApiMap.pluginB, log);
+  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats, log });
+  writePluginDocs(mdxOutputFolder, {
+    doc: pluginApiMap.pluginB,
+    plugin: pluginB,
+    pluginStats,
+    log,
+  });
 });
 
 it('Setup type is extracted', () => {
