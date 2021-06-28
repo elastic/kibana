@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
+export * from './overview_page_actions';
 export * from './overview_page_footer';
-export * from './overview_page_header';

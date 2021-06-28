@@ -20,7 +20,6 @@ describe('AppLogic', () => {
   const DEFAULT_VALUES = {
     account: {},
     hasInitialized: false,
-    isFederatedAuth: true,
     isOrganization: false,
     searchOAuth: {},
     organization: {},
@@ -37,7 +36,6 @@ describe('AppLogic', () => {
       viewedOnboardingPage: true,
     },
     hasInitialized: true,
-    isFederatedAuth: false,
     isOrganization: false,
     searchOAuth: {
       clientId: 'someUID',
@@ -66,7 +64,6 @@ describe('AppLogic', () => {
       expect(AppLogic.values).toEqual({
         ...DEFAULT_VALUES,
         hasInitialized: true,
-        isFederatedAuth: false,
       });
     });
   });

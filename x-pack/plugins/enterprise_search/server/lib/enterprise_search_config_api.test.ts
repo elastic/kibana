@@ -140,7 +140,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       publicUrl: undefined,
       readOnlyMode: false,
       ilmEnabled: false,
-      isFederatedAuth: false,
       searchOAuth: {
         clientId: undefined,
         redirectUrl: undefined,

@@ -282,13 +282,16 @@ describe('Task Runner', () => {
               "type_id": "test",
             },
           ],
+          "task": Object {
+            "schedule_delay": 0,
+            "scheduled": "1970-01-01T00:00:00.000Z",
+          },
         },
         "message": "alert execution start: \\"1\\"",
         "rule": Object {
           "category": "test",
           "id": "1",
           "license": "basic",
-          "namespace": undefined,
           "ruleset": "alerts",
         },
       }
@@ -352,6 +355,14 @@ describe('Task Runner', () => {
           "params": Object {
             "foo": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -386,6 +397,10 @@ describe('Task Runner', () => {
         kind: 'alert',
       },
       kibana: {
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
+        },
         saved_objects: [
           {
             id: '1',
@@ -401,7 +416,6 @@ describe('Task Runner', () => {
         category: 'test',
         id: '1',
         license: 'basic',
-        namespace: undefined,
         ruleset: 'alerts',
       },
     });
@@ -510,6 +524,10 @@ describe('Task Runner', () => {
         alerting: {
           status: 'active',
         },
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
+        },
         saved_objects: [
           {
             id: '1',
@@ -526,7 +544,6 @@ describe('Task Runner', () => {
         id: '1',
         license: 'basic',
         name: 'alert-name',
-        namespace: undefined,
         ruleset: 'alerts',
       },
     });
@@ -595,6 +612,10 @@ describe('Task Runner', () => {
         kind: 'alert',
       },
       kibana: {
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
+        },
         saved_objects: [
           {
             id: '1',
@@ -610,7 +631,6 @@ describe('Task Runner', () => {
         category: 'test',
         id: '1',
         license: 'basic',
-        namespace: undefined,
         ruleset: 'alerts',
       },
     });
@@ -692,6 +712,10 @@ describe('Task Runner', () => {
         alerting: {
           status: 'active',
         },
+        task: {
+          schedule_delay: 0,
+          scheduled: '1970-01-01T00:00:00.000Z',
+        },
         saved_objects: [
           {
             id: '1',
@@ -708,7 +732,6 @@ describe('Task Runner', () => {
         id: '1',
         license: 'basic',
         name: 'alert-name',
-        namespace: undefined,
         ruleset: 'alerts',
       },
     });
@@ -846,13 +869,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -889,7 +915,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -918,6 +943,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -925,7 +954,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1098,6 +1126,14 @@ describe('Task Runner', () => {
           "params": Object {
             "foo": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -1135,13 +1171,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1178,7 +1217,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1215,7 +1253,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1257,7 +1294,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1286,6 +1322,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -1293,7 +1333,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1417,13 +1456,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1460,7 +1502,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1497,7 +1538,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1539,7 +1579,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1581,7 +1620,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1610,6 +1648,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -1617,7 +1659,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1634,6 +1675,14 @@ describe('Task Runner', () => {
           "params": Object {
             "isResolved": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -1826,6 +1875,14 @@ describe('Task Runner', () => {
           "params": Object {
             "isResolved": true,
           },
+          "relatedSavedObjects": Array [
+            Object {
+              "id": "1",
+              "namespace": undefined,
+              "type": "alert",
+              "typeId": "test",
+            },
+          ],
           "source": Object {
             "source": Object {
               "id": "1",
@@ -1936,13 +1993,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -1980,7 +2040,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2017,7 +2076,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2046,6 +2104,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -2053,7 +2115,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2262,13 +2323,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2301,13 +2365,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution failure: test:1: 'alert-name'",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2365,13 +2432,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2404,13 +2474,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "test:1: execution failed",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2476,13 +2549,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2515,13 +2591,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "test:1: execution failed",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2587,13 +2666,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2626,13 +2708,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "test:1: execution failed",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2697,13 +2782,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2736,13 +2824,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "test:1: execution failed",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -2975,13 +3066,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3018,7 +3112,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3055,7 +3148,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3092,7 +3184,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3129,7 +3220,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3158,6 +3248,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -3165,7 +3259,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3259,13 +3352,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3302,7 +3398,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3339,7 +3434,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3368,6 +3462,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -3375,7 +3473,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3461,13 +3558,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3502,7 +3602,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3537,7 +3636,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3566,6 +3664,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -3573,7 +3675,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3654,13 +3755,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3697,7 +3801,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3734,7 +3837,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3763,6 +3865,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -3770,7 +3876,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3853,13 +3958,16 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert execution start: \\"1\\"",
             "rule": Object {
               "category": "test",
               "id": "1",
               "license": "basic",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3893,7 +4001,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3927,7 +4034,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },
@@ -3956,6 +4062,10 @@ describe('Task Runner', () => {
                   "type_id": "test",
                 },
               ],
+              "task": Object {
+                "schedule_delay": 0,
+                "scheduled": "1970-01-01T00:00:00.000Z",
+              },
             },
             "message": "alert executed: test:1: 'alert-name'",
             "rule": Object {
@@ -3963,7 +4073,6 @@ describe('Task Runner', () => {
               "id": "1",
               "license": "basic",
               "name": "alert-name",
-              "namespace": undefined,
               "ruleset": "alerts",
             },
           },

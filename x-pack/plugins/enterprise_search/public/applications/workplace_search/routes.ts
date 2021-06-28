@@ -51,9 +51,8 @@ export const PERSONAL_PATH = '/p';
 export const OAUTH_AUTHORIZE_PATH = `${PERSONAL_PATH}/oauth/authorize`;
 export const SEARCH_AUTHORIZE_PATH = `${PERSONAL_PATH}/authorize_search`;
 
-export const ROLE_MAPPINGS_PATH = '/role_mappings';
+export const USERS_AND_ROLES_PATH = '/users_and_roles';
 
-export const USERS_PATH = '/users';
 export const SECURITY_PATH = '/security';
 
 export const GROUPS_PATH = '/groups';
