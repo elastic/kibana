@@ -80,8 +80,7 @@ export function Discover({
     return collapseIcon && !collapseIcon.current;
   };
   const toggleHideChart = useCallback(() => {
-    const newState = { ...state, hideChart: !state.hideChart };
-    opts.stateContainer.setAppState(newState);
+    opts.stateContainer.setAppState({ hideChart: !state.hideChart });
   }, [state, opts]);
   const hideChart = useMemo(() => state.hideChart, [state]);
   const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;

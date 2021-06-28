@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
+  const filterBar = getService('filterBar');
   const security = getService('security');
   const PageObjects = getPageObjects(['settings', 'common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
@@ -74,11 +75,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const fromTime = 'Jan 01, 2010 @ 00:00:00.000';
       const toTime = 'Mar 21, 2019 @ 00:00:00.000';
       await prepareTest(fromTime, toTime);
+      await filterBar.addFilter('@tags', 'is', 'info');
+
       let canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
       await testSubjects.click('discoverChartToggle');
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
+      const url = await browser.getCurrentUrl();
+      expect(url).to.contain('hideChart:!t');
+      // check for URL to contain filter, used to catch a bug (#103100)
+      expect(url).to.contain('%27@tags%27:info');
       // histogram is hidden, when reloading the page it should remain hidden
       await browser.refresh();
       canvasExists = await elasticChart.canvasExists();
