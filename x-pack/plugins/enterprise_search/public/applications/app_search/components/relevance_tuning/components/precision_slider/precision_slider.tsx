@@ -71,7 +71,7 @@ export const PrecisionSlider: React.FC = () => {
         </EuiLink>
       </EuiText>
       <EuiSpacer />
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" aria-hidden>
         <EuiFlexItem grow={false}>
           <strong>
             {i18n.translate(
@@ -95,6 +95,10 @@ export const PrecisionSlider: React.FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiRange
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.precisionSlider.ariaLabel',
+          { defaultMessage: 'Recall vs. precision' }
+        )}
         data-test-subj="PrecisionRange"
         value={precision}
         onChange={(e) => {
