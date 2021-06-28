@@ -28,6 +28,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/ti
 import { TimelineTabs } from '../../../../common/types/timeline';
 import {
   filterDuplicateEnrichments,
+  getEnrichmentFields,
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from './cti_details/helpers';
@@ -105,11 +106,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     setSelectedTabId,
   ]);
 
-  const {
-    loading: enrichmentsLoading,
-    result: enrichmentsResponse,
-  } = useInvestigationTimeEnrichment();
-
+  const eventFields = useMemo(() => getEnrichmentFields(data ?? []), [data]);
   const existingEnrichments = useMemo(
     () =>
       isAlert
@@ -119,7 +116,10 @@ const EventDetailsComponent: React.FC<Props> = ({
         : [],
     [data, isAlert]
   );
-
+  const {
+    loading: enrichmentsLoading,
+    result: enrichmentsResponse,
+  } = useInvestigationTimeEnrichment(eventFields);
   const allEnrichments = useMemo(() => {
     if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;

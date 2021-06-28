@@ -7,7 +7,11 @@
 
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
 import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
-import { filterDuplicateEnrichments, parseExistingEnrichments } from './helpers';
+import {
+  filterDuplicateEnrichments,
+  getEnrichmentFields,
+  parseExistingEnrichments,
+} from './helpers';
 
 describe('parseExistingEnrichments', () => {
   it('returns an empty array if data is empty', () => {
@@ -441,5 +445,33 @@ describe('filterDuplicateEnrichments', () => {
       }),
     ];
     expect(filterDuplicateEnrichments(enrichments)).toEqual(enrichments);
+  });
+});
+
+describe('getEnrichmentFields', () => {
+  it('returns an empty object if items is empty', () => {
+    expect(getEnrichmentFields([])).toEqual({});
+  });
+
+  it('returns an object of event fields and values', () => {
+    const data = [
+      {
+        category: 'source',
+        field: 'source.ip',
+        isObjectArray: false,
+        originalValue: ['192.168.1.1'],
+        values: ['192.168.1.1'],
+      },
+      {
+        category: 'event',
+        field: 'event.reference',
+        isObjectArray: false,
+        originalValue: ['https://urlhaus.abuse.ch/url/1055419/'],
+        values: ['https://urlhaus.abuse.ch/url/1055419/'],
+      },
+    ];
+    expect(getEnrichmentFields(data)).toEqual({
+      'source.ip': '192.168.1.1',
+    });
   });
 });

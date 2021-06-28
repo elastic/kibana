@@ -8,15 +8,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
-import { useEventEnrichment } from '.';
 import { inputsActions } from '../../../store/actions';
+import * as i18n from './translations';
+import { useEventEnrichment } from '.';
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
 
-export const useInvestigationTimeEnrichment = () => {
+export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   const { addError } = useAppToasts();
   const kibana = useKibana();
   const dispatch = useDispatch();
@@ -48,7 +50,7 @@ export const useInvestigationTimeEnrichment = () => {
 
   useEffect(() => {
     if (error) {
-      addError(error, { title: 'TODO' });
+      addError(error, { title: i18n.INVESTIGATION_ENRICHMENT_REQUEST_ERROR });
     }
   }, [addError, error]);
 
@@ -57,12 +59,10 @@ export const useInvestigationTimeEnrichment = () => {
       data: kibana.services.data,
       timerange: { from, to, interval: '' },
       defaultIndex: ['filebeat-*'], // TODO do we apply the current sources here?
-      eventFields: {
-        'source.ip': '192.168.1.19', // TODO get event values
-      },
+      eventFields,
       filterQuery: '', // TODO do we apply the current filters here?
     });
-  }, [from, start, kibana.services.data, to]);
+  }, [from, start, kibana.services.data, to, eventFields]);
 
   return {
     loading,

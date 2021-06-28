@@ -17,7 +17,11 @@ import {
   MATCHED_TYPE,
 } from '../../../../../common/cti/constants';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
+import {
+  CtiEnrichment,
+  EventFields,
+  isValidEventField,
+} from '../../../../../common/search_strategy/security_solution/cti';
 import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
 import * as i18n from './translations';
 
@@ -110,3 +114,14 @@ export const filterDuplicateEnrichments = (enrichments: CtiEnrichment[]): CtiEnr
       ) ?? enrichmentGroup[0]
   );
 };
+
+export const getEnrichmentFields = (items: TimelineEventsDetailsItem[]): EventFields =>
+  items.reduce<EventFields>((fields, item) => {
+    if (isValidEventField(item.field)) {
+      const value = getFirstElement(item.originalValue);
+      if (value) {
+        return { ...fields, [item.field]: value };
+      }
+    }
+    return fields;
+  }, {});
