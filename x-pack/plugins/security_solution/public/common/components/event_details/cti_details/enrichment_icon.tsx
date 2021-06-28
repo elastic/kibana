@@ -8,7 +8,18 @@
 import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
-import { getTooltipTitle, getTooltipContent } from './helpers';
+import * as i18n from './translations';
+import { isInvestigationTimeEnrichment } from './helpers';
+
+export const getTooltipTitle = (type: string | undefined) =>
+  isInvestigationTimeEnrichment(type)
+    ? i18n.INVESTIGATION_TOOLTIP_TITLE
+    : i18n.INDICATOR_TOOLTIP_TITLE;
+
+export const getTooltipContent = (type: string | undefined) =>
+  isInvestigationTimeEnrichment(type)
+    ? i18n.INVESTIGATION_TOOLTIP_CONTENT
+    : i18n.INDICATOR_TOOLTIP_CONTENT;
 
 export const EnrichmentIcon: React.FC<{ type: string | undefined }> = ({ type }) => {
   return (

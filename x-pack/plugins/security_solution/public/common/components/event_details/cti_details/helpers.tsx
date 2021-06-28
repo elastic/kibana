@@ -23,7 +23,6 @@ import {
   isValidEventField,
 } from '../../../../../common/search_strategy/security_solution/cti';
 import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
-import * as i18n from './translations';
 
 const isEventDetailsItem = (
   item: TimelineEventsDetailsItem[] | null
@@ -62,16 +61,6 @@ export const timelineDataToEnrichment = (data: TimelineEventsDetailsItem[]): Cti
     acc[item.field] = item.originalValue;
     return acc;
   }, {});
-
-export const getTooltipTitle = (type: string | undefined) =>
-  isInvestigationTimeEnrichment(type)
-    ? i18n.INVESTIGATION_TOOLTIP_TITLE
-    : i18n.INDICATOR_TOOLTIP_TITLE;
-
-export const getTooltipContent = (type: string | undefined) =>
-  isInvestigationTimeEnrichment(type)
-    ? i18n.INVESTIGATION_TOOLTIP_CONTENT
-    : i18n.INDICATOR_TOOLTIP_CONTENT;
 
 export const getFirstElement: <T = unknown>(array: T[] | undefined) => T | undefined = (array) =>
   array ? array[0] : undefined;
