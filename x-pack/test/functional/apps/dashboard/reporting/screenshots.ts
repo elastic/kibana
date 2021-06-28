@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
       });
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
+
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
@@ -218,6 +218,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
+        await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
