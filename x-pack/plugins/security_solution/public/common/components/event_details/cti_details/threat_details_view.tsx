@@ -32,11 +32,11 @@ import {
   PROVIDER,
 } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import {
   getShimmedIndicatorValue,
   getEnrichmentValue,
-  getFirstElement,
   isInvestigationTimeEnrichment,
 } from './helpers';
 import * as i18n from './translations';

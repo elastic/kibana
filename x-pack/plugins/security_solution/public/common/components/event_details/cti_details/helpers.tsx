@@ -22,6 +22,7 @@ import {
   EventFields,
   isValidEventField,
 } from '../../../../../common/search_strategy/security_solution/cti';
+import { getFirstElement } from '../../../../../common/utils/data_retrieval';
 import { getDataFromSourceHits } from '../../../../../common/utils/field_formatters';
 
 export const isInvestigationTimeEnrichment = (type: string | undefined) =>
@@ -59,9 +60,6 @@ export const timelineDataToEnrichment = (data: TimelineEventsDetailsItem[]): Cti
     acc[item.field] = item.originalValue;
     return acc;
   }, {});
-
-export const getFirstElement: <T = unknown>(array: T[] | undefined) => T | undefined = (array) =>
-  array ? array[0] : undefined;
 
 export const getEnrichmentValue = (enrichment: CtiEnrichment, field: string) =>
   getFirstElement(enrichment[field]) as string | undefined;
