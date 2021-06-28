@@ -37,31 +37,27 @@ export interface ColumnFilter {
   query: string;
 }
 
-export interface ReportDefinition {
-  field: string;
-  required?: boolean;
-  custom?: boolean;
-  options?: Array<{
-    id: string;
-    field?: string;
-    label: string;
-    description?: string;
-    columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
-    columnFilters?: ColumnFilter[];
-    timeScale?: string;
-  }>;
+export interface MetricOption {
+  id: string;
+  field?: string;
+  label: string;
+  description?: string;
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
+  columnFilters?: ColumnFilter[];
+  timeScale?: string;
 }
 
-export interface DataSeries {
+export interface SeriesConfig {
   reportType: ReportViewType;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
-  breakdowns: string[];
+  breakdownFields: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
+  filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[] | ExistsFilter[];
-  reportDefinitions: ReportDefinition[];
+  baseFilters?: PersistableFilter[] | ExistsFilter[];
+  definitionFields: string[];
+  metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
@@ -83,6 +79,7 @@ export interface SeriesUrl {
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
+  selectedMetricField?: string;
   isNew?: boolean;
 }
 

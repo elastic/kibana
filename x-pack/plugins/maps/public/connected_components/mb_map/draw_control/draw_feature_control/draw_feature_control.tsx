@@ -6,26 +6,34 @@
  */
 
 import React, { Component } from 'react';
-import { Map as MbMap } from 'mapbox-gl';
+import { Map as MbMap, Point as MbPoint } from 'mapbox-gl';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import { Feature, Geometry, Position } from 'geojson';
 import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import * as jsts from 'jsts';
+import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../';
 import { DRAW_MODE, DRAW_SHAPE } from '../../../../../common';
+import { ILayer } from '../../../../classes/layers/layer';
+import {
+  EXCLUDE_CENTROID_FEATURES,
+  EXCLUDE_TOO_MANY_FEATURES_BOX,
+} from '../../../../classes/util/mb_filter_expressions';
 
 const geoJSONReader = new jsts.io.GeoJSONReader();
 
 export interface ReduxStateProps {
   drawShape?: DRAW_SHAPE;
   drawMode: DRAW_MODE;
+  editLayer: ILayer | undefined;
 }
 
 export interface ReduxDispatchProps {
   addNewFeatureToIndex: (geometry: Geometry | Position[]) => void;
+  deleteFeatureFromIndex: (featureId: string) => void;
   disableDrawState: () => void;
 }
 
@@ -75,11 +83,58 @@ export class DrawFeatureControl extends Component<Props, {}> {
     }
   };
 
+  _onClick = async (event: MapMouseEvent, drawControl?: MapboxDraw) => {
+    const mbLngLatPoint: MbPoint = event.point;
+    if (!this.props.editLayer) {
+      return;
+    }
+    const mbEditLayerIds = this.props.editLayer
+      .getMbLayerIds()
+      .filter((mbLayerId) => !!this.props.mbMap.getLayer(mbLayerId));
+    const PADDING = 2; // in pixels
+    const mbBbox = [
+      {
+        x: mbLngLatPoint.x - PADDING,
+        y: mbLngLatPoint.y - PADDING,
+      },
+      {
+        x: mbLngLatPoint.x + PADDING,
+        y: mbLngLatPoint.y + PADDING,
+      },
+    ] as [MbPoint, MbPoint];
+    const selectedFeatures = this.props.mbMap.queryRenderedFeatures(mbBbox, {
+      layers: mbEditLayerIds,
+      filter: ['all', EXCLUDE_TOO_MANY_FEATURES_BOX, EXCLUDE_CENTROID_FEATURES],
+    });
+    if (!selectedFeatures.length) {
+      return;
+    }
+    const topMostFeature = selectedFeatures[0];
+
+    try {
+      if (!(topMostFeature.properties && topMostFeature.properties._id)) {
+        throw Error(`Associated Elasticsearch document id not found`);
+      }
+      const docId = topMostFeature.properties._id;
+      this.props.deleteFeatureFromIndex(docId);
+    } catch (error) {
+      getToasts().addWarning(
+        i18n.translate('xpack.maps.drawFeatureControl.unableToDeleteFeature', {
+          defaultMessage: `Unable to delete feature, error: '{errorMsg}'.`,
+          values: {
+            errorMsg: error.message,
+          },
+        })
+      );
+    }
+  };
+
   render() {
     return (
       <DrawControl
         drawShape={this.props.drawShape}
         onDraw={this._onDraw}
+        onClick={this._onClick}
         mbMap={this.props.mbMap}
         enable={true}
       />

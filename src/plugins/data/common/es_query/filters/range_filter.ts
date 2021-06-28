@@ -84,10 +84,7 @@ export const getRangeFilterField = (filter: RangeFilter) => {
 };
 
 const formatValue = (field: IFieldType, params: any[]) =>
-  map(params, (val: any, key: string) => get(operators, key) + format(field, val)).join(' ');
-
-const format = (field: IFieldType, value: any) =>
-  field && field.format && field.format.convert ? field.format.convert(value) : value;
+  map(params, (val: any, key: string) => get(operators, key) + val).join(' ');
 
 // Creates a filter where the value for the given field is in the given range
 // params should be an object containing `lt`, `lte`, `gt`, and/or `gte`

@@ -24,12 +24,14 @@ export const UnisolateHost = React.memo(
     cases,
     casesInfo,
     cancelCallback,
+    successCallback,
   }: {
     endpointId: string;
     hostName: string;
     cases: ReactNode;
     casesInfo: CasesFromAlertsResponse;
     cancelCallback: () => void;
+    successCallback?: () => void;
   }) => {
     const [comment, setComment] = useState('');
     const [isUnIsolated, setIsUnIsolated] = useState(false);
@@ -41,9 +43,13 @@ export const UnisolateHost = React.memo(
     const { loading, unIsolateHost } = useHostUnisolation({ endpointId, comment, caseIds });
 
     const confirmHostUnIsolation = useCallback(async () => {
-      const hostIsolated = await unIsolateHost();
-      setIsUnIsolated(hostIsolated);
-    }, [unIsolateHost]);
+      const hostUnIsolated = await unIsolateHost();
+      setIsUnIsolated(hostUnIsolated);
+
+      if (hostUnIsolated && successCallback) {
+        successCallback();
+      }
+    }, [successCallback, unIsolateHost]);
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
 
