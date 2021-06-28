@@ -642,7 +642,7 @@ test('Should read out ordinal type correctly', async () => {
 });
 
 describe('renderDataMappingPopover', () => {
-  test('Should enable toggle when field is backed by geojson-source', () => {
+  test('Switch toggle should always be enabled', () => {
     const colorStyle = makeProperty(
       {
         color: 'Blues',
@@ -657,9 +657,9 @@ describe('renderDataMappingPopover', () => {
     expect(legendRow).toMatchSnapshot();
   });
 
-  test('Should disable toggle when field is not backed by geojson source', () => {
-    const nonGeoJsonField = Object.create(mockField);
-    nonGeoJsonField.canReadFromGeoJson = () => {
+  test('Should not render when autodomain not supported', () => {
+    const noAutoDomainField = Object.create(mockField);
+    noAutoDomainField.supportsAutoDomain = () => {
       return false;
     };
     const colorStyle = makeProperty(
@@ -669,7 +669,7 @@ describe('renderDataMappingPopover', () => {
         fieldMetaOptions,
       },
       undefined,
-      nonGeoJsonField
+      noAutoDomainField
     );
 
     const legendRow = colorStyle.renderDataMappingPopover(() => {});

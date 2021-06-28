@@ -15,7 +15,6 @@ import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
 interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
   onChange: (updatedOptions: DynamicOptions) => void;
-  switchDisabled: boolean;
 }
 
 export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
@@ -40,7 +39,6 @@ export function CategoricalDataMappingPopover<DynamicOptions>(props: Props<Dynam
             checked={props.fieldMetaOptions.isEnabled}
             onChange={onIsEnabledChange}
             compressed
-            disabled={props.switchDisabled}
           />{' '}
           <EuiToolTip
             content={

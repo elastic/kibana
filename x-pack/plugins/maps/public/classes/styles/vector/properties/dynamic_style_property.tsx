@@ -396,24 +396,16 @@ export class DynamicStyleProperty<T>
   }
 
   renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
-    if (!this.supportsFieldMeta()) {
-      return null;
-    }
-
-    const switchDisabled = !!this._field && !this._field.supportsFieldMeta();
-
     return this.isCategorical() ? (
       <CategoricalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
         onChange={onChange}
-        switchDisabled={switchDisabled}
       />
     ) : (
       <OrdinalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
         styleName={this.getStyleName()}
         onChange={onChange}
-        switchDisabled={switchDisabled}
         dataMappingFunction={this.getDataMappingFunction()}
         supportedDataMappingFunctions={this._getSupportedDataMappingFunctions()}
       />
