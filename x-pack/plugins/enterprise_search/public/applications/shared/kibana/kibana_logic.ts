@@ -20,18 +20,23 @@ import { createHref, CreateHrefOptions } from '../react_router_helpers';
 
 interface KibanaLogicProps {
   config: { host?: string };
+  // Kibana core
   history: History;
-  cloud: Partial<CloudSetup>;
-  charts: ChartsPluginStart;
   navigateToUrl: ApplicationStart['navigateToUrl'];
-  security: Partial<SecurityPluginStart>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   renderHeaderActions(HeaderActions: FC): void;
+  // Required plugins
+  charts: ChartsPluginStart;
+  // Optional plugins
+  cloud?: CloudSetup;
+  security?: SecurityPluginStart;
 }
-export interface KibanaValues extends KibanaLogicProps {
+export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud' | 'security'> {
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
+  cloud: Partial<CloudSetup>;
+  security: Partial<SecurityPluginStart>;
 }
 
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
