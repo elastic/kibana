@@ -4,50 +4,11 @@
   left: 50%;
   bottom: $euiSize;
   transform: translateX(-50%);
-  min-width: 530px;
+  min-width: 580px;
   z-index: 99999;
   background: $euiColorEmptyShade;
   padding: $euiSizeL $euiSizeXL;
   border-radius: $euiSize;
-
-  .euiRangeTick {
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    font-size: $euiFontSizeXS;
-    position: relative;
-    padding-top: $euiSize;
-    color: $euiColorDarkShade;
-
-    &::before {
-      @include size($euiSizeXS);
-      width: 3px;
-      height: $euiSizeS;
-      content: '';
-      background-color: $euiColorLightShade;
-      position: absolute;
-      top: $euiSizeXS;
-      left: calc(50% - #{($euiSizeXS/2)});
-    }
-
-    &--isCustom {
-      position: absolute;
-      transform: translateX(-50%);
-    }
-
-    &:enabled:hover,
-    &:focus,
-    &--selected {
-      color: $euiColorPrimary;
-    }
-
-    &--selected {
-      font-weight: $euiFontWeightMedium;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-    }
-  }
 }
 
 .mapTimeslider__row {
@@ -77,6 +38,10 @@
 
 .mapTimeslider__controls {
   margin-left: $euiSizeS;
+
+  .euiButtonIcon + .euiButtonIcon {
+    margin-left: $euiSizeXS;
+  }
 }
 
 .mapTimeslider__innerPanel {
@@ -86,4 +51,8 @@
   padding: $euiSizeXS;
   display: inline-flex;
   align-items: center;
+}
+
+.mapTimeslider__playButton {
+  border-radius: 50%;
 }
