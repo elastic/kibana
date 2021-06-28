@@ -26,7 +26,8 @@ import {
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getLayerById,
-  getEditState, getSelectedLayerId,
+  getEditState,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -342,7 +343,7 @@ export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
   };
 }
 
-export function setSelectedLayerToEditLayer() {
+export function setEditLayerToSelectedLayer() {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState

@@ -43,7 +43,6 @@ interface State {
   layerWizard: LayerWizard | null;
   isNextStepBtnEnabled: boolean;
   isStepLoading: boolean;
-  editModeEnabled: boolean;
 }
 
 const INITIAL_STATE: State = {
@@ -53,7 +52,6 @@ const INITIAL_STATE: State = {
   layerWizard: null,
   isNextStepBtnEnabled: false,
   isStepLoading: false,
-  editModeEnabled: false,
 };
 
 export class AddLayerPanel extends Component<Props, State> {
@@ -83,7 +81,6 @@ export class AddLayerPanel extends Component<Props, State> {
       layerWizard,
       layerSteps,
       currentStep: layerSteps[0],
-      editModeEnabled: !!layerWizard.showFeatureEditTools,
     });
   };
 
@@ -95,7 +92,7 @@ export class AddLayerPanel extends Component<Props, State> {
     if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
       // last step
       this.props.promotePreviewLayers();
-      if (this.state.editModeEnabled) {
+      if (this.state.layerWizard?.showFeatureEditTools) {
         this.props.enableEditMode();
       }
     } else {

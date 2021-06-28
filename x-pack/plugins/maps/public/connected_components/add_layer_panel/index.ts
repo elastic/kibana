@@ -16,7 +16,7 @@ import {
   removePreviewLayers,
   setDrawMode,
   setFirstPreviewLayerToSelectedLayer,
-  setSelectedLayerToEditLayer,
+  setEditLayerToSelectedLayer,
   updateFlyout,
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
@@ -46,7 +46,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(removePreviewLayers());
     },
     enableEditMode: () => {
-      dispatch(setSelectedLayerToEditLayer());
+      dispatch(setEditLayerToSelectedLayer());
       dispatch(setDrawMode(DRAW_MODE.DRAW_SHAPES));
     },
   };
