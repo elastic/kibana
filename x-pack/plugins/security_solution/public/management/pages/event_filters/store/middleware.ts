@@ -224,7 +224,7 @@ const checkIfEventFilterDataExist: MiddlewareActionHandler = async (
 };
 
 const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFiltersService) => {
-  const { getState, dispatch } = store;
+  const { dispatch, getState } = store;
   const state = getState();
   const isLoading = getListIsLoading(state);
 
@@ -232,9 +232,9 @@ const refreshListDataIfNeeded: MiddlewareActionHandler = async (store, eventFilt
     dispatch({
       type: 'eventFiltersListPageDataChanged',
       payload: {
-        type: 'LoadingResourceState',
         // Ignore will be fixed with when AsyncResourceState is refactored (#830)
         // @ts-ignore
+        type: 'LoadingResourceState',
         previousState: getCurrentListPageDataState(state),
       },
     });

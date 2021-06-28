@@ -192,7 +192,7 @@ describe('reducer', () => {
     });
   });
 
-  describe('TrustedAppsForceRefresj', () => {
+  describe('TrustedAppsForceRefresh', () => {
     it('sets the force refresh state to true', () => {
       const result = trustedAppsPageReducer(
         {
