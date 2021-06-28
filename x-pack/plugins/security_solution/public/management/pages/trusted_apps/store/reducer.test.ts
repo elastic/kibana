@@ -191,4 +191,29 @@ describe('reducer', () => {
       expect(result).toStrictEqual(initialState);
     });
   });
+
+  describe('TrustedAppsForceRefresh', () => {
+    it('sets the force refresh state to true', () => {
+      const result = trustedAppsPageReducer(
+        {
+          ...initialState,
+          forceRefresh: false,
+        },
+        { type: 'trustedAppForceRefresh', payload: { forceRefresh: true } }
+      );
+
+      expect(result).toStrictEqual({ ...initialState, forceRefresh: true });
+    });
+    it('sets the force refresh state to false', () => {
+      const result = trustedAppsPageReducer(
+        {
+          ...initialState,
+          forceRefresh: true,
+        },
+        { type: 'trustedAppForceRefresh', payload: { forceRefresh: false } }
+      );
+
+      expect(result).toStrictEqual({ ...initialState, forceRefresh: false });
+    });
+  });
 });

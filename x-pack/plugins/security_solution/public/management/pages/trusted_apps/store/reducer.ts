@@ -31,6 +31,7 @@ import {
   TrustedAppsExistResponse,
   TrustedAppsPoliciesStateChanged,
   TrustedAppCreationEditItemStateChanged,
+  TrustedAppForceRefresh,
 } from './action';
 
 import { TrustedAppsListPageState } from '../state';
@@ -177,6 +178,13 @@ const updatePolicies: CaseReducer<TrustedAppsPoliciesStateChanged> = (state, { p
   return state;
 };
 
+const forceRefresh: CaseReducer<TrustedAppForceRefresh> = (state, { payload }) => {
+  return {
+    ...state,
+    forceRefresh: payload.forceRefresh,
+  };
+};
+
 export const trustedAppsPageReducer: StateReducer = (
   state = initialTrustedAppsPageState(),
   action
@@ -226,6 +234,9 @@ export const trustedAppsPageReducer: StateReducer = (
 
     case 'trustedAppsPoliciesStateChanged':
       return updatePolicies(state, action);
+
+    case 'trustedAppForceRefresh':
+      return forceRefresh(state, action);
   }
 
   return state;
