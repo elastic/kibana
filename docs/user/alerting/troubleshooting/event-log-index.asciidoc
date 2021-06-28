@@ -185,10 +185,8 @@ GET .kibana-event-log-*/_search
 Here’s an example of what failed credentials from Google SMTP might look like from the response:
 [source, txt]
 --------------------------------------------------
-...
-      	"error" : {
-        	"message" : """error sending email: Invalid login: 535-5.7.8 Username and Password not accepted. Learn more at
+"error" : {
+  "message" : """error sending email: Invalid login: 535-5.7.8 Username and Password not accepted. Learn more at
 535 5.7.8  https://support.google.com/mail/?p=BadCredentials e207sm3359731pfh.171 - gsmtp"""
-      	},
-...
+},
 --------------------------------------------------

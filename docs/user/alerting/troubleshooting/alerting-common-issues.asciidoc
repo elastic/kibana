@@ -60,7 +60,7 @@ see <<action-settings,Action settings>>.
 
 [float]
 [[rules-long-execution-time]]
-==== Identify long-running rules
+==== Rules take a long time to run
 
 *Problem* 
 

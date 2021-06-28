@@ -17,7 +17,7 @@ Rules and connectors  log to the Kibana logger with tags of [alerting] and [acti
 --------------------------------------------------
 server    log   [11:39:40.389] [error][alerting][alerting][plugins][plugins] Executing Alert "5b6237b0-c6f6-11eb-b0ff-a1a0cbcf29b6" has resulted in Error: Saved object [action/fdbc8610-c6f5-11eb-b0ff-a1a0cbcf29b6] not found
 --------------------------------------------------
-Some of the resources, such as saved objects and API keys, may no longer be available or valid, yielding error messages about those missing resources. If {kib} logs is not clearly describing the problem, best to ask someone from the alerting team to determine whether errors/warnings are of which class.
+Some of the resources, such as saved objects and API keys, may no longer be available or valid, yielding error messages about those missing resources.
 
 [float]
 [[alerting-kibana-version]]
@@ -60,7 +60,7 @@ One of the http endpoints available for actions is the POST _execute API (refere
 curl -X POST -k \
  -H 'kbn-xsrf: foo' \
  -H 'content-type: application/json' \
- https://elastic:changeme@localhost:5601/api/actions/connector/a692dc89-15b9-4a3c-9e47-9fb6872e49ce/_execute \
+ api/actions/connector/a692dc89-15b9-4a3c-9e47-9fb6872e49ce/_execute \
  -d '{"params":{"subject":"hallo","message":"hallo!","to":["me@example.com"]}}'
 --------------------------------------------------
 
@@ -194,6 +194,6 @@ In addition to the above methods, broadly used the next approaches and common is
 * <<event-log-index, Quering Event log index>>
 * <<testing-connectors, Testing connectors using Connectors UI and `kbn-action` tool>>
 
+include::troubleshooting/alerting-common-issues.asciidoc[]
 include::troubleshooting/event-log-index.asciidoc[]
 include::troubleshooting/testing-connectors.asciidoc[]
-include::troubleshooting/alerting-common-issues.asciidoc[]
