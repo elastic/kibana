@@ -8,8 +8,9 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { mockAppIndexPattern, mockIndexPattern, render } from '../rtl_helpers';
-import { buildFilterLabel, FilterLabel } from './filter_label';
+import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
+import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 
 describe('FilterLabel', function () {
   mockAppIndexPattern();
@@ -28,6 +29,7 @@ describe('FilterLabel', function () {
         negate={false}
         seriesId={'kpi-over-time'}
         removeFilter={jest.fn()}
+        indexPattern={mockIndexPattern}
       />
     );
 
@@ -51,6 +53,7 @@ describe('FilterLabel', function () {
         negate={false}
         seriesId={'kpi-over-time'}
         removeFilter={removeFilter}
+        indexPattern={mockIndexPattern}
       />
     );
 
@@ -73,6 +76,7 @@ describe('FilterLabel', function () {
         negate={false}
         seriesId={'kpi-over-time'}
         removeFilter={removeFilter}
+        indexPattern={mockIndexPattern}
       />
     );
 
@@ -98,6 +102,7 @@ describe('FilterLabel', function () {
         negate={true}
         seriesId={'kpi-over-time'}
         removeFilter={jest.fn()}
+        indexPattern={mockIndexPattern}
       />
     );
 

@@ -45,7 +45,6 @@ export default function ({ getService }: FtrProviderContext) {
         created_by: false,
         jobtype: 'csv',
         status: 'pending',
-        // TODO: remove the payload field from the api respones
       };
       forOwn(expectedResJob, (value: any, key: string) => {
         expect(resJob[key]).to.eql(value, key);

@@ -126,14 +126,12 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
             const stats = body[0];
             return {
               alias: kibanaOrTaskManagerIndex(index, this.kibanaConfig!.index),
-              // @ts-expect-error @elastic/elasticsearch declares it 'docs.count' as optional
-              docsCount: parseInt(stats['docs.count'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'docs.deleted' as optional
-              docsDeleted: parseInt(stats['docs.deleted'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'store.size' as string | number
-              storeSizeBytes: parseInt(stats['store.size'], 10),
-              // @ts-expect-error @elastic/elasticsearch declares it 'pri.store.size' as string | number
-              primaryStoreSizeBytes: parseInt(stats['pri.store.size'], 10),
+              docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
+              docsDeleted: stats['docs.deleted'] ? parseInt(stats['docs.deleted'], 10) : 0,
+              storeSizeBytes: stats['store.size'] ? parseInt(stats['store.size'], 10) : 0,
+              primaryStoreSizeBytes: stats['pri.store.size']
+                ? parseInt(stats['pri.store.size'], 10)
+                : 0,
             };
           });
       })

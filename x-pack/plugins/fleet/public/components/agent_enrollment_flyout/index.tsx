@@ -42,6 +42,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentPolicy,
   agentPolicies,
+  viewDataStepContent,
 }) => {
   const [mode, setMode] = useState<'managed' | 'standalone'>('managed');
 
@@ -109,9 +110,17 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
         }
       >
         {fleetServerHosts.length === 0 && mode === 'managed' ? null : mode === 'managed' ? (
-          <ManagedInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
+          <ManagedInstructions
+            agentPolicy={agentPolicy}
+            agentPolicies={agentPolicies}
+            viewDataStepContent={viewDataStepContent}
+          />
         ) : (
-          <StandaloneInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
+          <StandaloneInstructions
+            agentPolicy={agentPolicy}
+            agentPolicies={agentPolicies}
+            viewDataStepContent={viewDataStepContent}
+          />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

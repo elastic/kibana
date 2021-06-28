@@ -103,6 +103,7 @@ export default async function ({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'visualization:visualize:legacyChartsLibrary': true,
+        'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
@@ -514,6 +515,14 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         license_management_user: {

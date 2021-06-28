@@ -13,7 +13,6 @@ module.exports = {
   rootDir: '.',
   roots: ['<rootDir>/src', '<rootDir>/packages'],
   testMatch: ['**/integration_tests**/*.test.{js,mjs,ts,tsx}'],
-  testRunner: 'jasmine2',
   testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),

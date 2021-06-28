@@ -45,6 +45,9 @@ import {
   CasesStatusResponse,
   CasesConfigurationsResponse,
   CaseUserActionsResponse,
+  AlertResponse,
+  ConnectorMappings,
+  CasesByAlertId,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -576,6 +579,32 @@ export const ensureSavedObjectIsAuthorized = (
   entities.forEach((entity) => expect(owners.includes(entity.owner)).to.be(true));
 };
 
+interface ConnectorMappingsSavedObject {
+  'cases-connector-mappings': ConnectorMappings;
+}
+
+/**
+ * Returns connector mappings saved objects from Elasticsearch directly.
+ */
+export const getConnectorMappingsFromES = async ({ es }: { es: KibanaClient }) => {
+  const mappings: ApiResponse<
+    estypes.SearchResponse<ConnectorMappingsSavedObject>
+  > = await es.search({
+    index: '.kibana',
+    body: {
+      query: {
+        term: {
+          type: {
+            value: 'cases-connector-mappings',
+          },
+        },
+      },
+    },
+  });
+
+  return mappings;
+};
+
 export const createCaseWithConnector = async ({
   supertest,
   configureReq = {},
@@ -1016,7 +1045,7 @@ export const findCases = async ({
   return res;
 };
 
-export const getCaseIDsByAlert = async ({
+export const getCasesByAlert = async ({
   supertest,
   alertID,
   query = {},
@@ -1028,7 +1057,7 @@ export const getCaseIDsByAlert = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<string[]> => {
+}): Promise<CasesByAlertId> => {
   const { body: res } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/alerts/${alertID}`)
     .auth(auth.user.username, auth.user.password)
@@ -1101,4 +1130,23 @@ export const pushCase = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const getAlertsAttachedToCase = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: st.SuperTest<supertestAsPromised.Test>;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<AlertResponse> => {
+  const { body: theCase } = await supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/alerts`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return theCase;
 };
