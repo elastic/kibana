@@ -12,7 +12,7 @@
   "license": "Elastic License v2",
   "name": "Azure Automation Runbook Deleted",
   "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.AUTOMATION/AUTOMATIONACCOUNTS/RUNBOOKS/DELETE\" and event.outcome:(Success or success)",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.AUTOMATION/AUTOMATIONACCOUNTS/RUNBOOKS/DELETE\" and event.outcome:(Success or success)\n",
   "references": [
     "https://powerzure.readthedocs.io/en/latest/Functions/operational.html#create-backdoor",
     "https://github.com/hausec/PowerZure",
