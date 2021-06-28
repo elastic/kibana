@@ -1,4 +1,4 @@
-$timesliderWidth: 580px;
+$timesliderWidth: 585px;
 
 .mapTimeslider {
   @include euiBottomShadowLarge;
@@ -10,7 +10,7 @@ $timesliderWidth: 580px;
   width: $timesliderWidth;
   z-index: 99999;
   background: $euiColorEmptyShade;
-  padding: $euiSizeL $euiSizeXL;
+  padding: $euiSizeL $euiSize;
   border-radius: $euiSize;
 }
 
@@ -23,6 +23,10 @@ $timesliderWidth: 580px;
 
   > * {
     align-items: center;
+  }
+
+  &:first-child {
+    padding: 0 $euiSize;
   }
 }
 
