@@ -613,6 +613,26 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
   });
 
+  it('tests constant_keyword field type with value', () => {
+    const constantKeywordLiteralYaml = `
+- name: constantKeyword
+  type: constant_keyword
+  value: always_the_same
+  `;
+    const constantKeywordMapping = {
+      properties: {
+        constantKeyword: {
+          type: 'constant_keyword',
+          value: 'always_the_same',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(constantKeywordLiteralYaml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(JSON.stringify(mappings)).toEqual(JSON.stringify(constantKeywordMapping));
+  });
+
   it('processes meta fields', () => {
     const metaFieldLiteralYaml = `
 - name: fieldWithMetas

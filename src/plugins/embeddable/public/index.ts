@@ -69,6 +69,7 @@ export {
   EmbeddablePackageState,
   EmbeddableRenderer,
   EmbeddableRendererProps,
+  useEmbeddableFactory,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
