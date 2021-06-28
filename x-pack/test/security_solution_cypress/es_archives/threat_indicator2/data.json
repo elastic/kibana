@@ -19,19 +19,9 @@
       "threatintel": {
         "indicator": {
           "first_seen": "2021-03-11T08:02:14.000Z",
-          "file": {
-            "size": 80280,
-            "pe": {},
-            "type": "elf",
-            "hash": {
-              "sha256": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3",
-              "tlsh": "6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE",
-              "ssdeep": "1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL",
-              "md5": "9b6c3518a91d23ed77504b5416bfb5b3"
-            }
-          },
+          "ip": "192.168.1.1",
           "provider": "another_provider",
-          "type": "file"
+          "type": "ip"
         },
         "abusemalware": {
           "virustotal": {
@@ -41,10 +31,7 @@
           }
         }
       },
-      "tags": [
-        "threatintel-abusemalware",
-        "forwarded"
-      ],
+      "tags": ["threatintel-abusemalware", "forwarded"],
       "input": {
         "type": "httpjson"
       },
