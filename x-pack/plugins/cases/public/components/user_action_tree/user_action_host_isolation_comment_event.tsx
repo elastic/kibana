@@ -24,6 +24,7 @@ interface Props {
 const HostIsolationCommentEventComponent: React.FC<Props> = ({ type, endpoints }) => {
   const activityLogPath = `/administration/endpoints?selected_endpoint=${endpoints[0].endpointId}&show=activity_log`;
   const { getUrlForApp, navigateToUrl } = useKibana().services.application;
+
   const endpointDetailsHref = getUrlForApp(SECURITY_SOLUTION_APP_ID, {
     path: activityLogPath,
   });
@@ -45,8 +46,8 @@ const HostIsolationCommentEventComponent: React.FC<Props> = ({ type, endpoints }
         data-test-subj={`endpointDetails-activity-log-link-${endpoints[0].endpointId}`}
       >
         {endpoints[0].hostname}
-        {endpoints.length > 1 && i18n.OTHER_ENDPOINTS(endpoints.length - 1)}
       </LinkAnchor>
+      {endpoints.length > 1 && i18n.OTHER_ENDPOINTS(endpoints.length - 1)}
     </>
   );
 };

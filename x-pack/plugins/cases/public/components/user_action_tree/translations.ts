@@ -68,5 +68,10 @@ export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost',
 export const OTHER_ENDPOINTS = (endpoints: number): string =>
   i18n.translate('xpack.cases.caseView.otherEndpoints', {
     values: { endpoints },
-    defaultMessage: ` and {endpoints} {endpoints, one {other} plural, other {others}`,
+    defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
   });
+
+export const LONG_HOSTNAME = i18n.translate('xpack.cases.caseView.something', {
+  defaultMessage:
+    'asdkjfkadjkfjakdsjkfjkadjkfjakdfkjaskdjfkjakdjfkajdkjfkajskdjfkajsdkfjakjdfkjakdfkajdkfakdjfkadjkfjakdjkajskdjfkdajahdfhadhfhahdhfahehdf',
+});
