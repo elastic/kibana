@@ -130,12 +130,17 @@ You should see an `error.message` property in that event, with a message from th
   "event": {
     "provider": "actions", 
     "action": "execute", 
-    "start": "2020-03-31T04:27:30.392Z", "end": "2020-03-31T04:27:30.393Z", "duration": 1000000
+    "start": "2020-03-31T04:27:30.392Z",
+    "end": "2020-03-31T04:27:30.393Z",
+    "duration": 1000000
   },
   "kibana": {
     "namespace": "default",
     "saved_objects": [
-      { "type": "action", "id": "7a6fd3c6-72b9-44a0-8767-0432b3c70910" }
+      { 
+        "type": "action",
+        "id": "7a6fd3c6-72b9-44a0-8767-0432b3c70910"
+      }
     ],
   },
   "message": "action executed: .server-log:7a6fd3c6-72b9-44a0-8767-0432b3c70910: server-log",
@@ -159,7 +164,7 @@ And see the errors for the rules you might provide the next search query:
       {
         "rel" : "primary",
         "type" : "alert", 
-      	"id" : "30d856c0-b14b-11eb-9a7c-9df284da9f99"
+      	  "id" : "30d856c0-b14b-11eb-9a7c-9df284da9f99"
       }
     ],
   },
