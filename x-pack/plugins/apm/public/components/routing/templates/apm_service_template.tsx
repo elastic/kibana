@@ -128,11 +128,12 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
           dataType: isRumAgentName(agentName) ? 'ux' : 'mobile',
           time: { from: rangeFrom, to: rangeTo },
           reportType: 'kpi-over-time',
-          reportDefintion: {
+          reportDefinitions: {
             'service.name': [serviceName],
-            'service.environement': [environment],
+            'service.environment': [environment],
           },
           operationType: 'average',
+          isNew: true,
         } as SeriesUrl,
       },
       basepath
