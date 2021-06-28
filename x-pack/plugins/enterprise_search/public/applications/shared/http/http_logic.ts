@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
 
-import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
+import { ERROR_CONNECTING_HEADER, READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
 interface HttpValues {
   http: HttpSetup;
@@ -60,11 +60,12 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
       const errorConnectingInterceptor = values.http.intercept({
         responseError: async (httpResponse) => {
           if (isEnterpriseSearchApi(httpResponse)) {
-            const { status } = httpResponse.response!;
-            const hasErrorConnecting = status === 502;
+            const hasErrorConnecting = httpResponse.response!.headers.get(ERROR_CONNECTING_HEADER);
 
-            if (hasErrorConnecting) {
+            if (hasErrorConnecting === 'true') {
               actions.setErrorConnecting(true);
+            } else {
+              actions.setErrorConnecting(false);
             }
           }
 
