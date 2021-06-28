@@ -11,11 +11,11 @@ esFilters: {
     buildQueryFilter: (query: any, index: string, alias: string) => import("../common").QueryStringFilter;
     buildCustomFilter: typeof buildCustomFilter;
     buildEmptyFilter: (isPinned: boolean, index?: string | undefined) => import("../common").Filter;
-    buildExistsFilter: (field: import("../common").IFieldType, indexPattern: import("../common").MinimalIndexPattern) => import("../common").ExistsFilter;
+    buildExistsFilter: (field: import("../common").IFieldType, indexPattern: import("../common").IndexPatternBase) => import("../common").ExistsFilter;
     buildFilter: typeof buildFilter;
-    buildPhraseFilter: (field: import("../common").IFieldType, value: any, indexPattern: import("../common").MinimalIndexPattern) => import("../common").PhraseFilter;
-    buildPhrasesFilter: (field: import("../common").IFieldType, params: any[], indexPattern: import("../common").MinimalIndexPattern) => import("../common").PhrasesFilter;
-    buildRangeFilter: (field: import("../common").IFieldType, params: import("../common").RangeFilterParams, indexPattern: import("../common").MinimalIndexPattern, formattedValue?: string | undefined) => import("../common").RangeFilter;
+    buildPhraseFilter: (field: import("../common").IFieldType, value: any, indexPattern: import("../common").IndexPatternBase) => import("../common").PhraseFilter;
+    buildPhrasesFilter: (field: import("../common").IFieldType, params: any[], indexPattern: import("../common").IndexPatternBase) => import("../common").PhrasesFilter;
+    buildRangeFilter: (field: import("../common").IFieldType, params: import("../common").RangeFilterParams, indexPattern: import("../common").IndexPatternBase, formattedValue?: string | undefined) => import("../common").RangeFilter;
     isFilterDisabled: (filter: import("../common").Filter) => boolean;
 }
 ```
