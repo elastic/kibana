@@ -196,7 +196,6 @@ test('enqueues execution per selected action', async () => {
             "id": "1",
             "license": "basic",
             "name": "name-of-alert",
-            "namespace": "test1",
             "ruleset": "alerts",
           },
         },
