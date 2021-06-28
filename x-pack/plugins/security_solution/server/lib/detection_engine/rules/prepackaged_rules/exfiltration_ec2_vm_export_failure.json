@@ -1,0 +1,70 @@
+{
+  "author": [
+    "Elastic",
+    "Austin Songer"
+  ],
+  "description": "Identifies an attempt to export an AWS EC2 instance. A virtual machine (VM) export may indicate an attempt to extract or exfiltrate information.",
+  "false_positives": [
+    "VM exports may be done by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. VM exports from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS EC2 VM Export Failure",
+  "note": "## Config\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and event.action:CreateInstanceExportTask and event.outcome:failure\n",
+  "references": [
+    "https://docs.aws.amazon.com/vm-import/latest/userguide/vmexport.html#export-instance"
+  ],
+  "risk_score": 21,
+  "rule_id": "e919611d-6b6f-493b-8314-7ed6ac2e413b",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Asset Visibility"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0010",
+        "name": "Exfiltration",
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
+      },
+      "technique": [
+        {
+          "id": "T1537",
+          "name": "Transfer Data to Cloud Account",
+          "reference": "https://attack.mitre.org/techniques/T1537/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0009",
+        "name": "Collection",
+        "reference": "https://attack.mitre.org/tactics/TA0009/"
+      },
+      "technique": [
+        {
+          "id": "T1005",
+          "name": "Data from Local System",
+          "reference": "https://attack.mitre.org/techniques/T1005/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

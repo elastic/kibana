@@ -21,16 +21,46 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ComponentStrings } from '../../../../../i18n/components';
 import { ZIP, CANVAS, HTML } from '../../../../../i18n/constants';
 import { OnCloseFn } from '../share_menu.component';
 import { WorkpadStep } from './workpad_step';
 import { RuntimeStep } from './runtime_step';
 import { SnippetsStep } from './snippets_step';
 
-const { ShareWebsiteFlyout: strings } = ComponentStrings;
+const strings = {
+  getRuntimeStepTitle: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadRuntimeTitle', {
+      defaultMessage: 'Download runtime',
+    }),
+  getSnippentsStepTitle: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.addSnippetsTitle', {
+      defaultMessage: 'Add snippets to website',
+    }),
+  getStepsDescription: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.description', {
+      defaultMessage:
+        'Follow these steps to share a static version of this workpad on an external website. It will be a visual snapshot of the current workpad, and will not have access to live data.',
+    }),
+  getTitle: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.flyoutTitle', {
+      defaultMessage: 'Share on a website',
+    }),
+  getUnsupportedRendererWarning: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.unsupportedRendererWarning', {
+      defaultMessage:
+        'This workpad contains render functions that are not supported by the {CANVAS} Shareable Workpad Runtime. These elements will not be rendered:',
+      values: {
+        CANVAS,
+      },
+    }),
+  getWorkpadStepTitle: () =>
+    i18n.translate('xpack.canvas.shareWebsiteFlyout.snippetsStep.downloadWorkpadTitle', {
+      defaultMessage: 'Download workpad',
+    }),
+};
 
 export type OnDownloadFn = (type: 'share' | 'shareRuntime' | 'shareZip') => void;
 export type OnCopyFn = () => void;
