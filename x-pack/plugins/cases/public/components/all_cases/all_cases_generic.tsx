@@ -28,11 +28,9 @@ import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
-import { CaseCallOut } from '../callout';
 import { CaseDetailsHrefSchema, CasesNavigation } from '../links';
 import { Panel } from '../panel';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
-import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
 import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
 import { CasesTableHeader } from './header';
@@ -267,9 +265,6 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
 
     return (
       <>
-        {!isEmpty(actionsErrors) && (
-          <CaseCallOut title={ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={actionsErrors} />
-        )}
         {configureCasesNavigation != null && (
           <CasesTableHeader
             actionsErrors={actionsErrors}
