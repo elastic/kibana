@@ -16,7 +16,7 @@
   "license": "Elastic License v2",
   "name": "AWS CloudTrail Log Created",
   "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:CreateTrail and event.outcome:success",
+  "query": "event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and event.action:CreateTrail and event.outcome:success\n",
   "references": [
     "https://docs.aws.amazon.com/awscloudtrail/latest/APIReference/API_CreateTrail.html",
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/cloudtrail/create-trail.html"
