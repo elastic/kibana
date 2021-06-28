@@ -10,6 +10,7 @@ import { SavedObjectsClient } from '../../../../src/core/server';
 import { IndexPatternsCommonService } from '../../../../src/plugins/data/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { IndexPatternsServiceStart } from '../../../../src/plugins/data/server/index_patterns';
+import { SecurityPluginStart } from '../../security/server';
 
 let internalRepository: ISavedObjectsRepository;
 export const setInternalRepository = (
@@ -30,3 +31,9 @@ export const setIndexPatternsService = async (
   );
 };
 export const getIndexPatternsService = () => indexPatternsService;
+
+let securityPlugin: SecurityPluginStart;
+export const setSecurityPlugin = (security: SecurityPluginStart) => {
+  securityPlugin = security;
+};
+export const getSecurityPlugin = () => securityPlugin;

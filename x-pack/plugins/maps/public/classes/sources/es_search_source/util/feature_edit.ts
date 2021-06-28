@@ -21,6 +21,7 @@ export const addFeatureToIndex = async (
     method: 'POST',
     body: JSON.stringify({
       index: indexName,
+      applyDefaultFields: true,
       data,
     }),
   });

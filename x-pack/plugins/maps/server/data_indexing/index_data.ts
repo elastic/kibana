@@ -6,13 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, KibanaRequest } from 'kibana/server';
 import { WriteSettings } from '../../common';
+import { getSecurityPlugin } from '../kibana_server_services';
 
 export async function writeDataToIndex(
   index: string,
   data: object,
-  asCurrentUser: ElasticsearchClient
+  asCurrentUser: ElasticsearchClient,
+  applyDefaultFields: boolean,
+  request: KibanaRequest
 ) {
   try {
     const { body: indexExists } = await asCurrentUser.indices.exists({ index });
@@ -26,7 +29,11 @@ export async function writeDataToIndex(
         })
       );
     }
-    const settings: WriteSettings = { index, body: data, refresh: true };
+    const writeData = {
+      ...data,
+      ...(applyDefaultFields ? getDefaultFields(request) : {}),
+    };
+    const settings: WriteSettings = { index, body: writeData, refresh: true };
     const { body: resp } = await asCurrentUser.index(settings);
     if (resp.result === 'Error') {
       throw resp;
@@ -43,3 +50,12 @@ export async function writeDataToIndex(
     };
   }
 }
+
+const getDefaultFields = (request: KibanaRequest) => {
+  const user = getSecurityPlugin().authc.getCurrentUser(request);
+  const timestamp = new Date().toISOString();
+  return {
+    user: user?.username,
+    '@timestamp': timestamp,
+  };
+};

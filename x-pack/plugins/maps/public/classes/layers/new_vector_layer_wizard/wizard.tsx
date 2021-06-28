@@ -59,7 +59,10 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
   _createNewIndex = async () => {
     let indexPatternId: string | undefined;
     try {
-      const response = await createNewIndexAndPattern(this.state.indexName);
+      const response = await createNewIndexAndPattern({
+        indexName: this.state.indexName,
+        applyDefaultMappings: true,
+      });
       indexPatternId = response.indexPatternId;
     } catch (e) {
       this._setCreateIndexError(e.message);
@@ -86,6 +89,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       indexPatternId,
       geoField: 'coordinates',
       filterByMapBounds: false,
+      useDefaultMappings: true,
     });
     const layerDescriptor = VectorLayer.createDescriptor(
       { sourceDescriptor },

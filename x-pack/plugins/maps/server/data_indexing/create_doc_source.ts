@@ -15,20 +15,29 @@ import {
 import { IndexPatternsCommonService } from '../../../../../src/plugins/data/server';
 
 const DEFAULT_SETTINGS = { number_of_shards: 1 };
-const DEFAULT_MAPPINGS = {
+const STD_DEFAULT_MAPPINGS = {
   _meta: {
     created_by: INDEX_META_DATA_CREATED_BY,
+  },
+};
+const OPT_IN_DEFAULT_MAPPINGS_PROPERTIES = {
+  '@timestamp': {
+    type: 'date',
+  },
+  user: {
+    type: 'keyword',
   },
 };
 
 export async function createDocSource(
   index: string,
+  applyDefaultMappings: boolean,
   mappings: IndexSourceMappings,
   { asCurrentUser }: IScopedClusterClient,
   indexPatternsService: IndexPatternsCommonService
 ): Promise<CreateDocSourceResp> {
   try {
-    await createIndex(index, mappings, asCurrentUser);
+    await createIndex(index, applyDefaultMappings, mappings, asCurrentUser);
     const { id: indexPatternId } = await indexPatternsService.createAndSave({ title: index }, true);
 
     return {
@@ -45,13 +54,18 @@ export async function createDocSource(
 
 async function createIndex(
   indexName: string,
+  applyDefaultMappings: boolean,
   mappings: IndexSourceMappings,
   asCurrentUser: ElasticsearchClient
 ) {
   const body: { mappings: IndexSourceMappings; settings: BodySettings } = {
     mappings: {
-      ...DEFAULT_MAPPINGS,
+      ...STD_DEFAULT_MAPPINGS,
       ...mappings,
+      properties: {
+        ...mappings.properties,
+        ...(applyDefaultMappings ? OPT_IN_DEFAULT_MAPPINGS_PROPERTIES : {}),
+      },
     },
     settings: DEFAULT_SETTINGS,
   };
