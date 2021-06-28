@@ -38,6 +38,7 @@ import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { EngineOverview } from '../engine_overview';
 import { AppSearchPageTemplate } from '../layout';
+import { NotFound } from '../not_found';
 import { RelevanceTuning } from '../relevance_tuning';
 import { ResultSettings } from '../result_settings';
 import { SchemaRouter } from '../schema';
@@ -45,7 +46,7 @@ import { SearchUI } from '../search_ui';
 import { SourceEngines } from '../source_engines';
 import { Synonyms } from '../synonyms';
 
-import { EngineLogic } from './';
+import { EngineLogic, getEngineBreadcrumbs } from './';
 
 export const EngineRouter: React.FC = () => {
   const {
@@ -159,6 +160,9 @@ export const EngineRouter: React.FC = () => {
           <ApiLogs />
         </Route>
       )}
+      <Route>
+        <NotFound pageChrome={getEngineBreadcrumbs()} />
+      </Route>
     </Switch>
   );
 };

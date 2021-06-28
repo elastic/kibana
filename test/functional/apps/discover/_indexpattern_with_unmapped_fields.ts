@@ -12,26 +12,31 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const log = getService('log');
+  const security = getService('security');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
   describe('index pattern with unmapped fields', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/unmapped_fields');
+      await security.testUser.setRoles(['kibana_admin', 'test-index-unmapped-fields']);
+      const fromTime = 'Jan 20, 2021 @ 00:00:00.000';
+      const toTime = 'Jan 25, 2021 @ 00:00:00.000';
+
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'test-index-unmapped-fields',
         'discover:searchFieldsFromSource': false,
+        'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
       });
-      log.debug('discover');
-      const fromTime = 'Jan 20, 2021 @ 00:00:00.000';
-      const toTime = 'Jan 25, 2021 @ 00:00:00.000';
+
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async () => {
       await esArchiver.unload('test/functional/fixtures/es_archiver/unmapped_fields');
+      await kibanaServer.uiSettings.unset('defaultIndex');
+      await kibanaServer.uiSettings.unset('discover:searchFieldsFromSource');
+      await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
     });
 
     it('unmapped fields exist on a new saved search', async () => {
