@@ -25,7 +25,6 @@ interface FlyoutPaneComponentProps {
 
 const StyledEuiFlyout = styled(EuiFlyout)<EuiFlyoutProps>`
   animation: none;
-  z-index: ${({ theme }) => theme.eui.euiZLevel8};
 `;
 
 const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({

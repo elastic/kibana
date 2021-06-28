@@ -33,21 +33,22 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
 export const GlobalHeader = React.memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
     const portalNode = useMemo(() => createPortalNode(), []);
-    const { http } = useKibana().services;
+    const {
+      http: {
+        basePath: { prepend },
+      },
+    } = useKibana().services;
     const { pathname } = useLocation();
 
     useEffect(() => {
-      let unmount = () => {};
-
       setHeaderActionMenu((element) => {
         const mount = toMountPoint(<OutPortal node={portalNode} />);
-        unmount = mount(element);
-        return unmount;
+        return mount(element);
       });
 
       return () => {
         portalNode.unmount();
-        unmount();
+        setHeaderActionMenu(undefined);
       };
     }, [portalNode, setHeaderActionMenu]);
 
@@ -64,7 +65,7 @@ export const GlobalHeader = React.memo(
               <EuiHeaderLink
                 color="primary"
                 data-test-subj="add-data"
-                href={http.basePath.prepend(ADD_DATA_PATH)}
+                href={prepend(ADD_DATA_PATH)}
                 iconType="indexOpen"
               >
                 {BUTTON_ADD_DATA}
