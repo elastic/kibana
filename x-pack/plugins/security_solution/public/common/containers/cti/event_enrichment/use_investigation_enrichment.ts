@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { isEmpty } from 'lodash';
 
 import { EventFields } from '../../../../../common/search_strategy/security_solution/cti';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -55,13 +56,15 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
   }, [addError, error]);
 
   useEffect(() => {
-    start({
-      data: kibana.services.data,
-      timerange: { from, to, interval: '' },
-      defaultIndex: ['filebeat-*'], // TODO do we apply the current sources here?
-      eventFields,
-      filterQuery: '', // TODO do we apply the current filters here?
-    });
+    if (!isEmpty(eventFields)) {
+      start({
+        data: kibana.services.data,
+        timerange: { from, to, interval: '' },
+        defaultIndex: ['filebeat-*'], // TODO do we apply the current sources here?
+        eventFields,
+        filterQuery: '', // TODO do we apply the current filters here?
+      });
+    }
   }, [from, start, kibana.services.data, to, eventFields]);
 
   return {
