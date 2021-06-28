@@ -3,29 +3,6 @@
 
 {kib} provides several editors that you can use to create panels of your data.
 
-[cols="2"]
-|===
-
-| <<lens,*Lens*>>
-| Create visualizations with the drag and drop editor.
-
-| <<maps,*Maps*>>
-| Create visualizations with your geographical data.
-
-| <<tsvb,*TSVB*>>
-| Create visualizations with your time series data.
-
-| <<vega,*Vega*>>
-| Create custom visualizations with the *Vega* and *Vega-Lite* grammars.
-
-| <<add-aggregation-based-visualization-panels,*Aggregation based*>>
-| Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
-
-| <<timelion,*Timelion*>>
-| Create visualizations with your time series data using a simple expression language.
-
-|===
-
 [float]
 [[lens-editor]]
 === Lens
@@ -35,8 +12,7 @@ users.
 
 With *Lens*, you can:
 
-* Use the automatically generated suggestions to change the visualization type.
-* Create visualizations with multiple layers and indices.
+* Create visualizations with multiple layers, indices, and visualization types.
 * Change the aggregation and labels to customize the data.
 * Perform math on aggregations using *Formula*.
 * Use time shifts to compare data at two times, such as month over month.
@@ -126,6 +102,497 @@ Aggregation-based visualizations include the following limitations:
 
 [role="screenshot"]
 image:dashboard/images/timelion.png[Timelion]
+
+[float]
+[[aggregation-reference]]
+=== Supported editor features
+
+Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations].
+This reference can help simplify the comparison if you need a specific feature.
+
+[float]
+[[chart-types]]
+=== Supported panel types
+
+[options="header"]
+|===
+
+| Type | *Lens* | *TSVB* | *Aggregation-based* | *Vega* | *Timelion*
+
+| Table
+| &check;
+| &check;
+| &check;
+|
+|
+
+| Bar, line, and area
+| &check;
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Split chart and small multiples
+|
+| &check;
+| &check;
+| &check;
+|
+
+| Pie and donut
+| &check;
+|
+| &check;
+| &check;
+|
+
+| Sunburst
+| &check;
+|
+| &check;
+| &check;
+|
+
+| Treemap
+| &check;
+|
+|
+| &check;
+|
+
+| Heat map
+| &check;
+| &check;
+| &check;
+| &check;
+|
+
+| Gauge and Goal
+|
+| &check;
+| &check;
+| &check;
+|
+
+| Markdown
+|
+| &check;
+|
+|
+|
+
+| Metric
+| &check;
+| &check;
+| &check;
+| &check;
+|
+
+| Tag cloud
+|
+|
+| &check;
+| &check;
+|
+
+|===
+
+[float]
+[[table-features]]
+=== Table features
+
+[options="header"]
+|===
+
+| Type | *Lens* | *TSVB* | *Aggregation-based*
+
+| Summary row
+| &check;
+|
+| &check;
+
+| Pivot table
+| &check;
+|
+|
+
+| Calculated column
+| Formula
+| &check;
+| Percent only
+
+| Color by value
+| &check;
+| &check;
+|
+
+|===
+
+[float]
+[[xy-features]]
+=== Bar, line, area features
+
+[options="header"]
+|===
+
+| Type | *Lens* | *TSVB* | *Aggregation-based* | *Vega* | *Timelion*
+
+| Dense time series
+| Customizable
+| &check;
+| Customizable
+| &check;
+| &check;
+
+| Percentage mode
+| &check;
+| &check;
+| &check;
+| &check;
+|
+
+| Break downs
+| 1
+| 1
+| 3
+| &infin;
+| 1
+
+| Custom color with break downs
+|
+| Only for Filters
+| &check;
+| &check;
+|
+
+| Fit missing values
+| &check;
+|
+| &check;
+| &check;
+| &check;
+
+| Synchronized tooltips
+|
+| &check;
+|
+|
+|
+
+|===
+
+[float]
+[[bucket-aggregations]]
+=== Bucket aggregations
+
+For information about {es} bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
+
+[options="header"]
+|===
+| Type | *Lens* | *TSVB* | *Aggregation-based* | *Vega*
+
+| Histogram
+| &check;
+| 
+| &check;
+| &check;
+
+| Date histogram
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Date range
+| Use filters
+| 
+| &check;
+| &check;
+
+| Filter
+|
+| &check;
+|
+| &check;
+
+| Filters
+| &check;
+| &check;
+| &check;
+| &check;
+
+| GeoHash grid
+| 
+| 
+| &check;
+| &check;
+
+| IP range
+| Use filters
+| Use filters
+| &check;
+| &check;
+
+| Range
+| &check;
+| Use filters
+| &check;
+| &check;
+
+| Terms
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Significant terms
+|
+|
+| &check;
+| &check;
+
+|===
+
+[float]
+[[metrics-aggregations]]
+=== Metrics aggregations
+
+For information about {es} metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
+
+[options="header"]
+|===
+
+| Type | *Lens* | *TSVB* | *Aggregation-based* | *Vega*
+
+| Metrics with filters
+| &check;
+|
+|
+| &check;
+
+| Average, Sum, Max, Min
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Unique count (Cardinality)
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Percentiles and Median
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Percentiles Rank
+|
+| &check;
+| &check;
+| &check;
+
+| Standard deviation
+|
+| &check;
+| &check;
+| &check;
+
+| Sum of squares
+|
+| &check;
+|
+| &check;
+
+| Top hit (Last value)
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Value count 
+| 
+| 
+| &check;
+| &check;
+
+| Variance
+| 
+| &check;
+| 
+| &check;
+
+|===
+
+[float]
+[[pipeline-aggregations]]
+=== Pipeline aggregations
+
+For information about {es} pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
+
+[options="header"]
+|===
+
+| Type | *Lens* | *TSVB* | *Aggregation-based* | *Vega*
+
+| Avg bucket  
+| <<lens-formulas, `overall_average` formula>>
+| &check;
+| &check;
+| &check;
+
+| Derivative  
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Max bucket   
+| <<lens-formulas, `overall_max` formula>>
+| &check;
+| &check;
+| &check;
+
+| Min bucket   
+| <<lens-formulas, `overall_min` formula>>
+| &check;
+| &check;
+| &check;
+
+| Sum bucket  
+| <<lens-formulas, `overall_sum` formula>>
+| &check;
+| &check;
+| &check;
+ 
+| Moving average  
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Cumulative sum 
+| &check;
+| &check;
+| &check;
+| &check;
+
+| Bucket script 
+| 
+| 
+| &check;
+| &check;
+
+| Bucket selector
+| 
+| 
+|
+| &check;
+
+| Serial differencing 
+| 
+| &check;
+| &check;
+| &check;
+
+|===
+
+[float]
+[[custom-functions]]
+=== Additional functions
+
+[options="header"]
+|===
+
+| Type | *Lens* | *TSVB* | *Aggregation-based*
+
+| Counter rate
+| &check;
+| &check;
+|
+
+| <<tsvb-function-reference, Filter ratio>>
+| Use <<lens-formulas, formula>>
+| &check;
+|
+
+| <<tsvb-function-reference, Positive only>>
+|
+| &check;
+|
+
+| <<tsvb-function-reference, Series agg>>
+|
+| &check;
+|
+
+| Static value
+|
+| &check;
+|
+
+
+|===
+
+[float]
+[[other-features]]
+=== Other features
+
+This comparison is meant for users who are not sure about which {kib} panel type to
+build their advanced visualization.
+
+[options="header"]
+|===
+
+| Type | *Lens* | *TSVB* | *Aggregation-based* | *Vega* | *Timelion*
+
+| Math
+| &check;
+| &check;
+|
+| &check;
+| &check;
+
+| Visualize two indices
+| &check;
+| &check;
+|
+| &check;
+| &check;
+
+| Math across indices
+|
+|
+|
+| &check;
+| &check;
+
+| Time shifts
+| &check;
+| &check;
+|
+| &check;
+| &check;
+
+| Fully custom {es} queries
+|
+|
+|
+| &check;
+|
+
+| Normalize by time
+| &check;
+| &check;
+|
+|
+|
+
+
+|===
 
 include::lens.asciidoc[]
 include::tsvb.asciidoc[]

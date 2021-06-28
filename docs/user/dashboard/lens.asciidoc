@@ -42,7 +42,7 @@ TIP: For sparse datasets, *Empty fields* can contain data, which you can use to 
 
 [float]
 [[view-the-data-summaries]]
-===== View the data summaries
+==== View the data summaries
 
 For each field, *Lens* displays a summary depending on the type of data. To analyze the fields, *Lens* uses a sample of 5,000 documents. 
 Each summary displays the percentage of sampled documents over all available documents.
@@ -77,38 +77,6 @@ Drag and drop the fields on to the visualization builder, then customize the vis
 
 * From the *Chart Type* dropdown, click the visualization.
 
-. To configure the data, use the editor, then click *Close*.
-
-. To configure the visualization, use the dropdown menus.
-+
-[role="screenshot"]
-image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
-
-[float]
-[[add-fields-in-lens]]
-===== Add fields
-
-Add and define fields to the index pattern that you want to visualize using the {ref}/modules-scripting-painless.html[Painless scripting language].
-The fields that you are add are saved to the index pattern and appear in all visualizations, saved searches, and saved objects that use the index pattern. 
-
-. Click *...*, then select *Add field to index pattern*.
-+
-[role="screenshot"]
-image:images/runtime-field-menu.png[Dropdown menu located next to index pattern field with items for adding and managing fields, width=50%]
-
-. Enter a *Name* for the field, then select the field *Type*.
-
-. Select *Set value*, then define the field value by emitting a single value using the {ref}/modules-scripting-painless.html[Painless scripting language].
-
-. Click *Save*.
-+
-To manage the field, click the field, then click *Edit index pattern field* or *Remove index pattern field*.
-+
-[role="screenshot"]
-image:images/manage-runtime-field.gif[Field menu to edit or remove field from index pattern, width=50%]
-
-For more information about adding fields to index patterns and Painless scripting language examples, refer to <<runtime-fields,Runtime fields>>.
-
 [float]
 [[drag-and-drop-keyboard-navigation]]
 ===== Create visualizations with keyboard navigation
@@ -140,40 +108,150 @@ image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
 . Press Space bar to confirm, or to cancel, press Esc.
 
 [float]
+[[add-fields-in-lens]]
+==== Add fields
+
+Add and define fields to the index pattern that you want to visualize using the {ref}/modules-scripting-painless.html[Painless scripting language].
+The fields that you are add are saved to the index pattern and appear in all visualizations, saved searches, and saved objects that use the index pattern. 
+
+. Click *...*, then select *Add field to index pattern*.
++
+[role="screenshot"]
+image:images/runtime-field-menu.png[Dropdown menu located next to index pattern field with items for adding and managing fields, width=50%]
+
+. Enter a *Name* for the field, then select the field *Type*.
+
+. Select *Set value*, then define the field value by emitting a single value using the {ref}/modules-scripting-painless.html[Painless scripting language].
+
+. Click *Save*.
++
+To manage the field, click the field, then click *Edit index pattern field* or *Remove index pattern field*.
++
+[role="screenshot"]
+image:images/manage-runtime-field.gif[Field menu to edit or remove field from index pattern, width=50%]
+
+For more information about adding fields to index patterns and Painless scripting language examples, refer to <<runtime-fields,Runtime fields>>.
+
+[float]
+[[configure-the-visualization]]
+==== Configure the visualization
+
+To configure the visualization, use the editor. For each visualization type, the editor options are different. 
+
+For area, bar, and line charts, you can add multiple layers. To display multiple index patterns and visualization types, you can specify an index pattern and visualization type for each layer. Each layer is made of dimensions that include the field you want to visualize, the bucket and metrics aggregation functions, and the display options. Dimensions are grouped by *Vertical axis*, *Hortizontal axis*, and *Break down by*. The *Vertical axis* and *Hortizontal axis* groups support multiple dimensions.
+
+All other visualization types support a single set of dimensions. The dimension groups are different for each visualization type, but also include the field, aggregation functions, and display options.
+
+[float]
 [[lens-formulas]]
-==== Use formulas to perform math
+===== Use formulas to perform math
 
-Formulas let you perform math on aggregated data in Lens by typing
-math and quick functions. To access formulas,
-click the *Formula* tab in the dimension editor. Access the complete
-reference for formulas from the help menu.
+Formulas let you perform math on aggregated data. The most common formulas are dividing two values to produce a percent.
 
-The most common formulas are dividing two values to produce a percent.
-To display accurately, set *Value format* to *Percent*.
+. In the editor, click a dimension.
 
-Filter ratio::
-
-Use `kql=''` to filter one set of documents and compare it to other documents within the same grouping.
-For example, to see how the error rate changes over time:
+. Click *Formula*, then enter the formula. 
++
+Filter ratio example:: Use `kql=''` to filter one set of documents, then compare the document set to other documents within the same grouping:
++
+See how the error rate changes over time:
 +
 ```
 count(kql='response.status_code > 400') / count()
 ```
-
-Week over week:: Use `shift='1w'` to get the value of each grouping from
-the previous week. Time shift should not be used with the *Top values* function.
++
+Week over week example:: Use `shift='1w'` to get the value of each grouping from the previous week. Time shift should not be used with the *Top values* function.
 +
 ```
 percentile(system.network.in.bytes, percentile=99) /
 percentile(system.network.in.bytes, percentile=99, shift='1w')
 ```
-
-Percent of total:: Formulas can calculate `overall_sum` for all the groupings,
++
+Percent of total example:: Formulas can calculate `overall_sum` for all the groupings,
 which lets you convert each grouping into a percent of total:
 +
 ```
 sum(products.base_price) / overall_sum(sum(products.base_price))
 ```
++
+TIP: For detailed information on formulas, click image:dashboard/images/formula_reference.png[Formula reference icon].
+
+. To accurately display formulas in your visualization, select *Percent* from the *Value format* dropdown.
+
+[float]
+[[compare-data-with-time-offsets]]
+===== Compare data with time offsets
+
+Compare your real-time data set to the results offset by a time increment. For example, you can compare the real-time percentage of a user CPU time spent to the results offset by one hour. 
+
+. In the editor, click the dimension you want to offset.
+
+. From the *Add advanced options* dropdown, select *Time shift*.
+
+. Select the time offset increment. 
+
+[float]
+[[create-custom-tables]]
+===== Create custom tables
+
+*Lens* tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.
+
+. From the *Chart type* dropdown, select *Table*. 
+
+. Drag and drop the fields you want to visualize on to the visualization builder. 
+
+. To sort or hide the columns, click the arrow next to the column heading, then select an option.
+
+. To change the display options, click a *Metrics* dimension, then configure the following options:
+
+* *Display name* &mdash; Specifies the dimension name. 
+
+* *Value format* &mdash; Specifies how the dimension value displays in the table. 
+
+* *Text alignment* &mdash; Aligns the values in the cell to the *Left*, *Center*, or *Right*.
+
+* *Hide column* &mdash; Hides the dimension column.
+
+* *Summary row* &mdash; Adds a row that displays the specified summary value. When specified, allows you to enter a *Summary label*.
+
+* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
+
+[float]
+[[configure-the-visualization]]
+==== Configure the visualization components
+
+To configure the visualization components, use the dropdown menus. The visualization components include visual options, data labels, legend, and axis. The dropdown menus differ depending on the visualization type.
+
+[role="screenshot"]
+image:images/lens_dropdown_menus.gif[Dropdown menus in Lens for configuring the visualization components, width=50%]
+
+For example, you can add data labels to a subset of visualizations:
+
+* *Bar* and *Horizontal Bar*
++
+[role="screenshot"]
+image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
+
+NOTE: In bar charts, you are unable to move the label positions.
+
+* *Pie*, *Donut*, and *Treemap*
++
+[role="screenshot"]
+image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
+
+[float]
+[[filter-the-data]]
+==== Filter the data
+
+Apply filters to visualizations based on the dimensions in the legend. Only *Bar*, *Line and area*, and *Proportion* visualizations support legend filters.
+
+. In the legend, open the filter menu for the dimension.
+
+. Choose one of the following options:
+
+* *Filter for value* &mdash; Applies a filter for the dimension value to the visualization.
+
+* *Filter out value* &mdash; Applies a filter that removes the dimension value from the visualization.
 
 [float]
 [[lens-faq]]
@@ -197,7 +275,7 @@ Use the *Filters* function in the following scenarios:
 
 Use the *Filter by* advanced option in the following scenarios:
 
-* When you want to assign a custom color to each filter in a bar, line or area chart.
+* When you want to assign a custom color to each filter in a bar, line, or area chart.
 
 * When you want to build a complex table, such as showing both failure rate and overall.
 
@@ -224,24 +302,6 @@ To create a custom interval:
 . Select *Customize time interval*.
 
 . Change the *Minimum interval*, then click *Close*.
-
-[float]
-[[can-i-show-value-labels-for-my-chart]]
-===== How do I display value labels?
-
-A subset of *Lens* visualizations support value labels.
-
-* *Bar* and *Horizontal Bar*
-+
-[role="screenshot"]
-image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
-
-NOTE: In bar charts, you are unable to move the label positions.
-
-* *Pie*, *Donut*, and *Treemap*
-+
-[role="screenshot"]
-image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
 
 [float]
 [[what-is-the-other-category]]
@@ -279,6 +339,31 @@ image::images/lens_bucketed_aggregation_advanced_dropdown.png[Lens Advanced opti
 *Lens* provides you with color pallettes that you can apply to the entire visualization, but you are unable to change the color for a single data point, such as a bar or line.
 
 [float]
+[[is-it-possible-to-have-more-than-one-Y-axis-scale]]
+===== Is it possible to have more than one y-axis scale in visualizations?
+
+*Lens* lets you pick, for each Y dimension, up to two distinct axis: *left* and *right*. Each axis can have a different scale.
+
+[float]
+[[why-is-my-value-with-the-right-color-using-value-based-coloring]]
+===== Why is my value with the incorrect color when using value-based coloring?
+
+There could be various reasons for a specific value in the table to have a different color than expected.
+
+Here's a short list of few different aspects to check:
+* Make sure the value falls within the desired color stop value defined in the panel. Color stop values are "inclusive".
+
+* Make sure you have the right value precision setup: value formatters could round the numeric values up or down.
+
+* Make sure the right color continuity option is selected: if the number is below the first color stop value, a continuity of type `Below` or `Above and below range` is required.
+
+* The default values set by the Value type are based on the current data range displayed on the data table.
+
+** If a custom `Number` configuration is used, check that the color stop values are covering the current data range.
+
+** If a `Percent` configuration is used, and the data range changes, the colors displayed are affected.
+
+[float]
 [[can-i-sort-by-multiple-columns]]
 ===== How do I sort by multiple columns?
 
@@ -307,19 +392,10 @@ Visualizing saved searches in unsupported in *Lens*.
 Configuring the *Suggestions* that *Lens* automatically populates is unsupported.
 
 [float]
-[[is-it-possible-to-use-different-indexpatterns-in-lens]]
-===== Can I visualize multiple index patterns in a single visualization?
-
-You can create *Bar*, *Line* and *Area* charts from multiple index patterns.
-
-Each *Layer* in a visualization is associated with an index pattern and mutiple *Layers* can be combined together within the same visualization. Each *Layer* also has a chart switcher button in order to select the best type of visualization for the specific dataset.
-You can also change the index pattern for a single *Layer*.
-
-[float]
 [[why-my-field-x-is-missing-from-the-fields-list]]
 ===== Why is my field X missing from the fields list?
 
-*Lens* does not support the visualization of full-text fields, therefore it is not showing them in the data summary.
+Full-text fields are unsupported in *Lens* and do not appear in data summaries.
 
 [float]
 [[how-to-handle-gaps-in-time-series-visualizations]]
@@ -336,7 +412,7 @@ image::images/lens_missing_values_strategy.png[Lens Missing values strategies me
 [[is-it-possible-to-change-the-scale-of-Y-axis]]
 ===== Is it possible to statically define the scale of the y-axis in a visualization?
 
-Yes, you can set the bounds on bar, line and area chart types in Lens, unless using percentage mode. Bar
+You can set the bounds on bar, line, and area charts, unless using percentage mode. Bar
 and area charts must have 0 in the bounds. Logarithmic scales are unsupported in *Lens*.
 To set the y-axis bounds, click the icon representing the axis you want to customize.
 
@@ -346,27 +422,4 @@ To set the y-axis bounds, click the icon representing the axis you want to custo
 
 Pagination in a data table is unsupported in *Lens*. However, the <<types-of-visualizations,aggregation-based data table>> supports pagination.
 
-[float]
-[[is-it-possible-to-have-more-than-one-Y-axis-scale]]
-===== Is it possible to have more than one y-axis scale in visualizations?
 
-*Lens* lets you pick, for each Y dimension, up to two distinct axis: *left* and *right*. Each axis can have a different scale.
-
-[float]
-[[why-is-my-value-with-the-right-color-using-value-based-coloring]]
-===== Why is my value with the incorrect color when using value-based coloring?
-
-There could be various reasons for a specific value in the table to have a different color than expected.
-
-Here's a short list of few different aspects to check:
-* Make sure the value falls within the desired color stop value defined in the panel. Color stop values are "inclusive".
-
-* Make sure you have the right value precision setup: value formatters could round the numeric values up or down.
-
-* Make sure the right color continuity option is selected: if the number is below the first color stop value, a continuity of type `Below` or `Above and below range` is required.
-
-* The default values set by the Value type are based on the current data range displayed on the data table.
-
-** If a custom `Number` configuration is used, check that the color stop values are covering the current data range.
-
-** If a `Percent` configuration is used, and the data range changes, the colors displayed are affected.

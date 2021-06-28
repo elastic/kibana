@@ -319,5 +319,3 @@ include::create-panels-with-editors.asciidoc[]
 include::enhance-dashboards.asciidoc[]
 
 include::drilldowns.asciidoc[]
-
-include::aggregation-reference.asciidoc[]

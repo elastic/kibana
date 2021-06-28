@@ -42,15 +42,6 @@ image::images/lens_end_to_end_1_2.png[Lens index pattern selector, width=50%]
 This tutorial uses `Records`, timestamp`, `bytes`, `clientip`, and `referer.keyword`.
 To see the most frequent values of a field, click the field name to view a summary.
 
-The main elements of *Lens* are named:
-
-Workspace panel:: Displays your visualization. You can drag and drop onto this area.
-Dimensions:: Each dimension is a function with extra options. Dimensions are grouped
-for each visualization type, for example the *Vertical axis* is a group that allows
-multiple dimensions. Each dimension starts empty with the label *Drop a field or click to add*.
-Functions:: There are two main types of functions: *buckets* and *metrics*, which are
-equivalent to what {es} provides.
-
 [discrete]
 [[view-the-number-of-website-visitors]]
 === Create your first visualization
@@ -63,7 +54,7 @@ visualization type after configuring your functions.
 
 * *Choose your field.* Do you know the dimension group you want to use the field in? If you do,
 drag and drop the field from the field list to your chosen dimension and Lens will pick a function for you.
-If you don't, drag and drop the field onto the workspace panel. Skip this step if you are
+If you don't, drag and drop the field onto the visualization builder. Skip this step if you are
 using the *Filters* function.
 
 * *Edit and delete.* To change the function or styling options, click the dimension to open
@@ -81,7 +72,7 @@ of the `clientip` field.
 [role="screenshot"]
 image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected, width=50%]
 
-. From the *Available fields* list, drag and drop `clientip` to the workspace panel.
+. From the *Available fields* list, drag and drop `clientip` to the visualization builder.
 Lens selects *Unique count* because it is the only numeric function
 that works for IP addresses. You can also drag and drop `clientip` onto
 the empty dimension for the same result.
@@ -120,13 +111,13 @@ width. The row for the metric will have 4 items on it later.
 === View a metric over time
 
 *Lens* has two shortcuts that simplify viewing metrics over time. 
-If you drag and drop a numeric field to the workspace panel, *Lens* adds the default
+If you drag and drop a numeric field to the visualization builder, *Lens* adds the default
 time field from the index pattern. If the *Date histogram* function is being used,
-quickly replace the time field by dragging and dropping on the workspace panel.
+quickly replace the time field by dragging and dropping on the visualization builder.
 
 To visualize the `bytes` field over time without choosing a visualization type or function:
 
-. From the *Available fields* list, drag and drop `bytes` onto the workspace panel to have *Lens* automatically
+. From the *Available fields* list, drag and drop `bytes` onto the visualization builder to have *Lens* automatically
 create a chart. *Lens* creates a bar chart with two dimensions, *timestamp* and *Median of bytes*.
 
 . *Lens* automatically chooses a date interval. To zoom in on the data you want to view,
@@ -188,7 +179,7 @@ The *Top values* function ranks the unique values of a field by another dimensio
 The values are the most frequent when ranked by a *Count* dimension.
 The values are the largest when ranked by a *Sum* dimension.
 
-When you drag and drop a text or IP address field onto the workspace panel,
+When you drag and drop a text or IP address field onto the visualization builder,
 *Lens* adds a *Top values* function ranked by *Count of records* to show the most frequent values.
 
 For this tutorial, you have picked a field and function, but not a visualization type.
