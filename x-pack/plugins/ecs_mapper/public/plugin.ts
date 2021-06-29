@@ -7,7 +7,7 @@
 
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { DevToolsSetup } from 'src/plugins/dev_tools/public';
-import { LicensingPluginSetup } from '../../licensing/public/types';
+import { LicensingPluginSetup } from '../../licensing/public';
 import { FileUploadPluginStart } from '../../file_upload/public';
 import { Plugin } from '../../../../src/core/public';
 
