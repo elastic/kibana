@@ -53,7 +53,7 @@ To enable filtering your dashboard by map extent:
 * Open the main menu, and then click *Dashboard*.
 * Select your dashboard from the list or click *Create dashboard*.
 * If your dashboard does not have a map, add a map panel.
-* Click the gear icon image:maps/images/gear_icon.png[] to open the map panel menu.
+* Click the gear icon image:maps/images/gear_icon.png[gear icon] to open the map panel menu.
 * Select *More* to view all panel options.
 * Select *Enable filter by map extent*.
 
