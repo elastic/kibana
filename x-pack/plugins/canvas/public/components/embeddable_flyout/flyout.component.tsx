@@ -56,9 +56,9 @@ export const AddEmbeddableFlyout: FC<Props> = ({ onSelect, availableEmbeddables,
   const embeddableFactories = getEmbeddableFactories();
 
   const availableSavedObjects = Array.from(embeddableFactories)
-    .filter((factory) => {
-      return availableEmbeddables.includes(factory.type);
-    })
+    // .filter((factory) => {
+    //   return availableEmbeddables.includes(factory.type);
+    // })
     .map((factory) => factory.savedObjectMetaData)
     .filter<SavedObjectMetaData<{}>>(function (
       maybeSavedObjectMetaData

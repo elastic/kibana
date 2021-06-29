@@ -26,3 +26,7 @@ export const capabilitiesServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };
+
+const applicationStartMock = {
+  capabilities: { navLinks: { management: true, dev_tools: true } },
+} as ApplicationStart;

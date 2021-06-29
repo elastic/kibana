@@ -63,9 +63,10 @@ const mergeProps = (
       const partialElement = {
         expression: `markdown "Could not find embeddable for type ${type}" | render`,
       };
-      if (allowedEmbeddables[type]) {
-        partialElement.expression = allowedEmbeddables[type](id);
-      }
+      // if (allowedEmbeddables[type]) {
+      partialElement.expression =
+        `embeddable id="${id}" type="${type}" | render` || allowedEmbeddables[type](id);
+      // }
 
       addEmbeddable(pageId, partialElement);
       ownProps.onClose();
@@ -99,7 +100,10 @@ export class EmbeddableFlyoutPortal extends React.Component<ComponentProps> {
   render() {
     if (this.el) {
       return ReactDOM.createPortal(
-        <Component {...this.props} availableEmbeddables={Object.keys(allowedEmbeddables)} />,
+        <Component
+          {...this.props}
+          availableEmbeddables={[...Object.keys(allowedEmbeddables), 'LOG_STREAM_EMBEDDABLE']}
+        />,
         this.el
       );
     }

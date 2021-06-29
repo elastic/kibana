@@ -12,7 +12,9 @@ import { StartDeps } from '../../plugin';
 import {
   IEmbeddable,
   EmbeddableFactory,
+  isErrorEmbeddable,
   EmbeddableFactoryNotFoundError,
+  isSavedObjectEmbeddableInput,
 } from '../../../../../../src/plugins/embeddable/public';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
@@ -55,6 +57,7 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType }, handlers) => {
+      console.log({ handlers, embeddableType });
       const uniqueId = handlers.getElementId();
 
       if (!embeddablesRegistry[uniqueId]) {
@@ -67,12 +70,20 @@ export const embeddableRendererFactory = (
           throw new EmbeddableFactoryNotFoundError(embeddableType);
         }
 
-        const embeddablePromise = factory
-          .createFromSavedObject(input.id, input)
-          .then((embeddable) => {
-            embeddablesRegistry[uniqueId] = embeddable;
-            return embeddable;
-          });
+        console.log({ input });
+
+        const embeddablePromise = input
+          ? factory.createFromSavedObject(input.id, input).then((embeddable) => {
+              embeddablesRegistry[uniqueId] = embeddable;
+              return embeddable;
+            })
+          : factory.create(input).then((embeddable) => {
+              if (embeddable && !isErrorEmbeddable(embeddable)) {
+                embeddablesRegistry[uniqueId] = embeddable;
+              }
+              return embeddable;
+            });
+
         embeddablesRegistry[uniqueId] = embeddablePromise;
 
         const embeddableObject = await (async () => embeddablePromise)();
