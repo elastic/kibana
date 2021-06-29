@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectsClient } from '../../../../../src/core/server';
 import type { SpacesPluginSetup } from '../../../spaces/server';
 import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
@@ -39,7 +40,8 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
         request,
         authz,
         audit.asScoped(request),
-        spacesAuditLogger
+        spacesAuditLogger,
+        SavedObjectsClient.errors
       )
   );
 };

@@ -6,6 +6,7 @@
  */
 import { isoToEpochRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { observabilityFeatureId } from '../../common';
 import { alertStatusRt } from '../../common/typings';
 import { getTopAlerts } from '../lib/rules/get_top_alerts';
 import { createObservabilityServerRoute } from './create_observability_server_route';
@@ -51,7 +52,7 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
     tags: [],
   },
   handler: async ({ ruleDataClient }) => {
-    const reader = ruleDataClient.getReader({ namespace: 'observability' });
+    const reader = ruleDataClient.getReader({ namespace: observabilityFeatureId });
 
     return reader.getDynamicIndexPattern();
   },
