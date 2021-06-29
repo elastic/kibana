@@ -196,7 +196,7 @@ export class TelemetryEndpointTask {
     });
 
     // Feature flag disabling channel send for now
-    this.sender.sendOnDemand('endpoint-metadata', telemetryPayloads, true);
+    this.sender.sendOnDemand('endpoint-metadata', telemetryPayloads);
     return telemetryPayloads.length;
   };
 }

@@ -338,11 +338,7 @@ export class TelemetryEventsSender {
    * @param channel the elastic telemetry channel
    * @param toSend telemetry events
    */
-  public async sendOnDemand(
-    channel: string,
-    toSend: unknown[],
-    featureDisableSending: boolean = true
-  ) {
+  public async sendOnDemand(channel: string, toSend: unknown[]) {
     try {
       const [telemetryUrl, clusterInfo, licenseInfo] = await Promise.all([
         this.fetchTelemetryUrl(channel),
@@ -355,15 +351,13 @@ export class TelemetryEventsSender {
         `cluster_uuid: ${clusterInfo?.cluster_uuid} cluster_name: ${clusterInfo?.cluster_name}`
       );
 
-      if (!featureDisableSending) {
-        await this.sendEvents(
-          toSend,
-          telemetryUrl,
-          clusterInfo.cluster_uuid,
-          clusterInfo.version?.number,
-          licenseInfo?.uid
-        );
-      }
+      await this.sendEvents(
+        toSend,
+        telemetryUrl,
+        clusterInfo.cluster_uuid,
+        clusterInfo.version?.number,
+        licenseInfo?.uid
+      );
     } catch (err) {
       this.logger.warn(`Error sending telemetry events data: ${err}`);
     }
