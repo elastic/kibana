@@ -258,6 +258,5 @@ export const AlertsUtilityBar = React.memo(
     prevProps.totalCount === nextProps.totalCount &&
     prevProps.showClearSelection === nextProps.showClearSelection &&
     prevProps.showBuildingBlockAlerts === nextProps.showBuildingBlockAlerts &&
-    prevProps.onShowOnlyThreatIndicatorAlertsChanged ===
-      nextProps.onShowOnlyThreatIndicatorAlertsChanged
+    prevProps.showOnlyThreatIndicatorAlerts === nextProps.showOnlyThreatIndicatorAlerts
 );
