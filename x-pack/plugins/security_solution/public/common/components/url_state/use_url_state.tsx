@@ -40,6 +40,11 @@ function usePrevious(value: PreviousLocationUrlState) {
   return ref.current;
 }
 
+const isDetectionsPages = (pageName: string) =>
+  pageName === SecurityPageName.alerts ||
+  pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.exceptions;
+
 const updateTimelineAtinitialization = (
   urlKey: CONSTANTS,
   newUrlStateString: string,
@@ -221,7 +226,7 @@ export const useUrlStateHooks = ({
         }
       });
     } else if (pathName !== prevProps.pathName) {
-      handleInitialize(type, pageName === SecurityPageName.alerts);
+      handleInitialize(type, isDetectionsPages(pageName));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitializing, history, pathName, pageName, prevProps, urlState]);
