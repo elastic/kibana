@@ -25,7 +25,7 @@ const pageSchema = schema.object({
   current: schema.nullable(schema.number()),
   size: schema.nullable(schema.number()),
   total_pages: schema.nullable(schema.number()),
-  total_results: schema.number(),
+  total_results: schema.nullable(schema.number()),
 });
 
 const oauthConfigSchema = schema.object({

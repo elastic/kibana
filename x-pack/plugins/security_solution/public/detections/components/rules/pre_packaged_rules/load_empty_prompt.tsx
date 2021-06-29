@@ -64,12 +64,12 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions,
+        isDisabled: !userHasPermissions || loading,
         onClick: handlePreBuiltCreation,
         fill: true,
         'data-test-subj': 'load-prebuilt-rules',
       }),
-    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasPermissions]
+    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasPermissions, loading]
   );
 
   return (
