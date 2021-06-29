@@ -12,7 +12,7 @@ export const emptyLabel = i18n.translate('visTypeTimeseries.emptyTextValue', {
   defaultMessage: '(empty)',
 });
 
-export const getMeaningfulValueOrEmpty = (value: unknown) => {
+export const getValueOrEmpty = (value: unknown) => {
   if (value === '' || value === null || value === undefined) {
     return emptyLabel;
   }
