@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Admin Group Account Addition",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:(dscl or dseditgroup) and process.args:((\"/Groups/admin\" or admin) and (\"-a\" or \"-append\"))",
+  "query": "event.category:process and event.type:(start or process_started) and\n process.name:(dscl or dseditgroup) and process.args:((\"/Groups/admin\" or admin) and (\"-a\" or \"-append\"))\n",
   "references": [
     "https://managingosx.wordpress.com/2010/01/14/add-a-user-to-the-admin-group-via-command-line-3-0/"
   ],

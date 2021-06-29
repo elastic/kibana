@@ -121,7 +121,7 @@ describe('<SnapshotRestoreHome />', () => {
         });
 
         expect(exists('repositoryList')).toBe(false);
-        expect(exists('snapshotList')).toBe(true);
+        expect(exists('snapshotListEmpty')).toBe(true);
       });
     });
   });

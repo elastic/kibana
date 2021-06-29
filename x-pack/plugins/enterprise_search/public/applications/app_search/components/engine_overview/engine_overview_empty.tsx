@@ -34,6 +34,7 @@ export const EmptyEngineOverview: React.FC = () => {
           </EuiButton>,
         ],
       }}
+      data-test-subj="EngineOverview"
     >
       <DocumentCreationButtons />
       <DocumentCreationFlyout />

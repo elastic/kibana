@@ -44,6 +44,7 @@ const alertType: NormalizedAlertType<
   ],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',
@@ -195,7 +196,6 @@ test('enqueues execution per selected action', async () => {
             "id": "1",
             "license": "basic",
             "name": "name-of-alert",
-            "namespace": "test1",
             "ruleset": "alerts",
           },
         },

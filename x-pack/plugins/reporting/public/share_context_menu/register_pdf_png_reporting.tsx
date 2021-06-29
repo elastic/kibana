@@ -16,9 +16,9 @@ import type { LicensingPluginSetup } from '../../../licensing/public';
 import type { LayoutParams } from '../../common/types';
 import type { JobParamsPNG } from '../../server/export_types/png/types';
 import type { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
-import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
 interface JobParamsProviderOptions {
   shareableUrl: string;

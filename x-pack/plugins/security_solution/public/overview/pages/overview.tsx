@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { AlertsByCategory } from '../components/alerts_by_category';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useFetchIndex } from '../../common/containers/source';
 
@@ -32,9 +32,14 @@ import { useSourcererScope } from '../../common/containers/sourcerer';
 import { Sourcerer } from '../../common/components/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
+`;
+
+const StyledSecuritySolutionPageWrapper = styled(SecuritySolutionPageWrapper)`
+  overflow-x: auto;
 `;
 
 const OverviewComponent = () => {
@@ -73,7 +78,7 @@ const OverviewComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage>
+          <StyledSecuritySolutionPageWrapper>
             {!dismissMessage && !metadataIndexExists && isIngestEnabled && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
@@ -136,10 +141,18 @@ const OverviewComponent = () => {
                       to={to}
                     />
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ThreatIntelLinkPanel
+                      deleteQuery={deleteQuery}
+                      from={from}
+                      setQuery={setQuery}
+                      to={to}
+                    />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </WrapperPage>
+          </StyledSecuritySolutionPageWrapper>
         </>
       ) : (
         <OverviewEmpty />
