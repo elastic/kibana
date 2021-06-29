@@ -26,7 +26,7 @@ import { ANOMALY_THRESHOLD } from '../../../common';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
-import { MlLocator } from '../../../common/types/locator';
+import { MlLocatorParams } from '../../../common/types/locator';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -59,7 +59,9 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   const [{ uiSettings }, { data: dataServices, share, uiActions }] = services;
   const { timefilter } = dataServices.query.timefilter;
 
-  const mlLocator = useMemo(() => share.url.locators.get(ML_APP_LOCATOR)! as MlLocator, [share]);
+  const mlLocator = useMemo(() => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!, [
+    share,
+  ]);
 
   const timeBuckets = useMemo(() => {
     return new TimeBuckets({
