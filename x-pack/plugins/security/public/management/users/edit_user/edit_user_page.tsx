@@ -191,7 +191,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       <EuiSpacer />
       <EuiHorizontalRule />
 
-      <EuiPanel color="subdued" hasShadow={false}>
+      <EuiPanel color="subdued" hasShadow={false} grow={false}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiDescriptionList>
@@ -223,7 +223,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
 
       <EuiSpacer />
       {user.enabled === false ? (
-        <EuiPanel color="subdued" hasShadow={false}>
+        <EuiPanel color="subdued" hasShadow={false} grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
               <EuiDescriptionList>
@@ -252,7 +252,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
           </EuiFlexGroup>
         </EuiPanel>
       ) : (
-        <EuiPanel color="subdued" hasShadow={false}>
+        <EuiPanel color="subdued" hasShadow={false} grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
               <EuiDescriptionList>
@@ -285,7 +285,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       {!isReservedUser && (
         <>
           <EuiSpacer />
-          <EuiPanel color="subdued" hasShadow={false}>
+          <EuiPanel color="subdued" hasShadow={false} grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
                 <EuiDescriptionList>
