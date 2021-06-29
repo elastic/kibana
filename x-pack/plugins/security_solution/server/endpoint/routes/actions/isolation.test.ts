@@ -43,7 +43,7 @@ import {
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createV2SearchResponse } from '../metadata/support/test_support';
 import { ElasticsearchAssetType } from '../../../../../fleet/common';
-import { CasesClientMock } from '../../../../../cases/server';
+import { CasesClientMock } from '../../../../../cases/server/client/mocks';
 
 interface CallRouteInterface {
   body?: HostIsolationRequestBody;

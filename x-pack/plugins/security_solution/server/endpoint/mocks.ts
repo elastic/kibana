@@ -31,7 +31,12 @@ import { MetadataRequestContext } from './routes/metadata/handlers';
 import { LicenseService } from '../../common/license';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
-import { createCasesClientMock } from '../../../cases/server';
+// A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
+// plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
+// file and not bundled with the application, adding a eslint disable below and using import from
+// a restricted path.
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createCasesClientMock } from '../../../cases/server/client/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
