@@ -10,6 +10,7 @@ import { mockConfig, mockLogger, mockHttpAgent } from '../__mocks__';
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
   JSON_HEADER,
+  ERROR_CONNECTING_HEADER,
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 
@@ -380,7 +381,7 @@ describe('EnterpriseSearchRequestHandler', () => {
       expect(responseMock.customError).toHaveBeenCalledWith({
         statusCode: 502,
         body: 'Error connecting to Enterprise Search: Failed',
-        headers: mockExpectedResponseHeaders,
+        headers: { ...mockExpectedResponseHeaders, [ERROR_CONNECTING_HEADER]: 'true' },
       });
       expect(mockLogger.error).toHaveBeenCalled();
     });

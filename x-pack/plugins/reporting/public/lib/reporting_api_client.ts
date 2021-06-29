@@ -22,7 +22,7 @@ import {
   ReportDocument,
   ReportSource,
 } from '../../common/types';
-import { add } from './job_completion_notifications';
+import { add } from '../notifier/job_completion_notifications';
 
 export interface JobQueueEntry {
   _id: string;
