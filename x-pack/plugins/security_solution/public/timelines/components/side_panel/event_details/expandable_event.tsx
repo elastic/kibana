@@ -113,7 +113,7 @@ export const ExpandableEvent = React.memo<Props>(
             <EuiDescriptionList data-test-subj="event-message" compressed>
               <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                <LineClamp content={message} />
+                <LineClamp>{message}</LineClamp>
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
             <EuiSpacer size="m" />
