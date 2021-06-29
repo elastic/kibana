@@ -642,7 +642,7 @@ test('Should read out ordinal type correctly', async () => {
 });
 
 describe('renderDataMappingPopover', () => {
-  test('Switch toggle should always be enabled', () => {
+  test('Switch toggle should be enabled', () => {
     const colorStyle = makeProperty(
       {
         color: 'Blues',
@@ -651,25 +651,6 @@ describe('renderDataMappingPopover', () => {
       },
       undefined,
       mockField
-    );
-
-    const legendRow = colorStyle.renderDataMappingPopover(() => {});
-    expect(legendRow).toMatchSnapshot();
-  });
-
-  test('Should not render when autodomain not supported', () => {
-    const noAutoDomainField = Object.create(mockField);
-    noAutoDomainField.supportsAutoDomain = () => {
-      return false;
-    };
-    const colorStyle = makeProperty(
-      {
-        color: 'Blues',
-        type: undefined,
-        fieldMetaOptions,
-      },
-      undefined,
-      noAutoDomainField
     );
 
     const legendRow = colorStyle.renderDataMappingPopover(() => {});

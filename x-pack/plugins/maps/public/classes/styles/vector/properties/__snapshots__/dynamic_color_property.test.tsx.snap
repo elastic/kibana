@@ -1,25 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renderDataMappingPopover Should not render when autodomain not supported 1`] = `
-<OrdinalDataMappingPopover
-  dataMappingFunction="INTERPOLATE"
-  fieldMetaOptions={
-    Object {
-      "isEnabled": true,
-    }
-  }
-  onChange={[Function]}
-  styleName="lineColor"
-  supportedDataMappingFunctions={
-    Array [
-      "INTERPOLATE",
-      "PERCENTILES",
-    ]
-  }
-/>
-`;
-
-exports[`renderDataMappingPopover Switch toggle should always be enabled 1`] = `
+exports[`renderDataMappingPopover Switch toggle should be enabled 1`] = `
 <OrdinalDataMappingPopover
   dataMappingFunction="INTERPOLATE"
   fieldMetaOptions={
