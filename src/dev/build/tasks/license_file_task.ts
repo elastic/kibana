@@ -8,23 +8,13 @@
 
 import { write, read, Task } from '../lib';
 
-const LICENSE_SEPARATOR = `\n------------------------------------------------------------------------\n\n`;
-
 export const UpdateLicenseFile: Task = {
   description: 'Updating LICENSE.txt file',
 
   async run(config, log, build) {
     const elasticLicense = await read(config.resolveFromRepo('licenses/ELASTIC-LICENSE-2.0.txt'));
-    if (build.isOss()) {
-      const ssplLicense = await read(config.resolveFromRepo('licenses/SSPL-LICENSE.txt'));
-      log.info('Copying dual-license to LICENSE.txt');
-      await write(
-        build.resolvePath('LICENSE.txt'),
-        ssplLicense + LICENSE_SEPARATOR + elasticLicense
-      );
-    } else {
-      log.info('Copying Elastic license to LICENSE.txt');
-      await write(build.resolvePath('LICENSE.txt'), elasticLicense);
-    }
+
+    log.info('Copying Elastic license to LICENSE.txt');
+    await write(build.resolvePath('LICENSE.txt'), elasticLicense);
   },
 };
