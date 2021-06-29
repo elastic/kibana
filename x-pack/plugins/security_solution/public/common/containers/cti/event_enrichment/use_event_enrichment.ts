@@ -7,9 +7,13 @@
 
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
-import { getEventEnrichment } from './api';
+import { getEventEnrichment, getEventEnrichmentComplete } from './api';
 
-// TODO define filtered version of getEventEnrichment that excludes incomplete responses
 const getEventEnrichmentOptionalSignal = withOptionalSignal(getEventEnrichment);
 
 export const useEventEnrichment = () => useObservable(getEventEnrichmentOptionalSignal);
+
+const getEventEnrichmentCompleteWithOptionalSignal = withOptionalSignal(getEventEnrichmentComplete);
+
+export const useEventEnrichmentComplete = () =>
+  useObservable(getEventEnrichmentCompleteWithOptionalSignal);

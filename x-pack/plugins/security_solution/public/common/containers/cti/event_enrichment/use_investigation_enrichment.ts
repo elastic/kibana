@@ -19,7 +19,7 @@ import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { inputsActions } from '../../../store/actions';
 import * as i18n from './translations';
-import { useEventEnrichment } from '.';
+import { useEventEnrichmentComplete } from '.';
 
 export const QUERY_ID = 'investigation_time_enrichment';
 const noop = () => {};
@@ -32,7 +32,7 @@ export const useInvestigationTimeEnrichment = (eventFields: EventFields) => {
     from: DEFAULT_EVENT_ENRICHMENT_FROM,
     to: DEFAULT_EVENT_ENRICHMENT_TO,
   });
-  const { error, loading, result, start } = useEventEnrichment();
+  const { error, loading, result, start } = useEventEnrichmentComplete();
 
   const deleteQuery = useCallback(() => {
     dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: QUERY_ID }));

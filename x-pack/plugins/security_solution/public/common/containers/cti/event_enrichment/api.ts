@@ -6,13 +6,23 @@
  */
 
 import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import {
+  isErrorResponse,
+  isCompleteResponse,
+} from '../../../../../../../../src/plugins/data/common';
 import {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
 } from '../../../../../common/search_strategy/security_solution/cti';
+
+type GetEventEnrichmentProps = CtiEventEnrichmentRequestOptions & {
+  data: DataPublicPluginStart;
+  signal: AbortSignal;
+};
 
 export const getEventEnrichment = ({
   data,
@@ -21,10 +31,7 @@ export const getEventEnrichment = ({
   filterQuery,
   timerange,
   signal,
-}: CtiEventEnrichmentRequestOptions & {
-  data: DataPublicPluginStart;
-  signal: AbortSignal;
-}): Observable<CtiEventEnrichmentStrategyResponse> =>
+}: GetEventEnrichmentProps): Observable<CtiEventEnrichmentStrategyResponse> =>
   data.search.search<CtiEventEnrichmentRequestOptions, CtiEventEnrichmentStrategyResponse>(
     {
       defaultIndex,
@@ -37,4 +44,11 @@ export const getEventEnrichment = ({
       strategy: 'securitySolutionSearchStrategy',
       abortSignal: signal,
     }
+  );
+
+export const getEventEnrichmentComplete = (
+  props: GetEventEnrichmentProps
+): Observable<CtiEventEnrichmentStrategyResponse> =>
+  getEventEnrichment(props).pipe(
+    filter((response) => isErrorResponse(response) || isCompleteResponse(response))
   );
