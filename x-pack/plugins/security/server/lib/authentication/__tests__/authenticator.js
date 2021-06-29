@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 import { serverFixture } from '../../__tests__/__fixtures__/server';
 import { requestFixture } from '../../__tests__/__fixtures__/request';

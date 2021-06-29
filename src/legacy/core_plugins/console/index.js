@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { resolve, join, sep } from 'path';
 import url from 'url';
 import { has, isEmpty, head } from 'lodash';

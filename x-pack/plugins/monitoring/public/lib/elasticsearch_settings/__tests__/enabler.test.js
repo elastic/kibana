@@ -6,7 +6,7 @@
 
 import { Enabler } from '../';
 import sinon from 'sinon';
-import { forbidden } from '@hapi/boom';
+import { forbidden } from '@commercial/boom';
 
 const updateModel = properties => properties;
 const updateModelSpy = sinon.spy(updateModel);

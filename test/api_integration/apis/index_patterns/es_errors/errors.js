@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { errors as esErrors } from 'elasticsearch';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 import {
   isEsIndexNotFoundError,

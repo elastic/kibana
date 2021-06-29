@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server, ServerOptions } from '@hapi/hapi';
+import { Server, ServerOptions } from '@commercial/hapi';
 
 import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';

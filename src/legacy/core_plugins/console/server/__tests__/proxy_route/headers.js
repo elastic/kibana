@@ -22,7 +22,7 @@ import { request } from 'http';
 import sinon from 'sinon';
 import Wreck from '@hapi/wreck';
 import expect from 'expect.js';
-import { Server } from '@hapi/hapi';
+import { Server } from '@commercial/hapi';
 
 import { createProxyRoute } from '../../';
 

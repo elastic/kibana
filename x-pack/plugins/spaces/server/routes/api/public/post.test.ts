@@ -22,7 +22,7 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
   };
 });
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
 import { initPostSpacesApi } from './post';
 

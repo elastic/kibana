@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapCustomError } from '../../../lib/error_wrappers';
 import { doesClusterExist } from '../../../lib/does_cluster_exist';

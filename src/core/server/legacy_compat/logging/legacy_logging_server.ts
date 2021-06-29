@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ServerExtType } from '@hapi/hapi';
-import Podium from '@hapi/podium';
+import { ServerExtType } from '@commercial/hapi';
+import Podium from '@commercial/podium';
 // @ts-ignore: implicit any for JS file
 import { Config, transformDeprecations } from '../../../../server/config';
 // @ts-ignore: implicit any for JS file

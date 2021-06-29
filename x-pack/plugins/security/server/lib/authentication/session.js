@@ -6,7 +6,7 @@
 
 import hapiAuthCookie from 'hapi-auth-cookie';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import Statehood from '@hapi/statehood';
+import Statehood from '@commercial/statehood';
 
 const HAPI_STRATEGY_NAME = 'security-cookie';
 // Forbid applying of Hapi authentication strategies to routes automatically.

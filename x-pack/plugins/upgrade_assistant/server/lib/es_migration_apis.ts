@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 
-import { Request } from '@hapi/hapi';
+import { Request } from '@commercial/hapi';
 import {
   CallClusterWithRequest,
   DeprecationAPIResponse,

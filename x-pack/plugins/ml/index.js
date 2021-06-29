@@ -7,7 +7,7 @@
 
 
 import { resolve } from 'path';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { checkLicense } from './server/lib/check_license';
 import { FEATURE_ANNOTATIONS_ENABLED } from './common/constants/feature_flags';
 

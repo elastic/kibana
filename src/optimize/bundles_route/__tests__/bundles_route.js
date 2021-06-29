@@ -23,7 +23,7 @@ import crypto from 'crypto';
 
 import Chance from 'chance';
 import expect from 'expect.js';
-import Hapi from '@hapi/hapi';
+import Hapi from '@commercial/hapi';
 import Inert from '@hapi/inert';
 import sinon from 'sinon';
 

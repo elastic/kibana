@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 import { initServer } from './server';
 import mappings from './mappings.json';

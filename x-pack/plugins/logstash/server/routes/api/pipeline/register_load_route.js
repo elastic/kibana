@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { INDEX_NAMES, TYPE_NAMES } from '../../../../common/constants';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { Pipeline } from '../../../models/pipeline';

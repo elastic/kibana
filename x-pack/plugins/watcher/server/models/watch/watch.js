@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { badRequest } from '@hapi/boom';
+import { badRequest } from '@commercial/boom';
 import { WATCH_TYPES } from '../../../common/constants';
 import { JsonWatch } from './json_watch';
 import { MonitoringWatch } from './monitoring_watch';

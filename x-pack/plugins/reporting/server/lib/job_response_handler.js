@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from '@hapi/boom';
+import boom from '@commercial/boom';
 import { oncePerServer } from './once_per_server';
 import { jobsQueryFactory } from './jobs_query';
 import { getDocumentPayloadFactory } from './get_document_payload';

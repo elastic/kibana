@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';

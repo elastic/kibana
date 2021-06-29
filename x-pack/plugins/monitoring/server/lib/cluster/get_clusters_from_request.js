@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { notFound } from '@hapi/boom';
+import { notFound } from '@commercial/boom';
 import { set, findIndex } from 'lodash';
 import { getClustersStats } from './get_clusters_stats';
 import { flagSupportedClusters } from './flag_supported_clusters';

@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { badRequest } from '@hapi/boom';
+import { badRequest } from '@commercial/boom';
 import { getActionType } from '../../../common/lib/get_action_type';
 import { ACTION_TYPES } from '../../../common/constants';
 import { LoggingAction } from './logging_action';

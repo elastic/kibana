@@ -21,7 +21,7 @@ jest.mock('../../../../../../server/lib/get_client_shield', () => {
     },
   };
 });
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { Space } from '../../../../common/model/space';
 import { createSpaces, createTestHandler, RequestRunner, TeardownFn } from '../__fixtures__';
 import { initGetSpacesApi } from './get';

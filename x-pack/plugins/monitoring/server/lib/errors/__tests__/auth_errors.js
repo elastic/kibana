@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { errors } from 'elasticsearch';
-import { forbidden, unauthorized } from '@hapi/boom';
+import { forbidden, unauthorized } from '@commercial/boom';
 import { isAuthError, handleAuthError } from '../auth_errors';
 
 describe('Error handling for 401/403 errors', () => {

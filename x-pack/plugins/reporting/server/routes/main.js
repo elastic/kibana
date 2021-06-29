@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from '@hapi/boom';
+import boom from '@commercial/boom';
 import { API_BASE_URL } from '../../common/constants';
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { reportingFeaturePreRoutingFactory } from '../lib/reporting_feature_pre_routing';

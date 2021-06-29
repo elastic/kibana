@@ -18,7 +18,7 @@
  */
 
 import getVisData from '../lib/get_vis_data';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 export default (server) => {
 
   server.route({

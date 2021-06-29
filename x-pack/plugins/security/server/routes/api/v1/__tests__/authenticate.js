@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import Joi from 'joi';
 import sinon from 'sinon';
 

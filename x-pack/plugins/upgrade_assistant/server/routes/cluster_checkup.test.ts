@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
-import { Server } from '@hapi/hapi';
+import Boom from '@commercial/boom';
+import { Server } from '@commercial/hapi';
 
 jest.mock('../lib/es_version_precheck');
 import { EsVersionPrecheck } from '../lib/es_version_precheck';

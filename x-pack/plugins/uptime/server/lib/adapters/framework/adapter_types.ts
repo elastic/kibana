@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Lifecycle, ResponseToolkit, RouteOptions } from '@hapi/hapi';
+import { Lifecycle, ResponseToolkit, RouteOptions } from '@commercial/hapi';
 import { GraphQLOptions } from 'apollo-server-core';
 import { GraphQLSchema } from 'graphql';
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Lifecycle, ResponseToolkit } from '@hapi/hapi';
+import { Lifecycle, ResponseToolkit } from '@commercial/hapi';
 import * as t from 'io-ts';
 import { LicenseType } from '../../../../common/constants/security';
 

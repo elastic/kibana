@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import Joi from 'joi';
 import { getClient } from '../../../../../../server/lib/get_client_shield';
 import { userSchema } from '../../../lib/user_schema';

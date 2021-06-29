@@ -20,8 +20,8 @@
 import { format } from 'url';
 import { resolve } from 'path';
 import _ from 'lodash';
-import Boom from '@hapi/boom';
-import Hapi from '@hapi/hapi';
+import Boom from '@commercial/boom';
+import Hapi from '@commercial/hapi';
 import { setupVersionCheck } from './version_check';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';

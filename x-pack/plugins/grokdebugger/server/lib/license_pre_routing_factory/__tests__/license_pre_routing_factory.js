@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { licensePreRoutingFactory } from '../license_pre_routing_factory';
 
 describe('license_pre_routing_factory', () => {

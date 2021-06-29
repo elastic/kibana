@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import Joi from 'joi';
 import { findRelationships } from '../../../../lib/management/saved_objects/relationships';
 import { isNotFoundError } from '../../../../../../../../server/saved_objects/service/lib/errors';

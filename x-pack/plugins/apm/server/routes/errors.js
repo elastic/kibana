@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 import { getDistribution } from '../lib/errors/distribution/get_distribution';
 import { getErrorGroups } from '../lib/errors/get_error_groups';

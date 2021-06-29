@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from '@hapi/boom';
+import { boomify } from '@commercial/boom';
 
 export function handleSettingsError(err) {
   return boomify(err, { statusCode: err.statusCode });

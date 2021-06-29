@@ -6,7 +6,7 @@
 
 
 
-import { boomify } from '@hapi/boom';
+import { boomify } from '@commercial/boom';
 
 export function wrapError(error) {
   return boomify(error, { statusCode: error.status });

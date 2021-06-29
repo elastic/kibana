@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
-import { Request } from '@hapi/hapi';
+import Boom from '@commercial/boom';
+import { Request } from '@commercial/hapi';
 import { get } from 'lodash';
 
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';

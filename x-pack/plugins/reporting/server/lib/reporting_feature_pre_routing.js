@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { oncePerServer } from './once_per_server';
 
 function reportingFeaturePreRoutingFn(server) {

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
-import { Plugin, Request, ResponseToolkit, RouteOptions, Server } from '@hapi/hapi';
+import Boom from '@commercial/boom';
+import { Plugin, Request, ResponseToolkit, RouteOptions, Server } from '@commercial/hapi';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 
 import { GraphQLOptions, runHttpQuery } from 'apollo-server-core';

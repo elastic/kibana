@@ -50,6 +50,7 @@ import {
   TranspileBabelTask,
   TranspileTypescriptTask,
   TranspileScssTask,
+  UpdateHapiCommercialLicenseTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
@@ -114,6 +115,7 @@ export async function buildDistributables(options) {
   await run(RemoveWorkspacesTask);
   await run(CleanTypescriptTask);
   await run(CleanPackagesTask);
+  await run(UpdateHapiCommercialLicenseTask);
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);

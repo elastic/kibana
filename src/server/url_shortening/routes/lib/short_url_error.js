@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 export function handleShortUrlError(error) {
   return Boom.boomify(error, {

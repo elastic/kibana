@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '@hapi/hapi';
+import '@commercial/hapi';
 
 import { CloudPlugin } from 'x-pack/plugins/cloud';
 import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
 
-declare module '@hapi/hapi' {
+declare module '@commercial/hapi' {
   interface PluginProperties {
     cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;

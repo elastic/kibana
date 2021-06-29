@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 const code = Symbol('SavedObjectsClientErrorCode');
 

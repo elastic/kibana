@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from '@hapi/hapi';
+import { Server } from '@commercial/hapi';
 
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../legacy/core_plugins/elasticsearch';
 import { IndexPatternsServiceFactory } from './index_patterns';
@@ -28,7 +28,7 @@ export interface KibanaConfig {
 }
 
 // Extend the defaults with the plugins and server methods we need.
-declare module '@hapi/hapi' {
+declare module '@commercial/hapi' {
   interface PluginProperties {
     elasticsearch: ElasticsearchPlugin;
     kibana: any;
@@ -65,7 +65,7 @@ export default class KbnServer {
 }
 
 // Re-export commonly used hapi types.
-export { Server, Request, ResponseToolkit } from '@hapi/hapi';
+export { Server, Request, ResponseToolkit } from '@commercial/hapi';
 
 // Re-export commonly accessed api types.
 export { IndexPatternsService } from './index_patterns';
