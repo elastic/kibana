@@ -8,133 +8,57 @@
 import { isVersionSupported, isOsSupported, isIsolationSupported } from './utils';
 
 describe('Host Isolation utils isVersionSupported', () => {
-  it('should validate that a higher major version is compatible with a lower major version', () => {
+  test.each`
+    a                    | b           | expected
+    ${'8.14.0'}          | ${'7.13.0'} | ${true}
+    ${'7.14.0'}          | ${'7.13.0'} | ${true}
+    ${'7.14.1'}          | ${'7.14.0'} | ${true}
+    ${'8.14.0'}          | ${'9.14.0'} | ${false}
+    ${'7.13.0'}          | ${'7.14.0'} | ${false}
+    ${'7.14.0'}          | ${'7.14.1'} | ${false}
+    ${'7.14.0'}          | ${'7.14.0'} | ${true}
+    ${'7.14.0-SNAPSHOT'} | ${'7.14.0'} | ${true}
+  `('should validate that version $a is compatible($expected) to $b', ({ a, b, expected }) => {
     expect(
       isVersionSupported({
-        currentVersion: '8.14.0',
-        minVersionRequired: '7.13.0',
+        currentVersion: a,
+        minVersionRequired: b,
       })
-    ).toEqual(true);
-  });
-
-  it('should validate that a higher minor version is compatible with a lower minor version', () => {
-    expect(
-      isVersionSupported({
-        currentVersion: '7.14.0',
-        minVersionRequired: '7.13.0',
-      })
-    ).toEqual(true);
-  });
-
-  it('should validate that a higher patch version is compatible with a lower patch version', () => {
-    expect(
-      isVersionSupported({
-        currentVersion: '7.14.1',
-        minVersionRequired: '7.14.0',
-      })
-    ).toEqual(true);
-  });
-
-  it('should validate that a lower major version is not compatible with a higher major version', () => {
-    expect(
-      isVersionSupported({
-        currentVersion: '8.14.0',
-        minVersionRequired: '9.14.0',
-      })
-    ).toEqual(false);
-  });
-
-  it('should validate that a lower minor version is not compatible with a higher minor version', () => {
-    expect(
-      isVersionSupported({
-        currentVersion: '7.13.0',
-        minVersionRequired: '7.14.0',
-      })
-    ).toEqual(false);
-  });
-
-  it('should validate that a lower patch version is not compatible with a higher patch version', () => {
-    expect(
-      isVersionSupported({
-        currentVersion: '7.14.0',
-        minVersionRequired: '7.14.1',
-      })
-    ).toEqual(false);
-  });
-
-  it('should validate that the same versions are compatible', () => {
-    expect(
-      isVersionSupported({
-        currentVersion: '7.14.0',
-        minVersionRequired: '7.14.0',
-      })
-    ).toEqual(true);
-  });
-
-  it('should validate correctly with a SNAPSHOT version', () => {
-    expect(
-      isVersionSupported({
-        currentVersion: '7.14.0-SNAPSHOT',
-        minVersionRequired: '7.14.0',
-      })
-    ).toEqual(true);
+    ).toEqual(expected);
   });
 });
 
 describe('Host Isolation utils isOsSupported', () => {
-  it('should validate that the OS is compatible if the support array contains the currentOs', () => {
+  test.each`
+    a          | b                       | expected
+    ${'linux'} | ${['macos', 'linux']}   | ${true}
+    ${'linux'} | ${['macos', 'windows']} | ${false}
+  `('should validate that os $a is compatible($expected) to $b', ({ a, b, expected }) => {
     expect(
       isOsSupported({
-        currentOs: 'linux',
-        supportedOss: ['macos', 'linux'],
+        currentOs: a,
+        supportedOss: b,
       })
-    ).toEqual(true);
-  });
-
-  it('should validate that the OS is not compatible if the support array does not contain the currentOs', () => {
-    expect(
-      isOsSupported({
-        currentOs: 'linux',
-        supportedOss: ['macos', 'windows'],
-      })
-    ).toEqual(false);
+    ).toEqual(expected);
   });
 });
 
 describe('Host Isolation utils isIsolationSupported', () => {
-  it('should be supported with a compatible os and version', () => {
-    expect(
-      isIsolationSupported({
-        osName: 'windows',
-        version: '7.14.0',
-      })
-    ).toEqual(true);
-  });
-
-  it('should not be supported with a incompatible os and version', () => {
-    expect(
-      isIsolationSupported({
-        osName: 'linux',
-        version: '7.13.0',
-      })
-    ).toEqual(false);
-  });
-
-  it('should not be supported with a incompatible os and compatible version', () => {
-    expect(
-      isIsolationSupported({
-        osName: 'linux',
-        version: '7.14.0',
-      })
-    ).toEqual(false);
-  });
-
-  it('should not be supported with a compatible os and incompatible version', () => {
-    expect(
-      isIsolationSupported({
-        osName: 'macos',
-        version: '7.13.0',
-      })
-    ).toEqual(false);
-  });
+  test.each`
+    a            | b           | expected
+    ${'windows'} | ${'7.14.0'} | ${true}
+    ${'linux'}   | ${'7.13.0'} | ${false}
+    ${'linux'}   | ${'7.14.0'} | ${false}
+    ${'macos'}   | ${'7.13.0'} | ${false}
+  `(
+    'should validate that os $a and version $b supports hostIsolation($expected)',
+    ({ a, b, expected }) => {
+      expect(
+        isIsolationSupported({
+          osName: a,
+          version: b,
+        })
+      ).toEqual(expected);
+    }
+  );
 });
