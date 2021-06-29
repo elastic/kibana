@@ -13,7 +13,7 @@ import { createMemoryHistory } from 'history';
 
 import { useExpandedRow } from './use_expanded_row';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { Ping } from '../../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../../common/runtime_types';
 import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../common/constants';
 import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
 import { act } from 'react-dom/test-utils';
@@ -25,17 +25,16 @@ describe('useExpandedROw', () => {
   const history = createMemoryHistory({
     initialEntries: ['/journey/fake-group/steps'],
   });
-  const steps: Ping[] = [
+  const steps: JourneyStep[] = [
     {
-      docId: '1',
-      timestamp: '123',
+      _id: '1',
+      '@timestamp': '123',
       monitor: {
         id: 'MON_ID',
         duration: {
           us: 10,
         },
         status: 'down',
-        type: 'browser',
         check_group: 'fake-group',
       },
       synthetics: {
@@ -50,15 +49,14 @@ describe('useExpandedROw', () => {
       },
     },
     {
-      docId: '2',
-      timestamp: '124',
+      _id: '2',
+      '@timestamp': '124',
       monitor: {
         id: 'MON_ID',
         duration: {
           us: 10,
         },
         status: 'down',
-        type: 'browser',
         check_group: 'fake-group',
       },
       synthetics: {
@@ -77,7 +75,7 @@ describe('useExpandedROw', () => {
   const Component = () => {
     const { expandedRows, toggleExpand } = useExpandedRow({
       steps,
-      allPings: steps,
+      allSteps: steps,
       loading: false,
     });
 
@@ -86,13 +84,13 @@ describe('useExpandedROw', () => {
     return (
       <Route path={SYNTHETIC_CHECK_STEPS_ROUTE}>
         Step list
-        {steps.map((ping, index) => (
+        {steps.map((journeyStep, index) => (
           <EuiButtonIcon
             key={index}
             data-test-subj={TEST_ID + index}
-            onClick={() => toggleExpand({ ping })}
-            aria-label={expandedRows[ping.docId] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[ping.docId] ? 'arrowUp' : 'arrowDown'}
+            onClick={() => toggleExpand({ journeyStep })}
+            aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
+            iconType={expandedRows[journeyStep._id] ? 'arrowUp' : 'arrowDown'}
           />
         ))}
       </Route>

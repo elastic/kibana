@@ -7,7 +7,7 @@
 
 import { ROLES } from '../../../common/test';
 import { deleteRoleAndUser, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 import {
   waitForAlertsPanelToBeLoaded,
   waitForAlertsIndexToBeCreated,
@@ -35,7 +35,7 @@ import {
 describe('value lists', () => {
   describe('management modal', () => {
     beforeEach(() => {
-      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       waitForAlertsPanelToBeLoaded();
       waitForAlertsIndexToBeCreated();
       waitForListsIndexToBeCreated();
@@ -228,7 +228,7 @@ describe('value lists', () => {
 
   describe('user with restricted access role', () => {
     beforeEach(() => {
-      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.t1_analyst);
+      loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.t1_analyst);
       goToManageAlertsDetectionRules();
     });
 

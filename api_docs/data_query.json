@@ -1183,7 +1183,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">) => ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">) => ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -1214,7 +1214,7 @@
                 "section": "def-public.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
             ],
             "source": {
               "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",

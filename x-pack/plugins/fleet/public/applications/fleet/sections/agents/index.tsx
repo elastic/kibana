@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter as Router, Route, Switch } from 'react-router-dom';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
-import { Loading, Error } from '../../components';
+import { Loading, Error, AgentEnrollmentFlyout } from '../../components';
 import {
   useConfig,
   useFleetStatus,
   useBreadcrumbs,
   useCapabilities,
   useGetSettings,
+  useGetAgentPolicies,
 } from '../../hooks';
 import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
@@ -26,18 +28,26 @@ import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal';
 
-const REFRESH_INTERVAL_MS = 30000;
-
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
 
   const { agents } = useConfig();
   const capabilities = useCapabilities();
 
+  const agentPoliciesRequest = useGetAgentPolicies({
+    page: 1,
+    perPage: 1000,
+  });
+
+  const agentPolicies = useMemo(() => agentPoliciesRequest.data?.items || [], [
+    agentPoliciesRequest.data,
+  ]);
+
   const fleetStatus = useFleetStatus();
 
   const settings = useGetSettings();
 
+  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const [fleetServerModalVisible, setFleetServerModalVisible] = useState(false);
   const onCloseFleetServerModal = useCallback(() => {
     setFleetServerModalVisible(false);
@@ -49,25 +59,6 @@ export const AgentsApp: React.FunctionComponent = () => {
       setFleetServerModalVisible(true);
     }
   }, [settings.data]);
-
-  useEffect(() => {
-    if (
-      !agents.enabled ||
-      fleetStatus.isLoading ||
-      !fleetStatus.missingRequirements ||
-      !fleetStatus.missingRequirements.includes('fleet_server')
-    ) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      fleetStatus.refresh();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [fleetStatus, agents.enabled]);
 
   if (!agents.enabled) return null;
   if (!fleetStatus.missingRequirements && fleetStatus.isLoading) {
@@ -105,6 +96,27 @@ export const AgentsApp: React.FunctionComponent = () => {
     return <NoAccessPage />;
   }
 
+  const rightColumn = hasOnlyFleetServerMissingRequirement ? (
+    <>
+      {isEnrollmentFlyoutOpen && (
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            defaultMode="standalone"
+            agentPolicies={agentPolicies}
+            onClose={() => setIsEnrollmentFlyoutOpen(false)}
+          />
+        </EuiPortal>
+      )}
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+            <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  ) : undefined;
+
   return (
     <Router>
       <Switch>
@@ -112,7 +124,7 @@ export const AgentsApp: React.FunctionComponent = () => {
           <AgentDetailsPage />
         </Route>
         <Route path={FLEET_ROUTING_PATHS.agents}>
-          <DefaultLayout section="agents">
+          <DefaultLayout section="agents" rightColumn={rightColumn}>
             {fleetServerModalVisible && (
               <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
             )}
