@@ -82,8 +82,8 @@ export const isolationRequestHandler = function (
     }
 
     // fetch the Agent IDs to send the commands to
-    let agentIDs = await getMetadataForEndpoints(req.body.endpoint_ids, context, endpointContext);
-    agentIDs = [...new Set(agentIDs)]; // dedupe
+    const endpointIDs = [...new Set(req.body.endpoint_ids)]; // dedupe
+    const endpointData = await getMetadataForEndpoints(endpointIDs, context, endpointContext);
 
     const casesClient = await endpointContext.service.getCasesClient(req);
 
@@ -118,7 +118,7 @@ export const isolationRequestHandler = function (
           expiration: moment().add(2, 'weeks').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'endpoint',
-          agents: agentIDs.map((x: HostMetadata) => x.elastic.agent.id),
+          agents: endpointData.map((endpt: HostMetadata) => endpt.elastic.agent.id),
           user_id: user!.username,
           data: {
             command: isolate ? 'isolate' : 'unisolate',
@@ -144,6 +144,11 @@ export const isolationRequestHandler = function (
 
     // Update all cases with a comment
     if (caseIDs.length > 0) {
+      const targets = endpointData.map((endpt: HostMetadata) => ({
+        hostname: endpt.host.hostname,
+        endpointId: endpt.agent.id,
+      }));
+
       await Promise.all(
         caseIDs.map((caseId) =>
           casesClient.attachments.add({
@@ -152,10 +157,7 @@ export const isolationRequestHandler = function (
               type: CommentType.actions,
               comment: req.body.comment || '',
               actions: {
-                targets: agentIDs.map((x: HostMetadata) => ({
-                  hostname: x.host.hostname,
-                  endpointId: x.agent.id,
-                })),
+                targets,
                 type: isolate ? 'isolate' : 'unisolate',
               },
               owner: APP_ID,
