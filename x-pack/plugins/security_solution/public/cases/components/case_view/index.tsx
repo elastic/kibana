@@ -235,7 +235,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(`${APP_ID}:${SecurityPageName.administration}`, {
+            return navigateToApp(APP_ID, {
               path: getEndpointDetailsPath({
                 name: 'endpointActivityLog',
                 selected_endpoint: endpointId,
