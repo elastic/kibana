@@ -6,10 +6,12 @@
  */
 
 import { ChromeBreadcrumb } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
 import { MouseEvent, useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { observabilityTitle } from '../../public/translations';
+
+type AppId = 'logs' | 'metrics';
 
 function handleBreadcrumbClick(
   breadcrumbs: ChromeBreadcrumb[],
@@ -30,36 +32,24 @@ function handleBreadcrumbClick(
   }));
 }
 
-type AppId = 'logs' | 'metrics';
-
-export const makeBaseBreadcrumb = (
+const makeBaseBreadcrumb = (
   path: string,
   observabilityPath: string,
-  app: AppId
+  appTitle: string
 ): [EuiBreadcrumb, EuiBreadcrumb] => {
-  const appText =
-    app === 'logs'
-      ? i18n.translate('xpack.infra.header.logsTitle', {
-          defaultMessage: 'Logs',
-        })
-      : i18n.translate('xpack.infra.header.metricsTitle', {
-          defaultMessage: 'Metrics',
-        });
   return [
     {
-      text: i18n.translate('xpack.infra.header.observabilityTitle', {
-        defaultMessage: 'Observability',
-      }),
+      text: observabilityTitle,
       href: observabilityPath,
     },
     {
-      text: appText,
+      text: appTitle,
       href: path,
     },
   ];
 };
 
-export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[], app: AppId) => {
+export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: ChromeBreadcrumb[]) => {
   const kibana = useKibana();
   const setBreadcrumbs = kibana.services.chrome?.setBreadcrumbs;
   const path = kibana.services.application?.getUrlForApp(app) ?? '';
@@ -71,10 +61,10 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[], app: AppId) => {
     if (setBreadcrumbs) {
       setBreadcrumbs(
         handleBreadcrumbClick(
-          makeBaseBreadcrumb(path, observabilityPath, app).concat(extraCrumbs),
+          makeBaseBreadcrumb(path, observabilityPath, appTitle).concat(extraCrumbs),
           navigate
         )
       );
     }
-  }, [path, app, observabilityPath, extraCrumbs, navigate, setBreadcrumbs]);
+  }, [path, appTitle, observabilityPath, extraCrumbs, navigate, setBreadcrumbs]);
 };

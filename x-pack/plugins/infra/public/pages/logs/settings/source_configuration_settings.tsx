@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTrackPageview } from '../../../../../observability/public';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { Prompt } from '../../../utils/navigation_warning_prompt';
@@ -29,7 +29,6 @@ import { LogSourceConfigurationFormErrors } from './source_configuration_form_er
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
 import { LogsPageTemplate } from '../page_template';
 import { settingsTitle } from '../../../../public/translations';
-import { LOGS_APP } from '../../../../common/constants';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -42,14 +41,11 @@ export const LogsSettingsPage = () => {
     delay: 15000,
   });
 
-  useBreadcrumbs(
-    [
-      {
-        text: settingsTitle,
-      },
-    ],
-    LOGS_APP
-  );
+  useLogsBreadcrumbs([
+    {
+      text: settingsTitle,
+    },
+  ]);
 
   const {
     sourceConfiguration: source,

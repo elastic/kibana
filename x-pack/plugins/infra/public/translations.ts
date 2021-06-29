@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const observabilityTitle = i18n.translate('xpack.infra.header.observabilityTitle', {
+  defaultMessage: 'Observability',
+});
+
 export const logsTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',
 });
@@ -28,6 +32,10 @@ export const logCategoriesTitle = i18n.translate(
 
 export const settingsTitle = i18n.translate('xpack.infra.logs.index.settingsTabTitle', {
   defaultMessage: 'Settings',
+});
+
+export const metricsTitle = i18n.translate('xpack.infra.header.metricsTitle', {
+  defaultMessage: 'Metrics',
 });
 
 export const inventoryTitle = i18n.translate('xpack.infra.metrics.inventoryPageTitle', {

@@ -8,8 +8,6 @@
 import { EuiButton, EuiErrorBoundary, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-
-import { METRICS_APP } from '../../../../common/constants';
 import { FilterBar } from './components/filter_bar';
 
 import { DocumentTitle } from '../../../components/document_title';
@@ -20,7 +18,7 @@ import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
 import { Source } from '../../../containers/metrics_source';
 import { useTrackPageview } from '../../../../../observability/public';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { LayoutView } from './components/layout_view';
 import { useLinkProps } from '../../../hooks/use_link_props';
@@ -51,14 +49,11 @@ export const SnapshotPage = () => {
     hash: '/tutorial_directory/metrics',
   });
 
-  useBreadcrumbs(
-    [
-      {
-        text: inventoryTitle,
-      },
-    ],
-    METRICS_APP
-  );
+  useMetricsBreadcrumbs([
+    {
+      text: inventoryTitle,
+    },
+  ]);
 
   return (
     <EuiErrorBoundary>

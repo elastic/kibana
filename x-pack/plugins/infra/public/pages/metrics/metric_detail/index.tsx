@@ -12,7 +12,7 @@ import { EuiTheme, withTheme } from '../../../../../../../src/plugins/kibana_rea
 import { DocumentTitle } from '../../../components/document_title';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { Source } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { findInventoryModel } from '../../../../common/inventory_models';
@@ -80,18 +80,15 @@ export const MetricDetail = withMetricPageProviders(
       pathname: '/inventory',
     });
 
-    useBreadcrumbs(
-      [
-        {
-          ...inventoryLinkProps,
-          text: inventoryTitle,
-        },
-        {
-          text: name,
-        },
-      ],
-      METRICS_APP
-    );
+    useMetricsBreadcrumbs([
+      {
+        ...inventoryLinkProps,
+        text: inventoryTitle,
+      },
+      {
+        text: name,
+      },
+    ]);
 
     if (metadataLoading && !filteredRequiredMetrics.length) {
       return (
