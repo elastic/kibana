@@ -24,6 +24,7 @@ import {
   jobCreatorFactory,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
+  isRareJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -171,6 +172,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
       const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
       jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
+    } else if (isRareJobCreator(jobCreator)) {
+      const rare = newJobCapsService.getAggById('rare');
+      const freqRare = newJobCapsService.getAggById('freq_rare');
+      jobCreator.setDefaultDetectorProperties(rare, freqRare);
     }
   }
 

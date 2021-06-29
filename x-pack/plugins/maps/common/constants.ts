@@ -58,15 +58,14 @@ export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
 export const MVT_TOKEN_PARAM_NAME = 'token';
 
-const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
-  return MAP_BASE_URL;
+  return `/${MAPS_APP_PATH}/${MAP_PATH}`;
 }
-export function getExistingMapPath(id: string) {
-  return `${MAP_BASE_URL}/${id}`;
+export function getFullPath(id: string | undefined) {
+  return `/${MAPS_APP_PATH}${getEditPath(id)}`;
 }
-export function getEditPath(id: string) {
-  return `/${MAP_PATH}/${id}`;
+export function getEditPath(id: string | undefined) {
+  return id ? `/${MAP_PATH}/${id}` : `/${MAP_PATH}`;
 }
 
 export enum LAYER_TYPE {
@@ -170,6 +169,7 @@ export enum DRAW_SHAPE {
   POINT = 'POINT',
   LINE = 'LINE',
   SIMPLE_SELECT = 'SIMPLE_SELECT',
+  DELETE = 'DELETE',
 }
 
 export const AGG_DELIMITER = '_of_';
@@ -263,11 +263,6 @@ export enum SCALING_TYPES {
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
   MVT = 'MVT',
-}
-
-export enum FORMAT_TYPE {
-  GEOJSON = 'geojson',
-  TOPOJSON = 'topojson',
 }
 
 export enum MVT_FIELD_TYPE {
