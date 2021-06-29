@@ -6,20 +6,37 @@
     "interfaces": [
       {
         "parentPluginId": "indexLifecycleManagement",
-        "id": "def-public.IlmUrlGeneratorState",
+        "id": "def-public.IlmLocatorParams",
         "type": "Interface",
         "tags": [],
-        "label": "IlmUrlGeneratorState",
+        "label": "IlmLocatorParams",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "indexLifecycleManagement",
+            "scope": "public",
+            "docId": "kibIndexLifecycleManagementPluginApi",
+            "section": "def-public.IlmLocatorParams",
+            "text": "IlmLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          }
+        ],
         "source": {
-          "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
-          "lineNumber": 21
+          "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+          "lineNumber": 20
         },
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "indexLifecycleManagement",
-            "id": "def-public.IlmUrlGeneratorState.page",
+            "id": "def-public.IlmLocatorParams.page",
             "type": "CompoundType",
             "tags": [],
             "label": "page",
@@ -28,14 +45,14 @@
               "\"policies_list\" | \"policy_edit\" | \"policy_create\""
             ],
             "source": {
-              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
-              "lineNumber": 22
+              "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+              "lineNumber": 21
             },
             "deprecated": false
           },
           {
             "parentPluginId": "indexLifecycleManagement",
-            "id": "def-public.IlmUrlGeneratorState.policyName",
+            "id": "def-public.IlmLocatorParams.policyName",
             "type": "string",
             "tags": [],
             "label": "policyName",
@@ -44,24 +61,8 @@
               "string | undefined"
             ],
             "source": {
-              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
-              "lineNumber": 23
-            },
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "indexLifecycleManagement",
-            "id": "def-public.IlmUrlGeneratorState.absolute",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "absolute",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "source": {
-              "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
-              "lineNumber": 24
+              "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+              "lineNumber": 22
             },
             "deprecated": false
           }
@@ -73,17 +74,17 @@
     "misc": [
       {
         "parentPluginId": "indexLifecycleManagement",
-        "id": "def-public.ILM_URL_GENERATOR_ID",
+        "id": "def-public.ILM_LOCATOR_ID",
         "type": "string",
         "tags": [],
-        "label": "ILM_URL_GENERATOR_ID",
+        "label": "ILM_LOCATOR_ID",
         "description": [],
         "signature": [
-          "\"ILM_URL_GENERATOR_ID\""
+          "\"ILM_LOCATOR_ID\""
         ],
         "source": {
-          "path": "x-pack/plugins/index_lifecycle_management/public/url_generator.ts",
-          "lineNumber": 19
+          "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false
