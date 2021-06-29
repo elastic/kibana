@@ -229,7 +229,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         getCaseDetailHrefWithCommentId,
         onCaseDataSuccess,
         onComponentInitialized,
-        endpointDetailsNavigation: {
+        actionsNavigation: {
           href: endpointDetailsHref,
           onClick: (endpointId: string, e) => {
             if (e) {

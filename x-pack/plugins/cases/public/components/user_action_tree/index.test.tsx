@@ -30,6 +30,7 @@ const defaultProps = {
   getCaseDetailHrefWithCommentId: jest.fn(),
   getRuleDetailsHref: jest.fn(),
   onRuleDetailsClick: jest.fn(),
+  actionsNavigation: jest.fn(),
   data: basicCase,
   fetchUserActions,
   isLoadingDescription: false,

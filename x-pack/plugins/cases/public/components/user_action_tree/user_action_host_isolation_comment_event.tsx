@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import * as i18n from './translations';
 import { LinkAnchor } from '../links';
-import { EndpointDetailsNavigation } from './helpers';
+import { ActionsNavigation } from './helpers';
 
 interface EndpointInfo {
   endpointId: string;
@@ -18,8 +18,8 @@ interface EndpointInfo {
 interface Props {
   type: string;
   endpoints: EndpointInfo[];
-  href: EndpointDetailsNavigation['href'];
-  onClick: EndpointDetailsNavigation['onClick'];
+  href: ActionsNavigation['href'];
+  onClick: ActionsNavigation['onClick'];
 }
 
 const HostIsolationCommentEventComponent: React.FC<Props> = ({

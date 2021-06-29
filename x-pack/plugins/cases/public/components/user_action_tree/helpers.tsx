@@ -39,7 +39,7 @@ interface LabelTitle {
 }
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
 
-export type EndpointDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
+export type ActionsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
 
 const getStatusTitle = (id: string, status: CaseStatuses) => (
   <EuiFlexGroup
@@ -362,8 +362,7 @@ export const getActionAttachment = ({
   userCanCrud,
   isLoadingIds,
   getCaseDetailHrefWithCommentId,
-  getEndpointDetailsHref,
-  getEndpointDetailsOnClick,
+  actionsNavigation,
   manageMarkdownEditIds,
   handleManageMarkdownEditId,
   handleManageQuote,
@@ -374,8 +373,7 @@ export const getActionAttachment = ({
   userCanCrud: boolean;
   isLoadingIds: string[];
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
-  getEndpointDetailsHref: EndpointDetailsNavigation['href'];
-  getEndpointDetailsOnClick: EndpointDetailsNavigation['onClick'];
+  actionsNavigation: ActionsNavigation;
   manageMarkdownEditIds: string[];
   handleManageMarkdownEditId: (id: string) => void;
   handleManageQuote: (id: string) => void;
@@ -395,8 +393,8 @@ export const getActionAttachment = ({
     <HostIsolationCommentEvent
       type={comment.actions.type}
       endpoints={comment.actions.targets}
-      href={getEndpointDetailsHref}
-      onClick={getEndpointDetailsOnClick}
+      href={actionsNavigation.href}
+      onClick={actionsNavigation.onClick}
     />
   ),
   'data-test-subj': 'endpoint-action',
