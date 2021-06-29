@@ -150,6 +150,7 @@ export class Server {
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
+      executionContext: executionContextSetup,
     });
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
@@ -236,7 +237,7 @@ export class Server {
     this.log.debug('starting server');
     const startTransaction = apm.startTransaction('server_start', 'kibana_platform');
 
-    this.executionContext.start();
+    const executionContextStart = this.executionContext.start();
     const elasticsearchStart = await this.elasticsearch.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
@@ -260,6 +261,7 @@ export class Server {
     this.coreStart = {
       capabilities: capabilitiesStart,
       elasticsearch: elasticsearchStart,
+      executionContext: executionContextStart,
       http: httpStart,
       metrics: metricsStart,
       savedObjects: savedObjectsStart,

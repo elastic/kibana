@@ -69,6 +69,8 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 
+import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+
 export type {
   CoreUsageStats,
   CoreUsageData,
@@ -475,6 +477,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   context: ContextSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup & {
     /** {@link HttpResources} */
@@ -521,6 +525,8 @@ export interface CoreStart {
   capabilities: CapabilitiesStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */
