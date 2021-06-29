@@ -26,10 +26,11 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "package.json",
-  "README.md",
   "jest/package.json",
   "jest-preset.js",
+  "jest.config.js"
+  "README.md",
+  "package.json",
 ]
 
 SRC_DEPS = [
