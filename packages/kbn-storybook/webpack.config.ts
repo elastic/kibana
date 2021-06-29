@@ -20,7 +20,6 @@ const stats = {
   errorDetails: true,
   errors: true,
   moduleTrace: true,
-  warningsFilter: /(export .* was not found in)|(entrypoint size limit)/,
 };
 
 // Extend the Storybook Webpack config with some customizations
