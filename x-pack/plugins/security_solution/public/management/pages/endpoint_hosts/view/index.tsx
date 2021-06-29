@@ -47,6 +47,7 @@ import {
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
+import { useAppUrl } from '../../../../common/lib/kibana/hooks';
 import { EndpointAction } from '../store/action';
 import { EndpointPolicyLink } from './components/endpoint_policy_link';
 import { OutOfDate } from './components/out_of_date';
@@ -121,7 +122,8 @@ export const EndpointList = () => {
     endpointsTotalError,
     isTransformEnabled,
   } = useEndpointSelector(selector);
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
+  const { search } = useFormatUrl(SecurityPageName.administration);
+  const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
@@ -160,13 +162,17 @@ export const EndpointList = () => {
       }/add-integration`,
       state: {
         onCancelNavigateTo: [
-          'securitySolution:administration',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
+          'securitySolution',
+          {
+            path: getEndpointListPath({ name: 'endpointList' }),
+          },
         ],
-        onCancelUrl: formatUrl(getEndpointListPath({ name: 'endpointList' })),
+        onCancelUrl: getAppUrl({ path: getEndpointListPath({ name: 'endpointList' }) }),
         onSaveNavigateTo: [
-          'securitySolution:administration',
-          { path: getEndpointListPath({ name: 'endpointList' }) },
+          'securitySolution',
+          {
+            path: getEndpointListPath({ name: 'endpointList' }),
+          },
         ],
       },
     }
@@ -201,7 +207,7 @@ export const EndpointList = () => {
       path: `#/policies/${selectedPolicyId}?openEnrollmentFlyout=true`,
       state: {
         onDoneNavigateTo: [
-          'securitySolution:administration',
+          'securitySolution',
           { path: getEndpointListPath({ name: 'endpointList' }) },
         ],
       },
@@ -257,7 +263,7 @@ export const EndpointList = () => {
             },
             search
           );
-          const toRouteUrl = formatUrl(toRoutePath);
+          const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
             <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
               <EndpointListNavLink
@@ -336,7 +342,7 @@ export const EndpointList = () => {
             ...queryParams,
             selected_endpoint: item.metadata.agent.id,
           });
-          const toRouteUrl = formatUrl(toRoutePath);
+          const toRouteUrl = getAppUrl({ path: toRoutePath });
           return (
             <EuiBadge
               color={POLICY_STATUS_TO_BADGE_COLOR[policy.status]}
@@ -416,7 +422,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, formatUrl, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {

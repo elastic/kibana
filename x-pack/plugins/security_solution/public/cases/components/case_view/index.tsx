@@ -23,11 +23,7 @@ import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common'
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { KibanaServices, useKibana } from '../../../common/lib/kibana';
-import {
-  APP_ID,
-  CASES_APP_ID,
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-} from '../../../../common/constants';
+import { APP_ID, DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -132,7 +128,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   const dispatch = useDispatch();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
-    SecurityPageName.detections
+    SecurityPageName.rules
   );
 
   const allCasesLink = getCaseUrl(search);
@@ -190,7 +186,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(CASES_APP_ID, {
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
               path: allCasesLink,
             });
           },
@@ -201,7 +198,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(CASES_APP_ID, {
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
               path: getCaseDetailsUrl({ id: caseId }),
             });
           },
@@ -213,7 +211,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(CASES_APP_ID, {
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
               path: getConfigureCasesUrl(search),
             });
           },
@@ -227,7 +226,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.rules,
               path: getRuleDetailsUrl(ruleId ?? ''),
             });
           },
