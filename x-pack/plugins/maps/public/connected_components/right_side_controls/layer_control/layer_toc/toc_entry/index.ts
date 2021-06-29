@@ -29,7 +29,8 @@ import {
   hideTOCDetails,
   showTOCDetails,
   toggleLayerVisible,
-  setDrawMode, updateDrawState,
+  setDrawMode,
+  updateDrawState,
 } from '../../../../../actions';
 import { DRAW_MODE } from '../../../../../../common';
 
