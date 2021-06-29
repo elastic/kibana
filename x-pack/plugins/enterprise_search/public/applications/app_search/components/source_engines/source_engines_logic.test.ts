@@ -23,7 +23,7 @@ import { SourceEnginesLogic } from './source_engines_logic';
 describe('SourceEnginesLogic', () => {
   const { http } = mockHttpValues;
   const { mount } = new LogicMounter(SourceEnginesLogic);
-  const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -292,8 +292,8 @@ describe('SourceEnginesLogic', () => {
             { name: 'source-engine-3' },
             { name: 'source-engine-4' },
           ]);
-          expect(setSuccessMessage).toHaveBeenCalledWith(
-            '2 engines have been added to this meta engine.'
+          expect(flashSuccessToast).toHaveBeenCalledWith(
+            '2 engines were added to this meta engine'
           );
         });
 
@@ -352,8 +352,8 @@ describe('SourceEnginesLogic', () => {
           SourceEnginesLogic.actions.removeSourceEngine('source-engine-2');
           await nextTick();
 
-          expect(setSuccessMessage).toHaveBeenCalledWith(
-            'Engine source-engine-2 has been removed from this meta engine.'
+          expect(flashSuccessToast).toHaveBeenCalledWith(
+            "Engine 'source-engine-2' was removed from this meta engine"
           );
         });
 

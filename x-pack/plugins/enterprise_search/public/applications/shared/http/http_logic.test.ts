@@ -91,31 +91,42 @@ describe('HttpLogic', () => {
           jest.spyOn(HttpLogic.actions, 'setErrorConnecting');
         });
 
-        it('handles errors connecting to Enterprise Search', async () => {
+        it('sets errorConnecting to true if the response header is true', async () => {
           const httpResponse = {
-            response: { url: '/api/app_search/engines', status: 502 },
+            response: { url: '/api/app_search/engines', headers: { get: () => 'true' } },
           };
           await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
-          expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalled();
+          expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalledWith(true);
         });
 
-        it('does not handle non-502 Enterprise Search errors', async () => {
+        it('sets errorConnecting to false if the response header is false', async () => {
           const httpResponse = {
-            response: { url: '/api/workplace_search/overview', status: 404 },
+            response: { url: '/api/workplace_search/overview', headers: { get: () => 'false' } },
           };
           await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
-          expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
+          expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalledWith(false);
         });
 
-        it('does not handle errors for non-Enterprise Search API calls', async () => {
-          const httpResponse = {
-            response: { url: '/api/some_other_plugin/', status: 502 },
-          };
-          await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
+        describe('isEnterpriseSearchApi check', () => {
+          let httpResponse: any;
 
-          expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
+          afterEach(async () => {
+            // Should always re-reject the promise and not call setErrorConnecting
+            await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
+            expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
+          });
+
+          it('does not handle non-Enterprise Search API calls', async () => {
+            httpResponse = {
+              response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
+            };
+          });
+
+          it('does not handle invalid responses', async () => {
+            httpResponse = {};
+          });
         });
       });
 
@@ -145,13 +156,24 @@ describe('HttpLogic', () => {
           expect(HttpLogic.actions.setReadOnlyMode).toHaveBeenCalledWith(false);
         });
 
-        it('does not handle headers for non-Enterprise Search API calls', async () => {
-          const httpResponse = {
-            response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
-          };
-          await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+        describe('isEnterpriseSearchApi check', () => {
+          let httpResponse: any;
 
-          expect(HttpLogic.actions.setReadOnlyMode).not.toHaveBeenCalled();
+          afterEach(async () => {
+            // Should always resolve the promise and not call setReadOnlyMode
+            await expect(interceptedResponse(httpResponse)).resolves.toEqual(httpResponse);
+            expect(HttpLogic.actions.setReadOnlyMode).not.toHaveBeenCalled();
+          });
+
+          it('does not handle non-Enterprise Search API calls', async () => {
+            httpResponse = {
+              response: { url: '/api/some_other_plugin/', headers: { get: () => 'true' } },
+            };
+          });
+
+          it('does not handle invalid responses', async () => {
+            httpResponse = {};
+          });
         });
       });
     });
