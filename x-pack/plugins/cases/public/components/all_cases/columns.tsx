@@ -113,17 +113,6 @@ export const useCasesColumns = ({
     [dispatchUpdateCaseProperty, refreshCases]
   );
 
-  const updateStatus = useCallback(
-    (status) =>
-      handleDispatchUpdate({
-        updateKey: 'status',
-        updateValue: status,
-        caseId: theCase.id,
-        version: theCase.version,
-      }),
-    [handleDispatchUpdate]
-  );
-
   const actions = useMemo(
     () =>
       getActions({
@@ -292,7 +281,14 @@ export const useCasesColumns = ({
             <StatusContextMenu
               currentStatus={theCase.status}
               disabled={!userCanCrud || isLoadingCases.length > 0}
-              onStatusChanged={updateStatus}
+              onStatusChanged={(status) =>
+                handleDispatchUpdate({
+                  updateKey: 'status',
+                  updateValue: status,
+                  caseId: theCase.id,
+                  version: theCase.version,
+                })
+              }
             />
           );
         }
