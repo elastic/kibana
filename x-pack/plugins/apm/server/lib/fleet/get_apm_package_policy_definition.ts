@@ -27,27 +27,28 @@ export function getApmPackagePolicyDefinition(
         vars: getApmPackageInputVars(apmServerSchema),
       },
     ],
-    package: { name: APM_PACKAGE_NAME, version: '0.3.0', title: 'Elastic APM' },
+    package: {
+      name: APM_PACKAGE_NAME,
+      version: '0.3.0-dev.1',
+      title: 'Elastic APM',
+    },
   };
 }
 
 function getApmPackageInputVars(apmServerSchema: Record<string, any>) {
   const apmServerConfigs = Object.entries(
-    apmServerSchema
-  ).map(([key, value]) => ({ key, value }));
+    apmConfigMapping
+  ).map(([key, { name, type }]) => ({ key, name, type }));
 
   const inputVars: Record<
     string,
     { type: string; value: any }
-  > = apmServerConfigs.reduce((acc, { key, value }) => {
-    if (key in apmConfigMapping) {
-      const { name, type } = apmConfigMapping[key];
-      return {
-        ...acc,
-        [name]: { type, value },
-      };
-    }
-    return acc;
+  > = apmServerConfigs.reduce((acc, { key, name, type }) => {
+    const value = apmServerSchema[key] ?? ''; // defaults to an empty string to be edited in Fleet UI
+    return {
+      ...acc,
+      [name]: { type, value },
+    };
   }, {});
   return inputVars;
 }
