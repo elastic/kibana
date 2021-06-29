@@ -63,6 +63,7 @@ export interface SeriesConfig {
   palette?: PaletteOutput;
   yTitle?: string;
   yConfig?: YConfig[];
+  query?: { query: string; language: 'kuery' };
 }
 
 export type URLReportDefinition = Record<string, string[]>;

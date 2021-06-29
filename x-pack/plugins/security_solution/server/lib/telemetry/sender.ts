@@ -307,6 +307,7 @@ const allowlistProcessFields: AllowlistFields = {
     },
   },
   thread: true,
+  working_directory: true,
 };
 
 // Allow list for event-related fields, which can also be nested under events[]
@@ -322,6 +323,7 @@ const allowlistBaseEventFields: AllowlistFields = {
   },
   event: true,
   file: {
+    extension: true,
     name: true,
     path: true,
     size: true,

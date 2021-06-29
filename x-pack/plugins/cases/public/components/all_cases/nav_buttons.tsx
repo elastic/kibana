@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash/fp';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import * as i18n from './translations';
 import { CasesNavigation, LinkButton } from '../links';
-import { ErrorMessage } from '../callout/types';
+import { ErrorMessage } from '../use_push_to_service/callout/types';
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];
@@ -33,7 +33,7 @@ export const NavButtons: FunctionComponent<Props> = ({
         label={i18n.CONFIGURE_CASES_BUTTON}
         isDisabled={!isEmpty(actionsErrors)}
         showToolTip={!isEmpty(actionsErrors)}
-        msgTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].description : <></>}
+        msgTooltip={!isEmpty(actionsErrors) ? <>{actionsErrors[0].description}</> : <></>}
         titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
       />
     </EuiFlexItem>

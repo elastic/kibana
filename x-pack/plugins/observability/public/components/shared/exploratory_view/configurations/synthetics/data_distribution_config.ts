@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
 import {
   CLS_LABEL,
   DCL_LABEL,
@@ -38,7 +38,7 @@ export function getSyntheticsDistributionConfig({
     },
     yAxisColumns: [
       {
-        sourceField: RECORDS_FIELD,
+        sourceField: RECORDS_PERCENTAGE_FIELD,
         label: PINGS_LABEL,
       },
     ],
