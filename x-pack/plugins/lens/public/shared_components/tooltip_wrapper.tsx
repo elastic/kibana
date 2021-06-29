@@ -6,22 +6,23 @@
  */
 
 import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiToolTipProps } from '@elastic/eui';
 
-export interface TooltipWrapperProps {
+export type TooltipWrapperProps = Partial<Omit<EuiToolTipProps, 'content'>> & {
   tooltipContent: string;
   condition: boolean;
-}
+};
 
 export const TooltipWrapper: React.FunctionComponent<TooltipWrapperProps> = ({
   children,
   condition,
   tooltipContent,
+  ...tooltipProps
 }) => {
   return (
     <>
       {condition ? (
-        <EuiToolTip content={tooltipContent} delay="long">
+        <EuiToolTip content={tooltipContent} delay="long" {...tooltipProps}>
           <>{children}</>
         </EuiToolTip>
       ) : (
