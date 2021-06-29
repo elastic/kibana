@@ -16,6 +16,8 @@ import {
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 import { ClusterPutComponentTemplateBody, PutIndexTemplateRequest } from '../../common/types';
+import { RuleDataClient } from '../rule_data_client';
+import { RuleDataWriteDisabledError } from './errors';
 
 const BOOTSTRAP_TIMEOUT = 60000;
 
@@ -154,5 +156,14 @@ export class RuleDataPluginService {
 
   getFullAssetName(assetName?: string) {
     return [this.options.index, assetName].filter(Boolean).join('-');
+  }
+
+  getRuleDataClient(alias: string, initialize: () => Promise<void>) {
+    return new RuleDataClient({
+      alias,
+      getClusterClient: () => this.getClusterClient(),
+      isWriteEnabled: this.isWriteEnabled(),
+      ready: initialize,
+    });
   }
 }

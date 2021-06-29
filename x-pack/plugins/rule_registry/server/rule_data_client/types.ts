@@ -39,6 +39,7 @@ export interface IRuleDataClient {
 
 export interface RuleDataClientConstructorOptions {
   getClusterClient: () => Promise<ElasticsearchClient>;
+  isWriteEnabled: boolean;
   ready: () => Promise<void>;
   alias: string;
 }
