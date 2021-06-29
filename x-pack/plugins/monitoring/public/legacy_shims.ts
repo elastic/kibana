@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup, IUiSettingsClient } from 'kibana/public';
+import { CoreStart, HttpSetup, IUiSettingsClient, AppMountParameters } from 'kibana/public';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies } from './types';
@@ -63,13 +63,21 @@ export interface IShims {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
+  appMountParameters: AppMountParameters;
 }
 
 export class Legacy {
   private static _shims: IShims;
 
   public static init(
-    { core, data, isCloud, triggersActionsUi, usageCollection }: MonitoringStartPluginDependencies,
+    {
+      core,
+      data,
+      isCloud,
+      triggersActionsUi,
+      usageCollection,
+      appMountParameters,
+    }: MonitoringStartPluginDependencies,
     ngInjector: angular.auto.IInjectorService
   ) {
     this._shims = {
@@ -129,6 +137,7 @@ export class Legacy {
         ...core,
         usageCollection,
       },
+      appMountParameters,
     };
   }
 

@@ -42,7 +42,7 @@ interface RouteProps {
 const baseTitle = 'Uptime - Kibana';
 
 export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.heading', {
-  defaultMessage: 'Monitoring overview',
+  defaultMessage: 'Monitors',
 });
 
 const Routes: RouteProps[] = [
