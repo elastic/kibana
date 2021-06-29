@@ -131,7 +131,7 @@ describe('embeddable factory', () => {
   });
 
   test('embeddableFactory migrate function gets called when calling embeddable migrate', () => {
-    start.migrate(embeddableState, '7.11.0');
+    start.getAllMigrations!()['7.11.0']!(embeddableState);
     expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
   });
 });
@@ -156,8 +156,9 @@ describe('embeddable enhancements', () => {
     },
   } as any;
 
+  setup.registerEnhancement(embeddableEnhancement);
+
   test('cannot register embeddable enhancement with the same ID', async () => {
-    setup.registerEnhancement(embeddableEnhancement);
     expect(() => setup.registerEnhancement(embeddableEnhancement)).toThrowError(
       'enhancement with id test already exists in the registry'
     );
@@ -179,7 +180,7 @@ describe('embeddable enhancements', () => {
   });
 
   test('enhancement migrate function gets called when calling embeddable migrate', () => {
-    start.migrate(embeddableState, '7.11.0');
+    start.getAllMigrations!()['7.11.0']!(embeddableState);
     expect(embeddableEnhancement.migrations['7.11.0']).toBeCalledWith(
       embeddableState.enhancements.test
     );
@@ -187,9 +188,9 @@ describe('embeddable enhancements', () => {
 
   test('doesnt fail if there is no migration function registered for specific version', () => {
     expect(() => {
-      start.migrate(embeddableState, '7.10.0');
+      start.getAllMigrations!()['7.11.0']!(embeddableState);
     }).not.toThrow();
 
-    expect(start.migrate(embeddableState, '7.10.0')).toEqual(embeddableState);
+    expect(start.getAllMigrations!()['7.11.0']!(embeddableState)).toEqual(embeddableState);
   });
 });

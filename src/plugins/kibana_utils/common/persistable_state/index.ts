@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { mergeWith } from 'lodash';
+import { SavedObjectMigrationMap } from 'kibana/server';
 import { SavedObjectReference } from '../../../../core/types';
 
 export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
@@ -21,8 +23,32 @@ export type MigrateFunction<
 > = (state: FromVersion) => ToVersion;
 
 export type MigrateFunctionsObject = {
-  [key: string]: MigrateFunction;
+  [key: string]: MigrateFunction<any, any>;
 };
+
+export const mergeSavedObjectMigrationMaps = (
+  obj1: SavedObjectMigrationMap,
+  obj2: SavedObjectMigrationMap
+) => {
+  const customizer = (objValue: MigrateFunction, srcValue: MigrateFunction) => {
+    if (!srcValue || !objValue) {
+      return srcValue || objValue;
+    }
+    return (state: SerializableState) => objValue(srcValue(state));
+  };
+
+  return mergeWith(obj1, obj2, customizer);
+};
+
+/**
+ * migrate function runs the specified migration
+ * @param state
+ * @param version
+ */
+export type PersistableStateMigrateFn = (
+  state: SerializableState,
+  version: string
+) => SerializableState;
 
 export interface PersistableStateService<P extends SerializableState = SerializableState> {
   /**
@@ -53,11 +79,9 @@ export interface PersistableStateService<P extends SerializableState = Serializa
   migrateToLatest?: (state: SerializableState, version: string) => P;
 
   /**
-   * migrate function runs the specified migration
-   * @param state
-   * @param version
+   * returns all registered migrations
    */
-  migrate: (state: SerializableState, version: string) => SerializableState;
+  getAllMigrations?: () => MigrateFunctionsObject;
 }
 
 export interface PersistableState<P extends SerializableState = SerializableState> {
@@ -87,6 +111,7 @@ export interface PersistableState<P extends SerializableState = SerializableStat
   migrations: MigrateFunctionsObject;
 }
 
+// the PersistableStateDefinition interface should be implemented by anything exposing SerializableState
 export type PersistableStateDefinition<P extends SerializableState = SerializableState> = Partial<
   PersistableState<P>
 >;
