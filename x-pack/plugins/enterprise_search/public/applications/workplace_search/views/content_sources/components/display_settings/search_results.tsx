@@ -42,15 +42,33 @@ export const SearchResults: React.FC = () => {
     toggleTitleFieldHover,
     toggleSubtitleFieldHover,
     toggleDescriptionFieldHover,
+    toggleTypeFieldHover,
+    toggleMediaTypeFieldHover,
+    toggleCreatedByFieldHover,
+    toggleUpdatedByFieldHover,
     setTitleField,
     setSubtitleField,
     setDescriptionField,
+    setTypeField,
+    setMediaTypeField,
+    setCreatedByField,
+    setUpdatedByField,
     setUrlField,
     setColorField,
   } = useActions(DisplaySettingsLogic);
 
   const {
-    searchResultConfig: { titleField, descriptionField, subtitleField, urlField, color },
+    searchResultConfig: {
+      titleField,
+      descriptionField,
+      subtitleField,
+      typeField,
+      mediaTypeField,
+      createdByField,
+      updatedByField,
+      urlField,
+      color,
+    },
     fieldOptions,
     optionalFieldOptions,
   } = useValues(DisplaySettingsLogic);
@@ -133,6 +151,74 @@ export const SearchResults: React.FC = () => {
                 value={descriptionField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
                   setDescriptionField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Type"
+              helpText="This area is optional"
+              onMouseOver={toggleTypeFieldHover}
+              onMouseOut={toggleTypeFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="TypeFieldSelect"
+                value={typeField || UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setTypeField(value === UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Media Type"
+              helpText="This area is optional"
+              onMouseOver={toggleMediaTypeFieldHover}
+              onMouseOut={toggleMediaTypeFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="MediaTypeFieldSelect"
+                value={mediaTypeField || UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setMediaTypeField(value === UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Created By"
+              helpText="This area is optional"
+              onMouseOver={toggleCreatedByFieldHover}
+              onMouseOut={toggleCreatedByFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="CreatedByFieldSelect"
+                value={createdByField || UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setCreatedByField(value === UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Updated By"
+              helpText="This area is optional"
+              onMouseOver={toggleUpdatedByFieldHover}
+              onMouseOut={toggleUpdatedByFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="UpdatedByFieldSelect"
+                value={updatedByField || UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setUpdatedByField(value === UNASSIGNED_FIELD ? null : value)
                 }
               />
             </EuiFormRow>

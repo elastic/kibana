@@ -10,6 +10,8 @@ import React from 'react';
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
+import { getAsLocalDateTimeString } from 'shared/utils/dateUtil';
+
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { DESCRIPTION_LABEL } from '../../../../constants';
@@ -22,10 +24,23 @@ import { TitleField } from './title_field';
 export const ExampleSearchResultGroup: React.FC = () => {
   const {
     sourceName,
-    searchResultConfig: { titleField, subtitleField, descriptionField, color },
+    searchResultConfig: {
+      titleField,
+      subtitleField,
+      descriptionField,
+      typeField,
+      mediaTypeField,
+      createdByField,
+      updatedByField,
+      color,
+    },
     titleFieldHover,
     subtitleFieldHover,
     descriptionFieldHover,
+    typeFieldHover,
+    mediaTypeFieldHover,
+    createdByFieldHover,
+    updatedByFieldHover,
     exampleDocuments,
   } = useValues(DisplaySettingsLogic);
 
@@ -71,6 +86,55 @@ export const ExampleSearchResultGroup: React.FC = () => {
                       {DESCRIPTION_LABEL}
                     </span>
                   )}
+                </div>
+                {createdByField && result[createdByField] && (
+                  <div
+                    className={classNames('example-result-content__subtitle', {
+                      'example-result-field-hover': createdByFieldHover,
+                    })}
+                  >
+                    Created by {result[createdByField]}
+                  </div>
+                )}
+                <div className="example-result-content__meta">
+                  {typeField && result[typeField] && (
+                    <div
+                      className={classNames('example-result-content__tag', {
+                        'example-result-field-hover': typeFieldHover,
+                      })}
+                    >
+                      <span className="example-search-result__tag-content">
+                        {result[typeField]}
+                      </span>
+                    </div>
+                  )}
+                  {mediaTypeField && result[mediaTypeField] && (
+                    <div
+                      className={classNames('example-result-content__tag', {
+                        'example-result-field-hover': mediaTypeFieldHover,
+                      })}
+                    >
+                      <span className="example-search-result__tag-content">
+                        {result[mediaTypeField]}
+                      </span>
+                    </div>
+                  )}
+                  <div className="example-result-content__tag-content">
+                    <span>
+                      Last updated&nbsp;
+                      {updatedByField && result[updatedByField] && (
+                        <span
+                          className={classNames('example-result-content__tag-content', {
+                            'example-result-field-hover': updatedByFieldHover,
+                          })}
+                        >
+                          {' '}
+                          by {result[updatedByField]}&nbsp;
+                        </span>
+                      )}
+                      {getAsLocalDateTimeString(result.last_updated) || result.last_updated}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
