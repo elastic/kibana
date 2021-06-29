@@ -34,7 +34,7 @@ describe('WaterfallChartWrapper', () => {
       <WaterfallChartWrapper
         data={extractItems(NETWORK_EVENTS.events)}
         total={1000}
-        markerItems={[]}
+        markerItems={[{ id: 'domContentLoaded', offset: 2352353 }]}
       />
     );
 
