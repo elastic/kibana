@@ -133,7 +133,7 @@ export const ThreatIntelPanelView: React.FC<ThreatIntelPanelViewProps> = ({
       >
         <EuiFlexItem grow={1}>
           <InspectButtonContainer>
-            <EuiPanel>
+            <EuiPanel hasBorder>
               <HeaderSection id={CTIEventCountQueryId} subtitle={subtitle} title={panelTitle}>
                 <>{button}</>
               </HeaderSection>

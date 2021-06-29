@@ -16,6 +16,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "l",
     }
   }
   restrictWidth={true}
@@ -28,6 +29,7 @@ exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "l",
     }
   }
   restrictWidth={true}
@@ -59,6 +61,7 @@ exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "l",
     }
   }
   restrictWidth={true}
@@ -80,6 +83,7 @@ exports[`KibanaPageTemplate render default empty prompt 1`] = `
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "l",
     }
   }
   restrictWidth={true}
@@ -118,6 +122,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
   pageSideBar={
     <KibanaPageTemplateSolutionNav
       icon="solution"
+      isOpenOnDesktop={true}
       items={
         Array [
           Object {
@@ -159,11 +164,13 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
         ]
       }
       name="Solution"
+      onCollapse={[Function]}
     />
   }
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "none",
     }
   }
   restrictWidth={true}
