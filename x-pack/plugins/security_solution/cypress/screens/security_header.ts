@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const DETECTIONS = '[data-test-subj="navigation-alerts"]';
+export const ALERTS = '[data-test-subj="navigation-alerts"]';
 
 export const BREADCRUMBS = '[data-test-subj="breadcrumbs"] a';
 

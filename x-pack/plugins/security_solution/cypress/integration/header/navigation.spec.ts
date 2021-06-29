@@ -7,7 +7,7 @@
 
 import {
   CASES,
-  DETECTIONS,
+  ALERTS,
   HOSTS,
   ENDPOINTS,
   TRUSTED_APPS,
@@ -63,7 +63,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
   });
 
   it('navigates to the Alerts page', () => {
-    navigateFromHeaderTo(DETECTIONS);
+    navigateFromHeaderTo(ALERTS);
     cy.url().should('include', ALERTS_URL);
   });
 
