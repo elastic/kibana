@@ -156,11 +156,11 @@ export const DateIndexName: FunctionComponent = () => {
       />
 
       <UseField
-        data-test-subj="dateRoundingField"
         config={fieldsConfig.date_rounding}
         component={SelectField}
         componentProps={{
           euiFieldProps: {
+            'data-test-subj': 'dateRoundingField',
             options: [
               {
                 value: 'y',

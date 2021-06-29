@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-const DATE_INDEX_TYPE = 'dateIndex';
+const DATE_INDEX_TYPE = 'date_index_name';
 
 describe('Processor: Date Index', () => {
   let onUpdate: jest.Mock;
@@ -57,33 +57,29 @@ describe('Processor: Date Index', () => {
     // Expect form error as "field" and "value" are required parameters
     expect(form.getErrorsMessages()).toEqual([
       'A field value is required.',
-      'A value is required.',
+      'A field value is required.',
     ]);
   });
 
-  test('saves with required parameter values', async () => {
+  test('saves with required field and date rounding parameter values', async () => {
     const {
       actions: { saveNewProcessor },
       form,
-      find,
-      component,
     } = testBed;
 
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field_1');
+    form.setInputValue('fieldNameField.input', '@timestamp');
 
-    await act(async () => {
-      find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
-    });
-    component.update();
+    // Select second value for date rounding
+    form.setSelectValue('dateRoundingField', 's');
 
     // Save the field
     await saveNewProcessor();
 
-    const processors = getProcessorValue(onUpdate, DATE_INDEX_TYPE);
-    expect(processors[0].dateIndex).toEqual({
-      field: 'field_1',
-      value: ['Some_Value'],
+    const processors = await getProcessorValue(onUpdate, DATE_INDEX_TYPE);
+    expect(processors[0].date_index_name).toEqual({
+      field: '@timestamp',
+      date_rounding: 's',
     });
   });
 
@@ -95,24 +91,34 @@ describe('Processor: Date Index', () => {
       component,
     } = testBed;
 
-    // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
-    // Set optional parameteres
-    await act(async () => {
-      find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
-      component.update();
-    });
+    form.setSelectValue('dateRoundingField', 'd');
 
-    form.toggleEuiSwitch('ignoreFailureSwitch.input');
+    form.setInputValue('indexNamePrefixField.input', 'prefix');
+
+    form.setInputValue('indexNameFormatField.input', 'yyyy-MM');
+
+    await act(async () => {
+      find('dateFormatsField.input').simulate('change', [{ label: 'ISO8601' }]);
+    });
+    component.update();
+
+    form.setInputValue('timezoneField.input', 'EST');
+
+    form.setInputValue('localeField.input', 'SPANISH');
     // Save the field with new changes
     await saveNewProcessor();
 
-    const processors = getProcessorValue(onUpdate, DATE_INDEX_TYPE);
-    expect(processors[0].dateIndex).toEqual({
+    const processors = await getProcessorValue(onUpdate, DATE_INDEX_TYPE);
+    expect(processors[0].date_index_name).toEqual({
       field: 'field_1',
-      ignore_failure: true,
-      value: ['Some_Value'],
+      date_rounding: 'd',
+      index_name_format: 'yyyy-MM',
+      index_name_prefix: 'prefix',
+      date_formats: ['ISO8601'],
+      locale: 'SPANISH',
+      timezone: 'EST',
     });
   });
 });
