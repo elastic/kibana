@@ -158,7 +158,9 @@ export const SearchResults: React.FC = () => {
               label="Type"
               helpText="This area is optional"
               onMouseOver={toggleTypeFieldHover}
+              onFocus={toggleTypeFieldHover}
               onMouseOut={toggleTypeFieldHover}
+              onBlur={toggleTypeFieldHover}
             >
               <EuiSelect
                 options={optionalFieldOptions}
@@ -175,7 +177,9 @@ export const SearchResults: React.FC = () => {
               label="Media Type"
               helpText="This area is optional"
               onMouseOver={toggleMediaTypeFieldHover}
+              onFocus={toggleMediaTypeFieldHover}
               onMouseOut={toggleMediaTypeFieldHover}
+              onBlur={toggleMediaTypeFieldHover}
             >
               <EuiSelect
                 options={optionalFieldOptions}
@@ -192,7 +196,9 @@ export const SearchResults: React.FC = () => {
               label="Created By"
               helpText="This area is optional"
               onMouseOver={toggleCreatedByFieldHover}
+              onFocus={toggleCreatedByFieldHover}
               onMouseOut={toggleCreatedByFieldHover}
+              onBlur={toggleCreatedByFieldHover}
             >
               <EuiSelect
                 options={optionalFieldOptions}
@@ -209,7 +215,9 @@ export const SearchResults: React.FC = () => {
               label="Updated By"
               helpText="This area is optional"
               onMouseOver={toggleUpdatedByFieldHover}
+              onFocus={toggleUpdatedByFieldHover}
               onMouseOut={toggleUpdatedByFieldHover}
+              onBlur={toggleUpdatedByFieldHover}
             >
               <EuiSelect
                 options={optionalFieldOptions}
