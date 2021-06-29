@@ -7,3 +7,4 @@
 
 export * from './histogram';
 export * from './ping';
+export * from './synthetics';

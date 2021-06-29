@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { AppLeaveHandler, AppMountParameters } from '../../../../../../src/core/public';
@@ -14,12 +15,11 @@ import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
 import { navTabs } from './home_navigations';
 import { useInitSourcerer, useSourcererScope } from '../../common/containers/sourcerer';
-import { useKibana } from '../../common/lib/kibana';
-import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
+import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
 import { SecuritySolutionTemplateWrapper } from './template_wrapper';
+import { isDetectionsPath } from '../../helpers';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -32,23 +32,14 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   onAppLeave,
   setHeaderActionMenu,
 }) => {
-  const { application } = useKibana().services;
-  const subPluginId = useRef<string>('');
-
-  application.currentAppId$.subscribe((appId) => {
-    subPluginId.current = appId ?? '';
-  });
+  const { pathname } = useLocation();
 
   useInitSourcerer(
-    subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default
+    isDetectionsPath(pathname) ? SourcererScopeName.detections : SourcererScopeName.default
   );
 
   const { browserFields, indexPattern } = useSourcererScope(
-    subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default
+    isDetectionsPath(pathname) ? SourcererScopeName.detections : SourcererScopeName.default
   );
 
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
@@ -56,7 +47,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
   // a background task solution can be built on the server side. Once a background task solution is available we
   // can remove this.
-  useUpgradeEndpointPackage();
+  useUpgradeSecurityPackages();
 
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">

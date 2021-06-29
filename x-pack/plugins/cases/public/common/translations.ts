@@ -161,7 +161,7 @@ export const SAVE = i18n.translate('xpack.cases.caseView.description.save', {
 });
 
 export const CONNECTORS = i18n.translate('xpack.cases.caseView.connectors', {
-  defaultMessage: 'External Incident Management System',
+  defaultMessage: 'External incident management system',
 });
 
 export const NO_CONNECTOR = i18n.translate('xpack.cases.common.noConnector', {
