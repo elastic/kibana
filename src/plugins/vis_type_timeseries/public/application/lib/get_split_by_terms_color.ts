@@ -9,7 +9,7 @@ import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { PALETTES, PanelData } from '../../../common/types';
 import { computeGradientFinalColor } from './compute_gradient_final_color';
 import { rainbowColors } from './rainbow_colors';
-import { emptyLabel } from '../../../common/empty_label';
+import { getValueOrEmpty } from '../../../common/empty_label';
 
 interface PaletteParams {
   colors: string[];
@@ -60,7 +60,7 @@ export const getSplitByTermsColor = ({
   const outputColor = palettesRegistry?.get(paletteName || 'default').getColor(
     [
       {
-        name: seriesName || emptyLabel,
+        name: getValueOrEmpty(seriesName),
         rankAtDepth: seriesById.findIndex(({ id }) => id === seriesId),
         totalSeriesAtDepth: seriesById.length,
       },
