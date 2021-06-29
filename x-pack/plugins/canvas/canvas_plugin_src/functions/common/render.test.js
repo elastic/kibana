@@ -24,12 +24,13 @@ const renderTable = {
 
 describe('render', () => {
   let fn;
+  let containerStyle;
   beforeEach(async () => {
     fn = await functionWrapper(render);
+    containerStyle = await getContainerStyle();
   });
 
   it('returns a render', async () => {
-    const containerStyle = await getContainerStyle();
     const result = fn(renderTable, {
       as: 'debug',
       css: '".canvasRenderEl { background-color: red; }"',
