@@ -13,15 +13,11 @@ import { useValues } from 'kea';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { URL_LABEL } from '../../../../constants';
+import { getAsLocalDateTimeString } from '../../../../utils';
 
 import { CustomSourceIcon } from './custom_source_icon';
 import { DisplaySettingsLogic } from './display_settings_logic';
 import { TitleField } from './title_field';
-
-const getAsLocalDateTimeString = (str: string) => {
-  const dateValue = Date.parse(str);
-  return dateValue ? new Date(dateValue).toLocaleString() : null;
-};
 
 export const ExampleResultDetailCard: React.FC = () => {
   const {

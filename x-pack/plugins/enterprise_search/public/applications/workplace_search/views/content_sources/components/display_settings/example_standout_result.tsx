@@ -10,11 +10,10 @@ import React from 'react';
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
-import { getAsLocalDateTimeString } from 'shared/utils/dateUtil';
-
 import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { DESCRIPTION_LABEL } from '../../../../constants';
+import { getAsLocalDateTimeString } from '../../../../utils';
 
 import { CustomSourceIcon } from './custom_source_icon';
 import { DisplaySettingsLogic } from './display_settings_logic';
@@ -122,7 +121,7 @@ export const ExampleStandoutResult: React.FC = () => {
                     by {result[updatedByField]}&nbsp;
                   </span>
                 )}
-                {getAsLocalDateTimeString(result.last_updated) || result.last_updated}
+                {getAsLocalDateTimeString(result.last_updated as string) || result.last_updated}
               </span>
             </div>
           </div>
