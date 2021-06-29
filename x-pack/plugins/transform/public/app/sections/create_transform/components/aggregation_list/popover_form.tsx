@@ -126,19 +126,30 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
   function getUpdatedItem(): PivotAggsConfig {
     let updatedItem: PivotAggsConfig;
+
+    let resultField = field;
+    if (
+      isPivotAggsConfigWithUiSupport(aggConfigDef) &&
+      !aggConfigDef.isMultiField &&
+      Array.isArray(field)
+    ) {
+      // reset to a single field in case agg doesn't support multiple fields
+      resultField = field[0];
+    }
+
     if (agg !== PIVOT_SUPPORTED_AGGS.PERCENTILES) {
       updatedItem = {
         ...aggConfigDef,
         agg,
         aggName,
-        field,
+        field: resultField,
         dropDownName: defaultData.dropDownName,
       };
     } else {
       updatedItem = {
         agg,
         aggName,
-        field,
+        field: resultField,
         dropDownName: defaultData.dropDownName,
         percents,
       };
