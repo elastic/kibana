@@ -86,6 +86,9 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
+  /**
+   * @deprecated Use locator instead.
+   */
   private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
   private locator: undefined | MlLocator;
 
@@ -186,6 +189,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     return {
+      /**
+       * @deprecated Use locator instead.
+       */
       urlGenerator: this.urlGenerator,
       locator: this.locator,
     };
@@ -200,6 +206,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     });
 
     return {
+      /**
+       * @deprecated Use locator instead.
+       */
       urlGenerator: this.urlGenerator,
       locator: this.locator,
     };
