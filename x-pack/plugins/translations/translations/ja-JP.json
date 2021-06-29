@@ -625,7 +625,6 @@
     "dashboard.listing.createNewDashboard.newToKibanaDescription": "Kibanaは初心者ですか？{sampleDataInstallLink}してお試しください。",
     "dashboard.listing.createNewDashboard.sampleDataInstallLinkText": "サンプルデータをインストール",
     "dashboard.listing.createNewDashboard.title": "初めてのダッシュボードを作成してみましょう。",
-    "dashboard.listing.noItemsMessage": "ダッシュボードがないようです。",
     "dashboard.listing.table.descriptionColumnName": "説明",
     "dashboard.listing.table.entityName": "ダッシュボード",
     "dashboard.listing.table.entityNamePlural": "ダッシュボード",

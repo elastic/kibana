@@ -628,7 +628,6 @@
     "dashboard.listing.createNewDashboard.newToKibanaDescription": "Kibana 新手？{sampleDataInstallLink}来试用一下。",
     "dashboard.listing.createNewDashboard.sampleDataInstallLinkText": "安装一些样例数据",
     "dashboard.listing.createNewDashboard.title": "创建您的首个仪表板",
-    "dashboard.listing.noItemsMessage": "似乎您没有任何仪表板。",
     "dashboard.listing.table.descriptionColumnName": "描述",
     "dashboard.listing.table.entityName": "仪表板",
     "dashboard.listing.table.entityNamePlural": "仪表板",
