@@ -111,14 +111,8 @@ export interface GetStateReturn {
    * App state, the _a part of the URL
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
-
-  initializeAndSync: (
-    indexPattern: IndexPattern,
-    filterManager: FilterManager,
-    data: DataPublicPluginStart
-  ) => () => void;
   /**
-   * Function starting state sync when Discover main is loaded
+   * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
     indexPattern: IndexPattern,

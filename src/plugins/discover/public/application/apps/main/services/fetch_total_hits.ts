@@ -14,20 +14,27 @@ import {
   SearchSource,
 } from '../../../../../../data/public';
 import { Adapters } from '../../../../../../inspector/common';
+import { FetchStatus } from '../../../types';
+import { SavedSearchTotalHitsSubject } from './use_saved_search';
 
-export function fetchTotalHits({
-  abortController,
-  data,
-  inspectorAdapters,
-  searchSessionId,
-  searchSource,
-}: {
-  abortController: AbortController;
-  data: DataPublicPluginStart;
-  inspectorAdapters: Adapters;
-  searchSessionId: string;
-  searchSource: SearchSource;
-}) {
+export function fetchTotalHits(
+  dataTotalHits$: SavedSearchTotalHitsSubject,
+  {
+    abortController,
+    data,
+    inspectorAdapters,
+    onResults,
+    searchSessionId,
+    searchSource,
+  }: {
+    abortController: AbortController;
+    data: DataPublicPluginStart;
+    onResults: (isEmpty: boolean) => void;
+    inspectorAdapters: Adapters;
+    searchSessionId: string;
+    searchSource: SearchSource;
+  }
+) {
   const childSearchSource = searchSource.createCopy();
   const indexPattern = searchSource.getField('index');
   childSearchSource.setField('trackTotalHits', true);
@@ -37,7 +44,7 @@ export function fetchTotalHits({
   );
   childSearchSource.setField('size', 0);
 
-  return childSearchSource
+  const fetch$ = childSearchSource
     .fetch$({
       inspector: {
         adapter: inspectorAdapters.requests,
@@ -53,4 +60,24 @@ export function fetchTotalHits({
       sessionId: searchSessionId,
     })
     .pipe(filter((res) => isCompleteResponse(res)));
+
+  fetch$.subscribe(
+    (res) => {
+      const totalHitsNr = res.rawResponse.hits.total as number;
+      dataTotalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
+      onResults(totalHitsNr === 0);
+    },
+    (error) => {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+
+      dataTotalHits$.next({
+        fetchStatus: FetchStatus.ERROR,
+        error,
+      });
+    }
+  );
+
+  return fetch$;
 }

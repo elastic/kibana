@@ -133,7 +133,7 @@ export function DiscoverChart({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!state.hideChart && (
+      {timefield && !state.hideChart && (
         <EuiFlexItem grow={false}>
           <section
             ref={(element) => (chartRef.current.element = element)}

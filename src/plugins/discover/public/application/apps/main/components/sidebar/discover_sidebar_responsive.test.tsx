@@ -87,7 +87,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   return {
     columns: ['extension'],
     fieldCounts,
-    hits,
+    documents: hits,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),

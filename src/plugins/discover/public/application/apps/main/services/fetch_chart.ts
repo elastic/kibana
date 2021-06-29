@@ -19,22 +19,30 @@ import { getChartAggConfigs, getDimensions } from '../utils';
 import { tabifyAggResponse } from '../../../../../../data/common';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
+import { FetchStatus } from '../../../types';
+import { SavedSearchChartsSubject } from './use_saved_search';
 
-export function fetchChart({
-  abortController,
-  data,
-  inspectorAdapters,
-  interval = 'auto',
-  searchSource,
-  searchSessionId,
-}: {
-  abortController: AbortController;
-  data: DataPublicPluginStart;
-  inspectorAdapters: Adapters;
-  interval: string;
-  searchSource: SearchSource;
-  searchSessionId: string;
-}): Observable<{ chartData: Chart; bucketInterval?: TimechartBucketInterval } | undefined> {
+export function fetchChart(
+  dataCharts$: SavedSearchChartsSubject,
+
+  {
+    abortController,
+    data,
+    inspectorAdapters,
+    interval = 'auto',
+    onResults,
+    searchSource,
+    searchSessionId,
+  }: {
+    abortController: AbortController;
+    data: DataPublicPluginStart;
+    inspectorAdapters: Adapters;
+    interval: string;
+    onResults: (isEmpty: boolean) => void;
+    searchSource: SearchSource;
+    searchSessionId: string;
+  }
+): Observable<{ chartData: Chart; bucketInterval?: TimechartBucketInterval } | undefined> {
   const childSearchSource = searchSource.createCopy();
   const indexPattern = searchSource.getField('index')!;
   childSearchSource.setField(
@@ -46,7 +54,7 @@ export function fetchChart({
   const chartAggConfigs = getChartAggConfigs(childSearchSource, interval, data);
   childSearchSource.setField('aggs', chartAggConfigs.toDsl());
 
-  return childSearchSource
+  const fetch$ = childSearchSource
     .fetch$({
       abortSignal: abortController.signal,
       sessionId: searchSessionId,
@@ -68,8 +76,10 @@ export function fetchChart({
         const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
         const dimensions = getDimensions(chartAggConfigs, data);
         if (dimensions) {
+          const chartData = buildPointSeriesData(tabifiedData, dimensions);
+          onResults(false);
           return {
-            chartData: buildPointSeriesData(tabifiedData, dimensions),
+            chartData,
             bucketInterval: search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
               ? bucketAggConfig?.buckets?.getInterval()
               : undefined,
@@ -78,4 +88,26 @@ export function fetchChart({
         return undefined;
       })
     );
+  fetch$.subscribe(
+    (res) => {
+      if (res) {
+        dataCharts$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          chartData: res.chartData,
+          bucketInterval: res.bucketInterval,
+        });
+      }
+    },
+    (error) => {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
+
+      dataCharts$.next({
+        fetchStatus: FetchStatus.ERROR,
+        error,
+      });
+    }
+  );
+  return fetch$;
 }

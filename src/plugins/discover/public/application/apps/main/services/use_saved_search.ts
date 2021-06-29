@@ -15,7 +15,6 @@ import { GetStateReturn } from './discover_state';
 import { ElasticSearchHit } from '../../../doc_views/doc_views_types';
 import { RequestAdapter } from '../../../../../../inspector/public';
 import { AutoRefreshDoneFn } from '../../../../../../data/public';
-import { calcFieldCounts } from '../utils/calc_field_counts';
 import { validateTimeRange } from '../utils/validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { TimechartBucketInterval } from '../components/timechart_header/timechart_header';
@@ -53,7 +52,6 @@ export interface SavedSearchDataDocumentsMessage {
   fetchStatus: FetchStatus;
   result?: ElasticSearchHit[];
   error?: Error;
-  fieldCounts?: Record<string, number>;
 }
 
 export interface SavedSearchDataTotalHitsMessage {
@@ -73,6 +71,7 @@ export interface SavedSearchDataMessage {
   error?: Error;
   fetchCounter?: number;
   fetchStatus: FetchStatus;
+  foundDocuments?: boolean;
 }
 
 /**
@@ -95,7 +94,7 @@ export const useSavedSearch = ({
   services: DiscoverServices;
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;
-}): UseSavedSearch => {
+}) => {
   const { data, filterManager } = services;
   const timefilter = data.query.timefilter.timefilter;
 
@@ -105,7 +104,7 @@ export const useSavedSearch = ({
    * The observable the UI (aka React component) subscribes to get notified about
    * the changes in the data fetching process (high level: fetching started, data was received)
    */
-  const data$: SavedSearchDataSubject = useSingleton(
+  const main$: SavedSearchDataSubject = useSingleton(
     () =>
       new BehaviorSubject<SavedSearchDataMessage>({
         fetchStatus: initialFetchStatus,
@@ -158,14 +157,8 @@ export const useSavedSearch = ({
      * loading is still ongoing
      */
     fetchStatus: FetchStatus;
-    /**
-     * needed for merging new with old field counts, high likely legacy, but kept this behavior
-     * because not 100% sure in this case
-     */
-    fieldCounts: Record<string, number>;
   }>({
     fetchCounter: 0,
-    fieldCounts: {},
     fetchStatus: initialFetchStatus,
   });
 
@@ -176,16 +169,14 @@ export const useSavedSearch = ({
    */
   const sendResetMsg = useCallback(
     (fetchStatus?: FetchStatus, fetchCounter = 0) => {
-      refs.current.fieldCounts = {};
       refs.current.fetchStatus = fetchStatus ?? initialFetchStatus;
-      data$.next({
+      main$.next({
         fetchStatus: initialFetchStatus,
         fetchCounter,
       });
       dataDocuments$.next({
         fetchStatus: initialFetchStatus,
         result: [],
-        fieldCounts: {},
       });
       dataCharts$.next({
         fetchStatus: initialFetchStatus,
@@ -194,7 +185,7 @@ export const useSavedSearch = ({
         fetchStatus: initialFetchStatus,
       });
     },
-    [data$, dataCharts$, dataDocuments$, dataTotalHits$, initialFetchStatus]
+    [main$, dataCharts$, dataDocuments$, dataTotalHits$, initialFetchStatus]
   );
   /**
    * Function to fetch data from ElasticSearch
@@ -215,7 +206,7 @@ export const useSavedSearch = ({
         sendResetMsg(FetchStatus.LOADING, fetchCounter);
       } else {
         // Let the UI know, data fetching started
-        data$.next({
+        main$.next({
           fetchStatus: FetchStatus.LOADING,
           fetchCounter,
         });
@@ -230,9 +221,20 @@ export const useSavedSearch = ({
 
       const sendPartialStateMsg = () => {
         refs.current.fetchStatus = FetchStatus.PARTIAL;
-        data$.next({
+        main$.next({
           fetchStatus: FetchStatus.PARTIAL,
         });
+      };
+
+      const sendCompleteStateMsg = (foundDocuments = true) => {
+        refs.current.fetchStatus = FetchStatus.COMPLETE;
+        main$.next({
+          fetchStatus: FetchStatus.COMPLETE,
+          foundDocuments,
+        });
+        if (!foundDocuments) {
+          refs.current.abortController!.abort();
+        }
       };
 
       const { hideChart, interval, sort } = stateContainer.appStateContainer.getState();
@@ -247,79 +249,48 @@ export const useSavedSearch = ({
       const fetchDeps = {
         abortController: refs.current.abortController!,
         inspectorAdapters,
+        onResults: (isEmpty: boolean) => {
+          if (isEmpty) {
+            refs.current.abortController!.abort();
+            sendCompleteStateMsg(false);
+          } else {
+            sendPartialStateMsg();
+          }
+        },
         searchSessionId: sessionId,
         searchSource,
       };
 
       const fetchAndSubscribeDocuments = () => {
-        const documentsSourceFetch$ = fetchDocuments(fetchDeps);
-
-        documentsSourceFetch$.subscribe((res) => {
-          const documents = res.rawResponse.hits.hits;
-          const fieldCounts = calcFieldCounts(refs.current.fieldCounts, documents, indexPattern);
-          dataDocuments$.next({
-            fetchStatus: FetchStatus.COMPLETE,
-            result: documents,
-            fieldCounts,
-          });
-          refs.current.fieldCounts = fieldCounts;
-          sendPartialStateMsg();
-        });
-        return documentsSourceFetch$;
+        return fetchDocuments(dataDocuments$, fetchDeps);
       };
 
       const fetchAndSubscribeChart = () => {
-        const chartDataFetch$ = fetchChart({
-          abortController: refs.current.abortController!,
+        return fetchChart(dataCharts$, {
+          ...fetchDeps,
           data,
-          inspectorAdapters,
           interval: interval ?? 'auto',
-          searchSessionId: sessionId,
-          searchSource,
         });
-
-        chartDataFetch$.subscribe((res) => {
-          if (res) {
-            dataCharts$.next({
-              fetchStatus: FetchStatus.COMPLETE,
-              chartData: res.chartData,
-              bucketInterval: res.bucketInterval,
-            });
-            sendPartialStateMsg();
-          }
-        });
-        return chartDataFetch$;
       };
 
       const fetchAndSubscribeTotalHits = () => {
-        const totalHitsFetch$ = fetchTotalHits({
-          searchSource,
-          data,
-          abortController: refs.current.abortController!,
-          searchSessionId: sessionId,
-          inspectorAdapters,
-        });
-        totalHitsFetch$.subscribe((res) => {
-          const totalHitsNr = res.rawResponse.hits.total as number;
-          dataTotalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
-          sendPartialStateMsg();
-        });
-        return totalHitsFetch$;
+        return fetchTotalHits(dataTotalHits$, { ...fetchDeps, data });
       };
 
-      forkJoin({
+      const all = {
         documents: fetchAndSubscribeDocuments(),
         totalHits: fetchAndSubscribeTotalHits(),
         chart: !hideChart && indexPattern.timeFieldName ? fetchAndSubscribeChart() : of(null),
-      }).subscribe(
+      };
+
+      forkJoin(all).subscribe(
         () => {
-          data$.next({ fetchStatus: FetchStatus.COMPLETE });
+          main$.next({ fetchStatus: FetchStatus.COMPLETE, foundDocuments: true });
         },
         (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
-          data.search.showError(error);
           refs.current.fetchStatus = FetchStatus.ERROR;
-          data$.next({
+          main$.next({
             fetchStatus: FetchStatus.ERROR,
             error,
           });
@@ -341,7 +312,7 @@ export const useSavedSearch = ({
       indexPattern,
       useNewFieldsApi,
       sendResetMsg,
-      data$,
+      main$,
       dataDocuments$,
       dataTotalHits$,
       dataCharts$,
@@ -383,14 +354,18 @@ export const useSavedSearch = ({
     fetchAll,
   ]);
 
-  return {
-    refetch$,
-    data$: {
-      main$: data$,
+  const dataSubjects = useMemo(() => {
+    return {
+      main$,
       documents$: dataDocuments$,
       totalHits$: dataTotalHits$,
       charts$: dataCharts$,
-    },
+    };
+  }, [main$, dataCharts$, dataDocuments$, dataTotalHits$]);
+
+  return {
+    refetch$,
+    data$: dataSubjects,
     reset: sendResetMsg,
     inspectorAdapters,
   };
