@@ -26,7 +26,7 @@ export const WorkpadPresentationHelper: FC = ({ children }) => {
   useEffect(() => {
     services.platform.setBreadcrumbs([
       getBaseBreadcrumb(),
-      getWorkpadBreadcrumb({ name: workpad.name, id: workpad.id }),
+      getWorkpadBreadcrumb({ name: workpad.name }),
     ]);
   }, [workpad.name, workpad.id, services.platform]);
 
