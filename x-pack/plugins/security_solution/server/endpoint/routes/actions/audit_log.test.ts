@@ -157,20 +157,14 @@ describe('Action Log API', () => {
 
     it('should have actions and action responses', async () => {
       havingActionsAndResponses(
-        [
-          aMockAction().withAgent(mockID).withAction('isolate'),
-          aMockAction().withAgent(mockID).withAction('unisolate'),
-          aMockAction().withAgent(mockID).withAction('isolate'),
-        ],
-        [aMockResponse(actionID, mockID), aMockResponse(actionID, mockID)]
+        [aMockAction().withAgent(mockID).withAction('isolate').withID(actionID)],
+        [aMockResponse(actionID, mockID)]
       );
       const response = await getActivityLog();
       const responseBody = response.ok.mock.calls[0][0]?.body as ActivityLog;
 
       expect(response.ok).toBeCalled();
-      expect(responseBody.data).toHaveLength(5);
-      expect(responseBody.data.filter((x: any) => x.type === 'response')).toHaveLength(2);
-      expect(responseBody.data.filter((x: any) => x.type === 'action')).toHaveLength(3);
+      expect(responseBody.data).toHaveLength(2);
     });
 
     it('should throw errors when no results for some agentID', async () => {
