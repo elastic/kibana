@@ -111,22 +111,6 @@ const saveApmServerSchemaRoute = createApmServerRoute({
   },
 });
 
-const getApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'GET /api/apm/fleet/apm_server_schema',
-  options: { tags: ['access:apm', 'access:apm_write'] },
-  handler: async (resources) => {
-    const { context } = resources;
-    const savedObjectsClient = context.core.savedObjects.client;
-    const {
-      attributes,
-    }: { attributes: { schemaJson: string } } = await savedObjectsClient.get(
-      APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
-      APM_SERVER_SCHEMA_SAVED_OBJECT_ID
-    );
-    return { schema: JSON.parse(attributes.schemaJson) };
-  },
-});
-
 const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fleet/apm_server_schema/unsupported',
   options: { tags: ['access:apm'] },
@@ -201,7 +185,6 @@ export const apmFleetRouteRepository = createApmServerRouteRepository()
   .add(hasFleetDataRoute)
   .add(fleetAgentsRoute)
   .add(saveApmServerSchemaRoute)
-  .add(getApmServerSchemaRoute)
   .add(getUnsupportedApmServerSchemaRoute)
   .add(getMigrationCheckRoute)
   .add(createCloudApmPackagePolicyRoute);
