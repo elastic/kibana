@@ -64,7 +64,7 @@ export interface UserActionTreeProps {
   fetchUserActions: () => void;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
-  actionsNavigation: ActionsNavigation;
+  actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
@@ -588,6 +588,7 @@ export const UserActionTree = React.memo(
         handleManageMarkdownEditId,
         handleSaveComment,
         getCaseDetailHrefWithCommentId,
+        actionsNavigation,
         userCanCrud,
         isLoadingIds,
         handleManageQuote,

@@ -39,7 +39,7 @@ interface LabelTitle {
 }
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
 
-export type ActionsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
+export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
 
 const getStatusTitle = (id: string, status: CaseStatuses) => (
   <EuiFlexGroup
@@ -373,7 +373,7 @@ export const getActionAttachment = ({
   userCanCrud: boolean;
   isLoadingIds: string[];
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
-  actionsNavigation: ActionsNavigation;
+  actionsNavigation?: ActionsNavigation;
   manageMarkdownEditIds: string[];
   handleManageMarkdownEditId: (id: string) => void;
   handleManageQuote: (id: string) => void;
@@ -393,8 +393,8 @@ export const getActionAttachment = ({
     <HostIsolationCommentEvent
       type={comment.actions.type}
       endpoints={comment.actions.targets}
-      href={actionsNavigation.href}
-      onClick={actionsNavigation.onClick}
+      href={actionsNavigation?.href}
+      onClick={actionsNavigation?.onClick}
     />
   ),
   'data-test-subj': 'endpoint-action',

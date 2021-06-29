@@ -18,8 +18,8 @@ interface EndpointInfo {
 interface Props {
   type: string;
   endpoints: EndpointInfo[];
-  href: ActionsNavigation['href'];
-  onClick: ActionsNavigation['onClick'];
+  href?: ActionsNavigation['href'];
+  onClick?: ActionsNavigation['onClick'];
 }
 
 const HostIsolationCommentEventComponent: React.FC<Props> = ({
@@ -28,12 +28,12 @@ const HostIsolationCommentEventComponent: React.FC<Props> = ({
   href,
   onClick,
 }) => {
-  const endpointDetailsHref = href(endpoints[0].endpointId);
+  const endpointDetailsHref = href ? href(endpoints[0].endpointId) : '';
 
   const onLinkClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      return onClick(endpoints[0].endpointId, ev);
+      if (onClick) onClick(endpoints[0].endpointId, ev);
     },
     [onClick, endpoints]
   );
