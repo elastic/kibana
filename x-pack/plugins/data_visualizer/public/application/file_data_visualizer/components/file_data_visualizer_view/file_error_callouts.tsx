@@ -146,3 +146,26 @@ export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ err
     </>
   );
 };
+
+export const FindFileStructurePermissionDenied: FC = () => {
+  return (
+    <>
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.title"
+            defaultMessage="Permission denied"
+          />
+        }
+        color="danger"
+        iconType="cross"
+        data-test-subj="dataVisualizerFileStructurePermissionDeniedErrorCallout"
+      >
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.description"
+          defaultMessage="You do not have sufficient privileges to analyze files."
+        />
+      </EuiCallOut>
+    </>
+  );
+};
