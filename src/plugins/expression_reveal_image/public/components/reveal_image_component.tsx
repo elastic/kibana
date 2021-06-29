@@ -14,7 +14,7 @@ import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
 import './reveal_image.scss';
 
 interface RevealImageComponentProps extends RevealImageRendererConfig {
-  handlers: IInterpreterRenderHandlers;
+  onLoaded: IInterpreterRenderHandlers['done'];
   parentNode: HTMLElement;
 }
 
@@ -29,7 +29,7 @@ interface AlignerStyles {
 }
 
 function RevealImageComponent({
-  handlers,
+  onLoaded,
   parentNode,
   percent,
   origin,
@@ -58,9 +58,9 @@ function RevealImageComponent({
       });
 
       setLoaded(true);
-      handlers.done();
+      onLoaded();
     }
-  }, [imgRef, handlers]);
+  }, [imgRef, onLoaded]);
 
   useEffect(() => {
     updateImageView();

@@ -34,7 +34,7 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
 
     render(
       <I18nProvider>
-        <RevealImageComponent handlers={handlers} {...config} parentNode={domNode} />
+        <RevealImageComponent {...config} parentNode={domNode} onLoaded={handlers.done} />
       </I18nProvider>,
       domNode
     );
