@@ -15,8 +15,10 @@ import { JobMessage } from '../../../../../../common/types/audit_message';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApiContext } from '../../../../contexts/kibana';
+import { checkPermission } from '../../../../capabilities/check_capabilities';
 interface JobMessagesPaneProps {
   jobId: string;
+  showClearButton: boolean;
   start?: string;
   end?: string;
   actionHandler?: (message: JobMessage) => void;
@@ -24,7 +26,9 @@ interface JobMessagesPaneProps {
 }
 
 export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
-  ({ jobId, start, end, actionHandler, refreshJobList }) => {
+  ({ jobId, start, end, actionHandler, refreshJobList, showClearButton }) => {
+    const canCreateJob = checkPermission('canCreateJob');
+
     const [messages, setMessages] = useState<JobMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -100,31 +104,33 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
       <>
         <EuiSpacer />
         <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <div>
-              {disabled === true ? (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip',
-                    {
-                      defaultMessage: 'Notification clearing not supported.',
-                    }
-                  )}
-                >
-                  {clearButton}
-                </EuiToolTip>
-              ) : (
-                <EuiToolTip
-                  content={i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesTooltip', {
-                    defaultMessage:
-                      'Clears warning icon from jobs list for messages produced in the last 24 hours.',
-                  })}
-                >
-                  {clearButton}
-                </EuiToolTip>
-              )}
-            </div>
-          </EuiFlexItem>
+          {canCreateJob && showClearButton ? (
+            <EuiFlexItem grow={false}>
+              <div>
+                {disabled === true ? (
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip',
+                      {
+                        defaultMessage: 'Notification clearing not supported.',
+                      }
+                    )}
+                  >
+                    {clearButton}
+                  </EuiToolTip>
+                ) : (
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesTooltip', {
+                      defaultMessage:
+                        'Clears warning icon from jobs list for messages produced in the last 24 hours.',
+                    })}
+                  >
+                    {clearButton}
+                  </EuiToolTip>
+                )}
+              </div>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <JobMessages
               refreshMessage={refreshMessage}
