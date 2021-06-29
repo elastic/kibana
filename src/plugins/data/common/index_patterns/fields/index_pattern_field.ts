@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RuntimeField } from '../types';
+import type { EsRuntimeField } from '../types';
 import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import type { IFieldType } from './types';
@@ -41,8 +41,12 @@ export class IndexPatternField implements IFieldType {
     return this.spec.runtimeField;
   }
 
-  public set runtimeField(runtimeField: RuntimeField | undefined) {
+  public set runtimeField(runtimeField: EsRuntimeField | undefined) {
     this.spec.runtimeField = runtimeField;
+  }
+
+  public get parent() {
+    return this.spec.parent;
   }
 
   /**
