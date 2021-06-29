@@ -104,6 +104,13 @@ export const getFieldEditorOpener = ({
     const fieldTypeToProcess: InternalFieldType =
       isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
+    if (field?.runtimeField && field?.parent !== undefined) {
+      console.log( // eslint-disable-line
+        'Need to display a modal to indicate that this field needs to be edited through its parent.'
+      );
+      return closeEditor;
+    }
+
     overlayRef = overlays.openFlyout(
       toMountPoint(
         <KibanaReactContextProvider>
