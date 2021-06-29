@@ -167,9 +167,9 @@ export const SearchResults: React.FC = () => {
                 className="field-selector"
                 hasNoInitialSelection
                 data-test-subj="TypeFieldSelect"
-                value={typeField || UNASSIGNED_FIELD}
+                value={typeField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
-                  setTypeField(value === UNASSIGNED_FIELD ? null : value)
+                  setTypeField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
                 }
               />
             </EuiFormRow>
@@ -186,9 +186,9 @@ export const SearchResults: React.FC = () => {
                 className="field-selector"
                 hasNoInitialSelection
                 data-test-subj="MediaTypeFieldSelect"
-                value={mediaTypeField || UNASSIGNED_FIELD}
+                value={mediaTypeField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
-                  setMediaTypeField(value === UNASSIGNED_FIELD ? null : value)
+                  setMediaTypeField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
                 }
               />
             </EuiFormRow>
@@ -205,9 +205,9 @@ export const SearchResults: React.FC = () => {
                 className="field-selector"
                 hasNoInitialSelection
                 data-test-subj="CreatedByFieldSelect"
-                value={createdByField || UNASSIGNED_FIELD}
+                value={createdByField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
-                  setCreatedByField(value === UNASSIGNED_FIELD ? null : value)
+                  setCreatedByField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
                 }
               />
             </EuiFormRow>
@@ -224,9 +224,9 @@ export const SearchResults: React.FC = () => {
                 className="field-selector"
                 hasNoInitialSelection
                 data-test-subj="UpdatedByFieldSelect"
-                value={updatedByField || UNASSIGNED_FIELD}
+                value={updatedByField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
-                  setUpdatedByField(value === UNASSIGNED_FIELD ? null : value)
+                  setUpdatedByField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
                 }
               />
             </EuiFormRow>
