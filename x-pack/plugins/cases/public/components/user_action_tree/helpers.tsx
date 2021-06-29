@@ -37,8 +37,9 @@ export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, '
 const getStatusTitle = (id: string, status: CaseStatuses) => (
   <EuiFlexGroup
     gutterSize="s"
-    alignItems={'center'}
+    alignItems="center"
     data-test-subj={`${id}-user-action-status-title`}
+    responsive={false}
   >
     <EuiFlexItem grow={false}>{i18n.MARKED_CASE_AS}</EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -103,7 +104,7 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
   const tags = action.newValue != null ? action.newValue.split(',') : [];
 
   return (
-    <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span">
+    <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span" responsive={false}>
       <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
         {action.action === 'add' && i18n.ADDED_FIELD}
         {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
@@ -118,7 +119,12 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
 export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
   const pushedVal = JSON.parse(action.newValue ?? '') as CaseFullExternalService;
   return (
-    <EuiFlexGroup alignItems="baseline" gutterSize="xs" data-test-subj="pushed-service-label-title">
+    <EuiFlexGroup
+      alignItems="baseline"
+      gutterSize="xs"
+      data-test-subj="pushed-service-label-title"
+      responsive={false}
+    >
       <EuiFlexItem data-test-subj="pushed-label">
         {`${firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
           pushedVal?.connector_name
@@ -183,15 +189,15 @@ export const getUpdateAction = ({
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
   timelineIcon: getUpdateActionIcon(action.actionField[0]),
   actions: (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup responsive={false}>
+      <EuiFlexItem grow={false}>
         <UserActionCopyLink
           getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
           id={action.actionId}
         />
       </EuiFlexItem>
       {action.action === 'update' && action.commentId != null && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <UserActionMoveToReference id={action.commentId} outlineComment={handleOutlineComment} />
         </EuiFlexItem>
       )}
@@ -245,14 +251,14 @@ export const getAlertAttachment = ({
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
   timelineIcon: 'bell',
   actions: (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup responsive={false}>
+      <EuiFlexItem grow={false}>
         <UserActionCopyLink
           id={action.actionId}
           getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <UserActionShowAlert
           id={action.actionId}
           alertId={alertId}
@@ -336,15 +342,17 @@ export const getGeneratedAlertsAttachment = ({
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
   timelineIcon: 'bell',
   actions: (
-    <EuiFlexGroup>
-      <EuiFlexItem>
+    <EuiFlexGroup responsive={false}>
+      <EuiFlexItem grow={false}>
         <UserActionCopyLink
           getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
           id={action.actionId}
         />
       </EuiFlexItem>
       {renderInvestigateInTimelineActionComponent ? (
-        <EuiFlexItem>{renderInvestigateInTimelineActionComponent(alertIds)}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {renderInvestigateInTimelineActionComponent(alertIds)}
+        </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
   ),

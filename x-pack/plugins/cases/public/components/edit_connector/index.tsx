@@ -68,6 +68,9 @@ const DisappearingFlexItem = styled(EuiFlexItem)`
     $isHidden &&
     `
       margin: 0 !important;
+      & .euiFlexItem {
+        margin: 0 !important;
+      }
     `}
 `;
 
@@ -244,7 +247,12 @@ export const EditConnector = React.memo(
 
     return (
       <EuiText>
-        <MyFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
+        <MyFlexGroup
+          alignItems="center"
+          gutterSize="xs"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
             <h4>{i18n.CONNECTORS}</h4>
           </EuiFlexItem>
@@ -304,7 +312,7 @@ export const EditConnector = React.memo(
           </EuiFlexItem>
           {editConnector && (
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     color="secondary"

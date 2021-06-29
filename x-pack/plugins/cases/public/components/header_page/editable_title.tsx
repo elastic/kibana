@@ -100,7 +100,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({
       <EuiFlexItem />
     </EuiFlexGroup>
   ) : (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem grow={false}>
         <Title title={title} />
       </EuiFlexItem>

@@ -26,7 +26,7 @@ export const NavButtons: FunctionComponent<Props> = ({
   configureCasesNavigation,
   createCaseNavigation,
 }) => (
-  <EuiFlexGroup>
+  <EuiFlexGroup responsive={false}>
     <EuiFlexItem grow={false}>
       <ConfigureCaseButton
         configureCasesNavigation={configureCasesNavigation}

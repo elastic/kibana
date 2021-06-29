@@ -49,13 +49,13 @@ const renderUsers = (
   handleSendEmail: (emailAddress: string | undefined | null) => void
 ) =>
   users.map(({ fullName, username, email }, key) => (
-    <MyFlexGroup key={key} justifyContent="spaceBetween">
+    <MyFlexGroup key={key} justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>
             <MyAvatar name={fullName ? fullName : username ?? ''} />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiToolTip position="top" content={<p>{fullName ? fullName : username ?? ''}</p>}>
               <p>
                 <strong>

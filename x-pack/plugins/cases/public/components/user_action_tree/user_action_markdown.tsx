@@ -56,7 +56,7 @@ export const UserActionMarkdown = ({
 
   const renderButtons = useCallback(
     ({ cancelAction, saveAction }) => (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="user-action-cancel-markdown"
