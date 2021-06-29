@@ -8,13 +8,14 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { repeatImage } from '../repeat_image';
-import { Render } from './render';
 import {
-  elasticLogo,
+  getElasticLogo,
   elasticOutline,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { waitFor } from '../../../../../../src/plugins/presentation_util/public/__stories__';
+import { Render } from './render';
 
-storiesOf('renderers/repeatImage', module).add('default', () => {
+const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
   const config = {
     count: 42,
     image: elasticLogo,
@@ -24,4 +25,10 @@ storiesOf('renderers/repeatImage', module).add('default', () => {
   };
 
   return <Render renderer={repeatImage} config={config} width="400px" />;
-});
+};
+
+storiesOf('enderers/repeatImage', module).add(
+  'default',
+  (_, props) => <Renderer elasticLogo={props?.elasticLogo} />,
+  { decorators: [waitFor(getElasticLogo())] }
+);
