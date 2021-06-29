@@ -21,11 +21,13 @@ import { createCase } from '../../tasks/api_calls/cases';
 
 describe('attach timeline to case', () => {
   context('without cases created', () => {
-    beforeEach(() => {
+    beforeEach((done) => {
       cleanKibana();
-      createTimeline(timeline).then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline')
-      );
+
+      createTimeline(timeline).then((response) => {
+        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
+        done();
+      });
     });
 
     it('attach timeline to a new case', function () {

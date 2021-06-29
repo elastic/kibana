@@ -61,7 +61,7 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
       const { engineName } = EngineLogic.values;
 
       try {
-        const response = await http.get(`/api/app_search/engines/${engineName}/search`, {
+        const response = await http.post(`/api/app_search/engines/${engineName}/search`, {
           query: { query },
         });
         actions.onSearch(response);

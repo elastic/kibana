@@ -67,6 +67,9 @@ export function registerCurationsRoutes({
     {
       path: '/api/app_search/engines/{engineName}/curations/{curationId}',
       validate: {
+        query: schema.object({
+          skip_record_analytics: schema.string(),
+        }),
         params: schema.object({
           engineName: schema.string(),
           curationId: schema.string(),
@@ -113,23 +116,6 @@ export function registerCurationsRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/curations/find_or_create',
-    })
-  );
-
-  router.get(
-    {
-      path: '/api/app_search/engines/{engineName}/curation_search',
-      validate: {
-        params: schema.object({
-          engineName: schema.string(),
-        }),
-        query: schema.object({
-          query: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:engineName/search.json',
     })
   );
 }

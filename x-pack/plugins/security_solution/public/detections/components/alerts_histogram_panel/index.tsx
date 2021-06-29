@@ -152,7 +152,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     });
     const kibana = useKibana();
     const { navigateToApp } = kibana.services.application;
-    const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.detections);
+    const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
 
     const totalAlerts = useMemo(
       () =>
@@ -175,7 +175,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const goToDetectionEngine = useCallback(
       (ev) => {
         ev.preventDefault();
-        navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+        navigateToApp(APP_ID, {
+          deepLinkId: SecurityPageName.alerts,
           path: getDetectionEngineUrl(urlSearch),
         });
       },

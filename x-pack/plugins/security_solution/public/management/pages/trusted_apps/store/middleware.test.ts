@@ -124,7 +124,9 @@ describe('middleware', () => {
 
       service.getTrustedAppsList.mockResolvedValue(createGetTrustedListAppsResponse(pagination));
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
+      store.dispatch(
+        createUserChangedUrlAction('/administration/trusted_apps', '?page_index=2&page_size=50')
+      );
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
@@ -161,11 +163,15 @@ describe('middleware', () => {
 
       service.getTrustedAppsList.mockResolvedValue(createGetTrustedListAppsResponse(pagination));
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
+      store.dispatch(
+        createUserChangedUrlAction('/administration/trusted_apps', '?page_index=2&page_size=50')
+      );
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
+      store.dispatch(
+        createUserChangedUrlAction('/administration/trusted_apps', '?page_index=2&page_size=50')
+      );
 
       expect(service.getTrustedAppsList).toBeCalledTimes(2);
       expect(store.getState()).toStrictEqual({
@@ -186,7 +192,7 @@ describe('middleware', () => {
 
       service.getTrustedAppsList.mockResolvedValue(createGetTrustedListAppsResponse(pagination));
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps'));
+      store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
@@ -227,7 +233,9 @@ describe('middleware', () => {
         body: createServerApiError('Internal Server Error'),
       });
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
+      store.dispatch(
+        createUserChangedUrlAction('/administration/trusted_apps', '?page_index=2&page_size=50')
+      );
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
@@ -281,7 +289,7 @@ describe('middleware', () => {
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockResolvedValue();
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps'));
+      store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
@@ -300,7 +308,7 @@ describe('middleware', () => {
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockResolvedValue();
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps'));
+      store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
@@ -340,7 +348,7 @@ describe('middleware', () => {
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockResolvedValue();
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps'));
+      store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
@@ -381,7 +389,7 @@ describe('middleware', () => {
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
       service.deleteTrustedApp.mockRejectedValue({ body: notFoundError });
 
-      store.dispatch(createUserChangedUrlAction('/trusted_apps'));
+      store.dispatch(createUserChangedUrlAction('/administration/trusted_apps'));
 
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 

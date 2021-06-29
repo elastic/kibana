@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
-import { History } from 'history';
 
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { Spacer } from '../../../../../../common/components/page';
@@ -24,8 +23,8 @@ export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListInfo>;
 export const getAllExceptionListsColumns = (
   onExport: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   onDelete: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
-  history: History,
-  formatUrl: FormatUrl
+  formatUrl: FormatUrl,
+  navigateToUrl: (url: string) => Promise<void>
 ): AllExceptionListsColumns[] => [
   {
     align: 'left',
@@ -81,7 +80,7 @@ export const getAllExceptionListsColumns = (
                 data-test-subj="ruleName"
                 onClick={(ev: { preventDefault: () => void }) => {
                   ev.preventDefault();
-                  history.push(getRuleDetailsUrl(id));
+                  navigateToUrl(formatUrl(getRuleDetailsUrl(id)));
                 }}
                 href={formatUrl(getRuleDetailsUrl(id))}
               >
