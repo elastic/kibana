@@ -27,6 +27,7 @@ it('build default and oss dist for current platform, without packages, by defaul
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
+        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCentOS": false,
@@ -53,6 +54,7 @@ it('builds packages if --all-platforms is passed', () => {
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
+        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCentOS": true,
@@ -79,6 +81,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
+        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCentOS": false,
@@ -105,6 +108,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
+        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCentOS": false,
@@ -132,6 +136,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
+        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCentOS": true,
@@ -166,6 +171,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
+        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
         "createDockerCentOS": true,
@@ -193,6 +199,7 @@ it('limits packages if --all-platforms passed with --skip-docker-centos', () => 
     Object {
       "buildOptions": Object {
         "buildDefaultDist": true,
+        "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": true,
         "createDockerCentOS": false,

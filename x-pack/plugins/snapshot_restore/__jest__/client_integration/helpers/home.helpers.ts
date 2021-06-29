@@ -379,4 +379,7 @@ export type TestSubjects =
   | 'verifyRepositoryButton'
   | 'version'
   | 'version.title'
-  | 'version.value';
+  | 'version.value'
+  | 'maxSnapshotsWarning'
+  | 'repositoryErrorsWarning'
+  | 'repositoryErrorsPrompt';
