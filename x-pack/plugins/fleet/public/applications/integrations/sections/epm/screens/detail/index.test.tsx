@@ -136,7 +136,7 @@ describe('when on integration detail', () => {
       testRenderer.startInterface.registerExtension({
         package: 'nginx',
         view: 'package-detail-custom',
-        component: CustomComponent,
+        Component: CustomComponent,
       });
 
       render();

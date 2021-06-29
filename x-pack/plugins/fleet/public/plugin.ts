@@ -210,7 +210,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,
       view: 'package-detail-assets',
-      component: LazyCustomLogsAssetsExtension,
+      Component: LazyCustomLogsAssetsExtension,
     });
 
     return {

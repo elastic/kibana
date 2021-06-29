@@ -197,19 +197,19 @@ export class UptimePlugin
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-create',
-        component: LazySyntheticsPolicyCreateExtension,
+        Component: LazySyntheticsPolicyCreateExtension,
       });
 
       registerExtension({
         package: 'synthetics',
         view: 'package-policy-edit',
-        component: LazySyntheticsPolicyEditExtension,
+        Component: LazySyntheticsPolicyEditExtension,
       });
 
       registerExtension({
         package: 'synthetics',
         view: 'package-detail-assets',
-        component: LazySyntheticsCustomAssetsExtension,
+        Component: LazySyntheticsCustomAssetsExtension,
       });
     }
   }

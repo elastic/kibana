@@ -58,7 +58,7 @@ export function toggleOsqueryPlugin(
         registerExtension({
           package: OSQUERY_INTEGRATION_NAME,
           view: 'package-detail-custom',
-          component: LazyOsqueryManagedCustomButtonExtension,
+          Component: LazyOsqueryManagedCustomButtonExtension,
         });
       }
 
@@ -146,13 +146,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         registerExtension({
           package: OSQUERY_INTEGRATION_NAME,
           view: 'package-policy-create',
-          component: LazyOsqueryManagedPolicyCreateImportExtension,
+          Component: LazyOsqueryManagedPolicyCreateImportExtension,
         });
 
         registerExtension({
           package: OSQUERY_INTEGRATION_NAME,
           view: 'package-policy-edit',
-          component: LazyOsqueryManagedPolicyEditExtension,
+          Component: LazyOsqueryManagedPolicyEditExtension,
         });
       }
     } else {

@@ -200,25 +200,25 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-edit',
-        component: getLazyEndpointPolicyEditExtension(core, plugins),
+        Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-create',
-        component: LazyEndpointPolicyCreateExtension,
+        Component: LazyEndpointPolicyCreateExtension,
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-detail-custom',
-        component: getLazyEndpointPackageCustomExtension(core, plugins),
+        Component: getLazyEndpointPackageCustomExtension(core, plugins),
       });
 
       registerExtension({
         package: 'endpoint',
         view: 'package-detail-assets',
-        component: LazyEndpointCustomAssetsExtension,
+        Component: LazyEndpointCustomAssetsExtension,
       });
     }
     licenseService.start(plugins.licensing.license$);
