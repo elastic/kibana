@@ -6,6 +6,7 @@
  */
 
 import type {
+  Logger,
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
@@ -17,7 +18,9 @@ import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objec
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawAlert } from '../types';
 import { getImportWarnings } from './get_import_warnings';
-import { AlertsConfig } from '../config';
+import { isRuleExportable } from './is_rule_exportable';
+import { AlertTypeRegistry } from '../alert_type_registry';
+
 export { partiallyUpdateAlert } from './partially_update_alert';
 
 export const AlertAttributesExcludedFromAAD = [
@@ -44,65 +47,63 @@ export type AlertAttributesExcludedFromAADType =
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  alertingConfig: Promise<AlertsConfig>
+  ruleTypeRegistry: AlertTypeRegistry,
+  logger: Logger
 ) {
-  alertingConfig.then((config: AlertsConfig) => {
-    savedObjects.registerType({
-      name: 'alert',
-      hidden: true,
-      namespaceType: 'single',
-      migrations: getMigrations(encryptedSavedObjects),
-      mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
-      ...(config.enableImportExport
-        ? {
-            management: {
-              importableAndExportable: true,
-              getTitle(ruleSavedObject: SavedObject<RawAlert>) {
-                return `Rule: [${ruleSavedObject.attributes.name}]`;
-              },
-              onImport(ruleSavedObjects) {
-                return {
-                  warnings: getImportWarnings(ruleSavedObjects),
-                };
-              },
-              onExport<RawAlert>(
-                context: SavedObjectsExportTransformContext,
-                objects: Array<SavedObject<RawAlert>>
-              ) {
-                return transformRulesForExport(objects);
-              },
-            },
-          }
-        : {}),
-    });
+  savedObjects.registerType({
+    name: 'alert',
+    hidden: true,
+    namespaceType: 'single',
+    migrations: getMigrations(encryptedSavedObjects),
+    mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
+    management: {
+      importableAndExportable: true,
+      getTitle(ruleSavedObject: SavedObject<RawAlert>) {
+        return `Rule: [${ruleSavedObject.attributes.name}]`;
+      },
+      onImport(ruleSavedObjects) {
+        return {
+          warnings: getImportWarnings(ruleSavedObjects),
+        };
+      },
+      onExport<RawAlert>(
+        context: SavedObjectsExportTransformContext,
+        objects: Array<SavedObject<RawAlert>>
+      ) {
+        return transformRulesForExport(objects);
+      },
+      isExportable<RawAlert>(ruleSavedObject: SavedObject<RawAlert>) {
+        return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
+      },
+    },
+  });
 
-    savedObjects.registerType({
-      name: 'api_key_pending_invalidation',
-      hidden: true,
-      namespaceType: 'agnostic',
-      mappings: {
-        properties: {
-          apiKeyId: {
-            type: 'keyword',
-          },
-          createdAt: {
-            type: 'date',
-          },
+  savedObjects.registerType({
+    name: 'api_key_pending_invalidation',
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        apiKeyId: {
+          type: 'keyword',
+        },
+        createdAt: {
+          type: 'date',
         },
       },
-    });
+    },
+  });
 
-    // Encrypted attributes
-    encryptedSavedObjects.registerType({
-      type: 'alert',
-      attributesToEncrypt: new Set(['apiKey']),
-      attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
-    });
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: 'alert',
+    attributesToEncrypt: new Set(['apiKey']),
+    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+  });
 
-    // Encrypted attributes
-    encryptedSavedObjects.registerType({
-      type: 'api_key_pending_invalidation',
-      attributesToEncrypt: new Set(['apiKeyId']),
-    });
+  // Encrypted attributes
+  encryptedSavedObjects.registerType({
+    type: 'api_key_pending_invalidation',
+    attributesToEncrypt: new Set(['apiKeyId']),
   });
 }
