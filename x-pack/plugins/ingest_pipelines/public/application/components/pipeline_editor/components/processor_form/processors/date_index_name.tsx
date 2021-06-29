@@ -47,7 +47,7 @@ const fieldsConfig: FieldsConfig = {
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.dateIndexNameForm.dateRoundingRequiredError',
             {
-              defaultMessage: 'A field value is required.',
+              defaultMessage: 'A date rounding value is required.',
             }
           )
         ),

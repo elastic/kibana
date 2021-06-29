@@ -54,10 +54,10 @@ describe('Processor: Date Index', () => {
     // Click submit button with only the type defined
     await saveNewProcessor();
 
-    // Expect form error as "field" and "value" are required parameters
+    // Expect form error as "field" and "date rounding" are required parameters
     expect(form.getErrorsMessages()).toEqual([
       'A field value is required.',
-      'A field value is required.',
+      'A date rounding value is required.',
     ]);
   });
 
@@ -104,7 +104,7 @@ describe('Processor: Date Index', () => {
     });
     component.update();
 
-    form.setInputValue('timezoneField.input', 'EST');
+    form.setInputValue('timezoneField.input', 'GMT');
 
     form.setInputValue('localeField.input', 'SPANISH');
     // Save the field with new changes
@@ -118,7 +118,7 @@ describe('Processor: Date Index', () => {
       index_name_prefix: 'prefix',
       date_formats: ['ISO8601'],
       locale: 'SPANISH',
-      timezone: 'EST',
+      timezone: 'GMT',
     });
   });
 });
