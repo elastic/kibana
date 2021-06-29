@@ -12,7 +12,6 @@ import { ANALYSIS_CONFIG_TYPE } from '../../common/constants/data_frame_analytic
 describe('MlUrlGenerator', () => {
   const urlGenerator = new MlUrlGenerator({
     appBasePath: '/app/ml',
-    useHash: false,
   });
 
   describe('AnomalyDetection', () => {
