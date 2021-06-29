@@ -22,6 +22,16 @@ export const formSchema = {
     }),
     validations: idFieldValidations.map((validator) => ({ validator })),
   },
+  description: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate(
+      'xpack.osquery.scheduledQueryGroup.queryFlyoutForm.descriptionFieldLabel',
+      {
+        defaultMessage: 'Description',
+      }
+    ),
+    validations: [],
+  },
   query: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate('xpack.osquery.scheduledQueryGroup.queryFlyoutForm.queryFieldLabel', {
