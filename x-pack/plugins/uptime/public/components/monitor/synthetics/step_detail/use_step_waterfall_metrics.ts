@@ -1,0 +1,82 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useSelector } from 'react-redux';
+import { createEsParams, useEsSearch } from '../../../../../../observability/public';
+import { selectDynamicSettings } from '../../../../state/selectors';
+import { MarkerItems } from '../waterfall/context/waterfall_chart';
+
+export interface Props {
+  checkGroup: string;
+}
+
+export const useStepWaterfallMetrics = ({ checkGroup }: Props) => {
+  const { settings } = useSelector(selectDynamicSettings);
+
+  const heartbeatIndices = settings?.heartbeatIndices || '';
+
+  const { data, loading } = useEsSearch(
+    createEsParams({
+      index: heartbeatIndices!,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  'monitor.check_group': checkGroup,
+                },
+              },
+              {
+                term: {
+                  'synthetics.type': 'journey/metrics',
+                },
+              },
+            ],
+          },
+        },
+        fields: ['browser.*'],
+        _source: false,
+      },
+    }),
+    [heartbeatIndices, checkGroup]
+  );
+
+  const metrics: MarkerItems = [];
+
+  if (data) {
+    const metricDocs = (data.hits.hits as unknown) as Array<{ fields: any }>;
+    let navigationStart = 0;
+    metricDocs.forEach(({ fields }) => {
+      if (fields['browser.relative_trace.type']?.[0] === 'mark') {
+        const {
+          'browser.relative_trace.name': metricType,
+          'browser.relative_trace.start.us': metricValue,
+        } = fields;
+        if (metricType?.[0] === 'navigationStart') {
+          navigationStart = metricValue?.[0];
+        }
+      }
+    });
+    metricDocs.forEach(({ fields }) => {
+      if (fields['browser.relative_trace.type']?.[0] === 'mark') {
+        const {
+          'browser.relative_trace.name': metricType,
+          'browser.relative_trace.start.us': metricValue,
+        } = fields;
+        if (metricType?.[0] !== 'navigationStart') {
+          metrics.push({
+            id: metricType?.[0],
+            offset: (metricValue?.[0] - navigationStart) / 1000,
+          });
+        }
+      }
+    });
+  }
+
+  return { metrics, loading };
+};
