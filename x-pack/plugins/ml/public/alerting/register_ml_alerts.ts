@@ -12,7 +12,7 @@ import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
 import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public';
 import { PLUGIN_ID } from '../../common/constants/app';
-import { createExplorerUrl } from '../ml_url_generator/anomaly_detection_urls_generator';
+import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { validateLookbackInterval, validateTopNBucket } from './validators';
 
 export function registerMlAlerts(
@@ -152,6 +152,6 @@ export function registerNavigation(alerting: AlertingSetup) {
       ]),
     ];
 
-    return createExplorerUrl('', { jobIds });
+    return formatExplorerUrl('', { jobIds });
   });
 }

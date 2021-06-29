@@ -28,7 +28,7 @@ import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
 import { LinkCard } from '../../../../components/link_card';
 import { CategorizationIcon } from './categorization_job_icon';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 
 export const Page: FC = () => {

@@ -10,8 +10,8 @@ import React, { FC, useState, useEffect } from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TabId } from './navigation_menu';
-import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
-import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { ML_APP_NAME } from '../../../../common/constants/app';
 
@@ -67,7 +67,7 @@ function getTabs(disableLinks: boolean): Tab[] {
 }
 interface TabData {
   testSubject: string;
-  pathId?: MlUrlGeneratorState['page'];
+  pathId?: MlLocatorParams['page'];
   name: string;
 }
 
@@ -125,10 +125,10 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   }
 
   const tabs = getTabs(disableLinks);
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
 
-  const redirectToTab = async (defaultPathId: MlUrlGeneratorState['page']) => {
+  const redirectToTab = async (defaultPathId: MlLocatorParams['page']) => {
     const pageState =
       globalState?.refreshInterval !== undefined
         ? {
@@ -139,7 +139,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
         : undefined;
     // TODO - Fix ts so passing pageState won't default to MlGenericUrlState when pageState is passed in
     // @ts-ignore
-    const path = await mlUrlGenerator.createUrl({
+    const path = await mlLocator.getUrl({
       page: defaultPathId,
       // only retain the refreshInterval part of globalState
       // appState will not be considered.
@@ -158,7 +158,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
       {tabs.map((tab: Tab) => {
         const { id, disabled } = tab;
         const testSubject = TAB_DATA[id].testSubject;
-        const defaultPathId = (TAB_DATA[id].pathId || id) as MlUrlGeneratorState['page'];
+        const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
 
         return disabled ? (
           <div className="euiTab" key={`div-${id}-key`}>

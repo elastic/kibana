@@ -21,7 +21,7 @@ import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_ca
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 export const indexBasedRouteFactory = (

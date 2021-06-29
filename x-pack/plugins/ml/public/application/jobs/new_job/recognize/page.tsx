@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { merge } from 'lodash';
 import moment from 'moment';
-import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
+import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { ml } from '../../../services/ml_api_service';
 import { useMlContext } from '../../../contexts/ml';
 import {
@@ -41,7 +41,7 @@ import { checkForSavedObjects } from './resolvers';
 import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
 import { TimeRange } from '../common/components';
 import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { isPopulatedObject } from '../../../../../common/util/object_utils';
@@ -77,7 +77,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const {
     services: { notifications },
   } = useMlKibana();
-  const urlGenerator = useMlUrlGenerator();
+  const locator = useMlLocator();
 
   // #region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
@@ -197,19 +197,21 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       );
       setKibanaObjects(merge(kibanaObjects, kibanaResponse));
 
-      const url = await urlGenerator.createUrl({
-        page: ML_PAGES.ANOMALY_EXPLORER,
-        pageState: {
-          jobIds: jobsResponse.filter(({ success }) => success).map(({ id }) => id),
-          timeRange: {
-            from: moment(resultTimeRange.start).format(TIME_FORMAT),
-            to: moment(resultTimeRange.end).format(TIME_FORMAT),
-            mode: 'absolute',
+      if (locator) {
+        const url = await locator.getUrl({
+          page: ML_PAGES.ANOMALY_EXPLORER,
+          pageState: {
+            jobIds: jobsResponse.filter(({ success }) => success).map(({ id }) => id),
+            timeRange: {
+              from: moment(resultTimeRange.start).format(TIME_FORMAT),
+              to: moment(resultTimeRange.end).format(TIME_FORMAT),
+              mode: 'absolute',
+            },
           },
-        },
-      });
+        });
+        setResultsUrl(url);
+      }
 
-      setResultsUrl(url);
       const failedJobsCount = jobsResponse.reduce(
         (count, { success }) => (success ? count : count + 1),
         0

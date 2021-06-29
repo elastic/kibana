@@ -10,7 +10,7 @@ import { calculateTextWidth } from './string_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import moment from 'moment';
 import { CHART_TYPE } from '../explorer/explorer_constants';
-import { ML_PAGES } from '../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../common/constants/locator';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
 export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
@@ -219,7 +219,7 @@ export function getChartType(config) {
   return chartType;
 }
 
-export async function getExploreSeriesLink(mlUrlGenerator, series, timefilter) {
+export async function getExploreSeriesLink(mlLocator, series, timefilter) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
   const bounds = timefilter.getActiveBounds();
@@ -241,7 +241,7 @@ export async function getExploreSeriesLink(mlUrlGenerator, series, timefilter) {
     });
   }
 
-  const url = await mlUrlGenerator.createUrl({
+  const url = await mlLocator.getUrl({
     page: ML_PAGES.SINGLE_METRIC_VIEWER,
     pageState: {
       jobIds: [series.jobId],

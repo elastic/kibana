@@ -36,7 +36,7 @@ import { JobMap } from '../job_map';
 import { usePageUrlState } from '../../../util/url_state';
 import { ListingPageUrlState } from '../../../../../common/types/common';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const ML_APP_URL_GENERATOR = 'ML_APP_URL_GENERATOR';
+export const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 
 export const ML_PAGES = {
   ANOMALY_DETECTION_JOBS_MANAGE: 'jobs',

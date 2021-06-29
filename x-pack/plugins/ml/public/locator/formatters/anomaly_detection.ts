@@ -16,8 +16,8 @@ import type {
   TimeSeriesExplorerAppState,
   TimeSeriesExplorerGlobalState,
   TimeSeriesExplorerUrlState,
-} from '../../../common/types/ml_url_generator';
-import { ML_PAGES } from '../../../common/constants/ml_url_generator';
+} from '../../../common/types/locator';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { formatGenericMlUrl } from './common';
 import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';

@@ -20,7 +20,7 @@ import { checkBasicLicense } from '../../../license';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 enum MODE {

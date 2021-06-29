@@ -30,7 +30,7 @@ import { ModelsTableToConfigMapping } from './index';
 import { DeleteModelsModal } from './delete_models_modal';
 import {
   useMlKibana,
-  useMlUrlGenerator,
+  useMlLocator,
   useNavigateToPath,
   useNotifications,
 } from '../../../../../contexts/kibana';
@@ -47,7 +47,7 @@ import {
   refreshAnalyticsList$,
   useRefreshAnalyticsList,
 } from '../../../../common';
-import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
@@ -83,7 +83,7 @@ export const ModelsList: FC = () => {
       application: { navigateToUrl, capabilities },
     },
   } = useMlKibana();
-  const urlGenerator = useMlUrlGenerator();
+  const urlLocator = useMlLocator()!;
 
   const [pageState, updatePageState] = usePageUrlState(
     ML_PAGES.DATA_FRAME_ANALYTICS_MODELS_MANAGE,
@@ -105,7 +105,6 @@ export const ModelsList: FC = () => {
     {}
   );
 
-  const mlUrlGenerator = useMlUrlGenerator();
   const navigateToPath = useNavigateToPath();
 
   const isBuiltInModel = useCallback(
@@ -300,7 +299,7 @@ export const ModelsList: FC = () => {
           item.metadata?.analytics_config.analysis
         ) as DataFrameAnalysisConfigType;
 
-        const url = await urlGenerator.createUrl({
+        const url = await urlLocator.getUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
           pageState: {
             jobId: item.metadata?.analytics_config.id as string,
@@ -329,7 +328,7 @@ export const ModelsList: FC = () => {
       isPrimary: true,
       available: (item) => !!item.metadata?.analytics_config?.id,
       onClick: async (item) => {
-        const path = await mlUrlGenerator.createUrl({
+        const path = await urlLocator.getUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
           pageState: { modelId: item.model_id },
         });

@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useMlLink } from '../../../contexts/kibana/use_create_url';
 
 export const ExplorerNoJobsFound = () => {

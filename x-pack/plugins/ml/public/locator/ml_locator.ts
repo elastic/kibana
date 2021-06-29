@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { SerializableState } from 'src/plugins/kibana_utils/common';
-import type {
-  LocatorDefinition,
-  LocatorPublic,
-  KibanaLocation,
-} from '../../../../../src/plugins/share/public';
-import type {
+import type { LocatorDefinition, KibanaLocation } from '../../../../../src/plugins/share/public';
+import {
   DataFrameAnalyticsExplorationUrlState,
-  MlUrlGeneratorState,
-} from '../../common/types/ml_url_generator';
-import { ML_PAGES } from '../../common/constants/ml_url_generator';
+  MlLocatorParams,
+  MlLocator,
+} from '../../common/types/locator';
+import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,
@@ -31,11 +27,7 @@ import {
   formatEditFilterUrl,
 } from './formatters';
 
-export type MlLocatorParams = MlUrlGeneratorState & SerializableState;
-
-export type MlLocator = LocatorPublic<MlLocatorParams>;
-
-export const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
+export { MlLocatorParams, MlLocator };
 
 export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
   public readonly id = ML_APP_LOCATOR;

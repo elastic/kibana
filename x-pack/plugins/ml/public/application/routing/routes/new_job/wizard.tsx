@@ -24,7 +24,7 @@ import {
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;

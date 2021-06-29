@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { MlGenericUrlState } from '../../../common/types/ml_url_generator';
+import { MlGenericUrlState } from '../../../common/types/locator';
 import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function extractParams<UrlState>(urlState: UrlState) {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CalendarEditUrlState, FilterEditUrlState } from '../../../common/types/ml_url_generator';
-import { ML_PAGES } from '../../../common/constants/ml_url_generator';
+import { CalendarEditUrlState, FilterEditUrlState } from '../../../common/types/locator';
+import { ML_PAGES } from '../../../common/constants/locator';
 import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 
 export function formatEditCalendarUrl(

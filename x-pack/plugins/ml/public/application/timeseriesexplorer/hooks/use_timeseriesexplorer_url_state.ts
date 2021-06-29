@@ -6,8 +6,8 @@
  */
 
 import { usePageUrlState } from '../../util/url_state';
-import { TimeSeriesExplorerAppState } from '../../../../common/types/ml_url_generator';
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
+import { ML_PAGES } from '../../../../common/constants/locator';
 
 export function useTimeSeriesExplorerUrlState() {
   return usePageUrlState<TimeSeriesExplorerAppState>(ML_PAGES.SINGLE_METRIC_VIEWER);

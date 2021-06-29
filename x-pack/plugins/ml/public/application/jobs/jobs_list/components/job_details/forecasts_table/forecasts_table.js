@@ -29,10 +29,7 @@ import {
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
 import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
-import {
-  ML_APP_URL_GENERATOR,
-  ML_PAGES,
-} from '../../../../../../../common/constants/ml_url_generator';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../../../../../common/constants/app';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
 

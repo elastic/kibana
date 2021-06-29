@@ -65,7 +65,7 @@ function ExplorerChartContainer({
   severity,
   tooManyBuckets,
   wrapLabel,
-  mlUrlGenerator,
+  mlLocator,
   basePath,
   timeBuckets,
   timefilter,
@@ -80,11 +80,7 @@ function ExplorerChartContainer({
     let isCancelled = false;
     const generateLink = async () => {
       if (!isCancelled && series.functionDescription !== ML_JOB_AGGREGATION.LAT_LONG) {
-        const singleMetricViewerLink = await getExploreSeriesLink(
-          mlUrlGenerator,
-          series,
-          timefilter
-        );
+        const singleMetricViewerLink = await getExploreSeriesLink(mlLocator, series, timefilter);
         setExplorerSeriesLink(singleMetricViewerLink);
       }
     };
@@ -92,7 +88,7 @@ function ExplorerChartContainer({
     return () => {
       isCancelled = true;
     };
-  }, [mlUrlGenerator, series]);
+  }, [mlLocator, series]);
 
   const addToRecentlyAccessed = useCallback(() => {
     if (recentlyAccessed) {
@@ -235,7 +231,7 @@ export const ExplorerChartsContainerUI = ({
   tooManyBuckets,
   kibana,
   errorMessages,
-  mlUrlGenerator,
+  mlLocator,
   timeBuckets,
   timefilter,
   onSelectEntity,
@@ -293,7 +289,7 @@ export const ExplorerChartsContainerUI = ({
                 severity={severity}
                 tooManyBuckets={tooManyBuckets}
                 wrapLabel={wrapLabel}
-                mlUrlGenerator={mlUrlGenerator}
+                mlLocator={mlLocator}
                 basePath={basePath.get()}
                 timeBuckets={timeBuckets}
                 timefilter={timefilter}
