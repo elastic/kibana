@@ -45,7 +45,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const setup = async (opts: {}) => {
+const setup = async () => {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
@@ -55,7 +55,6 @@ const setup = async (opts: {}) => {
   const run = createRunner({
     config,
     log,
-    ...opts,
   });
 
   return { config, run };
