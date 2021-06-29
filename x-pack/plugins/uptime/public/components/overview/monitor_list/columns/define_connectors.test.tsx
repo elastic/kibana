@@ -34,7 +34,7 @@ describe('EnableAlertComponent', () => {
     expect(screen.getByText(/Define a default connector/)).toBeInTheDocument();
   });
 
-  it('renders popover on click when showPopover is true', async () => {
+  it('renders popover on click when showPopover is true', () => {
     render(<DefineAlertConnectors showPopover />);
 
     fireEvent.click(screen.getByTestId('uptimeDisplayDefineConnector'));
