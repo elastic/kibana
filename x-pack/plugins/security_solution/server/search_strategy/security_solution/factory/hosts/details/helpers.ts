@@ -24,6 +24,7 @@ import {
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import { getHostMetaData } from '../../../../../endpoint/routes/metadata/handlers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
+import { fleetAgentStatusToEndpointHostStatus } from '../../../../../endpoint/utils';
 
 export const HOST_FIELDS = [
   '_id',
@@ -200,15 +201,24 @@ export const getHostEndpoint = async (
         ? await getHostMetaData(metadataRequestContext, id, undefined)
         : null;
 
+    const fleetAgentStatus = endpointData?.metadata
+      ? (await agentService.getAgentStatusById(
+          esClient.asCurrentUser,
+          endpointData.metadata.elastic.agent.id
+        )) || undefined
+      : undefined;
+
     return endpointData != null && endpointData.metadata
       ? {
           endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
           policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
           sensorVersion: endpointData.metadata.agent.version,
+          isolation: endpointData.metadata.Endpoint.state?.isolation ?? false,
+          elasticAgentStatus: fleetAgentStatusToEndpointHostStatus(fleetAgentStatus!),
         }
       : null;
   } catch (err) {
-    logger.warn(JSON.stringify(err, null, 2));
+    logger.warn(err);
     return null;
   }
 };
