@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useKibana } from '../utils/kibana_react';
-import { CASES_APP_ID } from '../../common/const';
+import { casesFeatureId } from '../../common';
 
 export interface UseGetUserCasesPermissions {
   crud: boolean;
@@ -20,12 +20,12 @@ export function useGetUserCasesPermissions() {
 
   useEffect(() => {
     const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities[CASES_APP_ID].crud_cases === 'boolean'
-        ? (uiCapabilities[CASES_APP_ID].crud_cases as boolean)
+      typeof uiCapabilities[casesFeatureId].crud_cases === 'boolean'
+        ? (uiCapabilities[casesFeatureId].crud_cases as boolean)
         : false;
     const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities[CASES_APP_ID].read_cases === 'boolean'
-        ? (uiCapabilities[CASES_APP_ID].read_cases as boolean)
+      typeof uiCapabilities[casesFeatureId].read_cases === 'boolean'
+        ? (uiCapabilities[casesFeatureId].read_cases as boolean)
         : false;
     setCasesPermissions({
       crud: capabilitiesCanUserCRUD,

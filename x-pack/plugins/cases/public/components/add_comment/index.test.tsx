@@ -32,6 +32,7 @@ const addCommentProps: AddCommentProps = {
   onCommentSaving,
   onCommentPosted,
   showLoading: false,
+  statusActionButton: null,
 };
 
 const defaultPostComment = {

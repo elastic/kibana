@@ -17,9 +17,9 @@ import {
 import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
-import { CASES_APP_ID } from '../constants';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import * as lensMarkdownPlugin from './markdown_editor/plugins/lens';
+import { observabilityAppId } from '../../../../../common';
 
 interface Props {
   caseId: string;
@@ -48,7 +48,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
   const allCasesLink = getCaseUrl();
-  const { formatUrl } = useFormatUrl(CASES_APP_ID);
+  const { formatUrl } = useFormatUrl();
   const href = formatUrl(allCasesLink);
   useBreadcrumbs([
     { ...casesBreadcrumbs.cases, href },
@@ -82,7 +82,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     [caseId, formatUrl, subCaseId]
   );
 
-  const casesUrl = getUrlForApp(CASES_APP_ID);
+  const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
   return casesUi.getCaseView({
     allCasesNavigation: {
       href: allCasesHref,

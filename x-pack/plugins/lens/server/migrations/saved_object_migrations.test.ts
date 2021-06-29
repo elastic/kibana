@@ -852,4 +852,96 @@ describe('Lens migrations', () => {
       validate(result2);
     });
   });
+
+  describe('7.14.0 remove time zone from date histogram', () => {
+    const context = ({ log: { warning: () => {} } } as unknown) as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsXY',
+        state: {
+          datasourceStates: {
+            indexpattern: {
+              layers: {
+                '2': {
+                  columns: {
+                    '3': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto', timeZone: 'Europe/Berlin' },
+                    },
+                    '4': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'date_histogram',
+                      sourceField: '@timestamp',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { interval: 'auto' },
+                    },
+                    '5': {
+                      label: '@timestamp',
+                      dataType: 'date',
+                      operationType: 'my_unexpected_operation',
+                      isBucketed: true,
+                      scale: 'interval',
+                      params: { timeZone: 'do not delete' },
+                    },
+                  },
+                  columnOrder: ['3', '4', '5'],
+                  incompleteColumns: {},
+                },
+              },
+            },
+          },
+          visualization: {
+            title: 'Empty XY chart',
+            legend: { isVisible: true, position: 'right' },
+            valueLabels: 'hide',
+            preferredSeriesType: 'bar_stacked',
+            layers: [
+              {
+                layerId: '5ab74ddc-93ca-44e2-9857-ecf85c86b53e',
+                accessors: [
+                  '5fea2a56-7b73-44b5-9a50-7f0c0c4f8fd0',
+                  'e5efca70-edb5-4d6d-a30a-79384066987e',
+                  '7ffb7bde-4f42-47ab-b74d-1b4fd8393e0f',
+                ],
+                position: 'top',
+                seriesType: 'bar_stacked',
+                showGridlines: false,
+                xAccessor: '2e57a41e-5a52-42d3-877f-bd211d903ef8',
+              },
+            ],
+          },
+          query: { query: '', language: 'kuery' },
+          filters: [],
+        },
+      },
+    };
+
+    it('should remove time zone param from date histogram', () => {
+      const result = migrations['7.14.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const layers = Object.values(result.attributes.state.datasourceStates.indexpattern.layers);
+      expect(layers.length).toBe(1);
+      const columns = Object.values(layers[0].columns);
+      expect(columns.length).toBe(3);
+      expect(columns[0].operationType).toEqual('date_histogram');
+      expect((columns[0] as { params: {} }).params).toEqual({ interval: 'auto' });
+      expect(columns[1].operationType).toEqual('date_histogram');
+      expect((columns[1] as { params: {} }).params).toEqual({ interval: 'auto' });
+      expect(columns[2].operationType).toEqual('my_unexpected_operation');
+      expect((columns[2] as { params: {} }).params).toEqual({ timeZone: 'do not delete' });
+    });
+  });
 });
