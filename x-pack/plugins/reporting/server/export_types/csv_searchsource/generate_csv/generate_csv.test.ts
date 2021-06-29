@@ -324,6 +324,23 @@ it('uses the scrollId to page all the data', async () => {
   const csvResult = await generateCsv.generateData();
   expect(csvResult.warnings).toEqual([]);
   expect(csvResult.content).toMatchSnapshot();
+
+  expect(mockDataClient.search).toHaveBeenCalledTimes(1);
+  expect(mockDataClient.search).toBeCalledWith(
+    { params: { scroll: '30s', size: 500 } },
+    { strategy: 'es' }
+  );
+
+  // `scroll` and `clearScroll` must be called with scroll ID in the post body!
+  expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledTimes(9);
+  expect(mockEsClient.asCurrentUser.scroll).toHaveBeenCalledWith({
+    body: { scroll: '30s', scroll_id: 'awesome-scroll-hero' },
+  });
+
+  expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledTimes(1);
+  expect(mockEsClient.asCurrentUser.clearScroll).toHaveBeenCalledWith({
+    body: { scroll_id: ['awesome-scroll-hero'] },
+  });
 });
 
 describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
