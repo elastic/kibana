@@ -43,7 +43,7 @@ import {
 } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from './types';
-import { LazyCustomLogsAssetsComponent } from './lazy_custom_logs_assets_component';
+import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 
 export { FleetConfigType } from '../common/types';
 
@@ -210,7 +210,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,
       view: 'package-detail-assets',
-      component: LazyCustomLogsAssetsComponent,
+      component: LazyCustomLogsAssetsExtension,
     });
 
     return {

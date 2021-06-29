@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 
-import type { PackageAssetsComponent } from './types';
 import { CustomAssetsAccordion } from './components/custom_assets_accordion';
 import type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 import { useStartServices } from './hooks';
+import type { PackageAssetsComponent } from './types';
 
-export const LazyCustomLogsAssetsComponent = lazy<PackageAssetsComponent>(async () => {
+export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useStartServices();
   const logStreamUrl = http.basePath.prepend('/app/logs/stream');
 
@@ -23,7 +23,6 @@ export const LazyCustomLogsAssetsComponent = lazy<PackageAssetsComponent>(async 
       description: 'View Custom logs data in Logs app',
     },
   ];
-  return {
-    default: () => <CustomAssetsAccordion views={views} initialIsOpen />,
-  };
-});
+
+  return <CustomAssetsAccordion views={views} initialIsOpen />;
+};
