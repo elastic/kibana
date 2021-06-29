@@ -29,7 +29,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-          "lineNumber": 23
+          "lineNumber": 24
         },
         "deprecated": false,
         "children": [
@@ -45,7 +45,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -61,7 +61,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "deprecated": false
           },
@@ -77,7 +77,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false,
             "children": [
@@ -151,7 +151,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 28
+                  "lineNumber": 29
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -218,7 +218,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 29
+                  "lineNumber": 30
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -241,7 +241,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 30
+                  "lineNumber": 31
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -264,7 +264,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 31
+                  "lineNumber": 32
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -281,10 +281,29 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 32
+                  "lineNumber": 33
                 },
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.AddPanelAction.Unnamed.$6",
+                "type": "Function",
+                "tags": [],
+                "label": "reportUiCounter",
+                "description": [],
+                "signature": [
+                  "((appName: string, type: ",
+                  "UiCounterMetricType",
+                  ", eventNames: string | string[], count?: number | undefined) => void) | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
+                  "lineNumber": 34
+                },
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -301,7 +320,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 35
+              "lineNumber": 37
             },
             "deprecated": false,
             "children": [],
@@ -319,7 +338,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "deprecated": false,
             "children": [],
@@ -345,7 +364,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 45
+              "lineNumber": 47
             },
             "deprecated": false,
             "children": [
@@ -368,7 +387,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 45
+                  "lineNumber": 47
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -396,7 +415,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-              "lineNumber": 50
+              "lineNumber": 52
             },
             "deprecated": false,
             "children": [
@@ -419,7 +438,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-                  "lineNumber": 50
+                  "lineNumber": 52
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3309,7 +3328,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-          "lineNumber": 89
+          "lineNumber": 108
         },
         "deprecated": false,
         "children": [
@@ -3325,7 +3344,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 96
+              "lineNumber": 115
             },
             "deprecated": false,
             "children": [
@@ -3341,7 +3360,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 96
+                  "lineNumber": 115
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3361,7 +3380,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 153
+              "lineNumber": 182
             },
             "deprecated": false,
             "children": [],
@@ -3379,7 +3398,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 187
+              "lineNumber": 216
             },
             "deprecated": false,
             "children": [],
@@ -3397,7 +3416,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 199
+              "lineNumber": 228
             },
             "deprecated": false,
             "children": [
@@ -3413,7 +3432,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 199
+                  "lineNumber": 228
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3433,7 +3452,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 203
+              "lineNumber": 232
             },
             "deprecated": false,
             "children": [
@@ -3449,7 +3468,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 203
+                  "lineNumber": 232
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3469,7 +3488,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 209
+              "lineNumber": 238
             },
             "deprecated": false,
             "children": [],
@@ -3487,7 +3506,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 251
+              "lineNumber": 285
             },
             "deprecated": false,
             "children": [],
@@ -3505,7 +3524,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 274
+              "lineNumber": 308
             },
             "deprecated": false,
             "children": [],
@@ -4708,7 +4727,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-          "lineNumber": 82
+          "lineNumber": 142
         },
         "deprecated": false,
         "children": [
@@ -4733,7 +4752,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-              "lineNumber": 83
+              "lineNumber": 143
             },
             "deprecated": false,
             "isRequired": true
@@ -5555,7 +5574,9 @@
             "section": "def-public.NotificationsStart",
             "text": "NotificationsStart"
           },
-          "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; }) => ",
+          "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: ",
+          "UiCounterMetricType",
+          ", eventNames: string | string[], count?: number | undefined) => void) | undefined; }) => ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -5566,7 +5587,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "deprecated": false,
         "children": [
@@ -5579,7 +5600,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-              "lineNumber": 16
+              "lineNumber": 17
             },
             "deprecated": false,
             "children": [
@@ -5618,7 +5639,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 17
+                  "lineNumber": 18
                 },
                 "deprecated": false
               },
@@ -5692,7 +5713,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 18
+                  "lineNumber": 19
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -5774,7 +5795,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 19
+                  "lineNumber": 20
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -5798,7 +5819,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 20
+                  "lineNumber": 21
                 },
                 "deprecated": false
               },
@@ -5820,7 +5841,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 21
+                  "lineNumber": 22
                 },
                 "deprecated": false
               },
@@ -5836,7 +5857,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 22
+                  "lineNumber": 23
                 },
                 "deprecated": false
               },
@@ -5852,11 +5873,90 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
-                  "lineNumber": 23
+                  "lineNumber": 24
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.openAddPanelFlyout.$1.options.reportUiCounter",
+                "type": "Function",
+                "tags": [],
+                "label": "reportUiCounter",
+                "description": [],
+                "signature": [
+                  "((appName: string, type: ",
+                  "UiCounterMetricType",
+                  ", eventNames: string | string[], count?: number | undefined) => void) | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
+                  "lineNumber": 25
                 },
                 "deprecated": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.useEmbeddableFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "useEmbeddableFactory",
+        "description": [],
+        "signature": [
+          "({\n  input,\n  factory,\n  onInputUpdated,\n}: EmbeddableRendererWithFactory<I>) => readonly [",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ErrorEmbeddable",
+            "text": "ErrorEmbeddable"
+          },
+          " | ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<I, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          "> | undefined, boolean, string | undefined]"
+        ],
+        "source": {
+          "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
+          "lineNumber": 43
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useEmbeddableFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  input,\n  factory,\n  onInputUpdated,\n}",
+            "description": [],
+            "signature": [
+              "EmbeddableRendererWithFactory<I>"
+            ],
+            "source": {
+              "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
+              "lineNumber": 43
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -8923,7 +9023,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
-          "lineNumber": 17
+          "lineNumber": 18
         },
         "deprecated": false,
         "initialIsOpen": false
