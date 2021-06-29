@@ -43,6 +43,7 @@ import { setDependencyCache } from './application/util/dependency_cache';
 import { registerFeature } from './register_feature';
 // Not importing from `ml_url_generator/index` here to avoid importing unnecessary code
 import { registerUrlGenerator } from './ml_url_generator/ml_url_generator';
+import { MlLocatorDefinition, MlLocator } from './locator';
 import type { MapsStartApi } from '../../maps/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -84,7 +85,9 @@ export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
 
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
   private urlGenerator: undefined | UrlGeneratorContract<typeof ML_APP_URL_GENERATOR>;
+  private locator: undefined | MlLocator;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -129,6 +132,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
+    }
+
+    if (pluginsSetup.share) {
+      this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
     }
 
     if (pluginsSetup.management) {
@@ -180,6 +187,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       urlGenerator: this.urlGenerator,
+      locator: this.locator,
     };
   }
 
@@ -193,6 +201,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       urlGenerator: this.urlGenerator,
+      locator: this.locator,
     };
   }
 
