@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { API_ROUTE_WORKPAD, DEFAULT_WORKPAD_CSS } from '../../common/lib/constants';
-import { CanvasWorkpad } from '../../types';
+import {
+  API_ROUTE_WORKPAD,
+  DEFAULT_WORKPAD_CSS,
+  API_ROUTE_TEMPLATES,
+} from '../../common/lib/constants';
+import { CanvasWorkpad, CanvasTemplate } from '../../types';
 import { CanvasServiceFactory } from './';
 
 /*
@@ -40,9 +44,15 @@ const sanitizeWorkpad = function (workpad: CanvasWorkpad) {
   return workpad;
 };
 
-interface WorkpadFindResponse {
+export type FoundWorkpads = Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;
+export type FoundWorkpad = FoundWorkpads[number];
+export interface WorkpadFindResponse {
   total: number;
-  workpads: Array<Pick<CanvasWorkpad, 'name' | 'id' | '@timestamp' | '@created'>>;
+  workpads: FoundWorkpads;
+}
+
+export interface TemplateFindResponse {
+  templates: CanvasTemplate[];
 }
 
 export interface WorkpadService {
@@ -51,6 +61,7 @@ export interface WorkpadService {
   createFromTemplate: (templateId: string) => Promise<CanvasWorkpad>;
   find: (term: string) => Promise<WorkpadFindResponse>;
   remove: (id: string) => Promise<void>;
+  findTemplates: () => Promise<TemplateFindResponse>;
 }
 
 export const workpadServiceFactory: CanvasServiceFactory<WorkpadService> = (
@@ -82,7 +93,9 @@ export const workpadServiceFactory: CanvasServiceFactory<WorkpadService> = (
         body: JSON.stringify({ templateId }),
       });
     },
+    findTemplates: async () => coreStart.http.get(API_ROUTE_TEMPLATES),
     find: (searchTerm: string) => {
+      // TODO: this shouldn't be necessary.  Check for usage.
       const validSearchTerm = typeof searchTerm === 'string' && searchTerm.length > 0;
 
       return coreStart.http.get(`${getApiPath()}/find`, {
