@@ -402,11 +402,25 @@ const AgentPolicySelectionStep = ({
   };
 };
 
-export const AddFleetServerHostStep = ({
+export const addFleetServerHostStep = ({
   addFleetServerHost,
 }: {
   addFleetServerHost: (v: string) => Promise<void>;
 }): EuiStepProps => {
+  return {
+    title: i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle', {
+      defaultMessage: 'Add your Fleet Server host',
+    }),
+    status: undefined,
+    children: <AddFleetServerHostStepContent addFleetServerHost={addFleetServerHost} />,
+  };
+};
+
+export const AddFleetServerHostStepContent = ({
+  addFleetServerHost,
+}: {
+  addFleetServerHost: (v: string) => Promise<void>;
+}) => {
   const [calloutHost, setCalloutHost] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [fleetServerHost, setFleetServerHost] = useState('');
@@ -453,84 +467,78 @@ export const AddFleetServerHostStep = ({
     [error, validate, setFleetServerHost]
   );
 
-  return {
-    title: i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle', {
-      defaultMessage: 'Add your Fleet Server host',
-    }),
-    status: undefined,
-    children: (
-      <EuiForm onSubmit={onSubmit}>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.fleetServerSetup.addFleetServerHostStepDescription"
-            defaultMessage="Specify the URL your agents will use to connect to Fleet Server. This should match the public IP address or domain of the host where Fleet Server will run. By default, Fleet Server uses port {port}."
-            values={{ port: <EuiCode>8220</EuiCode> }}
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFieldText
-              fullWidth
-              placeholder={'http://127.0.0.1:8220'}
-              value={calloutHost}
-              isInvalid={!!error}
-              onChange={onChange}
-              prepend={
-                <EuiText>
-                  <FormattedMessage
-                    id="xpack.fleet.fleetServerSetup.addFleetServerHostInputLabel"
-                    defaultMessage="Fleet Server host"
-                  />
-                </EuiText>
-              }
-            />
-            {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton isLoading={isLoading} onClick={onSubmit}>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.addFleetServerHostButton"
-                defaultMessage="Add host"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {calloutHost && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              iconType="check"
-              size="s"
-              color="success"
-              title={
+  return (
+    <EuiForm onSubmit={onSubmit}>
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.fleetServerSetup.addFleetServerHostStepDescription"
+          defaultMessage="Specify the URL your agents will use to connect to Fleet Server. This should match the public IP address or domain of the host where Fleet Server will run. By default, Fleet Server uses port {port}."
+          values={{ port: <EuiCode>8220</EuiCode> }}
+        />
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFieldText
+            fullWidth
+            placeholder={'http://127.0.0.1:8220'}
+            value={calloutHost}
+            isInvalid={!!error}
+            onChange={onChange}
+            prepend={
+              <EuiText>
                 <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle"
-                  defaultMessage="Added Fleet Server host"
+                  id="xpack.fleet.fleetServerSetup.addFleetServerHostInputLabel"
+                  defaultMessage="Fleet Server host"
                 />
-              }
-            >
+              </EuiText>
+            }
+          />
+          {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton isLoading={isLoading} onClick={onSubmit}>
+            <FormattedMessage
+              id="xpack.fleet.fleetServerSetup.addFleetServerHostButton"
+              defaultMessage="Add host"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {calloutHost && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            iconType="check"
+            size="s"
+            color="success"
+            title={
               <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
-                defaultMessage="Added {host}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
-                values={{
-                  host: calloutHost,
-                  fleetSettingsLink: (
-                    <EuiLink href={getModalHref('settings')}>
-                      <FormattedMessage
-                        id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
-                        defaultMessage="Fleet Settings"
-                      />
-                    </EuiLink>
-                  ),
-                }}
+                id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle"
+                defaultMessage="Added Fleet Server host"
               />
-            </EuiCallOut>
-          </>
-        )}
-      </EuiForm>
-    ),
-  };
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
+              defaultMessage="Added {host}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
+              values={{
+                host: calloutHost,
+                fleetSettingsLink: (
+                  <EuiLink href={getModalHref('settings')}>
+                    <FormattedMessage
+                      id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
+                      defaultMessage="Fleet Settings"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+        </>
+      )}
+    </EuiForm>
+  );
 };
 
 export const DeploymentModeStep = ({
@@ -746,7 +754,7 @@ export const OnPremInstructions: React.FC = () => {
           DownloadStep(),
           AgentPolicySelectionStep({ policyId, setPolicyId }),
           DeploymentModeStep({ deploymentMode, setDeploymentMode }),
-          AddFleetServerHostStep({ addFleetServerHost }),
+          addFleetServerHostStep({ addFleetServerHost }),
           ServiceTokenStep({
             disabled: deploymentMode === 'production' && !fleetServerHost,
             serviceToken,
