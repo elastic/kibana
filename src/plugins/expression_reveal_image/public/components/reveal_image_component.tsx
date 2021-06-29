@@ -7,6 +7,7 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
@@ -43,6 +44,8 @@ function RevealImageComponent({
 
   const imgRef = useRef<HTMLImageElement>(null);
 
+  const parentNodeDimensions = useResizeObserver(parentNode);
+
   // modify the top-level container class
   parentNode.className = 'revealImage';
 
@@ -60,12 +63,15 @@ function RevealImageComponent({
   }, [imgRef, handlers]);
 
   useEffect(() => {
-    handlers.event({ name: 'onResize', data: updateImageView });
     handlers.done();
     return () => {
       handlers.event({ name: 'destroy' });
     };
-  }, [handlers, updateImageView]);
+  }, [handlers]);
+
+  useEffect(() => {
+    updateImageView();
+  }, [parentNodeDimensions, updateImageView]);
 
   function getClipPath(percentParam: number, originParam: OriginString = 'bottom') {
     const directions: Record<OriginString, number> = { bottom: 0, left: 1, top: 2, right: 3 };
