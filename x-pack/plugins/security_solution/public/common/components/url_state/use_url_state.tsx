@@ -19,6 +19,7 @@ import {
   replaceStateInLocation,
   updateUrlStateString,
   decodeRisonUrlState,
+  isDetectionsPages,
 } from './helpers';
 import {
   UrlStateContainerPropTypes,
@@ -29,7 +30,6 @@ import {
   UrlStateToRedux,
   UrlState,
 } from './types';
-import { SecurityPageName } from '../../../app/types';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 
 function usePrevious(value: PreviousLocationUrlState) {
@@ -39,11 +39,6 @@ function usePrevious(value: PreviousLocationUrlState) {
   });
   return ref.current;
 }
-
-const isDetectionsPages = (pageName: string) =>
-  pageName === SecurityPageName.alerts ||
-  pageName === SecurityPageName.rules ||
-  pageName === SecurityPageName.exceptions;
 
 const updateTimelineAtinitialization = (
   urlKey: CONSTANTS,

@@ -19,17 +19,11 @@ import {
 } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
-import { decodeRisonUrlState } from './helpers';
+import { decodeRisonUrlState, isDetectionsPages } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
 import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
-import { SecurityPageName } from '../../../../common/constants';
-
-const isDetectionsPages = (pageName: string) =>
-  pageName === SecurityPageName.alerts ||
-  pageName === SecurityPageName.rules ||
-  pageName === SecurityPageName.exceptions;
 
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch
