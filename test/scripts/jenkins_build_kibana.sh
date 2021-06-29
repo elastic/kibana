@@ -31,7 +31,7 @@ node x-pack/scripts/functional_tests --assert-none-excluded \
   --include-tag ciGroupDocker
 
 echo " -> building and extracting default Kibana distributable for use in functional tests"
-node scripts/build --debug --no-oss
+node scripts/build --debug
 
 echo " -> shipping metrics from build to ci-stats"
 node scripts/ship_ci_stats \

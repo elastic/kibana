@@ -15,8 +15,6 @@ export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
-      'oss',
-      'no-oss',
       'skip-archives',
       'skip-initialize',
       'skip-generic-folders',
@@ -94,7 +92,6 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
-    buildOssDist: flags.oss !== false,
     buildDefaultDist: !flags.oss,
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
