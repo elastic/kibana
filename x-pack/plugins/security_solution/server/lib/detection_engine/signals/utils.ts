@@ -625,6 +625,15 @@ export const getValidDateFromDoc = ({
     const tempMoment = moment(lastTimestamp);
     if (tempMoment.isValid()) {
       return tempMoment.toDate();
+    } else if (typeof timestampValue === 'string') {
+      // worse case we have a string from fields API or other areas of Elasticsearch that have given us a number as a string,
+      // so we try one last time to parse this best we can by converting from string to a number
+      const maybeDate = moment(+lastTimestamp);
+      if (maybeDate.isValid()) {
+        return maybeDate.toDate();
+      } else {
+        return undefined;
+      }
     } else {
       return undefined;
     }

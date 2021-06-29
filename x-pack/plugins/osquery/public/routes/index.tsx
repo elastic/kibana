@@ -11,12 +11,16 @@ import { Switch, Redirect, Route } from 'react-router-dom';
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
 import { LiveQueries } from './live_queries';
 import { ScheduledQueryGroups } from './scheduled_query_groups';
+import { SavedQueries } from './saved_queries';
 
 const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
 
   return (
     <Switch>
+      <Route path={`/saved_queries`}>
+        <SavedQueries />
+      </Route>
       <Route path={`/scheduled_query_groups`}>
         <ScheduledQueryGroups />
       </Route>

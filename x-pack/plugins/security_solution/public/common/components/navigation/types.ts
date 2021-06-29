@@ -6,7 +6,7 @@
  */
 
 import { UrlStateType } from '../url_state/constants';
-import { SecurityPageName } from '../../../app/types';
+import { SecurityPageName, SecurityPageGroupName } from '../../../app/types';
 import { UrlState } from '../url_state/types';
 import { SiemRouteType } from '../../utils/route/types';
 
@@ -23,13 +23,25 @@ export interface TabNavigationComponentProps {
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
 
+export interface NavGroupTab {
+  id: string;
+  name: string;
+}
+
+export type SecurityNavTabGroupKey =
+  | SecurityPageGroupName.detect
+  | SecurityPageGroupName.explore
+  | SecurityPageGroupName.investigate
+  | SecurityPageGroupName.manage;
+
+export type NavTabGroups = Record<SecurityNavTabGroupKey, NavGroupTab>;
+
 export interface NavTab {
   id: string;
   name: string;
   href: string;
   disabled: boolean;
-  urlKey: UrlStateType;
-  isDetailPage?: boolean;
+  urlKey?: UrlStateType;
   pageId?: SecurityPageName;
 }
 
@@ -37,14 +49,21 @@ export type SiemNavTabKey =
   | SecurityPageName.overview
   | SecurityPageName.hosts
   | SecurityPageName.network
-  | SecurityPageName.detections
+  | SecurityPageName.alerts
+  | SecurityPageName.rules
+  | SecurityPageName.exceptions
   | SecurityPageName.timelines
   | SecurityPageName.case
-  | SecurityPageName.administration;
+  | SecurityPageName.administration
+  | SecurityPageName.endpoints
+  | SecurityPageName.trustedApps
+  | SecurityPageName.eventFilters;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 
 export type GetUrlForApp = (
   appId: string,
-  options?: { path?: string; absolute?: boolean }
+  options?: { deepLinkId?: string; path?: string; absolute?: boolean }
 ) => string;
+
+export type NavigateToUrl = (url: string) => void;

@@ -113,6 +113,7 @@ export const createThresholdAlertType = (ruleDataClient: RuleDataClient, logger:
       context: [{ name: 'server', description: 'the server' }],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: false,
     producer: 'security-solution',
     async executor({ startedAt, services, params, alertId }) {
       const fromDate = moment(startedAt).subtract(moment.duration(5, 'm')); // hardcoded 5-minute rule interval
