@@ -7573,7 +7573,6 @@
     "xpack.enterpriseSearch.appSearch.documentCreation.warningsTitle": "警告！",
     "xpack.enterpriseSearch.appSearch.documentDetail.confirmDelete": "是否确定要删除此文档？",
     "xpack.enterpriseSearch.appSearch.documentDetail.deleteSuccess": "成功标记要删除的文档。",
-    "xpack.enterpriseSearch.appSearch.documentDetail.deleteSuccessDescription": "文档将被暂时删除。",
     "xpack.enterpriseSearch.appSearch.documentDetail.fieldHeader": "字段",
     "xpack.enterpriseSearch.appSearch.documentDetail.title": "文档：{documentId}",
     "xpack.enterpriseSearch.appSearch.documentDetail.valueHeader": "值",
