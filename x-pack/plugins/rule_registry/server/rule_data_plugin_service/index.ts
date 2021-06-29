@@ -54,8 +54,8 @@ export class RuleDataPluginService {
   constructor(private readonly options: RuleDataPluginServiceConstructorOptions) {}
 
   private assertWriteEnabled() {
-    if (!this.isWriteEnabled) {
-      throw new Error('Write operations are disabled');
+    if (!this.isWriteEnabled()) {
+      throw new RuleDataWriteDisabledError();
     }
   }
 
@@ -64,7 +64,7 @@ export class RuleDataPluginService {
   }
 
   async init() {
-    if (!this.isWriteEnabled) {
+    if (!this.isWriteEnabled()) {
       this.options.logger.info('Write is disabled, not installing assets');
       this.signal.complete();
       return;
