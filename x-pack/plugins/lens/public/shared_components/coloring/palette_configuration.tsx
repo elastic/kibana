@@ -97,7 +97,7 @@ export function CustomizablePalette({
           })}
         >
           <PalettePicker
-            data-test-subj="lnsDatatable_dynamicColoring_palette_picker"
+            data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"
             palettes={palettes}
             activePalette={activePalette}
             setPalette={(newPalette) => {
@@ -150,7 +150,7 @@ export function CustomizablePalette({
             display="rowCompressed"
           >
             <EuiSuperSelect
-              data-test-subj="lnsDatatable_dynamicColoring_continuity"
+              data-test-subj="lnsPalettePanel_dynamicColoring_continuity"
               compressed
               options={[
                 {
@@ -235,7 +235,7 @@ export function CustomizablePalette({
             legend={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
               defaultMessage: 'Value type',
             })}
-            data-test-subj="lnsDatatable_dynamicColoring_custom_range_groups"
+            data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"
             name="dynamicColoringRangeType"
             buttonSize="compressed"
             options={[
@@ -244,14 +244,14 @@ export function CustomizablePalette({
                 label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.percent', {
                   defaultMessage: 'Percent',
                 }),
-                'data-test-subj': 'lnsDatatable_dynamicColoring_rangeType_groups_percent',
+                'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_percent',
               },
               {
                 id: `${idPrefix}number`,
                 label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.number', {
                   defaultMessage: 'Number',
                 }),
-                'data-test-subj': 'lnsDatatable_dynamicColoring_rangeType_groups_number',
+                'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_number',
               },
             ]}
             idSelected={
@@ -307,7 +307,7 @@ export function CustomizablePalette({
             <EuiText size="xs">
               <EuiLink
                 className="lnsPalettePanel__reverseButton"
-                data-test-subj="lnsDatatable_dynamicColoring_reverse"
+                data-test-subj="lnsPalettePanel_dynamicColoring_reverse"
                 onClick={() => {
                   const params: CustomPaletteParams = { reverse: !activePalette.params?.reverse };
                   if (isCurrentPaletteCustom) {
@@ -349,7 +349,7 @@ export function CustomizablePalette({
         >
           <CustomStops
             paletteConfiguration={activePalette?.params}
-            data-test-prefix="lnsDatatable"
+            data-test-prefix="lnsPalettePanel"
             colorStops={colorStopsToShow}
             dataBounds={dataBounds}
             onChange={(colorStops) => {
