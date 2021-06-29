@@ -566,6 +566,7 @@ export function defineAlertTypes(
     ],
     defaultActionGroupId: 'small',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {},
     producer: 'alertsFixture',
   };
