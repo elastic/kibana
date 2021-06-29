@@ -8,10 +8,10 @@
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
 import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
-import { AlertsRoutes } from './routes';
+import { routes } from './routes';
 import { SecuritySubPlugin } from '../app/types';
 
-const DETECTIONS_TIMELINE_IDS: TimelineIdLiteral[] = [
+export const DETECTIONS_TIMELINE_IDS: TimelineIdLiteral[] = [
   TimelineId.detectionsRulesDetailsPage,
   TimelineId.detectionsPage,
 ];
@@ -21,10 +21,10 @@ export class Detections {
 
   public start(storage: Storage): SecuritySubPlugin {
     return {
-      SubPluginRoutes: AlertsRoutes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, DETECTIONS_TIMELINE_IDS),
       },
+      routes,
     };
   }
 }
