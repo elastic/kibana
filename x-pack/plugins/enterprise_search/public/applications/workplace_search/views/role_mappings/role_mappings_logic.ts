@@ -7,14 +7,17 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-
 import {
   clearFlashMessages,
   flashAPIErrors,
   setSuccessMessage,
 } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
+import {
+  RoleMappingsBaseServerDetails,
+  RoleMappingsBaseActions,
+  RoleMappingsBaseValues,
+} from '../../../shared/role_mapping';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
 import { AttributeName, SingleUserRoleMapping, ElasticsearchUser } from '../../../shared/types';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
@@ -28,14 +31,9 @@ import {
 
 type UserMapping = SingleUserRoleMapping<WSRoleMapping>;
 
-interface RoleMappingsServerDetails {
+interface RoleMappingsServerDetails extends RoleMappingsBaseServerDetails {
   roleMappings: WSRoleMapping[];
-  attributes: string[];
-  authProviders: string[];
   availableGroups: RoleGroup[];
-  elasticsearchUsers: ElasticsearchUser[];
-  elasticsearchRoles: string[];
-  multipleAuthProvidersConfig: boolean;
   singleUserRoleMappings: UserMapping[];
 }
 
@@ -45,24 +43,8 @@ const getFirstAttributeValue = (roleMapping: WSRoleMapping): string =>
   Object.entries(roleMapping.rules)[0][1] as string;
 const emptyUser = { username: '', email: '' } as ElasticsearchUser;
 
-interface RoleMappingsActions {
-  handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
-  handleAuthProviderChange(value: string[]): { value: string[] };
-  handleAttributeSelectorChange(
-    value: AttributeName,
-    firstElasticsearchRole: string
-  ): { value: AttributeName; firstElasticsearchRole: string };
-  handleAttributeValueChange(value: string): { value: string };
-  handleDeleteMapping(roleMappingId: string): { roleMappingId: string };
-  handleGroupSelectionChange(groupIds: string[]): { groupIds: string[] };
-  handleRoleChange(roleType: Role): { roleType: Role };
-  handleUsernameSelectChange(username: string): { username: string };
-  handleSaveMapping(): void;
-  handleSaveUser(): void;
-  initializeRoleMapping(roleMappingId?: string): { roleMappingId?: string };
-  initializeSingleUserRoleMapping(roleMappingId?: string): { roleMappingId?: string };
-  initializeRoleMappings(): void;
-  resetState(): void;
+interface RoleMappingsActions extends RoleMappingsBaseActions {
+  setDefaultGroup(availableGroups: RoleGroup[]): { availableGroups: RoleGroup[] };
   setRoleMapping(roleMapping: WSRoleMapping): { roleMapping: WSRoleMapping };
   setSingleUserRoleMapping(data?: UserMapping): { singleUserRoleMapping: UserMapping };
   setRoleMappings({
@@ -71,34 +53,14 @@ interface RoleMappingsActions {
     roleMappings: WSRoleMapping[];
   }): { roleMappings: WSRoleMapping[] };
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
-  setElasticsearchUser(
-    elasticsearchUser?: ElasticsearchUser
-  ): { elasticsearchUser: ElasticsearchUser };
-  setDefaultGroup(availableGroups: RoleGroup[]): { availableGroups: RoleGroup[] };
-  openRoleMappingFlyout(): void;
-  openSingleUserRoleMappingFlyout(): void;
-  closeUsersAndRolesFlyout(): void;
-  setRoleMappingErrors(errors: string[]): { errors: string[] };
-  enableRoleBasedAccess(): void;
-  setUserExistingRadioValue(userFormUserIsExisting: boolean): { userFormUserIsExisting: boolean };
-  setElasticsearchUsernameValue(username: string): { username: string };
-  setElasticsearchEmailValue(email: string): { email: string };
-  setUserCreated(): void;
-  setUserFormIsNewUser(userFormIsNewUser: boolean): { userFormIsNewUser: boolean };
+  handleAllGroupsSelectionChange(selected: boolean): { selected: boolean };
+  handleGroupSelectionChange(groupIds: string[]): { groupIds: string[] };
+  handleRoleChange(roleType: Role): { roleType: Role };
 }
 
-interface RoleMappingsValues {
+interface RoleMappingsValues extends RoleMappingsBaseValues {
   includeInAllGroups: boolean;
-  attributeName: AttributeName;
-  attributeValue: string;
-  attributes: string[];
-  availableAuthProviders: string[];
   availableGroups: RoleGroup[];
-  dataLoading: boolean;
-  elasticsearchRoles: string[];
-  elasticsearchUsers: ElasticsearchUser[];
-  elasticsearchUser: ElasticsearchUser;
-  multipleAuthProvidersConfig: boolean;
   roleMapping: WSRoleMapping | null;
   roleMappings: WSRoleMapping[];
   singleUserRoleMapping: UserMapping | null;
@@ -106,13 +68,6 @@ interface RoleMappingsValues {
   roleType: Role;
   selectedAuthProviders: string[];
   selectedGroups: Set<string>;
-  roleMappingFlyoutOpen: boolean;
-  singleUserRoleMappingFlyoutOpen: boolean;
-  selectedOptions: EuiComboBoxOptionOption[];
-  roleMappingErrors: string[];
-  userFormUserIsExisting: boolean;
-  userCreated: boolean;
-  userFormIsNewUser: boolean;
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
@@ -367,6 +322,21 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       true,
       {
         setUserFormIsNewUser: (_, { userFormIsNewUser }) => userFormIsNewUser,
+      },
+    ],
+    smtpSettingsPresent: [
+      false,
+      {
+        setRoleMappingsData: (_, { smtpSettingsPresent }) => smtpSettingsPresent,
+      },
+    ],
+    formLoading: [
+      false,
+      {
+        handleSaveMapping: () => true,
+        handleSaveUser: () => true,
+        initializeRoleMappings: () => false,
+        setRoleMappingErrors: () => false,
       },
     ],
   },

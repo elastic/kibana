@@ -80,6 +80,7 @@ const refreshListIfNeeded = async (
   trustedAppsService: TrustedAppsService
 ) => {
   if (needsRefreshOfListData(store.getState())) {
+    store.dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: false } });
     store.dispatch(
       createTrustedAppsListResourceStateChangedAction({
         type: 'LoadingResourceState',
@@ -395,11 +396,11 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            type: 'LoadingResourceState',
             // No easy way to get around this that I can see. `previousState` does not
             // seem to allow everything that `editItem` state can hold, so not even sure if using
             // type guards would work here
             // @ts-ignore
+            type: 'LoadingResourceState',
             previousState: editItemState(currentState)!,
           },
         });
