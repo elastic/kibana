@@ -13,7 +13,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/newsfeed/public/types.ts",
-          "lineNumber": 45
+          "lineNumber": 49
         },
         "deprecated": false,
         "children": [
@@ -26,7 +26,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 46
+              "lineNumber": 50
             },
             "deprecated": false
           },
@@ -39,7 +39,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 47
+              "lineNumber": 51
             },
             "deprecated": false
           },
@@ -62,7 +62,7 @@
             ],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 48
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -78,7 +78,7 @@
             ],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 49
+              "lineNumber": 53
             },
             "deprecated": false
           }
@@ -94,7 +94,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/newsfeed/public/types.ts",
-          "lineNumber": 34
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -107,7 +107,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 35
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -120,7 +120,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 36
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -136,7 +136,7 @@
             ],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 37
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -149,7 +149,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 38
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -165,7 +165,7 @@
             ],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 39
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -181,7 +181,7 @@
             ],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 40
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -197,7 +197,7 @@
             ],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 41
+              "lineNumber": 45
             },
             "deprecated": false
           },
@@ -210,7 +210,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 42
+              "lineNumber": 46
             },
             "deprecated": false
           }
@@ -228,7 +228,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/newsfeed/public/lib/api.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "deprecated": false,
         "initialIsOpen": false
