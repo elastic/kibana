@@ -28,12 +28,7 @@ import { durationToNumber } from '../../common/schema_utils';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
-import {
-  ReportDeleteButton,
-  ReportDownloadButton,
-  ReportErrorButton,
-  ReportInfoButton,
-} from './buttons';
+import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
 import { ReportDiagnostic } from './report_diagnostic';
 
 export interface Job {

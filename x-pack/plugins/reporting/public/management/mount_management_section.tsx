@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import { CoreSetup, CoreStart } from 'src/core/public';
 import { Observable } from 'rxjs';
-import { ReportListing } from './components/report_listing';
-import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
-import { ILicense } from '../../licensing/public';
-import { ClientConfigType } from './plugin';
-import { ReportingAPIClient } from './lib/reporting_api_client';
+import { CoreSetup, CoreStart } from 'src/core/public';
+import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
+import { ILicense } from '../../../licensing/public';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ClientConfigType } from '../plugin';
+import { ReportListing } from './report_listing';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,
