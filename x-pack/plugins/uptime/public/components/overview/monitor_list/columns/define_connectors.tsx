@@ -81,12 +81,12 @@ export const DefineAlertConnectors = ({
           data-test-subj={'uptimeSettingsLink'}
         >
           <FormattedMessage
-            id="xpack.uptime.page_header.defineConnector.defaultLink"
+            id="xpack.uptime.page_header.defineConnector.popover.defaultLink"
             defaultMessage="Define a default connector"
           />
         </ReactRouterEuiLink>{' '}
         <FormattedMessage
-          id="xpack.uptime.monitorList.defineConnector.description"
+          id="xpack.uptime.monitorList.defineConnector.popover.description"
           defaultMessage="to receive status alerts."
         />
       </EuiText>
