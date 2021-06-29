@@ -86,7 +86,7 @@ export const SECURITY_SOLUTION_OWNER = 'securitySolution';
 /**
  * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.
  */
-export const ENABLE_CASE_CONNECTOR = true;
+export const ENABLE_CASE_CONNECTOR = false;
 
 if (ENABLE_CASE_CONNECTOR) {
   SAVED_OBJECT_TYPES.push(SUB_CASE_SAVED_OBJECT);
