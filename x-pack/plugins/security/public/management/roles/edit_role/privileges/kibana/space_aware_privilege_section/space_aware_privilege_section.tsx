@@ -199,7 +199,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
       <EuiButton
         color="primary"
         onClick={this.addSpacePrivilege}
-        iconType={'plusInCircleFilled'}
+        iconType={'plusInCircle'}
         data-test-subj={'addSpacePrivilegeButton'}
         isDisabled={!hasAvailableSpaces || !this.props.editable}
       >
