@@ -22,6 +22,8 @@ export default function ({ getService, getPageObjects }) {
         to: 'Dec 19, 2017 @ 18:15:09.000',
       });
 
+      await clusterOverview.closeAlertsModal();
+
       // go to beats detail
       await clusterOverview.clickBeatsListing();
       expect(await listing.isOnListing()).to.be(true);
