@@ -10,11 +10,15 @@ import { PluginFunctionalProviderContext } from 'test/plugin_functional/services
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('embedded Lens examples', function () {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/lens/basic'); // need at least one index pattern
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
     });
 
     after(async () => {
