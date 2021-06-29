@@ -12,7 +12,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IFieldType extends FieldBase 
+export interface IFieldType extends IndexPatternFieldBase 
 ```
 
 ## Properties
