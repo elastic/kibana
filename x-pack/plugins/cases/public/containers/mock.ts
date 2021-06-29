@@ -176,6 +176,12 @@ export const basicPush = {
 
 export const pushedCase: Case = {
   ...basicCase,
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   externalService: basicPush,
 };
 

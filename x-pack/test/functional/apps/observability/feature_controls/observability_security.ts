@@ -142,6 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows read-only glasses badge`, async () => {
+        await PageObjects.common.navigateToActualUrl('observabilityCases');
         await PageObjects.observability.expectReadOnlyGlassesBadge();
       });
 
