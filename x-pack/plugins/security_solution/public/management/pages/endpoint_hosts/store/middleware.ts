@@ -412,9 +412,11 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
 
         const lastLoadedLogData = getLastLoadedActivityLogData(getState());
         if (lastLoadedLogData !== undefined) {
-          const updatedLogDataItems = [
+          const updatedLogDataItems = ([
             ...new Set([...lastLoadedLogData.data, ...activityLog.data]),
-          ] as ActivityLog['data'];
+          ] as ActivityLog['data']).sort((a, b) =>
+            new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
+          );
 
           const updatedLogData = {
             page: activityLog.page,

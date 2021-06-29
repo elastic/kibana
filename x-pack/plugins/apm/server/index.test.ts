@@ -25,6 +25,7 @@ describe('mergeConfigs', () => {
       ui: { enabled: false },
       enabled: true,
       metricsInterval: 2000,
+      agent: { migrations: { enabled: true } },
     } as APMXPackConfig;
 
     expect(mergeConfigs(apmOssConfig, apmConfig)).toEqual({
@@ -35,6 +36,7 @@ describe('mergeConfigs', () => {
       'apm_oss.transactionIndices': 'apm-*-transaction-*',
       'xpack.apm.metricsInterval': 2000,
       'xpack.apm.ui.enabled': false,
+      'xpack.apm.agent.migrations.enabled': true,
     });
   });
 
@@ -47,7 +49,7 @@ describe('mergeConfigs', () => {
       fleetMode: true,
     } as APMOSSConfig;
 
-    const apmConfig = { ui: {} } as APMXPackConfig;
+    const apmConfig = { ui: {}, agent: { migrations: {} } } as APMXPackConfig;
 
     expect(mergeConfigs(apmOssConfig, apmConfig)).toEqual({
       'apm_oss.errorIndices': 'logs-apm*,apm-*-error-*',
@@ -66,7 +68,7 @@ describe('mergeConfigs', () => {
       fleetMode: false,
     } as APMOSSConfig;
 
-    const apmConfig = { ui: {} } as APMXPackConfig;
+    const apmConfig = { ui: {}, agent: { migrations: {} } } as APMXPackConfig;
 
     expect(mergeConfigs(apmOssConfig, apmConfig)).toEqual({
       'apm_oss.errorIndices': 'apm-*-error-*',

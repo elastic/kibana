@@ -598,12 +598,22 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                   defaultMessage: 'Enter field to be used as dependent variable.',
                 }
               )}
-              placeholder={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
-                {
-                  defaultMessage: 'dependent variable',
-                }
-              )}
+              placeholder={
+                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
+                  ? i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
+                      {
+                        defaultMessage: 'Select the numeric field that you want to predict.',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
+                      {
+                        defaultMessage:
+                          'Select the numeric, categorical, or boolean field that you want to predict.',
+                      }
+                    )
+              }
               isDisabled={isJobCreated}
               isLoading={loadingDepVarOptions}
               singleSelection={true}

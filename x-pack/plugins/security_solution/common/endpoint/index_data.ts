@@ -421,7 +421,7 @@ const indexFleetActionsForHost = async (
 
     action.agents = [agentId];
 
-    await esClient.index(
+    esClient.index(
       {
         index: AGENT_ACTIONS_INDEX,
         body: action,
@@ -436,7 +436,7 @@ const indexFleetActionsForHost = async (
       action_data: action.data,
     });
 
-    await esClient.index(
+    esClient.index(
       {
         index: AGENT_ACTIONS_RESULTS_INDEX,
         body: actionResponse,
@@ -449,7 +449,7 @@ const indexFleetActionsForHost = async (
   if (fleetActionGenerator.randomFloat() < 0.3) {
     const randomFloat = fleetActionGenerator.randomFloat();
 
-    // 60% of the time just add either an Isoalte -OR- an UnIsolate action
+    // 60% of the time just add either an Isolate -OR- an UnIsolate action
     if (randomFloat < 0.6) {
       let action: EndpointAction;
 

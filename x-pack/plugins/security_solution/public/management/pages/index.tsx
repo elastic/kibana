@@ -16,6 +16,7 @@ import {
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
+import { TrackApplicationView } from '../../../../../../src/plugins/usage_collection/public';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
@@ -54,6 +55,30 @@ const NoPermissions = memo(() => {
 });
 NoPermissions.displayName = 'NoPermissions';
 
+const EndpointTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.endpoints}>
+    <EndpointsContainer />
+  </TrackApplicationView>
+);
+
+const PolicyTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.policies}>
+    <PolicyContainer />
+  </TrackApplicationView>
+);
+
+const TrustedAppTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.trustedApps}>
+    <TrustedAppsContainer />
+  </TrackApplicationView>
+);
+
+const EventFilterTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.eventFilters}>
+    <EventFiltersContainer />
+  </TrackApplicationView>
+);
+
 export const ManagementContainer = memo(() => {
   const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
 
@@ -63,11 +88,10 @@ export const ManagementContainer = memo(() => {
 
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppsContainer} />
-      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
-
+      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
+      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
+      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
+      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
       <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>
