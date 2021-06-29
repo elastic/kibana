@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { SearchResponse } from 'elasticsearch';
 import { isEmpty } from 'lodash';
@@ -19,7 +19,7 @@ import {
   useFormatUrl,
 } from '../../../common/components/link_to';
 import { Ecs } from '../../../../common/ecs';
-import { Case } from '../../../../../cases/common';
+import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { KibanaServices, useKibana } from '../../../common/lib/kibana';
@@ -38,6 +38,7 @@ import { SEND_ALERT_TO_TIMELINE } from './translations';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
+import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 
 interface Props {
   caseId: string;
@@ -176,9 +177,13 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       })
     );
   }, [dispatch]);
+
+  const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+
   return (
-    <>
+    <CaseDetailsRefreshContext.Provider value={refreshRef}>
       {casesUi.getCaseView({
+        refreshRef,
         allCasesNavigation: {
           href: formattedAllCasesLink,
           onClick: async (e) => {
@@ -247,7 +252,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         userCanCrud,
       })}
       <SpyRoute state={spyState} pageName={SecurityPageName.case} />
-    </>
+    </CaseDetailsRefreshContext.Provider>
   );
 });
 

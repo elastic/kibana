@@ -260,7 +260,7 @@ describe('createApi', () => {
           body: {
             attributes: { _inspect: [] },
             message:
-              'Invalid value 1 supplied to : strict_keys/query: Partial<{| _inspect: pipe(JSON, boolean) |}>/_inspect: pipe(JSON, boolean)',
+              'Invalid value 1 supplied to : Partial<{| query: Partial<{| _inspect: pipe(JSON, boolean) |}> |}>/query: Partial<{| _inspect: pipe(JSON, boolean) |}>/_inspect: pipe(JSON, boolean)',
           },
           statusCode: 400,
         });

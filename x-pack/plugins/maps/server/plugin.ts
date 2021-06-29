@@ -170,14 +170,7 @@ export class MapsPlugin implements Plugin {
       lastLicenseId = license.uid;
     });
 
-    initRoutes(
-      core,
-      () => lastLicenseId,
-      emsSettings,
-      this.kibanaVersion,
-      this._logger,
-      currentConfig.enableDrawingFeature
-    );
+    initRoutes(core, () => lastLicenseId, emsSettings, this.kibanaVersion, this._logger);
 
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 

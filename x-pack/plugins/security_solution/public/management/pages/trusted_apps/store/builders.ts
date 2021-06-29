@@ -59,4 +59,5 @@ export const initialTrustedAppsPageState = (): TrustedAppsListPageState => ({
     filter: '',
   },
   active: false,
+  forceRefresh: false,
 });

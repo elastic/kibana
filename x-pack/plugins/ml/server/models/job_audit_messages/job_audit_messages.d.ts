@@ -15,8 +15,12 @@ export function jobAuditMessagesProvider(
 ): {
   getJobAuditMessages: (
     jobSavedObjectService: JobSavedObjectService,
-    jobId?: string,
-    from?: string
+    options: {
+      jobId?: string;
+      from?: string;
+      start?: string;
+      end?: string;
+    }
   ) => any;
   getAuditMessagesSummary: (jobIds?: string[]) => any;
 };

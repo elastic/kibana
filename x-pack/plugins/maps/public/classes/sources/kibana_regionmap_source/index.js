@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { kibanaRegionMapLayerWizardConfig } from './kibana_regionmap_layer_wizard';
 export { KibanaRegionmapSource } from './kibana_regionmap_source';
