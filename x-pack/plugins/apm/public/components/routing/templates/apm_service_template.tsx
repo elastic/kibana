@@ -13,6 +13,7 @@ import {
   EuiPageHeaderProps,
   EuiTitle,
   EuiBetaBadge,
+  EuiToolTip,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { ApmMainTemplate } from './apm_main_template';
@@ -22,7 +23,7 @@ import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import {
   isJavaAgentName,
   isRumAgentName,
-  isIosAgent,
+  isIosAgentName,
 } from '../../../../common/agent_name';
 import { ServiceIcons } from '../../shared/service_icons';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -35,6 +36,11 @@ import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_
 import { useServiceProfilingHref } from '../../shared/Links/apm/service_profiling_link';
 import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+} from '../../../../common/elasticsearch_fieldnames';
 import { Correlations } from '../../app/correlations';
 import { SearchBar } from '../../shared/search_bar';
 import {
@@ -121,7 +127,7 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
   const { rangeTo, rangeFrom, environment } = urlParams;
   const basepath = services.http?.basePath.get();
 
-  if (isRumAgentName(agentName) || isIosAgent(agentName)) {
+  if (isRumAgentName(agentName) || isIosAgentName(agentName)) {
     const href = createExploratoryViewUrl(
       {
         'apm-series': {
@@ -129,8 +135,10 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
           time: { from: rangeFrom, to: rangeTo },
           reportType: 'kpi-over-time',
           reportDefinitions: {
-            'service.name': [serviceName],
-            'service.environment': [environment],
+            [SERVICE_NAME]: [serviceName],
+            ...(!!environment && ENVIRONMENT_NOT_DEFINED.value !== environment
+              ? { [SERVICE_ENVIRONMENT]: [environment] }
+              : {}),
           },
           operationType: 'average',
           isNew: true,
@@ -140,11 +148,19 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
     );
 
     return (
-      <EuiButtonEmpty href={href} iconType="visBarVertical">
-        {i18n.translate('xpack.apm.analyzeDataButton.label', {
-          defaultMessage: 'Analyze data',
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.apm.analyzeDataButton.tooltip', {
+          defaultMessage:
+            'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
         })}
-      </EuiButtonEmpty>
+      >
+        <EuiButtonEmpty href={href} iconType="visBarVertical">
+          {i18n.translate('xpack.apm.analyzeDataButton.label', {
+            defaultMessage: 'Analyze data',
+          })}
+        </EuiButtonEmpty>
+      </EuiToolTip>
     );
   }
 
@@ -204,7 +220,10 @@ function useTabs({
         defaultMessage: 'Metrics',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isJavaAgentName(agentName),
+        !agentName ||
+        isRumAgentName(agentName) ||
+        isJavaAgentName(agentName) ||
+        isIosAgentName(agentName),
     },
     {
       key: 'service-map',

@@ -93,6 +93,7 @@ const apmPerAgentSchema: Pick<
     'opentelemetry/php': long,
     'opentelemetry/python': long,
     'opentelemetry/ruby': long,
+    'opentelemetry/swift': long,
     'opentelemetry/webjs': long,
   },
   agents: {
