@@ -103,7 +103,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           params: {
             rollup_index: rollupIndex,
           },
-          aggs: (rollupIndicesCapabilities[rollupIndex] as any).aggs,
+          aggs: rollupIndicesCapabilities[rollupIndex].aggs,
         };
       }
 
@@ -190,10 +190,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
     };
   }, [http, type]);
 
+  const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
+
   const reloadMatchedIndices = useCallback(
     async (title2: string) => {
-      const getRollupIndices = () => Object.keys(rollupIndicesCapabilities);
-      const isRollupIndex = (indexName: string) => getRollupIndices().includes(indexName);
+      const isRollupIndex = (indexName: string) =>
+        getRollupIndices(rollupIndicesCapabilities).includes(indexName);
       const getIndexTags = (indexName: string) =>
         isRollupIndex(indexName)
           ? [
@@ -310,7 +312,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const showIndexPatternTypeSelect = () =>
     uiSettings.isDeclared('rollups:enableIndexPatterns') &&
-    uiSettings.get('rollups:enableIndexPatterns');
+    uiSettings.get('rollups:enableIndexPatterns') &&
+    getRollupIndices(rollupIndicesCapabilities);
 
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
     <EuiFlexGroup>

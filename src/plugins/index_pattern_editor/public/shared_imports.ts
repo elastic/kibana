@@ -12,6 +12,7 @@ export {
   DataPublicPluginStart,
   IndexPatternSpec,
   GetFieldsOptions,
+  AggregationRestrictions,
 } from '../../data/public';
 
 export {
