@@ -64,7 +64,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 </UserPrivilegesProvider>
               </MlCapabilitiesProvider>
             </EuiThemeProvider>
-            {/* <ErrorToastDispatcher /> */}
+            <ErrorToastDispatcher />
             <GlobalToaster />
           </ReduxStoreProvider>
         </ManageGlobalToaster>

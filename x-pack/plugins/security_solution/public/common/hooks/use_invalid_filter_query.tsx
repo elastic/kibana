@@ -38,11 +38,16 @@ export const useInvalidFilterQuery = ({
 
   useEffect(() => {
     if (filterQuery === undefined && kqlError != null) {
-      const errorHash = JSON.stringify(kqlError);
+      // Local util for creating an replicatable error hash
+      const hashCode = kqlError.message
+        .split('')
+        // eslint-disable-next-line no-bitwise
+        .reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0)
+        .toString();
       dispatch(
         appActions.addErrorHash({
           id,
-          hash: errorHash,
+          hash: hashCode,
           title: kqlError.name,
           message: [kqlError.message],
         })
@@ -57,7 +62,6 @@ export const useInvalidFilterQuery = ({
     if (myError != null && myError.displayError && kqlError != null) {
       // Removes error stack from user view
       delete kqlError.stack; // Mutates the error object and can possibly lead to side effects, only going this route for type issues. Change when we add a stackless toast error
-      console.log('here');
       addError(kqlError, { title: kqlError.name });
     }
   }, [addError, errors, id, kqlError]);
