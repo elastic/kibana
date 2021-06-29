@@ -6,18 +6,35 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, RouteProps, RouteComponentProps } from 'react-router-dom';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { ALERTS_PATH, DETECTIONS_PATH, SecurityPageName } from '../../common/constants';
 
-import { DetectionEngineContainer } from './pages/detection_engine';
-import { NotFoundPage } from '../app/404';
+import { SpyRoute } from '../common/utils/route/spy_routes';
 
-export const AlertsRoutes: React.FC = () => (
-  <Switch>
-    <Route path="/">
-      <DetectionEngineContainer />
-    </Route>
-    <Route>
-      <NotFoundPage />
-    </Route>
-  </Switch>
+import { DetectionEnginePage } from './pages/detection_engine/detection_engine';
+
+const renderAlertsRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.alerts}>
+    <DetectionEnginePage />
+    <SpyRoute pageName={SecurityPageName.alerts} />
+  </TrackApplicationView>
 );
+
+const DetectionsRedirects = ({ location }: RouteComponentProps) =>
+  location.pathname === DETECTIONS_PATH ? (
+    <Redirect to={{ ...location, pathname: ALERTS_PATH }} />
+  ) : (
+    <Redirect to={{ ...location, pathname: location.pathname.replace(DETECTIONS_PATH, '') }} />
+  );
+
+export const routes: RouteProps[] = [
+  {
+    path: ALERTS_PATH,
+    render: renderAlertsRoutes,
+  },
+  {
+    path: DETECTIONS_PATH,
+    component: DetectionsRedirects,
+  },
+];

@@ -80,6 +80,7 @@ export const JSON_HEADER = {
   Accept: 'application/json', // Required for Enterprise Search APIs
 };
 
+export const ERROR_CONNECTING_HEADER = 'x-ent-search-error-connecting';
 export const READ_ONLY_MODE_HEADER = 'x-ent-search-read-only-mode';
 
 export const ENTERPRISE_SEARCH_KIBANA_COOKIE = '_enterprise_search';

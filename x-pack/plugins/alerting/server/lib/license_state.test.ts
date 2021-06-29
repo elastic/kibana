@@ -70,6 +70,7 @@ describe('getLicenseCheckForAlertType', () => {
     executor: jest.fn(),
     producer: 'alerts',
     minimumLicenseRequired: 'gold',
+    isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
   };
 
@@ -204,6 +205,7 @@ describe('ensureLicenseForAlertType()', () => {
     executor: jest.fn(),
     producer: 'alerts',
     minimumLicenseRequired: 'gold',
+    isExportable: true,
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
   };
 

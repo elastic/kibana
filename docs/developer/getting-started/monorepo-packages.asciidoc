@@ -104,9 +104,11 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
 - @kbn/server-route-repository
+- @kbn/spec-to-console
 - @kbn/std
 - @kbn/storybook
 - @kbn/telemetry-utils
+- @kbn/test-subj-selector
 - @kbn/tinymath
 - @kbn/ui-framework
 - @kbn/ui-shared-deps
