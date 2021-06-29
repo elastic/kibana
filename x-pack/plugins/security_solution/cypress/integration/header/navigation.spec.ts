@@ -38,9 +38,9 @@ import {
 } from '../../tasks/kibana_navigation';
 import {
   CASES_PAGE,
-  DETECTIONS_PAGE,
+  ALERTS_PAGE,
   HOSTS_PAGE,
-  ADMINISTRATION_PAGE,
+  ENDPOINTS_PAGE,
   NETWORK_PAGE,
   OVERVIEW_PAGE,
   TIMELINES_PAGE,
@@ -110,7 +110,7 @@ describe('Kibana navigation to all pages in the Security app ', () => {
   });
 
   it('navigates to the Alerts page', () => {
-    navigateFromKibanaCollapsibleTo(DETECTIONS_PAGE);
+    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
     cy.url().should('include', ALERTS_URL);
   });
 
@@ -134,8 +134,8 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Administration page', () => {
-    navigateFromKibanaCollapsibleTo(ADMINISTRATION_PAGE);
+  it('navigates to the Endpoints page', () => {
+    navigateFromKibanaCollapsibleTo(ENDPOINTS_PAGE);
     cy.url().should('include', ENDPOINTS_URL);
   });
 });

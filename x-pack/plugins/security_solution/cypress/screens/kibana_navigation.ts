@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const DETECTIONS_PAGE =
+export const ALERTS_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Alerts"]';
 
 export const CASES_PAGE = '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Cases"]';
@@ -14,8 +14,8 @@ export const HOSTS_PAGE = '[data-test-subj="collapsibleNavGroup-securitySolution
 
 export const KIBANA_NAVIGATION_TOGGLE = '[data-test-subj="toggleNavButton"]';
 
-export const ADMINISTRATION_PAGE =
-  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Administration"]';
+export const ENDPOINTS_PAGE =
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Endpoints"]';
 
 export const NETWORK_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Network"]';
