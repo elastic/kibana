@@ -25,8 +25,8 @@ describe('extractUnknownDocFailureReason', () => {
         '.kibana_15'
       )
     ).toMatchInlineSnapshot(`
-      "Migration failed because documents from unknown types were found. To proceed with the migration, please delete these documents from the \\".kibana_15\\" index.
-      The unknown documents were:
+      "Migration failed because documents were found for unknown saved object types. To proceed with the migration, please delete these documents from the \\".kibana_15\\" index.
+      The documents with unknown types are:
       - \\"unknownType:12\\" (type: \\"unknownType\\")
       - \\"anotherUnknownType:42\\" (type: \\"anotherUnknownType\\")
       You can delete them using the following command:

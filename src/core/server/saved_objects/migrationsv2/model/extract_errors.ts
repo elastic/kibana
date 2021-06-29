@@ -7,7 +7,7 @@
  */
 
 import { TransformErrorObjects } from '../../migrations/core';
-import { CheckForUnknownDocsResponseDoc } from '../actions';
+import { CheckForUnknownDocsFoundDoc } from '../actions';
 
 /**
  * Constructs migration failure message strings from corrupt document ids and document transformation errors
@@ -37,13 +37,13 @@ export function extractTransformFailuresReason(
 }
 
 export function extractUnknownDocFailureReason(
-  unknownDocs: CheckForUnknownDocsResponseDoc[],
+  unknownDocs: CheckForUnknownDocsFoundDoc[],
   sourceIndex: string
 ): string {
   return (
-    `Migration failed because documents from unknown types were found. ` +
+    `Migration failed because documents were found for unknown saved object types. ` +
     `To proceed with the migration, please delete these documents from the "${sourceIndex}" index.\n` +
-    `The unknown documents were:\n` +
+    `The documents with unknown types are:\n` +
     unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('') +
     `You can delete them using the following command:\n` +
     `curl -X POST "{elasticsearch}/${sourceIndex}/_bulk?pretty" -H 'Content-Type: application/json' -d'\n` +

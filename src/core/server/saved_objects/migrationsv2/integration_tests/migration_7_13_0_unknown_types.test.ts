@@ -68,7 +68,7 @@ describe('migration v2', () => {
       expect(
         errorMessage.startsWith(
           'Unable to complete saved object migrations for the [.kibana] index: Migration failed because documents ' +
-            'from unknown types were found. To proceed with the migration, please delete these documents from the ' +
+            'were found for unknown saved object types. To proceed with the migration, please delete these documents from the ' +
             '".kibana_7.13.0_001" index.'
         )
       ).toBeTruthy();

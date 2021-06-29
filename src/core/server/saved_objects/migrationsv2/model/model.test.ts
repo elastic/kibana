@@ -715,7 +715,7 @@ describe('migrations v2 model', () => {
         },
       } as const;
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds and no unknown docs were found', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK if action succeeds', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -723,7 +723,7 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({ unknownDocs: [] });
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({});
         const newState = model(checkUnknownDocumentsSourceState, res);
         expect(newState.controlState).toEqual('SET_SOURCE_WRITE_BLOCK');
 
@@ -760,7 +760,7 @@ describe('migrations v2 model', () => {
         `);
       });
 
-      test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if action succeeds but unknown docs were found', () => {
+      test('CHECK_UNKNOWN_DOCUMENTS -> FATAL if action fails and unknown docs were found', () => {
         const checkUnknownDocumentsSourceState: CheckUnknownDocumentsState = {
           ...baseState,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
@@ -768,7 +768,8 @@ describe('migrations v2 model', () => {
           sourceIndexMappings: mappingsWithUnknownType,
         };
 
-        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.right({
+        const res: ResponseType<'CHECK_UNKNOWN_DOCUMENTS'> = Either.left({
+          type: 'unknown_docs_found',
           unknownDocs: [
             { id: 'dashboard:12', type: 'dashboard' },
             { id: 'foo:17', type: 'foo' },
@@ -780,7 +781,7 @@ describe('migrations v2 model', () => {
         expect(newState).toMatchObject({
           controlState: 'FATAL',
           reason: expect.stringContaining(
-            'Migration failed because documents from unknown types were found'
+            'Migration failed because documents were found for unknown saved object types'
           ),
         });
       });
