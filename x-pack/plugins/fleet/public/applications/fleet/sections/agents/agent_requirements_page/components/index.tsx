@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { MissingESRequirementsPage } from './es_requirements_page';
-export { FleetServerRequirementPage } from './fleet_server_requirement_page';
+export { CloudInstructions } from './fleet_server_cloud_instructions';
+export * from './fleet_server_on_prem_instructions';
