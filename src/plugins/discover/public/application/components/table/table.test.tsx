@@ -325,6 +325,31 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
             },
           },
         },
+        {
+          name: 'city',
+          displayName: 'city',
+          type: 'keyword',
+          isMapped: true,
+          readFromDocValues: true,
+          searchable: true,
+          shortDotsEnable: false,
+          scripted: false,
+          filterable: false,
+        },
+        {
+          name: 'city.raw',
+          displayName: 'city.raw',
+          type: 'string',
+          isMapped: true,
+          subType: {
+            multi: {
+              parent: 'city',
+            },
+          },
+          shortDotsEnable: false,
+          scripted: false,
+          filterable: false,
+        },
       ],
     },
     metaFields: ['_index', '_type', '_score', '_id'],
@@ -371,6 +396,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       customer_first_name: 'Betty',
       'customer_first_name.keyword': 'Betty',
       'customer_first_name.nickname': 'Betsy',
+      'city.raw': 'Los Angeles',
     },
   };
   const props = {
