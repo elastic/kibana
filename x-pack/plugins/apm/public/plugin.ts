@@ -121,7 +121,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 entries: [
                   {
                     label: i18n.translate('xpack.apm.ux.overview.heading', {
-                      defaultMessage: 'Overview',
+                      defaultMessage: 'Dashboard',
                     }),
                     app: 'ux',
                     path: '/',
@@ -173,6 +173,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
       () => import('./tutorial/tutorial_fleet_instructions')
+    );
+
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialConfigAgent',
+      () => import('./tutorial/config_agent')
+    );
+
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialConfigAgentRumScript',
+      () => import('./tutorial/config_agent/rum_script')
     );
 
     plugins.observability.dashboard.register({

@@ -46,6 +46,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       logFactory: this.context.logger,
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
+      security: plugins.security,
     };
 
     initSavedObjects(core.savedObjects, osqueryContext);

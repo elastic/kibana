@@ -27,12 +27,9 @@ export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
 }
 
 export interface TabNavigationItemProps {
-  href: string;
   hrefWithSearch: string;
   id: string;
   disabled: boolean;
   name: string;
   isSelected: boolean;
-  urlSearch: string;
-  pageId?: string;
 }

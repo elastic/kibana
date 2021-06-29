@@ -1,53 +1,17 @@
+$timesliderWidth: 585px;
+
 .mapTimeslider {
   @include euiBottomShadowLarge;
   position: fixed;
   left: 50%;
   bottom: $euiSize;
-  transform: translateX(-50%);
-  min-width: 530px;
+  // we could center with translateX but this would impact the animation
+  margin-left: -($timesliderWidth / 2);
+  width: $timesliderWidth;
   z-index: 99999;
   background: $euiColorEmptyShade;
-  padding: $euiSizeL $euiSizeXL;
+  padding: $euiSizeL $euiSize;
   border-radius: $euiSize;
-
-  .euiRangeTick {
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-    font-size: $euiFontSizeXS;
-    position: relative;
-    padding-top: $euiSize;
-    color: $euiColorDarkShade;
-
-    &::before {
-      @include size($euiSizeXS);
-      width: 3px;
-      height: $euiSizeS;
-      content: '';
-      background-color: $euiColorLightShade;
-      position: absolute;
-      top: $euiSizeXS;
-      left: calc(50% - #{($euiSizeXS/2)});
-    }
-
-    &--isCustom {
-      position: absolute;
-      transform: translateX(-50%);
-    }
-
-    &:enabled:hover,
-    &:focus,
-    &--selected {
-      color: $euiColorPrimary;
-    }
-
-    &--selected {
-      font-weight: $euiFontWeightMedium;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-    }
-  }
 }
 
 .mapTimeslider__row {
@@ -59,6 +23,10 @@
 
   > * {
     align-items: center;
+  }
+
+  &:first-child {
+    padding: 0 $euiSize;
   }
 }
 
@@ -77,6 +45,10 @@
 
 .mapTimeslider__controls {
   margin-left: $euiSizeS;
+
+  .euiButtonIcon + .euiButtonIcon {
+    margin-left: $euiSizeXS;
+  }
 }
 
 .mapTimeslider__innerPanel {
@@ -86,4 +58,12 @@
   padding: $euiSizeXS;
   display: inline-flex;
   align-items: center;
+}
+
+.mapTimeslider__playButton {
+  border-radius: 50%;
+}
+
+.mapTimeslider--animation {
+  animation: mapAnimationPulse .6s ease-in-out;
 }
