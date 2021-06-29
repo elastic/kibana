@@ -37,6 +37,7 @@ export const rulesNotificationAlertType = ({
     }),
   },
   minimumLicenseRequired: 'basic',
+  isExportable: false,
   async executor({ startedAt, previousStartedAt, alertId, services, params }) {
     const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
@@ -91,7 +92,6 @@ export const rulesNotificationAlertType = ({
         signalsCount,
         resultsLink,
         ruleParams,
-        // @ts-expect-error @elastic/elasticsearch _source is optional
         signals,
       });
     }

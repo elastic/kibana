@@ -11,6 +11,11 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils/target/technical_field_names';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentEsField,
+  getEnvironmentLabel,
+} from '../../../common/environment_filter_values';
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
@@ -72,6 +77,7 @@ export function registerTransactionErrorRateAlertType({
       },
       producer: 'apm',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: async ({ services, params: alertParams }) => {
         const config = await config$.pipe(take(1)).toPromise();
         const indices = await getApmIndices({
@@ -123,7 +129,10 @@ export function registerTransactionErrorRateAlertType({
                 multi_terms: {
                   terms: [
                     { field: SERVICE_NAME },
-                    { field: SERVICE_ENVIRONMENT, missing: '' },
+                    {
+                      field: SERVICE_ENVIRONMENT,
+                      missing: ENVIRONMENT_NOT_DEFINED.value,
+                    },
                     { field: TRANSACTION_TYPE },
                   ],
                   size: 10000,
@@ -191,7 +200,7 @@ export function registerTransactionErrorRateAlertType({
                 .join('_'),
               fields: {
                 [SERVICE_NAME]: serviceName,
-                ...(environment ? { [SERVICE_ENVIRONMENT]: environment } : {}),
+                ...getEnvironmentEsField(environment),
                 [TRANSACTION_TYPE]: transactionType,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
@@ -201,7 +210,7 @@ export function registerTransactionErrorRateAlertType({
             .scheduleActions(alertTypeConfig.defaultActionGroupId, {
               serviceName,
               transactionType,
-              environment,
+              environment: getEnvironmentLabel(environment),
               threshold: alertParams.threshold,
               triggerValue: asDecimalOrInteger(errorRate),
               interval: `${alertParams.windowSize}${alertParams.windowUnit}`,

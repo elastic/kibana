@@ -29,7 +29,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Loading } from '../../../../shared/loading';
 import { EuiPanelTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
@@ -78,8 +77,10 @@ import {
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
+import { SourceLayout } from './source_layout';
+
 export const Overview: React.FC = () => {
-  const { contentSource, dataLoading } = useValues(SourceLogic);
+  const { contentSource } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   const {
@@ -96,8 +97,6 @@ export const Overview: React.FC = () => {
     hasPermissions,
     isFederatedSource,
   } = contentSource;
-
-  if (dataLoading) return <Loading />;
 
   const DocumentSummary = () => {
     let totalDocuments = 0;
@@ -199,12 +198,16 @@ export const Overview: React.FC = () => {
               {!custom && (
                 <EuiTableRowCell>
                   <EuiText size="xs">
-                    {status} {activityDetails && <StatusItem details={activityDetails} />}
+                    <small>
+                      {status} {activityDetails && <StatusItem details={activityDetails} />}
+                    </small>
                   </EuiText>
                 </EuiTableRowCell>
               )}
               <EuiTableRowCell align="right">
-                <EuiText size="xs">{time}</EuiText>
+                <EuiText size="xs">
+                  <small>{time}</small>
+                </EuiText>
               </EuiTableRowCell>
             </EuiTableRow>
           ))}
@@ -450,10 +453,11 @@ export const Overview: React.FC = () => {
   );
 
   return (
-    <>
+    <SourceLayout pageViewTelemetry="source_overview">
       <ViewContentHeader title="Source overview" />
+
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-        <EuiFlexItem>
+        <EuiFlexItem grow={8}>
           <EuiFlexGroup gutterSize="xl" direction="column">
             <EuiFlexItem>
               <DocumentSummary data-test-subj="DocumentSummary" />
@@ -465,7 +469,7 @@ export const Overview: React.FC = () => {
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={7}>
           <EuiFlexGroup gutterSize="m" direction="column">
             <EuiFlexItem>{groups.length > 0 && groupsSummary}</EuiFlexItem>
             {details.length > 0 && <EuiFlexItem>{detailsSummary}</EuiFlexItem>}
@@ -513,6 +517,6 @@ export const Overview: React.FC = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </SourceLayout>
   );
 };

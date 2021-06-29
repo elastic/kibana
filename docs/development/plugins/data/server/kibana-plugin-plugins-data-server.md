@@ -13,6 +13,7 @@
 |  [IndexPatternsFetcher](./kibana-plugin-plugins-data-server.indexpatternsfetcher.md) |  |
 |  [IndexPatternsService](./kibana-plugin-plugins-data-server.indexpatternsservice.md) |  |
 |  [IndexPatternsServiceProvider](./kibana-plugin-plugins-data-server.indexpatternsserviceprovider.md) |  |
+|  [NoSearchIdInSessionError](./kibana-plugin-plugins-data-server.nosearchidinsessionerror.md) |  |
 |  [OptionedParamType](./kibana-plugin-plugins-data-server.optionedparamtype.md) |  |
 |  [Plugin](./kibana-plugin-plugins-data-server.plugin.md) |  |
 
@@ -82,6 +83,7 @@
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [exporters](./kibana-plugin-plugins-data-server.exporters.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
+|  [INDEX\_PATTERN\_SAVED\_OBJECT\_TYPE](./kibana-plugin-plugins-data-server.index_pattern_saved_object_type.md) | \* |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
 |  [mergeCapabilitiesWithFields](./kibana-plugin-plugins-data-server.mergecapabilitieswithfields.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |

@@ -17,9 +17,9 @@ jest.mock('../common/lib/kibana');
 describe('useDeleteCases', () => {
   const abortCtrl = new AbortController();
   const deleteObj = [
-    { id: '1', type: CaseType.individual },
-    { id: '2', type: CaseType.individual },
-    { id: '3', type: CaseType.individual },
+    { id: '1', type: CaseType.individual, title: 'case 1' },
+    { id: '2', type: CaseType.individual, title: 'case 2' },
+    { id: '3', type: CaseType.individual, title: 'case 3' },
   ];
   const deleteArr = ['1', '2', '3'];
   it('init', async () => {

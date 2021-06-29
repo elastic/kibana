@@ -9,35 +9,31 @@ import { rangeQuery } from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { withApmSpan } from '../../../utils/with_apm_span';
 
 // returns true if 6.x data is found
 export async function getLegacyDataStatus(setup: Setup & SetupTimeRange) {
-  return withApmSpan('get_legacy_data_status', async () => {
-    const { apmEventClient, start, end } = setup;
+  const { apmEventClient, start, end } = setup;
 
-    const params = {
-      terminateAfter: 1,
-      apm: {
-        events: [ProcessorEvent.transaction],
-      },
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } },
-              ...rangeQuery(start, end),
-            ],
-          },
+  const params = {
+    terminateAfter: 1,
+    apm: {
+      events: [ProcessorEvent.transaction],
+      includeLegacyData: true,
+    },
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } },
+            ...rangeQuery(start, end),
+          ],
         },
       },
-    };
+    },
+  };
 
-    const resp = await apmEventClient.search(params, {
-      includeLegacyData: true,
-    });
-    const hasLegacyData = resp.hits.total.value > 0;
-    return hasLegacyData;
-  });
+  const resp = await apmEventClient.search('get_legacy_data_status', params);
+  const hasLegacyData = resp.hits.total.value > 0;
+  return hasLegacyData;
 }

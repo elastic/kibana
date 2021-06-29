@@ -73,12 +73,10 @@ export function registerSnapshotsRoutes({
             ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           });
 
-          const { responses: fetchedResponses } = response.body;
+          const { responses: fetchedResponses = [] } = response.body;
 
           // Decorate each snapshot with the repository with which it's associated.
-          // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
-          fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
-            // @ts-expect-error @elastic/elasticsearch related to above incorrect type from client
+          fetchedResponses.forEach(({ snapshots: fetchedSnapshots = [] }) => {
             fetchedSnapshots.forEach((snapshot) => {
               snapshots.push(
                 deserializeSnapshotDetails(

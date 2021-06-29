@@ -15,30 +15,41 @@ import {
   EndpointUnisolateForm,
 } from '../../../common/components/endpoint/host_isolation';
 import { useHostUnisolation } from '../../containers/detection_engine/alerts/use_host_unisolation';
+import { CasesFromAlertsResponse } from '../../containers/detection_engine/alerts/types';
 
 export const UnisolateHost = React.memo(
   ({
-    agentId,
+    endpointId,
     hostName,
     cases,
-    caseIds,
+    casesInfo,
     cancelCallback,
+    successCallback,
   }: {
-    agentId: string;
+    endpointId: string;
     hostName: string;
     cases: ReactNode;
-    caseIds: string[];
+    casesInfo: CasesFromAlertsResponse;
     cancelCallback: () => void;
+    successCallback?: () => void;
   }) => {
     const [comment, setComment] = useState('');
     const [isUnIsolated, setIsUnIsolated] = useState(false);
 
-    const { loading, unIsolateHost } = useHostUnisolation({ agentId, comment, caseIds });
+    const caseIds: string[] = casesInfo.map((caseInfo): string => {
+      return caseInfo.id;
+    });
+
+    const { loading, unIsolateHost } = useHostUnisolation({ endpointId, comment, caseIds });
 
     const confirmHostUnIsolation = useCallback(async () => {
-      const hostIsolated = await unIsolateHost();
-      setIsUnIsolated(hostIsolated);
-    }, [unIsolateHost]);
+      const hostUnIsolated = await unIsolateHost();
+      setIsUnIsolated(hostUnIsolated);
+
+      if (hostUnIsolated && successCallback) {
+        successCallback();
+      }
+    }, [successCallback, unIsolateHost]);
 
     const backToAlertDetails = useCallback(() => cancelCallback(), [cancelCallback]);
 
@@ -47,7 +58,7 @@ export const UnisolateHost = React.memo(
       []
     );
 
-    const caseCount: number = useMemo(() => caseIds.length, [caseIds]);
+    const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
 
     const hostUnisolatedSuccess = useMemo(() => {
       return (

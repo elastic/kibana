@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import {
+  casesBreadcrumbs,
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
   getCaseUrl,
@@ -16,8 +17,8 @@ import {
 import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
-import { CASES_APP_ID } from '../constants';
-import { casesBreadcrumbs, useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+import { observabilityAppId } from '../../../../../common';
 
 interface Props {
   caseId: string;
@@ -41,10 +42,12 @@ export interface CaseProps extends Props {
 export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
   const [caseTitle, setCaseTitle] = useState<string | null>(null);
 
-  const { cases: casesUi, application } = useKibana().services;
-  const { navigateToApp } = application;
+  const {
+    cases: casesUi,
+    application: { getUrlForApp, navigateToUrl },
+  } = useKibana().services;
   const allCasesLink = getCaseUrl();
-  const { formatUrl } = useFormatUrl(CASES_APP_ID);
+  const { formatUrl } = useFormatUrl();
   const href = formatUrl(allCasesLink);
   useBreadcrumbs([
     { ...casesBreadcrumbs.cases, href },
@@ -78,6 +81,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     [caseId, formatUrl, subCaseId]
   );
 
+  const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
   return casesUi.getCaseView({
     allCasesNavigation: {
       href: allCasesHref,
@@ -85,9 +89,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         if (ev != null) {
           ev.preventDefault();
         }
-        return navigateToApp(`${CASES_APP_ID}`, {
-          path: allCasesLink,
-        });
+        return navigateToUrl(casesUrl);
       },
     },
     caseDetailsNavigation: {
@@ -96,9 +98,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         if (ev != null) {
           ev.preventDefault();
         }
-        return navigateToApp(`${CASES_APP_ID}`, {
-          path: getCaseDetailsUrl({ id: caseId }),
-        });
+        return navigateToUrl(`${casesUrl}${getCaseDetailsUrl({ id: caseId })}`);
       },
     },
     caseId,
@@ -108,9 +108,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         if (ev != null) {
           ev.preventDefault();
         }
-        return navigateToApp(`${CASES_APP_ID}`, {
-          path: configureCasesLink,
-        });
+        return navigateToUrl(`${casesUrl}${configureCasesLink}`);
       },
     },
     getCaseDetailHrefWithCommentId,

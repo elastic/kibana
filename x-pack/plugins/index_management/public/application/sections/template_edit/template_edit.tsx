@@ -7,16 +7,18 @@
 
 import React, { useEffect, useState, Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageContentBody, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 
 import { TemplateDeserialized } from '../../../../common';
+import { PageError, PageLoading, attemptToURIDecode, Error } from '../../../shared_imports';
 import { breadcrumbService } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
-import { SectionLoading, SectionError, TemplateForm, Error } from '../../components';
+import { TemplateForm } from '../../components';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
-import { attemptToURIDecode } from '../../../shared_imports';
 
 interface MatchParams {
   name: string;
@@ -61,27 +63,27 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
     setSaveError(null);
   };
 
-  let content;
+  let isSystemTemplate;
 
   if (isLoading) {
-    content = (
-      <SectionLoading>
+    return (
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.templateEdit.loadingIndexTemplateDescription"
           defaultMessage="Loading template…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
-    content = (
-      <SectionError
+    return (
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.templateEdit.loadingIndexTemplateErrorMessage"
             defaultMessage="Error loading template"
           />
         }
-        error={error as Error}
+        error={error}
         data-test-subj="sectionError"
       />
     );
@@ -90,79 +92,75 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       name: templateName,
       _kbnMeta: { type },
     } = template;
-    const isSystemTemplate = templateName && templateName.startsWith('.');
+
+    isSystemTemplate = templateName && templateName.startsWith('.');
 
     if (type === 'cloudManaged') {
-      content = (
-        <EuiCallOut
+      return (
+        <PageError
           title={
             <FormattedMessage
               id="xpack.idxMgmt.templateEdit.managedTemplateWarningTitle"
               defaultMessage="Editing a managed template is not permitted"
             />
           }
-          color="danger"
-          iconType="alert"
-          data-test-subj="systemTemplateEditCallout"
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.templateEdit.managedTemplateWarningDescription"
-            defaultMessage="Managed templates are critical for internal operations."
-          />
-        </EuiCallOut>
-      );
-    } else {
-      content = (
-        <Fragment>
-          {isSystemTemplate && (
-            <Fragment>
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.idxMgmt.templateEdit.systemTemplateWarningTitle"
-                    defaultMessage="Editing a system template can break Kibana"
-                  />
+          error={
+            {
+              message: i18n.translate(
+                'xpack.idxMgmt.templateEdit.managedTemplateWarningDescription',
+                {
+                  defaultMessage: 'Managed templates are critical for internal operations.',
                 }
-                color="danger"
-                iconType="alert"
-                data-test-subj="systemTemplateEditCallout"
-              >
-                <FormattedMessage
-                  id="xpack.idxMgmt.templateEdit.systemTemplateWarningDescription"
-                  defaultMessage="System templates are critical for internal operations."
-                />
-              </EuiCallOut>
-              <EuiSpacer size="l" />
-            </Fragment>
-          )}
-          <TemplateForm
-            title={
-              <EuiTitle size="l">
-                <h1 data-test-subj="pageTitle">
-                  <FormattedMessage
-                    id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
-                    defaultMessage="Edit template '{name}'"
-                    values={{ name: decodedTemplateName }}
-                  />
-                </h1>
-              </EuiTitle>
-            }
-            defaultValue={template}
-            onSave={onSave}
-            isSaving={isSaving}
-            saveError={saveError}
-            clearSaveError={clearSaveError}
-            isEditing={true}
-            isLegacy={isLegacy}
-          />
-        </Fragment>
+              ),
+            } as Error
+          }
+          data-test-subj="systemTemplateEditCallout"
+        />
       );
     }
   }
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>{content}</EuiPageContent>
-    </EuiPageBody>
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      {isSystemTemplate && (
+        <Fragment>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.templateEdit.systemTemplateWarningTitle"
+                defaultMessage="Editing a system template can break Kibana"
+              />
+            }
+            color="danger"
+            iconType="alert"
+            data-test-subj="systemTemplateEditCallout"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.templateEdit.systemTemplateWarningDescription"
+              defaultMessage="System templates are critical for internal operations."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </Fragment>
+      )}
+
+      <TemplateForm
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.editTemplate.editTemplatePageTitle"
+            defaultMessage="Edit template '{name}'"
+            values={{ name: decodedTemplateName }}
+          />
+        }
+        defaultValue={template!}
+        onSave={onSave}
+        isSaving={isSaving}
+        saveError={saveError}
+        clearSaveError={clearSaveError}
+        isEditing={true}
+        isLegacy={isLegacy}
+        history={history as ScopedHistory}
+      />
+    </EuiPageContentBody>
   );
 };

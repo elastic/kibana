@@ -194,14 +194,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       return { dataType: type as DataType, isBucketed: true, scale: 'ordinal' };
     }
   },
-  getErrorMessage: (layer, columnId, indexPattern) =>
-    [
+  getErrorMessage: (layer, columnId, indexPattern) => {
+    const messages = [
       ...(getInvalidFieldMessage(
         layer.columns[columnId] as FieldBasedIndexPatternColumn,
         indexPattern
       ) || []),
       getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
-    ].filter(Boolean),
+    ].filter(Boolean);
+    return messages.length ? messages : undefined;
+  },
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
@@ -422,25 +424,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           />
         </EuiFormRow>
         <EuiFormRow
-          label={
-            <>
-              {i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
-                defaultMessage: 'Rank direction',
-              })}{' '}
-              <EuiIconTip
-                color="subdued"
-                content={i18n.translate('xpack.lens.indexPattern.terms.orderDirectionHelp', {
-                  defaultMessage: `Specifies the ranking order of the top values.`,
-                })}
-                iconProps={{
-                  className: 'eui-alignTop',
-                }}
-                position="top"
-                size="s"
-                type="questionInCircle"
-              />
-            </>
-          }
+          label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+            defaultMessage: 'Rank direction',
+          })}
           display="columnCompressed"
           fullWidth
         >
@@ -511,7 +497,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   defaultMessage: 'Include documents without this field',
                 })}
                 compressed
-                disabled={!currentColumn.params.otherBucket}
+                disabled={
+                  !currentColumn.params.otherBucket ||
+                  indexPattern.getFieldByName(currentColumn.sourceField)?.type !== 'string'
+                }
                 data-test-subj="indexPattern-terms-missing-bucket"
                 checked={Boolean(currentColumn.params.missingBucket)}
                 onChange={(e: EuiSwitchEvent) =>

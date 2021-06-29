@@ -1083,6 +1083,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1102,6 +1103,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1366,6 +1368,45 @@ describe('utils', () => {
       const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch when it has it in _source and fields', () => {
+      const doc = sampleDocNoSortId();
+      const testDateString = '2021-06-25T15:53:56.590Z';
+      const testDate = `${new Date(testDateString).valueOf()}`;
+      doc._source['@timestamp'] = testDate;
+      if (doc.fields != null) {
+        doc.fields['@timestamp'] = [testDate];
+      }
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(testDateString);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch when it has it in _source and fields is nonexistent', () => {
+      const doc = sampleDocNoSortId();
+      const testDateString = '2021-06-25T15:53:56.590Z';
+      const testDate = `${new Date(testDateString).valueOf()}`;
+      doc._source['@timestamp'] = testDate;
+      doc.fields = undefined;
+      const date = getValidDateFromDoc({ doc, timestampOverride: undefined });
+      expect(date?.toISOString()).toEqual(testDateString);
+    });
+
+    test('It returns the timestamp if the timestamp happens to be a string of an epoch in an override field', () => {
+      const override = '2020-10-07T19:36:31.110Z';
+      const testDate = `${new Date(override).valueOf()}`;
+      let doc = sampleDocNoSortId();
+      if (doc == null) {
+        throw new TypeError('Test requires one element');
+      }
+      doc = {
+        ...doc,
+        fields: {
+          different_timestamp: [testDate],
+        },
+      };
+      const date = getValidDateFromDoc({ doc, timestampOverride: 'different_timestamp' });
+      expect(date?.toISOString()).toEqual(override);
+    });
   });
 
   describe('createSearchAfterReturnType', () => {
@@ -1380,6 +1421,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1394,6 +1436,7 @@ describe('utils', () => {
         searchAfterTimes: ['123'],
         success: false,
         warning: true,
+        warningMessages: ['test warning'],
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
@@ -1404,6 +1447,7 @@ describe('utils', () => {
         searchAfterTimes: ['123'],
         success: false,
         warning: true,
+        warningMessages: ['test warning'],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1423,6 +1467,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1440,6 +1485,7 @@ describe('utils', () => {
         searchAfterTimes: [],
         success: true,
         warning: false,
+        warningMessages: [],
       };
       expect(merged).toEqual(expected);
     });
@@ -1494,6 +1540,7 @@ describe('utils', () => {
           lastLookBackDate: new Date('2020-08-21T18:51:25.193Z'),
           searchAfterTimes: ['123'],
           success: true,
+          warningMessages: ['warning1'],
         }),
         createSearchAfterReturnType({
           bulkCreateTimes: ['456'],
@@ -1503,6 +1550,8 @@ describe('utils', () => {
           lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
           searchAfterTimes: ['567'],
           success: true,
+          warningMessages: ['warning2'],
+          warning: true,
         }),
       ]);
       const expected: SearchAfterAndBulkCreateReturnType = {
@@ -1513,7 +1562,8 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
-        warning: false,
+        warning: true,
+        warningMessages: ['warning1', 'warning2'],
       };
       expect(merged).toEqual(expected);
     });

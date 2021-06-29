@@ -52,8 +52,14 @@ export interface SearchParams {
  * @param pkgkey a string containing the package name delimited by the package version
  */
 export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // this will return an empty string if `indexOf` returns -1
-  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
+  // If no version is provided, use the provided package key as the
+  // package name and return an empty version value
+  if (!pkgkey.includes('-')) {
+    return { pkgName: pkgkey, pkgVersion: '' };
+  }
+
+  const pkgName = pkgkey.includes('-') ? pkgkey.substr(0, pkgkey.indexOf('-')) : pkgkey;
+
   if (pkgName === '') {
     throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
   }
@@ -254,4 +260,16 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     kibana: assets.kibana,
     elasticsearch: assets.elasticsearch,
   };
+}
+
+export function getNoticePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'notice') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
 }

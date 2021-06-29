@@ -53,18 +53,9 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem
-        grow={false}
-        style={{
-          border: theme?.eui.euiFormInputGroupBorder,
-          boxShadow: `0px 3px 2px ${theme?.eui.euiTableActionsBorderColor}, 0px 1px 1px ${theme?.eui.euiTableActionsBorderColor}`,
-          marginRight: theme?.eui.paddingSizes.m,
-        }}
-        data-test-subj="waffleDatePicker"
-      >
+    <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
         <EuiDatePicker
-          className="euiFieldText--inGroup"
           dateFormat="L LTS"
           disabled={isAutoReloading}
           injectTimes={currentMoment ? [currentMoment] : []}

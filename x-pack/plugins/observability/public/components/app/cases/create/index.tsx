@@ -10,22 +10,24 @@ import { EuiPanel } from '@elastic/eui';
 
 import { useKibana } from '../../../../utils/kibana_react';
 import { getCaseDetailsUrl } from '../../../../pages/cases/links';
-import { CASES_APP_ID, CASES_OWNER } from '../constants';
+import { CASES_OWNER } from '../constants';
+import { observabilityAppId } from '../../../../../common';
 
 export const Create = React.memo(() => {
   const {
     cases,
-    application: { navigateToApp },
+    application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
+  const casesUrl = `${getUrlForApp(observabilityAppId)}/cases`;
   const onSuccess = useCallback(
-    async ({ id }) =>
-      navigateToApp(`${CASES_APP_ID}`, {
-        path: getCaseDetailsUrl({ id }),
-      }),
-    [navigateToApp]
+    async ({ id }) => navigateToUrl(`${casesUrl}${getCaseDetailsUrl({ id })}`),
+    [casesUrl, navigateToUrl]
   );
 
-  const handleSetIsCancel = useCallback(() => navigateToApp(`${CASES_APP_ID}`), [navigateToApp]);
+  const handleSetIsCancel = useCallback(() => navigateToUrl(`${casesUrl}`), [
+    casesUrl,
+    navigateToUrl,
+  ]);
 
   return (
     <EuiPanel>

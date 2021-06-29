@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FeatureCollection, GeoJsonProperties } from 'geojson';
+import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { TooltipProperty, ITooltipProperty } from '../../tooltips/tooltip_property';
@@ -24,6 +24,7 @@ import { DataRequest } from '../../util/data_request';
 export interface SourceTooltipConfig {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;
+  isDeprecated?: boolean;
 }
 
 export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
@@ -66,6 +67,10 @@ export interface IVectorSource extends ISource {
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getTimesliceMaskFieldName(): Promise<string | null>;
+  supportsFeatureEditing(): Promise<boolean>;
+  addFeature(geometry: Geometry | Position[]): Promise<void>;
+  deleteFeature(featureId: string): Promise<void>;
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -152,5 +157,21 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   getSyncMeta(): VectorSourceSyncMeta | null {
     return null;
+  }
+
+  async getTimesliceMaskFieldName(): Promise<string | null> {
+    return null;
+  }
+
+  async addFeature(geometry: Geometry | Position[]) {
+    throw new Error('Should implement VectorSource#addFeature');
+  }
+
+  async deleteFeature(featureId: string): Promise<void> {
+    throw new Error('Should implement VectorSource#deleteFeature');
+  }
+
+  async supportsFeatureEditing(): Promise<boolean> {
+    return false;
   }
 }

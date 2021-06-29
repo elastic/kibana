@@ -20,15 +20,17 @@ export const HostIsolationPanel = React.memo(
   ({
     details,
     cancelCallback,
+    successCallback,
     isolateAction,
   }: {
     details: Maybe<TimelineEventsDetailsItem[]>;
     cancelCallback: () => void;
+    successCallback?: () => void;
     isolateAction: string;
   }) => {
-    const agentId = useMemo(() => {
-      const findAgentId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
-      return findAgentId ? findAgentId[0] : '';
+    const endpointId = useMemo(() => {
+      const findEndpointId = find({ category: 'agent', field: 'agent.id' }, details)?.values;
+      return findEndpointId ? findEndpointId[0] : '';
     }, [details]);
 
     const hostName = useMemo(() => {
@@ -41,27 +43,27 @@ export const HostIsolationPanel = React.memo(
       return findAlertId ? findAlertId[0] : '';
     }, [details]);
 
-    const { caseIds } = useCasesFromAlerts({ alertId });
+    const { casesInfo } = useCasesFromAlerts({ alertId });
 
     // Cases related components to be used in both isolate and unisolate actions from the alert details flyout entry point
-    const caseCount: number = useMemo(() => caseIds.length, [caseIds]);
+    const caseCount: number = useMemo(() => casesInfo.length, [casesInfo]);
 
     const casesList = useMemo(
       () =>
-        caseIds.map((id, index) => {
+        casesInfo.map((caseInfo, index) => {
           return (
-            <li key={id}>
-              <CaseDetailsLink detailName={id}>
+            <li key={caseInfo.id}>
+              <CaseDetailsLink detailName={caseInfo.id}>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.hostIsolation.placeholderCase"
-                  defaultMessage="Case {caseIndex}"
-                  values={{ caseIndex: index + 1 }}
+                  defaultMessage="{caseName}"
+                  values={{ caseName: caseInfo.title }}
                 />
               </CaseDetailsLink>
             </li>
           );
         }),
-      [caseIds]
+      [casesInfo]
     );
 
     const associatedCases = useMemo(() => {
@@ -87,19 +89,21 @@ export const HostIsolationPanel = React.memo(
 
     return isolateAction === 'isolateHost' ? (
       <IsolateHost
-        agentId={agentId}
+        endpointId={endpointId}
         hostName={hostName}
         cases={associatedCases}
-        caseIds={caseIds}
+        casesInfo={casesInfo}
         cancelCallback={cancelCallback}
+        successCallback={successCallback}
       />
     ) : (
       <UnisolateHost
-        agentId={agentId}
+        endpointId={endpointId}
         hostName={hostName}
         cases={associatedCases}
-        caseIds={caseIds}
+        casesInfo={casesInfo}
         cancelCallback={cancelCallback}
+        successCallback={successCallback}
       />
     );
   }

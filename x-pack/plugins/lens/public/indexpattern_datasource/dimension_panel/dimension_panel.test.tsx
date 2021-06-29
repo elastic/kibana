@@ -606,7 +606,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('change', { target: { value: 'New Label' } });
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
         first: {
@@ -709,7 +710,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('change', { target: { value: 'Maximum of bytes' } });
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
         first: {
@@ -906,20 +908,21 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
-    it('should clean up when transitioning from incomplete reference-based operations to field operation', () => {
+    it('should keep current state and write incomplete column when transitioning from incomplete reference-based operations to field operation', () => {
+      const baseState = getStateWithColumns({
+        ...defaultProps.state.layers.first.columns,
+        col2: {
+          label: 'Counter rate',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'counter_rate',
+          references: ['ref'],
+        },
+      });
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={getStateWithColumns({
-            ...defaultProps.state.layers.first.columns,
-            col2: {
-              label: 'Counter rate',
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'counter_rate',
-              references: ['ref'],
-            },
-          })}
+          state={baseState}
           columnId={'col2'}
         />
       );
@@ -930,15 +933,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .simulate('click');
 
       // Now check that the dimension gets cleaned up on state update
-      expect(setState.mock.calls[0]).toEqual([
-        expect.any(Function),
-        { isDimensionComplete: false },
-      ]);
+      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](state)).toEqual({
-        ...state,
+        ...baseState,
         layers: {
           first: {
-            ...state.layers.first,
+            ...baseState.layers.first,
             incompleteColumns: {
               col2: { operationType: 'average' },
             },
@@ -1996,7 +1996,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!([{ value: 'bytes', label: 'Bytes' }]);
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
         first: {
@@ -2080,7 +2081,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .prop('onChange')!({ currentTarget: { value: '0' } });
     });
 
-    expect(setState).toHaveBeenCalledWith({
+    expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
+    expect(setState.mock.calls[0][0](state)).toEqual({
       ...state,
       layers: {
         first: {

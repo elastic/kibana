@@ -32,7 +32,7 @@ const ES_GROUPS_TO_WRITE = 3;
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 

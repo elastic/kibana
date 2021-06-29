@@ -79,7 +79,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     <>
       <TransactionCharts />
       <EuiSpacer size="s" />
-      <EuiPanel>
+      <EuiPanel hasBorder={true}>
         <EuiTitle size="xs">
           <h3>Transactions</h3>
         </EuiTitle>

@@ -10,9 +10,9 @@
  * WARNING: these typings are incomplete
  */
 
-import { IIndexPattern } from '../../../index_patterns';
-import { JsonValue } from '../../../../../kibana_utils/common';
+import { JsonValue } from '@kbn/common-utils';
 import { KueryNode } from '..';
+import { IndexPatternBase } from '../..';
 
 export type FunctionName =
   | 'is'
@@ -30,7 +30,7 @@ interface FunctionType {
   buildNodeWithArgumentNodes: (functionName: FunctionName, args: any[]) => FunctionTypeBuildNode;
   toElasticsearchQuery: (
     node: any,
-    indexPattern?: IIndexPattern,
+    indexPattern?: IndexPatternBase,
     config?: Record<string, any>,
     context?: Record<string, any>
   ) => JsonValue;

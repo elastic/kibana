@@ -13,6 +13,7 @@ import {
   TinymathLocation,
   TinymathAST,
   TinymathFunction,
+  TinymathVariable,
   TinymathNamedArgument,
 } from '@kbn/tinymath';
 import type {
@@ -21,16 +22,19 @@ import type {
 } from '../../../../../../../../../src/plugins/data/public';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
-import { tinymathFunctions, groupArgsByType } from '../util';
+import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
+import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
+import { parseTimeShift } from '../../../../../../../../../src/plugins/data/common';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
   NAMED_ARGUMENT = 'named_argument',
   FUNCTIONS = 'functions',
   KQL = 'kql',
+  SHIFTS = 'shifts',
 }
 
 export type LensMathSuggestion =
@@ -44,6 +48,7 @@ export type LensMathSuggestion =
 export interface LensMathSuggestions {
   list: LensMathSuggestion[];
   type: SUGGESTION_TYPE;
+  range?: monaco.IRange;
 }
 
 function inLocation(cursorPosition: number, location: TinymathLocation) {
@@ -89,7 +94,7 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
   let lineNumber = 1;
   for (const line of lines) {
     if (line.length >= remainingChars) {
-      return new monaco.Position(lineNumber, remainingChars);
+      return new monaco.Position(lineNumber, remainingChars + 1);
     }
     remainingChars -= line.length + 1;
     lineNumber++;
@@ -116,6 +121,7 @@ export async function suggest({
   indexPattern,
   operationDefinitionMap,
   data,
+  dateHistogramInterval,
 }: {
   expression: string;
   zeroIndexedOffset: number;
@@ -123,7 +129,8 @@ export async function suggest({
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   data: DataPublicPluginStart;
-}): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
+  dateHistogramInterval?: number;
+}): Promise<LensMathSuggestions> {
   const text =
     expression.substr(0, zeroIndexedOffset) + MARKER + expression.substr(zeroIndexedOffset);
   try {
@@ -143,11 +150,13 @@ export async function suggest({
         ast: tokenAst as TinymathNamedArgument,
         data,
         indexPattern,
+        dateHistogramInterval,
       });
     } else if (tokenInfo?.parent) {
       return getArgumentSuggestions(
         tokenInfo.parent,
         tokenInfo.parent.args.findIndex((a) => a === tokenAst),
+        text,
         indexPattern,
         operationDefinitionMap
       );
@@ -204,6 +213,7 @@ function getFunctionSuggestions(
 function getArgumentSuggestions(
   ast: TinymathFunction,
   position: number,
+  expression: string,
   indexPattern: IndexPattern,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
@@ -231,11 +241,17 @@ function getArgumentSuggestions(
     const { namedArguments } = groupArgsByType(ast.args);
     const list = [];
     if (operation.filterable) {
-      if (!namedArguments.find((arg) => arg.name === 'kql')) {
+      const hasFilterArgument = namedArguments.find(
+        (arg) => arg.name === 'kql' || arg.name === 'lucene'
+      );
+      if (!hasFilterArgument) {
         list.push('kql');
-      }
-      if (!namedArguments.find((arg) => arg.name === 'lucene')) {
         list.push('lucene');
+      }
+    }
+    if (operation.shiftable) {
+      if (!namedArguments.find((arg) => arg.name === 'shift')) {
+        list.push('shift');
       }
     }
     if ('operationParams' in operation) {
@@ -268,7 +284,16 @@ function getArgumentSuggestions(
         .filter((op) => op.operationType === operation.type)
         .map((op) => ('field' in op ? op.field : undefined))
         .filter((field) => field);
-      return { list: fields as string[], type: SUGGESTION_TYPE.FIELD };
+      const fieldArg = ast.args[0];
+      const location = typeof fieldArg !== 'string' && (fieldArg as TinymathVariable).location;
+      let range: monaco.IRange | undefined;
+      if (location) {
+        const start = offsetToRowColumn(expression, location.min);
+        // This accounts for any characters that the user has already typed
+        const end = offsetToRowColumn(expression, location.max - MARKER.length);
+        range = monaco.Range.fromPositions(start, end);
+      }
+      return { list: fields as string[], type: SUGGESTION_TYPE.FIELD, range };
     } else {
       return { list: [], type: SUGGESTION_TYPE.FIELD };
     }
@@ -308,11 +333,28 @@ export async function getNamedArgumentSuggestions({
   ast,
   data,
   indexPattern,
+  dateHistogramInterval,
 }: {
   ast: TinymathNamedArgument;
   indexPattern: IndexPattern;
   data: DataPublicPluginStart;
+  dateHistogramInterval?: number;
 }) {
+  if (ast.name === 'shift') {
+    return {
+      list: timeShiftOptions
+        .filter(({ value }) => {
+          if (typeof dateHistogramInterval === 'undefined') return true;
+          const parsedValue = parseTimeShift(value);
+          return (
+            typeof parsedValue === 'string' ||
+            Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval)
+          );
+        })
+        .map(({ value }) => value),
+      type: SUGGESTION_TYPE.SHIFTS,
+    };
+  }
   if (ast.name !== 'kql' && ast.name !== 'lucene') {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
@@ -346,7 +388,8 @@ export function getSuggestion(
   suggestion: LensMathSuggestion,
   type: SUGGESTION_TYPE,
   operationDefinitionMap: Record<string, GenericOperationDefinition>,
-  triggerChar: string | undefined
+  triggerChar: string | undefined,
+  range?: monaco.IRange
 ): monaco.languages.CompletionItem {
   let kind: monaco.languages.CompletionItemKind = monaco.languages.CompletionItemKind.Method;
   let label: string =
@@ -363,8 +406,15 @@ export function getSuggestion(
   const filterText: string = label;
 
   switch (type) {
+    case SUGGESTION_TYPE.SHIFTS:
+      sortText = String(timeShiftOptionOrder[label]).padStart(4, '0');
+      break;
     case SUGGESTION_TYPE.FIELD:
       kind = monaco.languages.CompletionItemKind.Value;
+      // Look for unsafe characters
+      if (unquotedStringRegex.test(label)) {
+        insertText = `'${label.replaceAll(`'`, "\\'")}'`;
+      }
       break;
     case SUGGESTION_TYPE.FUNCTIONS:
       insertText = `${label}($0)`;
@@ -387,7 +437,7 @@ export function getSuggestion(
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
       kind = monaco.languages.CompletionItemKind.Keyword;
-      if (label === 'kql' || label === 'lucene') {
+      if (label === 'kql' || label === 'lucene' || label === 'shift') {
         command = TRIGGER_SUGGESTION_COMMAND;
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
@@ -418,7 +468,7 @@ export function getSuggestion(
     command,
     additionalTextEdits: [],
     // @ts-expect-error Monaco says this type is required, but provides a default value
-    range: undefined,
+    range,
     sortText,
     filterText,
   };
@@ -550,7 +600,10 @@ export function getSignatureHelp(
   } catch (e) {
     // do nothing
   }
-  return { value: { signatures: [], activeParameter: 0, activeSignature: 0 }, dispose: () => {} };
+  return {
+    value: { signatures: [], activeParameter: 0, activeSignature: 0 },
+    dispose: () => {},
+  };
 }
 
 export function getHover(

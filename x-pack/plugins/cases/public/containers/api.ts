@@ -8,9 +8,14 @@
 import { assign, omit } from 'lodash';
 
 import {
+  ACTION_TYPES_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
+  CASES_URL,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
@@ -18,30 +23,19 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
+  getCaseCommentsUrl,
+  getCaseDetailsUrl,
+  getCasePushUrl,
+  getCaseUserActionUrl,
+  getSubCaseDetailsUrl,
+  getSubCaseUserActionUrl,
   StatusAll,
+  SUB_CASE_DETAILS_URL,
+  SUB_CASES_PATCH_DEL_URL,
   SubCasePatchRequest,
   SubCaseResponse,
   SubCasesResponse,
   User,
-} from '../../common';
-
-import {
-  ACTION_TYPES_URL,
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
-  CASE_TAGS_URL,
-  CASES_URL,
-  SUB_CASE_DETAILS_URL,
-  SUB_CASES_PATCH_DEL_URL,
-} from '../../common';
-
-import {
-  getCaseCommentsUrl,
-  getCasePushUrl,
-  getCaseDetailsUrl,
-  getCaseUserActionUrl,
-  getSubCaseDetailsUrl,
-  getSubCaseUserActionUrl,
 } from '../../common';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -289,14 +283,23 @@ export const postComment = async (
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
-export const patchComment = async (
-  caseId: string,
-  commentId: string,
-  commentUpdate: string,
-  version: string,
-  signal: AbortSignal,
-  subCaseId?: string
-): Promise<Case> => {
+export const patchComment = async ({
+  caseId,
+  commentId,
+  commentUpdate,
+  version,
+  signal,
+  owner,
+  subCaseId,
+}: {
+  caseId: string;
+  commentId: string;
+  commentUpdate: string;
+  version: string;
+  signal: AbortSignal;
+  owner: string;
+  subCaseId?: string;
+}): Promise<Case> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
     body: JSON.stringify({
@@ -304,6 +307,7 @@ export const patchComment = async (
       type: CommentType.user,
       id: commentId,
       version,
+      owner,
     }),
     ...(subCaseId ? { query: { subCaseId } } : {}),
     signal,
