@@ -117,7 +117,7 @@ export function registerSnapshotsRoutes({
           return res.notFound({ body: 'Snapshot not found' });
         }
 
-        const successfulSnapshots = fetchedSnapshots
+        const successfulSnapshots = snapshotsList
           .filter(({ state }) => state === 'SUCCESS')
           .sort((a, b) => {
             return +new Date(b.end_time!) - +new Date(a.end_time!);
