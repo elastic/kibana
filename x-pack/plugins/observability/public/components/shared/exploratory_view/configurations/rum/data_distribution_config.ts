@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
@@ -49,7 +49,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
     },
     yAxisColumns: [
       {
-        sourceField: RECORDS_FIELD,
+        sourceField: RECORDS_PERCENTAGE_FIELD,
         label: PAGES_LOADED_LABEL,
       },
     ],
@@ -91,5 +91,7 @@ export function getRumDistributionConfig({ indexPattern }: ConfigProps): SeriesC
       [SERVICE_NAME]: WEB_APPLICATION_LABEL,
       [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
     },
+    // rum page load transactions are always less then 60 seconds
+    query: { query: 'transaction.duration.us < 60000000', language: 'kuery' },
   };
 }
