@@ -12,10 +12,14 @@ import { Config } from './config';
 import { Platform } from './platform';
 
 export class Build {
-  private name = 'kibana';
-  private logTag = chalk`{cyan [  kibana  ]}`;
+  private name = this.oss ? 'kibana-oss' : 'kibana';
+  private logTag = this.oss ? chalk`{magenta [kibana-oss]}` : chalk`{cyan [  kibana  ]}`;
 
-  constructor(private config: Config) {}
+  constructor(private config: Config, private oss: boolean) {}
+
+  isOss() {
+    return !!this.oss;
+  }
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);
@@ -24,7 +28,7 @@ export class Build {
   resolvePathForPlatform(platform: Platform, ...args: string[]) {
     return this.config.resolveFromRepo(
       'build',
-      'default',
+      this.oss ? 'oss' : 'default',
       `kibana-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );
