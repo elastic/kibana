@@ -10,7 +10,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   markdownPlugins: schema.object({
-    lens: schema.boolean({ defaultValue: true }),
+    lens: schema.boolean({ defaultValue: false }),
   }),
 });
 

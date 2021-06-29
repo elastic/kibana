@@ -11,7 +11,6 @@ import { EuiPanel } from '@elastic/eui';
 import { getCaseDetailsUrl, getCaseUrl } from '../../../common/components/link_to';
 import { useKibana } from '../../../common/lib/kibana';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
-// import * as lensMarkdownPlugin from '../../../common/components/markdown_editor/plugins/lens';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { APP_ID, CASES_APP_ID } from '../../../../common/constants';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
@@ -43,14 +42,6 @@ export const Create = React.memo(() => {
       {cases.getCreateCase({
         onCancel: handleSetIsCancel,
         onSuccess,
-        // lensIntegration: {
-        //   editor_context: lensMarkdownPlugin.context,
-        //   editor_plugins: {
-        //     parsingPlugin: lensMarkdownPlugin.parser,
-        //     processingPluginRenderer: lensMarkdownPlugin.renderer,
-        //     uiPlugin: lensMarkdownPlugin.plugin,
-        //   },
-        // },
         timelineIntegration: {
           editor_plugins: {
             parsingPlugin: timelineMarkdownPlugin.parser,

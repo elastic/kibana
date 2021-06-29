@@ -18,7 +18,6 @@ import { Case } from '../../../../../../cases/common';
 import { useFetchAlertData } from './helpers';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import * as lensMarkdownPlugin from './markdown_editor/plugins/lens';
 import { observabilityAppId } from '../../../../../common';
 
 interface Props {
@@ -117,13 +116,5 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     subCaseId,
     useFetchAlertData,
     userCanCrud,
-    lensIntegration: {
-      editor_context: lensMarkdownPlugin.context,
-      editor_plugins: {
-        parsingPlugin: lensMarkdownPlugin.parser,
-        processingPluginRenderer: lensMarkdownPlugin.renderer,
-        uiPlugin: lensMarkdownPlugin.plugin,
-      },
-    },
   });
 });

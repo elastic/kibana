@@ -10,7 +10,7 @@ import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
-} from '../../../../../../../lens/public';
+} from '../../../../../../lens/public';
 
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.

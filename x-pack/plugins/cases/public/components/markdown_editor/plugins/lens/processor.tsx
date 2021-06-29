@@ -11,9 +11,9 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elast
 import styled from 'styled-components';
 import { useLocation } from 'react-router-dom';
 
-import { createGlobalStyle } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { TypedLensByValueInput } from '../../../../../../../lens/public';
-import { useKibana } from '../../../../lib/kibana';
+import { createGlobalStyle } from '../../../../../../../../src/plugins/kibana_react/common';
+import { TypedLensByValueInput } from '../../../../../../lens/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 
 const Container = styled.div`
@@ -111,7 +111,7 @@ const LensMarkDownRendererComponent: React.FC<LensMarkDownRendererProps> = ({
                   isDisabled={!canUseEditor() || !attributes}
                   onClick={handleClick}
                 >
-                  {`Open in Lens`}
+                  {`Open visualization`}
                 </EuiButton>
               ) : null}
             </EuiFlexItem>

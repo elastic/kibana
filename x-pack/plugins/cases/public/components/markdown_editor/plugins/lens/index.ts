@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const ID = 'lens';
-export const PREFIX = `[`;
-export const LENS_VISUALIZATION_HEIGHT = 200;
-export const DRAFT_COMMENT_STORAGE_ID = 'xpack.cases.commentDraft';
+import { plugin } from './plugin';
+import { LensParser } from './parser';
+import { LensMarkDownRenderer } from './processor';
+
+export { plugin, LensParser as parser, LensMarkDownRenderer as renderer };

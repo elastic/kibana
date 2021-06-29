@@ -40,7 +40,6 @@ import { CasesNavigation } from '../links';
 import { OwnerProvider } from '../owner_context';
 import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
-import { CasesLensIntegration, CasesLensIntegrationProvider } from '../lens_context';
 
 const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
 
@@ -64,7 +63,6 @@ export interface CaseViewComponentProps {
 }
 
 export interface CaseViewProps extends CaseViewComponentProps {
-  lensIntegration?: CasesLensIntegration;
   onCaseDataSuccess?: (data: Case) => void;
   timelineIntegration?: CasesTimelineIntegration;
 }
@@ -505,7 +503,6 @@ export const CaseView = React.memo(
     caseId,
     configureCasesNavigation,
     getCaseDetailHrefWithCommentId,
-    lensIntegration,
     onCaseDataSuccess,
     onComponentInitialized,
     ruleDetailsNavigation,
@@ -536,27 +533,25 @@ export const CaseView = React.memo(
     return (
       data && (
         <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-          <CasesLensIntegrationProvider lensIntegration={lensIntegration}>
-            <OwnerProvider owner={[data.owner]}>
-              <CaseComponent
-                allCasesNavigation={allCasesNavigation}
-                caseData={data}
-                caseDetailsNavigation={caseDetailsNavigation}
-                caseId={caseId}
-                configureCasesNavigation={configureCasesNavigation}
-                getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
-                fetchCase={fetchCase}
-                onComponentInitialized={onComponentInitialized}
-                ruleDetailsNavigation={ruleDetailsNavigation}
-                showAlertDetails={showAlertDetails}
-                subCaseId={subCaseId}
-                updateCase={updateCase}
-                useFetchAlertData={useFetchAlertData}
-                userCanCrud={userCanCrud}
-                refreshRef={refreshRef}
-              />
-            </OwnerProvider>
-          </CasesLensIntegrationProvider>
+          <OwnerProvider owner={[data.owner]}>
+            <CaseComponent
+              allCasesNavigation={allCasesNavigation}
+              caseData={data}
+              caseDetailsNavigation={caseDetailsNavigation}
+              caseId={caseId}
+              configureCasesNavigation={configureCasesNavigation}
+              getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+              fetchCase={fetchCase}
+              onComponentInitialized={onComponentInitialized}
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              showAlertDetails={showAlertDetails}
+              subCaseId={subCaseId}
+              updateCase={updateCase}
+              useFetchAlertData={useFetchAlertData}
+              userCanCrud={userCanCrud}
+              refreshRef={refreshRef}
+            />
+          </OwnerProvider>
         </CasesTimelineIntegrationProvider>
       )
     );

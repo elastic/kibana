@@ -19,8 +19,8 @@ import React, { useMemo } from 'react';
 import {
   SavedObjectFinderUi,
   SavedObjectFinderUiProps,
-} from '../../../../../../../../../../../src/plugins/saved_objects/public';
-import { useKibana } from '../../../../../../../utils/kibana_react';
+} from '../../../../../../../../src/plugins/saved_objects/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ModalContainer } from './modal_container';
 
 interface LensSavedObjectsModalProps {
@@ -28,7 +28,6 @@ interface LensSavedObjectsModalProps {
   onChoose: SavedObjectFinderUiProps['onChoose'];
 }
 
-// eslint-disable-next-line react/function-component-definition
 const LensSavedObjectsModalComponent: React.FC<LensSavedObjectsModalProps> = ({
   onClose,
   onChoose,

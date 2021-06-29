@@ -29,18 +29,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import { useLocation } from 'react-router-dom';
 
-import type { TypedLensByValueInput } from '../../../../../../../../../lens/public';
-import { useKibana } from '../../../../../../../utils/kibana_react';
+import type { TypedLensByValueInput } from '../../../../../../lens/public';
+import { useKibana } from '../../../../common/lib/kibana';
 import { LensMarkDownRenderer } from './processor';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
-import { CommentEditorContext } from './context';
+import { CommentEditorContext } from '../../context';
 import { LensSavedObjectsModal } from './lens_saved_objects_modal';
 import { ModalContainer } from './modal_container';
 import { getLensAttributes } from './helpers';
 import type {
   EmbeddablePackageState,
   EmbeddableInput,
-} from '../../../../../../../../../../../src/plugins/embeddable/public';
+} from '../../../../../../../../src/plugins/embeddable/public';
 
 type LensIncomingEmbeddablePackage = Omit<EmbeddablePackageState, 'input'> & {
   input: Omit<EmbeddableInput, 'id'> & {
@@ -57,7 +57,6 @@ type LensEuiMarkdownEditorUiPlugin = EuiMarkdownEditorUiPlugin<{
   attributes: TypedLensByValueInput['attributes'];
 }>;
 
-// eslint-disable-next-line react/function-component-definition
 const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   node,
   onCancel,
@@ -264,12 +263,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
             {editMode ? (
               <FormattedMessage
                 id="xpack.observability.markdownEditor.plugins.lens.editVisualizationModalTitle"
-                defaultMessage="Edit Lens visualization"
+                defaultMessage="Edit visualization"
               />
             ) : (
               <FormattedMessage
                 id="xpack.observability.markdownEditor.plugins.lens.addVisualizationModalTitle"
-                defaultMessage="Add Lens visualization"
+                defaultMessage="Add visualization"
               />
             )}
           </EuiModalHeaderTitle>
@@ -299,7 +298,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
               >
                 <FormattedMessage
                   id="xpack.observability.markdownEditor.plugins.lens.addVisualizationFromLibraryButtonLabel"
-                  defaultMessage="Add Lens from library"
+                  defaultMessage="Add from library"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -329,7 +328,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                 >
                   <FormattedMessage
                     id="xpack.observability.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
-                    defaultMessage="Edit in Lens"
+                    defaultMessage="Edit visualization"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -373,7 +372,7 @@ export const plugin: LensEuiMarkdownEditorUiPlugin = {
   name: ID,
   button: {
     label: i18n.translate('xpack.observability.markdownEditor.plugins.lens.insertLensButtonLabel', {
-      defaultMessage: 'Insert lens visualization',
+      defaultMessage: 'Insert visualization',
     }),
     iconType: 'lensApp',
   },

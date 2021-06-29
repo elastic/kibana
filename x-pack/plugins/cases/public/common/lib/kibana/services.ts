@@ -42,10 +42,6 @@ export class KibanaServices {
   }
 
   public static getConfig() {
-    if (!this.config) {
-      this.throwUninitializedError();
-    }
-
     return this.config;
   }
 

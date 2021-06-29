@@ -13,13 +13,12 @@ import {
 import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { TemporaryProcessingPluginsType } from './types';
-import { useCasesLensIntegrationContext } from '../lens_context/use_lens_context';
 import { KibanaServices } from '../../common/lib/kibana';
+import * as lensMarkdownPlugin from './plugins/lens';
 
 export const usePlugins = () => {
   const kibanaConfig = KibanaServices.getConfig();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
-  const lensPlugins = useCasesLensIntegrationContext()?.editor_plugins;
 
   return useMemo(() => {
     const uiPlugins = getDefaultEuiMarkdownUiPlugins();
@@ -35,13 +34,13 @@ export const usePlugins = () => {
       processingPlugins[1][1].components.timeline = timelinePlugins.processingPluginRenderer;
     }
 
-    if (kibanaConfig?.markdownPlugins?.lens && lensPlugins) {
-      uiPlugins.push(lensPlugins.uiPlugin);
+    if (kibanaConfig?.markdownPlugins?.lens) {
+      uiPlugins.push(lensMarkdownPlugin.plugin);
 
-      parsingPlugins.push(lensPlugins.parsingPlugin);
+      parsingPlugins.push(lensMarkdownPlugin.parser);
 
       // This line of code is TS-compatible and it will break if [1][1] change in the future.
-      processingPlugins[1][1].components.lens = lensPlugins.processingPluginRenderer;
+      processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
     }
 
     return {
@@ -49,5 +48,5 @@ export const usePlugins = () => {
       parsingPlugins,
       processingPlugins,
     };
-  }, [kibanaConfig?.markdownPlugins?.lens, lensPlugins, timelinePlugins]);
+  }, [kibanaConfig?.markdownPlugins?.lens, timelinePlugins]);
 };

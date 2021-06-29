@@ -18,12 +18,12 @@ import { PluggableList } from 'unified';
 import { EuiMarkdownEditor, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
-import { useCasesLensIntegrationContext } from '../lens_context/use_lens_context';
+import { CommentEditorContext } from './context';
 
 interface MarkdownEditorProps {
   ariaLabel: string;
   dataTestSubj?: string;
-  editorId?: string;
+  editorId: string;
   height?: number;
   onChange: (content: string) => void;
   parsingPlugins?: PluggableList;
@@ -47,8 +47,6 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       setMarkdownErrorMessages(err ? [err] : messages);
     }, []);
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
-    const CasesLensIntegrationContextProvider = useCasesLensIntegrationContext()?.editor_context
-      ?.Provider;
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
     // @ts-expect-error update types
@@ -82,20 +80,16 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       />
     );
 
-    if (CasesLensIntegrationContextProvider) {
-      return (
-        <CasesLensIntegrationContextProvider
-          value={{
-            editorId,
-            value,
-          }}
-        >
-          {editor}
-        </CasesLensIntegrationContextProvider>
-      );
-    }
-
-    return editor;
+    return (
+      <CommentEditorContext.Provider
+        value={{
+          editorId,
+          value,
+        }}
+      >
+        {editor}
+      </CommentEditorContext.Provider>
+    );
   }
 );
 
