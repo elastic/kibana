@@ -12,6 +12,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
+import { getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
 import { FullAgentPolicyInput } from '../../../../fleet/common/types/models/agent_policy';
 import {
@@ -49,15 +50,19 @@ export class TelemetryEndpointTask {
 
           return {
             run: async () => {
-              const lastExecutionTimestamp = moment().utc().toISOString();
+              const executeTo = moment().utc().toISOString();
+              const lastExecutionTimestamp = getLastTaskExecutionTimestamp(
+                executeTo,
+                taskInstance.state?.lastExecutionTimestamp
+              );
 
               const hits = await this.runTask(taskInstance.id);
-              this.logger.debug(`hits: ${hits}`);
 
               return {
                 state: {
                   lastExecutionTimestamp,
                   runs: (state.runs || 0) + 1,
+                  hits,
                 },
               };
             },
