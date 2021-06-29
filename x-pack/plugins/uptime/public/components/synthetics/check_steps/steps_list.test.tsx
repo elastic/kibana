@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { Ping } from '../../../../common/runtime_types/ping';
+import { JourneyStep } from '../../../../common/runtime_types/ping';
 import { StepsList } from './steps_list';
 import { render } from '../../../lib/helper/rtl_helpers';
 
 describe('StepList component', () => {
-  let steps: Ping[];
+  let steps: JourneyStep[];
 
   beforeEach(() => {
     steps = [
       {
-        docId: '1',
-        timestamp: '123',
+        _id: '1',
+        '@timestamp': '123',
         monitor: {
           id: 'MON_ID',
           duration: {
@@ -39,8 +39,8 @@ describe('StepList component', () => {
         },
       },
       {
-        docId: '2',
-        timestamp: '124',
+        _id: '2',
+        '@timestamp': '124',
         monitor: {
           id: 'MON_ID',
           duration: {
@@ -112,8 +112,8 @@ describe('StepList component', () => {
   it('uses appropriate count when non-step/end steps are included', () => {
     steps[0].synthetics!.payload!.status = 'succeeded';
     steps.push({
-      docId: '3',
-      timestamp: '125',
+      _id: '3',
+      '@timestamp': '125',
       monitor: {
         id: 'MON_ID',
         duration: {
