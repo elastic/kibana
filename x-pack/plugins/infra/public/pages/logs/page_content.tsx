@@ -24,7 +24,7 @@ import { StreamPage } from './stream';
 import { HeaderMenuPortal } from '../../../../observability/public';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { useLinkProps } from '../../hooks/use_link_props';
-import { useReadOnlyBadge } from '../../hooks/use_readOnly_badge';
+import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;

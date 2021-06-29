@@ -22,7 +22,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { useLinkProps } from '../../../hooks/use_link_props';
-import { useReadOnlyBadge } from '../../../hooks/use_readOnly_badge';
+import { useReadOnlyBadge } from '../../../hooks/use_readonly_badge';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 
