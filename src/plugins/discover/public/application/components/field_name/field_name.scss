@@ -1,0 +1,12 @@
+.kbnDocViewer__fieldIcon {
+  padding-top: $euiSizeXS * 1.5;
+}
+
+.kbnDocViewer__fieldName {
+  line-height: $euiLineHeight;
+  padding: $euiSizeXS;
+}
+
+.kbnDocViewer__multiFieldBadge {
+  @include euiFont;
+}

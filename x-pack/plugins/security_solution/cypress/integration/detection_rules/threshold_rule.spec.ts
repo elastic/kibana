@@ -81,7 +81,7 @@ import {
 } from '../../tasks/create_new_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 
 describe('Detection rules, threshold', () => {
   const expectedUrls = newThresholdRule.referenceUrls.join('');
@@ -96,7 +96,7 @@ describe('Detection rules, threshold', () => {
     createTimeline(newThresholdRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
   });

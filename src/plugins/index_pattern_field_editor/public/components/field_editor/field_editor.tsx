@@ -216,7 +216,11 @@ const FieldEditorComponent = ({
     Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
 
   return (
-    <Form form={form} className="indexPatternFieldEditor__form">
+    <Form
+      form={form}
+      className="indexPatternFieldEditor__form"
+      data-test-subj={'indexPatternFieldEditorForm'}
+    >
       <EuiFlexGroup>
         {/* Name */}
         <EuiFlexItem>

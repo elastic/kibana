@@ -11,7 +11,7 @@ import { AdministrationSubTab } from '../types';
 import { ENDPOINTS_TAB, EVENT_FILTERS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from './translations';
 import { AdministrationRouteSpyState } from '../../common/utils/route/types';
 import { GetUrlForApp } from '../../common/components/navigation/types';
-import { ADMINISTRATION } from '../../app/home/translations';
+import { ADMINISTRATION } from '../../app/translations';
 import { APP_ID, SecurityPageName } from '../../../common/constants';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
@@ -29,7 +29,8 @@ export function getBreadcrumbs(
   return [
     {
       text: ADMINISTRATION,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.administration}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.endpoints,
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
     },

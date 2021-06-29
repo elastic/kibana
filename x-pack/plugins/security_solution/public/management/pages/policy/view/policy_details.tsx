@@ -38,11 +38,10 @@ import { AppAction } from '../../../../common/store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath } from '../../../common/routing';
-import { useFormatUrl } from '../../../../common/components/link_to';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { MANAGEMENT_APP_ID } from '../../../common/constants';
+import { APP_ID } from '../../../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
 
@@ -51,7 +50,7 @@ const PolicyDetailsHeader = styled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.xl} 0;
   background-color: #fafbfd;
   border-bottom: 1px solid #d3dae6;
-  .siemHeaderPage {
+  .securitySolutionHeaderPage {
     max-width: ${maxFormWidth};
     margin: 0 auto;
   }
@@ -73,7 +72,6 @@ export const PolicyDetails = React.memo(() => {
     },
   } = useKibana<{ application: ApplicationStart }>();
   const toasts = useToasts();
-  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
@@ -128,7 +126,7 @@ export const PolicyDetails = React.memo(() => {
 
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routingOnCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: hostListRouterPath }];
+    return routingOnCancelNavigateTo ?? [APP_ID, { path: hostListRouterPath }];
   }, [hostListRouterPath, routingOnCancelNavigateTo]);
 
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
@@ -159,7 +157,7 @@ export const PolicyDetails = React.memo(() => {
   // Else, if we have an error, then show error on the page.
   if (!policyItem) {
     return (
-      <WrapperPage noTimeline>
+      <SecuritySolutionPageWrapper noTimeline>
         {isPolicyLoading ? (
           <EuiLoadingSpinner size="xl" />
         ) : policyApiError ? (
@@ -168,7 +166,7 @@ export const PolicyDetails = React.memo(() => {
           </EuiCallOut>
         ) : null}
         <SpyRoute pageName={SecurityPageName.administration} />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 
@@ -190,7 +188,7 @@ export const PolicyDetails = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
-      <WrapperPage
+      <SecuritySolutionPageWrapper
         noTimeline
         data-test-subj="policyDetailsPage"
         noPadding
@@ -208,8 +206,7 @@ export const PolicyDetails = React.memo(() => {
                   defaultMessage: 'Back to endpoint hosts',
                 }
               ),
-              href: formatUrl(hostListRouterPath),
-              pageId: SecurityPageName.administration,
+              pageId: SecurityPageName.endpoints,
               dataTestSubj: 'policyDetailsBackLink',
             }}
           >
@@ -221,7 +218,7 @@ export const PolicyDetails = React.memo(() => {
           <PolicyDetailsForm />
         </PolicyDetailsFormDiv>
         <EuiSpacer size="xxl" />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
       <EuiBottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>

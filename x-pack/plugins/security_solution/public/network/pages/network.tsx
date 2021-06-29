@@ -20,11 +20,11 @@ import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { LastEventIndexKey } from '../../../common/search_strategy';
@@ -62,7 +62,7 @@ const StyledFullHeightContainer = styled.div`
 `;
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
-  ({ networkPagePath, hasMlUserPermissions, capabilitiesFetched }) => {
+  ({ hasMlUserPermissions, capabilitiesFetched }) => {
     const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -155,10 +155,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
               <SiemSearchBar indexPattern={indexPattern} id="global" />
             </FiltersGlobal>
 
-            <WrapperPage noPadding={globalFullScreen}>
+            <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <Display show={!globalFullScreen}>
                 <HeaderPage
-                  border
                   subtitle={
                     <LastEventTime
                       docValueFields={docValueFields}
@@ -194,9 +193,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
-
-                    <SiemNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
-
+                    <SecuritySolutionTabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
                     <EuiSpacer />
                   </Display>
 
@@ -211,19 +208,18 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}
                     to={to}
-                    networkPagePath={networkPagePath}
                   />
                 </>
               ) : (
                 <NetworkRoutesLoading />
               )}
-            </WrapperPage>
+            </SecuritySolutionPageWrapper>
           </StyledFullHeightContainer>
         ) : (
-          <WrapperPage>
+          <SecuritySolutionPageWrapper>
             <HeaderPage border title={i18n.PAGE_TITLE} />
             <OverviewEmpty />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         )}
 
         <SpyRoute pageName={SecurityPageName.network} />
