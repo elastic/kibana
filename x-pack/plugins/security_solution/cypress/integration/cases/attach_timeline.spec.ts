@@ -19,14 +19,12 @@ import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana } from '../../tasks/common';
 import { createCase } from '../../tasks/api_calls/cases';
 
-describe('attach timeline to case', () => {
+describe.skip('attach timeline to case', () => {
   context('without cases created', () => {
-    beforeEach((done) => {
+    beforeEach(() => {
       cleanKibana();
-
       createTimeline(timeline).then((response) => {
         cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
-        done();
       });
     });
 
