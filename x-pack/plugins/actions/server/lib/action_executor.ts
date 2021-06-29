@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from 'src/core/server';
+import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
@@ -24,6 +25,9 @@ import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 
+// 1,000,000 nanoseconds in 1 millisecond
+const Millis2Nanos = 1000 * 1000;
+
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
@@ -38,11 +42,16 @@ export interface ActionExecutorContext {
   preconfiguredActions: PreConfiguredAction[];
 }
 
+export interface TaskInfo {
+  scheduled: Date;
+}
+
 export interface ExecuteOptions<Source = unknown> {
   actionId: string;
   request: KibanaRequest;
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
+  taskInfo?: TaskInfo;
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
@@ -70,6 +79,7 @@ export class ActionExecutor {
     params,
     request,
     source,
+    taskInfo,
     relatedSavedObjects,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
@@ -142,9 +152,19 @@ export class ActionExecutor {
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
 
+        const task = taskInfo
+          ? {
+              task: {
+                scheduled: taskInfo.scheduled.toISOString(),
+                schedule_delay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+              },
+            }
+          : {};
+
         const event: IEvent = {
           event: { action: EVENT_LOG_ACTIONS.execute },
           kibana: {
+            ...task,
             saved_objects: [
               {
                 rel: SAVED_OBJECT_REL_PRIMARY,
@@ -168,6 +188,17 @@ export class ActionExecutor {
         }
 
         eventLogger.startTiming(event);
+
+        const startEvent = cloneDeep({
+          ...event,
+          event: {
+            ...event.event,
+            action: EVENT_LOG_ACTIONS.executeStart,
+          },
+          message: `action started: ${actionLabel}`,
+        });
+        eventLogger.logEvent(startEvent);
+
         let rawResult: ActionTypeExecutorResult<unknown>;
         try {
           rawResult = await actionType.executor({

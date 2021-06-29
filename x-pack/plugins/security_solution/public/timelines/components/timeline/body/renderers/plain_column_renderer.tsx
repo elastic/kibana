@@ -8,8 +8,8 @@
 import { head } from 'lodash/fp';
 import React from 'react';
 
+import { ColumnHeaderOptions } from '../../../../../../common';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';

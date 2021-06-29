@@ -27,13 +27,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
+      });
+
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.loadIfNeeded(
-        'x-pack/test/functional/es_archives/reporting/ecommerce_kibana'
-      );
+      await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
 
       await security.role.create('test_reporting_user', {
@@ -61,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_kibana');
+      await kibanaServer.importExport.unload(ecommerceSOPath);
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -215,7 +218,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
-        await kibanaServer.uiSettings.replace({ 'doc_table:legacy': false });
+        await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');

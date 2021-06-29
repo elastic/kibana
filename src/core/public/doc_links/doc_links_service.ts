@@ -29,6 +29,7 @@ export class DocLinksService {
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
       links: {
+        settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
         canvas: {
           guide: `${KIBANA_DOCS}canvas.html`,
         },
@@ -204,6 +205,7 @@ export class DocLinksService {
         },
         search: {
           sessions: `${KIBANA_DOCS}search-sessions.html`,
+          sessionLimits: `${KIBANA_DOCS}search-sessions.html#_limitations`,
         },
         date: {
           dateMath: `${ELASTICSEARCH_DOCS}common-options.html#date-math`,
@@ -425,6 +427,7 @@ export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
   readonly links: {
+    readonly settings: string;
     readonly canvas: {
       readonly guide: string;
     };
@@ -523,6 +526,7 @@ export interface DocLinksStart {
     };
     readonly search: {
       readonly sessions: string;
+      readonly sessionLimits: string;
     };
     readonly indexPatterns: {
       readonly introduction: string;

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
-import { EuiIconTip, EuiTextColor, EuiInMemoryTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIconTip, EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
+import { docLinks } from '../doc_links';
 import { RoleRules } from '../types';
 
 import './role_mappings_table.scss';
+
+const AUTH_PROVIDER_DOCUMENTATION_URL = `${docLinks.enterpriseSearchBase}/users-access.html`;
 
 import {
   ANY_AUTH_PROVIDER,
@@ -25,6 +28,8 @@ import {
   ATTRIBUTE_VALUE_LABEL,
   FILTER_ROLE_MAPPINGS_PLACEHOLDER,
   ROLE_MAPPINGS_NO_RESULTS_MESSAGE,
+  EXTERNAL_ATTRIBUTE_TOOLTIP,
+  AUTH_PROVIDER_TOOLTIP,
 } from './constants';
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
@@ -46,11 +51,6 @@ interface Props {
   handleDeleteMapping(roleMappingId: string): void;
 }
 
-const noItemsPlaceholder = <EuiTextColor color="subdued">&mdash;</EuiTextColor>;
-
-const getAuthProviderDisplayValue = (authProvider: string) =>
-  authProvider === ANY_AUTH_PROVIDER ? ANY_AUTH_PROVIDER_OPTION_LABEL : authProvider;
-
 export const RoleMappingsTable: React.FC<Props> = ({
   accessItemKey,
   accessHeader,
@@ -71,7 +71,19 @@ export const RoleMappingsTable: React.FC<Props> = ({
 
   const attributeNameCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'attribute',
-    name: EXTERNAL_ATTRIBUTE_LABEL,
+    name: (
+      <span>
+        {EXTERNAL_ATTRIBUTE_LABEL}{' '}
+        <EuiIconTip
+          type="iInCircle"
+          color="subdued"
+          content={EXTERNAL_ATTRIBUTE_TOOLTIP}
+          iconProps={{
+            className: 'eui-alignTop',
+          }}
+        />
+      </span>
+    ),
     render: (_, { rules }: SharedRoleMapping) => getFirstAttributeName(rules),
   };
 
@@ -90,34 +102,36 @@ export const RoleMappingsTable: React.FC<Props> = ({
   const accessItemsCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'accessItems',
     name: accessHeader,
-    render: (_, { accessAllEngines, accessItems }: SharedRoleMapping) => (
-      <span data-test-subj="AccessItemsList">
-        {accessAllEngines ? (
-          ALL_LABEL
-        ) : (
-          <>
-            {accessItems.length === 0
-              ? noItemsPlaceholder
-              : accessItems.map(({ name }) => (
-                  <Fragment key={name}>
-                    {name}
-                    <br />
-                  </Fragment>
-                ))}
-          </>
-        )}
-      </span>
-    ),
+    render: (_, { accessAllEngines, accessItems }: SharedRoleMapping) => {
+      // Design calls for showing the first 2 items followed by a +x after those 2.
+      // ['foo', 'bar', 'baz'] would display as: "foo, bar + 1"
+      const numItems = accessItems.length;
+      if (accessAllEngines || numItems === 0)
+        return <span data-test-subj="AllItems">{ALL_LABEL}</span>;
+      const additionalItems = numItems > 2 ? ` + ${numItems - 2}` : '';
+      const names = accessItems.map((item) => item.name);
+      return (
+        <span data-test-subj="AccessItems">{names.slice(0, 2).join(', ') + additionalItems}</span>
+      );
+    },
   };
 
   const authProviderCol: EuiBasicTableColumn<SharedRoleMapping> = {
     field: 'authProvider',
     name: AUTH_PROVIDER_LABEL,
-    render: (_, { authProvider }: SharedRoleMapping) => (
-      <span data-test-subj="AuthProviderDisplayValue">
-        {authProvider.map(getAuthProviderDisplayValue).join(', ')}
-      </span>
-    ),
+    render: (_, { authProvider }: SharedRoleMapping) => {
+      if (authProvider[0] === ANY_AUTH_PROVIDER) {
+        return ANY_AUTH_PROVIDER_OPTION_LABEL;
+      }
+      return (
+        <span data-test-subj="ProviderSpecificList">
+          {authProvider.join(', ')}{' '}
+          <EuiLink href={AUTH_PROVIDER_DOCUMENTATION_URL} target="_blank">
+            <EuiIconTip type="alert" color="warning" content={AUTH_PROVIDER_TOOLTIP} />
+          </EuiLink>
+        </span>
+      );
+    },
   };
 
   const actionsCol: EuiBasicTableColumn<SharedRoleMapping> = {
@@ -143,6 +157,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
 
   const pagination = {
     hidePerPageOptions: true,
+    pageSize: 10,
   };
 
   const search = {

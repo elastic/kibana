@@ -207,7 +207,8 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         integrationPolicyId={policy?.id}
         agentPolicyId={policy?.policy_id}
       />
-      <EuiSpacer />
+      <EuiSpacer size="xxl" />
+      <EuiSpacer size="xxl" />
 
       {editMode && scheduledQueryGroupTableData.inputs[0].streams.length ? (
         <EuiFlexGroup>

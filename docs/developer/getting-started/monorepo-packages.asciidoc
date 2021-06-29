@@ -70,6 +70,7 @@ yarn kbn watch-bazel
 - @kbn/apm-utils
 - @kbn/babel-code-parser
 - @kbn/babel-preset
+- @kbn/cli-dev-mode
 - @kbn/config
 - @kbn/config-schema
 - @kbn/crypto
@@ -86,6 +87,8 @@ yarn kbn watch-bazel
 - @kbn/logging
 - @kbn/mapbox-gl
 - @kbn/monaco
+- @kbn/optimizer
+- @kbn/plugin-helpers
 - @kbn/rule-data-utils
 - @kbn/securitysolution-es-utils
 - @kbn/securitysolution-hook-utils
@@ -100,6 +103,7 @@ yarn kbn watch-bazel
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
 - @kbn/server-route-repository
+- @kbn/spec-to-console
 - @kbn/std
 - @kbn/storybook
 - @kbn/telemetry-utils

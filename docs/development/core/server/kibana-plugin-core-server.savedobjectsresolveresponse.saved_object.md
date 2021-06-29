@@ -4,6 +4,8 @@
 
 ## SavedObjectsResolveResponse.saved\_object property
 
+The saved object that was found.
+
 <b>Signature:</b>
 
 ```typescript

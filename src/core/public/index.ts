@@ -99,6 +99,7 @@ export type {
 } from './application';
 
 export { SimpleSavedObject } from './saved_objects';
+export type { ResolvedSimpleSavedObject } from './saved_objects';
 export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
@@ -107,6 +108,7 @@ export type {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
   SavedObjectsFindResponsePublic,
+  SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObject,
   SavedObjectAttribute,
