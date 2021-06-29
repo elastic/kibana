@@ -33,6 +33,7 @@ export const ALERT_TYPES_CONFIG: Record<
     actionGroups: Array<ActionGroup<ThresholdMetActionGroupId>>;
     defaultActionGroupId: ThresholdMetActionGroupId;
     minimumLicenseRequired: string;
+    isExportable: boolean;
     producer: string;
   }
 > = {
@@ -44,6 +45,7 @@ export const ALERT_TYPES_CONFIG: Record<
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
+    isExportable: true,
   },
   [AlertType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
@@ -53,6 +55,7 @@ export const ALERT_TYPES_CONFIG: Record<
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
+    isExportable: true,
   },
   [AlertType.TransactionDurationAnomaly]: {
     name: i18n.translate('xpack.apm.transactionDurationAnomalyAlert.name', {
@@ -62,6 +65,7 @@ export const ALERT_TYPES_CONFIG: Record<
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
+    isExportable: true,
   },
   [AlertType.TransactionErrorRate]: {
     name: i18n.translate('xpack.apm.transactionErrorRateAlert.name', {
@@ -71,6 +75,7 @@ export const ALERT_TYPES_CONFIG: Record<
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
+    isExportable: true,
   },
 };
 

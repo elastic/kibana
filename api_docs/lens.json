@@ -119,7 +119,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-          "lineNumber": 48
+          "lineNumber": 51
         },
         "deprecated": false,
         "children": [
@@ -136,7 +136,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 49
+              "lineNumber": 52
             },
             "deprecated": false
           },
@@ -149,7 +149,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 50
+              "lineNumber": 53
             },
             "deprecated": false
           },
@@ -166,7 +166,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/datatable_visualization/visualization.tsx",
-              "lineNumber": 51
+              "lineNumber": 54
             },
             "deprecated": false
           }
@@ -227,7 +227,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "{ interval: string; timeZone?: string | undefined; }"
+              "{ interval: string; }"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/date_histogram.tsx",
@@ -301,6 +301,65 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.FormulaIndexPatternColumn",
+        "type": "Interface",
+        "tags": [],
+        "label": "FormulaIndexPatternColumn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormulaIndexPatternColumn",
+            "text": "FormulaIndexPatternColumn"
+          },
+          " extends ",
+          "ReferenceBasedIndexPatternColumn"
+        ],
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula.tsx",
+          "lineNumber": 23
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormulaIndexPatternColumn.operationType",
+            "type": "string",
+            "tags": [],
+            "label": "operationType",
+            "description": [],
+            "signature": [
+              "\"formula\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula.tsx",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.FormulaIndexPatternColumn.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ formula?: string | undefined; isFormulaBroken?: boolean | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/formula.tsx",
+              "lineNumber": 25
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.IncompleteColumn",
         "type": "Interface",
         "tags": [],
@@ -320,7 +379,7 @@
             "label": "operationType",
             "description": [],
             "signature": [
-              "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | undefined"
+              "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\" | undefined"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/column_types.ts",
@@ -356,7 +415,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-          "lineNumber": 73
+          "lineNumber": 76
         },
         "deprecated": false,
         "children": [
@@ -374,7 +433,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-              "lineNumber": 74
+              "lineNumber": 77
             },
             "deprecated": false
           }
@@ -522,7 +581,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/plugin.ts",
-          "lineNumber": 84
+          "lineNumber": 89
         },
         "deprecated": false,
         "children": [
@@ -558,7 +617,31 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 93
+              "lineNumber": 98
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.LensPublicStart.SaveModalComponent",
+            "type": "CompoundType",
+            "tags": [
+              "experimental"
+            ],
+            "label": "SaveModalComponent",
+            "description": [
+              "\nReact component which can be used to embed a Lens Visualization Save Modal Component.\nSee `x-pack/examples/embedded_lens_example` for exemplary usage.\n\nThis API might undergo breaking changes even in minor versions.\n"
+            ],
+            "signature": [
+              "React.ComponentClass<Pick<",
+              "SaveModalContainerProps",
+              ", \"onClose\" | \"onSave\" | \"initialInput\" | \"redirectToOrigin\" | \"redirectTo\" | \"onAppLeave\" | \"isVisible\" | \"originatingApp\" | \"persistedDoc\" | \"lastKnownDoc\" | \"returnToOriginSwitchLabel\" | \"runSave\" | \"isSaveable\" | \"getAppNameFromId\">, any> | React.FunctionComponent<Pick<",
+              "SaveModalContainerProps",
+              ", \"onClose\" | \"onSave\" | \"initialInput\" | \"redirectToOrigin\" | \"redirectTo\" | \"onAppLeave\" | \"isVisible\" | \"originatingApp\" | \"persistedDoc\" | \"lastKnownDoc\" | \"returnToOriginSwitchLabel\" | \"runSave\" | \"isSaveable\" | \"getAppNameFromId\">>"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/plugin.ts",
+              "lineNumber": 107
             },
             "deprecated": false
           },
@@ -575,12 +658,18 @@
             ],
             "signature": [
               "(input: ",
-              "LensEmbeddableInput",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensEmbeddableInput",
+                "text": "LensEmbeddableInput"
+              },
               ", openInNewTab?: boolean | undefined) => void"
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 102
+              "lineNumber": 116
             },
             "deprecated": false,
             "returnComment": [],
@@ -599,7 +688,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/public/plugin.ts",
-                  "lineNumber": 102
+                  "lineNumber": 116
                 },
                 "deprecated": false
               },
@@ -615,7 +704,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/lens/public/plugin.ts",
-                  "lineNumber": 102
+                  "lineNumber": 116
                 },
                 "deprecated": false
               }
@@ -635,7 +724,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 106
+              "lineNumber": 120
             },
             "deprecated": false,
             "returnComment": [],
@@ -657,11 +746,76 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/plugin.ts",
-              "lineNumber": 111
+              "lineNumber": 125
             },
             "deprecated": false,
             "returnComment": [],
             "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.MathIndexPatternColumn",
+        "type": "Interface",
+        "tags": [],
+        "label": "MathIndexPatternColumn",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.MathIndexPatternColumn",
+            "text": "MathIndexPatternColumn"
+          },
+          " extends ",
+          "ReferenceBasedIndexPatternColumn"
+        ],
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MathIndexPatternColumn.operationType",
+            "type": "string",
+            "tags": [],
+            "label": "operationType",
+            "description": [],
+            "signature": [
+              "\"math\""
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
+              "lineNumber": 14
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.MathIndexPatternColumn.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ tinymathAst: string | number | ",
+              "TinymathVariable",
+              " | ",
+              "TinymathFunction",
+              " | ",
+              "TinymathNamedArgument",
+              "; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
+            ],
+            "source": {
+              "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/formula/math.tsx",
+              "lineNumber": 15
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -720,7 +874,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/lens/public/types.ts",
-          "lineNumber": 362
+          "lineNumber": 372
         },
         "deprecated": false,
         "children": [
@@ -736,7 +890,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 364
+              "lineNumber": 374
             },
             "deprecated": false
           },
@@ -749,7 +903,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 367
+              "lineNumber": 377
             },
             "deprecated": false
           },
@@ -767,7 +921,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/lens/public/types.ts",
-              "lineNumber": 373
+              "lineNumber": 383
             },
             "deprecated": false
           }
@@ -1759,7 +1913,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 139
+          "lineNumber": 162
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1842,7 +1996,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/types.ts",
-          "lineNumber": 351
+          "lineNumber": 361
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1875,19 +2029,53 @@
         "label": "EmbeddableComponentProps",
         "description": [],
         "signature": [
+          "(Pick<",
+          "LensByValueInput",
+          ", \"palette\" | \"timeRange\" | \"syncColors\" | \"viewMode\" | \"filters\" | \"title\" | \"query\" | \"hidePanelTitles\" | \"id\" | \"lastReloadRequestTime\" | \"enhancements\" | \"disabledActions\" | \"disableTriggers\" | \"searchSessionId\" | \"className\" | \"style\" | \"onLoad\" | \"renderMode\" | \"onBrushEnd\" | \"onFilter\" | \"onTableRowClick\"> & { attributes: LensAttributes<\"lnsXY\", ",
           {
             "pluginId": "lens",
             "scope": "public",
             "docId": "kibLensPluginApi",
-            "section": "def-public.TypedLensByValueInput",
-            "text": "TypedLensByValueInput"
+            "section": "def-public.XYState",
+            "text": "XYState"
           },
-          " | ",
-          "LensByReferenceInput"
+          "> | LensAttributes<\"lnsPie\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.PieVisualizationState",
+            "text": "PieVisualizationState"
+          },
+          "> | LensAttributes<\"lnsDatatable\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.DatatableVisualizationState",
+            "text": "DatatableVisualizationState"
+          },
+          "> | LensAttributes<\"lnsMetric\", ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.MetricState",
+            "text": "MetricState"
+          },
+          ">; } & { withActions?: boolean | undefined; }) | (",
+          {
+            "pluginId": "embeddable",
+            "scope": "common",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-common.SavedObjectEmbeddableInput",
+            "text": "SavedObjectEmbeddableInput"
+          },
+          " & LensBaseEmbeddableInput & { withActions?: boolean | undefined; })"
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx",
-          "lineNumber": 46
+          "lineNumber": 54
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1958,7 +2146,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-          "lineNumber": 80
+          "lineNumber": 92
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2044,7 +2232,7 @@
             "section": "def-public.CumulativeSumIndexPatternColumn",
             "text": "CumulativeSumIndexPatternColumn"
           },
-          " | ",
+          " | OverallMetricIndexPatternColumn<\"overall_sum\"> | OverallMetricIndexPatternColumn<\"overall_min\"> | OverallMetricIndexPatternColumn<\"overall_max\"> | OverallMetricIndexPatternColumn<\"overall_average\"> | ",
           {
             "pluginId": "lens",
             "scope": "public",
@@ -2069,13 +2257,44 @@
             "text": "MovingAverageIndexPatternColumn"
           },
           " | ",
-          "MathIndexPatternColumn",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.MathIndexPatternColumn",
+            "text": "MathIndexPatternColumn"
+          },
           " | ",
-          "FormulaIndexPatternColumn"
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.FormulaIndexPatternColumn",
+            "text": "FormulaIndexPatternColumn"
+          }
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-          "lineNumber": 59
+          "lineNumber": 67
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.LensEmbeddableInput",
+        "type": "Type",
+        "tags": [],
+        "label": "LensEmbeddableInput",
+        "description": [],
+        "signature": [
+          "LensByValueInput",
+          " | ",
+          "LensByReferenceInput"
+        ],
+        "source": {
+          "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable.tsx",
+          "lineNumber": 82
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2101,7 +2320,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 141
+          "lineNumber": 164
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2127,7 +2346,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 142
+          "lineNumber": 165
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2153,7 +2372,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 140
+          "lineNumber": 163
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2188,11 +2407,31 @@
           "\nA union type of all available operation types. The operation type is a unique id of an operation.\nEach column is assigned to exactly one operation type."
         ],
         "signature": [
-          "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\""
+          "\"range\" | \"filters\" | \"count\" | \"max\" | \"min\" | \"date_histogram\" | \"sum\" | \"average\" | \"percentile\" | \"terms\" | \"median\" | \"cumulative_sum\" | \"moving_average\" | \"math\" | \"overall_sum\" | \"overall_min\" | \"overall_max\" | \"overall_average\" | \"counter_rate\" | \"differences\" | \"unique_count\" | \"last_value\" | \"formula\""
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/index.ts",
-          "lineNumber": 533
+          "lineNumber": 573
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.OverallSumIndexPatternColumn",
+        "type": "Type",
+        "tags": [],
+        "label": "OverallSumIndexPatternColumn",
+        "description": [],
+        "signature": [
+          "BaseIndexPatternColumn",
+          " & { params?: { format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; } | undefined; } & ",
+          "ReferenceBasedIndexPatternColumn",
+          " & { operationType: \"overall_sum\"; }"
+        ],
+        "source": {
+          "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/calculations/overall_metric.tsx",
+          "lineNumber": 19
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2225,7 +2464,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/types.ts",
-          "lineNumber": 77
+          "lineNumber": 80
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2292,7 +2531,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/metrics.tsx",
-          "lineNumber": 138
+          "lineNumber": 161
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2345,7 +2584,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/editor_frame_service/embeddable/embeddable_component.tsx",
-          "lineNumber": 38
+          "lineNumber": 46
         },
         "deprecated": false,
         "initialIsOpen": false

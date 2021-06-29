@@ -6,7 +6,7 @@
  */
 
 import { isEmpty, pickBy } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -111,6 +111,15 @@ export const PlatformCheckBoxGroupField = ({
   );
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
+
+  useEffect(() => {
+    setCheckboxIdToSelectedMap(() =>
+      (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
+        acc[option.id] = isEmpty(field.value) ? true : field.value?.includes(option.id) ?? false;
+        return acc;
+      }, {} as Record<string, boolean>)
+    );
+  }, [field.value, options]);
 
   return (
     <EuiFormRow
