@@ -26,25 +26,22 @@ describe('getJourneyScreenshot', () => {
     expect(
       await getJourneyScreenshot({
         uptimeEsClient: mockSearchResult([], {
-          // @ts-expect-error incomplete search result
           step: { image: { hits: { hits: [screenshotResult] } } },
         }),
         checkGroup: 'checkGroup',
         stepIndex: 0,
       })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "synthetics": Object {
-          "blob": "image data",
-          "blob_mime": "image/jpeg",
-          "step": Object {
-            "name": "load homepage",
-          },
-          "type": "step/screenshot",
+    ).toEqual({
+      synthetics: {
+        blob: 'image data',
+        blob_mime: 'image/jpeg',
+        step: {
+          name: 'load homepage',
         },
-        "totalSteps": 0,
-      }
-    `);
+        type: 'step/screenshot',
+      },
+      totalSteps: 0,
+    });
   });
 
   it('returns ref data', async () => {
@@ -88,7 +85,6 @@ describe('getJourneyScreenshot', () => {
     expect(
       await getJourneyScreenshot({
         uptimeEsClient: mockSearchResult([], {
-          // @ts-expect-error incomplete search result
           step: { image: { hits: { hits: [screenshotRefResult] } } },
         }),
         checkGroup: 'checkGroup',
@@ -131,39 +127,5 @@ describe('getJourneyScreenshot', () => {
         "totalSteps": 0,
       }
     `);
-  });
-
-  it('throws for malformed data', async () => {
-    let exception: unknown;
-    try {
-      await getJourneyScreenshot({
-        uptimeEsClient: mockSearchResult([], {
-          // @ts-expect-error incorrect data format
-          step: { image: { hits: { hits: [{ foo: 'bar' }] } } },
-        }),
-        checkGroup: 'checkGroup',
-        stepIndex: 0,
-      });
-    } catch (e: unknown) {
-      exception = e;
-    } finally {
-      expect(exception).toBeDefined();
-      expect(exception).toMatchInlineSnapshot(
-        `[Error: Error parsing journey screenshot type. Malformed data.]`
-      );
-    }
-  });
-
-  it('returns null for empty set', async () => {
-    expect(
-      await getJourneyScreenshot({
-        uptimeEsClient: mockSearchResult([], {
-          // @ts-expect-error incomplete search result
-          step: { image: { hits: { hits: [] } } },
-        }),
-        checkGroup: 'checkGroup',
-        stepIndex: 0,
-      })
-    ).toBeNull();
   });
 });

@@ -22,7 +22,7 @@ const NANOS_IN_MILLIS = 1000 * 1000;
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -76,8 +76,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body).to.be.an('object');
       const searchResult = await esTestIndexTool.search('action:test.index-record', reference);
-      expect(searchResult.hits.total.value).to.eql(1);
-      const indexedRecord = searchResult.hits.hits[0];
+      expect(searchResult.body.hits.total.value).to.eql(1);
+      const indexedRecord = searchResult.body.hits.hits[0];
       expect(indexedRecord._source).to.eql({
         params: {
           reference,
@@ -211,8 +211,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-      expect(searchResult.hits.total.value).to.eql(1);
-      const indexedRecord = searchResult.hits.hits[0];
+      expect(searchResult.body.hits.total.value).to.eql(1);
+      const indexedRecord = searchResult.body.hits.hits[0];
       expect(indexedRecord._source.state).to.eql({
         callClusterSuccess: true,
         callScopedClusterSuccess: true,
@@ -405,6 +405,8 @@ export default function ({ getService }: FtrProviderContext) {
     if (startMessage) {
       expect(startExecuteEvent?.message).to.eql(startMessage);
     }
+
+    expect(executeEvent?.kibana?.task).to.eql(undefined);
 
     if (errorMessage) {
       expect(executeEvent?.error?.message).to.eql(errorMessage);

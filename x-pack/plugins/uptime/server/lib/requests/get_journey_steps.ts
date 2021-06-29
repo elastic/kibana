@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { isRight } from 'fp-ts/lib/Either';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { JourneyStepType, JourneyStep } from '../../../common/runtime_types';
+import { JourneyStep } from '../../../common/runtime_types/ping/synthetics';
+
 export interface GetJourneyStepsParams {
   checkGroup: string;
   syntheticEventTypes?: string | string[];
@@ -32,17 +31,7 @@ export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
   }
 };
 
-const ResultHit = t.intersection([JourneyStepType, t.type({ '@timestamp': t.string })]);
-
-const parseResult = (hits: unknown, checkGroup: string) => {
-  const decoded = t.array(ResultHit).decode(hits);
-  if (!isRight(decoded)) {
-    throw Error(
-      `Could not process synthetic journey steps for check group ${checkGroup}. Malformed data.`
-    );
-  }
-  return decoded.right;
-};
+type ResultType = JourneyStep & { '@timestamp': string };
 
 export const getJourneySteps: UMElasticsearchQueryFn<
   GetJourneyStepsParams,
@@ -76,14 +65,13 @@ export const getJourneySteps: UMElasticsearchQueryFn<
   };
   const { body: result } = await uptimeEsClient.search({ body: params });
 
-  const steps = parseResult(
-    result.hits.hits.map(({ _id, _source }) => Object.assign({ _id }, _source)),
-    checkGroup
+  const steps = result.hits.hits.map(
+    ({ _id, _source }) => Object.assign({ _id }, _source) as ResultType
   );
 
   const screenshotIndexList: number[] = [];
   const refIndexList: number[] = [];
-  const stepsWithoutImages: Array<t.TypeOf<typeof ResultHit>> = [];
+  const stepsWithoutImages: ResultType[] = [];
 
   /**
    * Store screenshot indexes, we use these to determine if a step has a screenshot below.
@@ -106,7 +94,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<
     timestamp: rest['@timestamp'],
     synthetics: {
       ...rest.synthetics,
-      screenshotExists: screenshotIndexList.some((i) => i === rest?.synthetics?.step?.index),
+      isFullScreenshot: screenshotIndexList.some((i) => i === rest?.synthetics?.step?.index),
       isScreenshotRef: refIndexList.some((i) => i === rest?.synthetics?.step?.index),
     },
   }));

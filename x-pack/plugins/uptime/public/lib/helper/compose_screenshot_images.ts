@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ScreenshotBlockBlob, ScreenshotRefImageData } from '../../../common/runtime_types';
+import {
+  ScreenshotBlockBlob,
+  ScreenshotRefImageData,
+} from '../../../common/runtime_types/ping/synthetics';
 
 /**
  * Draws image fragments on a canvas.
@@ -13,16 +16,17 @@ import { ScreenshotBlockBlob, ScreenshotRefImageData } from '../../../common/run
  * @param canvas A canvas to use for the rendering.
  * @returns A promise that will resolve when the final draw operation completes.
  */
-export const composeScreenshotRef = async (
+export async function composeScreenshotRef(
   data: ScreenshotRefImageData,
   canvas: HTMLCanvasElement,
   blocks: { [key: string]: ScreenshotBlockBlob }
-) => {
+) {
   const {
     ref: { screenshotRef },
   } = data;
 
   const ctx = canvas.getContext('2d', { alpha: false });
+
   canvas.width = screenshotRef.screenshot_ref.width;
   canvas.height = screenshotRef.screenshot_ref.height;
 
@@ -53,4 +57,4 @@ export const composeScreenshotRef = async (
 
   // once all `draw` operations finish, caller can extract img string
   return Promise.all(drawOperations);
-};
+}

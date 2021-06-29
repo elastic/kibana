@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import type { LensFilterEvent } from '../types';
-import { desanitizeFilterContext } from '../utils';
 
 export interface LegendActionPopoverProps {
   /**
@@ -45,7 +44,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           icon: <EuiIcon type="plusInCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
-            onFilter(desanitizeFilterContext(context));
+            onFilter(context);
           },
         },
         {
@@ -56,7 +55,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           icon: <EuiIcon type="minusInCircle" size="m" />,
           onClick: () => {
             setPopoverOpen(false);
-            onFilter(desanitizeFilterContext({ ...context, negate: true }));
+            onFilter({ ...context, negate: true });
           },
         },
       ],

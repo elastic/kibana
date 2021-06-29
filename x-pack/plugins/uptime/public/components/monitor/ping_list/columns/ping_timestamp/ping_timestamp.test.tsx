@@ -99,7 +99,7 @@ describe('Ping Timestamp component', () => {
   it('handles screenshot ref data', async () => {
     jest.spyOn(observabilityPublic, 'useFetcher').mockReturnValue({
       status: FETCH_STATUS.SUCCESS,
-      data: { ...mockRef },
+      data: mockRef,
       refetch: () => null,
     });
 

@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import {
+  ThresholdRT,
   countCriteriaRT,
   timeUnitRT,
   timeSizeRT,
@@ -58,6 +59,14 @@ export type GetLogAlertsChartPreviewDataSuccessResponsePayload = rt.TypeOf<
 export const getLogAlertsChartPreviewDataAlertParamsSubsetRT: any = rt.intersection([
   rt.type({
     criteria: countCriteriaRT,
+    count: rt.intersection([
+      rt.type({
+        comparator: ThresholdRT.props.comparator,
+      }),
+      rt.partial({
+        value: ThresholdRT.props.value,
+      }),
+    ]),
     timeUnit: timeUnitRT,
     timeSize: timeSizeRT,
   }),

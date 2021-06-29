@@ -6,13 +6,11 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { isRight } from 'fp-ts/lib/Either';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
   JourneyStep,
-  JourneyStepType,
   SyntheticsJourneyApiResponse,
-} from '../../../common/runtime_types';
+} from '../../../common/runtime_types/ping/synthetics';
 
 export interface GetJourneyDetails {
   checkGroup: string;
@@ -47,11 +45,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
 
   if (thisJourney.hits.hits.length > 0) {
     const { _id, _source } = thisJourney.hits.hits[0];
-    const decodedJourneySource = JourneyStepType.decode(Object.assign({ _id }, _source));
-    if (!isRight(decodedJourneySource)) {
-      throw Error(`Could not process journey step for check group ${checkGroup}, malformed data`);
-    }
-    const thisJourneySource: JourneyStep = decodedJourneySource.right;
+    const thisJourneySource = Object.assign({ _id }, _source) as JourneyStep;
 
     const baseSiblingParams = {
       query: {

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isRefResult, isScreenshot } from '../../../common/runtime_types/ping/synthetics';
+import { isRefResult, isFullScreenshot } from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';
@@ -35,18 +35,13 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
   handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
 
-    let result: ScreenshotReturnTypesUnion | null = null;
-    try {
-      result = await libs.requests.getJourneyScreenshot({
-        uptimeEsClient,
-        checkGroup,
-        stepIndex,
-      });
-    } catch (e) {
-      return response.customError({ body: { message: e }, statusCode: 500 });
-    }
+    const result: ScreenshotReturnTypesUnion | null = await libs.requests.getJourneyScreenshot({
+      uptimeEsClient,
+      checkGroup,
+      stepIndex,
+    });
 
-    if (isScreenshot(result)) {
+    if (isFullScreenshot(result)) {
       if (!result.synthetics.blob) {
         return response.notFound();
       }

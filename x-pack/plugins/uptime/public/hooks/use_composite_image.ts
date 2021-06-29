@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
 import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
 import { ScreenshotRefImageData } from '../../common/runtime_types';
-import { journeyScreenshotBlockSelector } from '../state/selectors';
+import { ScreenshotRefImageData } from '../../common/runtime_types/ping/synthetics';
 import {
   fetchBlocksAction,
   isPendingBlock,
@@ -29,8 +29,7 @@ function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes
  * Checks if two refs are the same. If the ref is unchanged, there's no need
  * to run the expensive draw procedure.
  */
-function isNewRef(a?: ScreenshotRefImageData, b?: ScreenshotRefImageData): boolean {
-  if (typeof a === 'undefined' || typeof b === 'undefined') return false;
+function isNewRef(a: ScreenshotRefImageData, b: ScreenshotRefImageData): boolean {
   const stepA = a.ref.screenshotRef.synthetics.step;
   const stepB = b.ref.screenshotRef.synthetics.step;
   return stepA.index !== stepB.index || stepA.name !== stepB.name;
@@ -44,8 +43,8 @@ function isNewRef(a?: ScreenshotRefImageData, b?: ScreenshotRefImageData): boole
  */
 export const useCompositeImage = (
   imgRef: ScreenshotRefImageData,
-  callback: React.Dispatch<string | undefined>,
-  url?: string
+  onComposeImageSuccess: React.Dispatch<string | undefined>,
+  imageData?: string
 ): void => {
   const dispatch = useDispatch();
   const blocks = useSelector(journeyScreenshotBlockSelector);
@@ -55,28 +54,25 @@ export const useCompositeImage = (
     );
   }, [dispatch, imgRef.ref.screenshotRef.screenshot_ref.blocks]);
 
-  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData | undefined>(undefined);
-
-  if (curRef === null) {
-    setCurRef(imgRef);
-  }
+  const [curRef, setCurRef] = React.useState<ScreenshotRefImageData>(imgRef);
   React.useEffect(() => {
     const canvas = document.createElement('canvas');
 
     async function compose() {
       await composeScreenshotRef(imgRef, canvas, blocks);
       const imgData = canvas.toDataURL('image/jpg', 1.0);
-      callback(imgData);
+      onComposeImageSuccess(imgData);
     }
 
     // if the URL is truthy it means it's already been composed, so there
     // is no need to call the function
     if (
-      (typeof url === 'undefined' || isNewRef(imgRef, curRef)) &&
-      allBlocksLoaded(
-        blocks,
-        imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash)
-      )
+      typeof imageData === 'undefined' ||
+      (isNewRef(imgRef, curRef) &&
+        allBlocksLoaded(
+          blocks,
+          imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash)
+        ))
     ) {
       compose();
       setCurRef(imgRef);
@@ -84,5 +80,5 @@ export const useCompositeImage = (
     return () => {
       canvas.parentElement?.removeChild(canvas);
     };
-  }, [imgRef, callback, curRef, url, blocks]);
+  }, [blocks, curRef, imageData, imgRef, onComposeImageSuccess]);
 };

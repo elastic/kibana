@@ -38,8 +38,8 @@ export const JourneyStepType = t.intersection([
         index: t.number,
         name: t.string,
       }),
+      isFullScreenshot: t.boolean,
       isScreenshotRef: t.boolean,
-      screenshotExists: t.boolean,
     }),
   }),
   t.type({
@@ -78,7 +78,7 @@ export const ScreenshotBlockType = t.type({
 /**
  * The old style of screenshot document that contains a full screenshot blob.
  */
-export const ScreenshotType = t.type({
+export const FullScreenshotType = t.type({
   synthetics: t.intersection([
     t.partial({
       blob: t.string,
@@ -94,10 +94,10 @@ export const ScreenshotType = t.type({
   ]),
 });
 
-export type Screenshot = t.TypeOf<typeof ScreenshotType>;
+export type FullScreenshot = t.TypeOf<typeof FullScreenshotType>;
 
-export function isScreenshot(data: unknown): data is Screenshot {
-  return isRight(ScreenshotType.decode(data));
+export function isFullScreenshot(data: unknown): data is FullScreenshot {
+  return isRight(FullScreenshotType.decode(data));
 }
 
 /**

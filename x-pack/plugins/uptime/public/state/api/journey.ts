@@ -10,7 +10,8 @@ import { FetchJourneyStepsParams } from '../actions/journey';
 import {
   FailedStepsApiResponse,
   FailedStepsApiResponseType,
-  Ping,
+  JourneyStep,
+  JourneyStepType,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
@@ -56,12 +57,16 @@ export async function fetchLastSuccessfulStep({
   monitorId: string;
   timestamp: string;
   stepIndex: number;
-}): Promise<Ping> {
-  return (await apiService.get(`/api/uptime/synthetics/step/success/`, {
-    monitorId,
-    timestamp,
-    stepIndex,
-  })) as Ping;
+}): Promise<JourneyStep> {
+  return await apiService.get(
+    `/api/uptime/synthetics/step/success/`,
+    {
+      monitorId,
+      timestamp,
+      stepIndex,
+    },
+    JourneyStepType
+  );
 }
 
 export async function getJourneyScreenshot(
