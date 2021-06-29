@@ -12,7 +12,7 @@ import { resolve } from 'path';
 import { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
-import { IgnoreNotFoundExportPlugin } from './ignoreNotFoundExportPlugin';
+import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 
 const stats = {
   ...Stats.presetToOptions('minimal'),
