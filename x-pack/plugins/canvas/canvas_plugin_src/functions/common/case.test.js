@@ -11,8 +11,11 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { caseFn } from './case';
 
 describe('case', () => {
-  const fn = functionWrapper(caseFn);
   let testScheduler;
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(caseFn);
+  });
 
   beforeEach(() => {
     testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));

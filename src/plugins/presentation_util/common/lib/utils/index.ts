@@ -16,3 +16,7 @@ export * from './url';
 export async function getElasticLogo() {
   return await import('./elastic_logo');
 }
+
+export async function getElasticOutline() {
+  return await import('./elastic_outline');
+}

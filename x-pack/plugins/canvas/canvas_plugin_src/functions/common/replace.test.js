@@ -9,7 +9,10 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { replace } from './replace';
 
 describe('replace', () => {
-  const fn = functionWrapper(replace);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(replace);
+  });
 
   it('replaces text that matches the pattern', () => {
     expect(

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { resolveWithMissingImage, elasticOutline } from '../../../presentation_util/common/lib';
-import { getFunctionHelp, getFunctionErrors } from '../i18n';
-import { ExpressionRevealImageFunction, Origin } from '../types';
+import { resolveWithMissingImage, getElasticOutline } from '../../../presentation_util/common/lib';
+import { getFunctionHelp, getFunctionErrors } from '../../common/i18n';
+import { ExpressionRevealImageFunction, Origin } from '../../common/types';
 
-export const revealImageFunction: ExpressionRevealImageFunction = () => {
+export const revealImageFunction: ExpressionRevealImageFunction = async () => {
   const { help, args: argHelp } = getFunctionHelp().revealImage;
   const errors = getFunctionErrors().revealImage;
-
+  const { elasticOutline } = await getElasticOutline();
   return {
     name: 'revealImage',
     aliases: [],

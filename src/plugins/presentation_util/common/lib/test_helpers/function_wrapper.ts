@@ -17,8 +17,8 @@ type FnType = () => typeof typeSpecs[number] &
   ExpressionFunctionDefinition<string, any, Record<string, any>, ExpressionValueBoxed<any, any>>;
 
 // It takes a function spec and passes in default args into the spec fn
-export const functionWrapper = (fnSpec: FnType): ReturnType<FnType>['fn'] => {
-  const spec = fnSpec();
+export const functionWrapper = async (fnSpec: FnType): Promise<ReturnType<FnType>['fn']> => {
+  const spec = await fnSpec();
   const defaultArgs = mapValues(spec.args, (argSpec) => {
     return argSpec.default;
   });

@@ -10,7 +10,11 @@ import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { tail } from './tail';
 
 describe('tail', () => {
-  const fn = functionWrapper(tail);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(tail);
+  });
+
   const lastIndex = testTable.rows.length - 1;
 
   it('returns a datatable with the last N rows of the context', () => {

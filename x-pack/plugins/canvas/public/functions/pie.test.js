@@ -15,13 +15,16 @@ import {
 import { pieFunctionFactory } from './pie';
 
 describe('pie', () => {
-  const fn = functionWrapper(
-    pieFunctionFactory({
-      get: () => ({
-        getCategoricalColors: () => ['red', 'black'],
-      }),
-    })
-  );
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(
+      pieFunctionFactory({
+        get: () => ({
+          getCategoricalColors: () => ['red', 'black'],
+        }),
+      })
+    );
+  });
 
   it('returns a render as pie', () => {
     const result = fn(testPie);

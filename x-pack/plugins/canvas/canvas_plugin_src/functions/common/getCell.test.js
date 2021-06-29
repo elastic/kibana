@@ -13,7 +13,10 @@ import { getCell } from './getCell';
 const errors = getFunctionErrors().getCell;
 
 describe('getCell', () => {
-  const fn = functionWrapper(getCell);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(getCell);
+  });
 
   it('returns the value from the specified row and column', () => {
     const arbitraryRowIndex = 3;

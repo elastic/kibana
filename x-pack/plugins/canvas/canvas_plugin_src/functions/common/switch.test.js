@@ -11,7 +11,11 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { switchFn } from './switch';
 
 describe('switch', () => {
-  const fn = functionWrapper(switchFn);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(switchFn);
+  });
+
   const getter = (value) => () => of(value);
   const mockCases = [
     {

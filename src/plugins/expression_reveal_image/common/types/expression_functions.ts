@@ -27,11 +27,8 @@ export interface Output {
   percent: number;
 }
 
-export type ExpressionRevealImageFunction = () => ExpressionFunctionDefinition<
-  'revealImage',
-  number,
-  Arguments,
-  ExpressionValueRender<Output>
+export type ExpressionRevealImageFunction = () => Promise<
+  ExpressionFunctionDefinition<'revealImage', number, Arguments, ExpressionValueRender<Output>>
 >;
 
 export enum Position {

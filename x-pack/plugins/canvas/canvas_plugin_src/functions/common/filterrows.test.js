@@ -15,8 +15,11 @@ const inStock = (datatable) => of(datatable.rows[0].in_stock);
 const returnFalse = () => of(false);
 
 describe('filterrows', () => {
-  const fn = functionWrapper(filterrows);
   let testScheduler;
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(filterrows);
+  });
 
   beforeEach(() => {
     testScheduler = new TestScheduler((actual, expected) => expect(actual).toStrictEqual(expected));

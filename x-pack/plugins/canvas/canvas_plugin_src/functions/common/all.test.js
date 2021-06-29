@@ -9,7 +9,10 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { all } from './all';
 
 describe('all', () => {
-  const fn = functionWrapper(all);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(all);
+  });
 
   it('should return true with no conditions', () => {
     expect(fn(null, {})).toBe(true);

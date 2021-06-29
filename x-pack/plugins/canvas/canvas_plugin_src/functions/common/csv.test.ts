@@ -14,7 +14,13 @@ import { Adapters } from 'src/plugins/inspector';
 const errors = getFunctionErrors().csv;
 
 describe('csv', () => {
-  const fn = functionWrapper(csv);
+  // const fn = functionWrapper(csv);
+  let fn: ReturnType<typeof csv>['fn'];
+
+  beforeEach(async () => {
+    fn = await functionWrapper(csv);
+  });
+
   const expected: Datatable = {
     type: 'datatable',
     columns: [

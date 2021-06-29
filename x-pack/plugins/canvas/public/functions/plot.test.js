@@ -18,13 +18,16 @@ import {
 import { plotFunctionFactory } from './plot';
 
 describe('plot', () => {
-  const fn = functionWrapper(
-    plotFunctionFactory({
-      get: () => ({
-        getCategoricalColors: () => ['red', 'black'],
-      }),
-    })
-  );
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(
+      plotFunctionFactory({
+        get: () => ({
+          getCategoricalColors: () => ['red', 'black'],
+        }),
+      })
+    );
+  });
 
   it('returns a render as plot', () => {
     const result = fn(testPlot);

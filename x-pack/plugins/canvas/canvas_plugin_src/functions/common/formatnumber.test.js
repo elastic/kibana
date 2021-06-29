@@ -9,7 +9,10 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { formatnumber } from './formatnumber';
 
 describe('formatnumber', () => {
-  const fn = functionWrapper(formatnumber);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(formatnumber);
+  });
 
   it('returns number as formatted string with given format', () => {
     expect(fn(140000, { format: '$0,0.00' })).toBe('$140,000.00');

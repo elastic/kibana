@@ -46,7 +46,10 @@ const rowCount = (datatable) =>
   });
 
 describe('ply', () => {
-  const fn = functionWrapper(ply);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(ply);
+  });
   let testScheduler;
 
   beforeEach(() => {

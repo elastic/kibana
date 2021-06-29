@@ -10,7 +10,10 @@ import { testTable } from './__fixtures__/test_tables';
 import { sort } from './sort';
 
 describe('sort', () => {
-  const fn = functionWrapper(sort);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(sort);
+  });
 
   const isSorted = (rows, column, reverse) => {
     if (reverse) {

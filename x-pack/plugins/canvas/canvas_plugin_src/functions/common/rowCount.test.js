@@ -10,7 +10,10 @@ import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { rowCount } from './rowCount';
 
 describe('rowCount', () => {
-  const fn = functionWrapper(rowCount);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(rowCount);
+  });
 
   it('returns the number of rows in the datatable', () => {
     expect(fn(testTable)).toEqual(testTable.rows.length);

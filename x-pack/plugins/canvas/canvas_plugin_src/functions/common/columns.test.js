@@ -10,7 +10,10 @@ import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { columns } from './columns';
 
 describe('columns', () => {
-  const fn = functionWrapper(columns);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(columns);
+  });
 
   it('returns a datatable', () => {
     expect(fn(testTable, { include: 'name' }).type).toBe('datatable');

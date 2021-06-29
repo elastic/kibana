@@ -12,7 +12,10 @@ import { compare } from './compare';
 const errors = getFunctionErrors().compare;
 
 describe('compare', () => {
-  const fn = functionWrapper(compare);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(compare);
+  });
 
   describe('args', () => {
     describe('op', () => {

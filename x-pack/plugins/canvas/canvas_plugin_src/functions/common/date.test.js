@@ -13,7 +13,10 @@ import { date } from './date';
 const errors = getFunctionErrors().date;
 
 describe('date', () => {
-  const fn = functionWrapper(date);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(date);
+  });
 
   let clock;
   // stubbed date constructor to check current dates match when no args are passed in

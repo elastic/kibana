@@ -10,7 +10,10 @@ import { testTable, emptyTable } from './__fixtures__/test_tables';
 import { context } from './context';
 
 describe('context', () => {
-  const fn = functionWrapper(context);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(context);
+  });
 
   it('returns whatever context you pass into', () => {
     expect(fn(null)).toBe(null);

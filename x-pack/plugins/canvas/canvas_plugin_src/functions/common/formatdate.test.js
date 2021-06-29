@@ -9,7 +9,10 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { formatdate } from './formatdate';
 
 describe('formatdate', () => {
-  const fn = functionWrapper(formatdate);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(formatdate);
+  });
 
   it('returns formatted date string from ms or ISO8601 string using the given format', () => {
     const testDate = new Date('2011-10-31T12:30:45Z').valueOf();

@@ -9,7 +9,10 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { seriesStyle } from './seriesStyle';
 
 describe('seriesStyle', () => {
-  const fn = functionWrapper(seriesStyle);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(seriesStyle);
+  });
 
   it('returns a seriesStyle', () => {
     const result = fn(null);

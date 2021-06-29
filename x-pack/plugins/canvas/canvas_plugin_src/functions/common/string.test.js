@@ -9,7 +9,10 @@ import { functionWrapper } from '../../../../../../src/plugins/presentation_util
 import { string } from './string';
 
 describe('string', () => {
-  const fn = functionWrapper(string);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(string);
+  });
 
   it('casts primitive types to strings', () => {
     expect(fn(null, { value: [14000] })).toBe('14000');
