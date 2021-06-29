@@ -15,6 +15,7 @@ import {
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { MonitorSSLCertificate } from './ssl_certificate';
 import * as labels from '../translations';
 import { StatusByLocations } from './status_by_location';
@@ -40,36 +41,24 @@ export const MonListDescription = styled(EuiDescriptionListDescription)`
   }
 `;
 
-const renderMonitorType = (type: string) => {
+export const renderMonitorType = (type: string | undefined) => {
   switch (type) {
     case 'http':
-      return (
-        <FormattedMessage
-          id="xpack.uptime.monitorDetails.statusBar.pingType.http"
-          defaultMessage="HTTP"
-        />
-      );
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.http', {
+        defaultMessage: 'HTTP',
+      });
     case 'tcp':
-      return (
-        <FormattedMessage
-          id="xpack.uptime.monitorDetails.statusBar.pingType.tcp"
-          defaultMessage="TCP"
-        />
-      );
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.tcp', {
+        defaultMessage: 'TCP',
+      });
     case 'icmp':
-      return (
-        <FormattedMessage
-          id="xpack.uptime.monitorDetails.statusBar.pingType.icmp"
-          defaultMessage="ICMP"
-        />
-      );
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.icmp', {
+        defaultMessage: 'ICMP',
+      });
     case 'browser':
-      return (
-        <FormattedMessage
-          id="xpack.uptime.monitorDetails.statusBar.pingType.browser"
-          defaultMessage="Browser"
-        />
-      );
+      return i18n.translate('xpack.uptime.monitorDetails.statusBar.pingType.browser', {
+        defaultMessage: 'Browser',
+      });
     default:
       return '';
   }
