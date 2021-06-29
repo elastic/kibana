@@ -129,4 +129,29 @@ describe('checkForUnknownDocs', () => {
       ],
     });
   });
+
+  it('uses `unknown` as the type when the document does not contain a type field', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [{ _id: '12', _source: {} }],
+        },
+      })
+    );
+
+    const task = checkForUnknownDocs({
+      client,
+      indexName: '.kibana_8.0.0',
+      knownTypes,
+      unusedTypesQuery,
+    });
+
+    const result = await task();
+
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual({
+      type: 'unknown_docs_found',
+      unknownDocs: [{ id: '12', type: 'unknown' }],
+    });
+  });
 });

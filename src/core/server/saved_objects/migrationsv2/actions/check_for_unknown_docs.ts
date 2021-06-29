@@ -59,7 +59,7 @@ export const checkForUnknownDocs = ({
       if (hits.length) {
         return Either.left({
           type: 'unknown_docs_found' as const,
-          unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'undefined' })),
+          unknownDocs: hits.map((hit) => ({ id: hit._id, type: hit._source?.type ?? 'unknown' })),
         });
       } else {
         return Either.right({});

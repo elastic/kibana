@@ -41,5 +41,9 @@ export const delayRetryState = <S extends State>(
   }
 };
 export const resetRetryState = <S extends State>(state: S): S => {
-  return { ...state, ...{ retryCount: 0, retryDelay: 0 } };
+  return {
+    ...state,
+    retryCount: 0,
+    retryDelay: 0,
+  };
 };
