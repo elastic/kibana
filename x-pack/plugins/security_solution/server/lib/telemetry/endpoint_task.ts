@@ -94,6 +94,22 @@ export class TelemetryEndpointTask {
     return `${TelemetryEndpointTaskConstants.TYPE}:${TelemetryEndpointTaskConstants.VERSION}`;
   };
 
+  private async fetchEndpointData() {
+    const [epMetricsResponse, fleetAgentsResponse, policyResponse] = await Promise.allSettled([
+      this.sender.fetchEndpointMetrics(),
+      this.sender.fetchFleetAgents(),
+      this.sender.fetchFailedEndpointPolicyResponses(),
+    ]);
+
+    return {
+      endpointMetrics:
+        epMetricsResponse.status === 'fulfilled' ? epMetricsResponse.value : undefined,
+      fleetAgentsResponse:
+        fleetAgentsResponse.status === 'fulfilled' ? fleetAgentsResponse.value : undefined,
+      epPolicyResponse: policyResponse.status === 'fulfilled' ? policyResponse.value : undefined,
+    };
+  }
+
   public runTask = async (taskId: string) => {
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
@@ -106,9 +122,9 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    const {
-      body: endpointMetricsResponse,
-    } = ((await this.sender.fetchEndpointMetrics()) as unknown) as {
+    const endpointData = await this.fetchEndpointData();
+
+    const { body: endpointMetricsResponse } = (endpointData.endpointMetrics as unknown) as {
       body: EndpointMetricsAggregation;
     };
     const endpointMetrics = endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
@@ -125,7 +141,7 @@ export class TelemetryEndpointTask {
       return 0;
     }
 
-    const agentsResponse = await this.sender.fetchFleetAgents();
+    const agentsResponse = endpointData.fleetAgentsResponse;
     if (agentsResponse === undefined) {
       this.logger.debug('no agents to report');
       return 0;
@@ -137,25 +153,23 @@ export class TelemetryEndpointTask {
     }, new Map<string, FleetAgentCacheItem>());
 
     const endpointPolicyCache = new Map<string, FullAgentPolicyInput>();
-    for (const policyInfo of fleetAgents.values()) {
+    for (const policy of fleetAgents.values()) {
       const shouldCachePolicy =
-        policyInfo.policy_id !== null &&
-        policyInfo.policy_id !== undefined &&
-        !endpointPolicyCache.has(policyInfo.policy_id);
+        policy.policy_id !== null &&
+        policy.policy_id !== undefined &&
+        !endpointPolicyCache.has(policy.policy_id);
 
       if (shouldCachePolicy) {
-        const packagePolicies = await this.sender.fetchEndpointPolicyConfigs(policyInfo.policy_id);
+        const packagePolicies = await this.sender.fetchEndpointPolicyConfigs(policy.policy_id);
         packagePolicies?.inputs.forEach((input) => {
-          if (input.type === 'endpoint' && policyInfo.policy_id !== undefined) {
-            endpointPolicyCache.set(policyInfo.policy_id, input);
+          if (input.type === 'endpoint') {
+            endpointPolicyCache.set(policy.policy_id, input);
           }
         });
       }
     }
 
-    const {
-      body: failedPolicyResponses,
-    } = ((await this.sender.fetchFailedEndpointPolicyResponses()) as unknown) as {
+    const { body: failedPolicyResponses } = (endpointData.epPolicyResponse as unknown) as {
       body: EndpointPolicyResponseAggregation;
     };
     const policyResponses = failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
@@ -196,7 +210,6 @@ export class TelemetryEndpointTask {
       };
     });
 
-    // Feature flag disabling channel send for now
     this.sender.sendOnDemand('endpoint-metadata', telemetryPayloads);
     return telemetryPayloads.length;
   };
