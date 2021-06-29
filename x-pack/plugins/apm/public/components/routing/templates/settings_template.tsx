@@ -20,7 +20,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'agent-configurations'
     | 'anomaly-detection'
     | 'apm-indices'
-    | 'customize-ui';
+    | 'customize-ui'
+    | 'schema';
   hidden?: boolean;
 };
 
@@ -99,6 +100,13 @@ function getTabs({
         defaultMessage: 'Indices',
       }),
       href: getAPMHref({ basePath, path: `/settings/apm-indices`, search }),
+    },
+    {
+      key: 'schema',
+      label: i18n.translate('xpack.apm.settings.schema', {
+        defaultMessage: 'Schema',
+      }),
+      href: getAPMHref({ basePath, path: `/settings/schema`, search }),
     },
   ];
 

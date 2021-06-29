@@ -22,6 +22,8 @@ export default function ({ getService, getPageObjects }) {
         to: 'Aug 29, 2017 @ 17:25:44.142',
       });
 
+      await clusterOverview.closeAlertsModal();
+
       // go to kibana overview
       await clusterOverview.clickKibanaOverview();
       expect(await overview.isOnOverview()).to.be(true);

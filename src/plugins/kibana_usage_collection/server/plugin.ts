@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import { Subject, Observable } from 'rxjs';
 import type {
   PluginInitializerContext,
@@ -24,6 +24,7 @@ import type {
 import { SavedObjectsClient } from '../../../core/server';
 import {
   startTrackingEventLoopDelaysUsage,
+  startTrackingEventLoopDelaysThreshold,
   SAVED_OBJECTS_DAILY_TYPE,
 } from './collectors/event_loop_delays';
 import {
@@ -59,6 +60,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
   private coreUsageData?: CoreUsageDataStart;
+  private eventLoopUsageCounter?: UsageCounter;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -70,6 +72,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
     usageCollection.createUsageCounter('uiCounters');
+    this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     this.registerUsageCollectors(
       usageCollection,
       coreSetup,
@@ -80,6 +83,9 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   }
 
   public start(core: CoreStart) {
+    if (!this.eventLoopUsageCounter) {
+      throw new Error('#setup must be called first');
+    }
     const { savedObjects, uiSettings } = core;
     this.savedObjectsClient = savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
@@ -87,6 +93,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
     this.coreUsageData = core.coreUsageData;
     startTrackingEventLoopDelaysUsage(this.savedObjectsClient, this.pluginStop$.asObservable());
+    startTrackingEventLoopDelaysThreshold(
+      this.eventLoopUsageCounter,
+      this.logger,
+      this.pluginStop$.asObservable()
+    );
   }
 
   public stop() {
