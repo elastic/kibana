@@ -7,8 +7,10 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '../../../core/server';
+import { ConfigDeprecationProvider, PluginInitializerContext } from '../../../core/server';
 import { APMOSSPlugin } from './plugin';
+
+const deprecations: ConfigDeprecationProvider = ({ unused }) => [unused('fleetMode')];
 
 export const config = {
   schema: schema.object({
@@ -22,6 +24,7 @@ export const config = {
     indexPattern: schema.string({ defaultValue: 'apm-*' }),
     fleetMode: schema.boolean({ defaultValue: true }),
   }),
+  deprecations,
 };
 
 export function plugin(initializerContext: PluginInitializerContext) {
