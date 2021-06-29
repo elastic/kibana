@@ -88,6 +88,10 @@ export type FunctionFactory<FnFactory> =
     ExpressionFunctionDefinition<Name, Input, Arguments, UnwrapPromiseOrReturn<Output>> :
     never;
 
+export type FromAsyncFunction<T extends (...args: any[]) => any> = () => UnwrapPromiseOrReturn<
+  ReturnType<T>
+>;
+
 type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
 type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
 type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
