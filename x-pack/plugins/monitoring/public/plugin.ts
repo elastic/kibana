@@ -105,6 +105,7 @@ export class MonitoringPlugin
           externalConfig: this.getExternalConfig(),
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
+          appMountParameters: params,
         };
 
         const monitoringApp = new AngularApp(deps);

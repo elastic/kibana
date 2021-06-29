@@ -374,7 +374,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getRoleName = () => {
     return (
-      <EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFormRow
           label={
             <FormattedMessage

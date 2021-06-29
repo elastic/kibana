@@ -85,7 +85,8 @@ export class DrawFeatureControl extends Component<Props, {}> {
 
   _onClick = async (event: MapMouseEvent, drawControl?: MapboxDraw) => {
     const mbLngLatPoint: MbPoint = event.point;
-    if (!this.props.editLayer) {
+    // Currently feature deletion is the only onClick handling
+    if (!this.props.editLayer || this.props.drawShape !== DRAW_SHAPE.DELETE) {
       return;
     }
     const mbEditLayerIds = this.props.editLayer

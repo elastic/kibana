@@ -38,9 +38,8 @@ import { AppAction } from '../../../../common/store/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath } from '../../../common/routing';
-import { useFormatUrl } from '../../../../common/components/link_to';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { MANAGEMENT_APP_ID } from '../../../common/constants';
+import { APP_ID } from '../../../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -73,7 +72,6 @@ export const PolicyDetails = React.memo(() => {
     },
   } = useKibana<{ application: ApplicationStart }>();
   const toasts = useToasts();
-  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
 
   // Store values
@@ -128,7 +126,7 @@ export const PolicyDetails = React.memo(() => {
 
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routingOnCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: hostListRouterPath }];
+    return routingOnCancelNavigateTo ?? [APP_ID, { path: hostListRouterPath }];
   }, [hostListRouterPath, routingOnCancelNavigateTo]);
 
   const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
@@ -208,8 +206,7 @@ export const PolicyDetails = React.memo(() => {
                   defaultMessage: 'Back to endpoint hosts',
                 }
               ),
-              href: formatUrl(hostListRouterPath),
-              pageId: SecurityPageName.administration,
+              pageId: SecurityPageName.endpoints,
               dataTestSubj: 'policyDetailsBackLink',
             }}
           >

@@ -50,15 +50,9 @@ export class DiskUsageAlert extends BaseAlert {
       },
       actionVariables: [
         {
-          name: 'nodes',
-          description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.nodes', {
-            defaultMessage: 'The list of nodes reporting high disk usage.',
-          }),
-        },
-        {
-          name: 'count',
-          description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.count', {
-            defaultMessage: 'The number of nodes reporting high disk usage.',
+          name: 'node',
+          description: i18n.translate('xpack.monitoring.alerts.diskUsage.actionVariables.node', {
+            defaultMessage: 'The node reporting high disk usage.',
           }),
         },
         ...Object.values(AlertingDefaults.ALERT_TYPE.context),
@@ -174,53 +168,63 @@ export class DiskUsageAlert extends BaseAlert {
     item: AlertData | null,
     cluster: AlertCluster
   ) {
-    const firingNodes = alertStates.filter(
-      (alertState) => alertState.ui.isFiring
-    ) as AlertDiskUsageState[];
-    const firingCount = firingNodes.length;
-
-    if (firingCount > 0) {
-      const shortActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.shortAction', {
-        defaultMessage: 'Verify disk usage levels across affected nodes.',
-      });
-      const fullActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.fullAction', {
-        defaultMessage: 'View nodes',
-      });
-
-      const action = `[${fullActionText}](elasticsearch/nodes)`;
-      const internalShortMessage = i18n.translate(
-        'xpack.monitoring.alerts.diskUsage.firing.internalShortMessage',
-        {
-          defaultMessage: `Disk usage alert is firing for {count} node(s) in cluster: {clusterName}. {shortActionText}`,
-          values: {
-            count: firingCount,
-            clusterName: cluster.clusterName,
-            shortActionText,
-          },
-        }
-      );
-      const internalFullMessage = i18n.translate(
-        'xpack.monitoring.alerts.diskUsage.firing.internalFullMessage',
-        {
-          defaultMessage: `Disk usage alert is firing for {count} node(s) in cluster: {clusterName}. {action}`,
-          values: {
-            count: firingCount,
-            clusterName: cluster.clusterName,
-            action,
-          },
-        }
-      );
-
-      instance.scheduleActions('default', {
-        internalShortMessage,
-        internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
-        state: AlertingDefaults.ALERT_STATE.firing,
-        nodes: firingNodes.map((state) => `${state.nodeName}:${state.diskUsage}`).join(','),
-        count: firingCount,
-        clusterName: cluster.clusterName,
-        action,
-        actionPlain: shortActionText,
-      });
+    if (alertStates.length === 0) {
+      return;
     }
+    const firingNode = alertStates[0] as AlertDiskUsageState;
+    if (!firingNode || !firingNode.ui.isFiring) {
+      return;
+    }
+
+    const shortActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.shortAction', {
+      defaultMessage: 'Verify disk usage level of node.',
+    });
+    const fullActionText = i18n.translate('xpack.monitoring.alerts.diskUsage.fullAction', {
+      defaultMessage: 'View node',
+    });
+    const ccs = firingNode.ccs;
+    const globalStateLink = this.createGlobalStateLink(
+      `elasticsearch/nodes/${firingNode.nodeId}`,
+      cluster.clusterUuid,
+      ccs
+    );
+    const action = `[${fullActionText}](${globalStateLink})`;
+    const internalShortMessage = i18n.translate(
+      'xpack.monitoring.alerts.diskUsage.firing.internalShortMessage',
+      {
+        defaultMessage: `Disk usage alert is firing for node {nodeName} in cluster: {clusterName}. {shortActionText}`,
+        values: {
+          clusterName: cluster.clusterName,
+          nodeName: firingNode.nodeName,
+          shortActionText,
+        },
+      }
+    );
+    const internalFullMessage = i18n.translate(
+      'xpack.monitoring.alerts.diskUsage.firing.internalFullMessage',
+      {
+        defaultMessage: `Disk usage alert is firing for node {nodeName} in cluster: {clusterName}. {action}`,
+        values: {
+          clusterName: cluster.clusterName,
+          nodeName: firingNode.nodeName,
+          action,
+        },
+      }
+    );
+
+    instance.scheduleActions('default', {
+      internalShortMessage,
+      internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
+      state: AlertingDefaults.ALERT_STATE.firing,
+      /* continue to send "nodes" and "count" values for users before https://github.com/elastic/kibana/pull/102544 
+          see https://github.com/elastic/kibana/issues/100136#issuecomment-865229431
+          */
+      nodes: `${firingNode.nodeName}:${firingNode.diskUsage}`,
+      count: 1,
+      node: `${firingNode.nodeName}:${firingNode.diskUsage}`,
+      clusterName: cluster.clusterName,
+      action,
+      actionPlain: shortActionText,
+    });
   }
 }
