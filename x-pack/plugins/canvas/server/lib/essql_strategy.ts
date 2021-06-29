@@ -8,7 +8,7 @@
 import { from } from 'rxjs';
 import { map, zipObject } from 'lodash';
 
-import { ISearchStrategy, PluginStart } from 'src/plugins/data/server';
+import { ISearchStrategy } from 'src/plugins/data/server';
 
 import { getKbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../types';
@@ -17,9 +17,10 @@ import { buildBoolArray } from '../../common/lib/request/build_bool_array';
 import { sanitizeName } from '../../common/lib/request/sanitize_name';
 import { normalizeType } from '../../common/lib/request/normalize_type';
 
-export const essqlSearchStrategyProvider = (
-  data: PluginStart
-): ISearchStrategy<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse> => {
+export const essqlSearchStrategyProvider = (): ISearchStrategy<
+  EssqlSearchStrategyRequest,
+  EssqlSearchStrategyResponse
+> => {
   return {
     search: (request, options, { esClient }) => {
       const { count, query, filter, timezone, params } = request;

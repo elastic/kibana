@@ -94,7 +94,7 @@ export const BetaNotification: React.FC<Props> = ({ buttonProps }) => {
 };
 
 export const appendBetaNotificationItem = (sideNav: KibanaPageTemplateProps['solutionNav']) => {
-  if (sideNav?.items) {
+  if (sideNav) {
     sideNav.items.push({
       id: 'beta',
       name: '',

@@ -122,10 +122,10 @@ describe('appendBetaNotificationItem', () => {
     expect(wrapper.find(BetaNotification)).toHaveLength(1);
   });
 
-  it('does nothing if a sidenav with no items was passed', () => {
-    const mockEmptySideNav = { name: 'empty' };
+  it('does nothing if no side nav was passed', () => {
+    const mockEmptySideNav = undefined;
     appendBetaNotificationItem(mockEmptySideNav);
 
-    expect(mockEmptySideNav).toEqual({ name: 'empty' });
+    expect(mockEmptySideNav).toEqual(undefined);
   });
 });

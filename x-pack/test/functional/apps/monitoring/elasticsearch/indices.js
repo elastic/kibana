@@ -22,6 +22,8 @@ export default function ({ getService, getPageObjects }) {
         to: 'Oct 6, 2017 @ 20:15:30.212',
       });
 
+      await overview.closeAlertsModal();
+
       // go to indices listing
       await overview.clickEsIndices();
       expect(await indicesList.isOnListing()).to.be(true);
