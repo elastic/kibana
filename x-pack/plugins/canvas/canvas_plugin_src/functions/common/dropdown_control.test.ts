@@ -21,14 +21,14 @@ describe('dropdownControl', () => {
     expect(
       fn(
         testTable,
-        { filterColumn: 'name', valueColumn: 'name' },
+        { filterColumn: 'name', valueColumn: 'name', labelColumn: '', filterGroup: '' },
         {} as ExecutionContext<Adapters, SerializableState>
       )
     ).toHaveProperty('type', 'render');
     expect(
       fn(
         testTable,
-        { filterColumn: 'name', valueColumn: 'name' },
+        { filterColumn: 'name', valueColumn: 'name', labelColumn: '', filterGroup: '' },
         {} as ExecutionContext<Adapters, SerializableState>
       )
     ).toHaveProperty('as', 'dropdown_filter');
@@ -45,7 +45,7 @@ describe('dropdownControl', () => {
         expect(
           fn(
             testTable,
-            { valueColumn: 'name' },
+            { valueColumn: 'name', labelColumn: '', filterGroup: '', filterColumn: '' },
             {} as ExecutionContext<Adapters, SerializableState>
           )?.value?.choices
         ).toEqual(uniqueNames);
@@ -53,12 +53,28 @@ describe('dropdownControl', () => {
 
       it('returns an empty array when provided an invalid column', () => {
         expect(
-          fn(testTable, { valueColumn: 'foo' }, {} as ExecutionContext<Adapters, SerializableState>)
-            ?.value?.choices
+          fn(
+            testTable,
+            {
+              valueColumn: 'foo',
+              labelColumn: '',
+              filterGroup: '',
+              filterColumn: '',
+            },
+            {} as ExecutionContext<Adapters, SerializableState>
+          )?.value?.choices
         ).toEqual([]);
         expect(
-          fn(testTable, { valueColumn: '' }, {} as ExecutionContext<Adapters, SerializableState>)
-            ?.value?.choices
+          fn(
+            testTable,
+            {
+              valueColumn: '',
+              labelColumn: '',
+              filterGroup: '',
+              filterColumn: '',
+            },
+            {} as ExecutionContext<Adapters, SerializableState>
+          )?.value?.choices
         ).toEqual([]);
       });
     });
@@ -69,7 +85,12 @@ describe('dropdownControl', () => {
         expect(
           fn(
             relationalTable,
-            { valueColumn: 'id', labelColumn: 'name' },
+            {
+              valueColumn: 'id',
+              labelColumn: 'name',
+              filterGroup: '',
+              filterColumn: '',
+            },
             {} as ExecutionContext<Adapters, SerializableState>
           )?.value?.choices
         ).toEqual(expectedChoices);
@@ -80,13 +101,26 @@ describe('dropdownControl', () => {
   describe('filterColumn', () => {
     it('sets which column the filter is applied to', () => {
       expect(
-        fn(testTable, { filterColumn: 'name' }, {} as ExecutionContext<Adapters, SerializableState>)
-          ?.value
+        fn(
+          testTable,
+          {
+            filterColumn: 'name',
+            valueColumn: '',
+            filterGroup: '',
+            labelColumn: '',
+          },
+          {} as ExecutionContext<Adapters, SerializableState>
+        )?.value
       ).toHaveProperty('column', 'name');
       expect(
         fn(
           testTable,
-          { filterColumn: 'name', valueColumn: 'price' },
+          {
+            filterColumn: 'name',
+            valueColumn: 'price',
+            labelColumn: '',
+            filterGroup: '',
+          },
           {} as ExecutionContext<Adapters, SerializableState>
         )?.value
       ).toHaveProperty('column', 'name');
@@ -94,15 +128,17 @@ describe('dropdownControl', () => {
 
     it('defaults to valueColumn if not provided', () => {
       expect(
-        fn(testTable, { valueColumn: 'price' }, {} as ExecutionContext<Adapters, SerializableState>)
-          ?.value
+        fn(
+          testTable,
+          {
+            valueColumn: 'price',
+            labelColumn: '',
+            filterGroup: '',
+            filterColumn: '',
+          },
+          {} as ExecutionContext<Adapters, SerializableState>
+        )?.value
       ).toHaveProperty('column', 'price');
-    });
-
-    it('sets column to undefined if no args are provided', () => {
-      expect(
-        fn(testTable, {}, {} as ExecutionContext<Adapters, SerializableState>)?.value
-      ).toHaveProperty('column', undefined);
     });
   });
 });
