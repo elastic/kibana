@@ -12,10 +12,12 @@ import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 
 export const NotFoundPage = React.memo(() => (
   <SecuritySolutionPageWrapper>
-    <FormattedMessage
-      id="xpack.securitySolution.pages.fourohfour.noContentFoundDescription"
-      defaultMessage="No content found"
-    />
+    <div data-test-subj="notFoundPage">
+      <FormattedMessage
+        id="xpack.securitySolution.pages.fourohfour.noContentFoundDescription"
+        defaultMessage="No content found"
+      />
+    </div>
   </SecuritySolutionPageWrapper>
 ));
 

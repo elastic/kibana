@@ -17,7 +17,7 @@ import { DetectionEnginePage } from './pages/detection_engine/detection_engine';
 
 const renderAlertsRoutes = () => (
   <Switch>
-    <Route path={ALERTS_PATH}>
+    <Route path={ALERTS_PATH} exact>
       <TrackApplicationView viewId={SecurityPageName.alerts}>
         <DetectionEnginePage />
         <SpyRoute pageName={SecurityPageName.alerts} />

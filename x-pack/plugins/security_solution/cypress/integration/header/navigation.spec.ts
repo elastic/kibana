@@ -33,8 +33,8 @@ import {
   NETWORK_URL,
   OVERVIEW_URL,
   TIMELINES_URL,
-  RULES_URL,
   EXCEPTIONS_URL,
+  DETECTIONS_RULE_MANAGEMENT_URL,
 } from '../../urls/navigation';
 import {
   openKibanaNavigation,
@@ -79,7 +79,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
 
   it('navigates to the Rules page', () => {
     navigateFromHeaderTo(RULES);
-    cy.url().should('include', RULES_URL);
+    cy.url().should('include', DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
   it('navigates to the Exceptions page', () => {
