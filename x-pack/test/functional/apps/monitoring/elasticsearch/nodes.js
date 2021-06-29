@@ -29,6 +29,8 @@ export default function ({ getService, getPageObjects }) {
           }
         );
 
+        await overview.closeAlertsModal();
+
         // go to nodes listing
         await overview.clickEsNodes();
         expect(await nodesList.isOnListing()).to.be(true);
