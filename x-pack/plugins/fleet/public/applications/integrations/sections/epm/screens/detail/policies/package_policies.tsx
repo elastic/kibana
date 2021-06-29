@@ -31,7 +31,7 @@ import {
   useUrlPagination,
   useGetPackageInstallStatus,
   AgentPolicyRefreshContext,
-  useAgentEnrollmentFlyoutExtension,
+  useUIExtension,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
@@ -91,7 +91,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
 
-  const agentEnrollmentFlyoutExtensionStepProps = useAgentEnrollmentFlyoutExtension(name);
+  const agentEnrollmentFlyoutExtension = useUIExtension(name, 'agent-enrollment-flyout');
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PackagePolicyAndAgentPolicy>) => {
@@ -104,8 +104,11 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   );
 
   const viewDataStep = useMemo<EuiStepInterface>(() => {
-    if (agentEnrollmentFlyoutExtensionStepProps) {
-      return agentEnrollmentFlyoutExtensionStepProps;
+    if (agentEnrollmentFlyoutExtension) {
+      return {
+        title: agentEnrollmentFlyoutExtension.title,
+        children: <agentEnrollmentFlyoutExtension.Component />,
+      };
     }
 
     return {
@@ -139,7 +142,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         </>
       ),
     };
-  }, [name, version, getHref, agentEnrollmentFlyoutExtensionStepProps]);
+  }, [name, version, getHref, agentEnrollmentFlyoutExtension]);
 
   const columns: Array<EuiTableFieldDataColumnType<PackagePolicyAndAgentPolicy>> = useMemo(
     () => [

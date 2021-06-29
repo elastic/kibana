@@ -338,7 +338,7 @@ export const EditPackagePolicyForm = memo<{
     packageInfo,
   };
 
-  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
+  const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
 
   const configurePackage = useMemo(
     () =>
@@ -354,7 +354,7 @@ export const EditPackagePolicyForm = memo<{
           />
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
-          {!ExtensionView && (
+          {!extensionView && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
@@ -364,12 +364,12 @@ export const EditPackagePolicyForm = memo<{
             />
           )}
 
-          {ExtensionView &&
+          {extensionView &&
             packagePolicy.policy_id &&
             packagePolicy.package?.name &&
             originalPackagePolicy && (
               <ExtensionWrapper>
-                <ExtensionView
+                <extensionView.Component
                   policy={originalPackagePolicy}
                   newPolicy={packagePolicy}
                   onChange={handleExtensionViewOnChange}
@@ -386,7 +386,7 @@ export const EditPackagePolicyForm = memo<{
       validationResults,
       formState,
       originalPackagePolicy,
-      ExtensionView,
+      extensionView,
       handleExtensionViewOnChange,
     ]
   );

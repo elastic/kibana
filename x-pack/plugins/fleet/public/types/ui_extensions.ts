@@ -49,7 +49,7 @@ export interface PackagePolicyEditExtensionComponentProps {
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
-  component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+  Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
 }
 
 /**
@@ -77,7 +77,7 @@ export interface PackagePolicyCreateExtensionComponentProps {
 export interface PackagePolicyCreateExtension {
   package: string;
   view: 'package-policy-create';
-  component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
+  Component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
 }
 
 /**
@@ -95,7 +95,7 @@ export interface PackageCustomExtensionComponentProps {
 export interface PackageCustomExtension {
   package: string;
   view: 'package-detail-custom';
-  component: LazyExoticComponent<PackageCustomExtensionComponent>;
+  Component: LazyExoticComponent<PackageCustomExtensionComponent>;
 }
 
 /**
@@ -107,14 +107,14 @@ export type PackageAssetsComponent = ComponentType<{}>;
 export interface PackageAssetsExtension {
   package: string;
   view: 'package-detail-assets';
-  component: LazyExoticComponent<PackageAssetsComponent>;
+  Component: LazyExoticComponent<PackageAssetsComponent>;
 }
 
 export interface AgentEnrollmentFlyoutFinalStepExtension {
   package: string;
   view: 'agent-enrollment-flyout';
-  stepProps: EuiStepProps;
-  component: null;
+  title: EuiStepProps['title'];
+  Component: ComponentType<{}>;
 }
 
 /** Fleet UI Extension Point */

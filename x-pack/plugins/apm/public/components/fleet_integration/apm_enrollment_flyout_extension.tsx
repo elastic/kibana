@@ -11,11 +11,40 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { AgentEnrollmentFlyoutFinalStepExtension } from '../../../../fleet/public';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../../plugin';
 
-export function getApmEnrollmentFlyoutStepProps(): AgentEnrollmentFlyoutFinalStepExtension['stepProps'] {
-  // TODO: Figure out how to get `http.basePath` here
-  const installApmAgentLink = '/app/home#/tutorial/apm';
+function StepComponent() {
+  const { http } = useKibana<ApmPluginStartDeps>().services;
+  const installApmAgentLink = http?.basePath.prepend('/app/home#/tutorial/apm');
 
+  return (
+    <>
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentInstructions"
+            defaultMessage="
+          After the agent starts, you can install APM agents on your hosts to collect data from your applications and services."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      <EuiButton fill href={installApmAgentLink}>
+        <FormattedMessage
+          id="xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText"
+          defaultMessage="Install APM Agent"
+        />
+      </EuiButton>
+    </>
+  );
+}
+
+export function getApmEnrollmentFlyoutData(): Pick<
+  AgentEnrollmentFlyoutFinalStepExtension,
+  'title' | 'Component'
+> {
   return {
     title: i18n.translate(
       'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentTitle',
@@ -23,26 +52,6 @@ export function getApmEnrollmentFlyoutStepProps(): AgentEnrollmentFlyoutFinalSte
         defaultMessage: 'Install APM Agent',
       }
     ),
-    children: (
-      <>
-        <EuiText>
-          <p>
-            <FormattedMessage
-              id="xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentInstructions"
-              defaultMessage="
-              After the agent starts, you can install APM agents on your hosts to collect data from your applications and services."
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-
-        <EuiButton fill href={installApmAgentLink}>
-          <FormattedMessage
-            id="xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText"
-            defaultMessage="Install APM Agent"
-          />
-        </EuiButton>
-      </>
-    ),
+    Component: StepComponent,
   };
 }

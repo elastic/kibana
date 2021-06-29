@@ -37,7 +37,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const {
     savedObjects: { client: savedObjectsClient },
   } = useStartServices();
-  const CustomAssets = useUIExtension(packageInfo.name, 'package-detail-assets');
+  const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
 
   const { getPath } = useLink();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -104,12 +104,12 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       />
     );
   } else if (assetSavedObjects === undefined) {
-    if (CustomAssets) {
+    if (customAssetsExtension) {
       // If a UI extension for custom asset entries is defined, render the custom component here depisite
       // there being no saved objects found
       content = (
         <ExtensionWrapper>
-          <CustomAssets />
+          <customAssetsExtension.Component />
         </ExtensionWrapper>
       );
     } else {
@@ -141,9 +141,9 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         );
       }),
       // Ensure we add any custom assets provided via UI extension to the end of the list of other assets
-      CustomAssets ? (
+      customAssetsExtension ? (
         <ExtensionWrapper>
-          <CustomAssets />
+          <customAssetsExtension.Component />
         </ExtensionWrapper>
       ) : null,
     ];

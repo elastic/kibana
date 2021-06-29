@@ -45,7 +45,7 @@ import type {
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import {
-  getApmEnrollmentFlyoutStepProps,
+  getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
 } from './components/fleet_integration';
 
@@ -312,17 +312,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { registerExtension } = plugins.fleet;
 
+    const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
+
     registerExtension({
       package: 'apm',
       view: 'agent-enrollment-flyout',
-      stepProps: getApmEnrollmentFlyoutStepProps(),
-      component: null,
+      title: agentEnrollmentExtensionData.title,
+      Component: agentEnrollmentExtensionData.Component,
     });
 
     registerExtension({
       package: 'apm',
       view: 'package-detail-assets',
-      component: LazyApmCustomAssetsExtension,
+      Component: LazyApmCustomAssetsExtension,
     });
   }
 }

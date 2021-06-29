@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+
 import {
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
 } from '../../../../fleet/public';
-import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ApmPluginStartDeps } from '../../plugin';
 
 export function ApmCustomAssetsExtension() {
-  const { core } = useApmPluginContext();
-  const basePath = core.http.basePath.get();
+  const { http } = useKibana<ApmPluginStartDeps>().services;
+  const basePath = http?.basePath.get();
 
   const views: CustomAssetsAccordionProps['views'] = [
     {
