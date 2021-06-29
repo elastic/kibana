@@ -1,0 +1,9 @@
+.apmHelpPopover__panel {
+  max-width: $euiSize * 30;
+}
+
+.apmHelpPopover__content {
+  @include euiYScrollWithShadows;
+  max-height: 40vh;
+  padding: $euiSizeS;
+}
