@@ -13,7 +13,6 @@ import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
-  buildOssDist: boolean;
   buildDefaultDist: boolean;
   downloadFreshNode: boolean;
   initialize: boolean;
@@ -38,7 +37,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     config,
     log,
     buildDefaultDist: options.buildDefaultDist,
-    buildOssDist: options.buildOssDist,
   });
 
   /**
