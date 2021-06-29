@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
@@ -19,7 +19,8 @@ import type { ObservabilityAPIReturnType } from '../../services/call_observabili
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
-import status_filterStories from './status_filter.stories';
+import { useFetcher } from '../../hooks/use_fetcher';
+import { callObservabilityApi } from '../../services/call_observability_api';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
@@ -56,6 +57,18 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   // observability. For now link to the settings page.
   const manageDetectionRulesHref = prepend(
     '/app/management/insightsAndAlerting/triggersActions/alerts'
+  );
+
+  const { data: dynamicIndexPatternResp } = useFetcher(({ signal }) => {
+    return callObservabilityApi({
+      signal,
+      endpoint: 'GET /api/observability/rules/alerts/dynamic_index_pattern',
+    });
+  }, []);
+
+  const dynamicIndexPattern = useMemo(
+    () => (dynamicIndexPatternResp ? [dynamicIndexPatternResp] : []),
+    [dynamicIndexPatternResp]
   );
 
   const setStatusFilter = useCallback(
@@ -137,6 +150,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
+            dynamicIndexPattern={dynamicIndexPattern}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             query={kuery}
@@ -154,6 +168,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertsTableTGrid
+              indexName={dynamicIndexPattern.length > 0 ? dynamicIndexPattern[0].title : ''}
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
               kuery={kuery}

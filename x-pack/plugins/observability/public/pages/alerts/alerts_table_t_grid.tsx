@@ -26,6 +26,7 @@ import { decorateResponse } from './decorate_response';
 import { LazyAlertsFlyout } from '../..';
 
 interface AlertsTableTGridProps {
+  indexName: string;
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
@@ -90,7 +91,7 @@ const trailingControlColumns: never[] = [];
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
-  const { rangeFrom, rangeTo, kuery, status, setRefetch } = props;
+  const { indexName, rangeFrom, rangeTo, kuery, status, setRefetch } = props;
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
@@ -159,7 +160,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         deletedEventIds: [],
         end: rangeTo,
         filters: [],
-        indexNames: ['.kibana_smith_alerts-observability*'],
+        indexNames: [indexName],
         itemsPerPage: 10,
         itemsPerPageOptions: [10, 25, 50],
         loadingText: i18n.translate('xpack.observability.alertsTable.loadingTextLabel', {
