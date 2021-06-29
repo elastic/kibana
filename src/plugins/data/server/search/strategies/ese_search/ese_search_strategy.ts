@@ -71,12 +71,14 @@ export const enhancedEsSearchStrategyProvider = (
       const promise = id
         ? client.asyncSearch.get({ ...params, id })
         : client.asyncSearch.submit(params);
-      const { body } = await shimAbortSignal(promise, options.abortSignal);
+      const { body, headers } = await shimAbortSignal(promise, options.abortSignal);
+
       const response = shimHitsTotal(body.response, options);
 
       return toAsyncKibanaSearchResponse(
         // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
-        { ...body, response }
+        { ...body, response },
+        headers?.warning
       );
     };
 
