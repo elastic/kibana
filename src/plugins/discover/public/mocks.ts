@@ -21,6 +21,10 @@ const createSetupContract = (): Setup => {
       getUrl: jest.fn(),
       useUrl: jest.fn(),
       navigate: jest.fn(),
+      extract: jest.fn(),
+      inject: jest.fn(),
+      telemetry: jest.fn(),
+      migrations: {},
     },
   };
   return setupContract;
@@ -37,6 +41,10 @@ const createStartContract = (): Start => {
       getUrl: jest.fn(),
       useUrl: jest.fn(),
       navigate: jest.fn(),
+      extract: jest.fn(),
+      inject: jest.fn(),
+      telemetry: jest.fn(),
+      migrations: {},
     },
   };
   return startContract;

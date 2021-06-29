@@ -14,44 +14,50 @@ import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 interface JobMessagesPaneProps {
   jobId: string;
+  start?: string;
+  end?: string;
+  actionHandler?: (message: JobMessage) => void;
 }
 
-export const JobMessagesPane: FC<JobMessagesPaneProps> = ({ jobId }) => {
-  const [messages, setMessages] = useState<JobMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const toastNotificationService = useToastNotificationService();
+export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
+  ({ jobId, start, end, actionHandler }) => {
+    const [messages, setMessages] = useState<JobMessage[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const toastNotificationService = useToastNotificationService();
 
-  const fetchMessages = async () => {
-    setIsLoading(true);
-    try {
-      setMessages(await ml.jobs.jobAuditMessages(jobId));
-      setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-      toastNotificationService.displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.jobService.jobAuditMessagesErrorTitle', {
-          defaultMessage: 'Error loading job messages',
-        })
-      );
+    const fetchMessages = async () => {
+      setIsLoading(true);
+      try {
+        setMessages(await ml.jobs.jobAuditMessages({ jobId, start, end }));
+        setIsLoading(false);
+      } catch (error) {
+        setIsLoading(false);
+        toastNotificationService.displayErrorToast(
+          error,
+          i18n.translate('xpack.ml.jobService.jobAuditMessagesErrorTitle', {
+            defaultMessage: 'Error loading job messages',
+          })
+        );
 
-      setErrorMessage(extractErrorMessage(error));
-    }
-  };
+        setErrorMessage(extractErrorMessage(error));
+      }
+    };
 
-  const refreshMessage = useCallback(fetchMessages, [jobId]);
+    const refreshMessage = useCallback(fetchMessages, [jobId]);
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
+    useEffect(() => {
+      fetchMessages();
+    }, []);
 
-  return (
-    <JobMessages
-      refreshMessage={refreshMessage}
-      messages={messages}
-      loading={isLoading}
-      error={errorMessage}
-    />
-  );
-};
+    return (
+      <JobMessages
+        refreshMessage={refreshMessage}
+        messages={messages}
+        loading={isLoading}
+        error={errorMessage}
+        actionHandler={actionHandler}
+      />
+    );
+  }
+);
