@@ -11,7 +11,7 @@ import {
   SavedObject,
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
 } from '../../../../../../../src/core/server';
 import { ruleStatusSavedObjectType } from '../rules/saved_object_mappings';
 import { IRuleStatusSOAttributes } from '../rules/types';
@@ -20,7 +20,7 @@ import { buildChunkedOrFilter } from './utils';
 export interface RuleStatusSavedObjectsClient {
   find: (
     options?: Omit<SavedObjectsFindOptions, 'type'>
-  ) => Promise<SavedObjectsFindResponse<IRuleStatusSOAttributes>>;
+  ) => Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>>;
   findBulk: (ids: string[], statusesPerId: number) => Promise<FindBulkResponse>;
   create: (attributes: IRuleStatusSOAttributes) => Promise<SavedObject<IRuleStatusSOAttributes>>;
   update: (
@@ -30,18 +30,20 @@ export interface RuleStatusSavedObjectsClient {
   delete: (id: string) => Promise<{}>;
 }
 
-interface FindBulkResponse {
+export interface FindBulkResponse {
   [key: string]: IRuleStatusSOAttributes[] | undefined;
 }
 
 export const ruleStatusSavedObjectsClientFactory = (
   savedObjectsClient: SavedObjectsClientContract
 ): RuleStatusSavedObjectsClient => ({
-  find: (options) =>
-    savedObjectsClient.find<IRuleStatusSOAttributes>({
+  find: async (options) => {
+    const result = await savedObjectsClient.find<IRuleStatusSOAttributes>({
       ...options,
       type: ruleStatusSavedObjectType,
-    }),
+    });
+    return result.saved_objects;
+  },
   findBulk: async (ids, statusesPerId) => {
     if (ids.length === 0) {
       return {};
