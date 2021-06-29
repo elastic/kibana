@@ -17,6 +17,7 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
@@ -266,7 +267,13 @@ export const App = (props: {
                 )}
               </>
             ) : (
-              <p>This demo only works if your default index pattern is set and time based</p>
+              <EuiCallOut
+                title="Please define a default index pattern to use this demo"
+                color="danger"
+                iconType="alert"
+              >
+                <p>This demo only works if your default index pattern is set and time based</p>
+              </EuiCallOut>
             )}
           </EuiPageContentBody>
         </EuiPageContent>
