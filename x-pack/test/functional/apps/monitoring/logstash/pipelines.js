@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects }) {
         to: 'Jan 22, 2018 @ 09:41:00.000',
       });
 
+      await overview.closeAlertsModal();
+
       // go to pipelines listing
       await overview.clickLsPipelines();
       expect(await pipelinesList.isOnListing()).to.be(true);
