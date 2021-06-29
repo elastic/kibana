@@ -19,6 +19,8 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
+import { AssetTitleMap } from '../applications/integrations/sections/epm/constants';
+
 export interface CustomAssetsAccordionProps {
   views: Array<{
     name: string;
@@ -39,7 +41,7 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="m">
-              <h3>Views</h3>
+              <h3>{AssetTitleMap.view}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
