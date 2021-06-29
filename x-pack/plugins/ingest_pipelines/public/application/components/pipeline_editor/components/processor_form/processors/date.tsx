@@ -87,7 +87,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     helpText: (
       <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.dateForm.localeHelpText"
+        id="xpack.ingestPipelines.pipelineEditor.dateForm.outputFormatHelpText"
         defaultMessage="Format to use when writing the date to {targetField}. Accepts a Java time pattern or one of the following formats: {allowedFormats}. Defaults to {defaultFormat}."
         values={{
           targetField: <EuiCode>{'target_field'}</EuiCode>,
