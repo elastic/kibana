@@ -7,15 +7,17 @@
 
 import { TestBed } from '@kbn/test/jest';
 import { Phase } from '../../../../common/types';
-import { createFormToggleAction } from './form_toggle_action';
-import { createFormSetValueAction } from './form_set_value_action';
+import { createFormToggleAndSetValueAction } from './form_toggle_and_set_value_action';
 
 export const createShrinkActions = (testBed: TestBed, phase: Phase) => {
   const { exists } = testBed;
   const toggleSelector = `${phase}-shrinkSwitch`;
   return {
     shrinkExists: () => exists(toggleSelector),
-    toggleShrink: createFormToggleAction(testBed, toggleSelector),
-    setShrink: createFormSetValueAction(testBed, `${phase}-primaryShardCount`),
+    setShrink: createFormToggleAndSetValueAction(
+      testBed,
+      toggleSelector,
+      `${phase}-primaryShardCount`
+    ),
   };
 };

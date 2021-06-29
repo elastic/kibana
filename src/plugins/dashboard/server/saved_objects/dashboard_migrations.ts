@@ -7,7 +7,7 @@
  */
 
 import semver from 'semver';
-import { get, flow } from 'lodash';
+import { get, flow, identity } from 'lodash';
 import {
   SavedObjectAttributes,
   SavedObjectMigrationFn,
@@ -25,7 +25,9 @@ import {
   convertSavedDashboardPanelToPanelState,
 } from '../../common/embeddable/embeddable_saved_object_converters';
 import { SavedObjectEmbeddableInput } from '../../../embeddable/common';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
 import { SerializableValue } from '../../../kibana_utils/common';
+import { replaceIndexPatternReference } from './replace_index_pattern_reference';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -43,7 +45,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
-      type: 'index-pattern',
+      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
       id: searchSource.index,
     });
     delete searchSource.index;
@@ -56,7 +58,7 @@ function migrateIndexPattern(doc: DashboardDoc700To720) {
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
-        type: 'index-pattern',
+        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
         id: filterRow.meta.index,
       });
       delete filterRow.meta.index;
@@ -214,12 +216,14 @@ export interface DashboardSavedObjectTypeMigrationsDeps {
 export const createDashboardSavedObjectTypeMigrations = (
   deps: DashboardSavedObjectTypeMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const embeddableMigrations = deps.embeddable
-    .getMigrationVersions()
-    .filter((version) => semver.gt(version, '7.12.0'))
-    .map((version): [string, SavedObjectMigrationFn] => {
-      return [version, migrateByValuePanels(deps, version)];
-    });
+  const embeddableMigrations = Object.fromEntries(
+    deps.embeddable
+      .getMigrationVersions()
+      .filter((version) => semver.gt(version, '7.12.0'))
+      .map((version): [string, SavedObjectMigrationFn] => {
+        return [version, migrateByValuePanels(deps, version)];
+      })
+  );
 
   return {
     /**
@@ -237,12 +241,15 @@ export const createDashboardSavedObjectTypeMigrations = (
     '7.3.0': flow(migrations730),
     '7.9.3': flow(migrateMatchAllQuery),
     '7.11.0': flow(createExtractPanelReferencesMigration(deps)),
-    ...Object.fromEntries(embeddableMigrations),
+
+    ...embeddableMigrations,
 
     /**
      * Any dashboard saved object migrations that come after this point will have to be wary of
      * potentially overwriting embeddable migrations. An example of how to mitigate this follows:
      */
-    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'])
+    // '7.x': flow(yourNewMigrationFunction, embeddableMigrations['7.x'] ?? identity),
+
+    '7.14.0': flow(replaceIndexPatternReference, embeddableMigrations['7.14.0'] ?? identity),
   };
 };

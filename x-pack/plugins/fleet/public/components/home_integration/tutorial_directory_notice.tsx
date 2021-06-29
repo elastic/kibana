@@ -66,7 +66,6 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
 
   return hasIngestManager && !hasSeenNotice ? (
     <>
-      <EuiSpacer size="m" />
       <EuiCallOut
         iconType="cheer"
         title={
@@ -134,6 +133,7 @@ const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
           </FlexItemButtonWrapper>
         </EuiFlexGroup>
       </EuiCallOut>
+      <EuiSpacer size="m" />
     </>
   ) : null;
 });

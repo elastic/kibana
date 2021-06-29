@@ -89,6 +89,7 @@ export const registerMetricInventoryThresholdAlertType = (
   actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
   producer: 'infrastructure',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   executor: createInventoryMetricThresholdExecutor(libs),
   actionVariables: {
     context: [

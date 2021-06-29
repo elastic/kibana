@@ -42,3 +42,8 @@ export const ISOLATION_STATUS_FAILURE = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.isolationStatus.title',
   { defaultMessage: 'Failed to retrieve current isolation status' }
 );
+
+export const ISOLATION_PENDING_FAILURE = i18n.translate(
+  'xpack.securitySolution.endpoint.hostIsolation.isolationPending.title',
+  { defaultMessage: 'Failed to retrieve isolation pending statuses' }
+);

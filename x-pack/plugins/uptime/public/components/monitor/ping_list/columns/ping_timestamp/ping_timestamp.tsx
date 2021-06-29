@@ -9,7 +9,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import {
+  isScreenshotImageBlob,
+  isScreenshotRef,
+  ScreenshotRefImageData,
+} from '../../../../../../common/runtime_types/ping';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../../contexts';
@@ -27,12 +31,12 @@ const StepDiv = styled.div`
 `;
 
 interface Props {
+  checkGroup?: string;
   label?: string;
-  ping: Ping;
   initialStepNo?: number;
 }
 
-export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
+export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -42,7 +46,7 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
 
   const { basePath } = useContext(UptimeSettingsContext);
 
-  const imgPath = `${basePath}/api/uptime/journey/screenshot/${ping.monitor.check_group}/${stepNumber}`;
+  const imgPath = `${basePath}/api/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
 
   const intersection = useIntersection(intersectionRef, {
     root: null,
@@ -55,13 +59,19 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
       return getJourneyScreenshot(imgPath);
   }, [intersection?.intersectionRatio, stepNumber]);
 
+  const [screenshotRef, setScreenshotRef] = useState<ScreenshotRefImageData | undefined>(undefined);
   useEffect(() => {
-    if (data) {
+    if (isScreenshotRef(data)) {
+      setScreenshotRef(data);
+    } else if (isScreenshotImageBlob(data)) {
       setStepImages((prevState) => [...prevState, data?.src]);
     }
   }, [data]);
 
-  const imgSrc = stepImages?.[stepNumber - 1] ?? data?.src;
+  let imgSrc;
+  if (isScreenshotImageBlob(data)) {
+    imgSrc = stepImages?.[stepNumber - 1] ?? data.src;
+  }
 
   const captionContent = formatCaptionContent(stepNumber, data?.maxSteps);
 
@@ -71,6 +81,7 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
     <StepImageCaption
       captionContent={captionContent}
       imgSrc={imgSrc}
+      imgRef={screenshotRef}
       maxSteps={data?.maxSteps}
       setStepNumber={setStepNumber}
       stepNumber={stepNumber}
@@ -100,14 +111,16 @@ export const PingTimestamp = ({ label, ping, initialStepNo = 1 }: Props) => {
           onMouseLeave={() => setIsImagePopoverOpen(false)}
           ref={intersectionRef}
         >
-          {imgSrc ? (
+          {(imgSrc || screenshotRef) && (
             <StepImagePopover
               captionContent={captionContent}
               imageCaption={ImageCaption}
               imgSrc={imgSrc}
+              imgRef={screenshotRef}
               isImagePopoverOpen={isImagePopoverOpen}
             />
-          ) : (
+          )}
+          {!imgSrc && !screenshotRef && (
             <NoImageDisplay
               imageCaption={ImageCaption}
               isLoading={status === FETCH_STATUS.LOADING}
