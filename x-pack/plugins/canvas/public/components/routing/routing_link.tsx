@@ -6,51 +6,35 @@
  */
 
 import React, { FC } from 'react';
-import {
-  EuiLink,
-  EuiLinkProps,
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiButtonEmptyProps,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiLink, EuiLinkProps, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
 interface RoutingProps {
   to: string;
 }
 
-type ComponentProps<P> = Omit<P, 'href' | 'onClick'> & RoutingProps;
+type RoutingLinkProps = Omit<EuiLinkProps, 'href' | 'onClick'> & RoutingProps;
 
-export const RoutingLink: FC<ComponentProps<EuiLinkProps>> = ({ to, ...rest }) => {
+export const RoutingLink: FC<RoutingLinkProps> = ({ to, ...rest }) => {
   const history = useHistory();
 
   // Generate the correct link href (with basename accounted for)
   const href = history.createHref({ pathname: to });
 
-  const props = { ...rest, href };
+  const props = { ...rest, href } as EuiLinkProps;
 
-  return <EuiLink {...(props as EuiLinkProps)} />;
+  return <EuiLink {...props} />;
 };
 
-export const RoutingButtonEmpty: FC<ComponentProps<EuiButtonEmptyProps>> = ({ to, ...rest }) => {
+type RoutingButtonIconProps = Omit<EuiButtonIconProps, 'href' | 'onClick'> & RoutingProps;
+
+export const RoutingButtonIcon: FC<RoutingButtonIconProps> = ({ to, ...rest }) => {
   const history = useHistory();
 
   // Generate the correct link href (with basename accounted for)
   const href = history.createHref({ pathname: to });
 
-  const props = { ...rest, href };
-
-  return <EuiButtonEmpty {...(props as EuiButtonEmptyProps)} />;
-};
-
-export const RoutingButtonIcon: FC<ComponentProps<EuiButtonIconProps>> = ({ to, ...rest }) => {
-  const history = useHistory();
-
-  // Generate the correct link href (with basename accounted for)
-  const href = history.createHref({ pathname: to });
-
-  const props = { ...rest, href };
+  const props = { ...rest, href } as EuiButtonIconProps;
 
   return <EuiButtonIcon {...props} />;
 };

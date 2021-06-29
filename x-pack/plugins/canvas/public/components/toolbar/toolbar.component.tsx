@@ -15,7 +15,7 @@ import { Expression } from '../expression';
 import { Tray } from './tray';
 
 import { CanvasElement } from '../../../types';
-import { RoutingButtonIcon, RoutingButtonEmpty } from '../routing';
+import { RoutingButtonIcon } from '../routing';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
@@ -95,9 +95,7 @@ export const Toolbar: FC<Props> = ({
       <div className="canvasToolbar__container">
         <EuiFlexGroup gutterSize="none" alignItems="center">
           <EuiFlexItem grow={false} className="canvasToolbar__home">
-            <RoutingButtonEmpty color="text" iconType="grid" to="/">
-              {workpadName}
-            </RoutingButtonEmpty>
+            {workpadName}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="none" className="canvasToolbar__controls">
