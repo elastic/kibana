@@ -30,7 +30,7 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
-import { emptyLabel } from '../../../../../common/empty_label';
+import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 
 const generateAnnotationData = (values, formatter) =>
@@ -213,7 +213,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -238,7 +238,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={seriesName || emptyLabel}
+                name={getValueOrEmpty(seriesName)}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}
