@@ -41,4 +41,26 @@ describe('ExampleSearchResultGroup', () => {
 
     expect(wrapper.find('[data-test-subj="DefaultDescriptionLabel"]')).toHaveLength(1);
   });
+
+  it('renders optional fields if they exist in result', () => {
+    setMockValues({
+      ...exampleResult,
+      exampleDocuments: [
+        {
+          myLink: 'http://foo',
+          otherTitle: 'foo',
+          otherType: 'File',
+          otherMediaType: 'PDF',
+          otherCreatedBy: 'bar',
+          otherUpdatedBy: 'baz',
+        },
+      ],
+    });
+    const wrapper = shallow(<ExampleSearchResultGroup />);
+
+    expect(wrapper.find('[data-test-subj="CreatedByField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="UpdatedByField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="TypeField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="MediaTypeField"]')).toHaveLength(1);
+  });
 });
