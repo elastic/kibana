@@ -69,7 +69,7 @@ export const HostsTabs = memo<HostsTabsProps>(
       endDate: to,
       filterQuery,
       indexNames,
-      skip: isInitializing,
+      skip: isInitializing || filterQuery === undefined,
       setQuery,
       startDate: from,
       type,

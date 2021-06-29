@@ -180,6 +180,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
+      skip={filterQuery === undefined}
       startDate={from}
       timelineId={timelineId}
       {...eventsByDatasetHistogramConfigs}
