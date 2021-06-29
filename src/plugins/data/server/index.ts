@@ -117,7 +117,12 @@ export const fieldFormats = {
   HistogramFormat,
 };
 
-export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
+export {
+  IFieldFormatsRegistry,
+  FieldFormatsGetConfigFn,
+  FieldFormatConfig,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+} from '../common';
 
 /*
  * Index patterns:
