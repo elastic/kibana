@@ -334,6 +334,10 @@ describe('Host Isolation', () => {
   describe('Cases', () => {
     let casesClient: CasesClientMock;
 
+    const getCaseIdsFromAttachmentAddService = () => {
+      return casesClient.attachments.add.mock.calls.map(([addArgs]) => addArgs.caseId);
+    };
+
     beforeEach(async () => {
       casesClient = (await endpointAppContextService.getCasesClient(
         {} as KibanaRequest
@@ -350,12 +354,13 @@ describe('Host Isolation', () => {
       });
     });
 
-    it('logs a comment to the provided case', async () => {
+    it('logs a comment to the provided cases', async () => {
       await callRoute(ISOLATE_HOST_ROUTE, {
         body: { agent_ids: ['XYZ'], case_ids: ['one', 'two'] },
       });
 
       expect(casesClient.attachments.add).toHaveBeenCalledTimes(2);
+      expect(getCaseIdsFromAttachmentAddService()).toEqual(expect.arrayContaining(['one', 'two']));
     });
 
     it('logs a comment to any cases associated with the given alerts', async () => {
@@ -363,38 +368,20 @@ describe('Host Isolation', () => {
         body: { agent_ids: ['XYZ'], alert_ids: ['one', 'two'] },
       });
 
-      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({ caseId: 'case-1' })
-      );
-      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ caseId: 'case-2' })
+      expect(getCaseIdsFromAttachmentAddService()).toEqual(
+        expect.arrayContaining(['case-1', 'case-2'])
       );
     });
 
     it('logs a comment to any cases  provided on input along with cases associated with the given alerts', async () => {
       await callRoute(ISOLATE_HOST_ROUTE, {
-        body: { agent_ids: ['XYZ'], case_ids: ['ONE', 'TWO', 'TWO'], alert_ids: ['one', 'two'] },
+        // 'case-1` provided on `case_ids` should be dedupped
+        body: { agent_ids: ['XYZ'], case_ids: ['ONE', 'TWO', 'case-1'], alert_ids: ['one', 'two'] },
       });
 
       expect(casesClient.attachments.add).toHaveBeenCalledTimes(4);
-
-      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({ caseId: 'ONE' })
-      );
-      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({ caseId: 'TWO' })
-      );
-      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
-        3,
-        expect.objectContaining({ caseId: 'case-1' })
-      );
-      expect(casesClient.attachments.add).toHaveBeenNthCalledWith(
-        4,
-        expect.objectContaining({ caseId: 'case-2' })
+      expect(getCaseIdsFromAttachmentAddService()).toEqual(
+        expect.arrayContaining(['ONE', 'TWO', 'case-1', 'case-2'])
       );
     });
   });
