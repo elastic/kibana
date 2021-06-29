@@ -39,7 +39,6 @@ export const FillOpacityOption: React.FC<FillOpacityOptionProps> = ({
           defaultMessage: 'Fill opacity',
         })}
         fullWidth
-        className="lnsXyToolbar__visualOption"
       >
         <EuiRange
           data-test-subj="lnsFillOpacity"

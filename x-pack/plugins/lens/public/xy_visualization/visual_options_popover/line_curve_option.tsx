@@ -33,7 +33,6 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
       label={i18n.translate('xpack.lens.xyChart.curveStyleLabel', {
         defaultMessage: 'Curve lines',
       })}
-      className="lnsXyToolbar__visualOption"
     >
       <EuiSwitch
         showLabel={false}
