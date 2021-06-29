@@ -117,7 +117,12 @@ export const DateProcessor: FunctionComponent = () => {
         )}
       />
 
-      <UseField config={fieldsConfig.formats} component={ComboBoxField} path="fields.formats" />
+      <UseField
+        data-test-subj="formatsValueField"
+        config={fieldsConfig.formats}
+        component={ComboBoxField}
+        path="fields.formats"
+      />
 
       <TargetField
         helpText={
@@ -131,11 +136,26 @@ export const DateProcessor: FunctionComponent = () => {
         }
       />
 
-      <UseField config={fieldsConfig.timezone} component={Field} path="fields.timezone" />
+      <UseField
+        data-test-subj="timezoneField"
+        config={fieldsConfig.timezone}
+        component={Field}
+        path="fields.timezone"
+      />
 
-      <UseField config={fieldsConfig.locale} component={Field} path="fields.locale" />
+      <UseField
+        data-test-subj="localeField"
+        config={fieldsConfig.locale}
+        component={Field}
+        path="fields.locale"
+      />
 
-      <UseField config={fieldsConfig.output_format} component={Field} path="fields.output_format" />
+      <UseField
+        data-test-subj="outputFormatField"
+        config={fieldsConfig.output_format}
+        component={Field}
+        path="fields.output_format"
+      />
     </>
   );
 };

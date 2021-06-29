@@ -278,7 +278,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 49
+          "lineNumber": 47
         },
         "deprecated": false,
         "children": [
@@ -294,7 +294,7 @@
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-              "lineNumber": 49
+              "lineNumber": 47
             },
             "deprecated": false,
             "isRequired": true
@@ -417,6 +417,80 @@
       },
       {
         "parentPluginId": "esUiShared",
+        "id": "def-public.PageError",
+        "type": "Function",
+        "tags": [],
+        "label": "PageError",
+        "description": [],
+        "signature": [
+          "({ title, error, actions, isCentered, ...rest }: React.PropsWithChildren<Props>) => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+          "lineNumber": 28
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.PageError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  title,\n  error,\n  actions,\n  isCentered,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/page_error.tsx",
+              "lineNumber": 28
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esUiShared",
+        "id": "def-public.PageLoading",
+        "type": "Function",
+        "tags": [],
+        "label": "PageLoading",
+        "description": [],
+        "signature": [
+          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+        ],
+        "source": {
+          "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+          "lineNumber": 12
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.PageLoading.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              "{ children?: React.ReactNode; }"
+            ],
+            "source": {
+              "path": "src/plugins/es_ui_shared/public/components/page_loading/page_loading.tsx",
+              "lineNumber": 12
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esUiShared",
         "id": "def-public.SectionError",
         "type": "Function",
         "tags": [],
@@ -427,7 +501,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-          "lineNumber": 24
+          "lineNumber": 19
         },
         "deprecated": false,
         "children": [
@@ -443,7 +517,7 @@
             ],
             "source": {
               "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 24
+              "lineNumber": 19
             },
             "deprecated": false,
             "isRequired": true
@@ -591,7 +665,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 35
+          "lineNumber": 33
         },
         "deprecated": false,
         "children": [],
@@ -735,8 +809,8 @@
         "label": "Error",
         "description": [],
         "source": {
-          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-          "lineNumber": 12
+          "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+          "lineNumber": 18
         },
         "deprecated": false,
         "children": [
@@ -748,8 +822,8 @@
             "label": "error",
             "description": [],
             "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 13
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -764,8 +838,8 @@
               "string[] | undefined"
             ],
             "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 14
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -780,8 +854,8 @@
               "string | undefined"
             ],
             "source": {
-              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/section_error.tsx",
-              "lineNumber": 15
+              "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+              "lineNumber": 21
             },
             "deprecated": false
           }
@@ -1349,7 +1423,7 @@
         ],
         "source": {
           "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/authorization_provider.tsx",
-          "lineNumber": 33
+          "lineNumber": 31
         },
         "deprecated": false,
         "initialIsOpen": false
