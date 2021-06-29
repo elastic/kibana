@@ -105,7 +105,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const { currentSavedSearch, currentIndexPattern } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
-  const [loadingFieldOptions, setLoadingFieldOptions] = useState<boolean>(false);
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
   const [loadingDepVarOptions, setLoadingDepVarOptions] = useState<boolean>(false);
   const [dependentVariableFetchFail, setDependentVariableFetchFail] = useState<boolean>(false);
@@ -247,21 +246,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     if (firstUpdate.current) {
       firstUpdate.current = false;
     }
-    // Reset if jobType changes (jobType requires dependent_variable to be set -
-    // which won't be the case if switching from outlier detection)
-    if (jobTypeChanged) {
-      setLoadingFieldOptions(true);
-    }
+
+    const depVarNotIncluded =
+      isJobTypeWithDepVar && includes.length > 0 && includes.includes(dependentVariable) === false;
     // Ensure runtime field is in 'includes' table if it is set as dependent variable
     const depVarIsRuntimeField =
-      isJobTypeWithDepVar &&
+      depVarNotIncluded &&
       runtimeMappings &&
-      Object.keys(runtimeMappings).includes(dependentVariable) &&
-      includes.length > 0 &&
-      includes.includes(dependentVariable) === false;
+      Object.keys(runtimeMappings).includes(dependentVariable);
     let formToUse = form;
 
-    if (depVarIsRuntimeField) {
+    if (depVarIsRuntimeField || depVarNotIncluded) {
       formToUse = cloneDeep(form);
       formToUse.includes = [...includes, dependentVariable];
     }
@@ -279,24 +274,22 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         (field) => field.is_included === true && field.is_required === false
       );
 
+      const formStateUpdated = {
+        ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
+        ...(depVarIsRuntimeField || jobTypeChanged || depVarNotIncluded
+          ? { includes: formToUse.includes }
+          : {}),
+        requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
+      };
+
       if (jobTypeChanged) {
-        setLoadingFieldOptions(false);
         setFieldOptionsFetchFail(false);
         setMaxDistinctValuesError(undefined);
         setUnsupportedFieldsError(undefined);
-        setFormState({
-          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
-          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
-          includes: formToUse.includes,
-        });
         setIncludesTableItems(fieldSelection ? fieldSelection : []);
-      } else {
-        setFormState({
-          ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
-          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
-          includes: formToUse.includes,
-        });
       }
+
+      setFormState(formStateUpdated);
       setFetchingExplainData(false);
     } else {
       const {
@@ -319,7 +312,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           : DEFAULT_MODEL_MEMORY_LIMIT.outlier_detection;
 
       setEstimatedModelMemoryLimit(fallbackModelMemoryLimit);
-      setLoadingFieldOptions(false);
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
       setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
@@ -650,7 +642,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         tableItems={includesTableItems}
         unsupportedFieldsError={unsupportedFieldsError}
         setUnsupportedFieldsError={setUnsupportedFieldsError}
-        loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
       {showScatterplotMatrix && (
