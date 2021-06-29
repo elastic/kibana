@@ -6,7 +6,6 @@
  */
 export interface MemoryProtection {
   cross_session?: boolean;
-  // should this be a enum with 'signature' and '  shellcode_thread' ? are there more options?
   feature?: string;
   parent_to_child?: boolean;
   self_injection?: boolean;
