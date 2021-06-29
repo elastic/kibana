@@ -32,7 +32,7 @@ const MyDescriptionList = styled(EuiDescriptionList)`
     & {
       padding-right: ${theme.eui.euiSizeL};
       border-right: ${theme.eui.euiBorderThin};
-      @media only screen and (min-width: ${theme.eui.euiBreakpoints.xs}) {
+      @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
         padding-right: 0;
         border-right: 0;
       }

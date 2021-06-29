@@ -32,7 +32,7 @@ const FlexItemDivider = styled(EuiFlexItem)`
       border-right: ${theme.eui.euiBorderThin};
       padding-right: ${theme.eui.euiSize};
       margin-right: ${theme.eui.euiSize};
-      @media only screen and (min-width: ${theme.eui.euiBreakpoints.xs}) {
+      @media only screen and (max-width: ${theme.eui.euiBreakpoints.l}) {
         padding-right: 0;
         border-right: 0;
         margin-right: 0;
