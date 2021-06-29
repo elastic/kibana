@@ -7,9 +7,7 @@
  */
 
 export * from './dataurl';
-export * from './elastic_outline';
 export * from './httpurl';
-export * from './missing_asset';
 export * from './resolve_dataurl';
 export * from './url';
 
