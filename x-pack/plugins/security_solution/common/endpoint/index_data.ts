@@ -412,7 +412,6 @@ const indexFleetActionsForHost = async (
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
   const agentId = endpointHost.elastic.agent.id;
   const total = fleetActionGenerator.randomN(5);
-  const query = 'SELECT name, path, pid FROM processes WHERE on_disk = 0;';
 
   for (let i = 0; i < total; i++) {
     // create an action
@@ -420,92 +419,30 @@ const indexFleetActionsForHost = async (
       data: { comment: 'data generator: this host is bad' },
     });
 
-    // create an osquery action
-    const OSQueryAction = fleetActionGenerator.generateOSQueryAction({
-      input_type: 'osquery',
-      data: {
-        query,
-      },
-    });
-
-    // create a fleet action
-    const fleetAction = fleetActionGenerator.generateFleetAction({
-      data: { log_level: 'debug' },
-      type: 'SETTINGS',
-    });
-
     action.agents = [agentId];
-    fleetAction.agents = [agentId];
-    OSQueryAction.agents = [agentId];
 
-    await Promise.all([
-      esClient.index(
-        {
-          index: AGENT_ACTIONS_INDEX,
-          body: action,
-        },
-        ES_INDEX_OPTIONS
-      ),
-      await esClient.index(
-        {
-          index: AGENT_ACTIONS_INDEX,
-          body: fleetAction,
-        },
-        ES_INDEX_OPTIONS
-      ),
-      await esClient.index(
-        {
-          index: AGENT_ACTIONS_INDEX,
-          body: OSQueryAction,
-        },
-        ES_INDEX_OPTIONS
-      ),
-    ]);
+    esClient.index(
+      {
+        index: AGENT_ACTIONS_INDEX,
+        body: action,
+      },
+      ES_INDEX_OPTIONS
+    );
 
     // Create an action response for the above
     const actionResponse = fleetActionGenerator.generateResponse({
       action_id: action.action_id,
       agent_id: agentId,
       action_data: action.data,
-      error: fleetActionGenerator.randomFloat() < 0.4 ? undefined : 'some error happened',
     });
 
-    const OSQueryActionResponse = fleetActionGenerator.generateOSQueryResponse({
-      action_id: OSQueryAction.action_id,
-      agent_id: agentId,
-      action_data: {
-        query,
+    esClient.index(
+      {
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        body: actionResponse,
       },
-      error: fleetActionGenerator.randomFloat() < 0.4 ? undefined : 'some error happened',
-    });
-
-    const fleetActionResponse = fleetActionGenerator.generateFleetResponse({
-      agent_id: agentId,
-    });
-
-    await Promise.all([
-      esClient.index(
-        {
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          body: actionResponse,
-        },
-        ES_INDEX_OPTIONS
-      ),
-      esClient.index(
-        {
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          body: OSQueryActionResponse,
-        },
-        ES_INDEX_OPTIONS
-      ),
-      esClient.index(
-        {
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          body: fleetActionResponse,
-        },
-        ES_INDEX_OPTIONS
-      ),
-    ]);
+      ES_INDEX_OPTIONS
+    );
   }
 
   // Add edge cases (maybe)
