@@ -7,30 +7,24 @@
 
 import {
   EuiCard,
+  EuiCodeBlock,
   EuiFlexGroup,
-  EuiImage,
   EuiFlexItem,
+  EuiImage,
   EuiSpacer,
   EuiToolTip,
-  EuiCodeBlock,
 } from '@elastic/eui';
-import React, { ComponentType } from 'react';
-import { AgentIcon } from './index';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
+import { EuiThemeProviderDecorator } from '../../../../../../../src/plugins/kibana_react/common';
 import { AGENT_NAMES } from '../../../../common/agent_name';
-import { getAgentIcon } from './get_agent_icon';
 import { useTheme } from '../../../hooks/use_theme';
+import { getAgentIcon } from './get_agent_icon';
+import { AgentIcon } from './index';
 
 export default {
   title: 'shared/icons',
   component: AgentIcon,
-  decorators: [
-    (Story: ComponentType) => (
-      <EuiThemeProvider>
-        <Story />
-      </EuiThemeProvider>
-    ),
-  ],
+  decorators: [EuiThemeProviderDecorator],
 };
 
 export function AgentIcons() {

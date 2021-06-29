@@ -6,32 +6,25 @@
  */
 
 import {
-  EuiImage,
   EuiCard,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiImage,
   EuiSpacer,
-  EuiCodeBlock,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
+import { EuiThemeProviderDecorator } from '../../../../../../../src/plugins/kibana_react/common';
+import { getSpanIcon, spanTypeIcons } from './get_span_icon';
 import { SpanIcon } from './index';
-import { getSpanIcon } from './get_span_icon';
-import { spanTypeIcons } from './get_span_icon';
 
 const spanTypes = Object.keys(spanTypeIcons);
 
 export default {
   title: 'shared/icons',
   component: SpanIcon,
-  decorators: [
-    (Story: ComponentType) => (
-      <EuiThemeProvider>
-        <Story />
-      </EuiThemeProvider>
-    ),
-  ],
+  decorators: [EuiThemeProviderDecorator],
 };
 
 export function SpanIcons() {

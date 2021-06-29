@@ -7,12 +7,12 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProviderDecorator } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { MapToolTip } from '../MapToolTip';
 import { COUNTRY_NAME, TRANSACTION_DURATION_COUNTRY } from '../useLayerList';
 
 storiesOf('app/RumDashboard/VisitorsRegionMap', module)
-  .addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>)
+  .addDecorator(EuiThemeProviderDecorator)
   .add(
     'Tooltip',
     () => {

@@ -7,7 +7,7 @@
 
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ExceptionStacktrace } from './exception_stacktrace';
 
 type Args = ComponentProps<typeof ExceptionStacktrace>;
@@ -15,13 +15,7 @@ type Args = ComponentProps<typeof ExceptionStacktrace>;
 export default {
   title: 'app/ErrorGroupDetails/DetailView/ExceptionStacktrace',
   component: ExceptionStacktrace,
-  decorators: [
-    (StoryComponent: ComponentType) => (
-      <EuiThemeProvider>
-        <StoryComponent />
-      </EuiThemeProvider>
-    ),
-  ],
+  decorators: [EuiThemeProviderDecorator],
 };
 
 export const JavaWithLongLines: Story<Args> = (args) => (
