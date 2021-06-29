@@ -8,18 +8,45 @@
 
 import { Buffer } from 'buffer';
 import { stringify } from 'querystring';
-import { ApiError, Client, RequestEvent, errors } from '@elastic/elasticsearch';
-import type { RequestBody } from '@elastic/elasticsearch/lib/Transport';
+import { ApiError, Client, RequestEvent, errors, Transport } from '@elastic/elasticsearch';
+import type {
+  RequestBody,
+  TransportRequestParams,
+  TransportRequestOptions,
+} from '@elastic/elasticsearch/lib/Transport';
+import type { ExecutionContextContainer } from '../../execution_context';
 import { Logger } from '../../logging';
 import { parseClientOptions, ElasticsearchClientConfig } from './client_config';
 
+const noop = () => undefined;
+
 export const configureClient = (
   config: ElasticsearchClientConfig,
-  { logger, type, scoped = false }: { logger: Logger; type: string; scoped?: boolean }
+  {
+    logger,
+    type,
+    scoped = false,
+    getExecutionContext = noop,
+  }: {
+    logger: Logger;
+    type: string;
+    scoped?: boolean;
+    getExecutionContext?: () => ExecutionContextContainer | undefined;
+  }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
+  class KibanaTransport extends Transport {
+    request(params: TransportRequestParams, options?: TransportRequestOptions) {
+      const opts = options || {};
+      const opaqueId = getExecutionContext()?.toString();
+      if (opaqueId && !opts.opaqueId) {
+        opts.opaqueId = opaqueId;
+      }
+      return super.request(params, opts);
+    }
+  }
 
-  const client = new Client(clientOptions);
+  const client = new Client({ ...clientOptions, Transport: KibanaTransport });
   addLogging(client, logger.get('query', type));
 
   return client;

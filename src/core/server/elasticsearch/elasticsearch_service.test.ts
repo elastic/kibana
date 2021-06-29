@@ -15,6 +15,7 @@ import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
@@ -28,6 +29,7 @@ let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
 const setupDeps = {
   http: httpServiceMock.createInternalSetupContract(),
+  executionContext: executionContextServiceMock.createInternalSetupContract(),
 };
 configService.atPath.mockReturnValue(
   new BehaviorSubject({

@@ -20,13 +20,15 @@ import {
 } from './legacy';
 import { ClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
+import type { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
+import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
 import { InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart } from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
 
 interface SetupDeps {
   http: InternalHttpServiceSetup;
+  executionContext: InternalExecutionContextSetup;
 }
 
 /** @internal */
@@ -37,6 +39,7 @@ export class ElasticsearchService
   private stop$ = new Subject();
   private kibanaVersion: string;
   private getAuthHeaders?: GetAuthHeaders;
+  private executionContextClient?: IExecutionContext;
 
   private createLegacyCustomClient?: (
     type: string,
@@ -60,6 +63,7 @@ export class ElasticsearchService
     const config = await this.config$.pipe(first()).toPromise();
 
     this.getAuthHeaders = deps.http.getAuthHeaders;
+    this.executionContextClient = deps.executionContext;
     this.legacyClient = this.createLegacyClusterClient('data', config);
     this.client = this.createClusterClient('data', config);
 
@@ -128,7 +132,8 @@ export class ElasticsearchService
       config,
       this.coreContext.logger.get('elasticsearch'),
       type,
-      this.getAuthHeaders
+      this.getAuthHeaders,
+      () => this.executionContextClient?.get()
     );
   }
 
