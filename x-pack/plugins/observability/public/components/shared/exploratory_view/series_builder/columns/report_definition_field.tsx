@@ -16,6 +16,7 @@ import { PersistableFilter } from '../../../../../../../lens/common';
 import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 import { buildPhrasesFilter } from '../../configurations/utils';
 import { SeriesConfig } from '../../types';
+import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';
 
 interface Props {
   seriesId: string;
@@ -51,8 +52,10 @@ export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange 
       definitionFields.forEach((fieldT) => {
         if (indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
           const values = selectedReportDefinitions?.[fieldT];
-          const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
-          filtersN.push(valueFilter.query);
+          if (!values.includes(ALL_VALUES_SELECTED)) {
+            const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
+            filtersN.push(valueFilter.query);
+          }
         }
       });
     }
@@ -74,6 +77,7 @@ export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange 
             filters={queryFilters}
             time={series.time}
             fullWidth={true}
+            allowAllValuesSelection={true}
           />
         )}
       </EuiFlexItem>
