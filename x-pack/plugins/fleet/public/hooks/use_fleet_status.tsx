@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
 
 import type { GetFleetStatusResponse } from '../types';
 
@@ -33,30 +33,35 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
     isLoading: false,
     isReady: false,
   });
-  async function sendGetStatus() {
-    try {
-      setState((s) => ({ ...s, isLoading: true }));
-      const res = await sendGetFleetStatus();
-      if (res.error) {
-        throw res.error;
-      }
+  const sendGetStatus = useCallback(
+    async function sendGetStatus() {
+      try {
+        setState((s) => ({ ...s, isLoading: true }));
+        const res = await sendGetFleetStatus();
+        if (res.error) {
+          throw res.error;
+        }
 
-      setState((s) => ({
-        ...s,
-        isLoading: false,
-        isReady: res.data?.isReady ?? false,
-        missingRequirements: res.data?.missing_requirements,
-      }));
-    } catch (error) {
-      setState((s) => ({ ...s, isLoading: false, error }));
-    }
-  }
+        setState((s) => ({
+          ...s,
+          isLoading: false,
+          isReady: res.data?.isReady ?? false,
+          missingRequirements: res.data?.missing_requirements,
+        }));
+      } catch (error) {
+        setState((s) => ({ ...s, isLoading: false, error }));
+      }
+    },
+    [setState]
+  );
   useEffect(() => {
     sendGetStatus();
-  }, []);
+  }, [sendGetStatus]);
+
+  const refresh = useCallback(() => sendGetStatus(), [sendGetStatus]);
 
   return (
-    <FleetStatusContext.Provider value={{ ...state, refresh: () => sendGetStatus() }}>
+    <FleetStatusContext.Provider value={{ ...state, refresh }}>
       {children}
     </FleetStatusContext.Provider>
   );

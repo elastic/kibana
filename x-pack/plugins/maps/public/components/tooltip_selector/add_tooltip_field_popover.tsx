@@ -164,14 +164,14 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
         >
           {(list, search) => (
             <div style={{ width: '300px' }}>
-              <EuiPopoverTitle>{search}</EuiPopoverTitle>
+              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
               {list}
             </div>
           )}
         </EuiSelectable>
 
         <EuiSpacer size="xs" />
-        <EuiPopoverFooter>
+        <EuiPopoverFooter paddingSize="s">
           <EuiTextAlign textAlign="right">
             <EuiButton
               fill

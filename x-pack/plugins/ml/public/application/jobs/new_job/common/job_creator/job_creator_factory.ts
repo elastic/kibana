@@ -12,6 +12,7 @@ import { PopulationJobCreator } from './population_job_creator';
 import { AdvancedJobCreator } from './advanced_job_creator';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { CategorizationJobCreator } from './categorization_job_creator';
+import { RareJobCreator } from './rare_job_creator';
 
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
@@ -36,6 +37,9 @@ export const jobCreatorFactory = (jobType: JOB_TYPE) => (
       break;
     case JOB_TYPE.CATEGORIZATION:
       jc = CategorizationJobCreator;
+      break;
+    case JOB_TYPE.RARE:
+      jc = RareJobCreator;
       break;
     default:
       jc = SingleMetricJobCreator;

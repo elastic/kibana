@@ -9,11 +9,9 @@ import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/s
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
 import { fetchDetectionsMetrics } from './detections';
-import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
-  endpoints: EndpointUsage | {};
   detectionMetrics: {};
 }
 
@@ -25,7 +23,6 @@ export async function getInternalSavedObjectsClient(core: CoreSetup) {
 
 export const registerCollector: RegisterCollector = ({
   core,
-  endpointAppContext,
   kibanaIndex,
   signalsIndex,
   ml,
@@ -397,69 +394,15 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
-      endpoints: {
-        total_installed: {
-          type: 'long',
-          _meta: { description: 'The number of installed endpoints' },
-        },
-        active_within_last_24_hours: {
-          type: 'long',
-          _meta: { description: 'The number of active endpoints' },
-        },
-        os: {
-          type: 'array',
-          items: {
-            full_name: {
-              type: 'keyword',
-              _meta: { description: 'Full name of the operating system' },
-            },
-            platform: {
-              type: 'keyword',
-              _meta: { description: 'OS Platform. eg Centos, Ubuntu' },
-            },
-            version: {
-              type: 'keyword',
-              _meta: {
-                description:
-                  'The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)',
-              },
-            },
-            count: {
-              type: 'long',
-              _meta: { description: 'The total number of endpoints from that platform' },
-            },
-          },
-        },
-        policies: {
-          malware: {
-            active: {
-              type: 'long',
-              _meta: { description: 'The total number of active malware policies' },
-            },
-            inactive: {
-              type: 'long',
-              _meta: { description: 'The total number of inactive malware policies' },
-            },
-            failure: {
-              type: 'long',
-              _meta: { description: 'The total number of failing malware policies' },
-            },
-          },
-        },
-      },
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(core);
-      const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
-      const [detectionMetrics, endpoints] = await Promise.allSettled([
-        fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, ml, savedObjectsClient),
-        getEndpointTelemetryFromFleet(savedObjectsClient, endpointAppContext, esClient),
-      ]);
+      const soClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
 
       return {
-        detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
-        endpoints: endpoints.status === 'fulfilled' ? endpoints.value : {},
+        detectionMetrics:
+          (await fetchDetectionsMetrics(kibanaIndex, signalsIndex, esClient, soClient, ml)) || {},
       };
     },
   });

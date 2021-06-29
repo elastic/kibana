@@ -7,15 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MANAGEMENT_APP_ID } from '../../../../common/constants';
-import { APP_ID, SecurityPageName } from '../../../../../../common/constants';
+import { APP_ID } from '../../../../../../common/constants';
 import { pagePathGetters } from '../../../../../../../fleet/public';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 import { ContextMenuItemNavByRouterProps } from '../components/context_menu_item_nav_by_rotuer';
 import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
@@ -28,14 +26,9 @@ export const useEndpointActionItems = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): ContextMenuItemNavByRouterProps[] => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
-  const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+  const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
-  const {
-    services: {
-      application: { getUrlForApp },
-    },
-  } = useKibana();
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -68,11 +61,11 @@ export const useEndpointActionItems = (
           'data-test-subj': 'unIsolateLink',
           icon: 'logoSecurity',
           key: 'unIsolateHost',
-          navigateAppId: MANAGEMENT_APP_ID,
+          navigateAppId: APP_ID,
           navigateOptions: {
             path: endpointUnIsolatePath,
           },
-          href: formatUrl(endpointUnIsolatePath),
+          href: getAppUrl({ path: endpointUnIsolatePath }),
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.unIsolateHost"
@@ -86,11 +79,11 @@ export const useEndpointActionItems = (
           'data-test-subj': 'isolateLink',
           icon: 'logoSecurity',
           key: 'isolateHost',
-          navigateAppId: MANAGEMENT_APP_ID,
+          navigateAppId: APP_ID,
           navigateOptions: {
             path: endpointIsolatePath,
           },
-          href: formatUrl(endpointIsolatePath),
+          href: getAppUrl({ path: endpointIsolatePath }),
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.isolateHost"
@@ -107,8 +100,8 @@ export const useEndpointActionItems = (
           icon: 'logoSecurity',
           key: 'hostDetailsLink',
           navigateAppId: APP_ID,
-          navigateOptions: { path: `hosts/${endpointHostName}` },
-          href: `${getUrlForApp('securitySolution')}/hosts/${endpointHostName}`,
+          navigateOptions: { path: `/hosts/${endpointHostName}` },
+          href: getAppUrl({ path: `/hosts/${endpointHostName}` }),
           children: (
             <FormattedMessage
               id="xpack.securitySolution.endpoint.actions.hostDetails"
@@ -128,7 +121,7 @@ export const useEndpointActionItems = (
               })[1]
             }`,
           },
-          href: `${getUrlForApp('fleet')}#${
+          href: `${getAppUrl({ appId: 'fleet' })}#${
             pagePathGetters.policy_details({
               policyId: fleetAgentPolicies[endpointPolicyId],
             })[1]
@@ -153,7 +146,7 @@ export const useEndpointActionItems = (
               })[1]
             }`,
           },
-          href: `${getUrlForApp('fleet')}#${
+          href: `${getAppUrl({ appId: 'fleet' })}#${
             pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
@@ -177,7 +170,7 @@ export const useEndpointActionItems = (
               })[1]
             }/activity?openReassignFlyout=true`,
           },
-          href: `${getUrlForApp('fleet')}#${
+          href: `${getAppUrl({ appId: 'fleet' })}#${
             pagePathGetters.agent_details({
               agentId: fleetAgentId,
             })[1]
@@ -193,12 +186,5 @@ export const useEndpointActionItems = (
     }
 
     return [];
-  }, [
-    allCurrentUrlParams,
-    endpointMetadata,
-    fleetAgentPolicies,
-    formatUrl,
-    getUrlForApp,
-    isPlatinumPlus,
-  ]);
+  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, getAppUrl, isPlatinumPlus]);
 };

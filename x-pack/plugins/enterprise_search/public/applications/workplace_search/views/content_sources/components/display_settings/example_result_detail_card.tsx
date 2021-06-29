@@ -18,6 +18,11 @@ import { CustomSourceIcon } from './custom_source_icon';
 import { DisplaySettingsLogic } from './display_settings_logic';
 import { TitleField } from './title_field';
 
+const getAsLocalDateTimeString = (str: string) => {
+  const dateValue = Date.parse(str);
+  return dateValue ? new Date(dateValue).toLocaleString() : null;
+};
+
 export const ExampleResultDetailCard: React.FC = () => {
   const {
     sourceName,
@@ -60,20 +65,25 @@ export const ExampleResultDetailCard: React.FC = () => {
       </div>
       <div className="example-result-detail-card__content">
         {detailFields.length > 0 ? (
-          detailFields.map(({ fieldName, label }, index) => (
-            <div
-              data-test-subj="DetailField"
-              className="example-result-detail-card__field"
-              key={index}
-            >
-              <EuiTitle size="xs">
-                <h4>{label}</h4>
-              </EuiTitle>
-              <EuiText size="s" color="subdued">
-                <div className="eui-textBreakWord">{result[fieldName]}</div>
-              </EuiText>
-            </div>
-          ))
+          detailFields.map(({ fieldName, label }, index) => {
+            const value = result[fieldName] as string;
+            const dateValue = getAsLocalDateTimeString(value);
+
+            return (
+              <div
+                className="example-result-detail-card__field"
+                key={index}
+                data-test-subj="DetailField"
+              >
+                <EuiTitle size="xs">
+                  <h4>{label}</h4>
+                </EuiTitle>
+                <EuiText size="s" color="subdued">
+                  <div className="eui-textBreakWord">{dateValue || value}</div>
+                </EuiText>
+              </div>
+            );
+          })
         ) : (
           <EuiSpacer size="m" />
         )}
