@@ -11,7 +11,6 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
-  EuiIconTip,
   EuiPanel,
   EuiRange,
   EuiSpacer,
@@ -95,24 +94,6 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   });
   return runtimeOptions;
 }
-
-interface OptionLabelWithIconTipProps {
-  label: string;
-  tooltip: string;
-}
-
-const OptionLabelWithIconTip: FC<OptionLabelWithIconTipProps> = ({ label, tooltip }) => (
-  <>
-    {label}
-    <EuiIconTip
-      content={tooltip}
-      iconProps={{
-        className: 'eui-alignTop',
-      }}
-      size="s"
-    />
-  </>
-);
 
 export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   actions,
@@ -565,22 +546,9 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         <Fragment>
           <EuiFormRow
             fullWidth
-            label={
-              <OptionLabelWithIconTip
-                label={i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.dependentVariableLabel',
-                  {
-                    defaultMessage: 'Dependent variable',
-                  }
-                )}
-                tooltip={i18n.translate(
-                  'xpack.ml.dataframe.analytics.dependentVariableInfoTooltip',
-                  {
-                    defaultMessage: 'The field that you want to predict the value of.',
-                  }
-                )}
-              />
-            }
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
+              defaultMessage: 'Dependent variable',
+            })}
             helpText={
               dependentVariableOptions.length === 0 &&
               dependentVariableFetchFail === false &&
@@ -630,12 +598,22 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                   defaultMessage: 'Enter field to be used as dependent variable.',
                 }
               )}
-              placeholder={i18n.translate(
-                'xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder',
-                {
-                  defaultMessage: 'Select the field to be used as the dependent variable.',
-                }
-              )}
+              placeholder={
+                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION
+                  ? i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableRegressionPlaceholder',
+                      {
+                        defaultMessage: 'Select the numeric field that you want to predict.',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.ml.dataframe.analytics.create.dependentVariableClassificationPlaceholder',
+                      {
+                        defaultMessage:
+                          'Select the numeric, categorical, or boolean field that you want to predict.',
+                      }
+                    )
+              }
               isDisabled={isJobCreated}
               isLoading={loadingDepVarOptions}
               singleSelection={true}
