@@ -29,11 +29,12 @@ describe('EnableAlertComponent', () => {
 
     fireEvent.click(getByTestId('uptimeDisplayDefineConnector'));
 
-    expect(
-      getByRole('link', { name: 'Settings External link (opens in a new tab or window)' })
-    ).toHaveAttribute('href', '/settings?focusConnectorField=true');
-    expect(getByText(/Define a default connector in the/));
-    expect(getByText(/to enable monitor status alerts./));
+    expect(getByRole('link', { name: 'Define a default connector' })).toHaveAttribute(
+      'href',
+      '/settings?focusConnectorField=true'
+    );
+    expect(getByText(/Define a default connector/));
+    expect(getByText(/to receive status alerts./));
   });
 
   it('does not displays define connectors when there is connector', () => {

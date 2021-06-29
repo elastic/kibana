@@ -1293,63 +1293,43 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFormRow"
-                  id="generated-id-row"
+                  class="euiPopover euiPopover--anchorDownCenter"
                 >
                   <div
-                    class="euiFormRow__fieldWrapper"
+                    class="euiPopover__anchor"
                   >
                     <div
-                      class="euiSwitch euiSwitch--compressed"
+                      class="euiFormRow"
+                      id="generated-id-row"
                     >
-                      <button
-                        aria-checked="false"
-                        aria-describedby="generated-id-help-0"
-                        aria-label="Enable rule"
-                        class="euiSwitch__button"
-                        data-test-subj="uptimeDisplayDefineConnector"
-                        disabled=""
-                        id="generated-id"
-                        role="switch"
-                        type="button"
+                      <div
+                        class="euiFormRow__fieldWrapper"
                       >
-                        <span
-                          class="euiSwitch__body"
+                        <div
+                          class="euiSwitch euiSwitch--compressed"
                         >
-                          <span
-                            class="euiSwitch__thumb"
-                          />
-                          <span
-                            class="euiSwitch__track"
-                          />
-                        </span>
-                      </button>
-                    </div>
-                    <div
-                      class="euiFormHelpText euiFormRow__text"
-                      id="generated-id-help-0"
-                    >
-                      Define a default connector in the 
-                      <a
-                        class="euiLink euiLink--primary"
-                        data-test-subj="uptimeSettingsLink"
-                        href="/settings?focusConnectorField=true"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        Settings
-                        <span
-                          aria-label="External link"
-                          class="euiLink__externalIcon"
-                          data-euiicon-type="popout"
-                        />
-                        <span
-                          class="euiScreenReaderOnly"
-                        >
-                          (opens in a new tab or window)
-                        </span>
-                      </a>
-                       to enable monitor status alerts.
+                          <button
+                            aria-checked="false"
+                            aria-label="Enable status alerts"
+                            class="euiSwitch__button"
+                            data-test-subj="uptimeDisplayDefineConnector"
+                            id="generated-id"
+                            role="switch"
+                            type="button"
+                          >
+                            <span
+                              class="euiSwitch__body"
+                            >
+                              <span
+                                class="euiSwitch__thumb"
+                              />
+                              <span
+                                class="euiSwitch__track"
+                              />
+                            </span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1575,63 +1555,43 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFormRow"
-                  id="generated-id-row"
+                  class="euiPopover euiPopover--anchorDownCenter"
                 >
                   <div
-                    class="euiFormRow__fieldWrapper"
+                    class="euiPopover__anchor"
                   >
                     <div
-                      class="euiSwitch euiSwitch--compressed"
+                      class="euiFormRow"
+                      id="generated-id-row"
                     >
-                      <button
-                        aria-checked="false"
-                        aria-describedby="generated-id-help-0"
-                        aria-label="Enable rule"
-                        class="euiSwitch__button"
-                        data-test-subj="uptimeDisplayDefineConnector"
-                        disabled=""
-                        id="generated-id"
-                        role="switch"
-                        type="button"
+                      <div
+                        class="euiFormRow__fieldWrapper"
                       >
-                        <span
-                          class="euiSwitch__body"
+                        <div
+                          class="euiSwitch euiSwitch--compressed"
                         >
-                          <span
-                            class="euiSwitch__thumb"
-                          />
-                          <span
-                            class="euiSwitch__track"
-                          />
-                        </span>
-                      </button>
-                    </div>
-                    <div
-                      class="euiFormHelpText euiFormRow__text"
-                      id="generated-id-help-0"
-                    >
-                      Define a default connector in the 
-                      <a
-                        class="euiLink euiLink--primary"
-                        data-test-subj="uptimeSettingsLink"
-                        href="/settings?focusConnectorField=true"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        Settings
-                        <span
-                          aria-label="External link"
-                          class="euiLink__externalIcon"
-                          data-euiicon-type="popout"
-                        />
-                        <span
-                          class="euiScreenReaderOnly"
-                        >
-                          (opens in a new tab or window)
-                        </span>
-                      </a>
-                       to enable monitor status alerts.
+                          <button
+                            aria-checked="false"
+                            aria-label="Enable status alerts"
+                            class="euiSwitch__button"
+                            data-test-subj="uptimeDisplayDefineConnector"
+                            id="generated-id"
+                            role="switch"
+                            type="button"
+                          >
+                            <span
+                              class="euiSwitch__body"
+                            >
+                              <span
+                                class="euiSwitch__thumb"
+                              />
+                              <span
+                                class="euiSwitch__track"
+                              />
+                            </span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

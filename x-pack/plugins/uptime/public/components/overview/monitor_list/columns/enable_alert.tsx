@@ -125,6 +125,10 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
       </EuiToolTip>
     </div>
   ) : (
-    <DefineAlertConnectors />
+    <DefineAlertConnectors
+      showPopover={!isMonitorPage}
+      showHelpText={!!isMonitorPage}
+      showLabel={!!isMonitorPage}
+    />
   );
 };

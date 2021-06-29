@@ -89,17 +89,9 @@ export const MonitorPageTitle: React.FC = () => {
 
   return (
     <>
-      <EuiFlexGroup wrap={false} data-test-subj="monitorTitle">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h1 className="eui-textNoWrap">{nameOrId}</h1>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor!} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle>
+        <h1 className="eui-textNoWrap">{nameOrId}</h1>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup wrap={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -126,6 +118,7 @@ export const MonitorPageTitle: React.FC = () => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor!} />
     </>
   );
 };
