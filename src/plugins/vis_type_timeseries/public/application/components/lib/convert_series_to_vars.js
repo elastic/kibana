@@ -9,7 +9,7 @@
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { getLastValue } from '../../../../common/last_value_utils';
-import { emptyLabel } from '../../../../common/empty_label';
+import { getMeaningfulValueOrEmpty } from '../../../../common/empty_label';
 import { createTickFormatter } from './tick_formatter';
 import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
@@ -20,7 +20,7 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
     series
       .filter((row) => _.startsWith(row.id, seriesModel.id))
       .forEach((row) => {
-        const label = row.label ? _.snakeCase(row.label) : emptyLabel;
+        const label = getMeaningfulValueOrEmpty(row.label);
         const varName = [label, _.snakeCase(seriesModel.var_name)].filter((v) => v).join('.');
 
         const formatter = createTickFormatter(
