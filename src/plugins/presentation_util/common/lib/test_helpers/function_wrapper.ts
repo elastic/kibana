@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { mapValues } from 'lodash';
 import {
   ExpressionValueBoxed,
@@ -13,11 +14,20 @@ import {
   ExpressionFunctionDefinition,
 } from '../../../../expressions/common';
 
-type FnType = () => typeof typeSpecs[number] &
-  ExpressionFunctionDefinition<string, any, Record<string, any>, ExpressionValueBoxed<any, any>>;
+type FnType = () => Promise<
+  typeof typeSpecs[number] &
+    ExpressionFunctionDefinition<
+      string,
+      any,
+      Record<string, any>,
+      ExpressionValueBoxed<any, any> | Promise<ExpressionValueBoxed<any, any>>
+    >
+>;
 
 // It takes a function spec and passes in default args into the spec fn
-export const functionWrapper = async (fnSpec: FnType): Promise<ReturnType<FnType>['fn']> => {
+export const functionWrapper = async (
+  fnSpec: FnType
+): Promise<UnwrapPromiseOrReturn<ReturnType<FnType>>['fn']> => {
   const spec = await fnSpec();
   const defaultArgs = mapValues(spec.args, (argSpec) => {
     return argSpec.default;

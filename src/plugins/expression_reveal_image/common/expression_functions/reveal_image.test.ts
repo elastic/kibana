@@ -9,17 +9,24 @@
 import {
   functionWrapper,
   elasticOutline,
-  elasticLogo,
+  getElasticLogo,
 } from '../../../presentation_util/common/lib';
-import { getFunctionErrors } from '../i18n';
+import { getFunctionErrors } from '../../common/i18n';
 import { revealImageFunction } from './reveal_image_function';
 import { Origin } from '../types';
 import { ExecutionContext } from 'src/plugins/expressions';
+import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
 const errors = getFunctionErrors().revealImage;
 
 describe('revealImageFunction', () => {
-  const fn = functionWrapper(revealImageFunction);
+  let fn: UnwrapPromiseOrReturn<ReturnType<typeof revealImageFunction>>['fn'];
+  let elasticLogo = '';
+
+  beforeEach(async () => {
+    fn = await functionWrapper(revealImageFunction);
+    elasticLogo = await (await getElasticLogo()).elasticLogo;
+  });
 
   it('returns a render as revealImage', () => {
     const result = fn(
