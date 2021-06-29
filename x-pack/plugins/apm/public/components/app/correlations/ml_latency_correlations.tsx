@@ -264,7 +264,6 @@ export function MlLatencyCorrelations({ onClose }: Props) {
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {!isRunning && (
