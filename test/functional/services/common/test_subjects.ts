@@ -314,7 +314,7 @@ export class TestSubjects extends FtrService {
 
   public async scrollIntoView(
     selector: string,
-    offset: number | { topOffset?: number; bottomOffset?: number }
+    offset?: number | { topOffset?: number; bottomOffset?: number }
   ) {
     const element = await this.find(selector);
     await element.scrollIntoViewIfNecessary(offset);
