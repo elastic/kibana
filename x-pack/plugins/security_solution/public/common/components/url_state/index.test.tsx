@@ -170,7 +170,7 @@ describe('UrlStateContainer', () => {
     });
   });
 
-  describe('After Initialization, keep Relative Date up to date for global only on detections page', () => {
+  describe('After Initialization, keep Relative Date up to date for global only on alerts page', () => {
     test.each(testCases)(
       '%o',
       async (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
@@ -196,7 +196,7 @@ describe('UrlStateContainer', () => {
         });
         wrapper.update();
 
-        if (CONSTANTS.detectionsPage === page) {
+        if (CONSTANTS.alertsPage === page) {
           await waitFor(() => {
             expect(mockSetRelativeRangeDatePicker.mock.calls[3][0]).toEqual({
               from: '2020-01-01T00:00:00.000Z',

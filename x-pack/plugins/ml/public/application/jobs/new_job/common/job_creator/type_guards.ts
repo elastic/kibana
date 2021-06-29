@@ -10,6 +10,7 @@ import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
 import { AdvancedJobCreator } from './advanced_job_creator';
 import { CategorizationJobCreator } from './categorization_job_creator';
+import { RareJobCreator } from './rare_job_creator';
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export type JobCreatorType =
@@ -17,7 +18,8 @@ export type JobCreatorType =
   | MultiMetricJobCreator
   | PopulationJobCreator
   | AdvancedJobCreator
-  | CategorizationJobCreator;
+  | CategorizationJobCreator
+  | RareJobCreator;
 
 export function isSingleMetricJobCreator(
   jobCreator: JobCreatorType
@@ -45,4 +47,8 @@ export function isCategorizationJobCreator(
   jobCreator: JobCreatorType
 ): jobCreator is CategorizationJobCreator {
   return jobCreator.type === JOB_TYPE.CATEGORIZATION;
+}
+
+export function isRareJobCreator(jobCreator: JobCreatorType): jobCreator is RareJobCreator {
+  return jobCreator.type === JOB_TYPE.RARE;
 }

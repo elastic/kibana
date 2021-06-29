@@ -15,7 +15,7 @@ import { ModelItem, Anomaly } from '../../../../../common/results_loader';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { SplitCards, useAnimateSplit } from '../split_cards';
 import { DetectorTitle } from '../detector_title';
-import { ByFieldSelector } from '../split_field';
+import { ByFieldSelector } from '../by_field';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 
 type DetectorFieldValues = Record<number, string[]>;

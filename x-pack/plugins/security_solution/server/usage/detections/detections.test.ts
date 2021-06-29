@@ -37,7 +37,7 @@ describe('Detections Usage and Metrics', () => {
     });
 
     it('returns zeroed counts if calls are empty', async () => {
-      const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
+      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -99,7 +99,7 @@ describe('Detections Usage and Metrics', () => {
         .mockReturnValue({ body: getMockRuleAlertsResponse(3400) });
       (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
 
-      const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
+      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -174,7 +174,7 @@ describe('Detections Usage and Metrics', () => {
         .mockReturnValue({ body: getMockRuleAlertsResponse(800) });
       (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
 
-      const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
+      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -236,7 +236,7 @@ describe('Detections Usage and Metrics', () => {
         .mockReturnValue({ body: getMockRuleAlertsResponse(0) });
       (savedObjectsClient.find as jest.Mock).mockReturnValue(getMockAlertCasesResponse());
 
-      const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
+      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -317,7 +317,7 @@ describe('Detections Usage and Metrics', () => {
         jobs: null,
         jobStats: null,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
-      const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
+      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -347,7 +347,7 @@ describe('Detections Usage and Metrics', () => {
         datafeedStats: mockDatafeedStatsResponse,
       } as unknown) as ReturnType<typeof mlMock.anomalyDetectorsProvider>);
 
-      const result = await fetchDetectionsMetrics('', '', esClientMock, mlMock, savedObjectsClient);
+      const result = await fetchDetectionsMetrics('', '', esClientMock, savedObjectsClient, mlMock);
 
       expect(result).toEqual(
         expect.objectContaining({
