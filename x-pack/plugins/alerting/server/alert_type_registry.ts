@@ -46,6 +46,7 @@ export interface RegistryAlertType
     | 'actionVariables'
     | 'producer'
     | 'minimumLicenseRequired'
+    | 'isExportable'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -268,6 +269,7 @@ export class AlertTypeRegistry {
             actionVariables,
             producer,
             minimumLicenseRequired,
+            isExportable,
           },
         ]: [string, UntypedNormalizedAlertType]) => ({
           id,
@@ -278,6 +280,7 @@ export class AlertTypeRegistry {
           actionVariables,
           producer,
           minimumLicenseRequired,
+          isExportable,
           enabledInLicense: !!this.licenseState.getLicenseCheckForAlertType(
             id,
             name,

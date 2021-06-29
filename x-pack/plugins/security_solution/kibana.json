@@ -17,6 +17,7 @@
     "inspector",
     "licensing",
     "maps",
+    "timelines",
     "triggersActionsUi",
     "uiActions"
   ],
@@ -24,6 +25,7 @@
     "encryptedSavedObjects",
     "fleet",
     "ml",
+    "dashboard",
     "newsfeed",
     "security",
     "spaces",

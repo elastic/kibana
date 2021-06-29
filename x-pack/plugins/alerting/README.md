@@ -120,6 +120,7 @@ The following table describes the properties of the `options` object.
 |minimumLicenseRequired|The value of a minimum license. Most of the rules are licensed as "basic".|string|
 |useSavedObjectReferences.extractReferences|(Optional) When developing a rule type, you can choose to implement hooks for extracting saved object references from rule parameters. This hook will be invoked when a rule is created or updated. Implementing this hook is optional, but if an extract hook is implemented, an inject hook must also be implemented.|Function
 |useSavedObjectReferences.injectReferences|(Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.|Function
+|isExportable|Whether the rule type is exportable from the Saved Objects Management UI.|boolean|
 
 ### Executor
 
@@ -285,6 +286,7 @@ const myRuleType: AlertType<
 		],
 	},
 	minimumLicenseRequired: 'basic',
+	isExportable: true,
 	async executor({
 		alertId,
 		startedAt,

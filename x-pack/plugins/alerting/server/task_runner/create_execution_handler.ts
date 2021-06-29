@@ -161,6 +161,8 @@ export function createExecutionHandler<
         continue;
       }
 
+      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
+
       // TODO would be nice  to add the action name here, but it's not available
       const actionLabel = `${action.actionTypeId}:${action.id}`;
       const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
@@ -173,9 +175,15 @@ export function createExecutionHandler<
           id: alertId,
           type: 'alert',
         }),
+        relatedSavedObjects: [
+          {
+            id: alertId,
+            type: 'alert',
+            namespace: namespace.namespace,
+            typeId: alertType.id,
+          },
+        ],
       });
-
-      const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
       const event: IEvent = {
         event: {
@@ -205,7 +213,6 @@ export function createExecutionHandler<
           license: alertType.minimumLicenseRequired,
           category: alertType.id,
           ruleset: alertType.producer,
-          ...namespace,
           name: alertName,
         },
       };

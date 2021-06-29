@@ -10,16 +10,24 @@ export const sampleAttribute = {
   visualizationType: 'lnsXY',
   references: [
     { id: 'apm-*', name: 'indexpattern-datasource-current-indexpattern', type: 'index-pattern' },
-    { id: 'apm-*', name: 'indexpattern-datasource-layer-layer1', type: 'index-pattern' },
+    { id: 'apm-*', name: 'indexpattern-datasource-layer-layer0', type: 'index-pattern' },
   ],
   state: {
     datasourceStates: {
       indexpattern: {
         layers: {
-          layer1: {
-            columnOrder: ['x-axis-column', 'y-axis-column'],
+          layer0: {
+            columnOrder: [
+              'x-axis-column-layer0',
+              'y-axis-column-layer0',
+              'y-axis-column-layer0X0',
+              'y-axis-column-layer0X1',
+              'y-axis-column-layer0X2',
+              'y-axis-column-layer0X3',
+              'y-axis-column-layer0X4',
+            ],
             columns: {
-              'x-axis-column': {
+              'x-axis-column-layer0': {
                 sourceField: 'transaction.duration.us',
                 label: 'Page load time',
                 dataType: 'number',
@@ -32,13 +40,100 @@ export const sampleAttribute = {
                   maxBars: 'auto',
                 },
               },
-              'y-axis-column': {
+              'y-axis-column-layer0': {
                 dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                },
                 isBucketed: false,
                 label: 'Pages loaded',
+                operationType: 'formula',
+                params: {
+                  format: {
+                    id: 'percent',
+                    params: {
+                      decimals: 0,
+                    },
+                  },
+                  formula:
+                    "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                  isFormulaBroken: false,
+                },
+                references: ['y-axis-column-layer0X4'],
+                scale: 'ratio',
+              },
+              'y-axis-column-layer0X0': {
+                customLabel: true,
+                dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                },
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: 'Records',
+              },
+              'y-axis-column-layer0X1': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'count',
+                scale: 'ratio',
+                sourceField: 'Records',
+                filter: {
+                  language: 'kuery',
+                  query:
+                    'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+                },
+              },
+              'y-axis-column-layer0X2': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'math',
+                params: {
+                  tinymathAst: 'y-axis-column-layer0X1',
+                },
+                references: ['y-axis-column-layer0X1'],
+                scale: 'ratio',
+              },
+              'y-axis-column-layer0X3': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'overall_sum',
+                references: ['y-axis-column-layer0X2'],
+                scale: 'ratio',
+              },
+              'y-axis-column-layer0X4': {
+                customLabel: true,
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Part of count() / overall_sum(count())',
+                operationType: 'math',
+                params: {
+                  tinymathAst: {
+                    args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
+                    location: {
+                      max: 30,
+                      min: 0,
+                    },
+                    name: 'divide',
+                    text:
+                      "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                    type: 'function',
+                  },
+                },
+                references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
+                scale: 'ratio',
               },
             },
             incompleteColumns: {},
@@ -57,18 +152,15 @@ export const sampleAttribute = {
       preferredSeriesType: 'line',
       layers: [
         {
-          accessors: ['y-axis-column'],
-          layerId: 'layer1',
+          accessors: ['y-axis-column-layer0'],
+          layerId: 'layer0',
           seriesType: 'line',
-          yConfig: [{ forAccessor: 'y-axis-column', color: 'green' }],
-          xAccessor: 'x-axis-column',
+          yConfig: [{ forAccessor: 'y-axis-column-layer0' }],
+          xAccessor: 'x-axis-column-layer0',
         },
       ],
     },
-    query: { query: '', language: 'kuery' },
-    filters: [
-      { meta: { index: 'apm-*' }, query: { match_phrase: { 'transaction.type': 'page-load' } } },
-      { meta: { index: 'apm-*' }, query: { match_phrase: { 'processor.event': 'transaction' } } },
-    ],
+    query: { query: 'transaction.duration.us < 60000000', language: 'kuery' },
+    filters: [],
   },
 };

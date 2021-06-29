@@ -47,6 +47,7 @@ describe('has()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -67,6 +68,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -99,6 +101,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -129,6 +132,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -159,6 +163,7 @@ describe('register()', () => {
       executor: jest.fn(),
       producer: 'alerts',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
     };
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
@@ -204,6 +209,7 @@ describe('register()', () => {
       },
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -228,6 +234,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -258,6 +265,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -280,6 +288,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -295,6 +304,7 @@ describe('register()', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isExportable: true,
         executor: jest.fn(),
         producer: 'alerts',
       })
@@ -316,6 +326,7 @@ describe('get()', () => {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -340,6 +351,7 @@ describe('get()', () => {
         "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
+        "isExportable": true,
         "minimumLicenseRequired": "basic",
         "name": "Test",
         "producer": "alerts",
@@ -378,6 +390,7 @@ describe('list()', () => {
         },
       ],
       defaultActionGroupId: 'testActionGroup',
+      isExportable: true,
       minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
@@ -404,6 +417,7 @@ describe('list()', () => {
           "defaultActionGroupId": "testActionGroup",
           "enabledInLicense": false,
           "id": "test",
+          "isExportable": true,
           "minimumLicenseRequired": "basic",
           "name": "Test",
           "producer": "alerts",
@@ -468,6 +482,7 @@ describe('ensureAlertTypeEnabled', () => {
       defaultActionGroupId: 'default',
       executor: jest.fn(),
       producer: 'alerts',
+      isExportable: true,
       minimumLicenseRequired: 'basic',
       recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     });
@@ -498,6 +513,7 @@ function alertTypeWithVariables<ActionGroupIds extends string>(
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
+    isExportable: true,
     minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',

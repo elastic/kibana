@@ -20,6 +20,7 @@ import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 interface FlyoutPaneComponentProps {
   timelineId: TimelineId;
+  visible?: boolean;
 }
 
 const EuiFlyoutContainer = styled.div`
@@ -31,7 +32,10 @@ const EuiFlyoutContainer = styled.div`
   }
 `;
 
-const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId }) => {
+const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
+  timelineId,
+  visible = true,
+}) => {
   const dispatch = useDispatch();
   const handleClose = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
@@ -39,7 +43,10 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId })
   }, [dispatch, timelineId]);
 
   return (
-    <EuiFlyoutContainer data-test-subj="flyout-pane">
+    <EuiFlyoutContainer
+      data-test-subj="flyout-pane"
+      style={{ visibility: visible ? 'visible' : 'hidden' }}
+    >
       <EuiFlyout
         aria-label={i18n.TIMELINE_DESCRIPTION}
         className="timeline-flyout"
@@ -47,6 +54,8 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId })
         hideCloseButton={true}
         onClose={handleClose}
         size="l"
+        ownFocus={false}
+        style={{ visibility: visible ? 'visible' : 'hidden' }}
       >
         <StatefulTimeline
           renderCellValue={DefaultCellRenderer}

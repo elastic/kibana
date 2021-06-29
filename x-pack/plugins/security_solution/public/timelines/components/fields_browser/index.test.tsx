@@ -18,6 +18,8 @@ import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
 import { StatefulFieldsBrowserComponent } from '.';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
 

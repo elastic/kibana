@@ -1645,6 +1645,7 @@ describe('create()', () => {
         }),
       },
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'alerts',
     });

@@ -34,6 +34,9 @@
             "__pagerduty": {
               "type": "long"
             },
+            "__swimlane": {
+              "type": "long"
+            },
             "__server-log": {
               "type": "long"
             },
@@ -69,6 +72,9 @@
               "type": "long"
             },
             "__pagerduty": {
+              "type": "long"
+            },
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -1254,6 +1260,20 @@
             }
           }
         },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "platform": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
         "counts": {
           "properties": {
             "transaction": {
@@ -1536,6 +1556,17 @@
               }
             },
             "cloud": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
               "properties": {
                 "took": {
                   "properties": {
@@ -1924,9 +1955,6 @@
             "create_first_engine_button": {
               "type": "long"
             },
-            "header_launch_button": {
-              "type": "long"
-            },
             "engine_table_link": {
               "type": "long"
             }
@@ -2162,6 +2190,10 @@
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
             },
+            "open_formula_popover": {
+              "type": "long",
+              "_meta": { "description": "Number of times the user opened the in-product formula help popover." }
+            },
             "toggle_fullscreen_formula": {
               "type": "long",
               "_meta": {
@@ -2396,6 +2428,10 @@
               "_meta": {
                 "description": "Number of times the user opened one of the in-product help popovers."
               }
+            },
+            "open_formula_popover": {
+              "type": "long",
+              "_meta": { "description": "Number of times the user opened the in-product formula help popover." }
             },
             "toggle_fullscreen_formula": {
               "type": "long",
@@ -5759,6 +5795,12 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.disableLegacyUrlAliases.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
           }
         }
       }

@@ -7,7 +7,12 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { IFieldType, IndexPatternAttributes, SavedObject } from '../../common';
+import {
+  IFieldType,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  IndexPatternAttributes,
+  SavedObject,
+} from '../../common';
 
 export const getFieldByName = (
   fieldName: string,
@@ -24,7 +29,7 @@ export const findIndexPatternById = async (
   index: string
 ): Promise<SavedObject<IndexPatternAttributes> | undefined> => {
   const savedObjectsResponse = await savedObjectsClient.find<IndexPatternAttributes>({
-    type: 'index-pattern',
+    type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
     fields: ['fields'],
     search: `"${index}"`,
     searchFields: ['title'],

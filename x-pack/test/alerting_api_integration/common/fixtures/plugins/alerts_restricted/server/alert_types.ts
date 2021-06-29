@@ -20,6 +20,7 @@ export function defineAlertTypes(
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     recoveryActionGroup: { id: 'restrictedRecovered', name: 'Restricted Recovery' },
     async executor() {},
   };
@@ -30,6 +31,7 @@ export function defineAlertTypes(
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor() {},
   };
   alerting.registerType(noopRestrictedAlertType);

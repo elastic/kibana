@@ -156,6 +156,7 @@ export interface AlertType<
     extractReferences: (params: Params) => RuleParamsAndRefs<ExtractedParams>;
     injectReferences: (params: SavedObjectAttributes, references: SavedObjectReference[]) => Params;
   };
+  isExportable: boolean;
 }
 
 export type UntypedAlertType = AlertType<

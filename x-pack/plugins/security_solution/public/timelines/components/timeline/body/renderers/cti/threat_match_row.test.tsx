@@ -12,6 +12,8 @@ import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { ThreatMatchRowProps, ThreatMatchRowView } from './threat_match_row';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 describe('ThreatMatchRowView', () => {
   const mount = useMountAppended();
 

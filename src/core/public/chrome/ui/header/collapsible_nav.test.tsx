@@ -16,10 +16,6 @@ import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
-  htmlIdGenerator: () => () => 'mockId',
-}));
-
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
 
 function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
