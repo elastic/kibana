@@ -82,6 +82,7 @@ export async function getServiceInstancesTransactionStatistics<
     start,
     end,
     numBuckets,
+    searchAggregatedTransactions,
   });
 
   const field = getTransactionDurationFieldForAggregatedTransactions(

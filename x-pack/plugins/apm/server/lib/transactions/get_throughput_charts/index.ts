@@ -115,7 +115,10 @@ export async function getThroughputCharts({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { bucketSize, intervalString } = getBucketSize(setup);
+  const { bucketSize, intervalString } = getBucketSize({
+    ...setup,
+    searchAggregatedTransactions,
+  });
 
   const response = await searchThroughput({
     environment,

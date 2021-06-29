@@ -68,7 +68,12 @@ export async function getServiceInstancesSystemMetricStatistics<
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
   const { apmEventClient } = setup;
 
-  const { intervalString } = getBucketSize({ start, end, numBuckets });
+  const { intervalString } = getBucketSize({
+    start,
+    end,
+    numBuckets,
+    searchAggregatedTransactions: true,
+  });
 
   const systemMemoryFilter = {
     bool: {

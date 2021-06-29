@@ -121,6 +121,7 @@ export async function getServiceTransactionStats({
                         start,
                         end,
                         numBuckets: 20,
+                        searchAggregatedTransactions,
                       }).intervalString,
                       min_doc_count: 0,
                       extended_bounds: { min: start, max: end },

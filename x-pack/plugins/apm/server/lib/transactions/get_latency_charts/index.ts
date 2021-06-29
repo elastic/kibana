@@ -58,7 +58,11 @@ function searchLatency({
   end: number;
 }) {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSize({ start, end });
+  const { intervalString } = getBucketSize({
+    start,
+    end,
+    searchAggregatedTransactions,
+  });
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
