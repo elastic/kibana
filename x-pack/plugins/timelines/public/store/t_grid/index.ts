@@ -60,9 +60,6 @@ export const createStore = (
     state,
     composeEnhancers(applyMiddleware(epicMiddleware))
   );
-  const unsubscribe = store.subscribe(() => {
-    const test = store.getState();
-    debugger;
-  });
+
   return store;
 };
