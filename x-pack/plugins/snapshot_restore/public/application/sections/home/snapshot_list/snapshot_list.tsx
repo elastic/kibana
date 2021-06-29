@@ -17,6 +17,7 @@ import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
 import {
+  linkToRepositories,
   linkToAddRepository,
   linkToPolicies,
   linkToAddPolicy,
@@ -42,7 +43,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const {
     error,
     isLoading,
-    data: { snapshots = [], repositories = [], policies = [] },
+    data: { snapshots = [], repositories = [], policies = [], errors = {} },
     resendRequest: reload,
   } = useLoadSnapshots();
 
@@ -257,41 +258,77 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
       />
     );
   } else {
+    const repositoryErrorsWarning = Object.keys(errors).length ? (
+      <>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryWarningTitle"
+              defaultMessage="Some repositories contain errors"
+            />
+          }
+          color="warning"
+          iconType="alert"
+          data-test-subj="repositoryErrorsWarning"
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryWarningDescription"
+            defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
+            values={{
+              repositoryLink: (
+                <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryWarningLinkText"
+                    defaultMessage="Repositories"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer />
+      </>
+    ) : null;
+
+    const maxSnapshotsWarning = snapshots.length === SNAPSHOT_LIST_MAX_SIZE && (
+      <>
+        <EuiCallOut
+          color="warning"
+          iconType="help"
+          data-test-subj="maxSnapshotsWarning"
+          title={i18n.translate('xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedTitle', {
+            defaultMessage: 'Cannot show the full list of snapshots',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDescription"
+            defaultMessage="You've reached the maximum number of viewable snapshots. To view all of your snapshots, use {docLink}."
+            values={{
+              docLink: (
+                <EuiLink
+                  href={docLinks.links.snapshotRestore.getSnapshot}
+                  target="_blank"
+                  data-test-subj="documentationLink"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDocLinkText"
+                    defaultMessage="the Elasticsearch API"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer size="l" />
+      </>
+    );
+
     content = (
       <>
-        {snapshots.length === SNAPSHOT_LIST_MAX_SIZE && (
-          <>
-            <EuiCallOut
-              color="warning"
-              iconType="help"
-              data-test-subj="maxSnapshotsWarning"
-              title={i18n.translate(
-                'xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedTitle',
-                { defaultMessage: 'Cannot show the full list of snapshots' }
-              )}
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDescription"
-                defaultMessage="You've reached the maximum number of viewable snapshots. To view all of your snapshots, use {docLink}."
-                values={{
-                  docLink: (
-                    <EuiLink
-                      href={docLinks.links.snapshotRestore.getSnapshot}
-                      target="_blank"
-                      data-test-subj="documentationLink"
-                    >
-                      <FormattedMessage
-                        id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDocLinkText"
-                        defaultMessage="the Elasticsearch API"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiCallOut>
-            <EuiSpacer size="l" />
-          </>
-        )}
+        {repositoryErrorsWarning}
+
+        {maxSnapshotsWarning}
+
         <SnapshotTable
           snapshots={snapshots}
           repositories={repositories}

@@ -103,6 +103,53 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       expect(response).toEqual({ body: expectedResponse });
     });
 
+    test('returns an error object if ES request contains repository failures', async () => {
+      const mockSnapshotGetPolicyEsResponse = {
+        fooPolicy: {},
+      };
+
+      const mockGetSnapshotsResponse = {
+        snapshots: [{ snapshot: 'snapshot1', repository: 'fooRepository' }],
+        failures: {
+          bar: {
+            type: 'repository_exception',
+            reason:
+              "[barRepository] Could not read repository data because the contents of the repository do not match its expected state. This is likely the result of either concurrently modifying the contents of the repository by a process other than this cluster or an issue with the repository's underlying storage. The repository has been disabled to prevent corrupting its contents. To re-enable it and continue using it please remove the repository from the cluster and add it again to make the cluster recover the known state of the repository from its physical contents.",
+          },
+        },
+      };
+
+      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
+      getLifecycleFn.mockResolvedValue({ body: mockSnapshotGetPolicyEsResponse });
+      getSnapshotFn.mockResolvedValueOnce({ body: mockGetSnapshotsResponse });
+
+      const expectedResponse = {
+        repositories: ['fooRepository'],
+        policies: ['fooPolicy'],
+        snapshots: [
+          {
+            ...defaultSnapshot,
+            repository: 'fooRepository',
+            snapshot: 'snapshot1',
+            managedRepository:
+              mockSnapshotGetManagedRepositoryEsResponse.defaults[
+                'cluster.metadata.managed_repository'
+              ],
+          },
+        ],
+        errors: {
+          bar: {
+            type: 'repository_exception',
+            reason:
+              "[barRepository] Could not read repository data because the contents of the repository do not match its expected state. This is likely the result of either concurrently modifying the contents of the repository by a process other than this cluster or an issue with the repository's underlying storage. The repository has been disabled to prevent corrupting its contents. To re-enable it and continue using it please remove the repository from the cluster and add it again to make the cluster recover the known state of the repository from its physical contents.",
+          },
+        },
+      };
+
+      const response = await router.runRequest(mockRequest);
+      expect(response).toEqual({ body: expectedResponse });
+    });
+
     test('returns empty arrays if no snapshots returned from ES', async () => {
       const mockSnapshotGetPolicyEsResponse = {};
       const mockSnapshotGetRepositoryEsResponse = {};

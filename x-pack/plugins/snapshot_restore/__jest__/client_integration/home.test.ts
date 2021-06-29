@@ -512,6 +512,34 @@ describe('<SnapshotRestoreHome />', () => {
         );
       });
 
+      test('should show a warning if a repository contains errors', async () => {
+        httpRequestsMockHelpers.setLoadSnapshotsResponse({
+          snapshots,
+          repositories: [REPOSITORY_NAME, 'repository_with_errors'],
+          errors: {
+            repository_with_errors: {
+              type: 'repository_exception',
+              reason:
+                '[repository_with_errors] Could not read repository data because the contents of the repository do not match its expected state.',
+            },
+          },
+        });
+
+        testBed = await setup();
+
+        await act(async () => {
+          testBed.actions.selectTab('snapshots');
+        });
+
+        testBed.component.update();
+
+        const { find, exists } = testBed;
+        expect(exists('repositoryErrorsWarning')).toBe(true);
+        expect(find('repositoryErrorsWarning').text()).toContain(
+          'Some repositories contain errors'
+        );
+      });
+
       test('each row should have a link to the repository', async () => {
         const { component, find, exists, table, router } = testBed;
 

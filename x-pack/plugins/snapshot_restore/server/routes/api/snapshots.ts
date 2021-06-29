@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
+import type { SnapshotDetailsEs } from '../../../common/types';
 import { SNAPSHOT_LIST_MAX_SIZE } from '../../../common/constants';
 import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
@@ -37,9 +37,6 @@ export function registerSnapshotsRoutes({
         // Silently swallow error as policy names aren't required in UI
       }
 
-      const allRepos: string[] = [];
-      const snapshots: SnapshotDetails[] = [];
-
       try {
         // If any of these repositories 504 they will cost the request significant time.
         const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
@@ -54,29 +51,31 @@ export function registerSnapshotsRoutes({
           size: SNAPSHOT_LIST_MAX_SIZE,
         });
 
+        const allRepos: string[] = [];
+
         // Decorate each snapshot with the repository with which it's associated.
-        fetchedSnapshots?.snapshots?.forEach((snapshot) => {
-          snapshots.push(
-            deserializeSnapshotDetails(snapshot as SnapshotDetailsEs, managedRepository)
-          );
-          // @ts-expect-error @elastic/elasticsearch repository is a new field in the response
+        const snapshots = fetchedSnapshots?.snapshots?.map((snapshot) => {
+          // @ts-expect-error @elastic/elasticsearch "repository" is a new field in the response
           allRepos.push(snapshot.repository);
+          return deserializeSnapshotDetails(snapshot as SnapshotDetailsEs, managedRepository);
+        });
+
+        const uniqueRepos = allRepos.filter((repo, index) => {
+          return allRepos.indexOf(repo) === index;
+        });
+
+        return res.ok({
+          body: {
+            snapshots: snapshots || [],
+            policies,
+            repositories: uniqueRepos,
+            // @ts-expect-error @elastic/elasticsearch "failures" is a new field in the response
+            errors: fetchedSnapshots?.failures,
+          },
         });
       } catch (e) {
         return handleEsError({ error: e, response: res });
       }
-
-      const uniqueRepos = allRepos.filter((repo, index) => {
-        return allRepos.indexOf(repo) === index;
-      });
-
-      return res.ok({
-        body: {
-          snapshots,
-          policies,
-          repositories: uniqueRepos,
-        },
-      });
     })
   );
 

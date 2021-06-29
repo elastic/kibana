@@ -379,4 +379,5 @@ export type TestSubjects =
   | 'version'
   | 'version.title'
   | 'version.value'
-  | 'maxSnapshotsWarning';
+  | 'maxSnapshotsWarning'
+  | 'repositoryErrorsWarning';
