@@ -67,8 +67,6 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
       try {
         await clearJobAuditMessages(jobId);
         setIsClearing(false);
-        // wait half a second before refreshing the jobs list
-        // setTimeout(refreshJobList, 500);
         if (typeof refreshJobList === 'function') {
           refreshJobList();
         }
@@ -77,7 +75,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
         toastNotificationService.displayErrorToast(
           e,
           i18n.translate('xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle', {
-            defaultMessage: 'Error clearning job message warnings and errors',
+            defaultMessage: 'Error clearing job message warnings and errors',
           })
         );
       }
