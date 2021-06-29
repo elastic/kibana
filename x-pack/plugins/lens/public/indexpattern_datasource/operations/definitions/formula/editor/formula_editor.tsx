@@ -745,7 +745,12 @@ export function FormulaEditor({
                         button={
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
-                            onClick={() => setIsHelpOpen(!isHelpOpen)}
+                            onClick={() => {
+                              if (!isHelpOpen) {
+                                trackUiEvent('open_formula_popover');
+                              }
+                              setIsHelpOpen(!isHelpOpen);
+                            }}
                             iconType="documentation"
                             color="text"
                             size="s"
