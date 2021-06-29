@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import * as H from 'history';
 import React, { Dispatch } from 'react';
+import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+import { APP_ID } from '../../../../../../common/constants';
 import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import { SecurityPageName } from '../../../../../app/types';
 import { getEditRuleUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import {
   ActionToaster,
@@ -31,8 +33,14 @@ import { transformOutput } from '../../../../containers/detection_engine/rules/t
 import * as i18n from '../translations';
 import { bucketRulesResponse, getExportedRulesCount } from './helpers';
 
-export const editRuleAction = (rule: Rule, history: H.History) => {
-  history.push(getEditRuleUrl(rule.id));
+export const editRuleAction = (
+  ruleId: string,
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>
+) => {
+  navigateToApp(APP_ID, {
+    deepLinkId: SecurityPageName.rules,
+    path: getEditRuleUrl(ruleId ?? ''),
+  });
 };
 
 export const duplicateRulesAction = async (
