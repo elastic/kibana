@@ -12,7 +12,6 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
   const esArchiver = getService('esArchiver');
 
   describe('embedded Lens examples', function () {
-    this.tags('ciGroup13');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/lens/basic'); // need at least one index pattern
@@ -22,6 +21,10 @@ export default function ({ getService, loadTestFile }: PluginFunctionalProviderC
       await esArchiver.unload('x-pack/test/functional/es_archives/lens/basic');
     });
 
-    loadTestFile(require.resolve('./embedded_example'));
+    describe('', function () {
+      this.tags(['ciGroup4', 'skipFirefox']);
+
+      loadTestFile(require.resolve('./embedded_example'));
+    });
   });
 }
