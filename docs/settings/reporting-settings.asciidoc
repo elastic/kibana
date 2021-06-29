@@ -105,7 +105,7 @@ security is enabled, <<xpack-security-encryptionKey, `xpack.security.encryptionK
 [cols="2*<"]
 |===
 | `xpack.reporting.queue.pollInterval`
-  | Specify the {ref}/common-options.html#time-units[time] that the reporting poller waits between polling the index for any
+  | Specify the {time-units}[time] that the reporting poller waits between polling the index for any
   pending Reporting jobs. Can be specified as number of milliseconds. Defaults to `3s`.
 
 | [[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}
