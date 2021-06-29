@@ -7,6 +7,7 @@
 
 import { SavedObjectReference } from 'kibana/public';
 import { Ast } from '@kbn/interpreter/common';
+import memoizeOne from 'memoize-one';
 import {
   Datasource,
   DatasourcePublicAPI,
@@ -53,7 +54,7 @@ export async function initializeDatasources(
   return states;
 }
 
-export function createDatasourceLayers(
+export const createDatasourceLayers = memoizeOne(function createDatasourceLayers(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>
 ) {
@@ -73,7 +74,7 @@ export function createDatasourceLayers(
       });
     });
   return datasourceLayers;
-}
+});
 
 export async function persistedStateToExpression(
   datasources: Record<string, Datasource>,

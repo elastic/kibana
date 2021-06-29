@@ -23,6 +23,7 @@ import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_ana
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
 import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
 import { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
+import { MachineLearningDataVisualizerIndexPatternManagementProvider } from './data_visualizer_index_pattern_management';
 import { MachineLearningJobManagementProvider } from './job_management';
 import { MachineLearningJobSelectionProvider } from './job_selection';
 import { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
@@ -48,6 +49,7 @@ import { MachineLearningAlertingProvider } from './alerting';
 import { SwimLaneProvider } from './swim_lane';
 import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
 import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
+import { TrainedModelsProvider } from './trained_models';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -85,11 +87,15 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
+  const dataVisualizerIndexPatternManagement = MachineLearningDataVisualizerIndexPatternManagementProvider(
+    context,
+    dataVisualizerTable
+  );
 
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
-  const jobTable = MachineLearningJobTableProvider(context);
+  const jobTable = MachineLearningJobTableProvider(context, commonUI, customUrls);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
   const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(context);
@@ -108,6 +114,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const testResources = MachineLearningTestResourcesProvider(context);
   const alerting = MachineLearningAlertingProvider(context, commonUI);
   const swimLane = SwimLaneProvider(context);
+  const trainedModels = TrainedModelsProvider(context, api, commonUI);
 
   return {
     anomaliesTable,
@@ -129,6 +136,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,
+    dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
     jobManagement,
     jobSelection,
@@ -151,5 +159,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     swimLane,
     testExecution,
     testResources,
+    trainedModels,
   };
 }

@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('legacy data table visualization', function indexPatternCreation() {
     before(async function () {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');

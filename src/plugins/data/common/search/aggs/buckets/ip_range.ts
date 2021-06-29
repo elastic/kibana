@@ -18,7 +18,7 @@ import { KBN_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
-  defaultMessage: 'IPv4 Range',
+  defaultMessage: 'IP Range',
 });
 
 export enum IP_RANGE_TYPES {

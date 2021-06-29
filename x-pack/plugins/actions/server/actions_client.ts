@@ -155,6 +155,7 @@ export class ActionsClient {
       {
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -164,6 +165,7 @@ export class ActionsClient {
     return {
       id: result.id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -228,6 +230,7 @@ export class ActionsClient {
         ...attributes,
         actionTypeId,
         name,
+        isMissingSecrets: false,
         config: validatedActionTypeConfig as SavedObjectAttributes,
         secrets: validatedActionTypeSecrets as SavedObjectAttributes,
       },
@@ -245,6 +248,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId as string,
+      isMissingSecrets: result.attributes.isMissingSecrets as boolean,
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
@@ -299,6 +303,7 @@ export class ActionsClient {
     return {
       id,
       actionTypeId: result.attributes.actionTypeId,
+      isMissingSecrets: result.attributes.isMissingSecrets,
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
@@ -464,6 +469,7 @@ export class ActionsClient {
     actionId,
     params,
     source,
+    relatedSavedObjects,
   }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
@@ -471,7 +477,13 @@ export class ActionsClient {
     ) {
       await this.authorization.ensureAuthorized('execute');
     }
-    return this.actionExecutor.execute({ actionId, params, source, request: this.request });
+    return this.actionExecutor.execute({
+      actionId,
+      params,
+      source,
+      request: this.request,
+      relatedSavedObjects,
+    });
   }
 
   public async enqueueExecution(options: EnqueueExecutionOptions): Promise<void> {
@@ -510,7 +522,7 @@ async function injectExtraFindData(
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, estypes.AggregationContainer> = {};
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {

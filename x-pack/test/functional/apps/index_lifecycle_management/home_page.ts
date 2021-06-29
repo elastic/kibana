@@ -41,7 +41,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         return (await testSubjects.getVisibleText('sectionHeading')) === 'Index Lifecycle Policies';
       });
 
+      await pageObjects.indexLifecycleManagement.increasePolicyListPageSize();
+
       const allPolicies = await pageObjects.indexLifecycleManagement.getPolicyList();
+
       const filteredPolicies = allPolicies.filter(function (policy) {
         return policy.name === policyName;
       });

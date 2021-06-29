@@ -7,16 +7,15 @@
 
 import uuid from 'uuid';
 import { ElasticsearchClient } from 'kibana/server';
-
-import { transformListItemToElasticQuery } from '../utils';
-import {
-  CreateEsBulkTypeSchema,
+import type {
   DeserializerOrUndefined,
-  IndexEsListItemSchema,
   MetaOrUndefined,
   SerializerOrUndefined,
   Type,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { transformListItemToElasticQuery } from '../utils';
+import { CreateEsBulkTypeSchema, IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemsBulkOptions {
   deserializer: DeserializerOrUndefined;

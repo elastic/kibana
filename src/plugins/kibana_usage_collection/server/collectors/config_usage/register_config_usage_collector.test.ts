@@ -28,7 +28,7 @@ describe('kibana_config_usage', () => {
 
   const collectorFetchContext = createCollectorFetchContextMock();
   const coreUsageDataStart = coreUsageDataServiceMock.createStartContract();
-  const mockConfigUsage = (Symbol('config usage telemetry') as any) as ConfigUsageData;
+  const mockConfigUsage = (Symbol('config usage telemetry') as unknown) as ConfigUsageData;
   coreUsageDataStart.getConfigsUsageData.mockResolvedValue(mockConfigUsage);
 
   beforeAll(() => registerConfigUsageCollector(usageCollectionMock, () => coreUsageDataStart));

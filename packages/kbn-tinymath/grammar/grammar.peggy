@@ -1,16 +1,16 @@
 // tinymath parsing grammar
 
 {
-   function simpleLocation (location) {
-  // Returns an object representing the position of the function within the expression,
-  // demarcated by the position of its first character and last character. We calculate these values
-  // using the offset because the expression could span multiple lines, and we don't want to deal
-  // with column and line values.
-  return {
-   min: location.start.offset,
-   max: location.end.offset
+  function simpleLocation (location) {
+    // Returns an object representing the position of the function within the expression,
+    // demarcated by the position of its first character and last character. We calculate these values
+    // using the offset because the expression could span multiple lines, and we don't want to deal
+    // with column and line values.
+    return {
+      min: location.start.offset,
+      max: location.end.offset
+    }
   }
- }
 }
 
 start
@@ -43,8 +43,16 @@ Literal "literal"
 // Quoted variables are interpreted as strings
 // but unquoted variables are more restrictive
 Variable
-  = _ Quote chars:(ValidChar / Space)* Quote _ {
+  = _ '"' chars:("\\\"" { return "\""; } / [^"])* '"' _ {
     return {
+      type: 'variable',
+      value: chars.join(''),
+      location: simpleLocation(location()),
+      text: text()
+    };
+  }
+  / _ "'" chars:("\\\'" { return "\'"; } / [^'])* "'" _ {
+      return {
       type: 'variable',
       value: chars.join(''),
       location: simpleLocation(location()),
@@ -66,26 +74,34 @@ Expression
   = AddSubtract
 
 AddSubtract
-  = _ left:MultiplyDivide rest:(('+' / '-') MultiplyDivide)* _ {
-    return rest.reduce((acc, curr) => ({
+  = _ left:MultiplyDivide rest:(('+' / '-') MultiplyDivide)+ _ {
+    const topLevel = rest.reduce((acc, curr) => ({
       type: 'function',
       name: curr[0] === '+' ? 'add' : 'subtract',
       args: [acc, curr[1]],
-      location: simpleLocation(location()),
-      text: text()
-    }), left)
+    }), left);
+    if (typeof topLevel === 'object') {
+      topLevel.location = simpleLocation(location());
+      topLevel.text = text();
+    }
+    return topLevel;
   }
+  / MultiplyDivide
 
 MultiplyDivide
   = _ left:Factor rest:(('*' / '/') Factor)* _ {
-    return rest.reduce((acc, curr) => ({
+    const topLevel = rest.reduce((acc, curr) => ({
       type: 'function',
       name: curr[0] === '*' ? 'multiply' : 'divide',
       args: [acc, curr[1]],
-      location: simpleLocation(location()),
-      text: text()
-    }), left)
+    }), left);
+    if (typeof topLevel === 'object') {
+      topLevel.location = simpleLocation(location());
+      topLevel.text = text();
+    }
+    return topLevel;
   }
+  / Factor
 
 Factor
   = Group
@@ -103,10 +119,9 @@ Argument_List "arguments"
   }
 
 String
-  = [\"] value:(ValidChar)+ [\"] { return value.join(''); }
-  / [\'] value:(ValidChar)+ [\'] { return value.join(''); }
-  / value:(ValidChar)+ { return value.join(''); }
-
+  = '"' chars:("\\\"" { return "\""; } / [^"])* '"' { return chars.join(''); }
+  / "'" chars:("\\\'" { return "\'"; } / [^'])* "'" { return chars.join(''); }
+  / chars:(ValidChar)+ { return chars.join(''); }
 
 Argument
  = name:[a-zA-Z_]+ _ '=' _ value:(Number / String) _ {

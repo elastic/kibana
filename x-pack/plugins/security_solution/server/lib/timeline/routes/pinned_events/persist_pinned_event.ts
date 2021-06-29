@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { PINNED_EVENT_URL } from '../../../../../common/constants';
@@ -13,7 +14,7 @@ import { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
 import { ConfigType } from '../../../..';
 
-import { transformError, buildSiemResponse } from '../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
 import { persistPinnedEventSchema } from '../../schemas/pinned_events';

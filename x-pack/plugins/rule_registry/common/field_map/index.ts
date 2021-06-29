@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export * from './base_rule_field_map';
-export * from './ecs_field_map';
 export * from './merge_field_maps';
 export * from './runtime_type_from_fieldmap';
 export * from './types';

@@ -470,3 +470,59 @@ test('subsequent calls to setContextConfig() for the same context name can disab
     },
   });
 });
+
+test('buffers log records for already created appenders', async () => {
+  // a default config
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const logger = system.get('test', 'context');
+
+  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+
+  const upgradePromise = system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'all' },
+    })
+  );
+
+  logger.trace('message to the known context');
+  expect(bufferAppendSpy).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+
+  await upgradePromise;
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to the known context');
+});
+
+test('buffers log records for appenders created during config upgrade', async () => {
+  // a default config
+  await system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'info' },
+    })
+  );
+
+  const bufferAppendSpy = jest.spyOn((system as any).bufferAppender, 'append');
+
+  const upgradePromise = system.upgrade(
+    config.schema.validate({
+      appenders: { default: { type: 'console', layout: { type: 'json' } } },
+      root: { level: 'all' },
+    })
+  );
+
+  const logger = system.get('test', 'context');
+  logger.trace('message to a new context');
+
+  expect(bufferAppendSpy).toHaveBeenCalledTimes(1);
+  expect(mockConsoleLog).toHaveBeenCalledTimes(0);
+
+  await upgradePromise;
+  expect(JSON.parse(mockConsoleLog.mock.calls[0][0]).message).toBe('message to a new context');
+});

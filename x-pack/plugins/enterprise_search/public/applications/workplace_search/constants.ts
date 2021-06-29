@@ -40,7 +40,7 @@ export const NAV = {
     defaultMessage: 'Content',
   }),
   ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
-    defaultMessage: 'Users & roles',
+    defaultMessage: 'Users and roles',
   }),
   SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
     defaultMessage: 'Security',
@@ -662,6 +662,49 @@ export const PRIVATE_SOURCES = i18n.translate(
   }
 );
 
+export const PRIVATE_CAN_CREATE_PAGE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.title',
+  {
+    defaultMessage: 'Manage private content sources',
+  }
+);
+
+export const PRIVATE_VIEW_ONLY_PAGE_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.title',
+  {
+    defaultMessage: 'Review Group Sources',
+  }
+);
+
+export const PRIVATE_VIEW_ONLY_PAGE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.vewOnly.description',
+  {
+    defaultMessage: 'Review the status of all sources shared with your Group.',
+  }
+);
+
+export const PRIVATE_CAN_CREATE_PAGE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.private.canCreate.description',
+  {
+    defaultMessage:
+      'Review the status of all connected private sources, and manage private sources for your account.',
+  }
+);
+
+export const ACCOUNT_SETTINGS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.accountSettings.title',
+  {
+    defaultMessage: 'Account Settings',
+  }
+);
+
+export const ACCOUNT_SETTINGS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.accountSettings.description',
+  {
+    defaultMessage: 'Manage access, passwords, and other account settings.',
+  }
+);
+
 export const CONFIRM_CHANGES_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.confirmChanges.text',
   {
@@ -749,5 +792,16 @@ export const REMOVE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.remove.button',
   {
     defaultMessage: 'Remove',
+  }
+);
+
+export const COPY_TEXT = i18n.translate('xpack.enterpriseSearch.workplaceSearch.copyText', {
+  defaultMessage: 'Copy',
+});
+
+export const STATUS_POPOVER_TOOLTIP = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.statusPopoverTooltip',
+  {
+    defaultMessage: 'Click to view info',
   }
 );

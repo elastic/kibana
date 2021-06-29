@@ -47,6 +47,8 @@ export function asPercent(
   return numeral(decimal).format('0.0%');
 }
 
+export type AsPercent = typeof asPercent;
+
 export function asDecimalOrInteger(value: number) {
   // exact 0 or above 10 should not have decimal
   if (value === 0 || value >= 10) {

@@ -17,8 +17,6 @@ export interface NewOutput {
   hosts?: string[];
   ca_sha256?: string;
   api_key?: string;
-  fleet_enroll_username?: string;
-  fleet_enroll_password?: string;
   config?: Record<string, any>;
   config_yaml?: string;
 }

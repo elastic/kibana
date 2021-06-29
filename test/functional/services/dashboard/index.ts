@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { DashboardVisualizationProvider } from './visualizations';
-export { DashboardExpectProvider } from './expectations';
-export { DashboardAddPanelProvider } from './add_panel';
-export { DashboardReplacePanelProvider } from './replace_panel';
-export { DashboardPanelActionsProvider } from './panel_actions';
+export { DashboardVisualizationsService } from './visualizations';
+export { DashboardExpectService } from './expectations';
+export { DashboardAddPanelService } from './add_panel';
+export { DashboardReplacePanelService } from './replace_panel';
+export { DashboardPanelActionsService } from './panel_actions';

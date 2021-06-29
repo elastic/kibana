@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { LIST_URL } from '@kbn/securitysolution-list-constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { LIST_URL } from '../../../../plugins/lists/common/constants';
 
 import {
   getCreateMinimalListSchemaMock,

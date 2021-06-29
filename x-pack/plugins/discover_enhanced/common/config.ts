@@ -6,5 +6,8 @@
  */
 
 export interface Config {
-  actions: { exploreDataInChart: { enabled: boolean } };
+  actions: {
+    exploreDataInChart: { enabled: boolean };
+    exploreDataInContextMenu: { enabled: boolean };
+  };
 }

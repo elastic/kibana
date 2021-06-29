@@ -11,7 +11,6 @@ import { PLUGIN_ID, AGENT_API_ROUTES } from '../../constants';
 import {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
-  GetOneAgentEventsRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
   PostAgentUnenrollRequestSchema,
@@ -31,7 +30,6 @@ import {
   getAgentHandler,
   updateAgentHandler,
   deleteAgentHandler,
-  getAgentEventsHandler,
   getAgentStatusForAgentPolicyHandler,
   putAgentsReassignHandler,
   postBulkAgentsReassignHandler,
@@ -107,16 +105,6 @@ export const registerAPIRoutes = (router: IRouter, config: FleetConfigType) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     putAgentsReassignHandler
-  );
-
-  // Get agent events
-  router.get(
-    {
-      path: AGENT_API_ROUTES.EVENTS_PATTERN,
-      validate: GetOneAgentEventsRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
-    },
-    getAgentEventsHandler
   );
 
   // Get agent status for policy

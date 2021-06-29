@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from '../translations';
 import { Filter } from '../types';
-import { ExceptionListTypeEnum } from '../../../../../public/lists_plugin_deps';
 
 interface ExceptionsViewerHeaderProps {
   isInitLoading: boolean;

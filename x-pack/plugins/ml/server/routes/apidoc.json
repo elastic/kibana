@@ -48,6 +48,7 @@
 
     "ResultsService",
     "GetAnomaliesTableData",
+    "GetDatafeedResultsChartData",
     "GetCategoryDefinition",
     "GetMaxAnomalyScore",
     "GetCategoryExamples",
@@ -127,9 +128,6 @@
     "ValidateCardinality",
     "ValidateJob",
 
-    "NotificationSettings",
-    "GetNotificationSettings",
-
     "DatafeedService",
     "CreateDatafeed",
     "PreviewDatafeed",
@@ -150,8 +148,7 @@
     "SavedObjectsStatus",
     "SyncJobSavedObjects",
     "InitializeJobSavedObjects",
-    "AssignJobsToSpaces",
-    "RemoveJobsFromSpaces",
+    "UpdateJobsSpaces",
     "RemoveJobsFromCurrentSpace",
     "JobsSpaces",
     "CanDeleteJob",

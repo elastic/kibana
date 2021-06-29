@@ -7,6 +7,13 @@ exports[`xy_expression XYChart component it renders area 1`] = `
   <Connect(SpecInstance)
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -52,6 +59,13 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
+    domain={
+      Object {
+        "fit": false,
+        "max": undefined,
+        "min": undefined,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -73,6 +87,10 @@ exports[`xy_expression XYChart component it renders area 1`] = `
     }
     tickFormat={[Function]}
     title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
   />
   <Connect(SpecInstance)
     areaSeriesStyle={
@@ -204,6 +222,13 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
   <Connect(SpecInstance)
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -249,6 +274,13 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
+    domain={
+      Object {
+        "fit": false,
+        "max": undefined,
+        "min": undefined,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -270,6 +302,10 @@ exports[`xy_expression XYChart component it renders bar 1`] = `
     }
     tickFormat={[Function]}
     title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
   />
   <Connect(SpecInstance)
     areaSeriesStyle={
@@ -409,6 +445,13 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
   <Connect(SpecInstance)
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -454,6 +497,13 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
+    domain={
+      Object {
+        "fit": false,
+        "max": undefined,
+        "min": undefined,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -475,6 +525,10 @@ exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
     }
     tickFormat={[Function]}
     title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
   />
   <Connect(SpecInstance)
     areaSeriesStyle={
@@ -614,6 +668,13 @@ exports[`xy_expression XYChart component it renders line 1`] = `
   <Connect(SpecInstance)
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -659,6 +720,13 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
+    domain={
+      Object {
+        "fit": false,
+        "max": undefined,
+        "min": undefined,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -680,6 +748,10 @@ exports[`xy_expression XYChart component it renders line 1`] = `
     }
     tickFormat={[Function]}
     title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
   />
   <Connect(SpecInstance)
     areaSeriesStyle={
@@ -811,6 +883,13 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
   <Connect(SpecInstance)
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -856,6 +935,13 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
+    domain={
+      Object {
+        "fit": false,
+        "max": undefined,
+        "min": undefined,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -877,6 +963,10 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
     }
     tickFormat={[Function]}
     title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
   />
   <Connect(SpecInstance)
     areaSeriesStyle={
@@ -1016,6 +1106,13 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
   <Connect(SpecInstance)
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -1061,6 +1158,13 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     title="c"
   />
   <Connect(SpecInstance)
+    domain={
+      Object {
+        "fit": false,
+        "max": undefined,
+        "min": undefined,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -1082,6 +1186,10 @@ exports[`xy_expression XYChart component it renders stacked bar 1`] = `
     }
     tickFormat={[Function]}
     title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
   />
   <Connect(SpecInstance)
     areaSeriesStyle={
@@ -1229,6 +1337,13 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
   <Connect(SpecInstance)
     baseTheme={Object {}}
     debugState={false}
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
     legendPosition="top"
     onBrushEnd={[Function]}
     onElementClick={[Function]}
@@ -1274,6 +1389,13 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     title="c"
   />
   <Connect(SpecInstance)
+    domain={
+      Object {
+        "fit": false,
+        "max": undefined,
+        "min": undefined,
+      }
+    }
     gridLine={
       Object {
         "visible": false,
@@ -1295,6 +1417,10 @@ exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] =
     }
     tickFormat={[Function]}
     title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
   />
   <Connect(SpecInstance)
     areaSeriesStyle={

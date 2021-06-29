@@ -14,6 +14,7 @@ import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/commo
 import { isPopulatedObject } from '../../../../../plugins/ml/common/util/object_utils';
 
 const moduleIds = [
+  'apache_data_stream',
   'apache_ecs',
   'apm_jsbase',
   'apm_nodejs',
@@ -25,9 +26,11 @@ const moduleIds = [
   'metricbeat_system_ecs',
   'metrics_ui_hosts',
   'metrics_ui_k8s',
+  'nginx_data_stream',
   'nginx_ecs',
   'sample_data_ecommerce',
   'sample_data_weblogs',
+  'security_auth',
   'security_linux',
   'security_network',
   'security_windows',

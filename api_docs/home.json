@@ -4,59 +4,69 @@
     "classes": [],
     "functions": [
       {
+        "parentPluginId": "home",
         "id": "def-public.getDisplayText",
         "type": "Function",
-        "label": "getDisplayText",
-        "signature": [
-          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\") => string"
-        ],
-        "description": [
-          "\nConvert instruction variant id into display text.\n"
-        ],
-        "children": [
-          {
-            "id": "def-public.getDisplayText.$1",
-            "type": "CompoundType",
-            "label": "id",
-            "isRequired": true,
-            "signature": [
-              "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\""
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/home/common/instruction_variant.ts",
-              "lineNumber": 55
-            }
-          }
-        ],
         "tags": [
           "params",
           "return"
         ],
-        "returnComment": [
-          "display name"
+        "label": "getDisplayText",
+        "description": [
+          "\nConvert instruction variant id into display text.\n"
+        ],
+        "signature": [
+          "(id: \"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\") => string"
         ],
         "source": {
           "path": "src/plugins/home/common/instruction_variant.ts",
           "lineNumber": 55
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-public.getDisplayText.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "\"ESC\" | \"OSX\" | \"DEB\" | \"RPM\" | \"DOCKER\" | \"WINDOWS\" | \"NODE\" | \"DJANGO\" | \"FLASK\" | \"RAILS\" | \"RACK\" | \"JS\" | \"GO\" | \"JAVA\" | \"DOTNET\" | \"LINUX\" | \"PHP\""
+            ],
+            "source": {
+              "path": "src/plugins/home/common/instruction_variant.ts",
+              "lineNumber": 55
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "display name"
+        ],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
       {
+        "parentPluginId": "home",
         "id": "def-public.Environment",
         "type": "Interface",
+        "tags": [],
         "label": "Environment",
         "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/home/public/services/environment/environment.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.Environment.cloud",
             "type": "boolean",
+            "tags": [],
             "label": "cloud",
             "description": [
               "\nFlag whether the home app should advertise cloud features"
@@ -64,12 +74,14 @@
             "source": {
               "path": "src/plugins/home/public/services/environment/environment.ts",
               "lineNumber": 14
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.Environment.apmUi",
             "type": "boolean",
+            "tags": [],
             "label": "apmUi",
             "description": [
               "\nFlag whether the home app should advertise apm features"
@@ -77,12 +89,14 @@
             "source": {
               "path": "src/plugins/home/public/services/environment/environment.ts",
               "lineNumber": 18
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.Environment.ml",
             "type": "boolean",
+            "tags": [],
             "label": "ml",
             "description": [
               "\nFlag whether the home app should advertise ml features"
@@ -90,28 +104,30 @@
             "source": {
               "path": "src/plugins/home/public/services/environment/environment.ts",
               "lineNumber": 22
-            }
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/home/public/services/environment/environment.ts",
-          "lineNumber": 10
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-public.FeatureCatalogueEntry",
         "type": "Interface",
+        "tags": [],
         "label": "FeatureCatalogueEntry",
         "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [
               "Unique string identifier for this feature."
@@ -119,12 +135,14 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 22
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.title",
             "type": "string",
+            "tags": [],
             "label": "title",
             "description": [
               "Title of feature displayed to the user."
@@ -132,20 +150,18 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 24
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.category",
             "type": "Enum",
+            "tags": [],
             "label": "category",
             "description": [
               "{@link FeatureCatalogueCategory} to display this feature in."
             ],
-            "source": {
-              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-              "lineNumber": 26
-            },
             "signature": [
               {
                 "pluginId": "home",
@@ -154,28 +170,36 @@
                 "section": "def-public.FeatureCatalogueCategory",
                 "text": "FeatureCatalogueCategory"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.subtitle",
             "type": "string",
+            "tags": [],
             "label": "subtitle",
             "description": [
               "A tagline of feature displayed to the user."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 28
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.description",
             "type": "string",
+            "tags": [],
             "label": "description",
             "description": [
               "One-line description of feature displayed to the user."
@@ -183,28 +207,32 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 30
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.icon",
             "type": "CompoundType",
+            "tags": [],
             "label": "icon",
             "description": [
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
+            ],
+            "signature": [
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 32
             },
-            "signature": [
-              "IconType"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.path",
             "type": "string",
+            "tags": [],
             "label": "path",
             "description": [
               "URL path to link to this future. Should not include the basePath."
@@ -212,12 +240,14 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 34
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.showOnHomePage",
             "type": "boolean",
+            "tags": [],
             "label": "showOnHomePage",
             "description": [
               "Whether or not this link should be shown on the front page of Kibana."
@@ -225,76 +255,84 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 36
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.order",
             "type": "number",
+            "tags": [],
             "label": "order",
             "description": [
               "An ordinal used to sort features relative to one another for display on the home page"
+            ],
+            "signature": [
+              "number | undefined"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 38
             },
-            "signature": [
-              "number | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.visible",
             "type": "Function",
+            "tags": [],
             "label": "visible",
             "description": [
               "Optional function to control visibility of this feature."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 40
             },
-            "signature": [
-              "(() => boolean) | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueEntry.solutionId",
             "type": "string",
+            "tags": [],
             "label": "solutionId",
             "description": [
               "Unique string identifier of the solution this feature belongs to"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 42
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-          "lineNumber": 20
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-public.FeatureCatalogueSolution",
         "type": "Interface",
+        "tags": [],
         "label": "FeatureCatalogueSolution",
         "description": [],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
+          "lineNumber": 46
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueSolution.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [
               "Unique string identifier for this solution."
@@ -302,12 +340,14 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 48
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueSolution.title",
             "type": "string",
+            "tags": [],
             "label": "title",
             "description": [
               "Title of solution displayed to the user."
@@ -315,12 +355,14 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 50
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueSolution.subtitle",
             "type": "string",
+            "tags": [],
             "label": "subtitle",
             "description": [
               "The tagline of the solution displayed to the user."
@@ -328,60 +370,68 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 52
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueSolution.description",
             "type": "string",
+            "tags": [],
             "label": "description",
             "description": [
               "One-line description of the solution displayed to the user."
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 54
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueSolution.appDescriptions",
             "type": "Array",
+            "tags": [],
             "label": "appDescriptions",
             "description": [
               "A list of use cases for this solution displayed to the user."
+            ],
+            "signature": [
+              "string[]"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 56
             },
-            "signature": [
-              "string[]"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueSolution.icon",
             "type": "CompoundType",
+            "tags": [],
             "label": "icon",
             "description": [
               "EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement."
+            ],
+            "signature": [
+              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 58
             },
-            "signature": [
-              "IconType"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueSolution.path",
             "type": "string",
+            "tags": [],
             "label": "path",
             "description": [
               "URL path to link to this future. Should not include the basePath."
@@ -389,61 +439,55 @@
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 60
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.FeatureCatalogueSolution.order",
             "type": "number",
+            "tags": [],
             "label": "order",
             "description": [
               "An ordinal used to sort solutions relative to one another for display on the home page"
+            ],
+            "signature": [
+              "number | undefined"
             ],
             "source": {
               "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
               "lineNumber": 62
             },
-            "signature": [
-              "number | undefined"
-            ]
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
-          "lineNumber": 46
-        },
         "initialIsOpen": false
       }
     ],
     "enums": [
       {
+        "parentPluginId": "home",
         "id": "def-public.FeatureCatalogueCategory",
         "type": "Enum",
+        "tags": [],
         "label": "FeatureCatalogueCategory",
-        "tags": [
-          "public"
-        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/public/services/feature_catalogue/feature_catalogue_registry.ts",
           "lineNumber": 13
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
+        "parentPluginId": "home",
         "id": "def-public.EnvironmentSetup",
         "type": "Type",
+        "tags": [],
         "label": "EnvironmentSetup",
-        "tags": [
-          "public"
-        ],
         "description": [],
-        "source": {
-          "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 161
-        },
         "signature": [
           "{ update: (update: Partial<",
           {
@@ -455,20 +499,20 @@
           },
           ">) => void; }"
         ],
+        "source": {
+          "path": "src/plugins/home/public/plugin.ts",
+          "lineNumber": 166
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-public.FeatureCatalogueSetup",
         "type": "Type",
+        "tags": [],
         "label": "FeatureCatalogueSetup",
-        "tags": [
-          "public"
-        ],
         "description": [],
-        "source": {
-          "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 158
-        },
         "signature": [
           "{ register: (feature: ",
           {
@@ -488,336 +532,392 @@
           },
           ") => void; }"
         ],
+        "source": {
+          "path": "src/plugins/home/public/plugin.ts",
+          "lineNumber": 163
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-public.TutorialDirectoryHeaderLinkComponent",
         "type": "Type",
+        "tags": [],
         "label": "TutorialDirectoryHeaderLinkComponent",
-        "tags": [
-          "public"
-        ],
         "description": [],
+        "signature": [
+          "React.FunctionComponent<{}>"
+        ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
           "lineNumber": 18
         },
-        "signature": [
-          "(props: { children?: React.ReactNode; }, context: any) => React.ReactElement<any, any> | null"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-public.TutorialDirectoryNoticeComponent",
         "type": "Type",
+        "tags": [],
         "label": "TutorialDirectoryNoticeComponent",
-        "tags": [
-          "public"
-        ],
         "description": [],
+        "signature": [
+          "React.FunctionComponent<{}>"
+        ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
           "lineNumber": 15
         },
-        "signature": [
-          "(props: { children?: React.ReactNode; }, context: any) => React.ReactElement<any, any> | null"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-public.TutorialModuleNoticeComponent",
         "type": "Type",
+        "tags": [],
         "label": "TutorialModuleNoticeComponent",
-        "tags": [
-          "public"
-        ],
         "description": [],
+        "signature": [
+          "React.FunctionComponent<{ moduleName: string; }>"
+        ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
           "lineNumber": 21
         },
-        "signature": [
-          "(props: React.PropsWithChildren<{ moduleName: string; }>, context: any) => React.ReactElement<any, any> | null"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-public.TutorialSetup",
         "type": "Type",
+        "tags": [],
         "label": "TutorialSetup",
-        "tags": [
-          "public"
-        ],
         "description": [],
+        "signature": [
+          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; }"
+        ],
         "source": {
           "path": "src/plugins/home/public/plugin.ts",
-          "lineNumber": 164
+          "lineNumber": 169
         },
-        "signature": [
-          "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: ",
-          "FC",
-          "<{}>) => void; registerDirectoryHeaderLink: (id: string, component: ",
-          "FC",
-          "<{}>) => void; registerModuleNotice: (id: string, component: ",
-          "FC",
-          "<{ moduleName: string; }>) => void; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-public.TutorialVariables",
         "type": "Type",
+        "tags": [],
         "label": "TutorialVariables",
-        "tags": [
-          "public"
-        ],
         "description": [],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
         "source": {
           "path": "src/plugins/home/public/services/tutorials/tutorial_service.ts",
           "lineNumber": 12
         },
-        "signature": [
-          "{ [x: string]: unknown; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
+        "parentPluginId": "home",
         "id": "def-public.INSTRUCTION_VARIANT",
         "type": "Object",
         "tags": [],
+        "label": "INSTRUCTION_VARIANT",
+        "description": [],
+        "source": {
+          "path": "src/plugins/home/common/instruction_variant.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.ESC",
             "type": "string",
+            "tags": [],
             "label": "ESC",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 10
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.OSX",
             "type": "string",
+            "tags": [],
             "label": "OSX",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 11
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.DEB",
             "type": "string",
+            "tags": [],
             "label": "DEB",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 12
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.RPM",
             "type": "string",
+            "tags": [],
             "label": "RPM",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 13
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.DOCKER",
             "type": "string",
+            "tags": [],
             "label": "DOCKER",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 14
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.WINDOWS",
             "type": "string",
+            "tags": [],
             "label": "WINDOWS",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 15
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.NODE",
             "type": "string",
+            "tags": [],
             "label": "NODE",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 16
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.DJANGO",
             "type": "string",
+            "tags": [],
             "label": "DJANGO",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 17
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.FLASK",
             "type": "string",
+            "tags": [],
             "label": "FLASK",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 18
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.RAILS",
             "type": "string",
+            "tags": [],
             "label": "RAILS",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 19
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.RACK",
             "type": "string",
+            "tags": [],
             "label": "RACK",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 20
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.JS",
             "type": "string",
+            "tags": [],
             "label": "JS",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 21
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.GO",
             "type": "string",
+            "tags": [],
             "label": "GO",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 22
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.JAVA",
             "type": "string",
+            "tags": [],
             "label": "JAVA",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 23
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.DOTNET",
             "type": "string",
+            "tags": [],
             "label": "DOTNET",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 24
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.LINUX",
             "type": "string",
+            "tags": [],
             "label": "LINUX",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 25
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-public.INSTRUCTION_VARIANT.PHP",
             "type": "string",
+            "tags": [],
             "label": "PHP",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 26
-            }
+            },
+            "deprecated": false
           }
         ],
-        "description": [],
-        "label": "INSTRUCTION_VARIANT",
-        "source": {
-          "path": "src/plugins/home/common/instruction_variant.ts",
-          "lineNumber": 9
-        },
         "initialIsOpen": false
       }
     ],
     "setup": {
+      "parentPluginId": "home",
       "id": "def-public.HomePublicPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "HomePublicPluginSetup",
       "description": [],
-      "tags": [
-        "public"
-      ],
+      "source": {
+        "path": "src/plugins/home/public/plugin.ts",
+        "lineNumber": 175
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "home",
           "id": "def-public.HomePublicPluginSetup.tutorials",
           "type": "Object",
+          "tags": [],
           "label": "tutorials",
           "description": [],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 168
-          },
           "signature": [
             "{ setVariable: (key: string, value: unknown) => void; registerDirectoryNotice: (id: string, component: React.FC<{}>) => void; registerDirectoryHeaderLink: (id: string, component: React.FC<{}>) => void; registerModuleNotice: (id: string, component: React.FC<{ moduleName: string; }>) => void; }"
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-public.HomePublicPluginSetup.featureCatalogue",
-          "type": "Object",
-          "label": "featureCatalogue",
-          "description": [],
+          ],
           "source": {
             "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 169
+            "lineNumber": 176
           },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "home",
+          "id": "def-public.HomePublicPluginSetup.addData",
+          "type": "Object",
+          "tags": [],
+          "label": "addData",
+          "description": [],
+          "signature": [
+            "{ registerAddDataTab: (tab: ",
+            "AddDataTab",
+            ") => void; }"
+          ],
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 177
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "home",
+          "id": "def-public.HomePublicPluginSetup.featureCatalogue",
+          "type": "Object",
+          "tags": [],
+          "label": "featureCatalogue",
+          "description": [],
           "signature": [
             "{ register: (feature: ",
             {
@@ -836,22 +936,24 @@
               "text": "FeatureCatalogueSolution"
             },
             ") => void; }"
-          ]
+          ],
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 178
+          },
+          "deprecated": false
         },
         {
+          "parentPluginId": "home",
+          "id": "def-public.HomePublicPluginSetup.environment",
+          "type": "Object",
           "tags": [
             "deprecated"
           ],
-          "id": "def-public.HomePublicPluginSetup.environment",
-          "type": "Object",
           "label": "environment",
           "description": [
             "\nThe environment service is only available for a transition period and will\nbe replaced by display specific extension points."
           ],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 176
-          },
           "signature": [
             "{ update: (update: Partial<",
             {
@@ -862,42 +964,70 @@
               "text": "Environment"
             },
             ">) => void; }"
+          ],
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 185
+          },
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/public/register_feature.ts",
+                "lineNumber": 18
+              }
+            },
+            {
+              "plugin": "apm",
+              "link": {
+                "path": "x-pack/plugins/apm/public/plugin.ts",
+                "lineNumber": 85
+              }
+            },
+            {
+              "plugin": "cloud",
+              "link": {
+                "path": "x-pack/plugins/cloud/public/plugin.ts",
+                "lineNumber": 66
+              }
+            }
           ]
         }
       ],
-      "source": {
-        "path": "src/plugins/home/public/plugin.ts",
-        "lineNumber": 167
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "home",
       "id": "def-public.HomePublicPluginStart",
       "type": "Interface",
+      "tags": [],
       "label": "HomePublicPluginStart",
       "description": [],
-      "tags": [],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-public.HomePublicPluginStart.featureCatalogue",
-          "type": "Object",
-          "label": "featureCatalogue",
-          "description": [],
-          "source": {
-            "path": "src/plugins/home/public/plugin.ts",
-            "lineNumber": 179
-          },
-          "signature": [
-            "FeatureCatalogueRegistry"
-          ]
-        }
-      ],
       "source": {
         "path": "src/plugins/home/public/plugin.ts",
-        "lineNumber": 178
+        "lineNumber": 187
       },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "home",
+          "id": "def-public.HomePublicPluginStart.featureCatalogue",
+          "type": "Object",
+          "tags": [],
+          "label": "featureCatalogue",
+          "description": [],
+          "signature": [
+            "FeatureCatalogueRegistry"
+          ],
+          "source": {
+            "path": "src/plugins/home/public/plugin.ts",
+            "lineNumber": 188
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -905,357 +1035,370 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "id": "def-server.ArtifactsSchema",
-        "type": "Interface",
-        "label": "ArtifactsSchema",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ArtifactsSchema.exportedFields",
-            "type": "Object",
-            "label": "exportedFields",
-            "description": [],
-            "source": {
-              "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-              "lineNumber": 60
-            },
-            "signature": [
-              "{ documentationUrl: string; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ArtifactsSchema.dashboards",
-            "type": "Array",
-            "label": "dashboards",
-            "description": [],
-            "source": {
-              "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-              "lineNumber": 63
-            },
-            "signature": [
-              "DashboardSchema",
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.ArtifactsSchema.application",
-            "type": "Object",
-            "label": "application",
-            "description": [],
-            "source": {
-              "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-              "lineNumber": 64
-            },
-            "signature": [
-              "{ path: string; label: string; } | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-          "lineNumber": 59
-        },
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [
       {
+        "parentPluginId": "home",
         "id": "def-server.TutorialsCategory",
         "type": "Enum",
+        "tags": [],
         "label": "TutorialsCategory",
-        "tags": [
-          "public"
-        ],
         "description": [],
         "source": {
           "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-          "lineNumber": 13
+          "lineNumber": 23
         },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
       {
+        "parentPluginId": "home",
+        "id": "def-server.ArtifactsSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "ArtifactsSchema",
+        "description": [],
+        "signature": [
+          "{ readonly application?: Readonly<{} & { label: string; path: string; }> | undefined; readonly exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; readonly dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }"
+        ],
+        "source": {
+          "path": "src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts",
+          "lineNumber": 40
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "home",
         "id": "def-server.SampleDataRegistrySetup",
         "type": "Type",
+        "tags": [],
         "label": "SampleDataRegistrySetup",
-        "tags": [
-          "public"
-        ],
         "description": [],
+        "signature": [
+          "{ registerSampleDataset: (specProvider: ",
+          {
+            "pluginId": "home",
+            "scope": "server",
+            "docId": "kibHomePluginApi",
+            "section": "def-server.SampleDatasetProvider",
+            "text": "SampleDatasetProvider"
+          },
+          ") => void; getSampleDatasets: () => ",
+          "Writable",
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+          "SavedObject",
+          "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
+          "SampleDatasetDashboardPanel",
+          ") => void; }"
+        ],
         "source": {
           "path": "src/plugins/home/server/services/sample_data/sample_data_registry.ts",
-          "lineNumber": 168
+          "lineNumber": 169
         },
-        "signature": [
-          "{ registerSampleDataset: (specProvider: SampleDatasetProvider) => void; getSampleDatasets: () => SampleDatasetSchema<unknown>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: AppLinkSchema[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: SampleDatasetDashboardPanel) => void; }"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-server.SampleDatasetProvider",
         "type": "Type",
-        "label": "SampleDatasetProvider",
         "tags": [],
+        "label": "SampleDatasetProvider",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
-          "lineNumber": 82
-        },
         "signature": [
           "() => ",
-          "SampleDatasetSchema",
-          "<unknown>"
+          "Writable",
+          "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>"
         ],
+        "source": {
+          "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+          "lineNumber": 30
+        },
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "home",
         "id": "def-server.TutorialProvider",
         "type": "Type",
-        "label": "TutorialProvider",
         "tags": [],
+        "label": "TutorialProvider",
         "description": [],
-        "source": {
-          "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
-          "lineNumber": 100
-        },
         "signature": [
           "(context: ",
           "TutorialContext",
-          ") => ",
-          "TutorialSchema"
+          ") => Readonly<{ savedObjects?: any[] | undefined; euiIconType?: string | undefined; previewImagePath?: string | undefined; moduleName?: string | undefined; isBeta?: boolean | undefined; completionTimeMinutes?: number | undefined; elasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; onPremElasticCloud?: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }> | undefined; artifacts?: Readonly<{ application?: Readonly<{} & { label: string; path: string; }> | undefined; exportedFields?: Readonly<{} & { documentationUrl: string; }> | undefined; } & { dashboards: Readonly<{ linkLabel?: string | undefined; } & { id: string; isOverview: boolean; }>[]; }> | undefined; savedObjectsInstallMsg?: string | undefined; } & { id: string; name: string; category: \"metrics\" | \"security\" | \"other\" | \"logging\"; shortDescription: string; longDescription: string; onPrem: Readonly<{ params?: Readonly<{ defaultValue?: any; } & { type: \"string\" | \"number\"; label: string; id: string; }>[] | undefined; } & { instructionSets: Readonly<{ title?: string | undefined; callOut?: Readonly<{ iconType?: string | undefined; message?: string | undefined; } & { title: string; }> | undefined; statusCheck?: Readonly<{ title?: string | undefined; text?: string | undefined; success?: string | undefined; error?: string | undefined; btnLabel?: string | undefined; } & { esHitsCheck: Readonly<{} & { query: Record<string, any>; index: string | string[]; }>; }> | undefined; } & { instructionVariants: Readonly<{} & { id: string; instructions: Readonly<{ title?: string | undefined; textPre?: string | undefined; commands?: string[] | undefined; textPost?: string | undefined; } & {}>[]; }>[]; }>[]; }>; }>"
         ],
+        "source": {
+          "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+          "lineNumber": 34
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [
       {
+        "parentPluginId": "home",
         "id": "def-server.INSTRUCTION_VARIANT",
         "type": "Object",
         "tags": [],
+        "label": "INSTRUCTION_VARIANT",
+        "description": [],
+        "source": {
+          "path": "src/plugins/home/common/instruction_variant.ts",
+          "lineNumber": 9
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.ESC",
             "type": "string",
+            "tags": [],
             "label": "ESC",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 10
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.OSX",
             "type": "string",
+            "tags": [],
             "label": "OSX",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 11
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.DEB",
             "type": "string",
+            "tags": [],
             "label": "DEB",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 12
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.RPM",
             "type": "string",
+            "tags": [],
             "label": "RPM",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 13
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.DOCKER",
             "type": "string",
+            "tags": [],
             "label": "DOCKER",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 14
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.WINDOWS",
             "type": "string",
+            "tags": [],
             "label": "WINDOWS",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 15
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.NODE",
             "type": "string",
+            "tags": [],
             "label": "NODE",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 16
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.DJANGO",
             "type": "string",
+            "tags": [],
             "label": "DJANGO",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 17
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.FLASK",
             "type": "string",
+            "tags": [],
             "label": "FLASK",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 18
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.RAILS",
             "type": "string",
+            "tags": [],
             "label": "RAILS",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 19
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.RACK",
             "type": "string",
+            "tags": [],
             "label": "RACK",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 20
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.JS",
             "type": "string",
+            "tags": [],
             "label": "JS",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 21
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.GO",
             "type": "string",
+            "tags": [],
             "label": "GO",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 22
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.JAVA",
             "type": "string",
+            "tags": [],
             "label": "JAVA",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 23
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.DOTNET",
             "type": "string",
+            "tags": [],
             "label": "DOTNET",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 24
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.LINUX",
             "type": "string",
+            "tags": [],
             "label": "LINUX",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 25
-            }
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "home",
             "id": "def-server.INSTRUCTION_VARIANT.PHP",
             "type": "string",
+            "tags": [],
             "label": "PHP",
             "description": [],
             "source": {
               "path": "src/plugins/home/common/instruction_variant.ts",
               "lineNumber": 26
-            }
+            },
+            "deprecated": false
           }
         ],
-        "description": [],
-        "label": "INSTRUCTION_VARIANT",
-        "source": {
-          "path": "src/plugins/home/common/instruction_variant.ts",
-          "lineNumber": 9
-        },
         "initialIsOpen": false
       }
     ],
     "setup": {
+      "parentPluginId": "home",
       "id": "def-server.HomeServerPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "HomeServerPluginSetup",
       "description": [],
-      "tags": [
-        "public"
-      ],
+      "source": {
+        "path": "src/plugins/home/server/plugin.ts",
+        "lineNumber": 54
+      },
+      "deprecated": false,
       "children": [
         {
-          "tags": [],
+          "parentPluginId": "home",
           "id": "def-server.HomeServerPluginSetup.tutorials",
           "type": "Object",
+          "tags": [],
           "label": "tutorials",
           "description": [],
-          "source": {
-            "path": "src/plugins/home/server/plugin.ts",
-            "lineNumber": 55
-          },
           "signature": [
             "{ registerTutorial: (specProvider: ",
             {
@@ -1276,18 +1419,20 @@
             ") => void; addScopedTutorialContextFactory: (scopedTutorialContextFactory: ",
             "ScopedTutorialContextFactory",
             ") => void; }"
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-server.HomeServerPluginSetup.sampleData",
-          "type": "Object",
-          "label": "sampleData",
-          "description": [],
+          ],
           "source": {
             "path": "src/plugins/home/server/plugin.ts",
-            "lineNumber": 56
+            "lineNumber": 55
           },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "home",
+          "id": "def-server.HomeServerPluginSetup.sampleData",
+          "type": "Object",
+          "tags": [],
+          "label": "sampleData",
+          "description": [],
           "signature": [
             "{ registerSampleDataset: (specProvider: ",
             {
@@ -1298,65 +1443,69 @@
               "text": "SampleDatasetProvider"
             },
             ") => void; getSampleDatasets: () => ",
-            "SampleDatasetSchema",
-            "<unknown>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
+            "Writable",
+            "<Readonly<{ status?: string | undefined; darkPreviewImagePath?: string | undefined; statusMsg?: string | undefined; } & { description: string; id: string; name: string; savedObjects: Readonly<{ version?: any; attributes?: any; } & { type: string; id: string; references: any[]; }>[]; previewImagePath: string; overviewDashboard: string; appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]; defaultIndex: string; dataIndices: Readonly<{} & { id: string; fields: Record<string, any>; timeFields: string[]; dataPath: string; currentTimeMarker: string; preserveDayOfWeekTimeOfDay: boolean; }>[]; }>>[]; addSavedObjectsToSampleDataset: (id: string, savedObjects: ",
             "SavedObject",
-            "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: ",
-            "AppLinkSchema",
-            "[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
-            "SampleDatasetDashboardPanel"
-          ]
+            "<unknown>[]) => void; addAppLinksToSampleDataset: (id: string, appLinks: Readonly<{} & { label: string; path: string; icon: string; }>[]) => void; replacePanelInSampleDatasetDashboard: ({ sampleDataId, dashboardId, oldEmbeddableId, embeddableId, embeddableType, embeddableConfig, }: ",
+            "SampleDatasetDashboardPanel",
+            ") => void; }"
+          ],
+          "source": {
+            "path": "src/plugins/home/server/plugin.ts",
+            "lineNumber": 56
+          },
+          "deprecated": false
         }
       ],
-      "source": {
-        "path": "src/plugins/home/server/plugin.ts",
-        "lineNumber": 54
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "home",
       "id": "def-server.HomeServerPluginStart",
       "type": "Interface",
+      "tags": [],
       "label": "HomeServerPluginStart",
       "description": [],
-      "tags": [
-        "public"
-      ],
-      "children": [
-        {
-          "tags": [],
-          "id": "def-server.HomeServerPluginStart.tutorials",
-          "type": "Object",
-          "label": "tutorials",
-          "description": [],
-          "source": {
-            "path": "src/plugins/home/server/plugin.ts",
-            "lineNumber": 61
-          },
-          "signature": [
-            "{}"
-          ]
-        },
-        {
-          "tags": [],
-          "id": "def-server.HomeServerPluginStart.sampleData",
-          "type": "Object",
-          "label": "sampleData",
-          "description": [],
-          "source": {
-            "path": "src/plugins/home/server/plugin.ts",
-            "lineNumber": 62
-          },
-          "signature": [
-            "{}"
-          ]
-        }
-      ],
       "source": {
         "path": "src/plugins/home/server/plugin.ts",
         "lineNumber": 60
       },
+      "deprecated": false,
+      "children": [
+        {
+          "parentPluginId": "home",
+          "id": "def-server.HomeServerPluginStart.tutorials",
+          "type": "Object",
+          "tags": [],
+          "label": "tutorials",
+          "description": [],
+          "signature": [
+            "{}"
+          ],
+          "source": {
+            "path": "src/plugins/home/server/plugin.ts",
+            "lineNumber": 61
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "home",
+          "id": "def-server.HomeServerPluginStart.sampleData",
+          "type": "Object",
+          "tags": [],
+          "label": "sampleData",
+          "description": [],
+          "signature": [
+            "{}"
+          ],
+          "source": {
+            "path": "src/plugins/home/server/plugin.ts",
+            "lineNumber": 62
+          },
+          "deprecated": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

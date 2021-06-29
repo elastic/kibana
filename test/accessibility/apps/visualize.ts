@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Visualize', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
       await PageObjects.common.navigateToApp('visualize');
     });
 

@@ -6,28 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { AppMeta } from 'kibana/public';
 import { CreateManagementItemArgs, Mount } from '../types';
 import { ManagementItem } from './management_item';
 
 export interface RegisterManagementAppArgs extends CreateManagementItemArgs {
   mount: Mount;
   basePath: string;
-  meta?: AppMeta;
+  keywords?: string[];
 }
 
 export class ManagementApp extends ManagementItem {
   public readonly mount: Mount;
   public readonly basePath: string;
-  public readonly meta: AppMeta;
+  public readonly keywords: string[];
 
   constructor(args: RegisterManagementAppArgs) {
     super(args);
 
     this.mount = args.mount;
     this.basePath = args.basePath;
-    this.meta = {
-      keywords: args.meta?.keywords || [],
-    };
+    this.keywords = args.keywords || [];
   }
 }

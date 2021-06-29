@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { ISessionTimeout } from './session_timeout';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import type { SessionTimeout } from './session_timeout';
 
 export function createSessionTimeoutMock() {
   return {
     start: jest.fn(),
     stop: jest.fn(),
-    extend: jest.fn(),
-  } as jest.Mocked<ISessionTimeout>;
+  } as jest.Mocked<PublicMethodsOf<SessionTimeout>>;
 }

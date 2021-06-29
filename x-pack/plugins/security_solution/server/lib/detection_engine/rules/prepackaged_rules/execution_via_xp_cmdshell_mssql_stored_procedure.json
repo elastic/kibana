@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Execution via MSSQL xp_cmdshell Stored Procedure",
-  "query": "event.category:process and event.type:(start or process_started) and process.name:cmd.exe and process.parent.name:sqlservr.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"cmd.exe\" and process.parent.name : \"sqlservr.exe\"\n",
   "risk_score": 73,
   "rule_id": "4ed493fc-d637-4a36-80ff-ac84937e5461",
   "severity": "high",
@@ -41,6 +41,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 4
 }

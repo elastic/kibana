@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ListItemArraySchema, Type } from '../../../common/schemas';
 import { getQueryFilterFromTypeValue } from '../utils';
 
 import { getListItemByValues } from './get_list_item_by_values';

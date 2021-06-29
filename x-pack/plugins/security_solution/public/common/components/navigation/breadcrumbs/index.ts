@@ -15,7 +15,7 @@ import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/p
 import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
-import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/pages';
+import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import {
   RouteSpyState,
@@ -61,10 +61,14 @@ const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
 
 // eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (
-  object: RouteSpyState & TabNavigationProps,
+  objectParam: RouteSpyState & TabNavigationProps,
   getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
-  const spyState: RouteSpyState = omit('navTabs', object);
+  const spyState: RouteSpyState = omit('navTabs', objectParam);
+
+  // Sets `timeline.isOpen` to false in the state to avoid reopening the timeline on breadcrumb click. https://github.com/elastic/kibana/issues/100322
+  const object = { ...objectParam, timeline: { ...objectParam.timeline, isOpen: false } };
+
   const overviewPath = getUrlForApp(APP_ID, { path: SecurityPageName.overview });
   const siemRootBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,

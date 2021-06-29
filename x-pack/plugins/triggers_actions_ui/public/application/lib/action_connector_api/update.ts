@@ -15,10 +15,16 @@ import type {
 
 const rewriteBodyRes: RewriteRequestCase<
   ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>
-> = ({ connector_type_id: actionTypeId, is_preconfigured: isPreconfigured, ...res }) => ({
+> = ({
+  connector_type_id: actionTypeId,
+  is_preconfigured: isPreconfigured,
+  is_missing_secrets: isMissingSecrets,
+  ...res
+}) => ({
   ...res,
   actionTypeId,
   isPreconfigured,
+  isMissingSecrets,
 });
 
 export async function updateActionConnector({
@@ -30,7 +36,7 @@ export async function updateActionConnector({
   connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
-  const res = await http.put(`${BASE_ACTION_API_PATH}/connector/${id}`, {
+  const res = await http.put(`${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`, {
     body: JSON.stringify({
       name: connector.name,
       config: connector.config,

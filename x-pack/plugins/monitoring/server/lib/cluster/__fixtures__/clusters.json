@@ -340,10 +340,10 @@
       "versions": []
     },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     }
@@ -679,10 +679,10 @@
       "versions": []
     },
     "beats": {
-      "totalEvents": null,
-      "bytesSent": null,
+      "totalEvents": 0,
+      "bytesSent": 0,
       "beats": {
-        "total": null,
+        "total": 0,
         "types": []
       }
     }

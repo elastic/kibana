@@ -8,10 +8,10 @@
 
 import { countBy, get, groupBy, mapValues, max, min, values } from 'lodash';
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { getPastDays } from './get_past_days';
-type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
+type ESResponse = estypes.SearchResponse<{ visualization: { visState: string } }>;
 
 interface VisSummary {
   type: string;

@@ -7,12 +7,12 @@
 
 import React, { ReactNode } from 'react';
 import { Observable, of } from 'rxjs';
+import { createObservabilityRuleTypeRegistryMock } from '../../../../observability/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { createCallApmApi } from '../../services/rest/createCallApmApi';
 import { MlUrlGenerator } from '../../../../ml/public';
-import { ApmRuleRegistry } from '../../plugin';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -44,6 +44,7 @@ const mockCore = {
       ml: {},
     },
     currentAppId$: new Observable(),
+    getUrlForApp: (appId: string) => '',
     navigateToUrl: (url: string) => {},
   },
   chrome: {
@@ -76,11 +77,6 @@ const mockCore = {
     get$: (key: string) => of(mockCore.uiSettings.get(key)),
   },
 };
-
-const mockApmRuleRegistry = ({
-  getTypeByRuleId: () => undefined,
-  registerType: () => undefined,
-} as unknown) as ApmRuleRegistry;
 
 const mockConfig: ConfigSchema = {
   serviceMapEnabled: true,
@@ -116,7 +112,7 @@ export const mockApmPluginContextValue = {
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
-  apmRuleRegistry: mockApmRuleRegistry,
+  observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
 };
 
 export function MockApmPluginContextWrapper({

@@ -24,15 +24,17 @@ export const isRootLevelAttribute = (
   allowedTypes: string[]
 ): boolean => {
   const splits = attributePath.split('.');
-  if (splits.length !== 2) {
+  if (splits.length <= 1) {
     return false;
   }
 
-  const [type, fieldName] = splits;
-  if (allowedTypes.includes(fieldName)) {
+  const [type, firstPath, ...otherPaths] = splits;
+  if (allowedTypes.includes(firstPath)) {
     return false;
   }
-  return allowedTypes.includes(type) && fieldDefined(indexMapping, fieldName);
+  return (
+    allowedTypes.includes(type) && fieldDefined(indexMapping, [firstPath, ...otherPaths].join('.'))
+  );
 };
 
 /**
@@ -45,7 +47,8 @@ export const isRootLevelAttribute = (
  * ```
  */
 export const rewriteRootLevelAttribute = (attributePath: string) => {
-  return attributePath.split('.')[1];
+  const [, ...attributes] = attributePath.split('.');
+  return attributes.join('.');
 };
 
 /**

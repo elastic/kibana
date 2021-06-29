@@ -7,16 +7,23 @@
 
 import React from 'react';
 import { SeriesFilter } from '../../series_editor/columns/series_filter';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
-import { DataSeries } from '../../types';
+import { SeriesConfig } from '../../types';
 
-export function ReportFilters({ dataViewSeries }: { dataViewSeries: DataSeries }) {
+export function ReportFilters({
+  seriesConfig,
+  seriesId,
+}: {
+  seriesConfig: SeriesConfig;
+  seriesId: string;
+}) {
   return (
     <SeriesFilter
-      series={dataViewSeries}
-      defaultFilters={dataViewSeries.defaultFilters}
-      seriesId={NEW_SERIES_KEY}
+      seriesConfig={seriesConfig}
+      filterFields={seriesConfig.filterFields}
+      baseFilters={seriesConfig.baseFilters}
+      seriesId={seriesId}
       isNew={true}
+      labels={seriesConfig.labels}
     />
   );
 }

@@ -24,3 +24,5 @@ export const OVERVIEW = '[data-test-subj="navigation-overview"]';
 export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';
 
 export const TIMELINES = '[data-test-subj="navigation-timelines"]';
+
+export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';

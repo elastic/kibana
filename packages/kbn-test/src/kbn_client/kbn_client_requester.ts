@@ -19,6 +19,10 @@ const isConcliftOnGetError = (error: any) => {
   );
 };
 
+const isIgnorableError = (error: any, ignorableErrors: number[] = []) => {
+  return isAxiosResponseError(error) && ignorableErrors.includes(error.response.status);
+};
+
 export const uriencode = (
   strings: TemplateStringsArray,
   ...values: Array<string | number | boolean>
@@ -53,6 +57,7 @@ export interface ReqOptions {
   body?: any;
   retries?: number;
   headers?: Record<string, string>;
+  ignoreErrors?: number[];
   responseType?: ResponseType;
 }
 
@@ -116,6 +121,8 @@ export class KbnClientRequester {
           responseType: options.responseType,
           // work around https://github.com/axios/axios/issues/2791
           transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
+          maxContentLength: 30000000,
+          maxBodyLength: 30000000,
           paramsSerializer: (params) => Qs.stringify(params),
         });
 
@@ -124,6 +131,10 @@ export class KbnClientRequester {
         const conflictOnGet = isConcliftOnGetError(error);
         const requestedRetries = options.retries !== undefined;
         const failedToGetResponse = isAxiosRequestError(error);
+
+        if (isIgnorableError(error, options.ignoreErrors)) {
+          return error.response;
+        }
 
         let errorMessage;
         if (conflictOnGet) {

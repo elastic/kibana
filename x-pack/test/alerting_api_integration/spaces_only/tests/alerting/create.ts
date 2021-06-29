@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { Spaces } from '../../scenarios';
 import {
   checkAAD,
@@ -13,24 +14,26 @@ import {
   getTestAlertData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
+  TaskManagerDoc,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('create', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
 
-    async function getScheduledTask(id: string) {
-      return await es.get({
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask: ApiResponse<estypes.GetResponse<TaskManagerDoc>> = await es.get({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
+      return scheduledTask.body._source!;
     }
 
     it('should handle create alert request appropriately', async () => {
@@ -96,13 +99,60 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(Date.parse(response.body.updated_at)).to.eql(Date.parse(response.body.created_at));
 
       expect(typeof response.body.scheduled_task_id).to.be('string');
-      const { _source: taskRecord } = await getScheduledTask(response.body.scheduled_task_id);
+      const taskRecord = await getScheduledTask(response.body.scheduled_task_id);
       expect(taskRecord.type).to.eql('task');
       expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
       expect(JSON.parse(taskRecord.task.params)).to.eql({
         alertId: response.body.id,
         spaceId: Spaces.space1.id,
       });
+      // Ensure AAD isn't broken
+      await checkAAD({
+        supertest,
+        spaceId: Spaces.space1.id,
+        type: 'alert',
+        id: response.body.id,
+      });
+    });
+
+    // see: https://github.com/elastic/kibana/issues/100607
+    // note this fails when the mappings for `params` does not have ignore_above
+    it('should handle alerts with immense params', async () => {
+      const { body: createdAction } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'MY action',
+          connector_type_id: 'test.noop',
+          config: {},
+          secrets: {},
+        })
+        .expect(200);
+
+      const lotsOfSpaces = ''.padEnd(100 * 1000); // 100K space chars
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            params: {
+              ignoredButPersisted: lotsOfSpaces,
+            },
+            actions: [
+              {
+                id: createdAction.id,
+                group: 'default',
+                params: {},
+              },
+            ],
+          })
+        );
+
+      expect(response.status).to.eql(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
+      expect(response.body.params.ignoredButPersisted).to.eql(lotsOfSpaces);
+
       // Ensure AAD isn't broken
       await checkAAD({
         supertest,
@@ -281,7 +331,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         expect(Date.parse(response.body.updatedAt)).to.eql(Date.parse(response.body.createdAt));
 
         expect(typeof response.body.scheduledTaskId).to.be('string');
-        const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);
+        const taskRecord = await getScheduledTask(response.body.scheduledTaskId);
         expect(taskRecord.type).to.eql('task');
         expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
         expect(JSON.parse(taskRecord.task.params)).to.eql({

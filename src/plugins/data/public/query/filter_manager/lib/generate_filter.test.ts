@@ -174,4 +174,22 @@ describe('Generate filters', () => {
       [FIELD.name]: ANOTHER_PHRASE,
     });
   });
+
+  it('should use only distinct values', () => {
+    const ANOTHER_PHRASE = 'another-value';
+    const filters = generateFilters(
+      mockFilterManager,
+      FIELD,
+      [PHRASE_VALUE, ANOTHER_PHRASE, PHRASE_VALUE, ANOTHER_PHRASE],
+      '',
+      INDEX_NAME
+    );
+    expect(filters).toHaveLength(2);
+    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+      [FIELD.name]: PHRASE_VALUE,
+    });
+    expect((filters[1] as PhraseFilter).query.match_phrase).toEqual({
+      [FIELD.name]: ANOTHER_PHRASE,
+    });
+  });
 });

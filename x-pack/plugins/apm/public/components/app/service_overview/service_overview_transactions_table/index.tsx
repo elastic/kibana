@@ -215,6 +215,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
             <TransactionOverviewLink
               serviceName={serviceName}
               latencyAggregationType={latencyAggregationType}
+              transactionType={transactionType}
             >
               {i18n.translate(
                 'xpack.apm.serviceOverview.transactionsTableLinkText',

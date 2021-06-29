@@ -7,6 +7,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     seriesParams={
       Array [
         Object {
+          "circlesRadius": 3,
           "data": Object {
             "id": "1",
             "label": "Count",
@@ -79,6 +80,7 @@ exports[`MetricsAxisOptions component should init with the default set of props 
     seriesParams={
       Array [
         Object {
+          "circlesRadius": 3,
           "data": Object {
             "id": "1",
             "label": "Count",

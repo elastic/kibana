@@ -1,0 +1,30 @@
+---
+id: formLibWelcome
+slug: /form-lib/welcome
+title: Welcome
+summary: Build complex forms the easy way
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+## Presentation
+
+The form library helps us build forms efficiently by providing a system whose main task is (1) to abstract away the state management of fields values and validity and (2) running validations on the fields when their values change.  
+
+The system is composed of **three parts**:
+
+* <DocLink id="formLibCoreFundamentals" text="The core"/>
+* <DocLink id="formLibHelpersComponents" text="Fields components"/>
+* <DocLink id="formLibHelpersValidators" text="Validators"/>
+
+## Motivation
+
+In the Elasticsearch UI team we build many forms. Many many forms! :blush: For each of them, we used to manually declare the form state, write validation functions, call them on certain events and then update the form state. We were basically re-inventing the wheel for each new form we built. It took our precious dev time to re-think the approach each time, but even more problematic: it meant that each of our form was built slightly differently. Maintaining those forms meant that we needed to remember how the state was being updated on a specific form and how its validation worked. This was far from efficient...
+
+We needed a system in place that took care of the repetitive task of managing a form state and validating its value, so we could dedicate more time doing what we love: **build amazing UX for our users!**.
+
+The form lib was born.
+
+## When shoud I use the form lib?
+
+As soon as you have a form with 3+ fields and some validation that you need to run on any of those fields, the form lib can help you reduce the boilerplate and the time to get your form running. Of course, the more you use it, the more addicted you will get! :smile: 

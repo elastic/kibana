@@ -67,8 +67,8 @@ describe('Cases', () => {
         .as('mycase')
     );
   });
-
-  it('Creates a new case with timeline and opens the timeline', function () {
+  // TODO: enable once attach timeline to cases is re-enabled
+  it.skip('Creates a new case with timeline and opens the timeline', function () {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);

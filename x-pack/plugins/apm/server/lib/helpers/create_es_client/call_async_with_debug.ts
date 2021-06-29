@@ -81,17 +81,26 @@ export async function callAsyncWithDebug<T>({
   return res;
 }
 
-export const getDebugBody = (
-  params: Record<string, any>,
-  requestType: string
-) => {
+export const getDebugBody = ({
+  params,
+  requestType,
+  operationName,
+}: {
+  params: Record<string, any>;
+  requestType: string;
+  operationName: string;
+}) => {
+  const operationLine = `${operationName}\n`;
+
   if (requestType === 'search') {
-    return `GET ${params.index}/_search\n${formatObj(params.body)}`;
+    return `${operationLine}GET ${params.index}/_search\n${formatObj(
+      params.body
+    )}`;
   }
 
   return `${chalk.bold('ES operation:')} ${requestType}\n${chalk.bold(
     'ES query:'
-  )}\n${formatObj(params)}`;
+  )}\n${operationLine}${formatObj(params)}`;
 };
 
 export const getDebugTitle = (request: KibanaRequest) =>

@@ -77,7 +77,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  updateGroups(updatedJobs: string[]) {
+  updateGroups(updatedJobs: Array<{ jobId: string; groups: string[] }>) {
     const body = JSON.stringify({ jobs: updatedJobs });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/update_groups`,
@@ -136,9 +136,23 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobAuditMessages(jobId: string, from?: number) {
+  jobAuditMessages({
+    jobId,
+    from,
+    start,
+    end,
+  }: {
+    jobId: string;
+    from?: number;
+    start?: string;
+    end?: string;
+  }) {
     const jobIdString = jobId !== undefined ? `/${jobId}` : '';
-    const query = from !== undefined ? { from } : {};
+    const query = {
+      ...(from !== undefined ? { from } : {}),
+      ...(start !== undefined && end !== undefined ? { start, end } : {}),
+    };
+
     return httpService.http<JobMessage[]>({
       path: `${ML_BASE_PATH}/job_audit_messages/messages${jobIdString}`,
       method: 'GET',
@@ -330,8 +344,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  datafeedPreview(job: Job, datafeed: Datafeed) {
-    const body = JSON.stringify({ job, datafeed });
+  datafeedPreview(datafeedId?: string, job?: Job, datafeed?: Datafeed) {
+    const body = JSON.stringify({ datafeedId, job, datafeed });
     return httpService.http<{
       total: number;
       categories: Array<{ count?: number; category: Category }>;

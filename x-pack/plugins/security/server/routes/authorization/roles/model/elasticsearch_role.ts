@@ -83,6 +83,21 @@ function transformRoleApplicationsToKibanaPrivileges(
     };
   }
 
+  // if there is a reserved privilege assigned to an application other than the reserved privileges application wildcard, we won't transform these.
+  if (
+    roleKibanaApplications.some(
+      (entry) =>
+        entry.application !== RESERVED_PRIVILEGES_APPLICATION_WILDCARD &&
+        entry.privileges.some((privilege) =>
+          PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
+        )
+    )
+  ) {
+    return {
+      success: false,
+    };
+  }
+
   // if space privilege assigned globally, we can't transform these
   if (
     roleKibanaApplications.some(
@@ -107,23 +122,6 @@ function transformRoleApplicationsToKibanaPrivileges(
           (privilege) =>
             PrivilegeSerializer.isSerializedGlobalBasePrivilege(privilege) ||
             PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
-        )
-    )
-  ) {
-    return {
-      success: false,
-    };
-  }
-
-  // if reserved privilege assigned with feature or base privileges, we won't transform these
-  if (
-    roleKibanaApplications.some(
-      (entry) =>
-        entry.privileges.some((privilege) =>
-          PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
-        ) &&
-        entry.privileges.some(
-          (privilege) => !PrivilegeSerializer.isSerializedReservedPrivilege(privilege)
         )
     )
   ) {
@@ -163,7 +161,10 @@ function transformRoleApplicationsToKibanaPrivileges(
     };
   }
 
-  const allResources = roleKibanaApplications.map((entry) => entry.resources).flat();
+  const allResources = roleKibanaApplications
+    .filter((entry) => entry.application !== RESERVED_PRIVILEGES_APPLICATION_WILDCARD)
+    .flatMap((entry) => entry.resources);
+
   // if we have improperly formatted resource entries, we can't transform these
   if (
     allResources.some(

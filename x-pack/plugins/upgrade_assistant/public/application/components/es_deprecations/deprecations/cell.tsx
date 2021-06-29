@@ -61,26 +61,25 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
           </EuiTitle>
         )}
 
+        {items.map((item, index) => (
+          <EuiText key={`deprecation-item-${index}`}>
+            {item.title && <h6>{item.title}</h6>}
+            <p>{item.body}</p>
+          </EuiText>
+        ))}
+
         {docUrl && (
-          <div>
+          <>
+            <EuiSpacer size="s" />
+
             <EuiLink href={docUrl} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.deprecations.documentationButtonLabel"
                 defaultMessage="Documentation"
               />
             </EuiLink>
-            <EuiSpacer size="s" />
-          </div>
+          </>
         )}
-
-        {items.map((item) => (
-          <div key={item.title || item.body}>
-            <EuiText>
-              {item.title && <h6>{item.title}</h6>}
-              <p>{item.body}</p>
-            </EuiText>
-          </div>
-        ))}
       </EuiFlexItem>
 
       {reindexIndexName && (

@@ -8,6 +8,10 @@ import { ValuesType } from 'utility-types';
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart, KibanaRequest } from 'kibana/server';
 import {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '../../rule_registry/server';
+import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
@@ -39,6 +43,10 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../task_manager/server';
+import {
+  FleetSetupContract as FleetPluginSetup,
+  FleetStartContract as FleetPluginStart,
+} from '../../fleet/server';
 import { APMConfig } from '.';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -115,6 +123,14 @@ interface DependencyMap {
     setup: DataPluginSetup;
     start: DataPluginStart;
   };
+  ruleRegistry: {
+    setup: RuleRegistryPluginSetupContract;
+    start: RuleRegistryPluginStartContract;
+  };
+  fleet: {
+    setup: FleetPluginSetup;
+    start: FleetPluginStart;
+  };
 }
 
 const requiredDependencies = [
@@ -126,6 +142,7 @@ const requiredDependencies = [
   'embeddable',
   'infra',
   'observability',
+  'ruleRegistry',
 ] as const;
 
 const optionalDependencies = [
@@ -139,6 +156,7 @@ const optionalDependencies = [
   'ml',
   'home',
   'maps',
+  'fleet',
 ] as const;
 
 type RequiredDependencies = Pick<

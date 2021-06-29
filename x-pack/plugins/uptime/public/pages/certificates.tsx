@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { useTrackPageview } from '../../../observability/public';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { UptimeRefreshContext } from '../contexts';
-import { certificatesSelector, getCertificatesAction } from '../state/certificates/certificates';
+import { getCertificatesAction } from '../state/certificates/certificates';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -58,22 +57,8 @@ export const CertificatesPage: React.FC = () => {
     );
   }, [dispatch, page, search, sort.direction, sort.field, lastRefresh]);
 
-  const { data: certificates } = useSelector(certificatesSelector);
-
   return (
-    <EuiPanel>
-      <EuiTitle>
-        <h1 className="eui-textNoWrap">
-          <FormattedMessage
-            id="xpack.uptime.certificates.heading"
-            defaultMessage="TLS Certificates ({total})"
-            values={{
-              total: <span data-test-subj="uptimeCertTotal">{certificates?.total ?? 0}</span>,
-            }}
-          />
-        </h1>
-      </EuiTitle>
-
+    <>
       <EuiSpacer size="m" />
       <CertificateSearch setSearch={setSearch} />
       <EuiSpacer size="m" />
@@ -86,6 +71,6 @@ export const CertificatesPage: React.FC = () => {
         }}
         sort={sort}
       />
-    </EuiPanel>
+    </>
   );
 };

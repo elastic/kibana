@@ -33,7 +33,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
           const viewCell = await row.findByTestSubject('sessionManagementNameCol');
           const actionsCell = await row.findByTestSubject('sessionManagementActionsCol');
           return {
-            name: $.findTestSubject('sessionManagementNameCol').text(),
+            name: $.findTestSubject('sessionManagementNameCol').text().trim(),
             status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
             mainUrl: $.findTestSubject('sessionManagementNameCol').text(),
             created: $.findTestSubject('sessionManagementCreatedCol').text(),

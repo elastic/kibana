@@ -90,3 +90,10 @@ export const ADD_EXCEPTION_SEQUENCE_WARNING = i18n.translate(
       "This rule's query contains an EQL sequence statement. The exception created will apply to all events in the sequence.",
   }
 );
+
+export const OPERATING_SYSTEM_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.operatingSystemPlaceHolder',
+  {
+    defaultMessage: 'Select an operating system',
+  }
+);

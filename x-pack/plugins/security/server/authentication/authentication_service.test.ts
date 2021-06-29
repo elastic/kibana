@@ -6,6 +6,9 @@
  */
 
 jest.mock('./authenticator');
+jest.mock('./unauthenticated_page');
+
+import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import Boom from '@hapi/boom';
 
@@ -18,6 +21,7 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
+  OnPreResponseToolkit,
 } from 'src/core/server';
 import {
   coreMock,
@@ -37,6 +41,7 @@ import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { AuthenticationResult } from './authentication_result';
@@ -47,15 +52,60 @@ describe('AuthenticationService', () => {
   let logger: jest.Mocked<Logger>;
   let mockSetupAuthenticationParams: {
     http: jest.Mocked<HttpServiceSetup>;
+    config: ConfigType;
     license: jest.Mocked<SecurityLicense>;
+    buildNumber: number;
+  };
+  let mockStartAuthenticationParams: {
+    legacyAuditLogger: jest.Mocked<SecurityAuditLogger>;
+    audit: jest.Mocked<AuditServiceSetup>;
+    config: ConfigType;
+    loggers: LoggerFactory;
+    http: jest.Mocked<HttpServiceStart>;
+    clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
+    featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
+    session: jest.Mocked<PublicMethodsOf<Session>>;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
 
+    const httpMock = coreMock.createSetup().http;
+    (httpMock.basePath.prepend as jest.Mock).mockImplementation(
+      (path) => `${httpMock.basePath.serverBasePath}${path}`
+    );
+    (httpMock.basePath.get as jest.Mock).mockImplementation(() => httpMock.basePath.serverBasePath);
     mockSetupAuthenticationParams = {
-      http: coreMock.createSetup().http,
+      http: httpMock,
+      config: createConfig(ConfigSchema.validate({}), loggingSystemMock.create().get(), {
+        isTLSEnabled: false,
+      }),
       license: licenseMock.create(),
+      buildNumber: 100500,
     };
+    mockCanRedirectRequest.mockReturnValue(false);
+
+    const coreStart = coreMock.createStart();
+    mockStartAuthenticationParams = {
+      legacyAuditLogger: securityAuditLoggerMock.create(),
+      audit: auditServiceMock.create(),
+      config: createConfig(
+        ConfigSchema.validate({
+          encryptionKey: 'ab'.repeat(16),
+          secureCookies: true,
+          cookieName: 'my-sid-cookie',
+        }),
+        loggingSystemMock.create().get(),
+        { isTLSEnabled: false }
+      ),
+      http: coreStart.http,
+      clusterClient: elasticsearchServiceMock.createClusterClient(),
+      loggers: loggingSystemMock.create(),
+      featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
+      session: sessionMock.create(),
+    };
+    (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
+      () => mockStartAuthenticationParams.http.basePath.serverBasePath
+    );
 
     service = new AuthenticationService(logger);
   });
@@ -71,40 +121,19 @@ describe('AuthenticationService', () => {
         expect.any(Function)
       );
     });
+
+    it('properly registers onPreResponse handler', () => {
+      service.setup(mockSetupAuthenticationParams);
+
+      expect(mockSetupAuthenticationParams.http.registerOnPreResponse).toHaveBeenCalledTimes(1);
+      expect(mockSetupAuthenticationParams.http.registerOnPreResponse).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
   });
 
   describe('#start()', () => {
-    let mockStartAuthenticationParams: {
-      legacyAuditLogger: jest.Mocked<SecurityAuditLogger>;
-      audit: jest.Mocked<AuditServiceSetup>;
-      config: ConfigType;
-      loggers: LoggerFactory;
-      http: jest.Mocked<HttpServiceStart>;
-      clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-      featureUsageService: jest.Mocked<SecurityFeatureUsageServiceStart>;
-      session: jest.Mocked<PublicMethodsOf<Session>>;
-    };
     beforeEach(() => {
-      const coreStart = coreMock.createStart();
-      mockStartAuthenticationParams = {
-        legacyAuditLogger: securityAuditLoggerMock.create(),
-        audit: auditServiceMock.create(),
-        config: createConfig(
-          ConfigSchema.validate({
-            encryptionKey: 'ab'.repeat(16),
-            secureCookies: true,
-            cookieName: 'my-sid-cookie',
-          }),
-          loggingSystemMock.create().get(),
-          { isTLSEnabled: false }
-        ),
-        http: coreStart.http,
-        clusterClient: elasticsearchServiceMock.createClusterClient(),
-        loggers: loggingSystemMock.create(),
-        featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
-        session: sessionMock.create(),
-      };
-
       service.setup(mockSetupAuthenticationParams);
     });
 
@@ -315,6 +344,373 @@ describe('AuthenticationService', () => {
         expect(getCurrentUser(mockRequest)).toBeNull();
         expect(mockAuthGet).toHaveBeenCalledTimes(1);
         expect(mockAuthGet).toHaveBeenCalledWith(mockRequest);
+      });
+    });
+  });
+
+  describe('onPreResponse handler', () => {
+    function getService({ runStart = true }: { runStart?: boolean } = {}) {
+      service.setup(mockSetupAuthenticationParams);
+
+      if (runStart) {
+        service.start(mockStartAuthenticationParams);
+      }
+
+      const onPreResponseHandler =
+        mockSetupAuthenticationParams.http.registerOnPreResponse.mock.calls[0][0];
+      const [authenticator] = jest.requireMock('./authenticator').Authenticator.mock.instances;
+
+      return { authenticator, onPreResponseHandler };
+    }
+
+    it('ignores responses with non-401 status code', async () => {
+      const mockReturnedValue = { type: 'next' as any };
+      const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+      mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+      const { onPreResponseHandler } = getService();
+      for (const statusCode of [200, 400, 403, 404]) {
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest(),
+            { statusCode },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+      }
+    });
+
+    it('ignores responses to requests that cannot handle redirects', async () => {
+      const mockReturnedValue = { type: 'next' as any };
+      const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+      mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+      mockCanRedirectRequest.mockReturnValue(false);
+
+      const { onPreResponseHandler } = getService();
+      await expect(
+        onPreResponseHandler(
+          httpServerMock.createKibanaRequest(),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        )
+      ).resolves.toBe(mockReturnedValue);
+    });
+
+    it('ignores responses if authenticator is not initialized', async () => {
+      // Run `setup`, but not `start` to simulate non-initialized `Authenticator`.
+      const { onPreResponseHandler } = getService({ runStart: false });
+
+      const mockReturnedValue = { type: 'next' as any };
+      const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+      mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+      mockCanRedirectRequest.mockReturnValue(true);
+
+      await expect(
+        onPreResponseHandler(
+          httpServerMock.createKibanaRequest(),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        )
+      ).resolves.toBe(mockReturnedValue);
+    });
+
+    describe('when login form is available', () => {
+      let mockReturnedValue: { type: any; body: string };
+      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      beforeEach(() => {
+        mockReturnedValue = { type: 'render' as any, body: 'body' };
+        mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+      });
+
+      it('redirects to the login page when user does not have an active session', async () => {
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+          },
+        });
+      });
+
+      it('performs logout if user has an active session', async () => {
+        mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+          },
+        });
+      });
+
+      it('does not preserve path for the authentication flow paths', async () => {
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/api/security/saml/callback',
+              query: { param: 'one two' },
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
+          },
+        });
+      });
+    });
+
+    describe('when login selector is available', () => {
+      let mockReturnedValue: { type: any; body: string };
+      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      beforeEach(() => {
+        mockReturnedValue = { type: 'render' as any, body: 'body' };
+        mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                saml: { saml1: { order: 0, realm: 'saml1' } },
+                basic: { basic1: { order: 1 } },
+              },
+            },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+      });
+
+      it('redirects to the login page when user does not have an active session', async () => {
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+          },
+        });
+      });
+
+      it('performs logout if user has an active session', async () => {
+        mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
+          },
+        });
+      });
+
+      it('does not preserve path for the authentication flow paths', async () => {
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/api/security/saml/callback',
+              query: { param: 'one two' },
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: '<div/>',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            Refresh:
+              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
+          },
+        });
+      });
+    });
+
+    describe('when neither login selector nor login form is available', () => {
+      let mockReturnedValue: { type: any; body: string };
+      let mockOnPreResponseToolkit: jest.Mocked<OnPreResponseToolkit>;
+      beforeEach(() => {
+        mockReturnedValue = { type: 'render' as any, body: 'body' };
+        mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate({
+            authc: { providers: { saml: { saml1: { order: 0, realm: 'saml1' } } } },
+          }),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+      });
+
+      it('renders unauthenticated page if user does not have an active session', async () => {
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: 'rendered-view',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+          },
+        });
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          buildNumber: 100500,
+          originalURL: '/mock-server-basepath/app/some',
+        });
+      });
+
+      it('renders unauthenticated page if user has an active session', async () => {
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+        mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: 'rendered-view',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+          },
+        });
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          buildNumber: 100500,
+          originalURL: '/mock-server-basepath/app/some',
+        });
+      });
+
+      it('does not preserve path for the authentication flow paths', async () => {
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
+        const { authenticator, onPreResponseHandler } = getService();
+        authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
+        mockCanRedirectRequest.mockReturnValue(true);
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path: '/api/security/saml/callback',
+              query: { param: 'one two' },
+              routeTags: [ROUTE_TAG_AUTH_FLOW],
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: 'rendered-view',
+          headers: {
+            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+          },
+        });
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          buildNumber: 100500,
+          originalURL: '/mock-server-basepath/',
+        });
       });
     });
   });

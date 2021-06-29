@@ -65,7 +65,8 @@ export function KeyValueFilterList({
   icon?: string;
   onClickFilter: (filter: { key: string; value: any }) => void;
 }) {
-  if (!keyValueList.length) {
+  const nonEmptyKeyValueList = removeEmptyValues(keyValueList);
+  if (!nonEmptyKeyValueList.length) {
     return null;
   }
 
@@ -77,7 +78,7 @@ export function KeyValueFilterList({
       buttonClassName="buttonContentContainer"
     >
       <StyledEuiDescriptionList type="column">
-        {removeEmptyValues(keyValueList).map(({ key, value }) => {
+        {nonEmptyKeyValueList.map(({ key, value }) => {
           return (
             <Fragment key={key}>
               <EuiDescriptionListTitle

@@ -41,6 +41,8 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'threat_match',
+      timeline_id: rule.timeline.templateTimelineId,
+      timeline_title: rule.timeline.title,
       threat_mapping: [
         {
           entries: [
@@ -85,7 +87,7 @@ export const createCustomRuleActivated = (
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
       from: 'now-17520h',
-      index: ['auditbeat-*'],
+      index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
       enabled: true,

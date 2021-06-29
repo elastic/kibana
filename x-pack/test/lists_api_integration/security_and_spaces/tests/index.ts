@@ -35,5 +35,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./find_exception_lists'));
     loadTestFile(require.resolve('./find_exception_list_items'));
     loadTestFile(require.resolve('./read_list_privileges'));
+    loadTestFile(require.resolve('./summary_exception_lists'));
   });
 };

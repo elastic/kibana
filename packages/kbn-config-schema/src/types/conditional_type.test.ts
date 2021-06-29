@@ -348,15 +348,15 @@ test('works within `oneOf`', () => {
   expect(type.validate(['a', 'b'], { type: 'array' })).toEqual(['a', 'b']);
 
   expect(() => type.validate(1, { type: 'string' })).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [string] but got [number]
-- [1]: expected value of type [array] but got [number]"
-`);
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [number]
+    - [1]: expected value of type [array] but got [number]"
+  `);
   expect(() => type.validate(true, { type: 'string' })).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value of type [string] but got [boolean]
-- [1]: expected value of type [array] but got [boolean]"
-`);
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [boolean]
+    - [1]: expected value of type [array] but got [boolean]"
+  `);
 });
 
 describe('#validate', () => {

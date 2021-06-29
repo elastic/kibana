@@ -7,8 +7,8 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ListItemSchema } from '../../../common/schemas';
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 
 import { updateListItem } from './update_list_item';

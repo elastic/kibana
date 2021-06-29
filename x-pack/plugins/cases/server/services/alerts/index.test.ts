@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common';
 import { AlertService, AlertServiceContract } from '.';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 

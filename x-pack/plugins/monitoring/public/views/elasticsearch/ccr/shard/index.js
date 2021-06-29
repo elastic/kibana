@@ -75,8 +75,16 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
             i18n.translate('xpack.monitoring.elasticsearch.ccr.shard.pageTitle', {
               defaultMessage: 'Elasticsearch Ccr Shard - Index: {followerIndex} Shard: {shardId}',
               values: {
-                followerIndex: get(pageData, 'stat.follower_index'),
-                shardId: get(pageData, 'stat.shard_id'),
+                followerIndex: get(
+                  pageData,
+                  'stat.follower.index',
+                  get(pageData, 'stat.follower_index')
+                ),
+                shardId: get(
+                  pageData,
+                  'stat.follower.shard.number',
+                  get(pageData, 'stat.shard_id')
+                ),
               },
             })
           );

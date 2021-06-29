@@ -969,7 +969,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -977,7 +977,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Status
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
@@ -985,7 +985,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -993,7 +993,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Name
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -1002,7 +1002,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
               style="width:30%"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -1010,7 +1010,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Url
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -1019,7 +1019,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
               style="width:12%"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -1027,7 +1027,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Tags
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -1035,7 +1035,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent"
               >
                 <span
@@ -1043,7 +1043,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   TLS Certificate
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
@@ -1051,7 +1051,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               role="columnheader"
               scope="col"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignCenter"
               >
                 <span
@@ -1059,7 +1059,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Downtime history
                 </span>
-              </div>
+              </span>
             </th>
             <th
               class="euiTableHeaderCell"
@@ -1068,7 +1068,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
               style="width:100px"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignCenter"
               >
                 <span
@@ -1076,7 +1076,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 >
                   Status alert
                 </span>
-              </div>
+              </span>
             </th>
             <td
               class="euiTableHeaderCell"
@@ -1085,13 +1085,13 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
               style="width:40px"
             >
-              <div
+              <span
                 class="euiTableCellContent euiTableCellContent--alignRight"
               >
                 <span
                   class="euiTableCellContent__text"
                 />
-              </div>
+              </span>
             </td>
           </tr>
         </thead>
@@ -1293,20 +1293,23 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiPopover euiPopover--anchorDownCenter"
+                  class="euiFormRow"
+                  id="generated-id-row"
                 >
                   <div
-                    class="euiPopover__anchor"
+                    class="euiFormRow__fieldWrapper"
                   >
                     <div
                       class="euiSwitch euiSwitch--compressed"
                     >
                       <button
                         aria-checked="false"
-                        aria-label="Enable status alert"
+                        aria-describedby="generated-id-help-0"
+                        aria-label="Enable rule"
                         class="euiSwitch__button"
                         data-test-subj="uptimeDisplayDefineConnector"
-                        id="defineAlertSettingsSwitch"
+                        disabled=""
+                        id="generated-id"
                         role="switch"
                         type="button"
                       >
@@ -1321,6 +1324,32 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           />
                         </span>
                       </button>
+                    </div>
+                    <div
+                      class="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help-0"
+                    >
+                      Define a default connector in the 
+                      <a
+                        class="euiLink euiLink--primary"
+                        data-test-subj="uptimeSettingsLink"
+                        href="/settings?focusConnectorField=true"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        Settings
+                        <span
+                          aria-label="External link"
+                          class="euiLink__externalIcon"
+                          data-euiicon-type="popout"
+                        />
+                        <span
+                          class="euiScreenReaderOnly"
+                        >
+                          (opens in a new tab or window)
+                        </span>
+                      </a>
+                       to enable monitor status alerts.
                     </div>
                   </div>
                 </div>
@@ -1342,6 +1371,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1545,20 +1575,23 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiPopover euiPopover--anchorDownCenter"
+                  class="euiFormRow"
+                  id="generated-id-row"
                 >
                   <div
-                    class="euiPopover__anchor"
+                    class="euiFormRow__fieldWrapper"
                   >
                     <div
                       class="euiSwitch euiSwitch--compressed"
                     >
                       <button
                         aria-checked="false"
-                        aria-label="Enable status alert"
+                        aria-describedby="generated-id-help-0"
+                        aria-label="Enable rule"
                         class="euiSwitch__button"
                         data-test-subj="uptimeDisplayDefineConnector"
-                        id="defineAlertSettingsSwitch"
+                        disabled=""
+                        id="generated-id"
                         role="switch"
                         type="button"
                       >
@@ -1573,6 +1606,32 @@ exports[`MonitorList component renders the monitor list 1`] = `
                           />
                         </span>
                       </button>
+                    </div>
+                    <div
+                      class="euiFormHelpText euiFormRow__text"
+                      id="generated-id-help-0"
+                    >
+                      Define a default connector in the 
+                      <a
+                        class="euiLink euiLink--primary"
+                        data-test-subj="uptimeSettingsLink"
+                        href="/settings?focusConnectorField=true"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        Settings
+                        <span
+                          aria-label="External link"
+                          class="euiLink__externalIcon"
+                          data-euiicon-type="popout"
+                        />
+                        <span
+                          class="euiScreenReaderOnly"
+                        >
+                          (opens in a new tab or window)
+                        </span>
+                      </a>
+                       to enable monitor status alerts.
                     </div>
                   </div>
                 </div>
@@ -1594,6 +1653,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiButtonIcon__icon"
+                    color="inherit"
                     data-euiicon-type="arrowDown"
                   />
                 </button>
@@ -1629,6 +1689,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             >
               <span
                 class="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="arrowDown"
               />
               <span
@@ -1660,6 +1721,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             <span
               aria-hidden="true"
               class="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="arrowLeft"
             />
           </button>
@@ -1677,6 +1739,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             <span
               aria-hidden="true"
               class="euiButtonIcon__icon"
+              color="inherit"
               data-euiicon-type="arrowRight"
             />
           </button>

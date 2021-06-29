@@ -10,6 +10,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
+import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
@@ -82,9 +83,10 @@ export class VegaBaseView {
         return;
       }
 
+      const containerDisplay = this._parser.useResize ? 'flex' : 'block';
       this._$container = $('<div class="vgaVis__view">')
         // Force a height here because css is not loaded in mocha test
-        .css('height', '100%')
+        .css({ height: '100%', display: containerDisplay })
         .appendTo(this._$parentEl);
       this._$controls = $(
         `<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`
@@ -166,6 +168,7 @@ export class VegaBaseView {
 
   createViewConfig() {
     const config = {
+      expr: expressionInterpreter,
       renderer: this._parser.renderer,
     };
 
@@ -229,18 +232,15 @@ export class VegaBaseView {
   }
 
   resize() {
-    if (this._parser.useResize && this._view && this.updateVegaSize(this._view)) {
+    if (this._parser.useResize && this._view) {
+      this.updateVegaSize(this._view);
       return this._view.runAsync();
     }
   }
 
   updateVegaSize(view) {
-    // For some reason the object is slightly scrollable without the extra padding.
-    // This might be due to https://github.com/jquery/jquery/issues/3808
-    // Which is being fixed as part of jQuery 3.3.0
-    const heightExtraPadding = 6;
-    const width = Math.max(0, this._$container.width());
-    const height = Math.max(0, this._$container.height()) - heightExtraPadding;
+    const width = Math.floor(Math.max(0, this._$container.width()));
+    const height = Math.floor(Math.max(0, this._$container.height()));
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);

@@ -109,6 +109,7 @@ export function visWithSplits(WrappedComponent) {
             model={model}
             visData={newVisData}
             onBrush={props.onBrush}
+            onFilterClick={props.onFilterClick}
             additionalLabel={additionalLabel || emptyLabel}
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}

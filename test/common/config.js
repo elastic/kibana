@@ -21,7 +21,7 @@ export default function () {
     servers,
 
     esTestCluster: {
-      serverArgs: ['xpack.security.enabled=false', 'geoip.downloader.enabled=false'],
+      serverArgs: ['xpack.security.enabled=false'],
     },
 
     kbnTestServer: {

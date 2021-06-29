@@ -9,15 +9,14 @@ import React from 'react';
 
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiTextColor, EuiIcon } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaType } from '../../../../shared/schema/types';
 
-import { BoostIcon } from '../boost_icon';
+import { BoostIcon, ValueBadge } from '../components';
 import { Boost, SearchField } from '../types';
-import { ValueBadge } from '../value_badge';
 
 interface Props {
   name: string;
-  type: SchemaTypes;
+  type: SchemaType;
   boosts?: Boost[];
   field?: SearchField;
 }

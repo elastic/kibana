@@ -6,16 +6,16 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-
-import {
+import type {
   Filter,
   FoundListSchema,
   Page,
   PerPage,
-  SearchEsListSchema,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { SearchEsListSchema } from '../../schemas/elastic_response';
 import {
   encodeCursor,
   getQueryFilter,
@@ -65,7 +65,7 @@ export const findList = async ({
 
   const { body: totalCount } = await esClient.count({
     body: {
-      // @ts-expect-error GetQueryFilterReturn is not compatible with QueryContainer
+      // @ts-expect-error GetQueryFilterReturn is not compatible with QueryDslQueryContainer
       query,
     },
     ignore_unavailable: true,
@@ -78,7 +78,7 @@ export const findList = async ({
     // to explicitly define the type <T>.
     const { body: response } = await esClient.search<SearchEsListSchema>({
       body: {
-        // @ts-expect-error GetQueryFilterReturn is not compatible with QueryContainer
+        // @ts-expect-error GetQueryFilterReturn is not compatible with QueryDslQueryContainer
         query,
         search_after: scroll.searchAfter,
         sort: getSortWithTieBreaker({ sortField, sortOrder }),

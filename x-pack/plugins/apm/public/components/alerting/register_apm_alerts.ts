@@ -8,9 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
 import { stringify } from 'querystring';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_SEVERITY_LEVEL,
+} from '@kbn/rule-data-utils/target/technical_field_names';
+import type { ObservabilityRuleTypeRegistry } from '../../../../observability/public';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { AlertType } from '../../../common/alert_types';
-import type { ApmRuleRegistry } from '../../plugin';
+
+// copied from elasticsearch_fieldnames.ts to limit page load bundle size
+const SERVICE_ENVIRONMENT = 'service.environment';
+const SERVICE_NAME = 'service.name';
+const TRANSACTION_TYPE = 'transaction.type';
 
 const format = ({
   pathname,
@@ -22,28 +32,32 @@ const format = ({
   return `${pathname}?${stringify(query)}`;
 };
 
-export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
-  apmRuleRegistry.registerType({
+export function registerApmAlerts(
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
+) {
+  observabilityRuleTypeRegistry.register({
     id: AlertType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
       defaultMessage:
         'Alert when the number of errors in a service exceeds a defined threshold.',
     }),
-    format: ({ alert }) => {
+    format: ({ fields }) => {
       return {
         reason: i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
           defaultMessage: `Error count is greater than {threshold} (current value is {measured}) for {serviceName}`,
           values: {
-            threshold: alert['kibana.observability.evaluation.threshold'],
-            measured: alert['kibana.observability.evaluation.value'],
-            serviceName: alert['service.name']!,
+            threshold: fields[ALERT_EVALUATION_THRESHOLD],
+            measured: fields[ALERT_EVALUATION_VALUE],
+            serviceName: String(fields[SERVICE_NAME][0]),
           },
         }),
         link: format({
-          pathname: `/app/apm/services/${alert['service.name']!}/errors`,
+          pathname: `/app/apm/services/${String(
+            fields[SERVICE_NAME][0]
+          )}/errors`,
           query: {
-            ...(alert['service.environment']
-              ? { environment: alert['service.environment'] }
+            ...(fields[SERVICE_ENVIRONMENT]?.[0]
+              ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
               : { environment: ENVIRONMENT_ALL.value }),
           },
         }),
@@ -71,7 +85,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
+  observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionDuration,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.description',
@@ -80,28 +94,24 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ alert, formatters: { asDuration } }) => ({
+    format: ({ fields, formatters: { asDuration } }) => ({
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionDuration.reason',
         {
           defaultMessage: `Latency is above {threshold} (current value is {measured}) for {serviceName}`,
           values: {
-            threshold: asDuration(
-              alert['kibana.observability.evaluation.threshold']
-            ),
-            measured: asDuration(
-              alert['kibana.observability.evaluation.value']
-            ),
-            serviceName: alert['service.name']!,
+            threshold: asDuration(fields[ALERT_EVALUATION_THRESHOLD]),
+            measured: asDuration(fields[ALERT_EVALUATION_VALUE]),
+            serviceName: String(fields[SERVICE_NAME][0]),
           },
         }
       ),
       link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
+        pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
         query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
+          transactionType: fields[TRANSACTION_TYPE][0]!,
+          ...(fields[SERVICE_ENVIRONMENT]?.[0]
+            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
             : { environment: ENVIRONMENT_ALL.value }),
         },
       }),
@@ -131,7 +141,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
+  observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionErrorRate,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.description',
@@ -140,30 +150,24 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ alert, formatters: { asPercent } }) => ({
+    format: ({ fields, formatters: { asPercent } }) => ({
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionErrorRate.reason',
         {
           defaultMessage: `Transaction error rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
           values: {
-            threshold: asPercent(
-              alert['kibana.observability.evaluation.threshold'],
-              100
-            ),
-            measured: asPercent(
-              alert['kibana.observability.evaluation.value'],
-              100
-            ),
-            serviceName: alert['service.name']!,
+            threshold: asPercent(fields[ALERT_EVALUATION_THRESHOLD], 100),
+            measured: asPercent(fields[ALERT_EVALUATION_VALUE], 100),
+            serviceName: String(fields[SERVICE_NAME][0]),
           },
         }
       ),
       link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
+        pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0]!)}`,
         query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
+          transactionType: String(fields[TRANSACTION_TYPE][0]!),
+          ...(fields[SERVICE_ENVIRONMENT]?.[0]
+            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
             : { environment: ENVIRONMENT_ALL.value }),
         },
       }),
@@ -193,7 +197,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
+  observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionDurationAnomaly,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.description',
@@ -201,24 +205,24 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
         defaultMessage: 'Alert when the latency of a service is abnormal.',
       }
     ),
-    format: ({ alert }) => ({
+    format: ({ fields }) => ({
       reason: i18n.translate(
         'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
         {
           defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
           values: {
-            serviceName: alert['service.name'],
-            severityLevel: alert['kibana.rac.alert.severity.level'],
-            measured: alert['kibana.observability.evaluation.value'],
+            serviceName: String(fields[SERVICE_NAME][0]),
+            severityLevel: String(fields[ALERT_SEVERITY_LEVEL]),
+            measured: Number(fields[ALERT_EVALUATION_VALUE]),
           },
         }
       ),
       link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
+        pathname: `/app/apm/services/${String(fields[SERVICE_NAME][0])}`,
         query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
+          transactionType: String(fields[TRANSACTION_TYPE][0]),
+          ...(fields[SERVICE_ENVIRONMENT]?.[0]
+            ? { environment: String(fields[SERVICE_ENVIRONMENT][0]) }
             : { environment: ENVIRONMENT_ALL.value }),
         },
       }),

@@ -8,20 +8,22 @@
 import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
+import { i18n } from '@kbn/i18n';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import {
   ResultEdges,
   PageInfoPaginated,
   OsqueryQueries,
-  ResultsRequestOptions,
-  ResultsStrategyResponse,
+  ActionResultsRequestOptions,
+  ActionResultsStrategyResponse,
   Direction,
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
 import { queryClient } from '../query_client';
 
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ResultsArgs {
   results: ResultEdges;
@@ -32,7 +34,7 @@ export interface ResultsArgs {
   totalCount: number;
 }
 
-interface UseActionResults {
+export interface UseActionResults {
   actionId: string;
   activePage: number;
   agentIds?: string[];
@@ -56,12 +58,13 @@ export const useActionResults = ({
   isLive = false,
 }: UseActionResults) => {
   const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actionResults', { actionId }],
     async () => {
       const responseData = await data.search
-        .search<ResultsRequestOptions, ResultsStrategyResponse>(
+        .search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
           {
             actionId,
             factoryQueryType: OsqueryQueries.actionResults,
@@ -99,9 +102,9 @@ export const useActionResults = ({
         aggregations: {
           totalResponded,
           // @ts-expect-error update types
-          successful: aggsBuckets.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
+          successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
           // @ts-expect-error update types
-          failed: aggsBuckets.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
+          failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
         },
         inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
@@ -120,6 +123,13 @@ export const useActionResults = ({
       refetchInterval: isLive ? 1000 : false,
       keepPreviousData: true,
       enabled: !skip && !!agentIds?.length,
+      onSuccess: () => setErrorToast(),
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.action_results.fetchError', {
+            defaultMessage: 'Error while fetching action results',
+          }),
+        }),
     }
   );
 };

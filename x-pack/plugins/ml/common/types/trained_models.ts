@@ -7,6 +7,7 @@
 
 import { DataFrameAnalyticsConfig } from './data_frame_analytics';
 import { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import { XOR } from './common';
 
 export interface IngestStats {
   count: number;
@@ -45,22 +46,54 @@ export interface TrainedModelStat {
   };
 }
 
+type TreeNode = object;
+
+export type PutTrainedModelConfig = {
+  description?: string;
+  metadata?: {
+    analytics_config: DataFrameAnalyticsConfig;
+    input: unknown;
+    total_feature_importance?: TotalFeatureImportance[];
+    feature_importance_baseline?: FeatureImportanceBaseline;
+    model_aliases?: string[];
+  } & Record<string, unknown>;
+  tags?: string[];
+  inference_config?: Record<string, unknown>;
+  input: { field_names: string[] };
+} & XOR<
+  { compressed_definition: string },
+  {
+    definition: {
+      preprocessors: object[];
+      trained_model: {
+        tree: {
+          classification_labels?: string;
+          feature_names: string;
+          target_type: string;
+          tree_structure: TreeNode[];
+        };
+        tree_node: TreeNode;
+        ensemble?: object;
+      };
+    };
+  }
+>; // compressed_definition and definition are mutually exclusive
+
 export interface TrainedModelConfigResponse {
-  description: string;
+  description?: string;
   created_by: string;
   create_time: string;
   default_field_map: Record<string, string>;
   estimated_heap_memory_usage_bytes: number;
   estimated_operations: number;
   license_level: string;
-  metadata?:
-    | {
-        analytics_config: DataFrameAnalyticsConfig;
-        input: any;
-        total_feature_importance?: TotalFeatureImportance[];
-        feature_importance_baseline?: FeatureImportanceBaseline;
-      }
-    | Record<string, any>;
+  metadata?: {
+    analytics_config: DataFrameAnalyticsConfig;
+    input: unknown;
+    total_feature_importance?: TotalFeatureImportance[];
+    feature_importance_baseline?: FeatureImportanceBaseline;
+    model_aliases?: string[];
+  } & Record<string, unknown>;
   model_id: string;
   tags: string[];
   version: string;

@@ -24,6 +24,8 @@ import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
+jest.mock('../../../common/lib/kibana');
+
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -90,7 +92,7 @@ describe('Tls Table Component', () => {
       });
 
       expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-        'SHA1 fingerprintClick to sort in descending order'
+        'SHA1 fingerprint'
       );
     });
   });

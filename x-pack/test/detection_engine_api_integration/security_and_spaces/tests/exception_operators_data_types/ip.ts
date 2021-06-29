@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await createSignalsIndex(supertest);
       await createListsIndex(supertest);
-      await esArchiver.load('rule_exceptions/ip');
+      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/ip');
     });
 
     afterEach(async () => {
@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllAlerts(supertest);
       await deleteAllExceptions(es);
       await deleteListsIndex(supertest);
-      await esArchiver.unload('rule_exceptions/ip');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/ip');
     });
 
     describe('"is" operator', () => {
@@ -626,8 +626,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql(['127.0.0.1', '127.0.0.3']);
       });
 
-      // flaky https://github.com/elastic/kibana/issues/89389
-      it.skip('will return 4 results if we have a list that excludes all ips', async () => {
+      it('will return 4 results if we have a list that excludes all ips', async () => {
         await importFile(
           supertest,
           'ip',

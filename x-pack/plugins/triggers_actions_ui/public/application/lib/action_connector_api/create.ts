@@ -14,7 +14,7 @@ import type {
 } from '../../../types';
 
 const rewriteBodyRequest: RewriteResponseCase<
-  Omit<ActionConnectorWithoutId, 'referencedByCount'>
+  Omit<ActionConnectorWithoutId, 'referencedByCount' | 'isMissingSecrets'>
 > = ({ actionTypeId, isPreconfigured, ...res }) => ({
   ...res,
   connector_type_id: actionTypeId,
@@ -23,10 +23,16 @@ const rewriteBodyRequest: RewriteResponseCase<
 
 const rewriteBodyRes: RewriteRequestCase<
   ActionConnectorProps<Record<string, unknown>, Record<string, unknown>>
-> = ({ connector_type_id: actionTypeId, is_preconfigured: isPreconfigured, ...res }) => ({
+> = ({
+  connector_type_id: actionTypeId,
+  is_preconfigured: isPreconfigured,
+  is_missing_secrets: isMissingSecrets,
+  ...res
+}) => ({
   ...res,
   actionTypeId,
   isPreconfigured,
+  isMissingSecrets,
 });
 
 export async function createActionConnector({

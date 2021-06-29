@@ -9,10 +9,10 @@
     "logs-endpoint.events.*",
     "logs-windows.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License v2",
   "name": "Suspicious Managed Code Hosting Process",
-  "query": "event.category:file and not event.type:deletion and file.name:(wscript.exe.log or mshta.exe.log or wscript.exe.log or wmic.exe.log or svchost.exe.log or dllhost.exe.log or cmstp.exe.log or regsvr32.exe.log)",
+  "query": "sequence by process.entity_id with maxspan=5m\n [process where event.type == \"start\" and \n  process.name : (\"wscript.exe\", \"cscript.exe\", \"mshta.exe\", \"wmic.exe\", \"regsvr32.exe\", \"svchost.exe\", \"dllhost.exe\", \"cmstp.exe\")]\n [file where event.type != \"deletion\" and\n  file.name : (\"wscript.exe.log\",\n               \"cscript.exe\",\n               \"mshta.exe.log\",\n               \"wmic.exe.log\",\n               \"svchost.exe.log\",\n               \"dllhost.exe.log\",\n               \"cmstp.exe.log\",\n               \"regsvr32.exe.log\")]\n",
   "references": [
     "https://blog.menasec.net/2019/07/interesting-difr-traces-of-net-clr.html"
   ],
@@ -44,6 +44,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 3
+  "type": "eql",
+  "version": 4
 }

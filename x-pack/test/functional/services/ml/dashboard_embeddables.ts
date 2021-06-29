@@ -35,46 +35,40 @@ export function MachineLearningDashboardEmbeddablesProvider(
 
     async assertSelectMaxSeriesToPlotValue(expectedValue: number) {
       const subj = 'mlAnomalyChartsInitializerMaxSeries';
-      await testSubjects.existOrFail(subj);
-      const input = await testSubjects.find(subj);
-      const actualValue = await input.getAttribute('value');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(subj);
+        const input = await testSubjects.find(subj);
+        const actualValue = await input.getAttribute('value');
 
-      expect(actualValue).to.eql(
-        expectedValue,
-        `Expected max series to plot value to be ${expectedValue}, got ${actualValue}`
-      );
-    },
-
-    async assertPanelTitle(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute('panelTitleInput', 'value');
-      expect(actualValue).to.eql(
-        expectedValue,
-        `Panel title should be '${expectedValue}' (got '${actualValue}')`
-      );
-    },
-
-    async setPanelTitle(panelTitle: string) {
-      await mlCommonUI.setValueWithChecks('panelTitleInput', panelTitle, {
-        clearWithKeyboard: true,
+        expect(actualValue).to.eql(
+          expectedValue,
+          `Expected max series to plot value to be ${expectedValue}, got ${actualValue}`
+        );
       });
-      await this.assertPanelTitle(panelTitle);
     },
 
     async assertInitializerConfirmButtonEnabled() {
       const subj = 'mlAnomalyChartsInitializerConfirmButton';
-      await testSubjects.existOrFail(subj);
-      await testSubjects.isEnabled(subj);
+
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(subj);
+        await testSubjects.isEnabled(subj);
+      });
     },
 
     async clickInitializerConfirmButtonEnabled() {
       const subj = 'mlAnomalyChartsInitializerConfirmButton';
-      await this.assertInitializerConfirmButtonEnabled();
-      await testSubjects.clickWhenNotDisabled(subj);
-      await this.assertAnomalyChartsEmbeddableInitializerNotExists();
+      await retry.tryForTime(60 * 1000, async () => {
+        await this.assertInitializerConfirmButtonEnabled();
+        await testSubjects.clickWhenNotDisabled(subj);
+        await this.assertAnomalyChartsEmbeddableInitializerNotExists();
+      });
     },
 
     async assertDashboardIsEmpty() {
-      await testSubjects.existOrFail('emptyDashboardWidget');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('emptyDashboardWidget');
+      });
     },
 
     async assertDashboardPanelExists(title: string) {
@@ -84,15 +78,21 @@ export function MachineLearningDashboardEmbeddablesProvider(
     },
 
     async assertAnomalyChartsSeverityThresholdControlExists() {
-      await testSubjects.existOrFail(`mlAnomalySeverityThresholdControls`);
+      await retry.tryForTime(3 * 60 * 1000, async () => {
+        await testSubjects.existOrFail(`mlAnomalySeverityThresholdControls`);
+      });
     },
 
     async assertNoMatchingAnomaliesMessageExists() {
-      await testSubjects.existOrFail(`mlNoMatchingAnomaliesMessage`);
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(`mlNoMatchingAnomaliesMessage`);
+      });
     },
 
     async assertAnomalyChartsExists() {
-      await testSubjects.existOrFail(`mlExplorerChartsContainer`);
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(`mlExplorerChartsContainer`);
+      });
     },
 
     async openJobSelectionFlyout() {

@@ -13,7 +13,7 @@ const bucketsA = [
   {
     doc_count: 3,
     aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
-    key_as_string: new Date(1577858400000).toISOString(),
+    to_as_string: new Date(1577858400000).toISOString(),
   },
 ];
 

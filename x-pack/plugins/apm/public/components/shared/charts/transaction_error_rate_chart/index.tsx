@@ -9,6 +9,7 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { RULE_ID } from '../../../../../../rule_registry/common/technical_rule_data_field_names';
 import { AlertType } from '../../../../../common/alert_types';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { asPercent } from '../../../../../common/utils/formatters';
@@ -134,7 +135,7 @@ export function TransactionErrorRateChart({
   ];
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.errorRate', {
@@ -152,7 +153,7 @@ export function TransactionErrorRateChart({
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartThem}
         alerts={alerts.filter(
-          (alert) => alert['rule.id'] === AlertType.TransactionErrorRate
+          (alert) => alert[RULE_ID]?.[0] === AlertType.TransactionErrorRate
         )}
       />
     </EuiPanel>

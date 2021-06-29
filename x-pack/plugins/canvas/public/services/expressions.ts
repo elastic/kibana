@@ -35,6 +35,7 @@ export const expressionsServiceFactory: CanvasServiceFactory<ExpressionsService>
           if (expressions.getFunction(functionName)) {
             return;
           }
+
           const fn = () => ({
             ...serverFunctionList[functionName],
             fn: (input: any, args: any) => {

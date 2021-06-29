@@ -33,6 +33,7 @@ import { InspectResponse } from '../../../types';
 import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'hostsAuthenticationsQuery';
@@ -81,6 +82,7 @@ export const useAuthentications = ({
     authenticationsRequest,
     setAuthenticationsRequest,
   ] = useState<HostAuthenticationsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
@@ -170,18 +172,25 @@ export const useAuthentications = ({
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsQueries.authentications,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        docValueFields: docValueFields ?? [],
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange,
         sort: {} as SortField,
       };
       if (!deepEqual(prevRequest, myRequest)) {
@@ -189,7 +198,16 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, startDate]);
+  }, [
+    activePage,
+    docValueFields,
+    endDate,
+    filterQuery,
+    indexNames,
+    limit,
+    startDate,
+    getTransformChangesIfTheyExist,
+  ]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

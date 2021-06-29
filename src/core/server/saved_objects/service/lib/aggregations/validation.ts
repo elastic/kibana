@@ -37,9 +37,9 @@ interface ValidationContext {
  */
 export const validateAndConvertAggregations = (
   allowedTypes: string[],
-  aggs: Record<string, estypes.AggregationContainer>,
+  aggs: Record<string, estypes.AggregationsAggregationContainer>,
   indexMapping: IndexMapping
-): Record<string, estypes.AggregationContainer> => {
+): Record<string, estypes.AggregationsAggregationContainer> => {
   return validateAggregations(aggs, {
     allowedTypes,
     indexMapping,
@@ -53,13 +53,15 @@ export const validateAndConvertAggregations = (
  * Or a nested record of aggregation (`SearchRequest.body.aggs.myAggregation.aggs`)
  */
 const validateAggregations = (
-  aggregations: Record<string, estypes.AggregationContainer>,
+  aggregations: Record<string, estypes.AggregationsAggregationContainer>,
   context: ValidationContext
 ) => {
-  return Object.entries(aggregations).reduce((memo, [aggrName, aggrContainer]) => {
+  return Object.entries(aggregations).reduce<
+    Record<string, estypes.AggregationsAggregationContainer>
+  >((memo, [aggrName, aggrContainer]) => {
     memo[aggrName] = validateAggregation(aggrContainer, childContext(context, aggrName));
     return memo;
-  }, {} as Record<string, estypes.AggregationContainer>);
+  }, {});
 };
 
 /**
@@ -67,7 +69,7 @@ const validateAggregations = (
  * from a nested aggregation record, including its potential nested aggregations.
  */
 const validateAggregation = (
-  aggregation: estypes.AggregationContainer,
+  aggregation: estypes.AggregationsAggregationContainer,
   context: ValidationContext
 ) => {
   const container = validateAggregationContainer(aggregation, context);
@@ -90,18 +92,21 @@ const validateAggregation = (
  * (ignoring its nested aggregations)
  */
 const validateAggregationContainer = (
-  container: estypes.AggregationContainer,
+  container: estypes.AggregationsAggregationContainer,
   context: ValidationContext
 ) => {
-  return Object.entries(container).reduce((memo, [aggName, aggregation]) => {
-    if (aggregationKeys.includes(aggName)) {
-      return memo;
-    }
-    return {
-      ...memo,
-      [aggName]: validateAggregationType(aggName, aggregation, childContext(context, aggName)),
-    };
-  }, {} as estypes.AggregationContainer);
+  return Object.entries(container).reduce<estypes.AggregationsAggregationContainer>(
+    (memo, [aggName, aggregation]) => {
+      if (aggregationKeys.includes(aggName)) {
+        return memo;
+      }
+      return {
+        ...memo,
+        [aggName]: validateAggregationType(aggName, aggregation, childContext(context, aggName)),
+      };
+    },
+    {}
+  );
 };
 
 const validateAggregationType = (
@@ -143,7 +148,7 @@ const validateAggregationStructure = (
  * },
  * ```
  */
-const attributeFields = ['field'];
+const attributeFields = ['field', 'path'];
 /**
  * List of fields that have a Record<attribute path, value> as value
  *

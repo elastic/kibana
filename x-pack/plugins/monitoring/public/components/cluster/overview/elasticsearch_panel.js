@@ -424,8 +424,8 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskAvailable">
                 <BytesPercentageUsage
-                  usedBytes={get(nodes, 'fs.available_in_bytes')}
-                  maxBytes={get(nodes, 'fs.total_in_bytes')}
+                  usedBytes={get(nodes, 'fs.available.bytes', get(nodes, 'fs.available_in_bytes'))}
+                  maxBytes={get(nodes, 'fs.total.bytes', get(nodes, 'fs.total_in_bytes'))}
                 />
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -437,8 +437,16 @@ export function ElasticsearchPanel(props) {
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esJvmHeap">
                 <BytesPercentageUsage
-                  usedBytes={get(nodes, 'jvm.mem.heap_used_in_bytes')}
-                  maxBytes={get(nodes, 'jvm.mem.heap_max_in_bytes')}
+                  usedBytes={get(
+                    nodes,
+                    'jvm.mem.heap.used.bytes',
+                    get(nodes, 'jvm.mem.heap_used_in_bytes')
+                  )}
+                  maxBytes={get(
+                    nodes,
+                    'jvm.mem.heap.max.bytes',
+                    get(nodes, 'jvm.mem.heap_max_in_bytes')
+                  )}
                 />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
@@ -489,7 +497,7 @@ export function ElasticsearchPanel(props) {
                 data-test-subj="esDocumentsCount"
                 className="eui-textBreakWord"
               >
-                {formatNumber(get(indices, 'docs.count'), 'int_commas')}
+                {formatNumber(get(indices, 'docs.total', get(indices, 'docs.count')), 'int_commas')}
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle className="eui-textBreakWord">
@@ -499,7 +507,10 @@ export function ElasticsearchPanel(props) {
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription data-test-subj="esDiskUsage">
-                {formatNumber(get(indices, 'store.size_in_bytes'), 'byte')}
+                {formatNumber(
+                  get(indices, 'store.size.bytes', get(indices, 'store.size_in_bytes')),
+                  'byte'
+                )}
               </EuiDescriptionListDescription>
 
               <EuiDescriptionListTitle className="eui-textBreakWord">

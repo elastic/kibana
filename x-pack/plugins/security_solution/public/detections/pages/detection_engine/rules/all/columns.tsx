@@ -96,7 +96,7 @@ export const getActions = (
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
-    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch),
+    onClick: (rowItem: Rule) => exportRulesAction([rowItem.rule_id], dispatch, dispatchToaster),
     enabled: (rowItem: Rule) => !rowItem.immutable,
   },
   {
@@ -125,7 +125,7 @@ interface GetColumns {
   formatUrl: FormatUrl;
   history: H.History;
   hasMlPermissions: boolean;
-  hasNoPermissions: boolean;
+  hasPermissions: boolean;
   loadingRuleIds: string[];
   reFetchRules: () => Promise<void>;
   refetchPrePackagedRulesStatus: () => Promise<void>;
@@ -142,7 +142,7 @@ export const getColumns = ({
   formatUrl,
   history,
   hasMlPermissions,
-  hasNoPermissions,
+  hasPermissions,
   loadingRuleIds,
   reFetchRules,
   refetchPrePackagedRulesStatus,
@@ -275,7 +275,7 @@ export const getColumns = ({
             enabled={item.enabled}
             isDisabled={
               !canEditRuleWithActions(item, hasReadActionsPrivileges) ||
-              hasNoPermissions ||
+              !hasPermissions ||
               (isMlRule(item.type) && !hasMlPermissions && !item.enabled)
             }
             isLoading={loadingRuleIds.includes(item.id)}
@@ -300,7 +300,7 @@ export const getColumns = ({
     } as EuiTableActionsColumnType<Rule>,
   ];
 
-  return hasNoPermissions ? cols : [...cols, ...actions];
+  return hasPermissions ? [...cols, ...actions] : cols;
 };
 
 export const getMonitoringColumns = (
@@ -369,20 +369,6 @@ export const getMonitoringColumns = (
       truncateText: true,
       width: '14%',
     },
-    // hiding this field until after 7.11 release
-    // {
-    //   field: 'current_status.last_look_back_date',
-    //   name: i18n.COLUMN_LAST_LOOKBACK_DATE,
-    //   render: (value: RuleStatus['current_status']['last_look_back_date']) => {
-    //     return value == null ? (
-    //       getEmptyTagValue()
-    //     ) : (
-    //       <FormattedDate value={value} fieldName={'last look back date'} />
-    //     );
-    //   },
-    //   truncateText: true,
-    //   width: '16%',
-    // },
     {
       field: 'current_status.status_date',
       name: i18n.COLUMN_LAST_COMPLETE_RUN,

@@ -17,12 +17,12 @@ export const FORM_DESCRIPTION = i18n.translate(
 export const NAME_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.eventFilter.form.name.placeholder',
   {
-    defaultMessage: 'Event exception name',
+    defaultMessage: 'Event filter name',
   }
 );
 
 export const NAME_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.name.label', {
-  defaultMessage: 'Name your event exception',
+  defaultMessage: 'Name your event filter',
 });
 
 export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilter.form.name.error', {
@@ -30,7 +30,7 @@ export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilter.for
 });
 
 export const OS_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.os.label', {
-  defaultMessage: 'Seelct OS',
+  defaultMessage: 'Select operating system',
 });
 
 export const RULE_NAME = i18n.translate('xpack.securitySolution.eventFilter.form.rule.name', {

@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await clickInChart(5, 5); // hardcoded position of bar, depends heavy on data and charts implementation
+      await clickInChart(6, 5); // hardcoded position of bar, depends heavy on data and charts implementation
 
       await retry.try(async () => {
         await testSubjects.click('applyFiltersPopoverButton');
@@ -86,6 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasIpFilter).to.be(true);
     });
 
+    // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled
+    // setting set in kibana.yml to work (not enabled by default)
     it('should be able to drill down to discover', async () => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();

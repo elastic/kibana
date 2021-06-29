@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Remote Scheduled Task Creation",
-  "note": "Decode the base64 encoded tasks actions registry value to investigate the task configured action.",
+  "note": "## Triage and analysis\n\nDecode the base64 encoded tasks actions registry value to investigate the task configured action.",
   "query": "/* Task Scheduler service incoming connection followed by TaskCache registry modification  */\n\nsequence by host.id, process.entity_id with maxspan = 1m\n   [network where process.name : \"svchost.exe\" and\n   network.direction == \"incoming\" and source.port >= 49152 and destination.port >= 49152 and\n   source.address != \"127.0.0.1\" and source.address != \"::1\"\n   ]\n   [registry where registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\TaskCache\\\\Tasks\\\\*\\\\Actions\"]\n",
   "risk_score": 47,
   "rule_id": "954ee7c8-5437-49ae-b2d6-2960883898e9",
@@ -57,5 +57,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 3
 }

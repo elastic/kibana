@@ -8,7 +8,6 @@
 
 import { Observable, Subscription, combineLatest, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Server } from '@hapi/hapi';
 import { pick } from '@kbn/std';
 
 import type { RequestHandlerContext } from 'src/core/server';
@@ -20,7 +19,7 @@ import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
 import { CspConfigType, config as cspConfig } from '../csp';
 
-import { Router } from './router';
+import { IRouter, Router } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
@@ -30,6 +29,7 @@ import {
   RequestHandlerContextProvider,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
+  InternalNotReadyHttpServiceSetup,
 } from './types';
 
 import { registerCoreHandlers } from './lifecycle_handlers';
@@ -54,7 +54,7 @@ export class HttpService
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
   private readonly env: Env;
-  private notReadyServer?: Server;
+  private notReadyServer?: HttpServer;
   private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: RequestHandlerContextContainer;
 
@@ -88,9 +88,7 @@ export class HttpService
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    if (this.shouldListen(config)) {
-      await this.runNotReadyServer(config);
-    }
+    const notReadyServer = await this.setupNotReadyService({ config, context: deps.context });
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
 
@@ -98,6 +96,8 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
+
+      notReadyServer,
 
       externalUrl: new ExternalUrlConfig(config.externalUrl),
 
@@ -178,14 +178,51 @@ export class HttpService
     await this.httpsRedirectServer.stop();
   }
 
+  private async setupNotReadyService({
+    config,
+    context,
+  }: {
+    config: HttpConfig;
+    context: ContextSetup;
+  }): Promise<InternalNotReadyHttpServiceSetup | undefined> {
+    if (!this.shouldListen(config)) {
+      return;
+    }
+
+    const notReadySetup = await this.runNotReadyServer(config);
+
+    // We cannot use the real context container since the core services may not yet be ready
+    const fakeContext: RequestHandlerContextContainer = new Proxy(
+      context.createContextContainer(),
+      {
+        get: (target, property, receiver) => {
+          if (property === 'createHandler') {
+            return Reflect.get(target, property, receiver);
+          }
+          throw new Error(`Unexpected access from fake context: ${String(property)}`);
+        },
+      }
+    );
+
+    return {
+      registerRoutes: (path: string, registerCallback: (router: IRouter) => void) => {
+        const router = new Router(
+          path,
+          this.log,
+          fakeContext.createHandler.bind(null, this.coreContext.coreId)
+        );
+
+        registerCallback(router);
+        notReadySetup.registerRouterAfterListening(router);
+      },
+    };
+  }
+
   private async runNotReadyServer(config: HttpConfig) {
     this.log.debug('starting NotReady server');
-    const httpServer = new HttpServer(this.logger, 'NotReady', of(config.shutdownTimeout));
-    const { server } = await httpServer.setup(config);
-    this.notReadyServer = server;
-    // use hapi server while KibanaResponseFactory doesn't allow specifying custom headers
-    // https://github.com/elastic/kibana/issues/33779
-    this.notReadyServer.route({
+    this.notReadyServer = new HttpServer(this.logger, 'NotReady', of(config.shutdownTimeout));
+    const notReadySetup = await this.notReadyServer.setup(config);
+    notReadySetup.server.route({
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
@@ -201,5 +238,7 @@ export class HttpService
       },
     });
     await this.notReadyServer.start();
+
+    return notReadySetup;
   }
 }

@@ -37,13 +37,21 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
 
   const [showFlyout, setShowFlyout] = useState(false);
 
-  async function changeSpacesHandler(spacesToAdd: string[], spacesToRemove: string[]) {
-    if (spacesToAdd.length) {
-      const resp = await ml.savedObjects.assignJobToSpace(jobType, [jobId], spacesToAdd);
-      handleApplySpaces(resp);
-    }
-    if (spacesToRemove.length && !spacesToAdd.includes(ALL_SPACES_ID)) {
-      const resp = await ml.savedObjects.removeJobFromSpace(jobType, [jobId], spacesToRemove);
+  async function changeSpacesHandler(
+    _objects: Array<{ type: string; id: string }>, // this is ignored because ML jobs do not have references
+    spacesToAdd: string[],
+    spacesToMaybeRemove: string[]
+  ) {
+    // If the user is adding the job to all current and future spaces, don't remove it from any specified spaces
+    const spacesToRemove = spacesToAdd.includes(ALL_SPACES_ID) ? [] : spacesToMaybeRemove;
+
+    if (spacesToAdd.length || spacesToRemove.length) {
+      const resp = await ml.savedObjects.updateJobsSpaces(
+        jobType,
+        [jobId],
+        spacesToAdd,
+        spacesToRemove
+      );
       handleApplySpaces(resp);
     }
     onClose();

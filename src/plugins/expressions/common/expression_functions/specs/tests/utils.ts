@@ -37,27 +37,27 @@ const testTable: Datatable = {
   columns: [
     {
       id: 'name',
-      name: 'name',
+      name: 'name label',
       meta: { type: 'string' },
     },
     {
       id: 'time',
-      name: 'time',
+      name: 'time label',
       meta: { type: 'date' },
     },
     {
       id: 'price',
-      name: 'price',
+      name: 'price label',
       meta: { type: 'number' },
     },
     {
       id: 'quantity',
-      name: 'quantity',
+      name: 'quantity label',
       meta: { type: 'number' },
     },
     {
       id: 'in_stock',
-      name: 'in_stock',
+      name: 'in_stock label',
       meta: { type: 'boolean' },
     },
   ],

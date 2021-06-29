@@ -44,7 +44,7 @@ jest.mock('../../../../common/hooks/use_app_toasts');
 const props = {
   createPrePackagedRules: jest.fn(),
   loading: false,
-  userHasNoPermissions: false,
+  userHasPermissions: true,
   'data-test-subj': 'load-prebuilt-rules',
 };
 
@@ -125,6 +125,28 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
       expect(wrapper.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
         'Load Elastic prebuilt timeline templates'
       );
+    });
+  });
+
+  it('renders disabled button if loading is true', async () => {
+    (getPrePackagedRulesStatus as jest.Mock).mockResolvedValue({
+      rules_not_installed: 0,
+      rules_installed: 0,
+      rules_not_updated: 0,
+      timelines_not_installed: 3,
+      timelines_installed: 0,
+      timelines_not_updated: 0,
+    });
+
+    const wrapper: ReactWrapper = mount(
+      <PrePackagedRulesPrompt {...{ ...props, loading: true }} />
+    );
+    await waitFor(() => {
+      wrapper.update();
+
+      expect(
+        wrapper.find('[data-test-subj="load-prebuilt-rules"] button').props().disabled
+      ).toEqual(true);
     });
   });
 });

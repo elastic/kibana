@@ -15,13 +15,13 @@ describe('stepRuleActions schema', () => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
   describe('validateSingleAction', () => {
-    it('should validate single action', () => {
+    it('should validate single action', async () => {
       (isUuid as jest.Mock).mockReturnValue(true);
       (validateActionParams as jest.Mock).mockReturnValue([]);
       (validateMustache as jest.Mock).mockReturnValue([]);
 
       expect(
-        validateSingleAction(
+        await validateSingleAction(
           {
             id: '817b8bca-91d1-4729-8ee1-3a83aaafd9d4',
             group: 'default',
@@ -33,12 +33,12 @@ describe('stepRuleActions schema', () => {
       ).toHaveLength(0);
     });
 
-    it('should validate single action with invalid mustache template', () => {
+    it('should validate single action with invalid mustache template', async () => {
       (isUuid as jest.Mock).mockReturnValue(true);
       (validateActionParams as jest.Mock).mockReturnValue([]);
       (validateMustache as jest.Mock).mockReturnValue(['Message is not valid mustache template']);
 
-      const errors = validateSingleAction(
+      const errors = await validateSingleAction(
         {
           id: '817b8bca-91d1-4729-8ee1-3a83aaafd9d4',
           group: 'default',
@@ -54,12 +54,12 @@ describe('stepRuleActions schema', () => {
       expect(errors[0]).toEqual('Message is not valid mustache template');
     });
 
-    it('should validate single action with incorrect id', () => {
+    it('should validate single action with incorrect id', async () => {
       (isUuid as jest.Mock).mockReturnValue(false);
       (validateMustache as jest.Mock).mockReturnValue([]);
       (validateActionParams as jest.Mock).mockReturnValue([]);
 
-      const errors = validateSingleAction(
+      const errors = await validateSingleAction(
         {
           id: '823d4',
           group: 'default',
@@ -74,10 +74,10 @@ describe('stepRuleActions schema', () => {
   });
 
   describe('validateRuleActionsField', () => {
-    it('should validate rule actions field', () => {
+    it('should validate rule actions field', async () => {
       const validator = validateRuleActionsField(actionTypeRegistry);
 
-      const result = validator({
+      const result = await validator({
         path: '',
         value: [],
         form: {} as FormHook,
@@ -88,11 +88,11 @@ describe('stepRuleActions schema', () => {
       expect(result).toEqual(undefined);
     });
 
-    it('should validate incorrect rule actions field', () => {
+    it('should validate incorrect rule actions field', async () => {
       (getActionTypeName as jest.Mock).mockReturnValue('Slack');
       const validator = validateRuleActionsField(actionTypeRegistry);
 
-      const result = validator({
+      const result = await validator({
         path: '',
         value: [
           {
@@ -117,7 +117,7 @@ describe('stepRuleActions schema', () => {
       });
     });
 
-    it('should validate multiple incorrect rule actions field', () => {
+    it('should validate multiple incorrect rule actions field', async () => {
       (isUuid as jest.Mock).mockReturnValueOnce(false);
       (getActionTypeName as jest.Mock).mockReturnValueOnce('Slack');
       (isUuid as jest.Mock).mockReturnValueOnce(true);
@@ -126,7 +126,7 @@ describe('stepRuleActions schema', () => {
       (validateMustache as jest.Mock).mockReturnValue(['Component is not valid mustache template']);
       const validator = validateRuleActionsField(actionTypeRegistry);
 
-      const result = validator({
+      const result = await validator({
         path: '',
         value: [
           {

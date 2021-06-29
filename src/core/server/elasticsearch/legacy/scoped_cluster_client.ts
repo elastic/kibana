@@ -19,6 +19,7 @@ import { LegacyAPICaller, LegacyCallAPIOptions } from './api_types';
  * See {@link LegacyScopedClusterClient}.
  *
  * @deprecated Use {@link IScopedClusterClient}.
+ * @removeBy 7.16
  * @public
  */
 export type ILegacyScopedClusterClient = Pick<
@@ -29,6 +30,7 @@ export type ILegacyScopedClusterClient = Pick<
 /**
  * {@inheritDoc IScopedClusterClient}
  * @deprecated Use {@link IScopedClusterClient | scoped cluster client}.
+ * @removeBy 7.16
  * @public
  */
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
@@ -46,6 +48,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
    * Kibana internal user.
    * See {@link LegacyAPICaller}.
    * @deprecated Use {@link IScopedClusterClient.asInternalUser}.
+   * @removeBy 7.16
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.
@@ -64,6 +67,7 @@ export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
    * user initiated request to the Kibana server (via HTTP request headers).
    * See {@link LegacyAPICaller}.
    * @deprecated Use {@link IScopedClusterClient.asCurrentUser}.
+   * @removeBy 7.16
    *
    * @param endpoint - String descriptor of the endpoint e.g. `cluster.getSettings` or `ping`.
    * @param clientParams - A dictionary of parameters that will be passed directly to the Elasticsearch JS client.

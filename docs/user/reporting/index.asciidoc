@@ -32,7 +32,7 @@ for different operating systems.
 == Roles and privileges
 
 When security is enabled, access to the {report-features} is controlled by security privileges. In versions 7.12 and earlier, you can grant access to the {report-features}
-by assigning users the `reporting_user` role in {es}. In 7.13 and later, you can configure *Reporting* to use
+by assigning users the `reporting_user` role in {es}. In 7.14 and later, you can configure *Reporting* to use
 <<kibana-privileges, {kib} privileges>>. It is recommended that *Reporting* is configured to
 use {kib} privileges by setting <<xpack-reporting-roles-enabled,`xpack.reporting.roles.enabled`>> to `false`. By using {kib} privileges, you can define
 custom roles that grant *Reporting* privileges as sub-features of {kib} applications in *Role Management*.

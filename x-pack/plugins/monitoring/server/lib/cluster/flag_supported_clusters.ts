@@ -31,13 +31,20 @@ async function findSupportedBasicLicenseCluster(
     index: kbnIndexPattern,
     size: 1,
     ignoreUnavailable: true,
-    filterPath: 'hits.hits._source.cluster_uuid',
+    filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.cluster.id'],
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
           filter: [
-            { term: { type: 'kibana_stats' } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'kibana_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
+                ],
+              },
+            },
             { term: { 'kibana_stats.kibana.uuid': kibanaUuid } },
             { range: { timestamp: { gte, lte, format: 'strict_date_optional_time' } } },
           ],
@@ -80,7 +87,7 @@ export function flagSupportedClusters(req: LegacyRequest, kbnIndexPattern: strin
   const serverLog = (message: string) => req.getLogger('supported-clusters').debug(message);
   const flagAllSupported = (clusters: ElasticsearchModifiedSource[]) => {
     clusters.forEach((cluster) => {
-      if (cluster.license) {
+      if (cluster.license || cluster.elasticsearch?.cluster?.stats?.license) {
         cluster.isSupported = true;
       }
     });
@@ -100,7 +107,9 @@ export function flagSupportedClusters(req: LegacyRequest, kbnIndexPattern: strin
     }
     if (linkedClusterCount > 1) {
       const basicLicenseCount = clusters.reduce((accumCount, cluster) => {
-        if (cluster.license && cluster.license.type === 'basic') {
+        const licenseType =
+          cluster.license?.type ?? cluster.elasticsearch?.cluster?.stats?.license?.type;
+        if (licenseType === 'basic') {
           accumCount++;
         }
         return accumCount;
@@ -129,7 +138,10 @@ export function flagSupportedClusters(req: LegacyRequest, kbnIndexPattern: strin
         'Found some basic license clusters in monitoring data. Only non-basic will be supported.'
       );
       clusters.forEach((cluster) => {
-        if (cluster.license && cluster.license.type !== 'basic') {
+        if (
+          cluster.license?.type !== 'basic' &&
+          cluster.elasticsearch?.cluster?.stats?.license?.type !== 'basic'
+        ) {
           cluster.isSupported = true;
         }
       });

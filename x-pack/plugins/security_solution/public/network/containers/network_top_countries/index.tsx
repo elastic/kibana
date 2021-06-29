@@ -29,6 +29,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'networkTopCountriesQuery';
@@ -75,6 +76,7 @@ export const useNetworkTopCountries = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [
     networkTopCountriesRequest,
@@ -172,27 +174,45 @@ export const useNetworkTopCountries = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: NetworkQueries.topCountries,
-        filterQuery: createFilter(filterQuery),
-        flowTarget,
-        ip,
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort,
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
+        pagination: generateTablePaginationOptions(activePage, limit),
+        sort,
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, flowTarget]);
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    ip,
+    limit,
+    startDate,
+    sort,
+    flowTarget,
+    getTransformChangesIfTheyExist,
+  ]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

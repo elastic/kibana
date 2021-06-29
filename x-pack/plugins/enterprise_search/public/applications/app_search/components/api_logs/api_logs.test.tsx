@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
@@ -13,9 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPageHeader } from '@elastic/eui';
-
-import { Loading } from '../../../shared/loading';
+import { rerender, getPageTitle } from '../../../test_helpers';
 import { LogRetentionCallout, LogRetentionTooltip } from '../log_retention';
 
 import { ApiLogsTable, NewApiEventsPrompt } from './components';
@@ -41,7 +39,7 @@ describe('ApiLogs', () => {
 
   it('renders', () => {
     const wrapper = shallow(<ApiLogs />);
-    expect(wrapper.find(EuiPageHeader).prop('pageTitle')).toEqual('API Logs');
+    expect(getPageTitle(wrapper)).toEqual('API Logs');
     expect(wrapper.find(ApiLogsTable)).toHaveLength(1);
     expect(wrapper.find(NewApiEventsPrompt)).toHaveLength(1);
 
@@ -49,11 +47,20 @@ describe('ApiLogs', () => {
     expect(wrapper.find(LogRetentionTooltip).prop('type')).toEqual('api');
   });
 
-  it('renders a loading screen', () => {
-    setMockValues({ ...values, dataLoading: true, apiLogs: [] });
-    const wrapper = shallow(<ApiLogs />);
+  describe('loading state', () => {
+    it('renders a full-page loading state on initial page load (no logs exist yet)', () => {
+      setMockValues({ ...values, dataLoading: true, apiLogs: [] });
+      const wrapper = shallow(<ApiLogs />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+      expect(wrapper.prop('isLoading')).toEqual(true);
+    });
+
+    it('does not re-render a full-page loading state after initial page load (uses component-level loading state instead)', () => {
+      setMockValues({ ...values, dataLoading: true, apiLogs: [{}] });
+      const wrapper = shallow(<ApiLogs />);
+
+      expect(wrapper.prop('isLoading')).toEqual(false);
+    });
   });
 
   describe('effects', () => {

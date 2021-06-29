@@ -5,97 +5,110 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.LegacyUrlConflictProps",
         "type": "Interface",
+        "tags": [],
         "label": "LegacyUrlConflictProps",
-        "description": [],
-        "tags": [
-          "public"
+        "description": [
+          "\nProperties for the LegacyUrlConflict component."
         ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 250
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.LegacyUrlConflictProps.objectNoun",
             "type": "string",
+            "tags": [],
             "label": "objectNoun",
             "description": [
               "\nThe string that is used to describe the object in the callout, e.g., _There is a legacy URL for this page that points to a different\n**object**_.\n\nDefault value is 'object'."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 252
-            },
             "signature": [
               "string | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 257
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.LegacyUrlConflictProps.currentObjectId",
             "type": "string",
+            "tags": [],
             "label": "currentObjectId",
             "description": [
               "\nThe ID of the object that is currently shown on the page."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 256
-            }
+              "lineNumber": 261
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.LegacyUrlConflictProps.otherObjectId",
             "type": "string",
+            "tags": [],
             "label": "otherObjectId",
             "description": [
               "\nThe ID of the other object that the legacy URL alias points to."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 260
-            }
+              "lineNumber": 265
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.LegacyUrlConflictProps.otherObjectPath",
             "type": "string",
+            "tags": [],
             "label": "otherObjectPath",
             "description": [
               "\nThe path to use for the new URL, optionally including `search` and/or `hash` URL components."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 264
-            }
+              "lineNumber": 269
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 245
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.ShareToSpaceFlyoutProps",
         "type": "Interface",
+        "tags": [],
         "label": "ShareToSpaceFlyoutProps",
-        "description": [],
-        "tags": [
-          "public"
+        "description": [
+          "\nProperties for the ShareToSpaceFlyout."
         ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 131
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceFlyoutProps.savedObjectTarget",
             "type": "Object",
+            "tags": [],
             "label": "savedObjectTarget",
             "description": [
               "\nThe object to render the flyout for."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 130
-            },
             "signature": [
               {
                 "pluginId": "spacesOss",
@@ -104,415 +117,468 @@
                 "section": "def-public.ShareToSpaceSavedObjectTarget",
                 "text": "ShareToSpaceSavedObjectTarget"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 135
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceFlyoutProps.flyoutIcon",
             "type": "string",
+            "tags": [],
             "label": "flyoutIcon",
             "description": [
               "\nThe EUI icon that is rendered in the flyout's title.\n\nDefault is 'share'."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 136
-            },
             "signature": [
               "string | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 141
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceFlyoutProps.flyoutTitle",
             "type": "string",
+            "tags": [],
             "label": "flyoutTitle",
             "description": [
               "\nThe string that is rendered in the flyout's title.\n\nDefault is 'Edit spaces for object'."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 142
-            },
             "signature": [
               "string | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 147
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceFlyoutProps.enableCreateCopyCallout",
             "type": "CompoundType",
+            "tags": [],
             "label": "enableCreateCopyCallout",
             "description": [
               "\nWhen enabled, if the object is not yet shared to multiple spaces, a callout will be displayed that suggests the user might want to\ncreate a copy instead.\n\nDefault value is false."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 149
-            },
             "signature": [
               "boolean | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 154
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceFlyoutProps.enableCreateNewSpaceLink",
             "type": "CompoundType",
+            "tags": [],
             "label": "enableCreateNewSpaceLink",
             "description": [
               "\nWhen enabled, if no other spaces exist _and_ the user has the appropriate privileges, a sentence will be displayed that suggests the\nuser might want to create a space.\n\nDefault value is false."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 156
-            },
             "signature": [
               "boolean | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 161
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceFlyoutProps.behaviorContext",
             "type": "CompoundType",
+            "tags": [],
             "label": "behaviorContext",
             "description": [
               "\nWhen set to 'within-space' (default), the flyout behaves like it is running on a page within the active space, and it will prevent the\nuser from removing the object from the active space.\n\nConversely, when set to 'outside-space', the flyout behaves like it is running on a page outside of any space, so it will allow the\nuser to remove the object from the active space."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 164
-            },
             "signature": [
               "\"within-space\" | \"outside-space\" | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler",
-            "type": "Function",
-            "label": "changeSpacesHandler",
-            "description": [
-              "\nOptional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If\nthis is not defined, a default handler will be used that calls `/api/spaces/_share_saved_object_add` and/or\n`/api/spaces/_share_saved_object_remove` and displays toast(s) indicating what occurred."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 170
+              "lineNumber": 169
             },
-            "signature": [
-              "((spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.ShareToSpaceFlyoutProps.changeSpacesHandler",
+            "type": "Function",
             "tags": [],
+            "label": "changeSpacesHandler",
+            "description": [
+              "\nOptional handler that is called when the user has saved changes and there are spaces to be added to and/or removed from the object. If\nthis is not defined, a default handler will be used that calls `/api/spaces/_update_objects_spaces` and displays a toast indicating\nwhat occurred."
+            ],
+            "signature": [
+              "((spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>) | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 175
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceFlyoutProps.onUpdate",
             "type": "Function",
+            "tags": [],
             "label": "onUpdate",
             "description": [
               "\nOptional callback when the target object is updated."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 174
-            },
             "signature": [
               "(() => void) | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 179
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceFlyoutProps.onClose",
             "type": "Function",
+            "tags": [],
             "label": "onClose",
             "description": [
               "\nOptional callback when the flyout is closed."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 178
-            },
             "signature": [
               "(() => void) | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 183
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 126
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.ShareToSpaceSavedObjectTarget",
         "type": "Interface",
+        "tags": [],
         "label": "ShareToSpaceSavedObjectTarget",
-        "description": [],
-        "tags": [
-          "public"
+        "description": [
+          "\nDescribes the target saved object during a share operation."
         ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 189
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceSavedObjectTarget.type",
             "type": "string",
+            "tags": [],
             "label": "type",
             "description": [
               "\nThe object's type."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 188
-            }
+              "lineNumber": 193
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceSavedObjectTarget.id",
             "type": "string",
+            "tags": [],
             "label": "id",
             "description": [
               "\nThe object's ID."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 192
-            }
+              "lineNumber": 197
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceSavedObjectTarget.namespaces",
             "type": "Array",
+            "tags": [],
             "label": "namespaces",
             "description": [
               "\nThe namespaces that the object currently exists in."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 196
-            },
             "signature": [
               "string[]"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 201
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceSavedObjectTarget.icon",
             "type": "string",
+            "tags": [],
             "label": "icon",
             "description": [
               "\nThe EUI icon that is rendered in the flyout's subtitle.\n\nDefault is 'empty'."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 202
-            },
             "signature": [
               "string | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 207
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceSavedObjectTarget.title",
             "type": "string",
+            "tags": [],
             "label": "title",
             "description": [
               "\nThe string that is rendered in the flyout's subtitle.\n\nDefault is `${type} [id=${id}]`."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 208
-            },
             "signature": [
               "string | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 213
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.ShareToSpaceSavedObjectTarget.noun",
             "type": "string",
+            "tags": [],
             "label": "noun",
             "description": [
               "\nThe string that is used to describe the object in several places, e.g., _Make **object** available in selected spaces only_.\n\nDefault value is 'object'."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 214
-            },
             "signature": [
               "string | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 219
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 184
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.SpaceAvatarProps",
         "type": "Interface",
+        "tags": [],
         "label": "SpaceAvatarProps",
-        "description": [],
-        "tags": [
-          "public"
+        "description": [
+          "\nProperties for the SpaceAvatar component."
         ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 275
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpaceAvatarProps.space",
             "type": "Object",
+            "tags": [],
             "label": "space",
-            "description": [],
+            "description": [
+              "The space to represent with an avatar."
+            ],
+            "signature": [
+              "{ id?: string | undefined; name?: string | undefined; description?: string | undefined; color?: string | undefined; initials?: string | undefined; imageUrl?: string | undefined; disabledFeatures?: string[] | undefined; _reserved?: boolean | undefined; }"
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 271
+              "lineNumber": 277
             },
-            "signature": [
-              "Partial<",
-              {
-                "pluginId": "spacesOss",
-                "scope": "common",
-                "docId": "kibSpacesOssPluginApi",
-                "section": "def-common.Space",
-                "text": "Space"
-              },
-              ">"
-            ]
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpaceAvatarProps.size",
             "type": "CompoundType",
+            "tags": [],
             "label": "size",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 272
-            },
+            "description": [
+              "The size of the avatar."
+            ],
             "signature": [
               "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SpaceAvatarProps.className",
-            "type": "string",
-            "label": "className",
-            "description": [],
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 273
+              "lineNumber": 280
             },
-            "signature": [
-              "string | undefined"
-            ]
+            "deprecated": false
           },
           {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.SpaceAvatarProps.className",
+            "type": "string",
             "tags": [],
+            "label": "className",
+            "description": [
+              "Optional CSS class(es) to apply."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 283
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpaceAvatarProps.announceSpaceName",
             "type": "CompoundType",
+            "tags": [],
             "label": "announceSpaceName",
             "description": [
               "\nWhen enabled, allows EUI to provide an aria-label for this component, which is announced on screen readers.\n\nDefault value is true."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 279
-            },
             "signature": [
               "boolean | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 290
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 270
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.SpaceListProps",
         "type": "Interface",
+        "tags": [],
         "label": "SpaceListProps",
-        "description": [],
-        "tags": [
-          "public"
+        "description": [
+          "\nProperties for the SpaceList component."
         ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 225
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpaceListProps.namespaces",
             "type": "Array",
+            "tags": [],
             "label": "namespaces",
             "description": [
               "\nThe namespaces of a saved object to render into a corresponding list of spaces."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 224
-            },
             "signature": [
               "string[]"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 229
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpaceListProps.displayLimit",
             "type": "number",
+            "tags": [],
             "label": "displayLimit",
             "description": [
               "\nOptional limit to the number of spaces that can be displayed in the list. If the number of spaces exceeds this limit, they will be\nhidden behind a \"show more\" button. Set to 0 to disable.\n\nDefault value is 5."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 231
-            },
             "signature": [
               "number | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 236
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpaceListProps.behaviorContext",
             "type": "CompoundType",
+            "tags": [],
             "label": "behaviorContext",
             "description": [
               "\nWhen set to 'within-space' (default), the space list behaves like it is running on a page within the active space, and it will omit the\nactive space (e.g., it displays a list of all the _other_ spaces that an object is shared to).\n\nConversely, when set to 'outside-space', the space list behaves like it is running on a page outside of any space, so it will not omit\nthe active space."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 239
-            },
             "signature": [
               "\"within-space\" | \"outside-space\" | undefined"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 244
+            },
+            "deprecated": false
           }
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 220
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.SpacesApi",
         "type": "Interface",
+        "tags": [],
         "label": "SpacesApi",
-        "description": [],
-        "tags": [
-          "public"
+        "description": [
+          "\nClient-side Spaces API."
         ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 17
+        },
+        "deprecated": false,
         "children": [
           {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.SpacesApi.getActiveSpace$",
+            "type": "Function",
             "tags": [],
-            "id": "def-public.SpacesApi.activeSpace$",
-            "type": "Object",
-            "label": "activeSpace$",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 18
-            },
+            "label": "getActiveSpace$",
+            "description": [
+              "\nObservable representing the currently active space.\nThe details of the space can change without a full page reload (such as display name, color, etc.)"
+            ],
             "signature": [
+              "() => ",
               "Observable",
               "<",
               {
@@ -523,12 +589,24 @@
                 "text": "Space"
               },
               ">"
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 22
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpacesApi.getActiveSpace",
             "type": "Function",
+            "tags": [],
             "label": "getActiveSpace",
+            "description": [
+              "\nRetrieve the currently active space."
+            ],
             "signature": [
               "() => Promise<",
               {
@@ -540,27 +618,23 @@
               },
               ">"
             ],
-            "description": [],
-            "children": [],
-            "tags": [],
-            "returnComment": [],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 19
-            }
+              "lineNumber": 27
+            },
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpacesApi.ui",
             "type": "Object",
+            "tags": [],
             "label": "ui",
             "description": [
-              "\nUI API to use to add spaces capabilities to an application"
+              "\nUI components and services to add spaces capabilities to an application."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 23
-            },
             "signature": [
               {
                 "pluginId": "spacesOss",
@@ -569,36 +643,40 @@
                 "section": "def-public.SpacesApiUi",
                 "text": "SpacesApiUi"
               }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 17
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SpacesApiUi",
-        "type": "Interface",
-        "label": "SpacesApiUi",
-        "description": [],
-        "tags": [
-          "public"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SpacesApiUi.components",
-            "type": "Object",
-            "label": "components",
-            "description": [
-              "\nLazy-loadable {@link SpacesApiUiComponent | React components} to support the spaces feature."
             ],
             "source": {
               "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 40
+              "lineNumber": 32
             },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spacesOss",
+        "id": "def-public.SpacesApiUi",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpacesApiUi",
+        "description": [
+          "\nUI components and services to add spaces capabilities to an application."
+        ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 43
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.SpacesApiUi.components",
+            "type": "Object",
+            "tags": [],
+            "label": "components",
+            "description": [
+              "\nLazy-loadable {@link SpacesApiUiComponent | React components} to support the Spaces feature."
+            ],
             "signature": [
               {
                 "pluginId": "spacesOss",
@@ -607,63 +685,96 @@
                 "section": "def-public.SpacesApiUiComponent",
                 "text": "SpacesApiUiComponent"
               }
-            ]
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 47
+            },
+            "deprecated": false
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpacesApiUi.redirectLegacyUrl",
             "type": "Function",
+            "tags": [],
             "label": "redirectLegacyUrl",
             "description": [
               "\nRedirect the user from a legacy URL to a new URL. This needs to be used if a call to `SavedObjectsClient.resolve()` results in an\n`\"aliasMatch\"` outcome, which indicates that the user has loaded the page using a legacy URL. Calling this function will trigger a\nclient-side redirect to the new URL, and it will display a toast to the user.\n\nConsumers need to determine the local path for the new URL on their own, based on the object ID that was used to call\n`SavedObjectsClient.resolve()` (old ID) and the object ID in the result (new ID). For example...\n\nThe old object ID is `workpad-123` and the new object ID is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.\n\nFull legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`\n\nNew URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`\n\nThe protocol, hostname, port, base path, and app path are automatically included.\n"
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 61
-            },
             "signature": [
               "(path: string, objectNoun?: string | undefined) => Promise<void>"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 68
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.path",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [
+                  "The path to use for the new URL, optionally including `search` and/or `hash` URL components."
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 68
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.objectNoun",
+                "type": "string",
+                "tags": [],
+                "label": "objectNoun",
+                "description": [
+                  "The string that is used to describe the object in the toast, e.g., _The **object** you're looking for has a new\nlocation_. Default value is 'object'."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 68
+                },
+                "deprecated": false
+              }
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 36
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.SpacesApiUiComponent",
         "type": "Interface",
+        "tags": [],
         "label": "SpacesApiUiComponent",
         "description": [
-          "\nReact UI components to be used to display the spaces feature in any application.\n"
+          "\nReact UI components to be used to display the Spaces feature in any application."
         ],
-        "tags": [
-          "public"
-        ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 74
+        },
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpacesApiUiComponent.getSpacesContextProvider",
             "type": "Function",
+            "tags": [],
             "label": "getSpacesContextProvider",
             "description": [
               "\nProvides a context that is required to render some Spaces components."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 73
-            },
             "signature": [
-              {
-                "pluginId": "spacesOss",
-                "scope": "public",
-                "docId": "kibSpacesOssPluginApi",
-                "section": "def-public.LazyComponentFn",
-                "text": "LazyComponentFn"
-              },
-              "<",
+              "(props: ",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -671,30 +782,44 @@
                 "section": "def-public.SpacesContextProps",
                 "text": "SpacesContextProps"
               },
-              ">"
+              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 78
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.props",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpacesApiUiComponent.getShareToSpaceFlyout",
             "type": "Function",
+            "tags": [],
             "label": "getShareToSpaceFlyout",
             "description": [
               "\nDisplays a flyout to edit the spaces that an object is shared to.\n\nNote: must be rendered inside of a SpacesContext."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 79
-            },
             "signature": [
-              {
-                "pluginId": "spacesOss",
-                "scope": "public",
-                "docId": "kibSpacesOssPluginApi",
-                "section": "def-public.LazyComponentFn",
-                "text": "LazyComponentFn"
-              },
-              "<",
+              "(props: ",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -702,30 +827,44 @@
                 "section": "def-public.ShareToSpaceFlyoutProps",
                 "text": "ShareToSpaceFlyoutProps"
               },
-              ">"
+              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 84
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.props",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpacesApiUiComponent.getSpaceList",
             "type": "Function",
+            "tags": [],
             "label": "getSpaceList",
             "description": [
               "\nDisplays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for\nany number of spaces that the user is not authorized to see) by default. If more than five named spaces would be displayed, the extras\n(along with the unauthorized spaces indicator, if present) are hidden behind a button. If '*' (aka \"All spaces\") is present, it\nsupersedes all of the above and just displays a single badge without a button.\n\nNote: must be rendered inside of a SpacesContext."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 88
-            },
             "signature": [
-              {
-                "pluginId": "spacesOss",
-                "scope": "public",
-                "docId": "kibSpacesOssPluginApi",
-                "section": "def-public.LazyComponentFn",
-                "text": "LazyComponentFn"
-              },
-              "<",
+              "(props: ",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -733,30 +872,44 @@
                 "section": "def-public.SpaceListProps",
                 "text": "SpaceListProps"
               },
-              ">"
+              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 93
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.props",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpacesApiUiComponent.getLegacyUrlConflict",
             "type": "Function",
+            "tags": [],
             "label": "getLegacyUrlConflict",
             "description": [
               "\nDisplays a callout that needs to be used if a call to `SavedObjectsClient.resolve()` results in an `\"conflict\"` outcome, which\nindicates that the user has loaded the page which is associated directly with one object (A), *and* with a legacy URL that points to a\ndifferent object (B).\n\nIn this case, `SavedObjectsClient.resolve()` has returned object A. This component displays a warning callout to the user explaining\nthat there is a conflict, and it includes a button that will redirect the user to object B when clicked.\n\nConsumers need to determine the local path for the new URL on their own, based on the object ID that was used to call\n`SavedObjectsClient.resolve()` (A) and the `aliasTargetId` value in the response (B). For example...\n\nA is `workpad-123` and B is `workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e`.\n\nFull legacy URL: `https://localhost:5601/app/canvas#/workpad/workpad-123/page/1`\n\nNew URL path: `#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e/page/1`"
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 106
-            },
             "signature": [
-              {
-                "pluginId": "spacesOss",
-                "scope": "public",
-                "docId": "kibSpacesOssPluginApi",
-                "section": "def-public.LazyComponentFn",
-                "text": "LazyComponentFn"
-              },
-              "<",
+              "(props: ",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -764,30 +917,44 @@
                 "section": "def-public.LegacyUrlConflictProps",
                 "text": "LegacyUrlConflictProps"
               },
-              ">"
+              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 111
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.props",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
+                "deprecated": false
+              }
             ]
           },
           {
-            "tags": [],
+            "parentPluginId": "spacesOss",
             "id": "def-public.SpacesApiUiComponent.getSpaceAvatar",
             "type": "Function",
+            "tags": [],
             "label": "getSpaceAvatar",
             "description": [
               "\nDisplays an avatar for the given space."
             ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 110
-            },
             "signature": [
-              {
-                "pluginId": "spacesOss",
-                "scope": "public",
-                "docId": "kibSpacesOssPluginApi",
-                "section": "def-public.LazyComponentFn",
-                "text": "LazyComponentFn"
-              },
-              "<",
+              "(props: ",
               {
                 "pluginId": "spacesOss",
                 "scope": "public",
@@ -795,20 +962,45 @@
                 "section": "def-public.SpaceAvatarProps",
                 "text": "SpaceAvatarProps"
               },
-              ">"
+              ") => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 115
+            },
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "spacesOss",
+                "id": "def-public.props",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "source": {
+                  "path": "src/plugins/spaces_oss/public/api.ts",
+                  "lineNumber": 38
+                },
+                "deprecated": false
+              }
             ]
           }
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 69
-        },
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.SpacesAvailableStartContract",
         "type": "Interface",
+        "tags": [],
         "label": "SpacesAvailableStartContract",
+        "description": [
+          "\nOSS Spaces plugin start contract when the Spaces feature is enabled."
+        ],
         "signature": [
           {
             "pluginId": "spacesOss",
@@ -826,125 +1018,159 @@
             "text": "SpacesApi"
           }
         ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SpacesAvailableStartContract.isSpacesAvailable",
-            "type": "boolean",
-            "label": "isSpacesAvailable",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/types.ts",
-              "lineNumber": 12
-            },
-            "signature": [
-              "true"
-            ]
-          }
-        ],
         "source": {
           "path": "src/plugins/spaces_oss/public/types.ts",
-          "lineNumber": 11
+          "lineNumber": 14
         },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SpacesContextProps",
-        "type": "Interface",
-        "label": "SpacesContextProps",
-        "description": [],
-        "tags": [
-          "public"
-        ],
+        "deprecated": false,
         "children": [
           {
-            "tags": [],
-            "id": "def-public.SpacesContextProps.feature",
-            "type": "string",
-            "label": "feature",
-            "description": [
-              "\nIf a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space."
-            ],
-            "source": {
-              "path": "src/plugins/spaces_oss/public/api.ts",
-              "lineNumber": 120
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 116
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.SpacesUnavailableStartContract",
-        "type": "Interface",
-        "label": "SpacesUnavailableStartContract",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SpacesUnavailableStartContract.isSpacesAvailable",
+            "parentPluginId": "spacesOss",
+            "id": "def-public.SpacesAvailableStartContract.isSpacesAvailable",
             "type": "boolean",
+            "tags": [],
             "label": "isSpacesAvailable",
-            "description": [],
+            "description": [
+              "Indicates if the Spaces feature is enabled."
+            ],
+            "signature": [
+              "true"
+            ],
             "source": {
               "path": "src/plugins/spaces_oss/public/types.ts",
               "lineNumber": 16
             },
-            "signature": [
-              "false"
-            ]
+            "deprecated": false
           }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spacesOss",
+        "id": "def-public.SpacesContextProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SpacesContextProps",
+        "description": [
+          "\nProperties for the SpacesContext."
+        ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 121
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.SpacesContextProps.feature",
+            "type": "string",
+            "tags": [],
+            "label": "feature",
+            "description": [
+              "\nIf a feature is specified, all Spaces components will treat it appropriately if the feature is disabled in a given Space."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/api.ts",
+              "lineNumber": 125
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "spacesOss",
+        "id": "def-public.SpacesUnavailableStartContract",
+        "type": "Interface",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "SpacesUnavailableStartContract",
+        "description": [
+          "\nOSS Spaces plugin start contract when the Spaces feature is disabled."
         ],
         "source": {
           "path": "src/plugins/spaces_oss/public/types.ts",
-          "lineNumber": 15
+          "lineNumber": 24
         },
+        "deprecated": true,
+        "removeBy": "8.0",
+        "references": [],
+        "children": [
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-public.SpacesUnavailableStartContract.isSpacesAvailable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSpacesAvailable",
+            "description": [
+              "Indicates if the Spaces feature is enabled."
+            ],
+            "signature": [
+              "false"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/public/types.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "spacesOss",
         "id": "def-public.LazyComponentFn",
         "type": "Type",
+        "tags": [],
         "label": "LazyComponentFn",
-        "tags": [
-          "public"
-        ],
         "description": [
-          "\nFunction that returns a promise for a lazy-loadable component.\n"
+          "\nFunction that returns a promise for a lazy-loadable component."
         ],
-        "source": {
-          "path": "src/plugins/spaces_oss/public/api.ts",
-          "lineNumber": 31
-        },
         "signature": [
           "(props: T) => React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
         ],
+        "source": {
+          "path": "src/plugins/spaces_oss/public/api.ts",
+          "lineNumber": 38
+        },
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],
     "objects": [],
     "setup": {
+      "parentPluginId": "spacesOss",
       "id": "def-public.SpacesOssPluginSetup",
       "type": "Interface",
-      "label": "SpacesOssPluginSetup",
-      "description": [],
       "tags": [],
+      "label": "SpacesOssPluginSetup",
+      "description": [
+        "\nOSS Spaces plugin setup contract."
+      ],
+      "source": {
+        "path": "src/plugins/spaces_oss/public/types.ts",
+        "lineNumber": 32
+      },
+      "deprecated": false,
       "children": [
         {
+          "parentPluginId": "spacesOss",
           "id": "def-public.SpacesOssPluginSetup.registerSpacesApi",
           "type": "Function",
+          "tags": [
+            "private"
+          ],
           "label": "registerSpacesApi",
+          "description": [
+            "\nRegister a provider for the Spaces API.\n\nOnly one provider can be registered, subsequent calls to this method will fail.\n"
+          ],
           "signature": [
             "(provider: ",
             {
@@ -956,15 +1182,21 @@
             },
             ") => void"
           ],
-          "description": [
-            "\nRegister a provider for the Spaces API.\n\nOnly one provider can be registered, subsequent calls to this method will fail."
-          ],
+          "source": {
+            "path": "src/plugins/spaces_oss/public/types.ts",
+            "lineNumber": 42
+          },
+          "deprecated": false,
           "children": [
             {
+              "parentPluginId": "spacesOss",
               "id": "def-public.SpacesOssPluginSetup.registerSpacesApi.$1",
               "type": "Object",
+              "tags": [],
               "label": "provider",
-              "isRequired": true,
+              "description": [
+                "the API provider."
+              ],
               "signature": [
                 {
                   "pluginId": "spacesOss",
@@ -974,38 +1206,29 @@
                   "text": "SpacesApi"
                 }
               ],
-              "description": [],
               "source": {
                 "path": "src/plugins/spaces_oss/public/types.ts",
-                "lineNumber": 25
-              }
+                "lineNumber": 42
+              },
+              "deprecated": false,
+              "isRequired": true
             }
           ],
-          "tags": [],
-          "returnComment": [],
-          "source": {
-            "path": "src/plugins/spaces_oss/public/types.ts",
-            "lineNumber": 25
-          }
+          "returnComment": []
         }
       ],
-      "source": {
-        "path": "src/plugins/spaces_oss/public/types.ts",
-        "lineNumber": 19
-      },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "spacesOss",
       "id": "def-public.SpacesOssPluginStart",
       "type": "Type",
-      "label": "SpacesOssPluginStart",
       "tags": [],
-      "description": [],
-      "source": {
-        "path": "src/plugins/spaces_oss/public/types.ts",
-        "lineNumber": 28
-      },
+      "label": "SpacesOssPluginStart",
+      "description": [
+        "\nOSS Spaces plugin start contract."
+      ],
       "signature": [
         {
           "pluginId": "spacesOss",
@@ -1023,6 +1246,11 @@
           "text": "SpacesUnavailableStartContract"
         }
       ],
+      "source": {
+        "path": "src/plugins/spaces_oss/public/types.ts",
+        "lineNumber": 48
+      },
+      "deprecated": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1040,123 +1268,161 @@
     "functions": [],
     "interfaces": [
       {
+        "parentPluginId": "spacesOss",
         "id": "def-common.Space",
         "type": "Interface",
-        "label": "Space",
-        "description": [],
         "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Space.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 10
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Space.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 11
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Space.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 12
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Space.color",
-            "type": "string",
-            "label": "color",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 13
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Space.initials",
-            "type": "string",
-            "label": "initials",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 14
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Space.disabledFeatures",
-            "type": "Array",
-            "label": "disabledFeatures",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 15
-            },
-            "signature": [
-              "string[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Space._reserved",
-            "type": "CompoundType",
-            "label": "_reserved",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 16
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Space.imageUrl",
-            "type": "string",
-            "label": "imageUrl",
-            "description": [],
-            "source": {
-              "path": "src/plugins/spaces_oss/common/types.ts",
-              "lineNumber": 17
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          }
+        "label": "Space",
+        "description": [
+          "\nA Space."
         ],
         "source": {
           "path": "src/plugins/spaces_oss/common/types.ts",
-          "lineNumber": 9
+          "lineNumber": 12
         },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-common.Space.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe unique identifier for this space.\nThe id becomes part of the \"URL Identifier\" of the space.\n\nExample: an id of `marketing` would result in the URL identifier of `/s/marketing`."
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-common.Space.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nDisplay name for this space."
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 24
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-common.Space.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nOptional description for this space."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-common.Space.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [
+              "\nOptional color (hex code) for this space.\nIf neither `color` nor `imageUrl` is specified, then a color will be automatically generated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-common.Space.initials",
+            "type": "string",
+            "tags": [],
+            "label": "initials",
+            "description": [
+              "\nOptional display initials for this space's avatar. Supports a maximum of 2 characters.\nIf initials are not provided, then they will be derived from the space name automatically.\n\nInitials are not displayed if an `imageUrl` has been specified."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 43
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-common.Space.imageUrl",
+            "type": "string",
+            "tags": [],
+            "label": "imageUrl",
+            "description": [
+              "\nOptional base-64 encoded data image url to show as this space's avatar.\nThis setting takes precedence over any configured `color` or `initials`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 49
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-common.Space.disabledFeatures",
+            "type": "Array",
+            "tags": [],
+            "label": "disabledFeatures",
+            "description": [
+              "\nThe set of feature ids that should be hidden within this space."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 54
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spacesOss",
+            "id": "def-common.Space._reserved",
+            "type": "CompoundType",
+            "tags": [
+              "private"
+            ],
+            "label": "_reserved",
+            "description": [
+              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/spaces_oss/common/types.ts",
+              "lineNumber": 61
+            },
+            "deprecated": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],

@@ -295,6 +295,7 @@ export type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
@@ -320,12 +321,16 @@ export type {
   SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsAddToNamespacesResponse,
-  SavedObjectsDeleteFromNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesResponse,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
@@ -335,8 +340,6 @@ export type {
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
@@ -372,11 +375,7 @@ export type {
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
   UserProvidedValues,
-  ImageValidation,
   DeprecationSettings,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
 } from './ui_settings';
 
 export type {
@@ -397,7 +396,7 @@ export type {
 } from './deprecations';
 
 export type { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 
 export type {
   SavedObject,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import moment from 'moment-timezone';
 import { TransformListRow } from '../../../../common';
@@ -35,26 +35,32 @@ describe('Transform: Transform List <ExpandedRow />', () => {
     // @ts-expect-error mock data is too loosely typed
     const item: TransformListRow = transformListRow;
 
-    const { getByText, getByTestId } = render(
+    render(
       <MlSharedContext.Provider value={mlShared}>
         <ExpandedRow item={item} />
       </MlSharedContext.Provider>
     );
 
-    expect(getByText('Details')).toBeInTheDocument();
-    expect(getByText('Stats')).toBeInTheDocument();
-    expect(getByText('JSON')).toBeInTheDocument();
-    expect(getByText('Messages')).toBeInTheDocument();
-    expect(getByText('Preview')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Details')).toBeInTheDocument();
+      expect(screen.getByText('Stats')).toBeInTheDocument();
+      expect(screen.getByText('JSON')).toBeInTheDocument();
+      expect(screen.getByText('Messages')).toBeInTheDocument();
+      expect(screen.getByText('Preview')).toBeInTheDocument();
 
-    const tabContent = getByTestId('transformDetailsTabContent');
-    expect(tabContent).toBeInTheDocument();
+      const tabContent = screen.getByTestId('transformDetailsTabContent');
+      expect(tabContent).toBeInTheDocument();
 
-    expect(getByTestId('transformDetailsTab')).toHaveAttribute('aria-selected', 'true');
-    expect(within(tabContent).getByText('General')).toBeInTheDocument();
+      expect(screen.getByTestId('transformDetailsTab')).toHaveAttribute('aria-selected', 'true');
+      expect(within(tabContent).getByText('General')).toBeInTheDocument();
+    });
 
-    fireEvent.click(getByTestId('transformStatsTab'));
-    expect(getByTestId('transformStatsTab')).toHaveAttribute('aria-selected', 'true');
-    expect(within(tabContent).getByText('Stats')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('transformStatsTab'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformStatsTab')).toHaveAttribute('aria-selected', 'true');
+      const tabContent = screen.getByTestId('transformDetailsTabContent');
+      expect(within(tabContent).getByText('Stats')).toBeInTheDocument();
+    });
   });
 });

@@ -8,12 +8,13 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
-import { mockUrlStorage, mockUseValuesList, render } from '../../rtl_helpers';
+import { mockAppIndexPattern, mockUseValuesList, render } from '../../rtl_helpers';
 import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
   it('should render properly', async function () {
-    mockUrlStorage({ filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] });
+    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
+    mockAppIndexPattern();
 
     render(
       <FilterExpanded
@@ -21,13 +22,15 @@ describe('FilterExpanded', function () {
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         goBack={jest.fn()}
-      />
+        filters={[]}
+      />,
+      { initSeries }
     );
 
     screen.getByText('Browser Family');
   });
   it('should call go back on click', async function () {
-    mockUrlStorage({ filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] });
+    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
     const goBack = jest.fn();
 
     render(
@@ -36,7 +39,9 @@ describe('FilterExpanded', function () {
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         goBack={goBack}
-      />
+        filters={[]}
+      />,
+      { initSeries }
     );
 
     fireEvent.click(screen.getByText('Browser Family'));
@@ -46,9 +51,12 @@ describe('FilterExpanded', function () {
   });
 
   it('should call useValuesList on load', async function () {
-    mockUrlStorage({ filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] });
+    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
 
-    const { spy } = mockUseValuesList(['Chrome', 'Firefox']);
+    const { spy } = mockUseValuesList([
+      { label: 'Chrome', count: 10 },
+      { label: 'Firefox', count: 5 },
+    ]);
 
     const goBack = jest.fn();
 
@@ -58,7 +66,9 @@ describe('FilterExpanded', function () {
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         goBack={goBack}
-      />
+        filters={[]}
+      />,
+      { initSeries }
     );
 
     expect(spy).toHaveBeenCalledTimes(1);
@@ -70,9 +80,12 @@ describe('FilterExpanded', function () {
     );
   });
   it('should filter display values', async function () {
-    mockUrlStorage({ filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] });
+    const initSeries = { filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] };
 
-    mockUseValuesList(['Chrome', 'Firefox']);
+    mockUseValuesList([
+      { label: 'Chrome', count: 10 },
+      { label: 'Firefox', count: 5 },
+    ]);
 
     render(
       <FilterExpanded
@@ -80,7 +93,9 @@ describe('FilterExpanded', function () {
         label={'Browser Family'}
         field={USER_AGENT_NAME}
         goBack={jest.fn()}
-      />
+        filters={[]}
+      />,
+      { initSeries }
     );
 
     expect(screen.queryByText('Firefox')).toBeTruthy();

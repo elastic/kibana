@@ -11,7 +11,7 @@ import { ReactWrapper } from 'enzyme';
 import { PalettePicker, PalettePickerProps } from './palette_picker';
 import { chartPluginMock } from '../../../../charts/public/mocks';
 import { EuiColorPalettePicker } from '@elastic/eui';
-import { PALETTES } from '../../../common/types';
+import { PALETTES } from '../../../common/enums';
 
 describe('PalettePicker', function () {
   let props: PalettePickerProps;

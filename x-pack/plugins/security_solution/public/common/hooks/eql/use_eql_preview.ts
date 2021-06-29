@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import * as i18n from '../translations';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -24,7 +25,6 @@ import { formatInspect, getEqlAggsData } from './helpers';
 import { EqlPreviewResponse, EqlPreviewRequest, Source } from './types';
 import { hasEqlSequenceQuery } from '../../../../common/detection_engine/utils';
 import { EqlSearchResponse } from '../../../../common/detection_engine/types';
-import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { inputsModel } from '../../../common/store';
 import { EQL_SEARCH_STRATEGY } from '../../../../../data_enhanced/public';
 import { useAppToasts } from '../use_app_toasts';

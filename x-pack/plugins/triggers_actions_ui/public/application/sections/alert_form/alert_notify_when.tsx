@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -39,7 +39,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     ),
     'data-test-subj': 'onActionGroupChange',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
             defaultMessage="Only on status change"
@@ -54,7 +54,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
   {
@@ -67,7 +67,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     ),
     'data-test-subj': 'onActiveAlert',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
             defaultMessage="Every time alert is active"
@@ -82,7 +82,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
   {
@@ -95,7 +95,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     ),
     'data-test-subj': 'onThrottleInterval',
     dropdownDisplay: (
-      <Fragment>
+      <>
         <strong>
           <FormattedMessage
             defaultMessage="On a custom action interval"
@@ -110,7 +110,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
             />
           </p>
         </EuiText>
-      </Fragment>
+      </>
     ),
   },
 ];
@@ -173,7 +173,7 @@ export const AlertNotifyWhen = ({
   );
 
   return (
-    <Fragment>
+    <>
       <EuiFormRow fullWidth label={labelForAlertRenotify}>
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
@@ -184,7 +184,7 @@ export const AlertNotifyWhen = ({
               onChange={onNotifyWhenValueChange}
             />
             {showCustomThrottleOpts && (
-              <Fragment>
+              <>
                 <EuiSpacer />
                 <EuiFormRow fullWidth>
                   <EuiFlexGroup gutterSize="s">
@@ -227,11 +227,11 @@ export const AlertNotifyWhen = ({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFormRow>
-              </Fragment>
+              </>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-    </Fragment>
+    </>
   );
 };

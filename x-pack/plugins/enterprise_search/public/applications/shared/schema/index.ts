@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { SchemaAddFieldModal } from './schema_add_field_modal';
-export { SchemaExistingField } from './schema_existing_field';
+export { SchemaAddFieldModal } from './add_field_modal';
+export { SchemaFieldTypeSelect } from './field_type_select';
+export { SchemaErrorsCallout } from './errors_callout';
+export { SchemaErrorsAccordion } from './errors_accordion';

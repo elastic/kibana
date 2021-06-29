@@ -107,10 +107,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   const preconfiguredPolicies = await Promise.allSettled(
     policies.map(async (preconfiguredAgentPolicy) => {
       if (preconfiguredAgentPolicy.id) {
-        // Check to see if a preconfigured policy with the same preconfigurationId was already deleted by the user
-        const preconfigurationId = String(preconfiguredAgentPolicy.id);
+        // Check to see if a preconfigured policy with the same preconfiguration id was already deleted by the user
+        const preconfigurationId = preconfiguredAgentPolicy.id.toString();
         const searchParams = {
-          searchFields: ['preconfiguration_id'],
+          searchFields: ['id'],
           search: escapeSearchQueryPhrase(preconfigurationId),
         };
         const deletionRecords = await soClient.find({
@@ -285,6 +285,8 @@ function overridePackageInputs(
     }
 
     if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
+    if (typeof override.keep_enabled !== 'undefined')
+      originalInput.keep_enabled = override.keep_enabled;
 
     if (override.vars) {
       try {
@@ -371,6 +373,11 @@ function deepMergeVars(
       throw new Error(name);
     }
     const originalVar = original.vars[name];
-    Reflect.set(original.vars, name, { ...originalVar, ...val });
+    const newVar =
+      // If a single value was passed in to a multi field, ensure it gets converted to a multi
+      Array.isArray(originalVar.value) && !Array.isArray(val.value)
+        ? { ...val, value: [val.value] }
+        : val;
+    Reflect.set(original.vars, name, { ...originalVar, ...newVar });
   }
 }

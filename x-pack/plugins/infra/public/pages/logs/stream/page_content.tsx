@@ -6,29 +6,60 @@
  */
 
 import React from 'react';
-import { SourceErrorPage } from '../../../components/source_error_page';
+import { i18n } from '@kbn/i18n';
+import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogsPageLogsContent } from './page_logs_content';
 import { LogsPageNoIndicesContent } from './page_no_indices_content';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { LogsPageTemplate } from '../page_template';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
+
+const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
+  defaultMessage: 'Stream',
+});
 
 export const StreamPageContent: React.FunctionComponent = () => {
   const {
-    hasFailedLoadingSource,
+    hasFailedLoading,
     isLoading,
     isUninitialized,
     loadSource,
-    loadSourceFailureMessage,
+    latestLoadSourceFailures,
     sourceStatus,
   } = useLogSourceContext();
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
-  } else if (hasFailedLoadingSource) {
-    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
+  } else if (hasFailedLoading) {
+    return <LogSourceErrorPage errors={latestLoadSourceFailures} onRetry={loadSource} />;
   } else if (sourceStatus?.logIndexStatus !== 'missing') {
-    return <LogsPageLogsContent />;
+    return (
+      <LogStreamPageWrapper className={APP_WRAPPER_CLASS}>
+        <LogsPageTemplate
+          pageHeader={{
+            pageTitle: streamTitle,
+          }}
+        >
+          <LogsPageLogsContent />
+        </LogsPageTemplate>
+      </LogStreamPageWrapper>
+    );
   } else {
     return <LogsPageNoIndicesContent />;
   }
 };
+
+// This is added to facilitate a full height layout whereby the
+// inner container will set it's own height and be scrollable.
+// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
+export const LogStreamPageWrapper = euiStyled.div`
+  .euiPage .euiPageContentBody {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 auto;
+    width: 100%;
+    height: 100%;
+  }
+`;

@@ -8,6 +8,8 @@
 
 import React, { Component } from 'react';
 
+import { NotificationsSetup } from 'src/core/public';
+
 import { EuiIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,7 +19,7 @@ interface Props {
   getCurl: () => Promise<string>;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev: React.MouseEvent) => void;
-  addNotification?: (opts: { title: string }) => void;
+  notifications: NotificationsSetup;
 }
 
 interface State {
@@ -42,25 +44,30 @@ export class ConsoleMenu extends Component<Props, State> {
     });
   };
 
-  copyAsCurl() {
-    this.copyText(this.state.curlCode);
-    const { addNotification } = this.props;
-    if (addNotification) {
-      addNotification({
+  async copyAsCurl() {
+    const { notifications } = this.props;
+    try {
+      await this.copyText(this.state.curlCode);
+      notifications.toasts.add({
         title: i18n.translate('console.consoleMenu.copyAsCurlMessage', {
           defaultMessage: 'Request copied as cURL',
+        }),
+      });
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: i18n.translate('console.consoleMenu.copyAsCurlFailedMessage', {
+          defaultMessage: 'Could not copy request as cURL',
         }),
       });
     }
   }
 
-  copyText(text: string) {
-    const textField = document.createElement('textarea');
-    textField.innerText = text;
-    document.body.appendChild(textField);
-    textField.select();
-    document.execCommand('copy');
-    textField.remove();
+  async copyText(text: string) {
+    if (window.navigator?.clipboard) {
+      await window.navigator.clipboard.writeText(text);
+      return;
+    }
+    throw new Error('Could not copy to clipboard!');
   }
 
   onButtonClick = () => {
@@ -107,7 +114,7 @@ export class ConsoleMenu extends Component<Props, State> {
       <EuiContextMenuItem
         key="Copy as cURL"
         id="ConCopyAsCurl"
-        disabled={!document.queryCommandSupported('copy')}
+        disabled={!window.navigator?.clipboard}
         onClick={() => {
           this.closePopover();
           this.copyAsCurl();

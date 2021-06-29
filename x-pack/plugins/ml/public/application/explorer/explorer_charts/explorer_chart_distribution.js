@@ -62,7 +62,7 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService, timeBuckets } = this.props;
+    const { tooManyBuckets, tooltipService, timeBuckets, showSelectedInterval } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -357,6 +357,7 @@ export class ExplorerChartDistribution extends React.Component {
     }
 
     function drawRareChartHighlightedSpan() {
+      if (showSelectedInterval === false) return;
       // Draws a rectangle which highlights the time span that has been selected for view.
       // Note depending on the overall time range and the bucket span, the selected time
       // span may be longer than the range actually being plotted.

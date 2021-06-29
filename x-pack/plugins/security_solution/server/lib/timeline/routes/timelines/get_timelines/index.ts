@@ -10,13 +10,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { TIMELINES_URL } from '../../../../../../common/constants';
 
 import { ConfigType } from '../../../../..';
 import { SetupPlugins } from '../../../../../plugin';
 
-import { buildSiemResponse, transformError } from '../../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/common';
 import { getAllTimeline } from '../../../saved_object/timelines';

@@ -14,7 +14,7 @@ import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
 
-const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.settingsLink', {
+const SETTINGS_LINK_TEXT = i18n.translate('xpack.uptime.page_header.defineConnector.settings', {
   defaultMessage: 'Settings',
 });
 
@@ -33,6 +33,7 @@ export const DefineAlertConnectors = () => {
                 <ReactRouterEuiLink
                   to={SETTINGS_ROUTE + '?focusConnectorField=true'}
                   data-test-subj={'uptimeSettingsLink'}
+                  target="_blank"
                 >
                   {SETTINGS_LINK_TEXT}
                 </ReactRouterEuiLink>
@@ -47,6 +48,7 @@ export const DefineAlertConnectors = () => {
         label={ENABLE_STATUS_ALERT}
         showLabel={!!isMonitorPage}
         aria-label={ENABLE_STATUS_ALERT}
+        // this switch is read only, no onChange applied
         onChange={() => {}}
         checked={false}
         compressed={true}

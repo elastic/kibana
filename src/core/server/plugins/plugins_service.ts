@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import { Observable } from 'rxjs';
-import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
+import { filter, first, map, concatMap, tap, toArray } from 'rxjs/operators';
 import { pick, getFlattenedObject } from '@kbn/std';
 
 import { CoreService } from '../../types';
@@ -206,7 +206,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     >();
     await plugin$
       .pipe(
-        mergeMap(async (plugin) => {
+        concatMap(async (plugin) => {
           const configDescriptor = plugin.getConfigDescriptor();
           if (configDescriptor) {
             this.pluginConfigDescriptors.set(plugin.name, configDescriptor);

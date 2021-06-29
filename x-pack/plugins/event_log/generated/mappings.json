@@ -237,6 +237,16 @@
                     "type": "keyword",
                     "ignore_above": 1024
                 },
+                "task": {
+                    "properties": {
+                        "scheduled": {
+                            "type": "date"
+                        },
+                        "schedule_delay": {
+                            "type": "long"
+                        }
+                    }
+                },
                 "alerting": {
                     "properties": {
                         "instance_id": {
@@ -273,6 +283,10 @@
                             "ignore_above": 1024
                         },
                         "type": {
+                            "type": "keyword",
+                            "ignore_above": 1024
+                        },
+                        "type_id": {
                             "type": "keyword",
                             "ignore_above": 1024
                         }

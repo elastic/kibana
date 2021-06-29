@@ -16,8 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.loadIfNeeded('discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });

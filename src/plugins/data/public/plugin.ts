@@ -16,7 +16,6 @@ import {
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
-  DataPublicPluginEnhancements,
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
@@ -122,9 +121,6 @@ export class DataPublicPlugin
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
-      __enhance: (enhancements: DataPublicPluginEnhancements) => {
-        searchService.__enhance(enhancements.search);
-      },
     };
   }
 

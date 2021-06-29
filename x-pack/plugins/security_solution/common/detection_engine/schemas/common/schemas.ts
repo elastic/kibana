@@ -8,21 +8,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
 
 import {
-  SavedObjectAttributes,
-  SavedObjectAttribute,
-  SavedObjectAttributeSingle,
-} from 'src/core/types';
-import { RiskScore } from '../types/risk_score';
-import { UUID } from '../types/uuid';
-import { IsoDateString } from '../types/iso_date_string';
-import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
-import { PositiveInteger } from '../types/positive_integer';
-import { NonEmptyString } from '../types/non_empty_string';
-import { parseScheduleDates } from '../../parse_schedule_dates';
-import { machine_learning_job_id_normalized } from '../types/normalized_ml_job_id';
+  UUID,
+  NonEmptyString,
+  IsoDateString,
+  PositiveIntegerGreaterThanZero,
+  PositiveInteger,
+} from '@kbn/securitysolution-io-ts-types';
 
 export const author = t.array(t.string);
 export type Author = t.TypeOf<typeof author>;
@@ -76,68 +69,6 @@ export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-a
 export const filtersOrUndefined = t.union([filters, t.undefined]);
 export type FiltersOrUndefined = t.TypeOf<typeof filtersOrUndefined>;
 
-export const saved_object_attribute_single: t.Type<SavedObjectAttributeSingle> = t.recursion(
-  'saved_object_attribute_single',
-  () => t.union([t.string, t.number, t.boolean, t.null, t.undefined, saved_object_attributes])
-);
-export const saved_object_attribute: t.Type<SavedObjectAttribute> = t.recursion(
-  'saved_object_attribute',
-  () => t.union([saved_object_attribute_single, t.array(saved_object_attribute_single)])
-);
-export const saved_object_attributes: t.Type<SavedObjectAttributes> = t.recursion(
-  'saved_object_attributes',
-  () => t.record(t.string, saved_object_attribute)
-);
-
-/**
- * Params is an "object", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/alert.ts
- */
-export const action_group = t.string;
-export const action_id = t.string;
-export const action_action_type_id = t.string;
-export const action_params = saved_object_attributes;
-export const action = t.exact(
-  t.type({
-    group: action_group,
-    id: action_id,
-    action_type_id: action_action_type_id,
-    params: action_params,
-  })
-);
-
-export const actions = t.array(action);
-export type Actions = t.TypeOf<typeof actions>;
-
-export const actionsCamel = t.array(
-  t.exact(
-    t.type({
-      group: action_group,
-      id: action_id,
-      actionTypeId: action_action_type_id,
-      params: action_params,
-    })
-  )
-);
-export type ActionsCamel = t.TypeOf<typeof actions>;
-
-const stringValidator = (input: unknown): input is string => typeof input === 'string';
-export const from = new t.Type<string, string, unknown>(
-  'From',
-  t.string.is,
-  (input, context): Either<t.Errors, string> => {
-    if (stringValidator(input) && parseScheduleDates(input) == null) {
-      return t.failure(input, context, 'Failed to parse "from" on rule param');
-    }
-    return t.string.validate(input, context);
-  },
-  t.identity
-);
-export type From = t.TypeOf<typeof from>;
-
-export const fromOrUndefined = t.union([from, t.undefined]);
-export type FromOrUndefined = t.TypeOf<typeof fromOrUndefined>;
-
 export const immutable = t.boolean;
 export type Immutable = t.TypeOf<typeof immutable>;
 
@@ -151,6 +82,8 @@ export const ruleIdOrUndefined = t.union([rule_id, t.undefined]);
 export type RuleIdOrUndefined = t.TypeOf<typeof ruleIdOrUndefined>;
 
 export const id = UUID;
+export type Id = t.TypeOf<typeof id>;
+
 export const idOrUndefined = t.union([id, t.undefined]);
 export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;
 
@@ -171,12 +104,6 @@ export type Query = t.TypeOf<typeof query>;
 
 export const queryOrUndefined = t.union([query, t.undefined]);
 export type QueryOrUndefined = t.TypeOf<typeof queryOrUndefined>;
-
-export const language = t.keyof({ eql: null, kuery: null, lucene: null });
-export type Language = t.TypeOf<typeof language>;
-
-export const languageOrUndefined = t.union([language, t.undefined]);
-export type LanguageOrUndefined = t.TypeOf<typeof languageOrUndefined>;
 
 export const license = t.string;
 export type License = t.TypeOf<typeof license>;
@@ -216,26 +143,11 @@ export type TimestampOverride = t.TypeOf<typeof timestamp_override>;
 export const timestampOverrideOrUndefined = t.union([timestamp_override, t.undefined]);
 export type TimestampOverrideOrUndefined = t.TypeOf<typeof timestampOverrideOrUndefined>;
 
-export const throttle = t.string;
-export type Throttle = t.TypeOf<typeof throttle>;
-
-export const throttleOrNull = t.union([throttle, t.null]);
-export type ThrottleOrNull = t.TypeOf<typeof throttleOrNull>;
-
-export const throttleOrNullOrUndefined = t.union([throttle, t.null, t.undefined]);
-export type ThrottleOrUndefinedOrNull = t.TypeOf<typeof throttleOrNullOrUndefined>;
-
 export const anomaly_threshold = PositiveInteger;
 export type AnomalyThreshold = t.TypeOf<typeof PositiveInteger>;
 
 export const anomalyThresholdOrUndefined = t.union([anomaly_threshold, t.undefined]);
 export type AnomalyThresholdOrUndefined = t.TypeOf<typeof anomalyThresholdOrUndefined>;
-
-export const machine_learning_job_id = t.union([t.string, machine_learning_job_id_normalized]);
-export type MachineLearningJobId = t.TypeOf<typeof machine_learning_job_id>;
-
-export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id, t.undefined]);
-export type MachineLearningJobIdOrUndefined = t.TypeOf<typeof machineLearningJobIdOrUndefined>;
 
 /**
  * Note that this is a non-exact io-ts type as we allow extra meta information
@@ -246,78 +158,17 @@ export type Meta = t.TypeOf<typeof meta>;
 export const metaOrUndefined = t.union([meta, t.undefined]);
 export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
-export const max_signals = PositiveIntegerGreaterThanZero;
-export type MaxSignals = t.TypeOf<typeof max_signals>;
-
-export const maxSignalsOrUndefined = t.union([max_signals, t.undefined]);
-export type MaxSignalsOrUndefined = t.TypeOf<typeof maxSignalsOrUndefined>;
-
 export const name = NonEmptyString;
 export type Name = t.TypeOf<typeof name>;
 
 export const nameOrUndefined = t.union([name, t.undefined]);
 export type NameOrUndefined = t.TypeOf<typeof nameOrUndefined>;
 
-export const operator = t.keyof({
-  equals: null,
-});
-export type Operator = t.TypeOf<typeof operator>;
-export enum OperatorEnum {
-  EQUALS = 'equals',
-}
-
-export const risk_score = RiskScore;
-export type RiskScore = t.TypeOf<typeof risk_score>;
-
-export const riskScoreOrUndefined = t.union([risk_score, t.undefined]);
-export type RiskScoreOrUndefined = t.TypeOf<typeof riskScoreOrUndefined>;
-
-export const risk_score_mapping_field = t.string;
-export const risk_score_mapping_value = t.string;
-export const risk_score_mapping_item = t.exact(
-  t.type({
-    field: risk_score_mapping_field,
-    value: risk_score_mapping_value,
-    operator,
-    risk_score: riskScoreOrUndefined,
-  })
-);
-
-export const risk_score_mapping = t.array(risk_score_mapping_item);
-export type RiskScoreMapping = t.TypeOf<typeof risk_score_mapping>;
-
-export const riskScoreMappingOrUndefined = t.union([risk_score_mapping, t.undefined]);
-export type RiskScoreMappingOrUndefined = t.TypeOf<typeof riskScoreMappingOrUndefined>;
-
 export const rule_name_override = t.string;
 export type RuleNameOverride = t.TypeOf<typeof rule_name_override>;
 
 export const ruleNameOverrideOrUndefined = t.union([rule_name_override, t.undefined]);
 export type RuleNameOverrideOrUndefined = t.TypeOf<typeof ruleNameOverrideOrUndefined>;
-
-export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
-export type Severity = t.TypeOf<typeof severity>;
-
-export const severityOrUndefined = t.union([severity, t.undefined]);
-export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
-
-export const severity_mapping_field = t.string;
-export const severity_mapping_value = t.string;
-export const severity_mapping_item = t.exact(
-  t.type({
-    field: severity_mapping_field,
-    operator,
-    value: severity_mapping_value,
-    severity,
-  })
-);
-export type SeverityMappingItem = t.TypeOf<typeof severity_mapping_item>;
-
-export const severity_mapping = t.array(severity_mapping_item);
-export type SeverityMapping = t.TypeOf<typeof severity_mapping>;
-
-export const severityMappingOrUndefined = t.union([severity_mapping, t.undefined]);
-export type SeverityMappingOrUndefined = t.TypeOf<typeof severityMappingOrUndefined>;
 
 export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
@@ -340,19 +191,6 @@ export type To = t.TypeOf<typeof to>;
 
 export const toOrUndefined = t.union([to, t.undefined]);
 export type ToOrUndefined = t.TypeOf<typeof toOrUndefined>;
-
-export const type = t.keyof({
-  eql: null,
-  machine_learning: null,
-  query: null,
-  saved_query: null,
-  threshold: null,
-  threat_match: null,
-});
-export type Type = t.TypeOf<typeof type>;
-
-export const typeOrUndefined = t.union([type, t.undefined]);
-export type TypeOrUndefined = t.TypeOf<typeof typeOrUndefined>;
 
 export const queryFilter = t.string;
 export type QueryFilter = t.TypeOf<typeof queryFilter>;
@@ -407,66 +245,6 @@ export type Fields = t.TypeOf<typeof fields>;
 export const fieldsOrUndefined = t.union([fields, t.undefined]);
 export type FieldsOrUndefined = t.TypeOf<typeof fieldsOrUndefined>;
 
-export const threat_framework = t.string;
-export const threat_tactic_id = t.string;
-export const threat_tactic_name = t.string;
-export const threat_tactic_reference = t.string;
-export const threat_tactic = t.type({
-  id: threat_tactic_id,
-  name: threat_tactic_name,
-  reference: threat_tactic_reference,
-});
-export type ThreatTactic = t.TypeOf<typeof threat_tactic>;
-export const threat_subtechnique_id = t.string;
-export const threat_subtechnique_name = t.string;
-export const threat_subtechnique_reference = t.string;
-export const threat_subtechnique = t.type({
-  id: threat_subtechnique_id,
-  name: threat_subtechnique_name,
-  reference: threat_subtechnique_reference,
-});
-export type ThreatSubtechnique = t.TypeOf<typeof threat_subtechnique>;
-export const threat_subtechniques = t.array(threat_subtechnique);
-export const threat_technique_id = t.string;
-export const threat_technique_name = t.string;
-export const threat_technique_reference = t.string;
-export const threat_technique = t.intersection([
-  t.exact(
-    t.type({
-      id: threat_technique_id,
-      name: threat_technique_name,
-      reference: threat_technique_reference,
-    })
-  ),
-  t.exact(
-    t.partial({
-      subtechnique: threat_subtechniques,
-    })
-  ),
-]);
-export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
-export const threat_techniques = t.array(threat_technique);
-export const threat = t.intersection([
-  t.exact(
-    t.type({
-      framework: threat_framework,
-      tactic: threat_tactic,
-    })
-  ),
-  t.exact(
-    t.partial({
-      technique: threat_techniques,
-    })
-  ),
-]);
-export type Threat = t.TypeOf<typeof threat>;
-
-export const threats = t.array(threat);
-export type Threats = t.TypeOf<typeof threats>;
-
-export const threatsOrUndefined = t.union([threats, t.undefined]);
-export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
-
 export const thresholdField = t.exact(
   t.type({
     field: t.union([t.string, t.array(t.string)]), // Covers pre- and post-7.12
@@ -518,19 +296,17 @@ export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.un
 export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
 export const created_at = IsoDateString;
+
 export const updated_at = IsoDateString;
+
 export const updated_by = t.string;
+
 export const created_by = t.string;
+
 export const updatedByOrNull = t.union([updated_by, t.null]);
 export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
 export const createdByOrNull = t.union([created_by, t.null]);
 export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
-
-export const version = PositiveIntegerGreaterThanZero;
-export type Version = t.TypeOf<typeof version>;
-
-export const versionOrUndefined = t.union([version, t.undefined]);
-export type VersionOrUndefined = t.TypeOf<typeof versionOrUndefined>;
 
 export const last_success_at = IsoDateString;
 export type LastSuccessAt = t.TypeOf<typeof IsoDateString>;
@@ -634,3 +410,13 @@ export const privilege = t.type({
 });
 
 export type Privilege = t.TypeOf<typeof privilege>;
+
+export enum BulkAction {
+  'enable' = 'enable',
+  'disable' = 'disable',
+  'export' = 'export',
+  'delete' = 'delete',
+  'duplicate' = 'duplicate',
+}
+
+export const bulkAction = t.keyof(BulkAction);

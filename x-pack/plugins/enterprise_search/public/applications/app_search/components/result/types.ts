@@ -7,9 +7,9 @@
 
 import { EuiButtonIconColor } from '@elastic/eui';
 
-import { InternalSchemaTypes, SchemaTypes } from '../../../shared/types';
+import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
 
-export type FieldType = InternalSchemaTypes | SchemaTypes;
+export type FieldType = InternalSchemaType | SchemaType;
 
 export type Raw = string | string[] | number | number[];
 export type Snippet = string;

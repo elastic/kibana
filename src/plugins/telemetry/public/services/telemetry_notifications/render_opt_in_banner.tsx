@@ -13,7 +13,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 
 interface RenderBannerConfig {
   overlays: CoreStart['overlays'];
-  setOptIn: (isOptIn: boolean) => Promise<any>;
+  setOptIn: (isOptIn: boolean) => Promise<unknown>;
 }
 
 export function renderOptInBanner({ setOptIn, overlays }: RenderBannerConfig) {

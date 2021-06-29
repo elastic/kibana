@@ -66,7 +66,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
   return (
     <>
-      {menuItems.length > 0 && (
+      {menuItems.length > 0 && chartsCount > 0 && (
         <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={

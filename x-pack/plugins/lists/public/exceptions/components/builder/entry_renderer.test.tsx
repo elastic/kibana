@@ -9,7 +9,6 @@ import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/dom';
-
 import {
   doesNotExistOperator,
   existsOperator,
@@ -19,7 +18,9 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
-} from '../autocomplete/operators';
+} from '@kbn/securitysolution-list-utils';
+import { useFindLists } from '@kbn/securitysolution-list-hooks';
+
 import {
   fields,
   getField,
@@ -27,11 +28,10 @@ import {
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
-import { useFindLists } from '../../../lists/hooks/use_find_lists';
 
 import { BuilderEntryItem } from './entry_renderer';
 
-jest.mock('../../../lists/hooks/use_find_lists');
+jest.mock('@kbn/securitysolution-list-hooks');
 
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
@@ -228,6 +228,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
@@ -264,6 +265,7 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isNotInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        allowLargeValueLists
         autocompleteService={autocompleteStartMock}
         entry={{
           correspondingKeywordField: undefined,
@@ -703,5 +705,44 @@ describe('BuilderEntryItem', () => {
     });
 
     expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+  });
+
+  test('it disabled field inputs correctly when passed "isDisabled=true"', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOneOfOperator,
+          parent: undefined,
+          value: ['1234'],
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        osTypes={['windows']}
+        showLabel={false}
+        isDisabled={true}
+      />
+    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().disabled
+    ).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().disabled
+    ).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"] input').props().disabled
+    ).toBeTruthy();
   });
 });

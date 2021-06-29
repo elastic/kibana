@@ -7,7 +7,7 @@
     "outDir": "target",
     "rootDir": "src",
     "sourceMap": true,
-    "sourceRoot": "../../../../../packages/kbn-config-schema/src",
+    "sourceRoot": "../../../../packages/kbn-config-schema/src",
     "stripInternal": true,
     "types": [
       "jest",

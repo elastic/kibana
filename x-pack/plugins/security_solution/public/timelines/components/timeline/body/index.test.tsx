@@ -17,14 +17,13 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { BodyComponent, StatefulBodyProps } from '.';
 import { Sort } from './sort';
+import { defaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+jest.mock('../../../../common/lib/kibana');
 
 const mockSort: Sort[] = [
   {
@@ -90,9 +89,9 @@ describe('Body', () => {
     showCheckboxes: false,
     tabType: TimelineTabs.query,
     totalPages: 1,
+    leadingControlColumns: [defaultControlColumn],
+    trailingControlColumns: [],
   };
-
-  useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
   describe('rendering', () => {
     test('it renders the column headers', () => {
@@ -258,7 +257,7 @@ describe('Body', () => {
           tabType: 'query',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -282,7 +281,7 @@ describe('Body', () => {
           tabType: 'pinned',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -306,7 +305,7 @@ describe('Body', () => {
           tabType: 'notes',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
       });
     });
   });

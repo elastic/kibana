@@ -12,17 +12,16 @@ export default function statusPageFunctonalTests({
   getPageObjects,
 }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['security', 'statusPage', 'home']);
+  const PageObjects = getPageObjects(['security', 'statusPage', 'common']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/50448
-  describe.skip('Status Page', function () {
+  describe('Status Page', function () {
     this.tags(['skipCloud', 'includeFirefox']);
-    before(async () => await esArchiver.load('empty_kibana'));
-    after(async () => await esArchiver.unload('empty_kibana'));
+    before(async () => await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana'));
+    after(async () => await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana'));
 
     it('allows user to navigate without authentication', async () => {
       await PageObjects.security.forceLogout();
-      await PageObjects.statusPage.navigateToPage();
+      await PageObjects.common.navigateToApp('status_page', { shouldLoginIfPrompted: false });
       await PageObjects.statusPage.expectStatusPage();
     });
   });

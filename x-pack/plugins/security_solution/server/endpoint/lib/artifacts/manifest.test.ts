@@ -27,24 +27,28 @@ describe('manifest', () => {
   let ARTIFACTS_COPY: InternalArtifactCompleteSchema[] = [];
   let ARTIFACT_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_EXCEPTIONS_LINUX: InternalArtifactCompleteSchema;
   let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
   let ARTIFACT_COPY_EXCEPTIONS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_COPY_EXCEPTIONS_WINDOWS: InternalArtifactCompleteSchema;
+  let ARTIFACT_COPY_EXCEPTIONS_LINUX: InternalArtifactCompleteSchema;
   let ARTIFACT_COPY_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_COPY_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
   beforeAll(async () => {
-    ARTIFACTS = await getMockArtifacts({ compress: true });
-    ARTIFACTS_COPY = await getMockArtifacts({ compress: true });
+    ARTIFACTS = await getMockArtifacts();
+    ARTIFACTS_COPY = await getMockArtifacts();
     ARTIFACT_EXCEPTIONS_MACOS = ARTIFACTS[0];
     ARTIFACT_EXCEPTIONS_WINDOWS = ARTIFACTS[1];
-    ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[2];
-    ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[3];
+    ARTIFACT_EXCEPTIONS_LINUX = ARTIFACTS[2];
+    ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[3];
+    ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[4];
     ARTIFACT_COPY_EXCEPTIONS_MACOS = ARTIFACTS_COPY[0];
     ARTIFACT_COPY_EXCEPTIONS_WINDOWS = ARTIFACTS_COPY[1];
-    ARTIFACT_COPY_TRUSTED_APPS_MACOS = ARTIFACTS_COPY[2];
-    ARTIFACT_COPY_TRUSTED_APPS_WINDOWS = ARTIFACTS_COPY[3];
+    ARTIFACT_COPY_EXCEPTIONS_LINUX = ARTIFACTS_COPY[2];
+    ARTIFACT_COPY_TRUSTED_APPS_MACOS = ARTIFACTS_COPY[3];
+    ARTIFACT_COPY_TRUSTED_APPS_WINDOWS = ARTIFACTS_COPY[4];
   });
 
   describe('Manifest constructor', () => {
@@ -139,12 +143,13 @@ describe('manifest', () => {
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
       manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_LINUX);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_WINDOWS);
 
-      expect(manifest.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 4));
+      expect(manifest.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(0, 5));
       expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_MACOS)).toBe(true);
       expect(manifest.isDefaultArtifact(ARTIFACT_EXCEPTIONS_WINDOWS)).toBe(false);
       expect(manifest.isDefaultArtifact(ARTIFACT_TRUSTED_APPS_MACOS)).toBe(true);
@@ -372,10 +377,11 @@ describe('manifest', () => {
 
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest.addEntry(ARTIFACT_EXCEPTIONS_LINUX);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
       expect(manifest.diff(Manifest.getDefault())).toStrictEqual({
-        additions: ARTIFACTS.slice(0, 3),
+        additions: ARTIFACTS.slice(0, 4),
         removals: [],
         transitions: [],
       });
@@ -516,6 +522,7 @@ describe('manifest', () => {
       manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       manifest1.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
       manifest1.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest1.addEntry(ARTIFACT_EXCEPTIONS_LINUX);
       manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_1);
       manifest1.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
@@ -524,6 +531,7 @@ describe('manifest', () => {
       // transition to default policy only
       manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_MACOS);
       manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
+      manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_LINUX);
       // transition to second policy
       manifest2.addEntry(ARTIFACT_COPY_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
       // transition to one policy only
@@ -532,7 +540,11 @@ describe('manifest', () => {
       expect(manifest2.diff(manifest1)).toStrictEqual({
         additions: [],
         removals: [],
-        transitions: ARTIFACTS_COPY.slice(0, 3),
+        transitions: [
+          ARTIFACT_EXCEPTIONS_MACOS,
+          ARTIFACT_COPY_EXCEPTIONS_WINDOWS,
+          ARTIFACT_COPY_TRUSTED_APPS_MACOS,
+        ],
       });
     });
 

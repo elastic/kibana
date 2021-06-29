@@ -13,8 +13,15 @@ import { INDICATOR_MATCH_SUBFIELDS } from '../../../../../../../common/cti/const
 import { Ecs } from '../../../../../../../common/ecs';
 import { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
 
-const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] =>
-  get(data, INDICATOR_DESTINATION_PATH) ?? [];
+const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] => {
+  const threatData = get(data, INDICATOR_DESTINATION_PATH);
+  if (threatData == null) {
+    return [];
+  } else if (!Array.isArray(threatData)) {
+    return [threatData];
+  }
+  return threatData;
+};
 
 export const hasThreatMatchValue = (data: Ecs): boolean =>
   getIndicatorEcs(data).some((indicator) =>

@@ -11,7 +11,7 @@ import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 import { AbstractTMSSource } from '../tms_source';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty } from '../source';
+import { ImmutableSourceProperty } from '../source';
 import { XYZTMSSourceConfig } from './xyz_tms_editor';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.ems_xyzTitle', {
@@ -23,16 +23,10 @@ export class XYZTMSSource extends AbstractTMSSource {
 
   readonly _descriptor: XYZTMSSourceDescriptor;
 
-  static createDescriptor({
-    urlTemplate,
-    attributionText,
-    attributionUrl,
-  }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
+  static createDescriptor({ urlTemplate }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
     return {
       type: XYZTMSSource.type,
       urlTemplate,
-      attributionText,
-      attributionUrl,
     };
   }
 
@@ -50,19 +44,6 @@ export class XYZTMSSource extends AbstractTMSSource {
 
   async getDisplayName(): Promise<string> {
     return this._descriptor.urlTemplate;
-  }
-
-  async getAttributions(): Promise<Attribution[]> {
-    const { attributionText, attributionUrl } = this._descriptor;
-    const attributionComplete = !!attributionText && !!attributionUrl;
-    return attributionComplete
-      ? [
-          {
-            url: attributionUrl as string,
-            label: attributionText as string,
-          },
-        ]
-      : [];
   }
 
   async getUrlTemplate(): Promise<string> {

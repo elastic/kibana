@@ -16,16 +16,36 @@ const createSetupContract = (): Setup => {
     docViews: {
       addDocView: jest.fn(),
     },
+    locator: {
+      getLocation: jest.fn(),
+      getUrl: jest.fn(),
+      useUrl: jest.fn(),
+      navigate: jest.fn(),
+      extract: jest.fn(),
+      inject: jest.fn(),
+      telemetry: jest.fn(),
+      migrations: {},
+    },
   };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    savedSearchLoader: {} as any,
-    urlGenerator: {
+    savedSearchLoader: {} as DiscoverStart['savedSearchLoader'],
+    urlGenerator: ({
       createUrl: jest.fn(),
-    } as any,
+    } as unknown) as DiscoverStart['urlGenerator'],
+    locator: {
+      getLocation: jest.fn(),
+      getUrl: jest.fn(),
+      useUrl: jest.fn(),
+      navigate: jest.fn(),
+      extract: jest.fn(),
+      inject: jest.fn(),
+      telemetry: jest.fn(),
+      migrations: {},
+    },
   };
   return startContract;
 };

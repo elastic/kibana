@@ -23,7 +23,7 @@ const NANOS_IN_MILLIS = 1000 * 1000;
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -97,8 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(1);
-              const indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -119,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
                 spaceId: space.id,
                 connectorId: createdAction.id,
                 outcome: 'success',
+                actionTypeId: 'test.index-record',
                 message: `action executed: test.index-record:${createdAction.id}: My action`,
               });
               break;
@@ -249,8 +250,8 @@ export default function ({ getService }: FtrProviderContext) {
                 'action:test.index-record',
                 reference
               );
-              expect(searchResult.hits.total.value).to.eql(1);
-              const indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              const indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source).to.eql({
                 params: {
                   reference,
@@ -452,8 +453,8 @@ export default function ({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: false,
                 callScopedClusterSuccess: false,
@@ -476,8 +477,8 @@ export default function ({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-              expect(searchResult.hits.total.value).to.eql(1);
-              indexedRecord = searchResult.hits.hits[0];
+              expect(searchResult.body.hits.total.value).to.eql(1);
+              indexedRecord = searchResult.body.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: true,
                 callScopedClusterSuccess: true,
@@ -502,13 +503,14 @@ export default function ({ getService }: FtrProviderContext) {
   interface ValidateEventLogParams {
     spaceId: string;
     connectorId: string;
+    actionTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, connectorId, outcome, message, errorMessage } = params;
+    const { spaceId, connectorId, actionTypeId, outcome, message, errorMessage } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -517,46 +519,93 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'action',
         id: connectorId,
         provider: 'actions',
-        actions: new Map([['execute', { equal: 1 }]]),
-        filter: 'event.action:(execute)',
+        actions: new Map([
+          ['execute-start', { equal: 1 }],
+          ['execute', { equal: 1 }],
+        ]),
+        // filter: 'event.action:(execute)',
       });
     });
 
-    const event = events[0];
+    const startExecuteEvent = events[0];
+    const executeEvent = events[1];
 
-    const duration = event?.event?.duration;
-    const eventStart = Date.parse(event?.event?.start || 'undefined');
-    const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    const duration = executeEvent?.event?.duration;
+    const executeEventStart = Date.parse(executeEvent?.event?.start || 'undefined');
+    const startExecuteEventStart = Date.parse(startExecuteEvent?.event?.start || 'undefined');
+    const executeEventEnd = Date.parse(executeEvent?.event?.end || 'undefined');
     const dateNow = Date.now();
 
     expect(typeof duration).to.be('number');
-    expect(eventStart).to.be.ok();
-    expect(eventEnd).to.be.ok();
+    expect(executeEventStart).to.be.ok();
+    expect(startExecuteEventStart).to.equal(executeEventStart);
+    expect(executeEventEnd).to.be.ok();
 
     const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+      Math.round(duration! / NANOS_IN_MILLIS) - (executeEventEnd - executeEventStart)
     );
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);
-    expect(eventStart <= eventEnd).to.equal(true);
-    expect(eventEnd <= dateNow).to.equal(true);
+    expect(executeEventStart <= executeEventEnd).to.equal(true);
+    expect(executeEventEnd <= dateNow).to.equal(true);
 
-    expect(event?.event?.outcome).to.equal(outcome);
+    expect(executeEvent?.event?.outcome).to.equal(outcome);
 
-    expect(event?.kibana?.saved_objects).to.eql([
+    expect(executeEvent?.kibana?.saved_objects).to.eql([
       {
         rel: 'primary',
         type: 'action',
         id: connectorId,
-        namespace: spaceId,
+        namespace: 'space1',
+        type_id: actionTypeId,
       },
     ]);
+    expect(startExecuteEvent?.kibana?.saved_objects).to.eql(executeEvent?.kibana?.saved_objects);
 
-    expect(event?.message).to.eql(message);
+    expect(executeEvent?.message).to.eql(message);
+    expect(startExecuteEvent?.message).to.eql(message.replace('executed', 'started'));
 
     if (errorMessage) {
-      expect(event?.error?.message).to.eql(errorMessage);
+      expect(executeEvent?.error?.message).to.eql(errorMessage);
     }
+
+    // const event = events[0];
+
+    // const duration = event?.event?.duration;
+    // const eventStart = Date.parse(event?.event?.start || 'undefined');
+    // const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    // const dateNow = Date.now();
+
+    // expect(typeof duration).to.be('number');
+    // expect(eventStart).to.be.ok();
+    // expect(eventEnd).to.be.ok();
+
+    // const durationDiff = Math.abs(
+    //   Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+    // );
+
+    // // account for rounding errors
+    // expect(durationDiff < 1).to.equal(true);
+    // expect(eventStart <= eventEnd).to.equal(true);
+    // expect(eventEnd <= dateNow).to.equal(true);
+
+    // expect(event?.event?.outcome).to.equal(outcome);
+
+    // expect(event?.kibana?.saved_objects).to.eql([
+    //   {
+    //     rel: 'primary',
+    //     type: 'action',
+    //     id: connectorId,
+    //     type_id: actionTypeId,
+    //     namespace: spaceId,
+    //   },
+    // ]);
+
+    // expect(event?.message).to.eql(message);
+
+    // if (errorMessage) {
+    //   expect(event?.error?.message).to.eql(errorMessage);
+    // }
   }
 }

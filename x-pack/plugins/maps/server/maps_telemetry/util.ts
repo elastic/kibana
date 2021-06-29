@@ -11,7 +11,7 @@ import {
   ESSearchSourceDescriptor,
   LayerDescriptor,
 } from '../../common/descriptor_types';
-import { LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../../common';
+import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../../common';
 import {
   DEFAULT_EMS_DARKMAP_ID,
   DEFAULT_EMS_ROADMAP_DESATURATED_ID,
@@ -72,6 +72,16 @@ const TELEMETRY_TERM_JOIN = 'term';
 export interface TELEMETRY_TERM_JOIN_COUNTS_PER_CLUSTER {
   [TELEMETRY_TERM_JOIN]?: ClusterCountStats;
 }
+
+export enum TELEMETRY_GRID_RESOLUTION {
+  COARSE = 'coarse',
+  FINE = 'fine',
+  MOST_FINE = 'most_fine',
+  SUPER_FINE = 'super_fine',
+}
+export type TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER = {
+  [key in TELEMETRY_GRID_RESOLUTION]?: ClusterCountStats;
+};
 
 // These capture a particular "combo" of source and layer-settings.
 // They are mutually exclusive (ie. a layerDescriptor can only be a single telemetry_layer_type)
@@ -259,6 +269,42 @@ export function getTermJoinsPerCluster(
       ? TELEMETRY_TERM_JOIN
       : null;
   });
+}
+
+function getGridResolution(layerDescriptor: LayerDescriptor): TELEMETRY_GRID_RESOLUTION | null {
+  if (
+    !layerDescriptor.sourceDescriptor ||
+    layerDescriptor.sourceDescriptor.type !== SOURCE_TYPES.ES_GEO_GRID ||
+    !(layerDescriptor.sourceDescriptor as ESGeoGridSourceDescriptor).resolution
+  ) {
+    return null;
+  }
+
+  const descriptor = layerDescriptor.sourceDescriptor as ESGeoGridSourceDescriptor;
+
+  if (descriptor.resolution === GRID_RESOLUTION.COARSE) {
+    return TELEMETRY_GRID_RESOLUTION.COARSE;
+  }
+
+  if (descriptor.resolution === GRID_RESOLUTION.FINE) {
+    return TELEMETRY_GRID_RESOLUTION.FINE;
+  }
+
+  if (descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
+    return TELEMETRY_GRID_RESOLUTION.MOST_FINE;
+  }
+
+  if (descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
+    return TELEMETRY_GRID_RESOLUTION.SUPER_FINE;
+  }
+
+  return null;
+}
+
+export function getGridResolutionsPerCluster(
+  layerLists: LayerDescriptor[][]
+): TELEMETRY_GRID_RESOLUTION_COUNTS_PER_CLUSTER {
+  return getCountsByCluster(layerLists, getGridResolution);
 }
 
 export function getBaseMapsPerCluster(

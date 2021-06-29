@@ -10,18 +10,21 @@ import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SeriesFilter } from './columns/series_filter';
-import { Breakdowns } from './columns/breakdowns';
-import { DataSeries } from '../types';
-import { SeriesBuilder } from '../series_builder/series_builder';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_storage';
+import { SeriesConfig } from '../types';
+import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
-import { ChartOptions } from './columns/chart_options';
 import { SeriesActions } from './columns/series_actions';
+import { ChartEditOptions } from './chart_edit_options';
+
+interface EditItem {
+  seriesConfig: SeriesConfig;
+  id: string;
+}
 
 export function SeriesEditor() {
-  const { allSeries, firstSeriesId } = useUrlStorage();
+  const { allSeries, allSeriesIds } = useSeriesStorage();
 
   const columns = [
     {
@@ -30,87 +33,87 @@ export function SeriesEditor() {
       }),
       field: 'id',
       width: '15%',
-      render: (val: string) => (
+      render: (seriesId: string) => (
         <EuiText>
           <EuiIcon type="dot" color="green" size="l" />{' '}
-          {val === NEW_SERIES_KEY ? 'series-preview' : val}
+          {seriesId === NEW_SERIES_KEY ? 'series-preview' : seriesId}
         </EuiText>
       ),
     },
-    ...(firstSeriesId !== NEW_SERIES_KEY
-      ? [
-          {
-            name: i18n.translate('xpack.observability.expView.seriesEditor.filters', {
-              defaultMessage: 'Filters',
-            }),
-            field: 'defaultFilters',
-            width: '25%',
-            render: (defaultFilters: string[], series: DataSeries) => (
-              <SeriesFilter defaultFilters={defaultFilters} seriesId={series.id} series={series} />
-            ),
-          },
-          {
-            name: i18n.translate('xpack.observability.expView.seriesEditor.breakdowns', {
-              defaultMessage: 'Breakdowns',
-            }),
-            field: 'breakdowns',
-            width: '15%',
-            render: (val: string[], item: DataSeries) => (
-              <Breakdowns seriesId={item.id} breakdowns={val} />
-            ),
-          },
-          {
-            name: '',
-            align: 'center' as const,
-            width: '15%',
-            field: 'id',
-            render: (val: string, item: DataSeries) => <ChartOptions series={item} />,
-          },
-          {
-            name: (
-              <div>
-                <FormattedMessage
-                  id="xpack.observability.expView.seriesEditor.time"
-                  defaultMessage="Time"
-                />
-              </div>
-            ),
-            width: '20%',
-            field: 'id',
-            align: 'right' as const,
-            render: (val: string, item: DataSeries) => <DatePickerCol seriesId={item.id} />,
-          },
-          {
-            name: i18n.translate('xpack.observability.expView.seriesEditor.actions', {
-              defaultMessage: 'Actions',
-            }),
-            align: 'center' as const,
-            width: '8%',
-            field: 'id',
-            render: (val: string, item: DataSeries) => <SeriesActions seriesId={item.id} />,
-          },
-        ]
-      : []),
+    {
+      name: i18n.translate('xpack.observability.expView.seriesEditor.filters', {
+        defaultMessage: 'Filters',
+      }),
+      field: 'defaultFilters',
+      width: '15%',
+      render: (seriesId: string, { seriesConfig, id }: EditItem) => (
+        <SeriesFilter
+          filterFields={seriesConfig.filterFields}
+          seriesId={id}
+          seriesConfig={seriesConfig}
+          baseFilters={seriesConfig.baseFilters}
+        />
+      ),
+    },
+    {
+      name: i18n.translate('xpack.observability.expView.seriesEditor.breakdowns', {
+        defaultMessage: 'Breakdowns',
+      }),
+      field: 'id',
+      width: '25%',
+      render: (seriesId: string, { seriesConfig, id }: EditItem) => (
+        <ChartEditOptions
+          seriesId={id}
+          breakdownFields={seriesConfig.breakdownFields}
+          seriesConfig={seriesConfig}
+        />
+      ),
+    },
+    {
+      name: (
+        <div>
+          <FormattedMessage
+            id="xpack.observability.expView.seriesEditor.time"
+            defaultMessage="Time"
+          />
+        </div>
+      ),
+      width: '20%',
+      field: 'id',
+      align: 'right' as const,
+      render: (seriesId: string, item: EditItem) => <DatePickerCol seriesId={seriesId} />,
+    },
+    {
+      name: i18n.translate('xpack.observability.expView.seriesEditor.actions', {
+        defaultMessage: 'Actions',
+      }),
+      align: 'center' as const,
+      width: '10%',
+      field: 'id',
+      render: (seriesId: string, item: EditItem) => <SeriesActions seriesId={seriesId} />,
+    },
   ];
 
-  const allSeriesKeys = Object.keys(allSeries);
+  const { indexPatterns } = useAppIndexPatternContext();
+  const items: EditItem[] = [];
 
-  const items: DataSeries[] = [];
-
-  const { indexPattern } = useAppIndexPatternContext();
-
-  allSeriesKeys.forEach((seriesKey) => {
+  allSeriesIds.forEach((seriesKey) => {
     const series = allSeries[seriesKey];
-    if (series.reportType && indexPattern) {
-      items.push(
-        getDefaultConfigs({
-          indexPattern,
+    if (series?.reportType && indexPatterns[series.dataType] && !series.isNew) {
+      items.push({
+        id: seriesKey,
+        seriesConfig: getDefaultConfigs({
+          indexPattern: indexPatterns[series.dataType],
           reportType: series.reportType,
-          seriesId: seriesKey,
-        })
-      );
+          dataType: series.dataType,
+        }),
+      });
     }
   });
+
+  if (items.length === 0 && allSeriesIds.length > 0) {
+    return null;
+  }
 
   return (
     <>
@@ -119,18 +122,17 @@ export function SeriesEditor() {
         items={items}
         rowHeader="firstName"
         columns={columns}
-        rowProps={() => (firstSeriesId === NEW_SERIES_KEY ? {} : { height: 100 })}
-        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
-          defaultMessage: 'No series found, please add a series.',
+        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.seriesNotFound', {
+          defaultMessage: 'No series found. Please add a series.',
         })}
         cellProps={{
           style: {
             verticalAlign: 'top',
           },
         }}
+        tableLayout="auto"
       />
       <EuiSpacer />
-      <SeriesBuilder />
     </>
   );
 }

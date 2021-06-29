@@ -27,10 +27,12 @@ export function createConfig$(context: PluginInitializerContext) {
 const disabledDeprecation: ConfigDeprecation = (config, fromPath, addDeprecation) => {
   if (config.xpack?.spaces?.enabled === false) {
     addDeprecation({
-      message: `Disabling the spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`,
+      message: `Disabling the Spaces plugin (xpack.spaces.enabled) will not be supported in the next major version (8.0)`,
+      correctiveActions: {
+        manualSteps: [`Remove "xpack.spaces.enabled: false" from your Kibana configuration`],
+      },
     });
   }
-  return config;
 };
 
 export const spacesConfigDeprecationProvider: ConfigDeprecationProvider = () => {

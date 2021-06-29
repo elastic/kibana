@@ -23,7 +23,7 @@ const varsSchema = schema.maybe(
     schema.object({
       name: schema.string(),
       type: schema.maybe(schema.string()),
-      value: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
+      value: schema.maybe(schema.any()),
       frozen: schema.maybe(schema.boolean()),
     })
   )
@@ -67,6 +67,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
             schema.object({
               type: schema.string(),
               enabled: schema.maybe(schema.boolean()),
+              keep_enabled: schema.maybe(schema.boolean()),
               vars: varsSchema,
               streams: schema.maybe(
                 schema.arrayOf(
@@ -76,6 +77,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
                       dataset: schema.string(),
                     }),
                     enabled: schema.maybe(schema.boolean()),
+                    keep_enabled: schema.maybe(schema.boolean()),
                     vars: varsSchema,
                   })
                 )

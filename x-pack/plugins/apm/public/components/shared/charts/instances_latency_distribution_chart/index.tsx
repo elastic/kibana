@@ -104,7 +104,7 @@ export function InstancesLatencyDistributionChart({
   };
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.instancesLatencyDistributionChartTitle', {

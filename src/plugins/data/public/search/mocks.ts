@@ -15,7 +15,6 @@ import { createSearchUsageCollectorMock } from './collectors/mocks';
 function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
-    __enhance: jest.fn(),
     session: getSessionServiceMock(),
     sessionsClient: getSessionsClientMock(),
     usageCollector: createSearchUsageCollectorMock(),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Threats } from '../../../common/detection_engine/schemas/common/schemas';
+import { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { mockThreatData } from './mitre_tactics_techniques';
 
 const { tactic, technique, subtechnique } = mockThreatData;

@@ -59,26 +59,11 @@ export const getColorSpec = (
   return { value: DEFAULT_COLOR };
 };
 
-// Replace dots in field names with an alternative UTF-8 character
-// since VEGA treats dots in field names as nested values and escaping
-// in columns/rows for repeated charts isn't working as expected.
+// Escapes the characters .[] in field names with double backslashes
+// since VEGA treats dots/brackets in field names as nested values.
+// See https://vega.github.io/vega-lite/docs/field.html for details.
 function getEscapedVegaFieldName(fieldName: string) {
-  return fieldName.replace(/\./g, '․');
-}
-
-// Replace dots for all keys of all data items with an alternative UTF-8 character
-// since VEGA treats dots in field names as nested values and escaping
-// in columns/rows for repeated charts isn't working as expected.
-function getEscapedVegaValues(values: VegaValue[]): VegaValue[] {
-  return values.map((d) =>
-    Object.keys(d).reduce(
-      (p, c) => ({
-        ...p,
-        [getEscapedVegaFieldName(c)]: d[c],
-      }),
-      {} as VegaValue
-    )
-  );
+  return fieldName.replace(/([\.|\[|\]])/g, '\\$1');
 }
 
 type VegaValue = Record<string, string | number>;
@@ -92,13 +77,11 @@ export const getScatterplotMatrixVegaLiteSpec = (
   legendType?: LegendType,
   dynamicSize?: boolean
 ): TopLevelSpec => {
-  const vegaValues = getEscapedVegaValues(values);
+  const vegaValues = values;
   const vegaColumns = columns.map(getEscapedVegaFieldName);
   const outliers = resultsField !== undefined;
 
-  // Use an alternative UTF-8 character for the dot
-  // since VEGA treats dots in field names as nested values.
-  const escapedOutlierScoreField = `${resultsField}․${OUTLIER_SCORE_FIELD}`;
+  const escapedOutlierScoreField = `${resultsField}\\.${OUTLIER_SCORE_FIELD}`;
 
   const colorSpec = getColorSpec(
     euiTheme,
@@ -193,7 +176,10 @@ export const getScatterplotMatrixVegaLiteSpec = (
           ...(color !== undefined
             ? [{ type: colorSpec.type, field: getEscapedVegaFieldName(color) }]
             : []),
-          ...vegaColumns.map((d) => ({ type: LEGEND_TYPES.QUANTITATIVE, field: d })),
+          ...vegaColumns.map((d) => ({
+            type: LEGEND_TYPES.QUANTITATIVE,
+            field: d,
+          })),
           ...(outliers
             ? [{ type: LEGEND_TYPES.QUANTITATIVE, field: escapedOutlierScoreField, format: '.3f' }]
             : []),

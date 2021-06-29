@@ -1,0 +1,214 @@
+---
+id: formLibExampleListeningToChanges
+slug: /form-lib/examples/listening-to-changes
+title: Listening to changes
+summary: React to changes deep down the tree
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+## Basic
+
+### Access the form data from the root component
+
+You can access the form data by using the <DocLink id="formLibCoreUseFormData" text="useFormData()"/> hook. This hook has an optional `form` option that you only have to provide if you need to access the data in the **root** component.
+
+```js
+// From the root component (where the "form" is declared)
+export const MyComponent = () => {
+  const { form } = useForm();
+
+  const [formData] = useFormData({ form });
+
+  return (
+    <Form form={form}>
+      <UseField path="firstName" config={{ label: 'First name' }} component={TextField} />
+      <UseField path="lastName" config={{ label: 'Last name' }} component={TextField} />
+      <EuiCode>{JSON.stringify(formData)}</EuiCode>
+    </Form>
+  );
+};
+```
+### Access the form data from a child component
+
+To access the form data from inside a child component you also use the `useFormData()` hook, but this time you don't need to provide the `form` as it is read from context.
+
+```js
+const FormFields = () => {
+  const [formData] = useFormData();
+
+  return (
+    <>
+      <UseField path="firstName" config={{ label: 'First name' }} component={TextField} />
+      <UseField path="lastName" config={{ label: 'Last name' }} component={TextField} />
+      <EuiCode>{JSON.stringify(formData)}</EuiCode>
+    </>
+  )
+};
+
+export const MyComponent = () => {
+  const { form } = useForm();
+
+  return (
+    <Form form={form}>
+      <FormFields />
+    </Form>
+  );
+};
+```
+
+## Listen to specific form fields changes
+
+In some cases you only want to listen to some field change and don't want to trigger a re-render of your component for every field value change in your form. You can specify a **watch** (`string | string[]`) parameter for that.
+
+```js
+export const ReactToSpecificFields = () => {
+  const { form } = useForm();
+
+  // Only listen for changes from the "showAddress" toggle
+  const [{ showAddress }] = useFormData({ form, watch: 'showAddress' });
+
+  return (
+    <Form form={form}>
+      {/* Changing the "name" field won't trigger a re-render */}
+      <UseField path="name" config={{ label: 'First name' }} component={TextField} />
+
+      <UseField
+        path="showAddress"
+        config={{ defaultValue: false, label: 'Show address' }}
+        component={ToggleField}
+      />
+      {showAddress && (
+        <>
+          <p>800 W El Camino Real #350</p>
+        </>
+      )}
+    </Form>
+  );
+};
+```
+
+## Using the `onChange` handler
+
+Sometimes the good old `onChange` handler is all you need to react to a form field value change (instead of reading the form data and adding a `useEffect` to react to it).
+
+```js
+export const OnChangeHandler = () => {
+  const { form } = useForm();
+
+  const onNameChange = (value: string) => {
+    console.log(value);
+  };
+
+  return (
+    <Form form={form}>
+      <UseField
+        path="name"
+        config={{ label: 'Name' }}
+        component={TextField}
+        onChange={onNameChange}
+      />
+    </Form>
+  );
+};
+```
+
+## Forward the form state to a parent component
+
+If your UX requires to submit the form in a parent component (e.g. because that's where your submit button is located), you will need a way to access the form validity and the form data outside your form component. Unless your parent component needs to be aware of every field value change in the form (which should rarely be needed), you don't want to use the `useFormData()` hook and forward the data from there. This would create unnecessary re-renders. Instead it is better to forward the `getFormData()` handler on the form.
+
+This pattern is useful when, for example, the form is inside one of the steps of multi-step wizard and the button to go "next" is thus outside the scope of the component where the form is declared.
+
+```js
+interface MyForm {
+  name: string;
+}
+
+interface FormState {
+  isValid: boolean | undefined;
+  validate(): Promise<boolean>;
+  getData(): MyForm;
+}
+
+const schema: FormSchema<MyForm> = {
+  name: {
+    validations: [
+      {
+        validator: ({ value }) => {
+          if (value === 'John') {
+            return { message: `The username "John" already exists` };
+          }
+        },
+      },
+    ],
+  },
+};
+
+interface Props {
+  defaultValue: MyForm;
+  onChange(formState: FormState): void;
+}
+
+const MyForm = ({ defaultValue, onChange }: Props) => {
+  const { form } = useForm<MyForm>({ defaultValue, schema });
+  const { isValid, validate, getFormData } = form;
+
+  // getFormData() is a stable reference that is not mutated when the form data change.
+  // This means that it does not trigger a re-render on each form data change.
+  useEffect(() => {
+    const updatedFormState = { isValid, validate, getData: getFormData };
+
+    // Forward the state to the parent
+    onChange(updatedFormState);
+  }, [onChange, isValid, validate, getFormData]);
+
+  return (
+    <Form form={form}>
+      <UseField path="name" component={TextField} />
+    </Form>
+  );
+};
+
+export const ForwardFormStateToParent = () => {
+  // This would probably come from the server
+  const formDefaultValue: MyForm = {
+    name: 'John',
+  };
+
+  // As the parent component does not know anything about the form until the form calls an onChange(),
+  // we initially set the validate() and getData() to return the default state.
+  const initialState = {
+    isValid: true,
+    validate: async () => true,
+    getData: () => formDefaultValue,
+  };
+
+  const [formState, setFormState] = useState<FormState>(initialState);
+
+  const sendForm = useCallback(async () => {
+    // The form isValid state will stay "undefined" until either:
+    // - all the fields are dirty
+    // - we call the form "validate()" or "submit()" methods
+
+    // This is why we first check if it is undefined and if it is, we call the validate() method
+    // which will validate **only** the fields that haven't been validated yet.
+    const isValid = formState.isValid ?? (await formState.validate());
+    if (!isValid) {
+      // Show a callout somewhere...
+      return;
+    }
+
+    console.log('Form data', formState.getData());
+  }, [formState]);
+
+  return (
+    <>
+      <h1>My form</h1>
+      <MyForm defaultValue={formDefaultValue} onChange={setFormState} />
+      <EuiButton color="primary" onClick={sendForm} disabled={formState.isValid === false} fill>
+        Submit
+      </EuiButton>
+    </>
+  );
+};
+```

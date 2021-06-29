@@ -274,7 +274,11 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     });
 
     const isReadyToImport = !!name && error === undefined;
-    this.props.onIndexReady(isReadyToImport);
+    if (isReadyToImport) {
+      this.props.enableImportBtn();
+    } else {
+      this.props.disableImportBtn();
+    }
   };
 
   render() {
@@ -309,6 +313,8 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         onFileSelect={this._onFileSelect}
         onGeoFieldTypeSelect={this._onGeoFieldTypeSelect}
         onIndexNameChange={this._onIndexNameChange}
+        onIndexNameValidationStart={this.props.disableImportBtn}
+        onIndexNameValidationEnd={this.props.enableImportBtn}
       />
     );
   }

@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -58,6 +59,7 @@ export const useHostsKpiHosts = ({
     hostsKpiHostsRequest,
     setHostsKpiHostsRequest,
   ] = useState<HostsKpiHostsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -123,23 +125,29 @@ export const useHostsKpiHosts = ({
 
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsKpiQueries.kpiHosts,
-        filterQuery: createFilter(filterQuery),
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        timerange,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
 
   useEffect(() => {
     hostsKpiHostsSearch(hostsKpiHostsRequest);

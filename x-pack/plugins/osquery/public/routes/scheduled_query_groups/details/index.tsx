@@ -13,6 +13,8 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
@@ -75,9 +77,17 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
             <BetaBadge />
           </BetaBadgeRowWrapper>
         </EuiFlexItem>
+        {data?.description && (
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued" size="s">
+              {data.description}
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     ),
-    [data?.name, scheduledQueryGroupsListProps]
+    [data?.description, data?.name, scheduledQueryGroupsListProps]
   );
 
   const RightColumn = useMemo(
@@ -115,7 +125,7 @@ const ScheduledQueryGroupDetailsPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      {data && <ScheduledQueryGroupQueriesTable data={data} />}
+      {data && <ScheduledQueryGroupQueriesTable data={data.inputs[0].streams} />}
     </WithHeaderLayout>
   );
 };

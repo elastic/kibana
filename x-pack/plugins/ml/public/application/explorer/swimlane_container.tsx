@@ -68,6 +68,10 @@ declare global {
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
+/**
+ * Minimum container height to make sure "No data" message is displayed without overflow.
+ */
+const MIN_CONTAINER_HEIGHT = 40;
 
 const Y_AXIS_HEIGHT = 24;
 
@@ -245,7 +249,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     return isLoading
       ? containerHeightRef.current
       : // TODO update when elastic charts X label will be fixed
-        rowsCount * CELL_HEIGHT + LEGEND_HEIGHT + (true ? Y_AXIS_HEIGHT : 0);
+        Math.max(
+          rowsCount * CELL_HEIGHT + (showLegend ? LEGEND_HEIGHT : 0) + (true ? Y_AXIS_HEIGHT : 0),
+          MIN_CONTAINER_HEIGHT
+        );
   }, [isLoading, rowsCount, showTimeline]);
 
   useEffect(() => {
@@ -331,7 +338,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       brushArea: {
         stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
       },
-      maxLegendHeight: LEGEND_HEIGHT,
+      ...(showLegend ? { maxLegendHeight: LEGEND_HEIGHT } : {}),
       timeZone: 'UTC',
     };
   }, [
@@ -369,13 +376,17 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneData?.fieldName]
   );
 
-  const xDomain = swimlaneData
-    ? {
-        min: swimlaneData.earliest * 1000,
-        max: swimlaneData.latest * 1000,
-        minInterval: swimlaneData.interval * 1000,
-      }
-    : undefined;
+  const xDomain = useMemo(
+    () =>
+      swimlaneData
+        ? {
+            min: swimlaneData.earliest * 1000,
+            max: swimlaneData.latest * 1000,
+            minInterval: swimlaneData.interval * 1000,
+          }
+        : undefined,
+    [swimlaneData]
+  );
 
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
@@ -392,6 +403,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             style={{
               width: '100%',
               overflowY: 'auto',
+              overflowX: 'hidden',
             }}
             grow={false}
           >
@@ -403,11 +415,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       onElementClick={onElementClick}
                       showLegend={showLegend}
                       legendPosition={Position.Top}
-                      xDomain={{
-                        min: swimlaneData.earliest * 1000,
-                        max: swimlaneData.latest * 1000,
-                        minInterval: swimlaneData.interval * 1000,
-                      }}
+                      xDomain={xDomain}
                       tooltip={tooltipOptions}
                       debugState={window._echDebugStateFlag ?? false}
                     />
@@ -462,7 +470,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 )}
                 {!isLoading && !showSwimlane && (
                   <EuiEmptyPrompt
-                    titleSize="xs"
+                    titleSize="xxs"
                     style={{ padding: 0 }}
                     title={<h2>{noDataWarning}</h2>}
                   />

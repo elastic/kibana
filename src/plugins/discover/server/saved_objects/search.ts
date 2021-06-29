@@ -47,5 +47,5 @@ export const searchSavedObjectType: SavedObjectsType = {
       version: { type: 'integer' },
     },
   },
-  migrations: searchMigrations as any,
+  migrations: searchMigrations,
 };

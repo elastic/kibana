@@ -30,6 +30,7 @@ import * as i18n from './translations';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const ID = 'hostsAllQuery';
@@ -77,6 +78,7 @@ export const useAllHost = ({
   const searchSubscription = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
   const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
@@ -166,18 +168,24 @@ export const useAllHost = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
+      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
         factoryQueryType: HostsQueries.hosts,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
+        indices: indexNames,
+        filterQuery,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
+      });
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indices,
+        docValueFields: docValueFields ?? [],
+        factoryQueryType,
+        filterQuery: createFilter(filterQuery),
+        pagination: generateTablePaginationOptions(activePage, limit),
+        timerange,
         sort: {
           direction,
           field: sortField,
@@ -198,6 +206,7 @@ export const useAllHost = ({
     limit,
     startDate,
     sortField,
+    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {

@@ -15,17 +15,13 @@ import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
-import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
+import { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 import { Setup as InspectorSetup } from '../../inspector/public';
 import { NowProviderPublicContract } from './now_provider';
-
-export interface DataPublicPluginEnhancements {
-  search: SearchEnhancements;
-}
 
 export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;
@@ -47,10 +43,6 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
-  /**
-   * @internal
-   */
-  __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }
 
 /**

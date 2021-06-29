@@ -8,32 +8,37 @@
 import { timeline } from '../../objects/timeline';
 
 import {
-  FAVORITE_TIMELINE,
   LOCKED_ICON,
   NOTES_TEXT,
   PIN_EVENT,
+  SERVER_SIDE_EVENT_COUNT,
   TIMELINE_FILTER,
+  TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_PANEL,
+  TIMELINE_TAB_CONTENT_EQL,
 } from '../../screens/timeline';
+import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
 import { cleanKibana } from '../../tasks/common';
 
-import { loginAndWaitForPage } from '../../tasks/login';
+import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
 import {
+  addEqlToTimeline,
   addFilter,
   addNameAndDescriptionToTimeline,
   addNotesToTimeline,
+  clickingOnCreateTimelineFormTemplateBtn,
   closeTimeline,
   createNewTimeline,
+  expandEventAction,
   goToQueryTab,
-  markAsFavorite,
   pinFirstEvent,
   populateTimeline,
-  waitForTimelineChanges,
 } from '../../tasks/timeline';
 
-import { OVERVIEW_URL } from '../../urls/navigation';
+import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
+import { waitForTimelinesPanelToBeLoaded } from '../../tasks/timelines';
 
 describe('Timelines', (): void => {
   before(() => {
@@ -88,10 +93,44 @@ describe('Timelines', (): void => {
       cy.get(NOTES_TEXT).should('have.text', timeline.notes);
     });
 
-    it('can be marked as favorite', () => {
-      markAsFavorite();
-      waitForTimelineChanges();
-      cy.get(FAVORITE_TIMELINE).should('have.text', 'Remove from favorites');
+    it('should update timeline after adding eql', () => {
+      cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+      const eql = 'any where process.name == "which"';
+      addEqlToTimeline(eql);
+
+      cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
+
+      cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
+        .invoke('text')
+        .then(parseInt)
+        .should('be.gt', 0);
+    });
+  });
+});
+
+describe('Create a timeline from a template', () => {
+  before(() => {
+    cleanKibana();
+    loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    waitForTimelinesPanelToBeLoaded();
+  });
+
+  it('Should have the same query and open the timeline modal', () => {
+    createTimelineTemplate(timeline).then(() => {
+      expandEventAction();
+      cy.intercept('/api/timeline').as('timeline');
+
+      clickingOnCreateTimelineFormTemplateBtn();
+      cy.wait('@timeline', { timeout: 100000 }).then(({ request }) => {
+        if (request.body && request.body.timeline) {
+          expect(request.body.timeline).to.haveOwnProperty('description', timeline.description);
+          expect(request.body.timeline.kqlQuery.filterQuery.kuery).to.haveOwnProperty(
+            'expression',
+            timeline.query
+          );
+          cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
+        }
+      });
     });
   });
 });

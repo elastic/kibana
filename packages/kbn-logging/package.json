@@ -4,10 +4,5 @@
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "main": "./target/index.js",
-  "types": "./target/index.d.ts",
-  "scripts": {
-    "build": "../../node_modules/.bin/tsc",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
-  }
+  "types": "./target/index.d.ts"
 }

@@ -41,11 +41,13 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         snapshotRequest.sourceId
       );
       const compositeSize = libs.configuration.inventory.compositeSize;
-      const logQueryFields = await libs.getLogQueryFields(
-        snapshotRequest.sourceId,
-        requestContext.core.savedObjects.client,
-        requestContext.core.elasticsearch.client.asCurrentUser
-      );
+      const logQueryFields = await libs
+        .getLogQueryFields(
+          snapshotRequest.sourceId,
+          requestContext.core.savedObjects.client,
+          requestContext.core.elasticsearch.client.asCurrentUser
+        )
+        .catch(() => undefined);
 
       UsageCollector.countNode(snapshotRequest.nodeType);
       const client = createSearchClient(requestContext, framework);
@@ -55,8 +57,8 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           client,
           snapshotRequest,
           source,
-          logQueryFields,
-          compositeSize
+          compositeSize,
+          logQueryFields
         );
         return response.ok({
           body: SnapshotNodeResponseRT.encode(snapshotResponse),

@@ -5,7 +5,7 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [],
   "optionalPlugins": ["spaces", "security"],
-  "requiredBundles": ["securitySolution"],
+  "requiredBundles": [],
   "server": true,
   "ui": true,
   "version": "8.0.0"

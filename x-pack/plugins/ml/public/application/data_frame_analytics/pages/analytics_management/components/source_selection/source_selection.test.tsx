@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 
-import { IntlProvider } from 'react-intl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
 
 import {
   getIndexPatternAndSavedSearch,
@@ -97,6 +97,7 @@ jest.mock('../../../../../util/index_utils', () => {
         };
       }
     ),
+    isCcsIndexPattern: (a: string) => a.includes(':'),
   };
 });
 

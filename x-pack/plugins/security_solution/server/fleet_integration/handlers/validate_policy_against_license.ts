@@ -8,7 +8,7 @@
 import { Logger } from 'kibana/server';
 import { isEndpointPolicyValidForLicense } from '../../../common/license/policy_config';
 import { PolicyConfig } from '../../../common/endpoint/types';
-import { LicenseService } from '../../../common/license/license';
+import { LicenseService } from '../../../common/license';
 
 export const validatePolicyAgainstLicense = (
   policyConfig: PolicyConfig,

@@ -19,14 +19,12 @@ export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
 export class WMSSource extends AbstractTMSSource {
   static type = SOURCE_TYPES.WMS;
 
-  static createDescriptor({ serviceUrl, layers, styles, attributionText, attributionUrl }) {
+  static createDescriptor({ serviceUrl, layers, styles }) {
     return {
       type: WMSSource.type,
       serviceUrl,
       layers,
       styles,
-      attributionText,
-      attributionUrl,
     };
   }
 
@@ -51,20 +49,6 @@ export class WMSSource extends AbstractTMSSource {
 
   async getDisplayName() {
     return this._descriptor.serviceUrl;
-  }
-
-  getAttributions() {
-    const { attributionText, attributionUrl } = this._descriptor;
-    const attributionComplete = !!attributionText && !!attributionUrl;
-
-    return attributionComplete
-      ? [
-          {
-            url: attributionUrl,
-            label: attributionText,
-          },
-        ]
-      : [];
   }
 
   getUrlTemplate() {

@@ -265,12 +265,12 @@ Note:
    3. If the clone operation fails because the target index already exist, ignore the error and wait for the target index to become green before proceeding.
    4. (The `001` postfix in the target index name isn't used by Kibana, but allows for re-indexing an index should this be required by an Elasticsearch upgrade. E.g. re-index `.kibana_7.10.0_001` into `.kibana_7.10.0_002` and point the `.kibana_7.10.0` alias to `.kibana_7.10.0_002`.)
 9.  Transform documents by reading batches of outdated documents from the target index then transforming and updating them with optimistic concurrency control. 
-   1. Ignore any version conflict errors.
-   2. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents. If any failures occured, log the complete list of documents that failed to transform. Fail the migration.
+    1. Ignore any version conflict errors.
+    2. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents. If any failures occured, log the complete list of documents that failed to transform. Fail the migration.
 10. Update the mappings of the target index
-   1. Retrieve the existing mappings including the `migrationMappingPropertyHashes` metadata.
-   2. Update the mappings with `PUT /.kibana_7.10.0_001/_mapping`. The API deeply merges any updates so this won't remove the mappings of any plugins that are disabled on this instance but have been enabled on another instance that also migrated this index.
-   3. Ensure that fields are correctly indexed using the target index's latest mappings `POST /.kibana_7.10.0_001/_update_by_query?conflicts=proceed`. In the future we could optimize this query by only targeting documents:
+    1. Retrieve the existing mappings including the `migrationMappingPropertyHashes` metadata.
+    2. Update the mappings with `PUT /.kibana_7.10.0_001/_mapping`. The API deeply merges any updates so this won't remove the mappings of any plugins that are disabled on this instance but have been enabled on another instance that also migrated this index.
+    3. Ensure that fields are correctly indexed using the target index's latest mappings `POST /.kibana_7.10.0_001/_update_by_query?conflicts=proceed`. In the future we could optimize this query by only targeting documents:
       1. That belong to a known saved object type.
 11.  Mark the migration as complete. This is done as a single atomic
     operation (requires https://github.com/elastic/elasticsearch/pull/58100)
@@ -278,12 +278,12 @@ Note:
     migration in parallel, only one version will win. E.g. if 7.11 and 7.12
     are started in parallel and migrate from a 7.9 index, either 7.11 or 7.12
     should succeed and accept writes, but not both.
-   1. Check that `.kibana` alias is still pointing to the source index
-   2. Point the `.kibana_7.10.0` and `.kibana` aliases to the target index.
-   3. Remove the temporary index `.kibana_7.10.0_reindex_temp`
-   4. If this fails with a "required alias [.kibana] does not exist" error or "index_not_found_exception" for the temporary index, fetch `.kibana` again:
-      1. If `.kibana` is _not_ pointing to our target index fail the migration.
-      2. If `.kibana` is pointing to our target index the migration has succeeded and we can proceed to step (12).
+     1. Check that `.kibana` alias is still pointing to the source index
+     2. Point the `.kibana_7.10.0` and `.kibana` aliases to the target index.
+     3. Remove the temporary index `.kibana_7.10.0_reindex_temp`
+     4. If this fails with a "required alias [.kibana] does not exist" error or "index_not_found_exception" for the temporary index, fetch `.kibana` again:
+        1. If `.kibana` is _not_ pointing to our target index fail the migration.
+        2. If `.kibana` is pointing to our target index the migration has succeeded and we can proceed to step (12).
 12.  Start serving traffic. All saved object reads/writes happen through the
     version-specific alias `.kibana_7.10.0`.
 

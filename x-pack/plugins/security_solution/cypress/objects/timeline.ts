@@ -15,6 +15,7 @@ export interface Timeline {
 export interface CompleteTimeline extends Timeline {
   notes: string;
   filter: TimelineFilter;
+  templateTimelineId?: string;
 }
 
 export interface TimelineFilter {
@@ -35,6 +36,22 @@ export const timeline: CompleteTimeline = {
   query: 'host.name: *',
   notes: 'Yes, the best timeline',
   filter,
+};
+
+export const indicatorMatchTimelineTemplate: CompleteTimeline = {
+  ...timeline,
+  title: 'Generic Threat Match Timeline',
+  templateTimelineId: '495ad7a7-316e-4544-8a0f-9c098daee76e',
+};
+
+/**
+ * Timeline query that finds no valid data to cut down on test failures
+ * or other issues for when we want to test one specific thing and not also
+ * test the queries happening
+ */
+export const timelineNonValidQuery: CompleteTimeline = {
+  ...timeline,
+  query: 'query_to_intentionally_find_nothing: *',
 };
 
 export const caseTimeline: Timeline = {

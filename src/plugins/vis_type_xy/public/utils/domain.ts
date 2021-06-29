@@ -57,8 +57,8 @@ export const getAdjustedDomain = (
     const lastXValue = xValues[xValues.length - 1];
 
     const domainMin = Math.min(firstXValue, domain.min);
-    const domainMaxValue = hasBars ? domain.max - interval : lastXValue + interval;
-    const domainMax = Math.max(domainMaxValue, lastXValue);
+    const domainMaxValue = Math.max(domain.max - interval, lastXValue);
+    const domainMax = hasBars ? domainMaxValue : domainMaxValue + interval;
     const minInterval = getAdjustedInterval(
       xValues,
       intervalESValue,

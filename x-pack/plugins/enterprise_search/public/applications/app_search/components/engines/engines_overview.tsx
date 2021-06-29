@@ -9,44 +9,34 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPageContentBody,
-  EuiTitle,
-  EuiSpacer,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { LicensingLogic } from '../../../shared/licensing';
+import { LicensingLogic, ManageLicenseButton } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
-import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
+import { DataPanel } from '../data_panel';
+import { AppSearchPageTemplate } from '../layout';
 
-import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
+import { EmptyState, EmptyMetaEnginesState } from './components';
 import { EnginesTable } from './components/tables/engines_table';
 import { MetaEnginesTable } from './components/tables/meta_engines_table';
 import {
+  ENGINES_OVERVIEW_TITLE,
   CREATE_AN_ENGINE_BUTTON_LABEL,
   CREATE_A_META_ENGINE_BUTTON_LABEL,
   ENGINES_TITLE,
-  META_ENGINE_EMPTY_PROMPT_DESCRIPTION,
-  META_ENGINE_EMPTY_PROMPT_TITLE,
   META_ENGINES_TITLE,
+  META_ENGINES_DESCRIPTION,
 } from './constants';
 import { EnginesLogic } from './engines_logic';
-
-import './engines_overview.scss';
 
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const {
-    myRole: { canManageEngines },
+    myRole: { canManageEngines, canManageMetaEngines },
   } = useValues(AppLogic);
 
   const {
@@ -71,107 +61,90 @@ export const EnginesOverview: React.FC = () => {
     if (hasPlatinumLicense) loadMetaEngines();
   }, [hasPlatinumLicense, metaEnginesMeta.page.current]);
 
-  if (dataLoading) return <LoadingState />;
-  if (!engines.length) return <EmptyState />;
-
   return (
-    <>
-      <SendTelemetry action="viewed" metric="engines_overview" />
-
-      <EnginesOverviewHeader />
-      <EuiPageContent hasBorder panelPaddingSize="s" className="enginesOverview">
-        <FlashMessages />
-        <EuiPageContentHeader responsive={false}>
-          <EuiPageContentHeaderSection>
-            <EuiTitle size="s">
-              <h2>
-                <EngineIcon /> {ENGINES_TITLE}
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
-            {canManageEngines && (
+    <AppSearchPageTemplate
+      pageViewTelemetry="engines_overview"
+      pageChrome={[ENGINES_TITLE]}
+      pageHeader={{ pageTitle: ENGINES_OVERVIEW_TITLE }}
+      isLoading={dataLoading}
+      isEmptyState={!engines.length}
+      emptyState={<EmptyState />}
+    >
+      <DataPanel
+        hasBorder
+        iconType={EngineIcon}
+        title={<h2>{ENGINES_TITLE}</h2>}
+        titleSize="s"
+        action={
+          canManageEngines && (
+            <EuiButtonTo
+              color="secondary"
+              size="s"
+              iconType="plusInCircle"
+              data-test-subj="appSearchEnginesEngineCreationButton"
+              to={ENGINE_CREATION_PATH}
+            >
+              {CREATE_AN_ENGINE_BUTTON_LABEL}
+            </EuiButtonTo>
+          )
+        }
+        data-test-subj="appSearchEngines"
+      >
+        <EnginesTable
+          items={engines}
+          loading={enginesLoading}
+          pagination={{
+            ...convertMetaToPagination(enginesMeta),
+            hidePerPageOptions: true,
+          }}
+          onChange={handlePageChange(onEnginesPagination)}
+        />
+      </DataPanel>
+      <EuiSpacer size="xxl" />
+      {hasPlatinumLicense ? (
+        <DataPanel
+          hasBorder
+          iconType={MetaEngineIcon}
+          title={<h2>{META_ENGINES_TITLE}</h2>}
+          titleSize="s"
+          action={
+            canManageMetaEngines && (
               <EuiButtonTo
                 color="secondary"
                 size="s"
                 iconType="plusInCircle"
-                data-test-subj="appSearchEnginesEngineCreationButton"
-                to={ENGINE_CREATION_PATH}
+                data-test-subj="appSearchEnginesMetaEngineCreationButton"
+                to={META_ENGINE_CREATION_PATH}
               >
-                {CREATE_AN_ENGINE_BUTTON_LABEL}
+                {CREATE_A_META_ENGINE_BUTTON_LABEL}
               </EuiButtonTo>
-            )}
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody data-test-subj="appSearchEngines">
-          <EuiSpacer />
-          <EnginesTable
-            items={engines}
-            loading={enginesLoading}
+            )
+          }
+          data-test-subj="appSearchMetaEngines"
+        >
+          <MetaEnginesTable
+            items={metaEngines}
+            loading={metaEnginesLoading}
             pagination={{
-              ...convertMetaToPagination(enginesMeta),
+              ...convertMetaToPagination(metaEnginesMeta),
               hidePerPageOptions: true,
             }}
-            onChange={handlePageChange(onEnginesPagination)}
+            noItemsMessage={<EmptyMetaEnginesState />}
+            onChange={handlePageChange(onMetaEnginesPagination)}
           />
-        </EuiPageContentBody>
-
-        {hasPlatinumLicense && (
-          <>
-            <EuiSpacer size="xl" />
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle size="s">
-                  <h2>
-                    <MetaEngineIcon /> {META_ENGINES_TITLE}
-                  </h2>
-                </EuiTitle>
-              </EuiPageContentHeaderSection>
-              <EuiPageContentHeaderSection>
-                {canManageEngines && (
-                  <EuiButtonTo
-                    color="secondary"
-                    size="s"
-                    iconType="plusInCircle"
-                    data-test-subj="appSearchEnginesMetaEngineCreationButton"
-                    to={META_ENGINE_CREATION_PATH}
-                  >
-                    {CREATE_A_META_ENGINE_BUTTON_LABEL}
-                  </EuiButtonTo>
-                )}
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
-            <EuiPageContentBody data-test-subj="appSearchMetaEngines">
-              <MetaEnginesTable
-                items={metaEngines}
-                loading={metaEnginesLoading}
-                pagination={{
-                  ...convertMetaToPagination(metaEnginesMeta),
-                  hidePerPageOptions: true,
-                }}
-                noItemsMessage={
-                  <EuiEmptyPrompt
-                    title={<h2>{META_ENGINE_EMPTY_PROMPT_TITLE}</h2>}
-                    body={<p>{META_ENGINE_EMPTY_PROMPT_DESCRIPTION}</p>}
-                    actions={
-                      canManageEngines && (
-                        <EuiButtonTo
-                          data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"
-                          fill
-                          to={META_ENGINE_CREATION_PATH}
-                        >
-                          {CREATE_A_META_ENGINE_BUTTON_LABEL}
-                        </EuiButtonTo>
-                      )
-                    }
-                  />
-                }
-                onChange={handlePageChange(onMetaEnginesPagination)}
-              />
-            </EuiPageContentBody>
-          </>
-        )}
-      </EuiPageContent>
-    </>
+        </DataPanel>
+      ) : (
+        <DataPanel
+          hasBorder
+          responsive
+          iconType={MetaEngineIcon}
+          title={<h2>{META_ENGINES_TITLE}</h2>}
+          titleSize="s"
+          subtitle={META_ENGINES_DESCRIPTION}
+          action={<ManageLicenseButton />}
+          data-test-subj="metaEnginesLicenseCTA"
+        />
+      )}
+    </AppSearchPageTemplate>
   );
 };

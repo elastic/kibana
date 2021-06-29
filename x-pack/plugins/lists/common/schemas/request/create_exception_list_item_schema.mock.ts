@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   COMMENTS,
   DESCRIPTION,
@@ -18,8 +20,6 @@ import {
   OS_TYPES,
   TAGS,
 } from '../../constants.mock';
-
-import { CreateExceptionListItemSchema } from './create_exception_list_item_schema';
 
 export const getCreateExceptionListItemSchemaMock = (): CreateExceptionListItemSchema => ({
   comments: COMMENTS,

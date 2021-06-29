@@ -544,6 +544,7 @@
       "type": "legacy-url-alias",
       "updated_at": "2017-09-21T18:51:23.794Z",
       "legacy-url-alias": {
+        "sourceId": "alias-match",
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "alias-match-newid"
@@ -561,6 +562,7 @@
       "type": "legacy-url-alias",
       "updated_at": "2017-09-21T18:51:23.794Z",
       "legacy-url-alias": {
+        "sourceId": "disabled",
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "alias-match-newid",
@@ -611,6 +613,7 @@
       "type": "legacy-url-alias",
       "updated_at": "2017-09-21T18:51:23.794Z",
       "legacy-url-alias": {
+        "sourceId": "conflict",
         "targetNamespace": "space_1",
         "targetType": "resolvetype",
         "targetId": "conflict-newid"

@@ -35,7 +35,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
         title: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.totalTitle',
           {
-            defaultMessage: 'Endpoints',
+            defaultMessage: 'Agents',
           }
         ),
         health: '',
@@ -45,10 +45,20 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
         title: i18n.translate(
           'xpack.securitySolution.endpoint.policyDetails.agentsSummary.onlineTitle',
           {
-            defaultMessage: 'Online',
+            defaultMessage: 'Healthy',
           }
         ),
         health: 'success',
+      },
+      {
+        key: 'error',
+        title: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.errorTitle',
+          {
+            defaultMessage: 'Unhealthy',
+          }
+        ),
+        health: 'warning',
       },
       {
         key: 'offline',
@@ -58,17 +68,7 @@ export const AgentsSummary = memo<AgentsSummaryProps>((props) => {
             defaultMessage: 'Offline',
           }
         ),
-        health: 'warning',
-      },
-      {
-        key: 'error',
-        title: i18n.translate(
-          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.errorTitle',
-          {
-            defaultMessage: 'Error',
-          }
-        ),
-        health: 'danger',
+        health: 'subdued',
       },
     ];
   }, []);

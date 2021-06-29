@@ -15,14 +15,14 @@ const log = new ToolingLog({
 });
 
 describe(`enumeratePatterns`, () => {
-  it(`should resolve x-pack/plugins/reporting/server/browsers/extract/unzip.js to kibana-reporting`, () => {
+  it(`should resolve x-pack/plugins/reporting/server/browsers/extract/unzip.ts to kibana-reporting`, () => {
     const actual = enumeratePatterns(REPO_ROOT)(log)(
       new Map([['x-pack/plugins/reporting', ['kibana-reporting']]])
     );
 
     expect(
       actual[0].includes(
-        'x-pack/plugins/reporting/server/browsers/extract/unzip.js kibana-reporting'
+        'x-pack/plugins/reporting/server/browsers/extract/unzip.ts kibana-reporting'
       )
     ).toBe(true);
   });

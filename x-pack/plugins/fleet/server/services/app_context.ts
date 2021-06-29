@@ -7,7 +7,6 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
 import { kibanaPackageJson } from '@kbn/utils';
 import type { KibanaRequest } from 'src/core/server';
 import type {
@@ -44,7 +43,7 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
-  public async start(appContext: FleetAppContext) {
+  public start(appContext: FleetAppContext) {
     this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
@@ -60,7 +59,7 @@ class AppContextService {
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
-      const initialValue = await this.config$.pipe(first()).toPromise();
+      const initialValue = appContext.configInitialValue;
       this.configSubject$ = new BehaviorSubject(initialValue);
       this.config$.subscribe(this.configSubject$);
     }

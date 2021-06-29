@@ -8,30 +8,34 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "osquery",
       "id": "def-public.OsqueryPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "OsqueryPluginSetup",
       "description": [],
-      "tags": [],
-      "children": [],
-      "source": {
-        "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 18
-      },
-      "lifecycle": "setup",
-      "initialIsOpen": true
-    },
-    "start": {
-      "id": "def-public.OsqueryPluginStart",
-      "type": "Interface",
-      "label": "OsqueryPluginStart",
-      "description": [],
-      "tags": [],
-      "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
         "lineNumber": 20
       },
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "osquery",
+      "id": "def-public.OsqueryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "OsqueryPluginStart",
+      "description": [],
+      "source": {
+        "path": "x-pack/plugins/osquery/public/types.ts",
+        "lineNumber": 22
+      },
+      "deprecated": false,
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -44,30 +48,34 @@
     "misc": [],
     "objects": [],
     "setup": {
+      "parentPluginId": "osquery",
       "id": "def-server.OsqueryPluginSetup",
       "type": "Interface",
+      "tags": [],
       "label": "OsqueryPluginSetup",
       "description": [],
-      "tags": [],
-      "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 16
+        "lineNumber": 17
       },
+      "deprecated": false,
+      "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
+      "parentPluginId": "osquery",
       "id": "def-server.OsqueryPluginStart",
       "type": "Interface",
+      "tags": [],
       "label": "OsqueryPluginStart",
       "description": [],
-      "tags": [],
-      "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 18
+        "lineNumber": 19
       },
+      "deprecated": false,
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -79,63 +87,105 @@
     "enums": [],
     "misc": [
       {
+        "parentPluginId": "osquery",
+        "id": "def-common.BASE_PATH",
+        "type": "string",
         "tags": [],
+        "label": "BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/osquery\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/osquery/common/constants.ts",
+          "lineNumber": 11
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "osquery",
         "id": "def-common.DEFAULT_DARK_MODE",
         "type": "string",
+        "tags": [],
         "label": "DEFAULT_DARK_MODE",
         "description": [],
+        "signature": [
+          "\"theme:darkMode\""
+        ],
         "source": {
           "path": "x-pack/plugins/osquery/common/constants.ts",
           "lineNumber": 9
         },
-        "signature": [
-          "\"theme:darkMode\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "osquery",
         "id": "def-common.DEFAULT_MAX_TABLE_QUERY_SIZE",
         "type": "number",
+        "tags": [],
         "label": "DEFAULT_MAX_TABLE_QUERY_SIZE",
         "description": [],
+        "signature": [
+          "10000"
+        ],
         "source": {
           "path": "x-pack/plugins/osquery/common/constants.ts",
           "lineNumber": 8
         },
-        "signature": [
-          "10000"
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
+        "parentPluginId": "osquery",
+        "id": "def-common.OSQUERY_INTEGRATION_NAME",
+        "type": "string",
         "tags": [],
+        "label": "OSQUERY_INTEGRATION_NAME",
+        "description": [],
+        "signature": [
+          "\"osquery_manager\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/osquery/common/constants.ts",
+          "lineNumber": 10
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "osquery",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
+        "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
+        "signature": [
+          "\"osquery\""
+        ],
         "source": {
           "path": "x-pack/plugins/osquery/common/index.ts",
           "lineNumber": 10
         },
-        "signature": [
-          "\"osquery\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
-        "tags": [],
+        "parentPluginId": "osquery",
         "id": "def-common.PLUGIN_NAME",
         "type": "string",
+        "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
+        "signature": [
+          "\"Osquery\""
+        ],
         "source": {
           "path": "x-pack/plugins/osquery/common/index.ts",
           "lineNumber": 11
         },
-        "signature": [
-          "\"Osquery\""
-        ],
+        "deprecated": false,
         "initialIsOpen": false
       }
     ],

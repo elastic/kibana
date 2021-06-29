@@ -98,9 +98,11 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
   );
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
-      setChartWidth(e.width);
+      if (Math.abs(chartWidth - e.width) > 20) {
+        setChartWidth(e.width);
+      }
     }, RESIZE_THROTTLE_TIME_MS),
-    []
+    [chartWidth]
   );
 
   if (error) {
@@ -181,6 +183,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               timeBuckets={timeBuckets}
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
+              showSelectedInterval={false}
             />
           )}
         </div>

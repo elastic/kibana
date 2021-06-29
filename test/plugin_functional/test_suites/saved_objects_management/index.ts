@@ -12,8 +12,9 @@ export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('Saved Objects Management', function () {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./scroll_count'));
-    loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./export_transform'));
     loadTestFile(require.resolve('./import_warnings'));
+    loadTestFile(require.resolve('./hidden_types'));
   });
 }

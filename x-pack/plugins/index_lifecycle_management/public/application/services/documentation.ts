@@ -22,3 +22,5 @@ export function init(esDocBasePath: string): void {
 }
 
 export const createDocLink = (docPath: string): string => `${_esDocBasePath}${docPath}`;
+export const getNodeAllocationMigrationLink = () =>
+  `${_esDocBasePath}migrate-index-allocation-filters.html`;

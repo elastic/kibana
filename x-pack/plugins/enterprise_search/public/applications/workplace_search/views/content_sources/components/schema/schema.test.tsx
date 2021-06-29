@@ -7,7 +7,7 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 import { mostRecentIndexJob } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -16,16 +16,13 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiFieldSearch } from '@elastic/eui';
 
-import { IndexingStatus } from '../../../../../shared/indexing_status';
-import { Loading } from '../../../../../shared/loading';
-import { SchemaAddFieldModal } from '../../../../../shared/schema/schema_add_field_modal';
+import { SchemaAddFieldModal, SchemaErrorsCallout } from '../../../../../shared/schema';
 
 import { Schema } from './schema';
 import { SchemaFieldsTable } from './schema_fields_table';
 
 describe('Schema', () => {
   const initializeSchema = jest.fn();
-  const onIndexingComplete = jest.fn();
   const addNewField = jest.fn();
   const updateFields = jest.fn();
   const openAddFieldModal = jest.fn();
@@ -59,7 +56,6 @@ describe('Schema', () => {
     setMockValues({ ...mockValues });
     setMockActions({
       initializeSchema,
-      onIndexingComplete,
       addNewField,
       updateFields,
       openAddFieldModal,
@@ -72,13 +68,6 @@ describe('Schema', () => {
     const wrapper = shallow(<Schema />);
 
     expect(wrapper.find(SchemaFieldsTable)).toHaveLength(1);
-  });
-
-  it('returns loading when loading', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<Schema />);
-
-    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('handles empty state', () => {
@@ -103,23 +92,13 @@ describe('Schema', () => {
     expect(setFilterValue).toHaveBeenCalledWith('Query');
   });
 
-  it('renders IndexingStatus (org)', () => {
+  it('renders schema errors', () => {
     setMockValues({ ...mockValues, mostRecentIndexJob });
     const wrapper = shallow(<Schema />);
 
-    expect(wrapper.find(IndexingStatus)).toHaveLength(1);
-    expect(wrapper.find(IndexingStatus).prop('statusPath')).toEqual(
-      '/api/workplace_search/org/sources/123/reindex_job/123/status'
-    );
-  });
-
-  it('renders IndexingStatus (account)', () => {
-    setMockValues({ ...mockValues, mostRecentIndexJob, isOrganization: false });
-    const wrapper = shallow(<Schema />);
-
-    expect(wrapper.find(IndexingStatus)).toHaveLength(1);
-    expect(wrapper.find(IndexingStatus).prop('statusPath')).toEqual(
-      '/api/workplace_search/account/sources/123/reindex_job/123/status'
+    expect(wrapper.find(SchemaErrorsCallout)).toHaveLength(1);
+    expect(wrapper.find(SchemaErrorsCallout).prop('viewErrorsPath')).toEqual(
+      '/sources/123/schemas/123'
     );
   });
 });

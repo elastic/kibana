@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export function wrapArray<T extends any>(subj: T | T[]): T[] {
+export function wrapArray<T>(subj: T | T[]): T[] {
   return Array.isArray(subj) ? subj : [subj];
 }
 

@@ -9,9 +9,10 @@
 import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
-import { SavedObjectsMigrationVersion } from '../types';
+import type { SavedObjectsMigrationVersion } from '../types';
+import type { TransformRawDocs } from './types';
 import { MigrationResult } from '../migrations/core';
-import { next, TransformRawDocs } from './next';
+import { next } from './next';
 import { createInitialState, model } from './model';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
@@ -55,5 +56,6 @@ export async function runResilientMigrator({
     logger,
     next: next(client, transformRawDocs),
     model,
+    client,
   });
 }

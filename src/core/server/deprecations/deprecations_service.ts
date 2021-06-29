@@ -11,8 +11,6 @@ import { RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 
 import { CoreContext } from '../core_context';
-import { CoreUsageDataSetup } from '../core_usage_data';
-import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
@@ -112,15 +110,13 @@ export interface InternalDeprecationsServiceSetup {
 /** @internal */
 export interface DeprecationsSetupDeps {
   http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  coreUsageData: CoreUsageDataSetup;
 }
 
 /** @internal */
 export class DeprecationsService implements CoreService<InternalDeprecationsServiceSetup> {
   private readonly logger: Logger;
 
-  constructor(private readonly coreContext: CoreContext) {
+  constructor(private readonly coreContext: Pick<CoreContext, 'logger' | 'configService'>) {
     this.logger = coreContext.logger.get('deprecations-service');
   }
 
@@ -156,8 +152,9 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
           return deprecationsContexts.map(({ message, correctiveActions, documentationUrl }) => {
             return {
               level: 'critical',
+              deprecationType: 'config',
               message,
-              correctiveActions: correctiveActions ?? {},
+              correctiveActions,
               documentationUrl,
             };
           });

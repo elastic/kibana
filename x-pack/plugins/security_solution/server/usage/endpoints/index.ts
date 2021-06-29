@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { SavedObject } from './../../../../../../src/core/types/saved_objects';
-import { Agent, NewAgentEvent } from './../../../../fleet/common/types/models/agent';
+import { Agent } from './../../../../fleet/common/types/models/agent';
 import { AgentMetadata } from '../../../../fleet/common/types/models/agent';
 import {
   getEndpointIntegratedFleetMetadata,
@@ -112,7 +112,8 @@ export const updateEndpointOSTelemetry = (
  * the same time span.
  */
 export const updateEndpointDailyActiveCount = (
-  latestEndpointEvent: SavedObject<NewAgentEvent>, // TODO: This information will be lost in 7.13, need to find an alternative route.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  latestEndpointEvent: SavedObject<any>, // TODO: This information will be lost in 7.13, need to find an alternative route.
   lastAgentCheckin: Agent['last_checkin'],
   currentCount: number
 ) => {
@@ -130,7 +131,8 @@ export const updateEndpointDailyActiveCount = (
  * to populate the success of it's application. The policy is provided in the agent health checks.
  */
 export const updateEndpointPolicyTelemetry = (
-  latestEndpointEvent: SavedObject<NewAgentEvent>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  latestEndpointEvent: SavedObject<any>,
   policiesTracker: PoliciesTelemetry
 ): PoliciesTelemetry => {
   const policyHostTypeToPolicyType = {

@@ -302,7 +302,7 @@ describe('Reporting Config Schema', () => {
     // kibanaServer
     const throwValidationErr = () => ConfigSchema.validate({ kibanaServer: { hostname: '0' } });
     expect(throwValidationErr).toThrowError(
-      `[kibanaServer.hostname]: must not be "0" for the headless browser to correctly resolve the host`
+      `[kibanaServer.hostname]: value must be a valid hostname (see RFC 1123).`
     );
   });
 });

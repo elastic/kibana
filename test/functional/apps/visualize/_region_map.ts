@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const PageObjects = getPageObjects(['visualize', 'visEditor', 'timePicker']);
 
     before(async function () {
+      await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickRegionMap');

@@ -33,8 +33,9 @@ export class FieldFormatsService {
     return {
       fieldFormatServiceFactory: async (uiSettings: IUiSettingsClient) => {
         const fieldFormatsRegistry = new FieldFormatsRegistry();
-        const uiConfigs = await uiSettings.getAll();
+        const coreUiConfigs = await uiSettings.getAll();
         const registeredUiSettings = uiSettings.getRegistered();
+        const uiConfigs = { ...coreUiConfigs };
 
         Object.keys(registeredUiSettings).forEach((key) => {
           if (has(uiConfigs, key) && registeredUiSettings[key].type === 'json') {

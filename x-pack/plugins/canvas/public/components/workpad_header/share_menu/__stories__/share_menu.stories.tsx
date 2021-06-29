@@ -5,19 +5,34 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { platformService } from '../../../../services/stubs/platform';
+import { reportingService } from '../../../../services/stubs/reporting';
 import { ShareMenu } from '../share_menu.component';
 
-storiesOf('components/WorkpadHeader/ShareMenu', module).add('default', () => (
+storiesOf('components/WorkpadHeader/ShareMenu', module).add('minimal', () => (
   <ShareMenu
-    includeReporting={true}
-    onCopy={action('onCopy')}
-    onExport={action('onExport')}
-    getExportUrl={(type: string) => {
-      action(`getExportUrl('${type}')`);
-      return type;
+    sharingData={{
+      workpad: { id: 'coolworkpad', name: 'Workpad of Cool', height: 10, width: 7 },
+      pageCount: 11,
     }}
+    sharingServices={{ basePath: platformService.getBasePathInterface() }}
+    onExport={action('onExport')}
+  />
+));
+
+storiesOf('components/WorkpadHeader/ShareMenu', module).add('with Reporting', () => (
+  <ShareMenu
+    sharingData={{
+      workpad: { id: 'coolworkpad', name: 'Workpad of Cool', height: 10, width: 7 },
+      pageCount: 11,
+    }}
+    sharingServices={{
+      basePath: platformService.getBasePathInterface(),
+      reporting: reportingService.start,
+    }}
+    onExport={action('onExport')}
   />
 ));

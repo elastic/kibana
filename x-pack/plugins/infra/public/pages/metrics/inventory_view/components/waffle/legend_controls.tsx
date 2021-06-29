@@ -173,7 +173,7 @@ export const LegendControls = ({
   const errors = !boundsValidRange
     ? [
         i18n.translate('xpack.infra.legnedControls.boundRangeError', {
-          defaultMessage: 'Minimum must be smaller then the maximum',
+          defaultMessage: 'Minimum must be smaller than the maximum',
         }),
       ]
     : [];

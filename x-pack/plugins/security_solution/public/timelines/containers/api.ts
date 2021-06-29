@@ -8,11 +8,9 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 
-import { throwErrors } from '../../../../cases/common/api';
+import { throwErrors } from '../../../../cases/common';
 import {
   TimelineResponse,
   TimelineResponseType,
@@ -41,10 +39,9 @@ import {
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
-import { ExportSelectedData } from '../../common/components/generic_downloader';
-
-import { createToasterPlainError } from '../../cases/containers/utils';
+import { ToasterError } from '../../common/components/toasters';
 import {
+  ExportDocumentsProps,
   ImportDataProps,
   ImportDataResponse,
 } from '../../detections/containers/detection_engine/rules';
@@ -61,7 +58,7 @@ interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
 }
 
 type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline<null | string>>;
-
+const createToasterPlainError = (message: string) => new ToasterError([message]);
 const decodeTimelineResponse = (respTimeline?: TimelineResponse | TimelineErrorResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),
@@ -222,11 +219,11 @@ export const importTimelines = async ({
   });
 };
 
-export const exportSelectedTimeline: ExportSelectedData = ({
+export const exportSelectedTimeline = ({
   filename = `timelines_export.ndjson`,
   ids = [],
   signal,
-}): Promise<Blob | TimelineErrorResponse> => {
+}: ExportDocumentsProps): Promise<Blob | TimelineErrorResponse> => {
   let requestBody;
   try {
     requestBody = ids.length > 0 ? JSON.stringify({ ids }) : undefined;

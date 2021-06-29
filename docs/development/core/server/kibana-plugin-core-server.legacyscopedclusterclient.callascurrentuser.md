@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use [IScopedClusterClient.asCurrentUser](./kibana-plugin-core-server.iscopedclusterclient.ascurrentuser.md)<!-- -->.
+> Use [IScopedClusterClient.asCurrentUser](./kibana-plugin-core-server.iscopedclusterclient.ascurrentuser.md)<!-- -->.  7.16
 > 
 
 Calls specified `endpoint` with provided `clientParams` on behalf of the user initiated request to the Kibana server (via HTTP request headers). See [LegacyAPICaller](./kibana-plugin-core-server.legacyapicaller.md)<!-- -->.

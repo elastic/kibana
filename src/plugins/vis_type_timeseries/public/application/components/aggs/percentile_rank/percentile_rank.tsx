@@ -27,7 +27,7 @@ import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
 import { KBN_FIELD_TYPES } from '../../../../../../data/public';
-import { MetricsItemsSchema, PanelSchema, SanitizedFieldType } from '../../../../../common/types';
+import type { Metric, Panel, SanitizedFieldType } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';
 
@@ -37,9 +37,9 @@ interface PercentileRankAggProps {
   disableDelete: boolean;
   fields: Record<string, SanitizedFieldType[]>;
   indexPattern: string;
-  model: MetricsItemsSchema;
-  panel: PanelSchema;
-  siblings: MetricsItemsSchema[];
+  model: Metric;
+  panel: Panel;
+  siblings: Metric[];
   dragHandleProps: DragHandleProps;
   onAdd(): void;
   onChange(): void;
@@ -57,7 +57,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
 
-  const handlePercentileRankValuesChange = (values: MetricsItemsSchema['values']) => {
+  const handlePercentileRankValuesChange = (values: Metric['values']) => {
     handleChange({
       ...model,
       values,

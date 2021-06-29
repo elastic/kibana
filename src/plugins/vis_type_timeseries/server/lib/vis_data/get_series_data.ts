@@ -20,13 +20,13 @@ import type {
   VisTypeTimeseriesVisDataRequest,
   VisTypeTimeseriesRequestServices,
 } from '../../types';
-import type { PanelSchema } from '../../../common/types';
-import { PANEL_TYPES } from '../../../common/panel_types';
+import type { Panel } from '../../../common/types';
+import { PANEL_TYPES } from '../../../common/enums';
 
 export async function getSeriesData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
-  panel: PanelSchema,
+  panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
   const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);

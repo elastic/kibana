@@ -7,10 +7,12 @@
 
 import React, { HTMLAttributes, useState } from 'react';
 
-import { CellValueElementProps } from '../../cell_rendering';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import {
+  ColumnHeaderOptions,
+  CellValueElementProps,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 
 export interface CommonProps {
   className?: string;
@@ -38,7 +40,6 @@ const StatefulCellComponent = ({
   timelineId: string;
 }) => {
   const [cellProps, setCellProps] = useState<CommonProps & HTMLAttributes<HTMLDivElement>>({});
-
   return (
     <div data-test-subj="statefulCell" {...cellProps}>
       {renderCellValue({

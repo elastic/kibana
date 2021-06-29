@@ -288,7 +288,10 @@ export async function fetchLogstashStats(
           { terms: { cluster_uuid: clusterUuids } },
           {
             bool: {
-              must: { term: { type: 'logstash_stats' } },
+              should: [
+                { term: { type: 'logstash_stats' } },
+                { term: { 'metricset.name': 'stats' } },
+              ],
             },
           },
         ],

@@ -59,7 +59,7 @@ export function ChangeIndexPattern({
   return (
     <>
       <EuiPopover
-        style={{ width: '100%' }}
+        panelClassName="lnsChangeIndexPatternPopover"
         button={createTrigger()}
         isOpen={isPopoverOpen}
         closePopover={() => setPopoverIsOpen(false)}
@@ -67,7 +67,7 @@ export function ChangeIndexPattern({
         panelPaddingSize="s"
         ownFocus
       >
-        <div style={{ width: 320 }} data-test-subj="lnsChangeIndexPatternPopup">
+        <div>
           <EuiPopoverTitle>
             {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
               defaultMessage: 'Change index pattern',

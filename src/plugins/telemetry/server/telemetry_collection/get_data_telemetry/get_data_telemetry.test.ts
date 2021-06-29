@@ -271,7 +271,7 @@ describe('get_data_telemetry', () => {
 function mockEsClient(
   indicesMappings: string[] = [], // an array of `indices` to get mappings from.
   { isECS = false, dataStreamDataset = '', dataStreamType = '', shipper = '' } = {},
-  indexStats: any = {}
+  indexStats = {}
 ) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // @ts-expect-error

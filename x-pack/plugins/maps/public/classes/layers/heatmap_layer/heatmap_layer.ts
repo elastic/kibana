@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from 'mapbox-gl';
+import type { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
@@ -111,6 +111,9 @@ export class HeatmapLayer extends AbstractLayer {
         },
         syncContext,
         source: this.getSource(),
+        getUpdateDueToTimeslice: () => {
+          return true;
+        },
       });
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {

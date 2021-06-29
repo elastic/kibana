@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { PALETTES, PanelData } from '../../../common/types';
+import { PALETTES } from '../../../common/enums';
+import type { PanelData } from '../../../common/types';
 import { computeGradientFinalColor } from './compute_gradient_final_color';
 import { rainbowColors } from './rainbow_colors';
 import { emptyLabel } from '../../../common/empty_label';
@@ -57,7 +58,7 @@ export const getSplitByTermsColor = ({
         }
       : seriesPalette.params;
 
-  const outputColor = palettesRegistry?.get(paletteName).getColor(
+  const outputColor = palettesRegistry?.get(paletteName || 'default').getCategoricalColor(
     [
       {
         name: seriesName || emptyLabel,

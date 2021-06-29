@@ -6,15 +6,15 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useFindLists } from '@kbn/securitysolution-list-hooks';
+import * as Api from '@kbn/securitysolution-list-api';
 
-import * as Api from '../api';
 import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getFoundListSchemaMock } from '../../../common/schemas/response/found_list_schema.mock';
 
-import { useFindLists } from './use_find_lists';
+jest.mock('@kbn/securitysolution-list-api');
 
-jest.mock('../api');
-
+// TODO: Move this test to the package of: kbn-securitysolution-list-hooks/src/use_find_lists/index.test.ts once kbn mocks such as httpServiceMock are figured out
 describe('useFindLists', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
 

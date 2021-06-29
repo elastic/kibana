@@ -25,6 +25,7 @@ import {
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
+  SHOW_MULTIFIELDS,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -155,13 +156,13 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   },
   [DOC_TABLE_LEGACY]: {
     name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use legacy table',
+      defaultMessage: 'Use classic table',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
-        'view. Enable this option if you prefer to fall back to the legacy table.',
+        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
+        'Turn on this option to use the classic table. Turn off to use the new table. ',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -195,6 +196,26 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
         defaultMessage: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
       }
     ),
+    value: false,
+    category: ['discover'],
+    schema: schema.boolean(),
+  },
+  [SHOW_MULTIFIELDS]: {
+    name: i18n.translate('discover.advancedSettings.discover.showMultifields', {
+      defaultMessage: 'Show multi-fields',
+    }),
+    description: i18n.translate('discover.advancedSettings.discover.showMultifieldsDescription', {
+      defaultMessage: `Controls whether {multiFields} display in the expanded document view. In most cases, multi-fields are the same as the original field. This option is only available when \`searchFieldsFromSource\` is off.`,
+      values: {
+        multiFields:
+          `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/multi-fields.html"
+            target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.discover.multiFieldsLinkText', {
+            defaultMessage: 'multi-fields',
+          }) +
+          '</a>',
+      },
+    }),
     value: false,
     category: ['discover'],
     schema: schema.boolean(),

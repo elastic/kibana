@@ -7,6 +7,6 @@
  */
 
 import React from 'react';
-import { PanelSchema } from '../../../common/types';
+import type { Panel } from '../../../common/types';
 
-export const PanelModelContext = React.createContext<PanelSchema | null>(null);
+export const PanelModelContext = React.createContext<Panel | null>(null);

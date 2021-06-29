@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { useDebounce } from 'react-use';
+import React, { useCallback, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useDispatch } from 'react-redux';
+import { Query } from 'src/plugins/data/common';
 import { useGetUrlParams, useUpdateKueryString, useUrlParams } from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
 import { useIndexPattern } from './use_index_pattern';
@@ -20,7 +21,26 @@ export enum SyntaxType {
 }
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
-export const useQueryBar = () => {
+const DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL = 800;
+
+interface UseQueryBarUtils {
+  // The Query object used by the search bar
+  query: Query;
+  // Update the Query object
+  setQuery: React.Dispatch<React.SetStateAction<Query>>;
+  /**
+   * By default the search bar uses a debounce to delay submitting input;
+   * this function will cancel the debounce and submit immediately.
+   */
+  submitImmediately: () => void;
+}
+
+/**
+ * Provides state management and automatic dispatching of a Query object.
+ *
+ * @returns {UseQueryBarUtils}
+ */
+export const useQueryBar = (): UseQueryBarUtils => {
   const dispatch = useDispatch();
 
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
@@ -30,7 +50,7 @@ export const useQueryBar = () => {
     services: { storage },
   } = useKibana<UptimePluginServices>();
 
-  const [query, setQuery] = useState(
+  const [query, setQuery] = useState<Query>(
     queryParam
       ? {
           query: queryParam,
@@ -44,7 +64,7 @@ export const useQueryBar = () => {
         }
   );
 
-  const { index_pattern: indexPattern } = useIndexPattern(query.language);
+  const { index_pattern: indexPattern } = useIndexPattern();
 
   const updateUrlParams = useUrlParams()[1];
 
@@ -59,22 +79,36 @@ export const useQueryBar = () => {
     [dispatch]
   );
 
-  useEffect(() => {
-    setEsKueryFilters(esFilters ?? '');
-  }, [esFilters, setEsKueryFilters]);
+  const setEs = useCallback(() => setEsKueryFilters(esFilters ?? ''), [
+    esFilters,
+    setEsKueryFilters,
+  ]);
+  const [, cancelEsKueryUpdate] = useDebounce(setEs, DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL, [
+    esFilters,
+    setEsKueryFilters,
+  ]);
 
-  useDebounce(
-    () => {
-      if (query.language === SyntaxType.text && queryParam !== query.query) {
-        updateUrlParams({ query: query.query as string });
-      }
-      if (query.language === SyntaxType.kuery) {
-        updateUrlParams({ query: '' });
-      }
-    },
-    350,
+  const handleQueryUpdate = useCallback(() => {
+    if (query.language === SyntaxType.text && queryParam !== query.query) {
+      updateUrlParams({ query: query.query as string });
+    }
+    if (query.language === SyntaxType.kuery) {
+      updateUrlParams({ query: '' });
+    }
+  }, [query.language, query.query, queryParam, updateUrlParams]);
+
+  const [, cancelQueryUpdate] = useDebounce(
+    handleQueryUpdate,
+    DEFAULT_QUERY_UPDATE_DEBOUNCE_INTERVAL,
     [query]
   );
+
+  const submitImmediately = useCallback(() => {
+    cancelQueryUpdate();
+    cancelEsKueryUpdate();
+    handleQueryUpdate();
+    setEs();
+  }, [cancelEsKueryUpdate, cancelQueryUpdate, handleQueryUpdate, setEs]);
 
   useDebounce(
     () => {
@@ -92,5 +126,5 @@ export const useQueryBar = () => {
     [esFilters, error]
   );
 
-  return { query, setQuery };
+  return { query, setQuery, submitImmediately };
 };

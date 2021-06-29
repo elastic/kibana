@@ -12,11 +12,11 @@ import {
   KibanaRequest,
   CoreStart,
 } from 'src/core/server';
+import { RuleDataClient } from '../../../rule_registry/server';
 import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { APMConfig } from '..';
 import { APMPluginDependencies } from '../types';
-import { APMRuleRegistry } from '../plugin';
 
 export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
   licensing: LicensingApiRequestHandlerContext;
@@ -39,6 +39,7 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
     >;
+    body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
   };
 }
 
@@ -62,5 +63,5 @@ export interface APMRouteHandlerResources {
       start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
     };
   };
-  apmRuleRegistry: APMRuleRegistry;
+  ruleDataClient: RuleDataClient;
 }

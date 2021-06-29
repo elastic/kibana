@@ -117,13 +117,14 @@ export enum IndexGroup {
 // Telemetry types
 export const UPGRADE_ASSISTANT_TYPE = 'upgrade-assistant-telemetry';
 export const UPGRADE_ASSISTANT_DOC_ID = 'upgrade-assistant-telemetry';
-export type UIOpenOption = 'overview' | 'cluster' | 'indices';
+export type UIOpenOption = 'overview' | 'cluster' | 'indices' | 'kibana';
 export type UIReindexOption = 'close' | 'open' | 'start' | 'stop';
 
 export interface UIOpen {
   overview: boolean;
   cluster: boolean;
   indices: boolean;
+  kibana: boolean;
 }
 
 export interface UIReindex {
@@ -138,6 +139,7 @@ export interface UpgradeAssistantTelemetrySavedObject {
     overview: number;
     cluster: number;
     indices: number;
+    kibana: number;
   };
   ui_reindex: {
     close: number;
@@ -152,6 +154,7 @@ export interface UpgradeAssistantTelemetry {
     overview: number;
     cluster: number;
     indices: number;
+    kibana: number;
   };
   ui_reindex: {
     close: number;

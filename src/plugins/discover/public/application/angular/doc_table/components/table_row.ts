@@ -6,39 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { find, template } from 'lodash';
+import { find } from 'lodash';
 import $ from 'jquery';
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 import { dispatchRenderComplete } from '../../../../../../kibana_utils/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
-import cellTemplateHtml from '../components/table_row/cell.html';
-import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 import { getServices } from '../../../../kibana_services';
 import { getContextUrl } from '../../../helpers/get_context_url';
 import { formatRow, formatTopLevelObject } from '../../helpers';
-
-const TAGS_WITH_WS = />\s+</g;
-
-/**
- * Remove all of the whitespace between html tags
- * so that inline elements don't have extra spaces.
- */
-export function noWhiteSpace(html: string): string {
-  return html.replace(TAGS_WITH_WS, '><');
-}
+import { truncateByHeight } from './table_row/truncate_by_height';
+import { cell } from './table_row/cell';
 
 // guesstimate at the minimum number of chars wide cells in the table should be
 const MIN_LINE_LENGTH = 20;
 
 interface LazyScope extends ng.IScope {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
 export function createTableRowDirective($compile: ng.ICompileService) {
-  const cellTemplate = template(noWhiteSpace(cellTemplateHtml));
-  const truncateByHeightTemplate = template(noWhiteSpace(truncateByHeightTemplateHtml));
-
   return {
     restrict: 'A',
     scope: {
@@ -94,6 +82,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
         createSummaryRow($scope.row);
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       $scope.inlineFilter = function inlineFilter($event: any, type: string) {
         const column = $($event.currentTarget).data().column;
         const field = $scope.indexPattern.fields.getByName(column);
@@ -119,6 +108,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       };
 
       // create a tr element that lists the value for each *column*
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function createSummaryRow(row: any) {
         const indexPattern = $scope.indexPattern;
         $scope.flattenedRow = indexPattern.flattenHit(row);
@@ -130,7 +120,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
         const hideTimeColumn = getServices().uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
-            cellTemplate({
+            cell({
               timefield: true,
               formatted: _displayField(row, indexPattern.timeFieldName),
               filterable: mapping(indexPattern.timeFieldName).filterable && $scope.filter,
@@ -143,7 +133,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           const formatted = formatRow(row, indexPattern);
 
           newHtmls.push(
-            cellTemplate({
+            cell({
               timefield: false,
               sourcefield: true,
               formatted,
@@ -161,7 +151,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
                 })
               );
               newHtmls.push(
-                cellTemplate({
+                cell({
                   timefield: false,
                   sourcefield: true,
                   formatted: formatTopLevelObject(row, innerColumns, indexPattern),
@@ -171,7 +161,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
               );
             } else {
               newHtmls.push(
-                cellTemplate({
+                cell({
                   timefield: false,
                   sourcefield: column === '_source',
                   formatted: _displayField(row, column, true),
@@ -188,8 +178,8 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           const $cell = $cells.eq(i);
           if ($cell.data('discover:html') === html) return;
 
-          const reuse = find($cells.slice(i + 1), function (cell: any) {
-            return $.data(cell, 'discover:html') === html;
+          const reuse = find($cells.slice(i + 1), (c) => {
+            return $.data(c, 'discover:html') === html;
           });
 
           const $target = reuse ? $(reuse).detach() : $(html);
@@ -222,12 +212,13 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       /**
        * Fill an element with the value of a field
        */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       function _displayField(row: any, fieldName: string, truncate = false) {
         const indexPattern = $scope.indexPattern;
         const text = indexPattern.formatField(row, fieldName);
 
         if (truncate && text.length > MIN_LINE_LENGTH) {
-          return truncateByHeightTemplate({
+          return truncateByHeight({
             body: text,
           });
         }

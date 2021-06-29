@@ -8,7 +8,7 @@ import { HttpSetup } from 'kibana/public';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 
 export async function unmuteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERTING_API_PATH}/rule/${id}/_unmute_all`);
+  await http.post(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_unmute_all`);
 }
 
 export async function unmuteAlerts({
