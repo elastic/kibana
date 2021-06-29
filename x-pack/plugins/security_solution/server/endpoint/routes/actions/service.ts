@@ -5,75 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import type { estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient, Logger } from 'kibana/server';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../../fleet/common';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { ActivityLog, EndpointAction } from '../../../../common/endpoint/types';
-
-const getFilterClause = ({
-  index,
-  elasticAgentId,
-  actionIds,
-}: {
-  index: typeof AGENT_ACTIONS_INDEX | typeof AGENT_ACTIONS_RESULTS_INDEX;
-  elasticAgentId: string;
-  actionIds?: string[];
-}) => {
-  const clause: Array<{ term: { [x: string]: string } } | { terms: { [x: string]: string[] } }> = [
-    { term: { [index === AGENT_ACTIONS_INDEX ? 'agents' : 'agent_id']: elasticAgentId } },
-  ];
-
-  if (index === AGENT_ACTIONS_INDEX) {
-    clause.push(
-      { term: { input_type: 'endpoint' } },
-      { term: { type: 'INPUT_ACTION' } },
-      { term: { agents: elasticAgentId } }
-    );
-  } else if (actionIds) {
-    clause.push({
-      terms: {
-        action_id: actionIds,
-      },
-    });
-  }
-
-  return clause;
-};
-
-export const getAuditLogESQuery = ({
-  index,
-  elasticAgentId,
-  actionIds,
-  from,
-  size,
-}: {
-  index: typeof AGENT_ACTIONS_INDEX | typeof AGENT_ACTIONS_RESULTS_INDEX;
-  elasticAgentId: string;
-  actionIds?: string[];
-  from: number;
-  size: number;
-}): estypes.SearchRequest => {
-  return {
-    index,
-    size,
-    from,
-    body: {
-      query: {
-        bool: {
-          filter: getFilterClause({ index, elasticAgentId, actionIds }),
-        },
-      },
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-          },
-        },
-      ],
-    },
-  };
-};
 
 export const getAuditLogResponse = async ({
   elasticAgentId,
@@ -98,27 +33,67 @@ export const getAuditLogResponse = async ({
     };
   }>;
 }> => {
-  const size = pageSize;
-  const from = page <= 1 ? 0 : page * pageSize - pageSize + 1;
+  const size = Math.round(pageSize / 2);
+  const from = page <= 1 ? 0 : page * size - size + 1;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
 
+  const data = await getActivityLog({ esClient, from, size, elasticAgentId, logger });
+
+  return {
+    page,
+    pageSize,
+    data,
+  };
+};
+
+const getActivityLog = async ({
+  esClient,
+  size,
+  from,
+  elasticAgentId,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  elasticAgentId: string;
+  size: number;
+  from: number;
+  logger: Logger;
+}) => {
   const options = {
     headers: {
       'X-elastic-product-origin': 'fleet',
     },
     ignore: [404],
   };
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   let actionsResult;
   let responsesResult;
 
   try {
     actionsResult = await esClient.search(
-      getAuditLogESQuery({
+      {
         index: AGENT_ACTIONS_INDEX,
-        elasticAgentId,
-        from,
         size,
-      }),
+        from,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { term: { agents: elasticAgentId } },
+                { term: { input_type: 'endpoint' } },
+                { term: { type: 'INPUT_ACTION' } },
+              ],
+            },
+          },
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
+        },
+      },
       options
     );
     const actionIds = actionsResult.body.hits.hits.map(
@@ -126,13 +101,17 @@ export const getAuditLogResponse = async ({
     );
 
     responsesResult = await esClient.search(
-      getAuditLogESQuery({
+      {
         index: AGENT_ACTIONS_RESULTS_INDEX,
-        elasticAgentId,
-        actionIds,
-        from,
-        size,
-      }),
+        size: 1000,
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { agent_id: elasticAgentId } }, { terms: { action_id: actionIds } }],
+            },
+          },
+        },
+      },
       options
     );
   } catch (error) {
@@ -145,21 +124,17 @@ export const getAuditLogResponse = async ({
   }
 
   const sortedData = ([
-    ...actionsResult.body.hits.hits.map((e) => ({
-      type: 'action',
-      item: { id: e._id, data: e._source },
-    })),
     ...responsesResult.body.hits.hits.map((e) => ({
       type: 'response',
+      item: { id: e._id, data: e._source },
+    })),
+    ...actionsResult.body.hits.hits.map((e) => ({
+      type: 'action',
       item: { id: e._id, data: e._source },
     })),
   ] as ActivityLog['data']).sort((a, b) =>
     new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
   );
 
-  return {
-    page,
-    pageSize,
-    data: sortedData,
-  };
+  return sortedData;
 };
