@@ -152,7 +152,7 @@ export function MlLatencyCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
               {
                 defaultMessage:
-                  'The impact of a field on the latency of the service, ranging from 0 to 1.',
+                  'The impact [0-1] of an attribute; the greater the impact, the more an attribute increases latency.',
               }
             )}
           >
