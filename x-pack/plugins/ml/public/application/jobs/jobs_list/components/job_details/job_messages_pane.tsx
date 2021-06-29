@@ -14,7 +14,7 @@ import { JobMessages } from '../../../../components/job_messages';
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useMlKibana } from '../../../../../application/contexts/kibana';
+import { useMlApiContext } from '../../../../contexts/kibana';
 interface JobMessagesPaneProps {
   jobId: string;
   start?: string;
@@ -32,14 +32,8 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
 
     const toastNotificationService = useToastNotificationService();
     const {
-      services: {
-        mlServices: {
-          mlApiServices: {
-            jobs: { clearJobAuditMessages },
-          },
-        },
-      },
-    } = useMlKibana();
+      jobs: { clearJobAuditMessages },
+    } = useMlApiContext();
 
     const fetchMessages = async () => {
       setIsLoading(true);

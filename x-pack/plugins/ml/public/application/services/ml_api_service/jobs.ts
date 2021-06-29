@@ -162,7 +162,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
 
   clearJobAuditMessages(jobId: string) {
     const body = JSON.stringify({ jobId });
-    return httpService.http<any>({
+    return httpService.http<{ success: boolean; latest_cleared: number }>({
       path: `${ML_BASE_PATH}/job_audit_messages/clear_messages`,
       method: 'PUT',
       body,
