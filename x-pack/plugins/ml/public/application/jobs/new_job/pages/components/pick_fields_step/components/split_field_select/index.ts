@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SplitFieldSelector } from './split_field';
+export { SplitFieldSelect } from './split_field_select';
