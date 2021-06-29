@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const elasticChart = getService('elasticChart');
   const testSubjects = getService('testSubjects');
 
@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '10', {
         clearWithKeyboard: true,
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -83,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '5722.77', name: '> 5,722.77', color: '#6092c0' },
+        { key: '7126', name: '> 7,126', color: '#6092c0' },
         { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
         { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
         { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
@@ -93,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not change when passing from percentage to number', async () => {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
-      // const stopValue = await testSubjects.get('lnsPalettePanel_dynamicColoring_stop_value_0');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -103,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '5722.77', name: '> 5,722.77', color: '#6092c0' },
+        { key: '7126', name: '> 7,126', color: '#6092c0' },
         { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
         { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
         { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
@@ -115,6 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '0', {
         clearWithKeyboard: true,
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -133,9 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset stop numbers when changing palette', async () => {
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_0', '0', {
-        clearWithKeyboard: true,
-      });
+      await PageObjects.lens.changePaletteTo('status');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       const debugState = await PageObjects.lens.getCurrentChartDebugState();
 
@@ -145,11 +146,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend has changed
       expect(debugState.legend!.items).to.eql([
-        { key: '0', name: '> 0', color: '#6092c0' },
-        { key: '8529.22', name: '> 8,529.22', color: '#a8bfda' },
-        { key: '11335.66', name: '> 11,335.66', color: '#ebeff5' },
-        { key: '14142.11', name: '> 14,142.11', color: '#ecb385' },
-        { key: '16948.55', name: '> 16,948.55', color: '#e7664c' },
+        { key: '5722.77', name: '> 5,722.77', color: '#209280' },
+        { key: '8529.22', name: '> 8,529.22', color: '#54b399' },
+        { key: '11335.66', name: '> 11,335.66', color: '#d6bf57' },
+        { key: '14142.11', name: '> 14,142.11', color: '#e7664c' },
+        { key: '16948.55', name: '> 16,948.55', color: '#cc5642' },
       ]);
     });
   });
