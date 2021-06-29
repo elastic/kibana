@@ -474,7 +474,7 @@
     "@kbn/storybook": "link:bazel-bin/packages/kbn-storybook",
     "@kbn/telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",
-    "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
+    "@kbn/test-subj-selector": "link:bazel-bin/packages/kbn-test-subj-selector",
     "@loaders.gl/polyfills": "^2.3.5",
     "@microsoft/api-documenter": "7.7.2",
     "@microsoft/api-extractor": "7.7.0",

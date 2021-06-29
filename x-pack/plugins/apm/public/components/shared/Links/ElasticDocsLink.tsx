@@ -10,7 +10,13 @@ import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 // union type constisting of valid guide sections that we link to
-type DocsSection = '/apm/get-started' | '/x-pack' | '/apm/server' | '/kibana';
+type DocsSection =
+  | '/apm/get-started'
+  | '/x-pack'
+  | '/apm/server'
+  | '/kibana'
+  | '/elasticsearch/reference'
+  | '/cloud';
 
 interface Props extends EuiLinkAnchorProps {
   section: DocsSection;
@@ -20,7 +26,7 @@ interface Props extends EuiLinkAnchorProps {
 export function ElasticDocsLink({ section, path, children, ...rest }: Props) {
   const { docLinks } = useApmPluginContext().core;
   const baseUrl = docLinks.ELASTIC_WEBSITE_URL;
-  const version = docLinks.DOC_LINK_VERSION;
+  const version = section === '/cloud' ? 'current' : docLinks.DOC_LINK_VERSION;
   const href = `${baseUrl}guide/en${section}/${version}${path}`;
 
   return typeof children === 'function' ? (

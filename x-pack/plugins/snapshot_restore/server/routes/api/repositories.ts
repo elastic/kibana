@@ -116,7 +116,7 @@ export function registerRepositoriesRoutes({
         snapshot: '_all',
       });
 
-      const { responses: snapshotResponses } = response.body;
+      const { snapshots: snapshotList } = response.body;
 
       if (repositoryByName[name]) {
         const { type = '', settings = {} } = repositoryByName[name];
@@ -130,10 +130,7 @@ export function registerRepositoriesRoutes({
             },
             isManagedRepository: managedRepository === name,
             snapshots: {
-              count:
-                snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots
-                  ? snapshotResponses[0].snapshots.length
-                  : null,
+              count: snapshotList ? snapshotList.length : null,
             },
           },
         });

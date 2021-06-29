@@ -49,6 +49,11 @@ export const config = {
     maxServiceEnvironments: schema.number({ defaultValue: 100 }),
     maxServiceSelection: schema.number({ defaultValue: 50 }),
     profilingEnabled: schema.boolean({ defaultValue: false }),
+    agent: schema.object({
+      migrations: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+    }),
   }),
 };
 
@@ -94,6 +99,7 @@ export function mergeConfigs(
     'xpack.apm.searchAggregatedTransactions':
       apmConfig.searchAggregatedTransactions,
     'xpack.apm.metricsInterval': apmConfig.metricsInterval,
+    'xpack.apm.agent.migrations.enabled': apmConfig.agent.migrations.enabled,
   };
 
   if (apmOssConfig.fleetMode) {

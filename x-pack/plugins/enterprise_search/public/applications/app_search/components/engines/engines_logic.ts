@@ -118,27 +118,35 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
       const { http } = HttpLogic.values;
       const { enginesMeta } = values;
 
-      const response = await http.get('/api/app_search/engines', {
-        query: {
-          type: 'indexed',
-          'page[current]': enginesMeta.page.current,
-          'page[size]': enginesMeta.page.size,
-        },
-      });
-      actions.onEnginesLoad(response);
+      try {
+        const response = await http.get('/api/app_search/engines', {
+          query: {
+            type: 'indexed',
+            'page[current]': enginesMeta.page.current,
+            'page[size]': enginesMeta.page.size,
+          },
+        });
+        actions.onEnginesLoad(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     loadMetaEngines: async () => {
       const { http } = HttpLogic.values;
       const { metaEnginesMeta } = values;
 
-      const response = await http.get('/api/app_search/engines', {
-        query: {
-          type: 'meta',
-          'page[current]': metaEnginesMeta.page.current,
-          'page[size]': metaEnginesMeta.page.size,
-        },
-      });
-      actions.onMetaEnginesLoad(response);
+      try {
+        const response = await http.get('/api/app_search/engines', {
+          query: {
+            type: 'meta',
+            'page[current]': metaEnginesMeta.page.current,
+            'page[size]': metaEnginesMeta.page.size,
+          },
+        });
+        actions.onMetaEnginesLoad(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     onDeleteEngineSuccess: async ({ engine }) => {
       flashSuccessToast(DELETE_ENGINE_MESSAGE(engine.name));

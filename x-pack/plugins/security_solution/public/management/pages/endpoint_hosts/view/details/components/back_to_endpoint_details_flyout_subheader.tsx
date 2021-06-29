@@ -10,14 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './flyout_sub_header';
 import { getEndpointDetailsPath } from '../../../../../common/routing';
 import { useNavigateByRouterEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { useFormatUrl } from '../../../../../../common/components/link_to';
-import { SecurityPageName } from '../../../../../../../common/constants';
 import { useEndpointSelector } from '../../hooks';
 import { uiQueryParams } from '../../../store/selectors';
+import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 
 export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>(
   ({ endpointId }) => {
-    const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+    const { getAppUrl } = useAppUrl();
     const { show, ...currentUrlQueryParams } = useEndpointSelector(uiQueryParams);
 
     const detailsRoutePath = useMemo(
@@ -37,10 +36,10 @@ export const BackToEndpointDetailsFlyoutSubHeader = memo<{ endpointId: string }>
         title: i18n.translate('xpack.securitySolution.endpoint.policyResponse.backLinkTitle', {
           defaultMessage: 'Endpoint Details',
         }),
-        href: formatUrl(detailsRoutePath),
+        href: getAppUrl({ path: detailsRoutePath }),
         onClick: backToDetailsClickHandler,
       };
-    }, [backToDetailsClickHandler, detailsRoutePath, formatUrl]);
+    }, [backToDetailsClickHandler, getAppUrl, detailsRoutePath]);
 
     return (
       <FlyoutSubHeader

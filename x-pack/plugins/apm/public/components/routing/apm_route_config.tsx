@@ -19,6 +19,7 @@ import { AgentConfigurations } from '../app/Settings/AgentConfigurations';
 import { AnomalyDetection } from '../app/Settings/anomaly_detection';
 import { ApmIndices } from '../app/Settings/ApmIndices';
 import { CustomizeUI } from '../app/Settings/CustomizeUI';
+import { Schema } from '../app/Settings/schema';
 import { TraceLink } from '../app/TraceLink';
 import { TransactionLink } from '../app/transaction_link';
 import { TransactionDetails } from '../app/transaction_details';
@@ -250,6 +251,14 @@ function SettingsCustomizeUI() {
   );
 }
 
+function SettingsSchema() {
+  return (
+    <SettingsTemplate selectedTab="schema">
+      <Schema />
+    </SettingsTemplate>
+  );
+}
+
 export function EditAgentConfigurationRouteView(props: RouteComponentProps) {
   const { search } = props.history.location;
 
@@ -314,6 +323,10 @@ const EditAgentConfigurationTitle = i18n.translate(
 const SettingsCustomizeUITitle = i18n.translate(
   'xpack.apm.views.settings.customizeUI.title',
   { defaultMessage: 'Customize app' }
+);
+const SettingsSchemaTitle = i18n.translate(
+  'xpack.apm.views.settings.schema.title',
+  { defaultMessage: 'Schema' }
 );
 const SettingsAnomalyDetectionTitle = i18n.translate(
   'xpack.apm.views.settings.anomalyDetection.title',
@@ -394,6 +407,12 @@ export const apmRouteConfig: APMRouteDefinition[] = [
     path: '/settings/customize-ui',
     component: SettingsCustomizeUI,
     breadcrumb: SettingsCustomizeUITitle,
+  },
+  {
+    exact: true,
+    path: '/settings/schema',
+    component: SettingsSchema,
+    breadcrumb: SettingsSchemaTitle,
   },
   {
     exact: true,
