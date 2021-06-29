@@ -22,6 +22,7 @@ import { createCloudApmPackgePolicy } from '../lib/fleet/create_cloud_apm_packag
 import { getUnsupportedApmServerSchema } from '../lib/fleet/get_unsupported_apm_server_schema';
 import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import { isSuperuser } from '../lib/fleet/is_superuser';
+import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 
 const hasFleetDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/fleet/has_data',
@@ -48,15 +49,15 @@ const saveApmServerSchemaRoute = createApmServerRoute({
     }),
   }),
   handler: async (resources) => {
-    const { params, logger, context } = resources;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const { params, logger, core } = resources;
+    const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
     const { schema } = params.body;
     await savedObjectsClient.create(
       APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
       { schemaJson: JSON.stringify(schema) },
       { id: APM_SERVER_SCHEMA_SAVED_OBJECT_ID, overwrite: true }
     );
-    logger.info(`Stored apm-server settings.`);
+    logger.info(`Stored apm-server schema.`);
   },
 });
 
@@ -66,11 +67,13 @@ const getApmServerSchemaRoute = createApmServerRoute({
   handler: async (resources) => {
     const { context } = resources;
     const savedObjectsClient = context.core.savedObjects.client;
-    const { attributes } = await savedObjectsClient.get(
+    const {
+      attributes,
+    }: { attributes: { schemaJson: string } } = await savedObjectsClient.get(
       APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
       APM_SERVER_SCHEMA_SAVED_OBJECT_ID
     );
-    return attributes;
+    return { schema: JSON.parse(attributes.schemaJson) };
   },
 });
 
