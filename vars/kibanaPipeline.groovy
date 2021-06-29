@@ -85,11 +85,12 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def parallelId = env.TASK_QUEUE_PROCESS_ID ?: env.CI_PARALLEL_PROCESS_NUMBER
 
   def kibanaPort = "61${parallelId}1"
-  def esPort = "61${parallelId}2"
-  def esTransportPort = "61${parallelId}3"
-  def fleetPackageRegistryPort = "61${parallelId}4"
-  def alertingProxyPort = "61${parallelId}5"
-  def corsTestServerPort = "61${parallelId}6"
+  def esPort = "62${parallelId}1"
+  // Ports 62x2-62x9 kept open for ES nodes
+  def esTransportPort = "63${parallelId}1-63${parallelId}9"
+  def fleetPackageRegistryPort = "64${parallelId}1"
+  def alertingProxyPort = "64${parallelId}2"
+  def corsTestServerPort = "64${parallelId}3"
   def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([

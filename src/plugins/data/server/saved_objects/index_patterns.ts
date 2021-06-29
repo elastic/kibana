@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from 'kibana/server';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
+import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../common';
 
 export const indexPatternSavedObjectType: SavedObjectsType = {
-  name: 'index-pattern',
+  name: INDEX_PATTERN_SAVED_OBJECT_TYPE,
   hidden: false,
   namespaceType: 'single',
   management: {

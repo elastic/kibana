@@ -604,7 +604,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should not leave an incomplete column in the visualization config with reference-based operations', async () => {
+    it('should revert to previous configuration and not leave an incomplete column in the visualization config with reference-based operations', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -636,7 +636,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        undefined
+        'Moving average of Count of records'
       );
     });
 

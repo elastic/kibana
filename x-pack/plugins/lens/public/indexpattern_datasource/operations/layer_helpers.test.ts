@@ -25,6 +25,7 @@ import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
+import { IndexPatternColumn, OperationDefinition } from './definitions';
 import { TinymathAST } from 'packages/kbn-tinymath';
 
 jest.mock('../operations');
@@ -1917,6 +1918,54 @@ describe('state_helpers', () => {
           })
         );
       });
+
+      it('should keep state and set incomplete column on incompatible switch', () => {
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['metric', 'ref'],
+          columns: {
+            metric: {
+              dataType: 'number' as const,
+              isBucketed: false,
+              sourceField: 'source',
+              operationType: 'unique_count' as const,
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
+              label: 'Cardinality',
+              customLabel: true,
+            },
+            ref: {
+              label: 'Reference',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'differences',
+              references: ['metric'],
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+              timeShift: '3h',
+            },
+          },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'ref',
+          op: 'sum',
+          visualizationGroups: [],
+        });
+        expect(result.columnOrder).toEqual(layer.columnOrder);
+        expect(result.columns).toEqual(layer.columns);
+        expect(result.incompleteColumns).toEqual({
+          ref: {
+            operationType: 'sum',
+            filter: {
+              language: 'kuery',
+              query: 'bytes > 4000',
+            },
+            timeScale: undefined,
+            timeShift: '3h',
+          },
+        });
+      });
     });
 
     it('should allow making a replacement on an operation that is being referenced, even if it ends up invalid', () => {
@@ -2594,7 +2643,15 @@ describe('state_helpers', () => {
       });
     });
 
+    // no operation currently requires this check, faking a transfer function to check whether the generic logic works
     it('should rewrite column params if that is necessary due to restrictions', () => {
+      operationDefinitionMap.date_histogram.transfer = ((oldColumn) => ({
+        ...oldColumn,
+        params: {
+          ...oldColumn.params,
+          interval: 'w',
+        },
+      })) as OperationDefinition<IndexPatternColumn, 'field'>['transfer'];
       const layer: IndexPatternLayer = {
         columnOrder: ['col1', 'col2'],
         columns: {
@@ -2618,10 +2675,10 @@ describe('state_helpers', () => {
           ...layer.columns.col1,
           params: {
             interval: 'w',
-            timeZone: 'CET',
           },
         },
       });
+      delete operationDefinitionMap.date_histogram.transfer;
     });
 
     it('should remove operations referencing fields with wrong field types', () => {

@@ -11,8 +11,8 @@ specific needs.
 [role="screenshot"]
 image::user/monitoring/images/monitoring-kibana-alerting-notification.png["{kib} alerting notifications in {stack-monitor-app}"]
 
-When you open *{stack-monitor-app}*, the preconfigured rules are created 
-automatically. They are initially configured to detect and notify on various 
+When you open *{stack-monitor-app}*, you will be ask to create these rules 
+They are initially configured to detect and notify on various 
 conditions across your monitored clusters. You can view notifications for: *Cluster health*, *Resource utilization*, and *Errors and exceptions* for {es}
 in real time.
 
@@ -130,6 +130,14 @@ soon the expiration date is:
 +
 The 60-day and 30-day thresholds are skipped for Trial licenses, which are only
 valid for 30 days.
+
+[discrete]
+== Alerts and rules
+[discrete]
+=== Create default rules
+This option can be used to create default rules in this kibana spaces. This is 
+useful for scenarios when you didn't choose to create these default rules initially 
+or anytime later if the rules were accidentally deleted.
 
 NOTE: Some action types are subscription features, while others are free.
 For a comparison of the Elastic subscription levels, see the alerting section of

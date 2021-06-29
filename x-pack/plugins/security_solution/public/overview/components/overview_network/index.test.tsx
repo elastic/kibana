@@ -20,6 +20,7 @@ import {
 import { OverviewNetwork } from '.';
 import { createStore, State } from '../../../common/store';
 import { useNetworkOverview } from '../../containers/overview_network';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();
@@ -137,6 +138,9 @@ describe('OverviewNetwork', () => {
         preventDefault: jest.fn(),
       });
 
-    expect(mockNavigateToApp).toBeCalledWith('securitySolution:network', { path: '' });
+    expect(mockNavigateToApp).toBeCalledWith('securitySolution', {
+      path: '',
+      deepLinkId: SecurityPageName.network,
+    });
   });
 });
