@@ -9,7 +9,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import VirtualList from 'react-tiny-virtual-list';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButton, EuiSpacer, EuiEmptyPrompt, EuiTextColor } from '@elastic/eui';
 
 import { useFieldEditorContext } from '../../field_editor_context';
 import {
@@ -151,15 +151,18 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
         <EuiEmptyPrompt
           iconType="search"
           title={
-            <h3>
-              {i18n.translate(
-                'indexPatternFieldEditor.fieldPreview.searchResult.emptyPromptTitle',
-                {
-                  defaultMessage: 'No fields match your search',
-                }
-              )}
-            </h3>
+            <EuiTextColor color="subdued">
+              <h3 className="indexPatternFieldEditor__previewEmptySearchResult__title">
+                {i18n.translate(
+                  'indexPatternFieldEditor.fieldPreview.searchResult.emptyPromptTitle',
+                  {
+                    defaultMessage: 'No fields in this index pattern match your filter criteria.',
+                  }
+                )}
+              </h3>
+            </EuiTextColor>
           }
+          titleSize="xs"
           actions={
             <EuiButton onClick={clearSearch}>
               {i18n.translate(
