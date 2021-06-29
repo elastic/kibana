@@ -75,7 +75,7 @@ describe('Row renderers', () => {
     });
   });
 
-  it('Selected renderer can be disabled with one click', () => {
+  it.skip('Selected renderer can be disabled with one click', () => {
     cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).click({ force: true });
 
     cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
