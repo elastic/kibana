@@ -133,6 +133,7 @@ valid for 30 days.
 
 [discrete]
 == Alerts and rules
+[discrete]
 === Create default rules
 This option can be used to create default rules in this kibana spaces. This is 
 useful for scenarios when you didn't choose to create these default rules initially 
