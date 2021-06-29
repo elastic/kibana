@@ -17,7 +17,7 @@ import {
   getRecentCasesLazy,
   getAllCasesSelectorModalLazy,
 } from './methods';
-import { ENABLE_CASE_CONNECTOR } from '../common';
+import { CasesUiConfigType, ENABLE_CASE_CONNECTOR } from '../common';
 
 /**
  * @public
@@ -26,7 +26,7 @@ import { ENABLE_CASE_CONNECTOR } from '../common';
 export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   public setup(core: CoreSetup, plugins: SetupPlugins) {
@@ -36,7 +36,8 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
   }
 
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
-    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
+    const config = this.initializerContext.config.get<CasesUiConfigType>();
+    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
     return {
       /**
        * Get the all cases table

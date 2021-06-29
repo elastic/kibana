@@ -14,8 +14,10 @@ import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { TemporaryProcessingPluginsType } from './types';
 import { useCasesLensIntegrationContext } from '../lens_context/use_lens_context';
+import { KibanaServices } from '../../common/lib/kibana';
 
 export const usePlugins = () => {
+  const kibanaConfig = KibanaServices.getConfig();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
   const lensPlugins = useCasesLensIntegrationContext()?.editor_plugins;
 
@@ -33,7 +35,7 @@ export const usePlugins = () => {
       processingPlugins[1][1].components.timeline = timelinePlugins.processingPluginRenderer;
     }
 
-    if (lensPlugins) {
+    if (kibanaConfig?.markdownPlugins?.lens && lensPlugins) {
       uiPlugins.push(lensPlugins.uiPlugin);
 
       parsingPlugins.push(lensPlugins.parsingPlugin);
@@ -47,5 +49,5 @@ export const usePlugins = () => {
       parsingPlugins,
       processingPlugins,
     };
-  }, [lensPlugins, timelinePlugins]);
+  }, [kibanaConfig?.markdownPlugins?.lens, lensPlugins, timelinePlugins]);
 };

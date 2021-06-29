@@ -6,16 +6,23 @@
  */
 
 import { CoreStart } from 'kibana/public';
+import { CasesUiConfigType } from '../../../../common/ui/types';
 
 type GlobalServices = Pick<CoreStart, 'http'>;
 
 export class KibanaServices {
   private static kibanaVersion?: string;
   private static services?: GlobalServices;
+  private static config?: CasesUiConfigType;
 
-  public static init({ http, kibanaVersion }: GlobalServices & { kibanaVersion: string }) {
+  public static init({
+    http,
+    kibanaVersion,
+    config,
+  }: GlobalServices & { kibanaVersion: string } & { config: any }) {
     this.services = { http };
     this.kibanaVersion = kibanaVersion;
+    this.config = config;
   }
 
   public static get(): GlobalServices {
@@ -32,6 +39,14 @@ export class KibanaServices {
     }
 
     return this.kibanaVersion;
+  }
+
+  public static getConfig() {
+    if (!this.config) {
+      this.throwUninitializedError();
+    }
+
+    return this.config;
   }
 
   private static throwUninitializedError(): never {

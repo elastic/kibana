@@ -13,6 +13,9 @@ import { CasePlugin } from './plugin';
 export { CaseRequestContext } from './types';
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: ConfigSchema,
+  exposeToBrowser: {
+    markdownPlugins: true,
+  },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
   ],
