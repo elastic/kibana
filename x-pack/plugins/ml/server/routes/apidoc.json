@@ -121,7 +121,7 @@
     "JobAuditMessages",
     "GetJobAuditMessages",
     "GetAllJobAuditMessages",
-
+    "ClearJobAuditMessages",
     "JobValidation",
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",

@@ -159,6 +159,11 @@ export function jobAuditMessagesProvider({ asInternalUser, asCurrentUser }, mlCl
           },
           anomalyDetectorTypeFilter,
         ],
+        must_not: {
+          term: {
+            cleared: true,
+          },
+        },
       },
     };
 
@@ -172,8 +177,7 @@ export function jobAuditMessagesProvider({ asInternalUser, asCurrentUser }, mlCl
       });
       levelsPerJobAggSize = jobIds.length;
     }
-    // TODO: needs to return whether latest message is cleared so we can have it as part of the audit message and
-    // not show the icon in the table if it is
+
     const { body } = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
