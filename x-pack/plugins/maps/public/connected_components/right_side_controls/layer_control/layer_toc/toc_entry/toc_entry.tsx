@@ -339,8 +339,8 @@ export class TOCEntry extends Component<Props, State> {
             <EuiIcon type="vector" size="s" />
             <span className="mapTocEntry-isInEditingMode__editFeatureText">
               <FormattedMessage
-                id="xpack.maps.layerControl.tocEntry.EditFeature"
-                defaultMessage="Edit feature"
+                id="xpack.maps.layerControl.tocEntry.EditFeatures"
+                defaultMessage="Edit features"
               />
             </span>
             <EuiButtonEmpty size="xs" flush="both" onClick={this.props.cancelEditing}>
