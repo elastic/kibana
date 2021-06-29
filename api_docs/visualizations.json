@@ -3067,7 +3067,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 34
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -3080,7 +3080,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 35
+              "lineNumber": 37
             },
             "deprecated": false
           },
@@ -3093,7 +3093,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 36
+              "lineNumber": 38
             },
             "deprecated": false
           },
@@ -3106,7 +3106,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 37
+              "lineNumber": 39
             },
             "deprecated": false
           },
@@ -3119,7 +3119,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 38
+              "lineNumber": 40
             },
             "deprecated": false
           },
@@ -3132,7 +3132,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 39
+              "lineNumber": 41
             },
             "deprecated": false
           },
@@ -3148,7 +3148,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             },
             "deprecated": false
           },
@@ -3161,7 +3161,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "deprecated": false
           },
@@ -3177,7 +3177,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 42
+              "lineNumber": 44
             },
             "deprecated": false
           },
@@ -3193,7 +3193,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 43
+              "lineNumber": 45
             },
             "deprecated": false
           },
@@ -3209,7 +3209,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 44
+              "lineNumber": 46
             },
             "deprecated": false
           },
@@ -3227,7 +3227,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 46
+              "lineNumber": 48
             },
             "deprecated": false
           }
@@ -3821,7 +3821,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 13
+          "lineNumber": 14
         },
         "deprecated": false,
         "children": [
@@ -3834,7 +3834,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 14
+              "lineNumber": 15
             },
             "deprecated": false
           },
@@ -3850,7 +3850,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 15
+              "lineNumber": 16
             },
             "deprecated": false
           },
@@ -3866,7 +3866,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 16
+              "lineNumber": 17
             },
             "deprecated": false
           },
@@ -3879,7 +3879,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 17
+              "lineNumber": 18
             },
             "deprecated": false
           },
@@ -3892,7 +3892,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 18
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -3908,7 +3908,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 19
+              "lineNumber": 20
             },
             "deprecated": false
           },
@@ -3921,7 +3921,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 20
+              "lineNumber": 21
             },
             "deprecated": false
           },
@@ -3934,7 +3934,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 21
+              "lineNumber": 22
             },
             "deprecated": false
           },
@@ -3950,7 +3950,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 22
+              "lineNumber": 23
             },
             "deprecated": false
           },
@@ -3966,7 +3966,7 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 23
+              "lineNumber": 24
             },
             "deprecated": false
           },
@@ -3979,7 +3979,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 24
+              "lineNumber": 25
             },
             "deprecated": false
           },
@@ -3995,7 +3995,39 @@
             ],
             "source": {
               "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-              "lineNumber": 25
+              "lineNumber": 26
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizationListItem.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.BaseVisType",
+                "text": "BaseVisType"
+              },
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              "> | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
+              "lineNumber": 27
             },
             "deprecated": false
           }
@@ -4271,7 +4303,7 @@
         ],
         "source": {
           "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-          "lineNumber": 11
+          "lineNumber": 12
         },
         "deprecated": false,
         "initialIsOpen": false

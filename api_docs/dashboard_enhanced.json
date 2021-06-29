@@ -124,10 +124,10 @@
           },
           {
             "parentPluginId": "dashboardEnhanced",
-            "id": "def-public.AbstractDashboardDrilldown.getURL",
+            "id": "def-public.AbstractDashboardDrilldown.getLocation",
             "type": "Function",
             "tags": [],
-            "label": "getURL",
+            "label": "getLocation",
             "description": [],
             "signature": [
               "(config: ",
@@ -139,14 +139,8 @@
                 "text": "DrilldownConfig"
               },
               ", context: Context) => Promise<",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.KibanaURL",
-                "text": "KibanaURL"
-              },
-              ">"
+              "KibanaLocation",
+              "<object>>"
             ],
             "source": {
               "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -156,7 +150,7 @@
             "children": [
               {
                 "parentPluginId": "dashboardEnhanced",
-                "id": "def-public.AbstractDashboardDrilldown.getURL.$1",
+                "id": "def-public.AbstractDashboardDrilldown.getLocation.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "config",
@@ -179,7 +173,7 @@
               },
               {
                 "parentPluginId": "dashboardEnhanced",
-                "id": "def-public.AbstractDashboardDrilldown.getURL.$2",
+                "id": "def-public.AbstractDashboardDrilldown.getLocation.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "context",
@@ -459,7 +453,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 72
+              "lineNumber": 76
             },
             "deprecated": false,
             "children": [
@@ -481,7 +475,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 72
+                  "lineNumber": 76
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -498,7 +492,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-                  "lineNumber": 72
+                  "lineNumber": 76
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -508,24 +502,32 @@
           },
           {
             "parentPluginId": "dashboardEnhanced",
-            "id": "def-public.AbstractDashboardDrilldown.urlGenerator",
+            "id": "def-public.AbstractDashboardDrilldown.locator",
             "type": "Object",
             "tags": [],
-            "label": "urlGenerator",
+            "label": "locator",
             "description": [],
             "signature": [
               {
                 "pluginId": "share",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.UrlGeneratorContract",
-                "text": "UrlGeneratorContract"
+                "section": "def-common.LocatorPublic",
+                "text": "LocatorPublic"
               },
-              "<\"DASHBOARD_APP_URL_GENERATOR\">"
+              "<",
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardAppLocatorParams",
+                "text": "DashboardAppLocatorParams"
+              },
+              ">"
             ],
             "source": {
               "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
-              "lineNumber": 77
+              "lineNumber": 84
             },
             "deprecated": false
           }
