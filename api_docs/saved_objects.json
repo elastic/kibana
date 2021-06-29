@@ -23,7 +23,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-          "lineNumber": 103
+          "lineNumber": 104
         },
         "deprecated": false,
         "children": [
@@ -36,7 +36,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 107
+              "lineNumber": 108
             },
             "deprecated": false,
             "children": [
@@ -53,7 +53,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 108
+                  "lineNumber": 109
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -143,7 +143,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 109
+                  "lineNumber": 110
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -231,7 +231,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 110
+                  "lineNumber": 111
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -319,7 +319,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 111
+                  "lineNumber": 112
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -407,7 +407,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 112
+                  "lineNumber": 113
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -495,7 +495,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 113
+                  "lineNumber": 114
                 },
                 "deprecated": false,
                 "returnComment": [],
@@ -584,7 +584,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 173
+              "lineNumber": 174
             },
             "deprecated": false,
             "children": [
@@ -600,7 +600,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-                  "lineNumber": 173
+                  "lineNumber": 174
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -620,7 +620,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 188
+              "lineNumber": 189
             },
             "deprecated": false,
             "children": [],
@@ -638,7 +638,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 193
+              "lineNumber": 194
             },
             "deprecated": false,
             "children": [],
@@ -656,7 +656,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 198
+              "lineNumber": 199
             },
             "deprecated": false,
             "children": [],
@@ -680,6 +680,20 @@
         },
         "deprecated": true,
         "references": [
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
+              "lineNumber": 16
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
+              "lineNumber": 35
+            }
+          },
           {
             "plugin": "discover",
             "link": {
@@ -705,21 +719,7 @@
             "plugin": "discover",
             "link": {
               "path": "src/plugins/discover/public/plugin.tsx",
-              "lineNumber": 88
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 35
+              "lineNumber": 122
             }
           },
           {
@@ -803,7 +803,7 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 127
+              "lineNumber": 130
             }
           },
           {
@@ -817,7 +817,7 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 95
+              "lineNumber": 101
             }
           },
           {
@@ -983,7 +983,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
@@ -1707,7 +1707,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-          "lineNumber": 526
+          "lineNumber": 527
         },
         "deprecated": false,
         "children": [
@@ -1729,7 +1729,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 526
+              "lineNumber": 527
             },
             "deprecated": false,
             "isRequired": true
@@ -1752,7 +1752,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 526
+              "lineNumber": 527
             },
             "deprecated": false,
             "isRequired": true
@@ -1892,7 +1892,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2116,7 +2116,15 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
+                  "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.ResolvedSimpleSavedObject",
+                    "text": "ResolvedSimpleSavedObject"
+                  },
+                  "<T>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -2569,20 +2577,6 @@
             }
           },
           {
-            "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
-              "lineNumber": 61
-            }
-          },
-          {
             "plugin": "visualizations",
             "link": {
               "path": "src/plugins/visualizations/public/types.ts",
@@ -2594,6 +2588,20 @@
             "link": {
               "path": "src/plugins/visualizations/public/types.ts",
               "lineNumber": 41
+            }
+          },
+          {
+            "plugin": "discover",
+            "link": {
+              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "plugin": "discover",
+            "link": {
+              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
+              "lineNumber": 61
             }
           },
           {
@@ -4005,6 +4013,57 @@
           },
           {
             "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectMetaData.getSavedObjectSubType",
+            "type": "Function",
+            "tags": [],
+            "label": "getSavedObjectSubType",
+            "description": [],
+            "signature": [
+              "((savedObject: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-public.SimpleSavedObject",
+                "text": "SimpleSavedObject"
+              },
+              "<T>) => string) | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+              "lineNumber": 49
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "savedObjects",
+                "id": "def-public.SavedObjectMetaData.getSavedObjectSubType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.SimpleSavedObject",
+                    "text": "SimpleSavedObject"
+                  },
+                  "<T>"
+                ],
+                "source": {
+                  "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+                  "lineNumber": 49
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjects",
             "id": "def-public.SavedObjectMetaData.includeFields",
             "type": "Array",
             "tags": [],
@@ -4015,7 +4074,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "deprecated": false
           }

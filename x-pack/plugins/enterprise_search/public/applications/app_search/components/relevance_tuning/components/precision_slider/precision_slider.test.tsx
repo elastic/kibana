@@ -13,6 +13,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { rerender } from '../../../../../test_helpers';
 
+import { STEP_DESCRIPTIONS } from './constants';
 import { PrecisionSlider } from './precision_slider';
 
 const MOCK_VALUES = {
@@ -59,11 +60,14 @@ describe('PrecisionSlider', () => {
 
   describe('Step Description', () => {
     it('is visible when there is a step description', () => {
-      setMockValues({ ...MOCK_VALUES, precision: 10 });
+      setMockValues({
+        ...MOCK_VALUES,
+        searchSettings: { ...MOCK_VALUES.searchSettings, precision: 10 },
+      });
       rerender(wrapper);
 
       expect(wrapper.find('[data-test-subj="StepDescription"]').render().text()).toEqual(
-        'Default. High recall, low precision.'
+        STEP_DESCRIPTIONS[10]
       );
     });
 

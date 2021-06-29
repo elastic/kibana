@@ -9,7 +9,7 @@
 import './visualize_listing.scss';
 
 import React, { useCallback, useRef, useMemo, useEffect, MouseEvent } from 'react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -147,68 +147,66 @@ export const VisualizeListing = () => {
   }, [savedObjectsTagging]);
 
   const calloutMessage = (
-    <>
-      <FormattedMessage
-        data-test-subj="visualize-dashboard-flow-prompt"
-        id="visualize.visualizeListingDashboardFlowDescription"
-        defaultMessage="Building a dashboard? Create content directly from the {dashboardApp} using a new integrated workflow."
-        values={{
-          dashboardApp: (
-            <EuiLink
-              className="visListingCallout__link"
-              onClick={(event: MouseEvent) => {
-                event.preventDefault();
-                application.navigateToUrl(application.getUrlForApp('dashboards'));
-              }}
-            >
-              <FormattedMessage
-                id="visualize.visualizeListingDashboardAppName"
-                defaultMessage="Dashboard application"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    </>
+    <FormattedMessage
+      data-test-subj="visualize-dashboard-flow-prompt"
+      id="visualize.visualizeListingDashboardFlowDescription"
+      defaultMessage="Building a dashboard? Create and add your visualizations right from the {dashboardApp}."
+      values={{
+        dashboardApp: (
+          <EuiLink
+            className="visListingCallout__link"
+            onClick={(event: MouseEvent) => {
+              event.preventDefault();
+              application.navigateToUrl(application.getUrlForApp('dashboards'));
+            }}
+          >
+            <FormattedMessage
+              id="visualize.visualizeListingDashboardAppName"
+              defaultMessage="Dashboard application"
+            />
+          </EuiLink>
+        ),
+      }}
+    />
   );
 
   return (
-    <>
+    <TableListView
+      headingId="visualizeListingHeading"
+      // we allow users to create visualizations even if they can't save them
+      // for data exploration purposes
+      createItem={createNewVis}
+      tableCaption={i18n.translate('visualize.listing.table.listTitle', {
+        defaultMessage: 'Visualize Library',
+      })}
+      findItems={fetchItems}
+      deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
+      editItem={visualizeCapabilities.save ? editItem : undefined}
+      tableColumns={tableColumns}
+      listingLimit={listingLimit}
+      initialPageSize={savedObjectsPublic.settings.getPerPage()}
+      initialFilter={''}
+      rowHeader="title"
+      emptyPrompt={noItemsFragment}
+      entityName={i18n.translate('visualize.listing.table.entityName', {
+        defaultMessage: 'visualization',
+      })}
+      entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
+        defaultMessage: 'visualizations',
+      })}
+      tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
+        defaultMessage: 'Visualize Library',
+      })}
+      toastNotifications={toastNotifications}
+      searchFilters={searchFilters}
+    >
       {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
         dashboardCapabilities.createNew && (
-          <div className="visListingCallout">
+          <>
             <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-          </div>
+            <EuiSpacer size="m" />
+          </>
         )}
-      <TableListView
-        headingId="visualizeListingHeading"
-        // we allow users to create visualizations even if they can't save them
-        // for data exploration purposes
-        createItem={createNewVis}
-        tableCaption={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualize Library',
-        })}
-        findItems={fetchItems}
-        deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-        editItem={visualizeCapabilities.save ? editItem : undefined}
-        tableColumns={tableColumns}
-        listingLimit={listingLimit}
-        initialPageSize={savedObjectsPublic.settings.getPerPage()}
-        initialFilter={''}
-        rowHeader="title"
-        emptyPrompt={noItemsFragment}
-        entityName={i18n.translate('visualize.listing.table.entityName', {
-          defaultMessage: 'visualization',
-        })}
-        entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
-          defaultMessage: 'visualizations',
-        })}
-        tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-          defaultMessage: 'Visualize Library',
-        })}
-        toastNotifications={toastNotifications}
-        searchFilters={searchFilters}
-      />
-    </>
+    </TableListView>
   );
 };

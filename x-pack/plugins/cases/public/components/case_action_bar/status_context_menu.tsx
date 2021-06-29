@@ -9,6 +9,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import { caseStatuses, CaseStatuses } from '../../../common';
 import { Status } from '../status';
+import { CHANGE_STATUS } from '../all_cases/translations';
 
 interface Props {
   currentStatus: CaseStatuses;
@@ -53,18 +54,17 @@ const StatusContextMenuComponent: React.FC<Props> = ({
   );
 
   return (
-    <>
-      <EuiPopover
-        anchorPosition="downLeft"
-        button={popOverButton}
-        closePopover={closePopover}
-        data-test-subj="case-view-status-dropdown"
-        id="caseStatusPopover"
-        isOpen={isPopoverOpen}
-      >
-        <EuiContextMenuPanel items={panelItems} />
-      </EuiPopover>
-    </>
+    <EuiPopover
+      anchorPosition="downLeft"
+      button={popOverButton}
+      closePopover={closePopover}
+      data-test-subj="case-view-status-dropdown"
+      id="caseStatusPopover"
+      isOpen={isPopoverOpen}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel title={CHANGE_STATUS} items={panelItems} />
+    </EuiPopover>
   );
 };
 

@@ -67,6 +67,7 @@ describe('EditConnector ', () => {
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
+    expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeTruthy();
     wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
 
     expect(
@@ -173,6 +174,8 @@ describe('EditConnector ', () => {
     await waitFor(() =>
       expect(wrapper.find(`[data-test-subj="connector-edit"]`).exists()).toBeFalsy()
     );
+
+    expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeFalsy();
   });
 
   it('displays the permissions error message when one is provided', async () => {
@@ -191,6 +194,8 @@ describe('EditConnector ', () => {
       expect(
         wrapper.find(`[data-test-subj="edit-connector-no-connectors-msg"]`).exists()
       ).toBeFalsy();
+
+      expect(wrapper.find(`[data-test-subj="has-data-to-push-button"]`).exists()).toBeFalsy();
     });
   });
 

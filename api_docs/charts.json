@@ -1602,7 +1602,13 @@
             ],
             "signature": [
               "(state?: T | undefined) => ",
-              "Ast"
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              }
             ],
             "source": {
               "path": "src/plugins/charts/public/services/palettes/types.ts",

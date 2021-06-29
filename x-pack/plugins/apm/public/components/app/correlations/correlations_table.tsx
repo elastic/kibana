@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import {
   EuiIcon,
@@ -22,12 +22,14 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { createHref, push } from '../../shared/Links/url_helpers';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { useUiTracker } from '../../../../../observability/public';
+import { useTheme } from '../../../hooks/use_theme';
 
+const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
   | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
 
-type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
+export type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
 
 export type SelectedSignificantTerm = Pick<
   SignificantTerm,
@@ -37,9 +39,11 @@ export type SelectedSignificantTerm = Pick<
 interface Props<T> {
   significantTerms?: T[];
   status: FETCH_STATUS;
-  percentageColumnName: string;
+  percentageColumnName?: string;
   setSelectedSignificantTerm: (term: SelectedSignificantTerm | null) => void;
+  selectedTerm?: { fieldName: string; fieldValue: string };
   onFilter: () => void;
+  columns?: Array<EuiBasicTableColumn<T>>;
 }
 
 export function CorrelationsTable<T extends SignificantTerm>({
@@ -48,7 +52,10 @@ export function CorrelationsTable<T extends SignificantTerm>({
   percentageColumnName,
   setSelectedSignificantTerm,
   onFilter,
+  columns,
+  selectedTerm,
 }: Props<T>) {
+  const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantTerm = useCallback(
     () =>
@@ -59,7 +66,33 @@ export function CorrelationsTable<T extends SignificantTerm>({
     [trackApmEvent]
   );
   const history = useHistory();
-  const columns: Array<EuiBasicTableColumn<T>> = [
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const { pagination, pageOfItems } = useMemo(() => {
+    const pageStart = pageIndex * pageSize;
+
+    const itemCount = significantTerms?.length ?? 0;
+    return {
+      pageOfItems: significantTerms?.slice(pageStart, pageStart + pageSize),
+      pagination: {
+        pageIndex,
+        pageSize,
+        totalItemCount: itemCount,
+        pageSizeOptions: PAGINATION_SIZE_OPTIONS,
+      },
+    };
+  }, [pageIndex, pageSize, significantTerms]);
+
+  const onTableChange = useCallback(({ page }) => {
+    const { index, size } = page;
+
+    setPageIndex(index);
+    setPageSize(size);
+  }, []);
+
+  const tableColumns: Array<EuiBasicTableColumn<T>> = columns ?? [
     {
       width: '116px',
       field: 'impact',
@@ -73,7 +106,12 @@ export function CorrelationsTable<T extends SignificantTerm>({
     },
     {
       field: 'percentage',
-      name: percentageColumnName,
+      name:
+        percentageColumnName ??
+        i18n.translate(
+          'xpack.apm.correlations.correlationsTable.percentageLabel',
+          { defaultMessage: 'Percentage' }
+        ),
       render: (_: any, term: T) => {
         return (
           <EuiToolTip
@@ -190,12 +228,12 @@ export function CorrelationsTable<T extends SignificantTerm>({
 
   return (
     <EuiBasicTable
-      items={significantTerms ?? []}
+      items={pageOfItems ?? []}
       noItemsMessage={
         status === FETCH_STATUS.LOADING ? loadingText : noDataText
       }
       loading={status === FETCH_STATUS.LOADING}
-      columns={columns}
+      columns={tableColumns}
       rowProps={(term) => {
         return {
           onMouseEnter: () => {
@@ -203,8 +241,18 @@ export function CorrelationsTable<T extends SignificantTerm>({
             trackSelectSignificantTerm();
           },
           onMouseLeave: () => setSelectedSignificantTerm(null),
+          style:
+            selectedTerm &&
+            selectedTerm.fieldValue === term.fieldValue &&
+            selectedTerm.fieldName === term.fieldName
+              ? {
+                  backgroundColor: euiTheme.eui.euiColorLightestShade,
+                }
+              : null,
         };
       }}
+      pagination={pagination}
+      onChange={onTableChange}
     />
   );
 }

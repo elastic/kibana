@@ -13,6 +13,25 @@ import { ExternalServiceColumn } from './columns';
 
 import { useGetCasesMockState } from '../../containers/mock';
 
+jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: jest.fn().mockReturnValue({
+              actionTypeTitle: '.jira',
+              iconClass: 'logoSecurity',
+            }),
+          },
+        },
+      },
+    }),
+  };
+});
+
 describe('ExternalServiceColumn ', () => {
   it('Not pushed render', () => {
     const wrapper = mount(

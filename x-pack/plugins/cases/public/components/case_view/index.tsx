@@ -381,7 +381,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             data-test-subj="case-view-title"
             titleNode={
               <EditableTitle
-                disabled={!userCanCrud}
+                userCanCrud={userCanCrud}
                 isLoading={isLoading && updateKey === 'title'}
                 title={caseData.title}
                 onSubmit={onSubmitTitle}
