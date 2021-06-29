@@ -90,7 +90,6 @@ const mockPlugin = {
   ml: {
     urlGenerator: new MlUrlGenerator({
       appBasePath: '/app/ml',
-      useHash: false,
     }),
   },
   data: {

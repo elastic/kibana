@@ -141,7 +141,6 @@ export const createStartServicesMock = (): StartServices => {
     ml: {
       urlGenerator: new MlUrlGenerator({
         appBasePath: '/app/ml',
-        useHash: false,
       }),
     },
   } as unknown) as StartServices;
