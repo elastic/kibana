@@ -292,6 +292,12 @@ export const basicPushSnake = {
 
 export const pushedCaseSnake = {
   ...basicCaseSnake,
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   external_service: basicPushSnake,
 };
 
