@@ -1,11 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FieldName renders a geo field 1`] = `
-<div
-  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
->
+Array [
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
       class="euiToken euiToken--euiColorVis5 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
@@ -16,27 +14,29 @@ exports[`FieldName renders a geo field 1`] = `
         title="Geo point field"
       />
     </span>
-  </div>
+  </div>,
   <div
-    class="euiFlexItem eui-textTruncate"
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
-    <span
-      class="euiToolTipAnchor eui-textTruncate"
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
-      <span>
-        test.test.test
+      <span
+        class="euiToolTipAnchor eui-textBreakAll"
+      >
+        <span>
+          test.test.test
+        </span>
       </span>
-    </span>
-  </div>
-</div>
+    </div>
+  </div>,
+]
 `;
 
 exports[`FieldName renders a number field by providing a field record 1`] = `
-<div
-  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
->
+Array [
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
       class="euiToken euiToken--euiColorVis0 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
@@ -47,27 +47,29 @@ exports[`FieldName renders a number field by providing a field record 1`] = `
         title="Number field"
       />
     </span>
-  </div>
+  </div>,
   <div
-    class="euiFlexItem eui-textTruncate"
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
-    <span
-      class="euiToolTipAnchor eui-textTruncate"
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
-      <span>
-        test.test.test
+      <span
+        class="euiToolTipAnchor eui-textBreakAll"
+      >
+        <span>
+          test.test.test
+        </span>
       </span>
-    </span>
-  </div>
-</div>
+    </div>
+  </div>,
+]
 `;
 
 exports[`FieldName renders a string field by providing fieldType and fieldName 1`] = `
-<div
-  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
->
+Array [
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldIcon"
   >
     <span
       class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small kbnFieldIcon"
@@ -78,17 +80,21 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
         title="String field"
       />
     </span>
-  </div>
+  </div>,
   <div
-    class="euiFlexItem eui-textTruncate"
+    class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--wrap"
   >
-    <span
-      class="euiToolTipAnchor eui-textTruncate"
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero kbnDocViewer__fieldName eui-textBreakAll"
     >
-      <span>
-        test
+      <span
+        class="euiToolTipAnchor eui-textBreakAll"
+      >
+        <span>
+          test
+        </span>
       </span>
-    </span>
-  </div>
-</div>
+    </div>
+  </div>,
+]
 `;

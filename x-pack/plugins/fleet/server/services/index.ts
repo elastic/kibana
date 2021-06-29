@@ -69,6 +69,7 @@ export interface AgentPolicyServiceInterface {
   list: typeof agentPolicyService['list'];
   getDefaultAgentPolicyId: typeof agentPolicyService['getDefaultAgentPolicyId'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
+  getByIds: typeof agentPolicyService['getByIDs'];
 }
 
 // Saved object services
