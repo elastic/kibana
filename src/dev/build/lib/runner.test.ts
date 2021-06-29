@@ -45,7 +45,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const setup = async (opts: { buildDefaultDist: boolean }) => {
+const setup = async (opts: {}) => {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
@@ -63,9 +63,7 @@ const setup = async (opts: { buildDefaultDist: boolean }) => {
 
 describe('default dist', () => {
   it('runs global task once, passing config and log', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-    });
+    const { config, run } = await setup();
 
     const mock = jest.fn();
 
@@ -80,9 +78,7 @@ describe('default dist', () => {
   });
 
   it('calls local tasks once, passing the default build', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-    });
+    const { config, run } = await setup();
 
     const mock = jest.fn();
 
@@ -98,9 +94,7 @@ describe('default dist', () => {
 
 describe('task rejection', () => {
   it('rejects, logs error, and marks error logged', async () => {
-    const { run } = await setup({
-      buildDefaultDist: true,
-    });
+    const { run } = await setup();
 
     const error = new Error('FOO');
     expect(isErrorLogged(error)).toBe(false);
@@ -126,9 +120,7 @@ describe('task rejection', () => {
   });
 
   it('just rethrows errors that have already been logged', async () => {
-    const { run } = await setup({
-      buildDefaultDist: true,
-    });
+    const { run } = await setup();
 
     const error = markErrorLogged(new Error('FOO'));
     const promise = run({
