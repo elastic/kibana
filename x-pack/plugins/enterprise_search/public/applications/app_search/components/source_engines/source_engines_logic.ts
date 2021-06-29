@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { recursivelyFetchEngines } from '../../utils/recursively_fetch_engines';
 import { EngineLogic } from '../engine';
@@ -143,7 +143,7 @@ export const SourceEnginesLogic = kea<
         );
 
         actions.onSourceEnginesAdd(sourceEnginesToAdd);
-        setSuccessMessage(ADD_SOURCE_ENGINES_SUCCESS_MESSAGE(sourceEngineNames));
+        flashSuccessToast(ADD_SOURCE_ENGINES_SUCCESS_MESSAGE(sourceEngineNames));
         EngineLogic.actions.initializeEngine();
       } catch (e) {
         flashAPIErrors(e);
@@ -176,7 +176,7 @@ export const SourceEnginesLogic = kea<
         );
 
         actions.onSourceEngineRemove(sourceEngineName);
-        setSuccessMessage(REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE(sourceEngineName));
+        flashSuccessToast(REMOVE_SOURCE_ENGINE_SUCCESS_MESSAGE(sourceEngineName));
 
         // Changing source engines can change schema conflicts and invalid boosts,
         // so we re-initialize the engine to re-fetch that data

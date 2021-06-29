@@ -31,7 +31,6 @@ export const Home = ({ activeTab = 'workpads' }: Props) => {
       pageHeader={{
         pageTitle: 'Canvas',
         rightSideItems: [<WorkpadCreate />],
-        bottomBorder: true,
         tabs: [
           {
             label: strings.getMyWorkpadsTabLabel(),
