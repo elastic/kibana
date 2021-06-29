@@ -774,22 +774,22 @@
               {
                 "plugin": "discover",
                 "link": {
-                  "path": "src/plugins/discover/public/application/embeddable/search_embeddable.ts",
-                  "lineNumber": 115
+                  "path": "src/plugins/discover/public/application/embeddable/saved_search_embeddable.tsx",
+                  "lineNumber": 101
                 }
               },
               {
                 "plugin": "discover",
                 "link": {
                   "path": "src/plugins/discover/public/application/embeddable/search_embeddable_factory.ts",
-                  "lineNumber": 25
+                  "lineNumber": 26
                 }
               },
               {
                 "plugin": "discover",
                 "link": {
                   "path": "src/plugins/discover/public/plugin.tsx",
-                  "lineNumber": 387
+                  "lineNumber": 462
                 }
               }
             ],
