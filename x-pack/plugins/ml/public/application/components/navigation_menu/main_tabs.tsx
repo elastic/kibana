@@ -14,6 +14,7 @@ import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../context
 import { MlUrlGeneratorState } from '../../../../common/types/ml_url_generator';
 import { useUrlState } from '../../util/url_state';
 import { ML_APP_NAME } from '../../../../common/constants/app';
+import './main_tabs.scss';
 
 export interface Tab {
   id: TabId;
@@ -156,6 +157,7 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
   return (
     <EuiPageHeader
       paddingSize="m"
+      className="mlMainTabs"
       bottomBorder
       tabs={tabs.map((tab: Tab) => {
         const { id, disabled } = tab;
