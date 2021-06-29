@@ -8,10 +8,13 @@
 import React, { memo, MouseEventHandler } from 'react';
 import { EuiLink, EuiLinkProps, EuiButton, EuiButtonProps } from '@elastic/eui';
 import { useNavigateToAppEventHandler } from '../../hooks/endpoint/use_navigate_to_app_event_handler';
+import { APP_ID } from '../../../../common/constants';
 
 export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
-  appId: string;
+  appId?: string;
+  /** optional app deep link id */
+  deepLinkId?: string;
   /** Any app specific path (route) */
   appPath?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,8 +29,17 @@ export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
  * a given app without causing a full browser refresh
  */
 export const LinkToApp = memo<LinkToAppProps>(
-  ({ appId, appPath: path, appState: state, onClick, asButton, children, ...otherProps }) => {
-    const handleOnClick = useNavigateToAppEventHandler(appId, { path, state, onClick });
+  ({
+    appId = APP_ID,
+    deepLinkId,
+    appPath: path,
+    appState: state,
+    onClick,
+    asButton,
+    children,
+    ...otherProps
+  }) => {
+    const handleOnClick = useNavigateToAppEventHandler(appId, { deepLinkId, path, state, onClick });
 
     return (
       <>
