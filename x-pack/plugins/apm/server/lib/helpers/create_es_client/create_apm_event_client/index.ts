@@ -120,6 +120,7 @@ export function createApmEventClient({
         debug,
         request,
         requestType,
+        operationName,
         requestParams: searchParams,
       });
     },

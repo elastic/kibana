@@ -54,6 +54,7 @@ export function createInternalESClient({
       request,
       requestType,
       requestParams: params,
+      operationName,
     });
   }
 
