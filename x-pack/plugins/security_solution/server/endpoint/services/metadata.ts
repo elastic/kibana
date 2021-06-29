@@ -12,11 +12,11 @@ import { SecuritySolutionRequestHandlerContext } from '../../types';
 import { getESQueryHostMetadataByIDs } from '../routes/metadata/query_builders';
 import { EndpointAppContext } from '../types';
 
-export async function getAgentIDsForEndpoints(
+export async function getMetadataForEndpoints(
   endpointIDs: string[],
   requestHandlerContext: SecuritySolutionRequestHandlerContext,
   endpointAppContext: EndpointAppContext
-): Promise<string[]> {
+): Promise<HostMetadata[]> {
   const queryStrategy = await endpointAppContext.service
     ?.getMetadataService()
     ?.queryStrategy(requestHandlerContext.core.savedObjects.client);
@@ -25,6 +25,5 @@ export async function getAgentIDsForEndpoints(
   const esClient = requestHandlerContext.core.elasticsearch.client.asCurrentUser;
   const { body } = await esClient.search<HostMetadata>(query as SearchRequest);
   const hosts = queryStrategy!.queryResponseToHostListResult(body as SearchResponse<HostMetadata>);
-
-  return hosts.resultList.map((x: HostMetadata): string => x.elastic.agent.id);
+  return hosts.resultList;
 }
