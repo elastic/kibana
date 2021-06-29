@@ -8,7 +8,7 @@
 import { coreMock } from 'src/core/public/mocks';
 import { ReportingSetup } from '.';
 import { getDefaultLayoutSelectors } from '../common';
-import { getSharedComponents } from './components/shared';
+import { getSharedComponents } from './shared';
 
 type Setup = jest.Mocked<ReportingSetup>;
 

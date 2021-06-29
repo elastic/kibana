@@ -10,6 +10,14 @@ import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-
 import { Ecs } from '../../../../../common/ecs';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 
+const osTypeBasedOnAgentType = (data?: Ecs) => {
+  if (data?.agent?.type?.includes('endpoint')) {
+    return (data?.host?.os?.name || ['windows']).map((name) => name.toLowerCase());
+  } else {
+    return data?.host?.os?.family ?? ['windows'];
+  }
+};
+
 export const getInitialExceptionFromEvent = (data?: Ecs): CreateExceptionListItemSchema => ({
   comments: [],
   description: '',
@@ -46,11 +54,5 @@ export const getInitialExceptionFromEvent = (data?: Ecs): CreateExceptionListIte
   namespace_type: 'agnostic',
   tags: ['policy:all'],
   type: 'simple',
-  // TODO: Try to fix this type casting
-  os_types: [
-    (data && data.host ? data.host.os?.family ?? ['windows'] : ['windows'])[0] as
-      | 'windows'
-      | 'linux'
-      | 'macos',
-  ],
+  os_types: osTypeBasedOnAgentType(data) as Array<'windows' | 'linux' | 'macos'>,
 });
