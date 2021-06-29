@@ -52,7 +52,7 @@ export type IngestPipelinesParams =
   | IngestPipelinesCloneParams
   | IngestPipelinesCreateParams;
 
-export type IngestPipelinesLocator = LocatorPublic<void>;
+export type IngestPipelinesLocator = LocatorPublic<IngestPipelinesParams>;
 
 export const INGEST_PIPELINES_APP_LOCATOR = 'INGEST_PIPELINES_APP_LOCATOR';
 

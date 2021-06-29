@@ -9,7 +9,7 @@
 const path = require('path');
 const KIBANA_ROOT = path.resolve(__dirname, '../../..');
 
-function checkModuleNameNode(context, mappings, node) {
+function checkModuleNameNode(context, mappings, node, desc = 'Imported') {
   const mapping = mappings.find(
     (mapping) => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
   );
@@ -42,7 +42,7 @@ function checkModuleNameNode(context, mappings, node) {
   }
 
   context.report({
-    message: `Imported module "${node.value}" should be "${newSource}"`,
+    message: `${desc} module "${node.value}" should be "${newSource}"`,
     loc: node.loc,
     fix(fixer) {
       return fixer.replaceText(node, `'${newSource}'`);
@@ -100,6 +100,11 @@ module.exports = {
     return {
       ImportDeclaration(node) {
         checkModuleNameNode(context, mappings, node.source);
+      },
+      ExportNamedDeclaration(node) {
+        if (node.source) {
+          checkModuleNameNode(context, mappings, node.source, 'Re-exported');
+        }
       },
       CallExpression(node) {
         if (

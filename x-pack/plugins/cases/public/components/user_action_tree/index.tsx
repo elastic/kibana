@@ -67,6 +67,7 @@ export interface UserActionTreeProps {
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
+  statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
@@ -130,6 +131,7 @@ export const UserActionTree = React.memo(
     onShowAlertDetails,
     onUpdateField,
     renderInvestigateInTimelineActionComponent,
+    statusActionButton,
     updateCase,
     useFetchAlertData,
     userCanCrud,
@@ -246,10 +248,11 @@ export const UserActionTree = React.memo(
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
+          statusActionButton={statusActionButton}
           subCaseId={subCaseId}
         />
       ),
-      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, subCaseId]
+      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, statusActionButton, subCaseId]
     );
 
     useEffect(() => {
