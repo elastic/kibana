@@ -41,6 +41,10 @@ describe('SearchResults', () => {
   const setDescriptionField = jest.fn();
   const setUrlField = jest.fn();
   const setColorField = jest.fn();
+  const setTypeField = jest.fn();
+  const setMediaTypeField = jest.fn();
+  const setCreatedByField = jest.fn();
+  const setUpdatedByField = jest.fn();
 
   beforeEach(() => {
     setMockActions({
@@ -52,6 +56,10 @@ describe('SearchResults', () => {
       setDescriptionField,
       setUrlField,
       setColorField,
+      setTypeField,
+      setMediaTypeField,
+      setCreatedByField,
+      setUpdatedByField,
     });
     setMockValues({
       searchResultConfig,
@@ -103,6 +111,42 @@ describe('SearchResults', () => {
     expect(setDescriptionField).toHaveBeenCalledWith(searchResultConfig.descriptionField);
   });
 
+  it('calls setTypeField on change', () => {
+    const wrapper = shallow(<SearchResults />);
+    wrapper
+      .find('[data-test-subj="TypeFieldSelect"]')
+      .simulate('change', { target: { value: searchResultConfig.typeField } });
+
+    expect(setTypeField).toHaveBeenCalledWith(searchResultConfig.typeField);
+  });
+
+  it('calls setMediaTypeField on change', () => {
+    const wrapper = shallow(<SearchResults />);
+    wrapper
+      .find('[data-test-subj="MediaTypeFieldSelect"]')
+      .simulate('change', { target: { value: searchResultConfig.mediaTypeField } });
+
+    expect(setMediaTypeField).toHaveBeenCalledWith(searchResultConfig.mediaTypeField);
+  });
+
+  it('calls setCreatedByField on change', () => {
+    const wrapper = shallow(<SearchResults />);
+    wrapper
+      .find('[data-test-subj="CreatedByFieldSelect"]')
+      .simulate('change', { target: { value: searchResultConfig.createdByField } });
+
+    expect(setCreatedByField).toHaveBeenCalledWith(searchResultConfig.createdByField);
+  });
+
+  it('calls setUpdatedByField on change', () => {
+    const wrapper = shallow(<SearchResults />);
+    wrapper
+      .find('[data-test-subj="UpdatedByFieldSelect"]')
+      .simulate('change', { target: { value: searchResultConfig.updatedByField } });
+
+    expect(setUpdatedByField).toHaveBeenCalledWith(searchResultConfig.updatedByField);
+  });
+
   it('handles blank fallbacks', () => {
     setMockValues({
       searchResultConfig: { detailFields: [] },
@@ -116,9 +160,25 @@ describe('SearchResults', () => {
     wrapper
       .find('[data-test-subj="DescriptionFieldSelect"]')
       .simulate('change', { target: { value: LEAVE_UNASSIGNED_FIELD } });
+    wrapper
+      .find('[data-test-subj="TypeFieldSelect"]')
+      .simulate('change', { target: { value: LEAVE_UNASSIGNED_FIELD } });
+    wrapper
+      .find('[data-test-subj="MediaTypeFieldSelect"]')
+      .simulate('change', { target: { value: LEAVE_UNASSIGNED_FIELD } });
+    wrapper
+      .find('[data-test-subj="CreatedByFieldSelect"]')
+      .simulate('change', { target: { value: LEAVE_UNASSIGNED_FIELD } });
+    wrapper
+      .find('[data-test-subj="UpdatedByFieldSelect"]')
+      .simulate('change', { target: { value: LEAVE_UNASSIGNED_FIELD } });
 
     expect(wrapper.find('[data-test-subj="UrlFieldSelect"]').prop('value')).toEqual('');
     expect(setSubtitleField).toHaveBeenCalledWith(null);
     expect(setDescriptionField).toHaveBeenCalledWith(null);
+    expect(setTypeField).toHaveBeenCalledWith(null);
+    expect(setMediaTypeField).toHaveBeenCalledWith(null);
+    expect(setCreatedByField).toHaveBeenCalledWith(null);
+    expect(setUpdatedByField).toHaveBeenCalledWith(null);
   });
 });
