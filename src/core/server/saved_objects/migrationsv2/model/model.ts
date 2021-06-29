@@ -6,180 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { gt, valid } from 'semver';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
-import { AliasAction, FetchIndexResponse, isLeftTypeof, RetryableEsClientError } from './actions';
-import { AllActionStates, InitState, State } from './types';
-import { IndexMapping } from '../mappings';
-import { ResponseType } from './next';
-import { SavedObjectsMigrationVersion } from '../types';
-import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
-import { excludeUnusedTypesQuery, TransformErrorObjects } from '../migrations/core';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import { AliasAction, isLeftTypeof } from '../actions';
+import { AllActionStates, State } from '../types';
+import type { ResponseType } from '../next';
+import { disableUnknownTypeMappingFields } from '../../migrations/core/migration_context';
 import {
   createInitialProgress,
   incrementProcessedProgress,
   logProgress,
   setProgressTotal,
 } from './progress';
-
-/**
- * A helper function/type for ensuring that all control state's are handled.
- */
-function throwBadControlState(p: never): never;
-function throwBadControlState(controlState: any) {
-  throw new Error('Unexpected control state: ' + controlState);
-}
-
-/**
- * A helper function/type for ensuring that all response types are handled.
- */
-function throwBadResponse(state: State, p: never): never;
-function throwBadResponse(state: State, res: any): never {
-  throw new Error(
-    `${state.controlState} received unexpected action response: ` + JSON.stringify(res)
-  );
-}
-
-/**
- * Merge the _meta.migrationMappingPropertyHashes mappings of an index with
- * the given target mappings.
- *
- * @remarks When another instance already completed a migration, the existing
- * target index might contain documents and mappings created by a plugin that
- * is disabled in the current Kibana instance performing this migration.
- * Mapping updates are commutative (deeply merged) by Elasticsearch, except
- * for the `_meta` key. By merging the `_meta.migrationMappingPropertyHashes`
- * mappings from the existing target index index into the targetMappings we
- * ensure that any `migrationPropertyHashes` for disabled plugins aren't lost.
- *
- * Right now we don't use these `migrationPropertyHashes` but it could be used
- * in the future to detect if mappings were changed. If mappings weren't
- * changed we don't need to reindex but can clone the index to save disk space.
- *
- * @param targetMappings
- * @param indexMappings
- */
-function mergeMigrationMappingPropertyHashes(
-  targetMappings: IndexMapping,
-  indexMappings: IndexMapping
-) {
-  return {
-    ...targetMappings,
-    _meta: {
-      migrationMappingPropertyHashes: {
-        ...indexMappings._meta?.migrationMappingPropertyHashes,
-        ...targetMappings._meta?.migrationMappingPropertyHashes,
-      },
-    },
-  };
-}
-
-function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
-  const version = valid(indexVersion(indexName));
-  return version != null ? gt(version, kibanaVersion) : false;
-}
-
-/**
- * Extracts the version number from a >= 7.11 index
- * @param indexName A >= v7.11 index name
- */
-function indexVersion(indexName?: string): string | undefined {
-  return (indexName?.match(/.+_(\d+\.\d+\.\d+)_\d+/) || [])[1];
-}
-
-/**
- * Creates a record of alias -> index name pairs
- */
-function getAliases(indices: FetchIndexResponse) {
-  return Object.keys(indices).reduce((acc, index) => {
-    Object.keys(indices[index].aliases || {}).forEach((alias) => {
-      // TODO throw if multiple .kibana aliases point to the same index?
-      acc[alias] = index;
-    });
-    return acc;
-  }, {} as Record<string, string>);
-}
-
-/**
- * Constructs migration failure message strings from corrupt document ids and document transformation errors
- */
-function extractTransformFailuresReason(
-  corruptDocumentIds: string[],
-  transformErrors: TransformErrorObjects[]
-): string {
-  const corruptDocumentIdReason =
-    corruptDocumentIds.length > 0
-      ? ` ${
-          corruptDocumentIds.length
-        } corrupt saved object documents were found: ${corruptDocumentIds.join(',')}`
-      : '';
-  // we have both the saved object Id and the stack trace in each `transformErrors` item.
-  const transformErrorsReason =
-    transformErrors.length > 0
-      ? ` ${transformErrors.length} transformation errors were encountered:\n ` +
-        transformErrors
-          .map((errObj) => `- ${errObj.rawId}: ${errObj.err.stack ?? errObj.err.message}\n`)
-          .join('')
-      : '';
-  return (
-    `Migrations failed. Reason:${corruptDocumentIdReason}${transformErrorsReason}\n` +
-    `To allow migrations to proceed, please delete or fix these documents.`
-  );
-}
-
-const delayRetryState = <S extends State>(
-  state: S,
-  errorMessage: string,
-  /** How many times to retry a step that fails */
-  maxRetryAttempts: number
-): S => {
-  if (state.retryCount >= maxRetryAttempts) {
-    return {
-      ...state,
-      controlState: 'FATAL',
-      reason: `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating.`,
-    };
-  } else {
-    const retryCount = state.retryCount + 1;
-    const retryDelay = 1000 * Math.min(Math.pow(2, retryCount), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
-
-    return {
-      ...state,
-      retryCount,
-      retryDelay,
-      logs: [
-        ...state.logs,
-        {
-          level: 'error',
-          message: `Action failed with '${errorMessage}'. Retrying attempt ${retryCount} in ${
-            retryDelay / 1000
-          } seconds.`,
-        },
-      ],
-    };
-  }
-};
-const resetRetryState = <S extends State>(state: S): S => {
-  return { ...state, ...{ retryCount: 0, retryDelay: 0 } };
-};
-
-export type ExcludeRetryableEsError<Response> = Exclude<
-  | Exclude<
-      Response,
-      Either.Either<Response extends Either.Left<unknown> ? Response['left'] : never, never>
-    >
-  | Either.Either<
-      Exclude<
-        Response extends Either.Left<unknown> ? Response['left'] : never,
-        RetryableEsClientError
-      >,
-      Response extends Either.Right<unknown> ? Response['right'] : never
-    >,
-  Either.Left<never>
->;
+import { delayRetryState, resetRetryState } from './retry_state';
+import { extractTransformFailuresReason, extractUnknownDocFailureReason } from './extract_errors';
+import type { ExcludeRetryableEsError } from './types';
+import {
+  getAliases,
+  indexBelongsToLaterVersion,
+  indexVersion,
+  mergeMigrationMappingPropertyHashes,
+  throwBadControlState,
+  throwBadResponse,
+} from './helpers';
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -459,6 +309,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+      };
+    } else {
+      return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
       const source = stateP.sourceIndex;
       const target = stateP.versionIndex;
       return {
@@ -478,7 +338,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ]),
       };
     } else {
-      return throwBadResponse(stateP, res);
+      if (isLeftTypeof(res.left, 'unknown_docs_found')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: extractUnknownDocFailureReason(res.left.unknownDocs, stateP.sourceIndex.value),
+        };
+      } else {
+        return throwBadResponse(stateP, res.left);
+      }
     }
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -957,68 +825,4 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else {
     return throwBadControlState(stateP);
   }
-};
-
-/**
- * Construct the initial state for the model
- */
-export const createInitialState = ({
-  kibanaVersion,
-  targetMappings,
-  preMigrationScript,
-  migrationVersionPerType,
-  indexPrefix,
-  migrationsConfig,
-}: {
-  kibanaVersion: string;
-  targetMappings: IndexMapping;
-  preMigrationScript?: string;
-  migrationVersionPerType: SavedObjectsMigrationVersion;
-  indexPrefix: string;
-  migrationsConfig: SavedObjectsMigrationConfigType;
-}): InitState => {
-  const outdatedDocumentsQuery = {
-    bool: {
-      should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
-        bool: {
-          must: { term: { type } },
-          must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
-        },
-      })),
-    },
-  };
-
-  const reindexTargetMappings: IndexMapping = {
-    dynamic: false,
-    properties: {
-      type: { type: 'keyword' },
-      migrationVersion: {
-        // @ts-expect-error we don't allow plugins to set `dynamic`
-        dynamic: 'true',
-        type: 'object',
-      },
-    },
-  };
-
-  const initialState: InitState = {
-    controlState: 'INIT',
-    indexPrefix,
-    legacyIndex: indexPrefix,
-    currentAlias: indexPrefix,
-    versionAlias: `${indexPrefix}_${kibanaVersion}`,
-    versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
-    kibanaVersion,
-    preMigrationScript: Option.fromNullable(preMigrationScript),
-    targetIndexMappings: targetMappings,
-    tempIndexMappings: reindexTargetMappings,
-    outdatedDocumentsQuery,
-    retryCount: 0,
-    retryDelay: 0,
-    retryAttempts: migrationsConfig.retryAttempts,
-    batchSize: migrationsConfig.batchSize,
-    logs: [],
-    unusedTypesQuery: excludeUnusedTypesQuery,
-  };
-  return initialState;
 };

@@ -192,6 +192,7 @@ export class KibanaMigrator {
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
               migrationsConfig: this.soMigrationsConfig,
+              typeRegistry: this.typeRegistry,
             });
           },
         };
