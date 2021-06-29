@@ -530,13 +530,10 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         defaultMessage: 'Calculates the network direction given a source IP address.',
       }
     ),
-    getDefaultDescription: ({ name }) =>
+    getDefaultDescription: () =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.networkDirection', {
-        defaultMessage: 'Runs the "{name}" ingest pipeline',
-        values: {
-          name,
-        },
-      }),
+        defaultMessage: 'Calculates the network direction given a source IP address.',
+      })
   },
   pipeline: {
     FieldsComponent: Pipeline,
