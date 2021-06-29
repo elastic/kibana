@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
-import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
-import { ReportApiJSON } from '../../../common/types';
-import { ReportingAPIClient } from '../../lib/reporting_api_client';
+import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
+import { ReportApiJSON } from '../../common/types';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 interface Props {
   jobId: string;

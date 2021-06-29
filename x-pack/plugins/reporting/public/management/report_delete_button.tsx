@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiButton } from '@elastic/eui';
-import React, { PureComponent, Fragment } from 'react';
-import { Job, Props as ListingProps } from '../report_listing';
+import { EuiButton, EuiConfirmModal } from '@elastic/eui';
+import React, { Fragment, PureComponent } from 'react';
+import { Job, Props as ListingProps } from './report_listing';
 
 type DeleteFn = () => Promise<void>;
 type Props = { jobsToDelete: Job[]; performDelete: DeleteFn } & ListingProps;
