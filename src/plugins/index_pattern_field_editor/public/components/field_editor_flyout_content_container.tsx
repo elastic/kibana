@@ -15,7 +15,6 @@ import {
   IndexPatternField,
   IndexPattern,
   DataPublicPluginStart,
-  RuntimeType,
   UsageCollectionStart,
 } from '../shared_imports';
 import type { Field, PluginStart, InternalFieldType } from '../types';
@@ -121,22 +120,18 @@ export const FieldEditorFlyoutContentContainer = ({
     async (updatedField: Field) => {
       setIsSaving(true);
 
-      const { script } = updatedField;
-
       if (fieldTypeToProcess === 'runtime') {
         try {
           usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
           // eslint-disable-next-line no-empty
         } catch {}
+
         // rename an existing runtime field
         if (field?.name && field.name !== updatedField.name) {
           indexPattern.removeRuntimeField(field.name);
         }
 
-        indexPattern.addRuntimeField(updatedField.name, {
-          type: updatedField.type as RuntimeType,
-          script,
-        });
+        indexPattern.addRuntimeField(updatedField.name, updatedField);
       } else {
         try {
           usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
@@ -144,32 +139,18 @@ export const FieldEditorFlyoutContentContainer = ({
         } catch {}
       }
 
-      const editedField = indexPattern.getFieldByName(updatedField.name);
-
       try {
-        if (!editedField) {
-          throw new Error(
-            `Unable to find field named '${updatedField.name}' on index pattern '${indexPattern.title}'`
-          );
-        }
+        await indexPatternService.updateSavedObject(indexPattern);
 
-        indexPattern.setFieldCustomLabel(updatedField.name, updatedField.customLabel);
-        editedField.count = updatedField.popularity || 0;
-        if (updatedField.format) {
-          indexPattern.setFieldFormat(updatedField.name, updatedField.format);
-        } else {
-          indexPattern.deleteFieldFormat(updatedField.name);
-        }
-
-        await indexPatternService.updateSavedObject(indexPattern).then(() => {
-          const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
-            defaultMessage: "Saved '{fieldName}'",
-            values: { fieldName: updatedField.name },
-          });
-          notifications.toasts.addSuccess(message);
-          setIsSaving(false);
-          onSave(editedField);
+        const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
+          defaultMessage: "Saved '{fieldName}'",
+          values: { fieldName: updatedField.name },
         });
+        notifications.toasts.addSuccess(message);
+        setIsSaving(false);
+
+        const editedField = indexPattern.getFieldByName(updatedField.name);
+        onSave(editedField!);
       } catch (e) {
         const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
           defaultMessage: 'Failed to save field changes',
