@@ -171,8 +171,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
               <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiSpacer size="l" />
         </EuiFlyoutFooter>
       )}
     </>
