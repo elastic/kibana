@@ -74,6 +74,7 @@ const apmPerAgentSchema: Pick<
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
     dotnet: long,
+    'iOS/swift': long,
     go: long,
     java: long,
     'js-base': long,
@@ -96,6 +97,7 @@ const apmPerAgentSchema: Pick<
   },
   agents: {
     dotnet: agentSchema,
+    'iOS/swift': agentSchema,
     go: agentSchema,
     java: agentSchema,
     'js-base': agentSchema,
