@@ -25,15 +25,9 @@ export const getAuditLogResponse = async ({
 }): Promise<{
   page: number;
   pageSize: number;
-  data: Array<{
-    type: 'action' | 'response';
-    item: {
-      id: string;
-      data: unknown;
-    };
-  }>;
+  data: ActivityLog['data'];
 }> => {
-  const size = Math.round(pageSize / 2);
+  const size = Math.floor(pageSize / 2);
   const from = page <= 1 ? 0 : page * size - size + 1;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
@@ -96,7 +90,7 @@ const getActivityLog = async ({
       },
       options
     );
-    const actionIds = actionsResult.body.hits.hits.map(
+    const actionIds = actionsResult?.body?.hits?.hits?.map(
       (e) => (e._source as EndpointAction).action_id
     );
 
@@ -118,21 +112,24 @@ const getActivityLog = async ({
     logger.error(error);
     throw error;
   }
-  if (actionsResult?.statusCode !== 200 || responsesResult?.statusCode !== 200) {
+  if (actionsResult?.statusCode !== 200) {
     logger.error(`Error fetching actions log for agent_id ${elasticAgentId}`);
     throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
   }
 
-  const sortedData = ([
-    ...responsesResult.body.hits.hits.map((e) => ({
-      type: 'response',
-      item: { id: e._id, data: e._source },
-    })),
-    ...actionsResult.body.hits.hits.map((e) => ({
-      type: 'action',
-      item: { id: e._id, data: e._source },
-    })),
-  ] as ActivityLog['data']).sort((a, b) =>
+  const responses = responsesResult?.body?.hits?.hits?.length
+    ? responsesResult?.body?.hits?.hits?.map((e) => ({
+        type: 'response',
+        item: { id: e._id, data: e._source },
+      }))
+    : [];
+  const actions = actionsResult?.body?.hits?.hits?.length
+    ? actionsResult?.body?.hits?.hits?.map((e) => ({
+        type: 'action',
+        item: { id: e._id, data: e._source },
+      }))
+    : [];
+  const sortedData = ([...responses, ...actions] as ActivityLog['data']).sort((a, b) =>
     new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
   );
 
