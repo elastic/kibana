@@ -114,7 +114,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
         body: clearJobAuditMessagesBodySchema,
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canCreateJob'],
       },
     },
     routeGuard.fullLicenseAPIGuard(
