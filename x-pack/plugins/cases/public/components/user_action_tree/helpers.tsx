@@ -39,6 +39,8 @@ interface LabelTitle {
 }
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
 
+export type EndpointDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
+
 const getStatusTitle = (id: string, status: CaseStatuses) => (
   <EuiFlexGroup
     gutterSize="s"
@@ -360,6 +362,8 @@ export const getActionAttachment = ({
   userCanCrud,
   isLoadingIds,
   getCaseDetailHrefWithCommentId,
+  getEndpointDetailsHref,
+  getEndpointDetailsOnClick,
   manageMarkdownEditIds,
   handleManageMarkdownEditId,
   handleManageQuote,
@@ -370,6 +374,8 @@ export const getActionAttachment = ({
   userCanCrud: boolean;
   isLoadingIds: string[];
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  getEndpointDetailsHref: EndpointDetailsNavigation['href'];
+  getEndpointDetailsOnClick: EndpointDetailsNavigation['onClick'];
   manageMarkdownEditIds: string[];
   handleManageMarkdownEditId: (id: string) => void;
   handleManageQuote: (id: string) => void;
@@ -386,7 +392,12 @@ export const getActionAttachment = ({
     isEdit: manageMarkdownEditIds.includes(comment.id),
   }),
   event: (
-    <HostIsolationCommentEvent type={comment.actions.type} endpoints={comment.actions.targets} />
+    <HostIsolationCommentEvent
+      type={comment.actions.type}
+      endpoints={comment.actions.targets}
+      href={getEndpointDetailsHref}
+      onClick={getEndpointDetailsOnClick}
+    />
   ),
   'data-test-subj': 'endpoint-action',
   timestamp: <UserActionTimestamp createdAt={action.actionAt} />,

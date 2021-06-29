@@ -46,6 +46,7 @@ import {
   getAlertAttachment,
   getGeneratedAlertsAttachment,
   RuleDetailsNavigation,
+  EndpointDetailsNavigation,
   getActionAttachment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
@@ -63,6 +64,8 @@ export interface UserActionTreeProps {
   fetchUserActions: () => void;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
+  getEndpointDetailsHref: EndpointDetailsNavigation['href'];
+  getEndpointDetailsOnClick: EndpointDetailsNavigation['onClick'];
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
@@ -127,6 +130,8 @@ export const UserActionTree = React.memo(
     fetchUserActions,
     getCaseDetailHrefWithCommentId,
     getRuleDetailsHref,
+    getEndpointDetailsHref,
+    getEndpointDetailsOnClick,
     isLoadingDescription,
     isLoadingUserActions,
     onRuleDetailsClick,
@@ -463,6 +468,8 @@ export const UserActionTree = React.memo(
                           userCanCrud,
                           isLoadingIds,
                           getCaseDetailHrefWithCommentId,
+                          getEndpointDetailsHref,
+                          getEndpointDetailsPath,
                           manageMarkdownEditIds,
                           handleManageMarkdownEditId,
                           handleManageQuote,

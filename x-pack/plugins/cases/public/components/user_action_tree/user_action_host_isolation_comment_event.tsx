@@ -8,8 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import * as i18n from './translations';
 import { LinkAnchor } from '../links';
-import { useKibana } from '../../common/lib/kibana';
-import { SECURITY_SOLUTION_APP_ID } from './constants';
+import { EndpointDetailsNavigation } from './helpers';
 
 interface EndpointInfo {
   endpointId: string;
@@ -19,22 +18,24 @@ interface EndpointInfo {
 interface Props {
   type: string;
   endpoints: EndpointInfo[];
+  href: EndpointDetailsNavigation['href'];
+  onClick: EndpointDetailsNavigation['onClick'];
 }
 
-const HostIsolationCommentEventComponent: React.FC<Props> = ({ type, endpoints }) => {
-  const activityLogPath = `/administration/endpoints?selected_endpoint=${endpoints[0].endpointId}&show=activity_log`;
-  const { getUrlForApp, navigateToUrl } = useKibana().services.application;
-
-  const endpointDetailsHref = getUrlForApp(SECURITY_SOLUTION_APP_ID, {
-    path: activityLogPath,
-  });
+const HostIsolationCommentEventComponent: React.FC<Props> = ({
+  type,
+  endpoints,
+  href,
+  onClick,
+}) => {
+  const endpointDetailsHref = href(endpoints[0].endpointId);
 
   const onLinkClick = useCallback(
     (ev) => {
       ev.preventDefault();
-      return navigateToUrl(endpointDetailsHref);
+      return onClick(endpoints[0].endpointId, ev);
     },
-    [endpointDetailsHref, navigateToUrl]
+    [onClick, endpoints]
   );
 
   return (
