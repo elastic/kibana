@@ -142,8 +142,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-          operation: 'terms',
-          field: 'ip',
+          operation: 'date_histogram',
+          field: '@timestamp',
         },
         1
       );
