@@ -104,7 +104,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
           : [],
       }}
     >
-      <EuiPanel>
+      <EuiPanel hasBorder>
         {(!journey || journey.loading) && (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>

@@ -148,7 +148,7 @@ export const SettingsPage: React.FC = () => {
   );
 
   return (
-    <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
+    <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }} hasBorder>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>{cannotEditNotice}</EuiFlexItem>
       </EuiFlexGroup>

@@ -173,7 +173,7 @@ export const MonitorListComponent: ({
   ];
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <MonitorListHeader />
       <EuiSpacer size="m" />
       <EuiBasicTable

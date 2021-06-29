@@ -34,7 +34,7 @@ export const MonitorDurationComponent = ({
   hasMLJob,
 }: DurationChartProps) => {
   return (
-    <EuiPanel paddingSize="m">
+    <EuiPanel paddingSize="m" hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">

@@ -49,7 +49,7 @@ export const MonitorStatusDetailsComponent = ({ monitorLocations }: MonitorStatu
   }, []);
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <EuiFlexGroup gutterSize="l" wrap={true} responsive={true}>
         <EuiFlexItem grow={1}>
           <MonitorStatusBar />

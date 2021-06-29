@@ -30,7 +30,7 @@ export const DataOrIndexMissing = ({ headingMessage, settings }: DataMissingProp
     <EuiFlexGroup justifyContent="center" data-test-subj="data-missing">
       <EuiFlexItem grow={false} style={{ flexBasis: 700 }}>
         <EuiSpacer size="m" />
-        <EuiPanel>
+        <EuiPanel hasBorder>
           <EuiEmptyPrompt
             iconType="logoUptime"
             title={

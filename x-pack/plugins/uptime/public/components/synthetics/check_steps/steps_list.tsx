@@ -147,7 +147,7 @@ export const StepsList = ({ data, error, loading }: Props) => {
   };
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <EuiTitle>
         <h2>
           {statusMessage(

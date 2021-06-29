@@ -251,7 +251,7 @@ export const PingList = () => {
   };
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder>
       <PingListHeader />
       <EuiSpacer size="s" />
       <EuiBasicTable
