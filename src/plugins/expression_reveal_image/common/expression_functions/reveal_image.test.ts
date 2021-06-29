@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { functionWrapper, elasticOutline, elasticLogo } from '../../../presentation_util/public';
-import { getFunctionErrors } from '../../common/i18n';
+import {
+  functionWrapper,
+  elasticOutline,
+  elasticLogo,
+} from '../../../presentation_util/common/lib';
+import { getFunctionErrors } from '../i18n';
 import { revealImageFunction } from './reveal_image_function';
-import { Origin } from '../../common/types/expression_functions';
+import { Origin } from '../types';
 import { ExecutionContext } from 'src/plugins/expressions';
 
 const errors = getFunctionErrors().revealImage;
