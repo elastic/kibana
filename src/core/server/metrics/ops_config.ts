@@ -12,7 +12,6 @@ export const opsConfig = {
   path: 'ops',
   schema: schema.object({
     interval: schema.duration({ defaultValue: '5s' }),
-    eventLoopDelayThreshold: schema.duration({ defaultValue: '350ms' }),
     cGroupOverrides: schema.object({
       cpuPath: schema.maybe(schema.string()),
       cpuAcctPath: schema.maybe(schema.string()),

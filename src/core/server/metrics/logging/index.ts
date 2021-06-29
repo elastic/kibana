@@ -7,4 +7,3 @@
  */
 
 export { getEcsOpsMetricsLog } from './get_ops_metrics_log';
-export { getEventLoopThresholdLog } from './get_event_loop_threshold_log';
