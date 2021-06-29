@@ -8,15 +8,12 @@
 import { KibanaRequest } from 'kibana/server';
 import { AuthorizationServiceSetup, CheckPrivilegesPayload } from '../../security/server';
 
-interface BasicDeps {
+interface Deps {
   request: KibanaRequest;
   authorization?: Pick<
     AuthorizationServiceSetup,
     'mode' | 'actions' | 'checkPrivilegesDynamicallyWithRequest'
   >;
-}
-
-interface FileUploadDeps extends BasicDeps {
   checkHasManagePipeline: boolean;
   checkCreateIndexPattern: boolean;
   indexName?: string;
@@ -28,7 +25,7 @@ export const checkFileUploadPrivileges = async ({
   checkHasManagePipeline,
   checkCreateIndexPattern,
   indexName,
-}: FileUploadDeps) => {
+}: Deps) => {
   const requiresAuthz = authorization?.mode.useRbacForRequest(request) ?? false;
 
   if (!authorization || !requiresAuthz) {

@@ -146,26 +146,3 @@ export const Explanation: FC<{ error: FindFileStructureErrorResponse }> = ({ err
     </>
   );
 };
-
-export const FindFileStructurePermissionDenied: FC = () => {
-  return (
-    <>
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.title"
-            defaultMessage="Permission denied"
-          />
-        }
-        color="danger"
-        iconType="cross"
-        data-test-subj="dataVisualizerFileStructurePermissionDeniedErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.description"
-          defaultMessage="You must have monitor_text_structure or monitor cluster privileges to use this feature."
-        />
-      </EuiCallOut>
-    </>
-  );
-};
