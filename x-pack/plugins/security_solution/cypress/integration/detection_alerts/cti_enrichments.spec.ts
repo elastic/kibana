@@ -170,8 +170,8 @@ describe('CTI Enrichment', () => {
         value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
       };
       const investigationTimeEnrichment = {
-        field: 'myhash.mysha256',
-        value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+        field: 'source.ip',
+        value: '192.168.1.1',
       };
       const expectedMatches = [indicatorMatchRuleEnrichment, investigationTimeEnrichment];
 
