@@ -15,6 +15,8 @@ import {
   NETWORK,
   OVERVIEW,
   TIMELINES,
+  RULES,
+  EXCEPTIONS,
 } from '../../screens/security_header';
 
 import { loginAndWaitForPage } from '../../tasks/login';
@@ -31,6 +33,8 @@ import {
   NETWORK_URL,
   OVERVIEW_URL,
   TIMELINES_URL,
+  RULES_URL,
+  EXCEPTIONS_URL,
 } from '../../urls/navigation';
 import {
   openKibanaNavigation,
@@ -71,6 +75,16 @@ describe('top-level navigation common to all pages in the Security app', () => {
   it('navigates to the Network page', () => {
     navigateFromHeaderTo(NETWORK);
     cy.url().should('include', NETWORK_URL);
+  });
+
+  it('navigates to the Rules page', () => {
+    navigateFromHeaderTo(RULES);
+    cy.url().should('include', RULES_URL);
+  });
+
+  it('navigates to the Exceptions page', () => {
+    navigateFromHeaderTo(EXCEPTIONS);
+    cy.url().should('include', EXCEPTIONS_URL);
   });
 
   it('navigates to the Timelines page', () => {

@@ -23,6 +23,10 @@ export const EVENT_FILTERS = '[data-test-subj="navigation-event_filters"]';
 
 export const NETWORK = '[data-test-subj="navigation-network"]';
 
+export const RULES = '[data-test-subj="navigation-rules"]';
+
+export const EXCEPTIONS = '[data-test-subj="navigation-exceptions"]';
+
 export const OVERVIEW = '[data-test-subj="navigation-overview"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';
