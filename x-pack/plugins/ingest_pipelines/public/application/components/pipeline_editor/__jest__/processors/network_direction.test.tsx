@@ -88,7 +88,7 @@ describe('Processor: Network Direction', () => {
     const processors = getProcessorValue(onUpdate, NETWORK_DIRECTION_TYPE);
     expect(processors[0][NETWORK_DIRECTION_TYPE]).toEqual({
       ...defaultNetworkDirectionParameters,
-      'internal_networks': ['loopback'],
+      internal_networks: ['loopback'],
     });
   });
 
@@ -98,7 +98,6 @@ describe('Processor: Network Direction', () => {
       form,
       find,
     } = testBed;
-
 
     find('toggleCustomField').simulate('click');
 
@@ -110,7 +109,7 @@ describe('Processor: Network Direction', () => {
     const processors = getProcessorValue(onUpdate, NETWORK_DIRECTION_TYPE);
     expect(processors[0][NETWORK_DIRECTION_TYPE]).toEqual({
       ...defaultNetworkDirectionParameters,
-      'internal_networks_field': 'internal_networks_field',
+      internal_networks_field: 'internal_networks_field',
     });
   });
 
@@ -121,7 +120,6 @@ describe('Processor: Network Direction', () => {
       find,
       component,
     } = testBed;
-
 
     // Set internal_networks field
     await act(async () => {
@@ -139,7 +137,7 @@ describe('Processor: Network Direction', () => {
     const processors = getProcessorValue(onUpdate, NETWORK_DIRECTION_TYPE);
     expect(processors[0][NETWORK_DIRECTION_TYPE]).toEqual({
       ...defaultNetworkDirectionParameters,
-      'internal_networks_field': 'internal_networks_field',
+      internal_networks_field: 'internal_networks_field',
     });
   });
 
@@ -175,7 +173,7 @@ describe('Processor: Network Direction', () => {
       source_ip: 'source.ip',
       target_field: 'target_field',
       destination_ip: 'destination.ip',
-      'internal_networks': ['loopback'],
+      internal_networks: ['loopback'],
     });
   });
 });

@@ -14,7 +14,15 @@ import { FieldsConfig, from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { SerializerFunc } from '../../../../../../shared_imports';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FIELD_TYPES, UseField, UseMultiFields, useFormData, Field, FieldHook, FieldConfig } from '../../../../../../shared_imports';
+import {
+  FIELD_TYPES,
+  UseField,
+  UseMultiFields,
+  useFormData,
+  Field,
+  FieldHook,
+  FieldConfig,
+} from '../../../../../../shared_imports';
 
 interface InternalNetworkTypes {
   internal_networks: string[];
@@ -44,12 +52,9 @@ const fieldsConfig: FieldsConfig = {
   source_ip: {
     type: FIELD_TYPES.TEXT,
     serializer: from.emptyStringToUndefined,
-    label: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.networkDirection.sourceIpLabel',
-      {
-        defaultMessage: 'Source IP (optional)',
-      }
-    ),
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.networkDirection.sourceIpLabel', {
+      defaultMessage: 'Source IP (optional)',
+    }),
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.networkDirection.sourceIpHelpText"
@@ -83,13 +88,13 @@ const fieldsConfig: FieldsConfig = {
 
 const internalNetworkConfig: Record<
   keyof InternalNetworkFields,
-  { path: string; config?: FieldConfig<any>, euiFieldProps?: Record<string, any> }
+  { path: string; config?: FieldConfig<any>; euiFieldProps?: Record<string, any> }
 > = {
   internal_networks: {
     path: 'fields.internal_networks',
     euiFieldProps: {
       noSuggestions: false,
-      options: internalNetworkValues.map(label => ({ label }))
+      options: internalNetworkValues.map((label) => ({ label })),
     },
     config: {
       type: FIELD_TYPES.COMBO_BOX,
@@ -103,11 +108,11 @@ const internalNetworkConfig: Record<
               return {
                 err: 'ERR_FIELD_MISSING',
                 path,
-                message: 'A field value is required.'
+                message: 'A field value is required.',
               };
             }
-          }
-        }
+          },
+        },
       ],
       label: i18n.translate(
         'xpack.ingestPipelines.pipelineEditor.networkDirection.internalNetworksLabel',
@@ -121,7 +126,7 @@ const internalNetworkConfig: Record<
           defaultMessage="List of internal networks."
         />
       ),
-    }
+    },
   },
   internal_networks_field: {
     path: 'fields.internal_networks_field',
@@ -136,11 +141,11 @@ const internalNetworkConfig: Record<
               return {
                 err: 'ERR_FIELD_MISSING',
                 path,
-                message: 'A field value is required.'
+                message: 'A field value is required.',
               };
             }
-          }
-        }
+          },
+        },
       ],
       label: i18n.translate(
         'xpack.ingestPipelines.pipelineEditor.networkDirection.internalNetworksFieldLabel',
@@ -157,11 +162,20 @@ const internalNetworkConfig: Record<
           }}
         />
       ),
-    }
+    },
   },
 };
 
 export const NetworkDirection: FunctionComponent = () => {
+  const [{ fields }] = useFormData();
+  const [isCustom, setIsCustom] = useState<boolean | undefined>();
+
+  useEffect(() => {
+    if (fields && isCustom === undefined) {
+      setIsCustom(fields?.internal_networks_field?.length > 0);
+    }
+  }, [fields, isCustom]);
+
   return (
     <>
       <UseField
@@ -191,26 +205,23 @@ export const NetworkDirection: FunctionComponent = () => {
       />
 
       <UseMultiFields fields={internalNetworkConfig}>
-        {({ internal_networks, internal_networks_field }) => {
-          const [{ fields }] = useFormData();
-          const [isCustom, setIsCustom] = useState<boolean | undefined>();
-          const field = isCustom ? internal_networks_field : internal_networks;
-          const configKey: keyof InternalNetworkTypes = isCustom ? 'internal_networks_field' : 'internal_networks';
+        {({
+          internal_networks: internalNetworks,
+          internal_networks_field: internalNetworksField,
+        }) => {
+          const field = isCustom ? internalNetworksField : internalNetworks;
+          const configKey: keyof InternalNetworkTypes = isCustom
+            ? 'internal_networks_field'
+            : 'internal_networks';
 
-          useEffect(() => {
-            if (fields && isCustom === undefined) {
-              setIsCustom(fields?.internal_networks_field?.length > 0);
-            }
-          }, [fields]);
-
-          const toggleCustom = (field: FieldHook) => () => {
+          const toggleCustom = (currentField: FieldHook) => () => {
             if (isCustom) {
-              field.setValue('');
+              currentField.setValue('');
             } else {
-              field.setValue([]);
+              currentField.setValue([]);
             }
 
-            field.reset({ resetValue: false });
+            currentField.reset({ resetValue: false });
 
             setIsCustom(!isCustom);
           };
@@ -220,7 +231,7 @@ export const NetworkDirection: FunctionComponent = () => {
               field={field}
               euiFieldProps={internalNetworkConfig[configKey].euiFieldProps}
               data-test-subj="networkDirectionField"
-              labelAppend={(
+              labelAppend={
                 <EuiButtonEmpty
                   size="xs"
                   onClick={toggleCustom(field)}
@@ -228,13 +239,13 @@ export const NetworkDirection: FunctionComponent = () => {
                 >
                   {isCustom
                     ? i18n.translate('xpack.idxMgmt.mappingsEditor.predefinedButtonLabel', {
-                      defaultMessage: 'Use preset fields',
-                    })
+                        defaultMessage: 'Use preset fields',
+                      })
                     : i18n.translate('xpack.idxMgmt.mappingsEditor.customButtonLabel', {
-                      defaultMessage: 'Use custom field',
-                  })}
+                        defaultMessage: 'Use custom field',
+                      })}
                 </EuiButtonEmpty>
-              )}
+              }
             />
           );
         }}
