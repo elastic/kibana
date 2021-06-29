@@ -76,7 +76,6 @@
     { "path": "./x-pack/plugins/canvas/tsconfig.json" },
     { "path": "./x-pack/plugins/cases/tsconfig.json" },
     { "path": "./x-pack/plugins/cloud/tsconfig.json" },
-    { "path": "./x-pack/plugins/console_extensions/tsconfig.json" },
     { "path": "./x-pack/plugins/data_enhanced/tsconfig.json" },
     { "path": "./x-pack/plugins/dashboard_mode/tsconfig.json" },
     { "path": "./x-pack/plugins/discover_enhanced/tsconfig.json" },
