@@ -56,8 +56,7 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
   );
   useEffect(() => {
     sendGetStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sendGetStatus]);
 
   const refresh = useCallback(() => sendGetStatus(), [sendGetStatus]);
 

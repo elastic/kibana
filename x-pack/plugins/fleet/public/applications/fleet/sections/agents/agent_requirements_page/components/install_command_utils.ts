@@ -17,7 +17,7 @@ export function getInstallCommandForPlatform(
 ) {
   let commandArguments = '';
 
-  if (fleetServerHost) {
+  if (isProductionDeployment && fleetServerHost) {
     commandArguments += `--url=${fleetServerHost} \\\n`;
   }
 

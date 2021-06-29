@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiLink,
   EuiSteps,
+  EuiCode,
   EuiCodeBlock,
   EuiCallOut,
   EuiSelect,
@@ -241,17 +242,15 @@ export const FleetServerCommandStep = ({
   };
 };
 
-export const useFleetServerInstructions = (
-  policyId?: string,
-  fleetServerHost?: string,
-  isProduction?: boolean
-) => {
+export const useFleetServerInstructions = (policyId?: string) => {
   const outputsRequest = useGetOutputs();
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
   const { platform, setPlatform } = usePlatform();
-
+  const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('production');
+  const { data: settings, resendRequest: refreshSettings } = useGetSettings();
+  const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
   const output = outputsRequest.data?.items?.[0];
   const esHost = output?.hosts?.[0];
 
@@ -266,9 +265,9 @@ export const useFleetServerInstructions = (
       serviceToken,
       policyId,
       fleetServerHost,
-      isProduction
+      deploymentMode === 'production'
     );
-  }, [serviceToken, esHost, platform, policyId, fleetServerHost, isProduction]);
+  }, [serviceToken, esHost, platform, policyId, fleetServerHost, deploymentMode]);
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);
@@ -289,10 +288,32 @@ export const useFleetServerInstructions = (
   }, [notifications.toasts]);
 
   const refresh = useCallback(() => {
-    outputsRequest.resendRequest();
-  }, [outputsRequest]);
+    return Promise.all([outputsRequest.resendRequest(), refreshSettings()]);
+  }, [outputsRequest, refreshSettings]);
+
+  const addFleetServerHost = useCallback(
+    async (host: string) => {
+      try {
+        await sendPutSettings({
+          fleet_server_hosts: [host, ...(settings?.item.fleet_server_hosts || [])],
+        });
+        await refreshSettings();
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
+            defaultMessage: 'Error adding Fleet Server host',
+          }),
+        });
+      }
+    },
+    [refreshSettings, notifications.toasts, settings?.item.fleet_server_hosts]
+  );
 
   return {
+    addFleetServerHost,
+    fleetServerHost,
+    deploymentMode,
+    setDeploymentMode,
     serviceToken,
     getServiceToken,
     isLoadingServiceToken,
@@ -381,12 +402,12 @@ const AgentPolicySelectionStep = ({
   };
 };
 
-const AddFleetServerHostStep = ({
+export const AddFleetServerHostStep = ({
   addFleetServerHost,
 }: {
   addFleetServerHost: (v: string) => Promise<void>;
 }): EuiStepProps => {
-  const [isCalloutVisible, setIsCalloutVisible] = useState(false);
+  const [calloutHost, setCalloutHost] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [fleetServerHost, setFleetServerHost] = useState('');
   const [error, setError] = useState<undefined | string>();
@@ -415,7 +436,7 @@ const AddFleetServerHostStep = ({
       if (validate(fleetServerHost)) {
         await addFleetServerHost(fleetServerHost);
       }
-      setIsCalloutVisible(true);
+      setCalloutHost(fleetServerHost);
     } finally {
       setIsLoading(false);
     }
@@ -441,7 +462,8 @@ const AddFleetServerHostStep = ({
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.addFleetServerHostStepDescription"
-            defaultMessage="Specify the URL your agents will use to connect to Fleet Server. This should match the public IP address or domain of the host where Fleet Server will run. By default, Fleet Server uses port `8220`."
+            defaultMessage="Specify the URL your agents will use to connect to Fleet Server. This should match the public IP address or domain of the host where Fleet Server will run. By default, Fleet Server uses port {port}."
+            values={{ port: <EuiCode>8220</EuiCode> }}
           />
         </EuiText>
         <EuiSpacer size="m" />
@@ -450,7 +472,7 @@ const AddFleetServerHostStep = ({
             <EuiFieldText
               fullWidth
               placeholder={'http://127.0.0.1:8220'}
-              value={fleetServerHost}
+              value={calloutHost}
               isInvalid={!!error}
               onChange={onChange}
               prepend={
@@ -473,7 +495,7 @@ const AddFleetServerHostStep = ({
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {isCalloutVisible && (
+        {calloutHost && (
           <>
             <EuiSpacer size="m" />
             <EuiCallOut
@@ -491,7 +513,7 @@ const AddFleetServerHostStep = ({
                 id="xpack.fleet.fleetServerSetup.addFleetServerHostSuccessText"
                 defaultMessage="Added {host}. You can edit your Fleet Server hosts in {fleetSettingsLink}."
                 values={{
-                  host: fleetServerHost,
+                  host: calloutHost,
                   fleetSettingsLink: (
                     <EuiLink href={getModalHref('settings')}>
                       <FormattedMessage
@@ -510,7 +532,7 @@ const AddFleetServerHostStep = ({
   };
 };
 
-const DeploymentModeStep = ({
+export const DeploymentModeStep = ({
   deploymentMode,
   setDeploymentMode,
 }: {
@@ -637,10 +659,6 @@ const CompleteStep = (): EuiStepProps => {
 export const OnPremInstructions: React.FC = () => {
   const { notifications } = useStartServices();
   const [policyId, setPolicyId] = useState<string | undefined>();
-  const [deploymentMode, setDeploymentMode] = useState<DeploymentMode>('production');
-  const { data: settings, resendRequest: refreshSettings } = useGetSettings();
-
-  const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
 
   const {
     serviceToken,
@@ -649,37 +667,23 @@ export const OnPremInstructions: React.FC = () => {
     installCommand,
     platform,
     setPlatform,
-    refresh: refreshInstructions,
-  } = useFleetServerInstructions(policyId, fleetServerHost, deploymentMode === 'production');
+    refresh,
+    deploymentMode,
+    setDeploymentMode,
+    fleetServerHost,
+    addFleetServerHost,
+  } = useFleetServerInstructions(policyId);
 
   const { modal } = useUrlModal();
   useEffect(() => {
     // Refresh settings when the settings modal is closed
     if (!modal) {
-      refreshSettings();
-      refreshInstructions();
+      refresh();
     }
-  }, [modal, refreshSettings, refreshInstructions]);
+  }, [modal, refresh]);
 
   const { docLinks } = useStartServices();
 
-  const addFleetServerHost = useCallback(
-    async (host: string) => {
-      try {
-        await sendPutSettings({
-          fleet_server_hosts: [host, ...(settings?.item.fleet_server_hosts || [])],
-        });
-        await refreshSettings();
-      } catch (err) {
-        notifications.toasts.addError(err, {
-          title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
-            defaultMessage: 'Error adding Fleet Server host',
-          }),
-        });
-      }
-    },
-    [refreshSettings, notifications.toasts, settings?.item.fleet_server_hosts]
-  );
   const [isWaitingForFleetServer, setIsWaitingForFleetServer] = useState(true);
 
   useEffect(() => {

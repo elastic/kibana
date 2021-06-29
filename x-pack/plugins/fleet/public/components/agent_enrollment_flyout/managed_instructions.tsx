@@ -15,9 +15,11 @@ import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } fr
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
+  DeploymentModeStep,
   ServiceTokenStep,
   FleetServerCommandStep,
   useFleetServerInstructions,
+  AddFleetServerHostStep,
 } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
@@ -69,7 +71,7 @@ export const ManagedInstructions = React.memo<Props>(
     const settings = useGetSettings();
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
-    const steps = useMemo(() => {
+    const fleetServerSteps = useMemo(() => {
       const {
         serviceToken,
         getServiceToken,
@@ -77,7 +79,19 @@ export const ManagedInstructions = React.memo<Props>(
         installCommand,
         platform,
         setPlatform,
+        deploymentMode,
+        setDeploymentMode,
+        addFleetServerHost,
       } = fleetServerInstructions;
+      return [
+        DeploymentModeStep({ deploymentMode, setDeploymentMode }),
+        AddFleetServerHostStep({ addFleetServerHost }),
+        ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
+        FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
+      ];
+    }, [fleetServerInstructions]);
+
+    const steps = useMemo(() => {
       const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
       const baseSteps: EuiContainedStepProps[] = [
         DownloadStep(),
@@ -91,12 +105,7 @@ export const ManagedInstructions = React.memo<Props>(
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
       ];
       if (isFleetServerPolicySelected) {
-        baseSteps.push(
-          ...[
-            ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
-            FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
-          ]
-        );
+        baseSteps.push(...fleetServerSteps);
       } else {
         baseSteps.push({
           title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
@@ -120,8 +129,8 @@ export const ManagedInstructions = React.memo<Props>(
       apiKey.data,
       isFleetServerPolicySelected,
       settings.data?.item?.fleet_server_hosts,
-      fleetServerInstructions,
       viewDataStepContent,
+      fleetServerSteps,
     ]);
 
     return (
