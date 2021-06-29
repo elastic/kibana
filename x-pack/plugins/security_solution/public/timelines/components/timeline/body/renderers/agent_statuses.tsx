@@ -24,7 +24,12 @@ export const AgentStatuses = React.memo(
     eventId: string;
     value: string;
   }) => {
-    const { isIsolated, agentStatus } = useHostIsolationStatus({ agentId: value });
+    const {
+      isIsolated,
+      agentStatus,
+      pendingIsolation,
+      pendingUnisolation,
+    } = useHostIsolationStatus({ agentId: value });
     const isolationFieldName = 'host.isolation';
     return (
       <EuiFlexGroup gutterSize="none">
@@ -45,7 +50,11 @@ export const AgentStatuses = React.memo(
             tooltipContent={isolationFieldName}
             value={`${isIsolated}`}
           >
-            <EndpointHostIsolationStatus isIsolated={isIsolated} />
+            <EndpointHostIsolationStatus
+              isIsolated={isIsolated}
+              pendingIsolate={pendingIsolation}
+              pendingUnIsolate={pendingUnisolation}
+            />
           </DefaultDraggable>
         </EuiFlexItem>
       </EuiFlexGroup>

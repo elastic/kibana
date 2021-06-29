@@ -302,7 +302,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [threatBrowserFields, threatIndexPatternsLoading, threatIndexPatterns, indexPatterns]
   );
-
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -343,7 +342,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   'data-test-subj': 'detectionEngineStepDefineRuleIndices',
                   euiFieldProps: {
                     fullWidth: true,
-                    isDisabled: isLoading,
                     placeholder: '',
                   },
                 }}

@@ -1436,10 +1436,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@34.3.0":
-  version "34.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-34.3.0.tgz#5cd7d66c86d9644991c4391682f84824126361df"
-  integrity sha512-cUFh5H7Y95lzbsyRP1yL88mVVe5MAODOhV+O+8jYmuDQH6WrEiDhtSljTKfVYssbP7Bv+qFraVwyUj623dfr2w==
+"@elastic/eui@34.5.1":
+  version "34.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-34.5.1.tgz#280faff755aa8dc4d683ec9d7eab09465e2f9628"
+  integrity sha512-+7viKbdu3nbUHKfFeNm8f7VFqyn68gp33vIOdwvZ2iXV93mqK4AWaUitW5j0QrpcodmbyaQma8Csggce9K9wYg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1475,6 +1475,7 @@
     tabbable "^3.0.0"
     text-diff "^1.0.1"
     unified "^9.2.0"
+    unist-util-visit "^2.0.3"
     url-parse "^1.5.0"
     uuid "^8.3.0"
     vfile "^4.2.0"
@@ -2765,6 +2766,10 @@
   uid ""
 
 "@kbn/server-route-repository@link:bazel-bin/packages/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
   version "0.0.0"
   uid ""
 
@@ -4301,6 +4306,11 @@
     prettier "~2.0.5"
     regenerator-runtime "^0.13.7"
     source-map "^0.7.3"
+
+"@storybook/testing-react@^0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@storybook/testing-react/-/testing-react-0.0.17.tgz#632dd22f8815743f78c182b126f444cf51d92d71"
+  integrity sha512-93nbA/JSWDEys1msd438+wzETRFDEgT2aFqJL2y46++zsyv8g2mCYKZkf9E36KQHMQbO1uJBHT8CmrLQa8VmZw==
 
 "@storybook/theming@6.1.20", "@storybook/theming@^6.1.20":
   version "6.1.20"
@@ -17600,6 +17610,11 @@ js-search@^1.4.3:
   resolved "https://registry.yarnpkg.com/js-search/-/js-search-1.4.3.tgz#23a86d7e064ca53a473930edc48615b6b1c1954a"
   integrity sha512-Sny5pf00kX1sM1KzvUC9nGYWXOvBfy30rmvZWeRktpg+esQKedIXrXNee/I2CAnsouCyaTjitZpRflDACx4toA==
 
+js-sha256@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/js-sha256/-/js-sha256-0.9.0.tgz#0b89ac166583e91ef9123644bd3c5334ce9d0966"
+  integrity sha512-sga3MHh9sgQN2+pJ9VYZ+1LPwXOxuBJBA5nrR5/ofPfuiJBE2hnjsaN8se8JznOmGLN2p49Pe5U/ttafcs/apA==
+
 js-sha3@0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/js-sha3/-/js-sha3-0.8.0.tgz#b9b7a5da73afad7dedd0f8c463954cbde6818840"
@@ -27728,7 +27743,7 @@ unist-util-visit-parents@^3.0.0:
     "@types/unist" "^2.0.0"
     unist-util-is "^4.0.0"
 
-unist-util-visit@2.0.3, unist-util-visit@^2.0.0, unist-util-visit@^2.0.2:
+unist-util-visit@2.0.3, unist-util-visit@^2.0.0, unist-util-visit@^2.0.2, unist-util-visit@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/unist-util-visit/-/unist-util-visit-2.0.3.tgz#c3703893146df47203bb8a9795af47d7b971208c"
   integrity sha512-iJ4/RczbJMkD0712mGktuGpm/U4By4FfDonL7N/9tATGIF4imikjOuagyMY53tnZq3NP6BcmlrHhEKAfGWjh7Q==

@@ -13,7 +13,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
@@ -24,6 +23,8 @@ import { useFormatUrl } from '../link_to';
 import { SecurityPageName } from '../../../app/types';
 import { Sourcerer } from '../sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useKibana } from '../../lib/kibana';
+import { SiemNavTabKey } from '../navigation/types';
 
 interface HeaderProps {
   border?: boolean;
@@ -55,11 +56,19 @@ const Badge = (styled(EuiBadge)`
 ` as unknown) as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
+const HeaderSection = styled(EuiPageHeaderSection)`
+  // Without  min-width: 0, as a flex child, it wouldn't shrink properly
+  // and could overflow its parent.
+  min-width: 0;
+  max-width: 100%;
+`;
+HeaderSection.displayName = 'HeaderSection';
+
 interface BackOptions {
-  href: LinkIconProps['href'];
   text: LinkIconProps['children'];
+  href?: LinkIconProps['href'];
   dataTestSubj?: string;
-  pageId: SecurityPageName;
+  pageId: SiemNavTabKey;
 }
 
 export interface HeaderPageProps extends HeaderProps {
@@ -91,27 +100,29 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   titleNode,
   ...rest
 }) => {
-  const history = useHistory();
+  const { navigateToUrl } = useKibana().services.application;
+
   const { formatUrl } = useFormatUrl(backOptions?.pageId ?? SecurityPageName.overview);
+  const backUrl = formatUrl(backOptions?.href ?? '');
   const goTo = useCallback(
     (ev) => {
       ev.preventDefault();
       if (backOptions) {
-        history.push(backOptions.href ?? '');
+        navigateToUrl(backUrl);
       }
     },
-    [backOptions, history]
+    [backOptions, navigateToUrl, backUrl]
   );
   return (
     <>
       <EuiPageHeader alignItems="center" bottomBorder={border}>
-        <EuiPageHeaderSection>
+        <HeaderSection>
           {backOptions && (
             <LinkBack>
               <LinkIcon
                 dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
                 onClick={goTo}
-                href={formatUrl(backOptions.href ?? '')}
+                href={backUrl}
                 iconType="arrowLeft"
               >
                 {backOptions.text}
@@ -120,7 +131,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           )}
 
           {!backOptions && backComponent && <>{backComponent}</>}
-
           {titleNode || (
             <Title
               draggableArguments={draggableArguments}
@@ -132,7 +142,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
           {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
           {border && isLoading && <EuiProgress size="xs" color="accent" />}
-        </EuiPageHeaderSection>
+        </HeaderSection>
 
         {children && (
           <EuiPageHeaderSection data-test-subj="header-page-supplements">

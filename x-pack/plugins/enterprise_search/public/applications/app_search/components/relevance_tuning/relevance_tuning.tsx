@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SAVE_BUTTON_LABEL } from '../../../shared/constants';
@@ -19,6 +19,7 @@ import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
 import { EmptyState } from './components';
+import { PrecisionSlider } from './components/precision_slider';
 import { RELEVANCE_TUNING_TITLE } from './constants';
 import { RelevanceTuningCallouts } from './relevance_tuning_callouts';
 import { RelevanceTuningForm } from './relevance_tuning_form';
@@ -43,7 +44,7 @@ export const RelevanceTuning: React.FC = () => {
         pageTitle: RELEVANCE_TUNING_TITLE,
         description: i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.description',
-          { defaultMessage: 'Set field weights and boosts.' }
+          { defaultMessage: 'Manage precision and relevance settings for your engine' }
         ),
         rightSideItems: engineHasSchemaFields
           ? [
@@ -74,6 +75,9 @@ export const RelevanceTuning: React.FC = () => {
 
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={3}>
+          <EuiSpacer size="m" />
+          <PrecisionSlider />
+          <EuiSpacer />
           <RelevanceTuningForm />
         </EuiFlexItem>
         <EuiFlexItem grow={4}>

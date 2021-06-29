@@ -28,7 +28,7 @@ SyntaxHighlighter.registerLanguage('sql', sql);
 
 const DatabaseStatement = euiStyled.div`
   padding: ${px(units.half)} ${px(unit)};
-  background: ${({ theme }) => tint(0.1, theme.eui.euiColorWarning)};
+  background: ${({ theme }) => tint(0.9, theme.eui.euiColorWarning)};
   border-radius: ${borderRadius};
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   font-family: ${fontFamilyCode};
