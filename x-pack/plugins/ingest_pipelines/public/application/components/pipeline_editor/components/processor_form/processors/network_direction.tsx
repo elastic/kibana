@@ -238,12 +238,18 @@ export const NetworkDirection: FunctionComponent = () => {
                   data-test-subj="toggleCustomField"
                 >
                   {isCustom
-                    ? i18n.translate('xpack.ingestPipelines.pipelineEditor.internalNetworkPredefinedLabel', {
-                        defaultMessage: 'Use preset field',
-                      })
-                    : i18n.translate('xpack.ingestPipelines.pipelineEditor.internalNetworkCustomLabel', {
-                        defaultMessage: 'Use custom field',
-                      })}
+                    ? i18n.translate(
+                        'xpack.ingestPipelines.pipelineEditor.internalNetworkPredefinedLabel',
+                        {
+                          defaultMessage: 'Use preset field',
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.ingestPipelines.pipelineEditor.internalNetworkCustomLabel',
+                        {
+                          defaultMessage: 'Use custom field',
+                        }
+                      )}
                 </EuiButtonEmpty>
               }
             />
