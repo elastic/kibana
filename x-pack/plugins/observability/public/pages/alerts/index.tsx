@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import type { AlertStatus } from '../../../common/typings';
@@ -19,6 +19,7 @@ import type { ObservabilityAPIReturnType } from '../../services/call_observabili
 import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
+import status_filterStories from './status_filter.stories';
 
 export type TopAlertResponse = ObservabilityAPIReturnType<'GET /api/observability/rules/alerts/top'>[number];
 
@@ -38,6 +39,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   const { core, ObservabilityPageTemplate } = usePluginContext();
   const { prepend } = core.http.basePath;
   const history = useHistory();
+  const refetch = useRef<() => void>();
   const {
     query: { rangeFrom = 'now-15m', rangeTo = 'now', kuery = '', status = 'open' },
   } = routeParams;
@@ -56,14 +58,40 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
     '/app/management/insightsAndAlerting/triggersActions/alerts'
   );
 
-  function setStatusFilter(value: AlertStatus) {
-    const nextSearchParams = new URLSearchParams(history.location.search);
-    nextSearchParams.set('status', value);
-    history.push({
-      ...history.location,
-      search: nextSearchParams.toString(),
-    });
-  }
+  const setStatusFilter = useCallback(
+    (value: AlertStatus) => {
+      const nextSearchParams = new URLSearchParams(history.location.search);
+      nextSearchParams.set('status', value);
+      history.push({
+        ...history.location,
+        search: nextSearchParams.toString(),
+      });
+    },
+    [history]
+  );
+
+  const onQueryChange = useCallback(
+    ({ dateRange, query }) => {
+      if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
+        return refetch.current && refetch.current();
+      }
+      const nextSearchParams = new URLSearchParams(history.location.search);
+
+      nextSearchParams.set('rangeFrom', dateRange.from);
+      nextSearchParams.set('rangeTo', dateRange.to);
+      nextSearchParams.set('kuery', query ?? '');
+
+      history.push({
+        ...history.location,
+        search: nextSearchParams.toString(),
+      });
+    },
+    [history, rangeFrom, rangeTo, kuery]
+  );
+
+  const setRefetch = useCallback((ref) => {
+    refetch.current = ref;
+  }, []);
 
   return (
     <ObservabilityPageTemplate
@@ -112,18 +140,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             query={kuery}
-            onQueryChange={({ dateRange, query }) => {
-              const nextSearchParams = new URLSearchParams(history.location.search);
-
-              nextSearchParams.set('rangeFrom', dateRange.from);
-              nextSearchParams.set('rangeTo', dateRange.to);
-              nextSearchParams.set('kuery', query ?? '');
-
-              history.push({
-                ...history.location,
-                search: nextSearchParams.toString(),
-              });
-            }}
+            onQueryChange={onQueryChange}
           />
         </EuiFlexItem>
         <EuiSpacer size="s" />
@@ -141,6 +158,7 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
               rangeTo={rangeTo}
               kuery={kuery}
               status={status}
+              setRefetch={setRefetch}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

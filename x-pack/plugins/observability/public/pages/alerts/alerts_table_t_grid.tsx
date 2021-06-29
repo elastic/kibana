@@ -30,6 +30,7 @@ interface AlertsTableTGridProps {
   rangeTo: string;
   kuery: string;
   status: string;
+  setRefetch: (ref: () => void) => void;
 }
 
 /**
@@ -89,7 +90,7 @@ const trailingControlColumns: never[] = [];
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
   const { prepend } = core.http.basePath;
-  const { rangeFrom, rangeTo, kuery, status } = props;
+  const { rangeFrom, rangeTo, kuery, status, setRefetch } = props;
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { timelines } = useKibana<{ timelines: TimelinesUIStart }>().services;
@@ -174,6 +175,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
         renderCellValue: getRenderCellValue({ rangeFrom, rangeTo, setFlyoutAlert }),
         rowRenderers: NO_ROW_RENDER,
         start: rangeFrom,
+        setRefetch,
         sort: [
           {
             columnId: '@timestamp',

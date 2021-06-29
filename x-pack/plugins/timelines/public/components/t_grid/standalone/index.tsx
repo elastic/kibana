@@ -116,6 +116,7 @@ export interface TGridStandaloneProps {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
+  setRefetch: (ref: () => void) => void;
   start: string;
   sort: SortColumnTimeline[];
   utilityBar?: (refetch: Refetch, totalCount: number) => React.ReactNode;
@@ -142,6 +143,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   query,
   renderCellValue,
   rowRenderers,
+  setRefetch,
   start,
   sort,
   utilityBar,
@@ -223,6 +225,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     skip: !canQueryTimeline,
     data,
   });
+  setRefetch(refetch);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
