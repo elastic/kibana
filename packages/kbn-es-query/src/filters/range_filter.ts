@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, get, keys, pickBy } from 'lodash';
 import { Filter, FilterMeta } from './types';
-import { IndexPatternBase, FieldBase } from '..';
+import { IndexPatternBase, IndexPatternFieldBase } from '..';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -88,7 +88,7 @@ const formatValue = (params: any[]) =>
 // Creates a filter where the value for the given field is in the given range
 // params should be an object containing `lt`, `lte`, `gt`, and/or `gte`
 export const buildRangeFilter = (
-  field: FieldBase,
+  field: IndexPatternFieldBase,
   params: RangeFilterParams,
   indexPattern: IndexPatternBase,
   formattedValue?: string
@@ -134,7 +134,7 @@ export const buildRangeFilter = (
   return filter as RangeFilter;
 };
 
-export const getRangeScript = (field: FieldBase, params: RangeFilterParams) => {
+export const getRangeScript = (field: IndexPatternFieldBase, params: RangeFilterParams) => {
   const knownParams = mapValues(
     pickBy(params, (val, key: any) => key in operators),
     (value) => (field.type === 'number' && typeof value === 'string' ? parseFloat(value) : value)

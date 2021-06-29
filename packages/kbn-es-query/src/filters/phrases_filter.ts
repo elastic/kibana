@@ -9,7 +9,7 @@
 import { Filter, FilterMeta } from './types';
 import { getPhraseScript } from './phrase_filter';
 import { FILTERS } from './index';
-import { FieldBase, IndexPatternBase } from '../es_query';
+import { IndexPatternFieldBase, IndexPatternBase } from '../es_query';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values
@@ -32,7 +32,7 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
 // Creates a filter where the given field matches one or more of the given values
 // params should be an array of values
 export const buildPhrasesFilter = (
-  field: FieldBase,
+  field: IndexPatternFieldBase,
   params: any[],
   indexPattern: IndexPatternBase
 ) => {

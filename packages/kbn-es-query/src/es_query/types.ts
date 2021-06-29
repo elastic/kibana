@@ -12,7 +12,7 @@ export interface IFieldSubType {
   multi?: { parent: string };
   nested?: { path: string };
 }
-export interface FieldBase {
+export interface IndexPatternFieldBase {
   name: string;
   type: string;
   subType?: IFieldSubType;
@@ -29,6 +29,6 @@ export interface FieldBase {
 }
 
 export interface IndexPatternBase {
-  fields: FieldBase[];
+  fields: IndexPatternFieldBase[];
   id?: string;
 }

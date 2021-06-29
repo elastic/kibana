@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldBase, IndexPatternBase } from '..';
+import { IndexPatternFieldBase, IndexPatternBase } from '..';
 import { Filter, FilterMeta } from './types';
 
 export type ExistsFilterMeta = FilterMeta;
@@ -26,7 +26,7 @@ export const getExistsFilterField = (filter: ExistsFilter) => {
   return filter.exists && filter.exists.field;
 };
 
-export const buildExistsFilter = (field: FieldBase, indexPattern: IndexPatternBase) => {
+export const buildExistsFilter = (field: IndexPatternFieldBase, indexPattern: IndexPatternBase) => {
   return {
     meta: {
       index: indexPattern.id,

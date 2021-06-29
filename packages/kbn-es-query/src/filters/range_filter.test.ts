@@ -9,7 +9,7 @@
 import { each } from 'lodash';
 import { buildRangeFilter, getRangeFilterField, RangeFilter } from './range_filter';
 import { fields, getField } from '../../index_patterns/mocks';
-import { IndexPatternBase, FieldBase } from '../es_query';
+import { IndexPatternBase, IndexPatternFieldBase } from '../es_query';
 
 describe('Range filter builder', () => {
   let indexPattern: IndexPatternBase;
@@ -130,7 +130,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where one side is infinite', () => {
-    let field: FieldBase;
+    let field: IndexPatternFieldBase;
     let filter: RangeFilter;
 
     beforeEach(() => {
@@ -160,7 +160,7 @@ describe('Range filter builder', () => {
   });
 
   describe('when given params where both sides are infinite', () => {
-    let field: FieldBase;
+    let field: IndexPatternFieldBase;
     let filter: RangeFilter;
 
     beforeEach(() => {

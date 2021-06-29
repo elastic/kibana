@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
-import type { FieldBase, IFieldSubType, IndexPatternBase } from '../es_query';
+import type { IndexPatternFieldBase, IFieldSubType, IndexPatternBase } from '../es_query';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { SerializedFieldFormat } from '../../../expressions/common';
@@ -178,7 +178,7 @@ export interface FieldSpecExportFmt {
 /**
  * Serialized version of IndexPatternField
  */
-export interface FieldSpec extends FieldBase {
+export interface FieldSpec extends IndexPatternFieldBase {
   /**
    * Popularity count is used by discover
    */
