@@ -138,7 +138,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     };
 
     const createAlertMenuItem: SectionLinkProps = {
-      label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
+      label: i18n.translate('xpack.infra.nodeContextMenu.createRuleLink', {
         defaultMessage: 'Create inventory rule',
       }),
       onClick: () => {

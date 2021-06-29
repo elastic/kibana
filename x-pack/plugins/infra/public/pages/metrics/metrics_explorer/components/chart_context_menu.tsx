@@ -155,7 +155,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   const createAlert = uiCapabilities?.infrastructure?.save
     ? [
         {
-          name: i18n.translate('xpack.infra.metricsExplorer.alerts.createAlertButton', {
+          name: i18n.translate('xpack.infra.metricsExplorer.alerts.createRuleButton', {
             defaultMessage: 'Create threshold rule',
           }),
           icon: 'bell',
