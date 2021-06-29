@@ -25,7 +25,7 @@ import {
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '5m',
   TYPE: 'security:endpoint-meta-telemetry',
-  INTERVAL: '24h',
+  INTERVAL: '1m',
   VERSION: '1.0.0',
 };
 
@@ -127,6 +127,11 @@ export class TelemetryEndpointTask {
     const { body: endpointMetricsResponse } = (endpointData.endpointMetrics as unknown) as {
       body: EndpointMetricsAggregation;
     };
+    if (endpointMetricsResponse.aggregations === undefined) {
+      this.logger.debug(`No endpoint metrics`);
+      return 0;
+    }
+
     const endpointMetrics = endpointMetricsResponse.aggregations.endpoint_agents.buckets.map(
       (epMetrics) => {
         return {
@@ -153,12 +158,16 @@ export class TelemetryEndpointTask {
     }, new Map<string, FleetAgentCacheItem>());
 
     const endpointPolicyCache = new Map<string, FullAgentPolicyInput>();
-    for (const policy of fleetAgents.values()) {
-      if (policy.policy_id !== undefined && !endpointPolicyCache.has(policy.policy_id)) {
-        const packagePolicies = await this.sender.fetchEndpointPolicyConfigs(policy.policy_id);
+    for (const policyInfo of fleetAgents.values()) {
+      if (
+        policyInfo.policy_id !== null &&
+        policyInfo.policy_id !== undefined &&
+        !endpointPolicyCache.has(policyInfo.policy_id)
+      ) {
+        const packagePolicies = await this.sender.fetchEndpointPolicyConfigs(policyInfo.policy_id);
         packagePolicies?.inputs.forEach((input) => {
-          if (input.type === 'endpoint' && policy.policy_id !== undefined) {
-            endpointPolicyCache.set(policy.policy_id, input);
+          if (input.type === 'endpoint' && policyInfo.policy_id !== undefined) {
+            endpointPolicyCache.set(policyInfo.policy_id, input);
           }
         });
       }
