@@ -19,7 +19,7 @@ image::user/alerting/images/teams-connector-test.png[Five clauses define the con
 
 Executing an Email action via https://github.com/pmuellr/kbn-action[kbn-action]. In this example, is using a cloud deployment of the stack:
 
-[source]
+[source, txt]
 --------------------------------------------------
 $ npm -g install pmuellr/kbn-action
 
@@ -45,7 +45,7 @@ $ kbn-action ls
 --------------------------------------------------
 and then execute this:
 
-[source]
+[source, txt]
 --------------------------------------------------
 $ kbn-action execute a692dc89-15b9-4a3c-9e47-9fb6872e49ce '{subject: "hallo", message: "hallo!", to:["test@yahoo.com"]}'
 {
