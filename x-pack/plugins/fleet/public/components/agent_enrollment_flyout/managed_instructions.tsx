@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { EuiSteps, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
@@ -71,67 +71,53 @@ export const ManagedInstructions = React.memo<Props>(
     const settings = useGetSettings();
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
-    const fleetServerSteps = useMemo(() => {
-      const {
-        serviceToken,
-        getServiceToken,
-        isLoadingServiceToken,
-        installCommand,
-        platform,
-        setPlatform,
-        deploymentMode,
-        setDeploymentMode,
-        addFleetServerHost,
-      } = fleetServerInstructions;
-      return [
-        DeploymentModeStep({ deploymentMode, setDeploymentMode }),
-        AddFleetServerHostStep({ addFleetServerHost }),
-        ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
-        FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
-      ];
-    }, [fleetServerInstructions]);
+    const {
+      serviceToken,
+      getServiceToken,
+      isLoadingServiceToken,
+      installCommand,
+      platform,
+      setPlatform,
+      deploymentMode,
+      setDeploymentMode,
+      addFleetServerHost,
+    } = fleetServerInstructions;
 
-    const steps = useMemo(() => {
-      const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
-      const baseSteps: EuiContainedStepProps[] = [
-        DownloadStep(),
-        !agentPolicy
-          ? AgentPolicySelectionStep({
-              agentPolicies,
-              selectedApiKeyId,
-              setSelectedAPIKeyId,
-              setIsFleetServerPolicySelected,
-            })
-          : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
-      ];
-      if (isFleetServerPolicySelected) {
-        baseSteps.push(...fleetServerSteps);
-      } else {
-        baseSteps.push({
-          title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
-            defaultMessage: 'Enroll and start the Elastic Agent',
-          }),
-          children: selectedApiKeyId && apiKey.data && (
-            <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
-          ),
-        });
-      }
+    const fleetServerSteps = [
+      DeploymentModeStep({ deploymentMode, setDeploymentMode }),
+      AddFleetServerHostStep({ addFleetServerHost }),
+      ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
+      FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),
+    ];
 
-      if (viewDataStepContent) {
-        baseSteps.push(ViewDataStep(viewDataStepContent));
-      }
+    const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
+    const steps: EuiContainedStepProps[] = [
+      DownloadStep(),
+      !agentPolicy
+        ? AgentPolicySelectionStep({
+            agentPolicies,
+            selectedApiKeyId,
+            setSelectedAPIKeyId,
+            setIsFleetServerPolicySelected,
+          })
+        : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
+    ];
+    if (isFleetServerPolicySelected) {
+      steps.push(...fleetServerSteps);
+    } else {
+      steps.push({
+        title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
+          defaultMessage: 'Enroll and start the Elastic Agent',
+        }),
+        children: selectedApiKeyId && apiKey.data && (
+          <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
+        ),
+      });
+    }
 
-      return baseSteps;
-    }, [
-      agentPolicy,
-      agentPolicies,
-      selectedApiKeyId,
-      apiKey.data,
-      isFleetServerPolicySelected,
-      settings.data?.item?.fleet_server_hosts,
-      viewDataStepContent,
-      fleetServerSteps,
-    ]);
+    if (viewDataStepContent) {
+      steps.push(ViewDataStep(viewDataStepContent));
+    }
 
     return (
       <>
