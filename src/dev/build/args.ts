@@ -46,7 +46,6 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
-      oss: null,
       'version-qualifier': '',
     },
     unknown: (flag) => {
