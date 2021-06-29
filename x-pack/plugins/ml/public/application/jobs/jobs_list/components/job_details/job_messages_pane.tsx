@@ -18,7 +18,7 @@ import { useMlApiContext } from '../../../../contexts/kibana';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 interface JobMessagesPaneProps {
   jobId: string;
-  showClearButton: boolean;
+  showClearButton?: boolean;
   start?: string;
   end?: string;
   actionHandler?: (message: JobMessage) => void;
