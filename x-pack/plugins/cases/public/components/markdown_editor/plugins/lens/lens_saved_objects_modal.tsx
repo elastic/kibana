@@ -40,7 +40,7 @@ const LensSavedObjectsModalComponent: React.FC<LensSavedObjectsModalProps> = ({
         type: 'lens',
         getIconForSavedObject: () => 'lensApp',
         name: i18n.translate(
-          'xpack.observability.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.savedObjectType.lens',
+          'xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.savedObjectType.lens',
           {
             defaultMessage: 'Lens',
           }
@@ -58,8 +58,8 @@ const LensSavedObjectsModalComponent: React.FC<LensSavedObjectsModalProps> = ({
           <EuiModalHeaderTitle>
             <h1>
               <FormattedMessage
-                id="xpack.observability.markdownEditor.plugins.lens.insertLensSavedObjectModal.modalTitle"
-                defaultMessage="Add Lens from library"
+                id="xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.modalTitle"
+                defaultMessage="Add from library"
               />
             </h1>
           </EuiModalHeaderTitle>
@@ -72,7 +72,7 @@ const LensSavedObjectsModalComponent: React.FC<LensSavedObjectsModalProps> = ({
             showFilter
             noItemsMessage={
               <FormattedMessage
-                id="xpack.observability.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel"
+                id="xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel"
                 defaultMessage="'No matching lens found."
               />
             }

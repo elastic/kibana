@@ -60,6 +60,6 @@ export const UNKNOWN_RULE = i18n.translate('xpack.cases.caseView.unknownRule.lab
 export const INSERT_LENS = i18n.translate(
   'xpack.cases.markdownEditor.plugins.lens.insertLensButtonLabel',
   {
-    defaultMessage: 'Insert lens visualization',
+    defaultMessage: 'Insert visualization',
   }
 );

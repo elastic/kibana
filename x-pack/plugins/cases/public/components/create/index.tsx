@@ -17,7 +17,6 @@ import { SubmitCaseButton } from './submit_button';
 import { Case } from '../../containers/types';
 import { CaseType } from '../../../common';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
-// import { CasesLensIntegration, CasesLensIntegrationProvider } from '../lens_context';
 import { fieldName as descriptionFieldName } from './description';
 import { InsertTimeline } from '../insert_timeline';
 import { UsePostComment } from '../../containers/use_post_comment';
@@ -39,7 +38,6 @@ export interface CreateCaseProps extends Owner {
   hideConnectorServiceNowSir?: boolean;
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  // lensIntegration?: CasesLensIntegration;
   timelineIntegration?: CasesTimelineIntegration;
   withSteps?: boolean;
 }
@@ -51,12 +49,10 @@ const CreateCaseComponent = ({
   disableAlerts,
   onCancel,
   onSuccess,
-  // lensIntegration,
   timelineIntegration,
   withSteps,
 }: Omit<CreateCaseProps, 'owner'>) => (
   <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-    {/* <CasesLensIntegrationProvider lensIntegration={lensIntegration}> */}
     <FormContext
       afterCaseCreated={afterCaseCreated}
       caseType={caseType}
@@ -92,7 +88,6 @@ const CreateCaseComponent = ({
       </Container>
       <InsertTimeline fieldName={descriptionFieldName} />
     </FormContext>
-    {/* </CasesLensIntegrationProvider> */}
   </CasesTimelineIntegrationProvider>
 );
 

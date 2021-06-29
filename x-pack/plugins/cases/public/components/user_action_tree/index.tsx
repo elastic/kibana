@@ -160,16 +160,13 @@ export const UserActionTree = React.memo(
       getManualAlertIdsWithNoRuleId(caseData.comments)
     );
 
-    const handleManageMarkdownEditId = useCallback(
-      (id: string) => {
-        if (!manageMarkdownEditIds.includes(id)) {
-          setManageMarkdownEditIds([...manageMarkdownEditIds, id]);
-        } else {
-          setManageMarkdownEditIds(manageMarkdownEditIds.filter((myId) => id !== myId));
-        }
-      },
-      [manageMarkdownEditIds]
-    );
+    const handleManageMarkdownEditId = useCallback((id: string) => {
+      setManageMarkdownEditIds((prevManageMarkdownEditIds) =>
+        !prevManageMarkdownEditIds.includes(id)
+          ? prevManageMarkdownEditIds.concat(id)
+          : prevManageMarkdownEditIds.filter((myId) => id !== myId)
+      );
+    }, []);
 
     const handleSaveComment = useCallback(
       ({ id, version }: { id: string; version: string }, content: string) => {
@@ -627,12 +624,15 @@ export const UserActionTree = React.memo(
           }
 
           if (draftComment?.commentId) {
-            if (
-              ![NEW_ID, DESCRIPTION_ID].includes(draftComment.commentId) &&
-              !manageMarkdownEditIds.includes(draftComment.commentId)
-            ) {
-              setManageMarkdownEditIds([draftComment.commentId]);
-            }
+            setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
+              if (
+                ![NEW_ID, DESCRIPTION_ID].includes(draftComment.commentId) &&
+                !prevManageMarkdownEditIds.includes(draftComment.commentId)
+              ) {
+                return [draftComment.commentId];
+              }
+              return prevManageMarkdownEditIds;
+            });
 
             if (
               commentRefs.current &&

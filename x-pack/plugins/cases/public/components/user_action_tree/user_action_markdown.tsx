@@ -67,36 +67,6 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
       editor: editorRef.current,
     }));
 
-    const renderButtons = useCallback(
-      ({ cancelAction, saveAction }) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="user-action-cancel-markdown"
-              size="s"
-              onClick={cancelAction}
-              iconType="cross"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="user-action-save-markdown"
-              color="secondary"
-              fill
-              iconType="save"
-              onClick={saveAction}
-              size="s"
-            >
-              {i18n.SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      []
-    );
-
     return isEditable ? (
       <Form form={form} data-test-subj="user-action-markdown-form">
         <UseField
@@ -107,10 +77,32 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
             'aria-label': 'Cases markdown editor',
             value: content,
             id,
-            bottomRightContent: renderButtons({
-              cancelAction: handleCancelAction,
-              saveAction: handleSaveAction,
-            }),
+            bottomRightContent: (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="user-action-cancel-markdown"
+                    size="s"
+                    onClick={handleCancelAction}
+                    iconType="cross"
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="user-action-save-markdown"
+                    color="secondary"
+                    fill
+                    iconType="save"
+                    onClick={handleSaveAction}
+                    size="s"
+                  >
+                    {i18n.SAVE}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
           }}
         />
       </Form>

@@ -262,12 +262,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           <EuiModalHeaderTitle>
             {editMode ? (
               <FormattedMessage
-                id="xpack.observability.markdownEditor.plugins.lens.editVisualizationModalTitle"
+                id="xpack.cases.markdownEditor.plugins.lens.editVisualizationModalTitle"
                 defaultMessage="Edit visualization"
               />
             ) : (
               <FormattedMessage
-                id="xpack.observability.markdownEditor.plugins.lens.addVisualizationModalTitle"
+                id="xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle"
                 defaultMessage="Add visualization"
               />
             )}
@@ -284,7 +284,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                 fill
               >
                 <FormattedMessage
-                  id="xpack.observability.markdownEditor.plugins.lens.createVisualizationButtonLabel"
+                  id="xpack.cases.markdownEditor.plugins.lens.createVisualizationButtonLabel"
                   defaultMessage="Create visualization"
                 />
               </EuiButton>
@@ -297,7 +297,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                 onClick={() => setShowLensSavedObjectsModal(true)}
               >
                 <FormattedMessage
-                  id="xpack.observability.markdownEditor.plugins.lens.addVisualizationFromLibraryButtonLabel"
+                  id="xpack.cases.markdownEditor.plugins.lens.addVisualizationFromLibraryButtonLabel"
                   defaultMessage="Add from library"
                 />
               </EuiButton>
@@ -309,7 +309,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                 <EuiFormRow label="Title">
                   <EuiFieldText
                     placeholder={i18n.translate(
-                      'xpack.observability.markdownEditor.plugins.lens.visualizationTitleFieldPlaceholder',
+                      'xpack.cases.markdownEditor.plugins.lens.visualizationTitleFieldPlaceholder',
                       {
                         defaultMessage: 'Visualization title',
                       }
@@ -327,7 +327,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
                   onClick={handleEditInLensClick}
                 >
                   <FormattedMessage
-                    id="xpack.observability.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
+                    id="xpack.cases.markdownEditor.plugins.lens.editVisualizationInLensButtonLabel"
                     defaultMessage="Edit visualization"
                   />
                 </EuiButton>
@@ -347,12 +347,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
           <EuiButton onClick={handleAdd} fill disabled={!lensEmbeddableAttributes || !lensTitle}>
             {editMode ? (
               <FormattedMessage
-                id="xpack.observability.markdownEditor.plugins.lens.updateVisualizationButtonLabel"
+                id="xpack.cases.markdownEditor.plugins.lens.updateVisualizationButtonLabel"
                 defaultMessage="Update"
               />
             ) : (
               <FormattedMessage
-                id="xpack.observability.markdownEditor.plugins.lens.addVisualizationToCaseButtonLabel"
+                id="xpack.cases.markdownEditor.plugins.lens.addVisualizationToCaseButtonLabel"
                 defaultMessage="Add to a Case"
               />
             )}
@@ -371,7 +371,7 @@ export const LensEditor = React.memo(LensEditorComponent);
 export const plugin: LensEuiMarkdownEditorUiPlugin = {
   name: ID,
   button: {
-    label: i18n.translate('xpack.observability.markdownEditor.plugins.lens.insertLensButtonLabel', {
+    label: i18n.translate('xpack.cases.markdownEditor.plugins.lens.insertLensButtonLabel', {
       defaultMessage: 'Insert visualization',
     }),
     iconType: 'lensApp',
