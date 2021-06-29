@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     /**
      * Test fails claiming that a user can focus on an element with aria-hidden
      * But axe does not recognize our focus trap which prevents a user from ever actually doing that
-     * Open question on why this doesn't fail in other areas though but the structure is the same
+     * Open question on why this doesn't fail in other areas though but the structure is the
      */
     it.skip('toggle side nav meets a11y requirements', async () => {
       await testSubjects.click('toggleNavButton');
@@ -38,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Enterprise search overview page meets a11y requirements ', async () => {
+      await testSubjects.click('toggleNavButton');
       await testSubjects.click('homeLink');
       await testSubjects.click('homSolutionPanel homSolutionPanel_enterpriseSearch');
       await a11y.testAppSnapshot();
