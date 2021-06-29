@@ -146,6 +146,7 @@ export interface AlertType<
     params?: ActionVariable[];
   };
   minimumLicenseRequired: LicenseType;
+  isExportable: boolean;
 }
 
 export type UntypedAlertType = AlertType<

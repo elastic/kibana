@@ -39,7 +39,7 @@ import {
   getTabs,
   logStacktraceTab,
 } from './ErrorTabs';
-import { ExceptionStacktrace } from './ExceptionStacktrace';
+import { ExceptionStacktrace } from './exception_stacktrace';
 
 const HeaderContainer = euiStyled.div`
   display: flex;
