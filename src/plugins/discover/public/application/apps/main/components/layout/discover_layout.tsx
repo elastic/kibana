@@ -278,8 +278,10 @@ export function DiscoverLayout({
             </EuiHideFor>
             <EuiFlexItem className="dscPageContent__wrapper">
               <EuiPageContent
-                verticalPosition={contentCentered ? 'center' : undefined}
-                horizontalPosition={contentCentered ? 'center' : undefined}
+                // verticalPosition={contentCentered ? 'center' : undefined}
+                verticalPosition={'center'}
+                // horizontalPosition={contentCentered ? 'center' : undefined}
+                horizontalPosition={'center'}
                 paddingSize="none"
                 hasShadow={false}
                 className={classNames('dscPageContent', {

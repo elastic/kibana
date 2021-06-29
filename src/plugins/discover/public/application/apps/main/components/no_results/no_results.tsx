@@ -29,17 +29,6 @@ export function DiscoverNoResults({
 }: DiscoverNoResultsProps) {
   const callOut = !error ? (
     <EuiFlexItem grow={false} className="dscNoResults">
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-            defaultMessage="No results match your search criteria"
-          />
-        }
-        color="warning"
-        iconType="help"
-        data-test-subj="discoverNoResults"
-      />
       {timeFieldName ? getTimeFieldMessage() : null}
       {queryLanguage === 'lucene'
         ? getLuceneQueryMessage(getServices().docLinks.links.query.luceneQuerySyntax)

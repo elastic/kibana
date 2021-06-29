@@ -8,28 +8,52 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode, EuiDescriptionList, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiCode,
+  EuiDescriptionList,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { Illustration } from './assets/no_results_illustration';
 
 export function getTimeFieldMessage() {
   return (
     <Fragment>
-      <EuiSpacer size="xl" />
       <EuiText>
-        <h2 data-test-subj="discoverNoResultsTimefilter">
+        <h1 data-test-subj="discoverNoResults">
           <FormattedMessage
-            id="discover.noResults.expandYourTimeRangeTitle"
-            defaultMessage="Expand your time range"
+            id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
+            defaultMessage="No results match your search criteria"
           />
-        </h2>
-        <p>
-          <FormattedMessage
-            id="discover.noResults.queryMayNotMatchTitle"
-            defaultMessage="One or more of the indices you&rsquo;re looking at contains a date field. Your query may
+        </h1>
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="xl" alignItems="center" direction="rowReverse" wrap>
+        <EuiFlexItem grow={1} className="inpEmptyIndexPatternPrompt__illustration">
+          <Illustration />
+        </EuiFlexItem>
+        <EuiFlexItem grow={2} className="inpEmptyIndexPatternPrompt__text">
+          <EuiText grow={false}>
+            <h2 data-test-subj="discoverNoResultsTimefilter">
+              <FormattedMessage
+                id="discover.noResults.expandYourTimeRangeTitle"
+                defaultMessage="Expand your time range"
+              />
+            </h2>
+            <p>
+              <FormattedMessage
+                id="discover.noResults.queryMayNotMatchTitle"
+                defaultMessage="One or more of the indices you&rsquo;re looking at contains a date field. Your query may
                   not match anything in the current time range, or there may not be any data at all in
                   the currently selected time range. You can try changing the time range to one which contains data."
-          />
-        </p>
-      </EuiText>
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Fragment>
   );
 }
@@ -104,14 +128,14 @@ export function getLuceneQueryMessage(link: string) {
   ];
   return (
     <Fragment>
-      <EuiSpacer size="xl" />
+      <EuiSpacer size="m" />
       <EuiText data-test-subj="discoverNoResultsLucene">
-        <h3>
+        <h2>
           <FormattedMessage
             id="discover.noResults.searchExamples.refineYourQueryTitle"
             defaultMessage="Refine your query"
           />
-        </h3>
+        </h2>
         <p>
           <FormattedMessage
             id="discover.noResults.searchExamples.howTosearchForWebServerLogsDescription"
@@ -130,7 +154,6 @@ export function getLuceneQueryMessage(link: string) {
           />
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
       <EuiDescriptionList type="column" listItems={searchExamples} />
       <EuiSpacer size="xl" />
     </Fragment>
