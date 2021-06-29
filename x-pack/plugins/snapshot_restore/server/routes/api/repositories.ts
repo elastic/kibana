@@ -111,18 +111,12 @@ export function registerRepositoriesRoutes({
         return handleEsError({ error: e, response: res });
       }
 
-      const {
-        body: { snapshots },
-      } = await clusterClient.asCurrentUser.snapshot
-        .get({
-          repository: name,
-          snapshot: '_all',
-        })
-        .catch((e) => ({
-          body: {
-            snapshots: null,
-          },
-        }));
+      const response = await clusterClient.asCurrentUser.snapshot.get({
+        repository: name,
+        snapshot: '_all',
+      });
+
+      const { snapshots: snapshotList } = response.body;
 
       if (repositoryByName[name]) {
         const { type = '', settings = {} } = repositoryByName[name];
@@ -136,7 +130,7 @@ export function registerRepositoriesRoutes({
             },
             isManagedRepository: managedRepository === name,
             snapshots: {
-              count: snapshots ? snapshots.length : null,
+              count: snapshotList ? snapshotList.length : null,
             },
           },
         });
