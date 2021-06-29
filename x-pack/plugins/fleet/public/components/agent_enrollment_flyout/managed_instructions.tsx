@@ -15,7 +15,7 @@ import { useGetOneEnrollmentAPIKey, useGetSettings, useLink, useFleetStatus } fr
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
-  DeploymentModeStep,
+  deploymentModeStep,
   ServiceTokenStep,
   FleetServerCommandStep,
   useFleetServerInstructions,
@@ -85,7 +85,7 @@ export const ManagedInstructions = React.memo<Props>(
       } = fleetServerInstructions;
 
       return [
-        DeploymentModeStep({ deploymentMode, setDeploymentMode }),
+        deploymentModeStep({ deploymentMode, setDeploymentMode }),
         addFleetServerHostStep({ addFleetServerHost }),
         ServiceTokenStep({ serviceToken, getServiceToken, isLoadingServiceToken }),
         FleetServerCommandStep({ serviceToken, installCommand, platform, setPlatform }),

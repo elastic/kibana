@@ -541,13 +541,34 @@ export const AddFleetServerHostStepContent = ({
   );
 };
 
-export const DeploymentModeStep = ({
+export const deploymentModeStep = ({
   deploymentMode,
   setDeploymentMode,
 }: {
   deploymentMode: DeploymentMode;
   setDeploymentMode: (v: DeploymentMode) => void;
 }): EuiStepProps => {
+  return {
+    title: i18n.translate('xpack.fleet.fleetServerSetup.stepDeploymentModeTitle', {
+      defaultMessage: 'Choose a deployment mode for security',
+    }),
+    status: undefined,
+    children: (
+      <DeploymentModeStepContent
+        deploymentMode={deploymentMode}
+        setDeploymentMode={setDeploymentMode}
+      />
+    ),
+  };
+};
+
+const DeploymentModeStepContent = ({
+  deploymentMode,
+  setDeploymentMode,
+}: {
+  deploymentMode: DeploymentMode;
+  setDeploymentMode: (v: DeploymentMode) => void;
+}) => {
   const onChangeCallback = useCallback(
     (v: string) => {
       if (v === 'production' || v === 'quickstart') {
@@ -557,68 +578,62 @@ export const DeploymentModeStep = ({
     [setDeploymentMode]
   );
 
-  return {
-    title: i18n.translate('xpack.fleet.fleetServerSetup.stepDeploymentModeTitle', {
-      defaultMessage: 'Choose a deployment mode for security',
-    }),
-    status: undefined,
-    children: (
-      <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.fleetServerSetup.stepDeploymentModeDescriptionText"
-            defaultMessage="Fleet uses Transport Layer Security (TLS) to encrypt traffic between Elastic Agents and other components in the Elastic Stack. Choose a deployment mode to determine how you wish to handle certificates. Your selection will affect the Fleet Server set up command shown in a later step."
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiRadioGroup
-          options={[
-            {
-              id: 'quickstart',
-              label: (
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.deploymentModeQuickStartOption"
-                  defaultMessage="{quickStart} – Fleet Server will generate a self-signed certificate. Subsequent agents must be enrolled using the --insecure flag. Not recommended for production use cases."
-                  values={{
-                    quickStart: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.fleet.fleetServerSetup.quickStartText"
-                          defaultMessage="Quick start"
-                        />
-                      </strong>
-                    ),
-                  }}
-                />
-              ),
-            },
-            {
-              id: 'production',
-              label: (
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.deploymentModeProductionOption"
-                  defaultMessage="{production} – Provide your own certificates. This option will require agents to specify a cert key when enrolling with Fleet"
-                  values={{
-                    production: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.fleet.fleetServerSetup.productionText"
-                          defaultMessage="Production"
-                        />
-                      </strong>
-                    ),
-                  }}
-                />
-              ),
-            },
-          ]}
-          idSelected={deploymentMode}
-          onChange={onChangeCallback}
-          name="radio group"
+  return (
+    <>
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.fleetServerSetup.stepDeploymentModeDescriptionText"
+          defaultMessage="Fleet uses Transport Layer Security (TLS) to encrypt traffic between Elastic Agents and other components in the Elastic Stack. Choose a deployment mode to determine how you wish to handle certificates. Your selection will affect the Fleet Server set up command shown in a later step."
         />
-      </>
-    ),
-  };
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiRadioGroup
+        options={[
+          {
+            id: 'quickstart',
+            label: (
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.deploymentModeQuickStartOption"
+                defaultMessage="{quickStart} – Fleet Server will generate a self-signed certificate. Subsequent agents must be enrolled using the --insecure flag. Not recommended for production use cases."
+                values={{
+                  quickStart: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.fleet.fleetServerSetup.quickStartText"
+                        defaultMessage="Quick start"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            ),
+          },
+          {
+            id: 'production',
+            label: (
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.deploymentModeProductionOption"
+                defaultMessage="{production} – Provide your own certificates. This option will require agents to specify a cert key when enrolling with Fleet"
+                values={{
+                  production: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.fleet.fleetServerSetup.productionText"
+                        defaultMessage="Production"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            ),
+          },
+        ]}
+        idSelected={deploymentMode}
+        onChange={onChangeCallback}
+        name="radio group"
+      />
+    </>
+  );
 };
 
 const WaitingForFleetServerStep = ({
@@ -753,7 +768,7 @@ export const OnPremInstructions: React.FC = () => {
         steps={[
           DownloadStep(),
           AgentPolicySelectionStep({ policyId, setPolicyId }),
-          DeploymentModeStep({ deploymentMode, setDeploymentMode }),
+          deploymentModeStep({ deploymentMode, setDeploymentMode }),
           addFleetServerHostStep({ addFleetServerHost }),
           ServiceTokenStep({
             disabled: deploymentMode === 'production' && !fleetServerHost,
