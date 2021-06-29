@@ -25,7 +25,7 @@ import {
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '5m',
   TYPE: 'security:endpoint-meta-telemetry',
-  INTERVAL: '1m',
+  INTERVAL: '24m',
   VERSION: '1.0.0',
 };
 
