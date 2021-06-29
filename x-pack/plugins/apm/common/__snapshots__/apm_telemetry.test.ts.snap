@@ -675,6 +675,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         }
                       }
                     },
+                    "host": {
+                      "properties": {
+                        "os": {
+                          "properties": {
+                            "platform": {
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    },
                     "counts": {
                       "properties": {
                         "transaction": {
@@ -957,6 +968,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           }
                         },
                         "cloud": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "host": {
                           "properties": {
                             "took": {
                               "properties": {

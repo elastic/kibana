@@ -80,7 +80,7 @@ describe('body', () => {
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <MemoryRouter initialEntries={[`/host-1/${path}`]}>
+          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
             <HostDetailsTabs
               isInitializing={false}
               detailName={'host-1'}
