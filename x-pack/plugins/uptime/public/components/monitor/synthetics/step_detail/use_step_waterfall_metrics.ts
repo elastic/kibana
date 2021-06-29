@@ -51,6 +51,8 @@ export const useStepWaterfallMetrics = ({ checkGroup }: Props) => {
   if (data) {
     const metricDocs = (data.hits.hits as unknown) as Array<{ fields: any }>;
     let navigationStart = 0;
+    let navigationStartExist = false;
+
     metricDocs.forEach(({ fields }) => {
       if (fields['browser.relative_trace.type']?.[0] === 'mark') {
         const {
@@ -59,11 +61,12 @@ export const useStepWaterfallMetrics = ({ checkGroup }: Props) => {
         } = fields;
         if (metricType?.[0] === 'navigationStart') {
           navigationStart = metricValue?.[0];
+          navigationStartExist = true;
         }
       }
     });
 
-    if (navigationStart > 0) {
+    if (navigationStartExist) {
       metricDocs.forEach(({ fields }) => {
         if (fields['browser.relative_trace.type']?.[0] === 'mark') {
           const {
