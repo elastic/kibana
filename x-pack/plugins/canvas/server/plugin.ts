@@ -61,7 +61,6 @@ export class CanvasPlugin implements Plugin {
       router: canvasRouter,
       expressions: plugins.expressions,
       bfetch: plugins.bfetch,
-      elasticsearch: coreSetup.elasticsearch,
       logger: this.logger,
     });
 
@@ -77,7 +76,7 @@ export class CanvasPlugin implements Plugin {
     setupInterpreter(plugins.expressions);
 
     coreSetup.getStartServices().then(([_, depsStart]) => {
-      const strategy = essqlSearchStrategyProvider(depsStart.data);
+      const strategy = essqlSearchStrategyProvider();
       plugins.data.search.registerSearchStrategy(ESSQL_SEARCH_STRATEGY, strategy);
     });
   }

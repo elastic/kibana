@@ -12,7 +12,7 @@ import { CaseHeaderPage } from '../case_header_page';
 import * as i18n from './translations';
 import { Count } from './count';
 import { CasesNavigation } from '../links';
-import { ErrorMessage } from '../callout/types';
+import { ErrorMessage } from '../use_push_to_service/callout/types';
 import { NavButtons } from './nav_buttons';
 
 interface OwnProps {

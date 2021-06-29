@@ -18,7 +18,8 @@ const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 export const newVectorLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
-    defaultMessage: 'Creates a new empty layer. Use this to add shapes to the map',
+    defaultMessage:
+      'Create an empty layer. Use this to create documents by drawing shapes on the map',
   }),
   disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
     defaultMessage:
@@ -31,6 +32,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
     });
     return !hasImportPermission;
   },
+  isBeta: true,
   icon: DrawLayerIcon,
   prerequisiteSteps: [
     {
