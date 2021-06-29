@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { withSuspense } from '../../../presentation_util/public';
+import { getElasticOutline, withSuspense } from '../../../presentation_util/public';
 import { getRendererStrings } from '../../common/i18n';
 import { RevealImageRendererConfig } from '../../common/types';
 
@@ -23,7 +23,7 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
   displayName: revealImageStrings.getDisplayName(),
   help: revealImageStrings.getHelpDescription(),
   reuseDomNode: true,
-  render: (
+  render: async (
     domNode: HTMLElement,
     config: RevealImageRendererConfig,
     handlers: IInterpreterRenderHandlers
@@ -32,9 +32,15 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
       unmountComponentAtNode(domNode);
     });
 
+    const { elasticOutline } = await getElasticOutline();
     render(
       <I18nProvider>
-        <RevealImageComponent {...config} parentNode={domNode} onLoaded={handlers.done} />
+        <RevealImageComponent
+          onLoaded={handlers.done}
+          {...config}
+          parentNode={domNode}
+          defaultEmptyImage={elasticOutline}
+        />
       </I18nProvider>,
       domNode
     );

@@ -10,12 +10,13 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
-import { isValidUrl, elasticOutline } from '../../../presentation_util/public';
+import { isValidUrl } from '../../../presentation_util/public';
 import './reveal_image.scss';
 
 interface RevealImageComponentProps extends RevealImageRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];
   parentNode: HTMLElement;
+  defaultEmptyImage: string;
 }
 
 interface ImageStyles {
@@ -35,6 +36,7 @@ function RevealImageComponent({
   origin,
   image,
   emptyImage,
+  defaultEmptyImage,
 }: RevealImageComponentProps) {
   const [loaded, setLoaded] = useState(false);
   const [dimensions, setDimensions] = useState<NodeDimensions>({
@@ -99,7 +101,7 @@ function RevealImageComponent({
     return imgStyles;
   }
 
-  const imgSrc = isValidUrl(image ?? '') ? image : elasticOutline;
+  const imgSrc = isValidUrl(image ?? '') ? image : defaultEmptyImage;
 
   const alignerStyles: AlignerStyles = {};
 
