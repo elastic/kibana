@@ -70,8 +70,3 @@ export const OTHER_ENDPOINTS = (endpoints: number): string =>
     values: { endpoints },
     defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
   });
-
-export const LONG_HOSTNAME = i18n.translate('xpack.cases.caseView.something', {
-  defaultMessage:
-    'asdkjfkadjkfjakdsjkfjkadjkfjakdfkjaskdjfkjakdjfkajdkjfkajskdjfkajsdkfjakjdfkjakdfkajdkfakdjfkadjkfjakdjkajskdjfkdajahdfhadhfhahdhfahehdf',
-});
