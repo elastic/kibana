@@ -245,7 +245,7 @@ export const EndpointList = () => {
     return [
       {
         field: 'metadata',
-        width: '17%',
+        width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
@@ -392,7 +392,7 @@ export const EndpointList = () => {
       {
         field: 'metadata.@timestamp',
         name: lastActiveColumnName,
-        width: '7%',
+        width: '9%',
         render(dateValue: HostInfo['metadata']['@timestamp']) {
           return (
             <FormattedDate
