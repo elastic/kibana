@@ -6,7 +6,7 @@
  */
 
 import { PaletteOutput } from 'src/plugins/charts/public';
-import { DataType } from '../types';
+import { DataType, SuggestionRequest } from '../types';
 import { suggestions } from './suggestions';
 import { PieVisualizationState } from './types';
 
@@ -352,6 +352,81 @@ describe('suggestions', () => {
           state: expect.objectContaining({ shape: 'pie' }),
         })
       );
+    });
+
+    it('should score higher for more groups', () => {
+      const config: SuggestionRequest<PieVisualizationState> = {
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'b',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'e',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+      };
+      const twoGroupsResults = suggestions(config);
+      config.table.columns.splice(1, 1);
+      const oneGroupResults = suggestions(config);
+
+      expect(Math.max(...twoGroupsResults.map((suggestion) => suggestion.score))).toBeGreaterThan(
+        Math.max(...oneGroupResults.map((suggestion) => suggestion.score))
+      );
+    });
+
+    it('should score higher for more groups for each subvis with passed-in subvis id', () => {
+      const config: SuggestionRequest<PieVisualizationState> = {
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'b',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'e',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+        subVisualizationId: 'donut',
+      };
+      const twoGroupsResults = suggestions(config);
+      config.table.columns.splice(1, 1);
+      const oneGroupResults = suggestions(config);
+      // collect scores for one or two groups for each sub vis
+      const scores: Record<string, { two: number; one: number }> = {};
+      twoGroupsResults.forEach((r) => {
+        scores[r.state.shape] = { ...(scores[r.state.shape] || {}), two: r.score };
+      });
+      oneGroupResults.forEach((r) => {
+        scores[r.state.shape] = { ...(scores[r.state.shape] || {}), one: r.score };
+      });
+      expect(Object.keys(scores).length).toEqual(2);
+      Object.values(scores).forEach(({ one, two }) => {
+        expect(two).toBeGreaterThan(one);
+      });
     });
 
     it('should keep passed in palette', () => {

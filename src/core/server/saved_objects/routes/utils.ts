@@ -32,7 +32,7 @@ export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable)
       }
     }),
     createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
-      (obj) => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
+      (obj) => !!obj && (obj as SavedObjectsExportResultDetails).exportedCount === undefined
     ),
     createConcatStream([]),
   ]);
