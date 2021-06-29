@@ -9,6 +9,8 @@ import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import type { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
+
 import type { AgentPolicy, PackagePolicy } from '../types';
 
 import { useAgentPolicyRefresh, useCapabilities, useLink } from '../hooks';
@@ -21,8 +23,8 @@ import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
-  viewDataStepContent?: JSX.Element;
-}> = ({ agentPolicy, packagePolicy, viewDataStepContent }) => {
+  viewDataStep: EuiStepInterface;
+}> = ({ agentPolicy, packagePolicy, viewDataStep }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
@@ -106,7 +108,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         <EuiPortal>
           <AgentEnrollmentFlyout
             agentPolicy={agentPolicy}
-            viewDataStepContent={viewDataStepContent}
+            viewDataStep={viewDataStep}
             onClose={onEnrollmentFlyoutClose}
           />
         </EuiPortal>

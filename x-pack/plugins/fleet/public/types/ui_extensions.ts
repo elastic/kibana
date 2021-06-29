@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from './index';
@@ -109,12 +110,11 @@ export interface PackageAssetsExtension {
   component: LazyExoticComponent<PackageAssetsComponent>;
 }
 
-export type AgentEnrollmentFlyoutFinalStepExtensionComponent = ComponentType<{}>;
-
 export interface AgentEnrollmentFlyoutFinalStepExtension {
   package: string;
   view: 'agent-enrollment-flyout';
-  component: LazyExoticComponent<AgentEnrollmentFlyoutFinalStepExtensionComponent>;
+  stepProps: EuiStepProps;
+  component: null;
 }
 
 /** Fleet UI Extension Point */

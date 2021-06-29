@@ -23,19 +23,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
+import type { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
+
 import { InstallStatus } from '../../../../../types';
 import {
   useLink,
   useUrlPagination,
   useGetPackageInstallStatus,
   AgentPolicyRefreshContext,
-  useUIExtension,
+  useAgentEnrollmentFlyoutExtension,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
   AgentEnrollmentFlyout,
   AgentPolicySummaryLine,
-  ExtensionWrapper,
   LinkedAgentCount,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
@@ -90,7 +91,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
 
-  const CustomEnrollmentFlyoutFinalStep = useUIExtension(name, 'agent-enrollment-flyout');
+  const agentEnrollmentFlyoutExtensionStepProps = useAgentEnrollmentFlyoutExtension(name);
 
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PackagePolicyAndAgentPolicy>) => {
@@ -102,13 +103,16 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     [setPagination]
   );
 
-  const renderViewDataStepContent = useCallback(
-    () =>
-      CustomEnrollmentFlyoutFinalStep ? (
-        <ExtensionWrapper>
-          <CustomEnrollmentFlyoutFinalStep />
-        </ExtensionWrapper>
-      ) : (
+  const viewDataStep = useMemo<EuiStepInterface>(() => {
+    if (agentEnrollmentFlyoutExtensionStepProps) {
+      return agentEnrollmentFlyoutExtensionStepProps;
+    }
+
+    return {
+      title: i18n.translate('xpack.fleet.agentEnrollment.stepViewDataTitle', {
+        defaultMessage: 'View your data',
+      }),
+      children: (
         <>
           <EuiText>
             <FormattedMessage
@@ -134,8 +138,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           </EuiButton>
         </>
       ),
-    [name, version, getHref, CustomEnrollmentFlyoutFinalStep]
-  );
+    };
+  }, [name, version, getHref, agentEnrollmentFlyoutExtensionStepProps]);
 
   const columns: Array<EuiTableFieldDataColumnType<PackagePolicyAndAgentPolicy>> = useMemo(
     () => [
@@ -239,13 +243,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             <PackagePolicyActionsMenu
               agentPolicy={agentPolicy}
               packagePolicy={packagePolicy}
-              viewDataStepContent={renderViewDataStepContent()}
+              viewDataStep={viewDataStep}
             />
           );
         },
       },
     ],
-    [renderViewDataStepContent]
+    [viewDataStep]
   );
 
   const noItemsMessage = useMemo(() => {
@@ -301,7 +305,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
             data?.items.find(({ agentPolicy }) => agentPolicy.id === flyoutOpenForPolicyId)
               ?.agentPolicy
           }
-          viewDataStepContent={renderViewDataStepContent()}
+          viewDataStep={viewDataStep}
         />
       )}
     </AgentPolicyRefreshContext.Provider>

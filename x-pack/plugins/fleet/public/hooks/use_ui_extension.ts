@@ -7,7 +7,11 @@
 
 import React, { useContext } from 'react';
 
-import type { UIExtensionPoint, UIExtensionsStorage } from '../types';
+import type {
+  AgentEnrollmentFlyoutFinalStepExtension,
+  UIExtensionPoint,
+  UIExtensionsStorage,
+} from '../types';
 
 export const UIExtensionsContext = React.createContext<UIExtensionsStorage>({});
 
@@ -33,5 +37,25 @@ export const useUIExtension = <V extends UIExtensionPoint['view'] = UIExtensionP
     // FIXME:PT Revisit ignore below and see if TS error can be addressed
     // @ts-ignore
     return extension.component;
+  }
+};
+
+// The agent enrollment flyout extension doesn't accept a React component,
+// so it gets its own hook as a special case here
+export const useAgentEnrollmentFlyoutExtension = (
+  packageName: UIExtensionPoint['package']
+): AgentEnrollmentFlyoutFinalStepExtension['stepProps'] | undefined => {
+  const registeredExtensions = useContext(UIExtensionsContext);
+
+  if (!registeredExtensions) {
+    throw new Error('useUIExtension called outside of UIExtensionsContext');
+  }
+
+  const extension = registeredExtensions?.[packageName]?.['agent-enrollment-flyout'];
+
+  if (extension) {
+    // FIXME:PT Revisit ignore below and see if TS error can be addressed
+    // @ts-ignore
+    return extension.stepProps;
   }
 };

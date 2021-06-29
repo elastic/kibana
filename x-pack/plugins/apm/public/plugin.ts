@@ -45,7 +45,7 @@ import type {
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import {
-  LazyApmEnrollmentFlyoutExtension,
+  getApmEnrollmentFlyoutStepProps,
   LazyApmCustomAssetsExtension,
 } from './components/fleet_integration';
 
@@ -315,7 +315,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     registerExtension({
       package: 'apm',
       view: 'agent-enrollment-flyout',
-      component: LazyApmEnrollmentFlyoutExtension,
+      stepProps: getApmEnrollmentFlyoutStepProps(),
+      component: null,
     });
 
     registerExtension({
