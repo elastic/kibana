@@ -18,12 +18,11 @@ const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 export const newVectorLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
-    defaultMessage:
-      'Create an empty layer. Use this to create documents by drawing shapes on the map',
+    defaultMessage: 'Draw shapes on the map and index in Elasticsearch',
   }),
   disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
     defaultMessage:
-      'Unable to draw vector shapes, you are missing the Kibana privilege "Index Pattern Management".',
+      'Unable to create index, you are missing the Kibana privilege "Index Pattern Management".',
   }),
   getIsDisabled: async () => {
     const hasImportPermission = await getFileUpload().hasImportPermission({
@@ -38,7 +37,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
     {
       id: ADD_VECTOR_DRAWING_LAYER,
       label: i18n.translate('xpack.maps.newVectorLayerWizard.indexNewLayer', {
-        defaultMessage: 'Index new layer',
+        defaultMessage: 'Create index',
       }),
     },
   ],
@@ -47,6 +46,6 @@ export const newVectorLayerWizardConfig: LayerWizard = {
   },
   showFeatureEditTools: true,
   title: i18n.translate('xpack.maps.newVectorLayerWizard.title', {
-    defaultMessage: 'Create new layer',
+    defaultMessage: 'Create index',
   }),
 };
