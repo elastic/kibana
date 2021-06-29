@@ -28,6 +28,7 @@ const i18nTexts = {
 export const IlmPolicyLink: FunctionComponent<Props> = ({ locator, navigateToUrl }) => {
   return (
     <EuiButtonEmpty
+      data-test-subj="ilmPolicyLink"
       size="xs"
       onClick={() => {
         locator

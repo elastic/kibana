@@ -13,7 +13,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiButtonEmpty,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +33,7 @@ import type { SharePluginSetup } from '../shared_imports';
 import { ClientConfigType } from '../plugin';
 import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
 import { ReportDiagnostic } from './report_diagnostic';
-import { MigrateIlmPolicy } from './migrate_ilm_policy';
+import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 import { IlmPolicyLink } from './ilm_policy_link';
 
 export interface Job {
@@ -143,6 +142,8 @@ class ReportListingUi extends Component<Props, State> {
   public render() {
     const { ilmPolicyContextValue, urlService, navigateToUrl } = this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
+    const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
+    const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
     return (
       <>
         <EuiPageHeader
@@ -157,7 +158,7 @@ class ReportListingUi extends Component<Props, State> {
           }
         />
 
-        <MigrateIlmPolicy toasts={this.props.toasts} />
+        <MigrateIlmPolicyCallOut toasts={this.props.toasts} />
 
         <EuiSpacer size={'l'} />
         {this.renderTable()}
@@ -168,7 +169,9 @@ class ReportListingUi extends Component<Props, State> {
             {ilmPolicyContextValue.isLoading ? (
               <EuiLoadingSpinner />
             ) : (
-              ilmLocator && <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator} />
+              showIlmPolicyLink && (
+                <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator} />
+              )
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

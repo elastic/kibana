@@ -32,8 +32,8 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       req,
       res
     ) => {
-      const shouldMigrateIndices = () => {
-        return deprecations.shouldMigrateIndices({
+      const checkIlmMigrationStatus = () => {
+        return deprecations.checkIlmMigrationStatus({
           reportingCore: reporting,
           // We want to make the current status visible to all reporting users
           elasticsearchClient: scopedClient.asInternalUser,
@@ -41,15 +41,8 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       };
 
       try {
-        let status: IlmPolicyStatusResponse['status'];
-
-        if (await shouldMigrateIndices()) {
-          status = 'migration-needed';
-        } else {
-          status = 'ok';
-        }
         const response: IlmPolicyStatusResponse = {
-          status,
+          status: await checkIlmMigrationStatus(),
         };
         return res.ok({ body: response });
       } catch (e) {

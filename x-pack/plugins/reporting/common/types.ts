@@ -165,6 +165,8 @@ export type DownloadReportFn = (jobId: JobId) => DownloadLink;
 type ManagementLink = string;
 export type ManagementLinkFn = () => ManagementLink;
 
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
 export interface IlmPolicyStatusResponse {
-  status: 'migration-needed' | 'ok';
+  status: IlmPolicyMigrationStatus;
 }

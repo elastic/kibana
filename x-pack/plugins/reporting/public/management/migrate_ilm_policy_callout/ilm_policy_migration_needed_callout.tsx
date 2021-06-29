@@ -78,7 +78,7 @@ export const IlmPolicyMigrationNeededCallOut: FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiCallOut title={i18nTexts.title}>
+      <EuiCallOut data-test-subj="migrateReportingIndicesPolicyCallOut" title={i18nTexts.title}>
         <p>{i18nTexts.description}</p>
         <EuiButton isLoading={isMigratingIndices} onClick={() => migrateReportingIndices()}>
           {i18nTexts.buttonLabel}

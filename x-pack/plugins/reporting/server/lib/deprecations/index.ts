@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shouldMigrateIndices } from './should_migrate_indices';
+import { checkIlmMigrationStatus } from './check_ilm_migration_status';
 
 export const deprecations = {
-  shouldMigrateIndices,
+  checkIlmMigrationStatus,
 };

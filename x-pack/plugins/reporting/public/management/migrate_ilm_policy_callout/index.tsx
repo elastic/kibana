@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
 import { NotificationsSetup } from 'src/core/public';
 
@@ -19,7 +19,7 @@ interface Props {
   toasts: NotificationsSetup['toasts'];
 }
 
-export const MigrateIlmPolicy: FunctionComponent<Props> = ({ toasts }) => {
+export const MigrateIlmPolicyCallOut: FunctionComponent<Props> = ({ toasts }) => {
   const { isLoading, recheckStatus, status } = useIlmPolicyStatus();
 
   const renderContent = () => {
@@ -40,10 +40,8 @@ export const MigrateIlmPolicy: FunctionComponent<Props> = ({ toasts }) => {
 
   return (
     <>
-      <EuiSpacer />
-      <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
-        {!isLoading && renderContent()}
-      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {!isLoading && renderContent()}
     </>
   );
 };
