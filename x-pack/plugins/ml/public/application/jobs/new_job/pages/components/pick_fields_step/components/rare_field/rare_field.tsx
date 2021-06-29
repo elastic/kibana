@@ -7,7 +7,7 @@
 
 import React, { FC, useContext, useEffect, useState, useMemo } from 'react';
 
-import { SplitFieldSelect } from '../split_field_select';
+import { RareFieldSelect } from './rare_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
   newJobCapsService,
@@ -15,15 +15,11 @@ import {
 } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { Description } from './description';
 import { Field } from '../../../../../../../../../common/types/fields';
-import {
-  MultiMetricJobCreator,
-  RareJobCreator,
-  isMultiMetricJobCreator,
-} from '../../../../../common/job_creator';
+import { RareJobCreator } from '../../../../../common/job_creator';
 
-export const SplitFieldSelector: FC = () => {
+export const RareFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
-  const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
+  const jobCreator = jc as RareJobCreator;
 
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const allCategoryFields = useMemo(
@@ -35,53 +31,49 @@ export const SplitFieldSelector: FC = () => {
     jobCreator,
     jobCreatorUpdated
   );
-  const [splitField, setSplitField] = useState(jobCreator.splitField);
+
+  const [rareField, setRareField] = useState(jobCreator.rareField);
 
   useEffect(() => {
-    jobCreator.setSplitField(splitField);
+    jobCreator.setRareField(rareField);
     // add the split field to the influencers
-    if (splitField !== null && jobCreator.influencers.includes(splitField.name) === false) {
-      jobCreator.addInfluencer(splitField.name);
+    if (rareField !== null && jobCreator.influencers.includes(rareField.name) === false) {
+      jobCreator.addInfluencer(rareField.name);
     }
     jobCreatorUpdate();
-  }, [splitField]);
+  }, [rareField]);
 
   useEffect(() => {
-    setSplitField(jobCreator.splitField);
+    setRareField(jobCreator.rareField);
   }, [jobCreatorUpdated]);
 
   return (
     <Description>
-      <SplitFieldSelect
+      <RareFieldSelect
         fields={categoryFields}
-        changeHandler={setSplitField}
-        selectedField={splitField}
-        isClearable={true}
-        testSubject="mlMultiMetricSplitFieldSelect"
+        changeHandler={setRareField}
+        selectedField={rareField}
+        testSubject="mlRareFieldSelect"
       />
     </Description>
   );
 };
 
-// remove the rare (by) and population (over) fields from the by field options in the rare wizard
+// remove the rare (by) field from the by field options in the rare wizard
 function useFilteredCategoryFields(
   allCategoryFields: Field[],
-  jobCreator: MultiMetricJobCreator | RareJobCreator,
+  jobCreator: RareJobCreator,
   jobCreatorUpdated: number
 ) {
   const [fields, setFields] = useState(allCategoryFields);
 
   useEffect(() => {
-    if (isMultiMetricJobCreator(jobCreator)) {
-      setFields(allCategoryFields);
+    const pf = jobCreator.populationField;
+    const sf = jobCreator.splitField;
+    if (pf !== null || sf !== null) {
+      setFields(allCategoryFields.filter(({ name }) => name !== pf?.name && name !== sf?.name));
     } else {
-      const rf = jobCreator.rareField;
-      const pf = jobCreator.populationField;
-      if (rf !== null || pf !== null) {
-        setFields(allCategoryFields.filter(({ name }) => name !== rf?.name && name !== pf?.name));
-      } else {
-        setFields(allCategoryFields);
-      }
+      setFields(allCategoryFields);
     }
   }, [jobCreatorUpdated]);
 
