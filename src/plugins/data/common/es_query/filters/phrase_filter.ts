@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { get, isPlainObject } from 'lodash';
 import { Filter, FilterMeta } from './meta_filter';
-import { FieldBase, IndexPatternBase } from '..';
+import { IndexPatternFieldBase, IndexPatternBase } from '..';
 
 export type PhraseFilterMeta = FilterMeta & {
   params?: {
@@ -58,7 +58,7 @@ export const getPhraseFilterValue = (filter: PhraseFilter): PhraseFilterValue =>
 };
 
 export const buildPhraseFilter = (
-  field: FieldBase,
+  field: IndexPatternFieldBase,
   value: any,
   indexPattern: IndexPatternBase
 ): PhraseFilter => {
@@ -81,7 +81,7 @@ export const buildPhraseFilter = (
   }
 };
 
-export const getPhraseScript = (field: FieldBase, value: string) => {
+export const getPhraseScript = (field: IndexPatternFieldBase, value: string) => {
   const convertedValue = getConvertedValueForField(field, value);
   const script = buildInlineScriptForPhraseFilter(field);
 
@@ -105,7 +105,7 @@ export const getPhraseScript = (field: FieldBase, value: string) => {
  * https://github.com/elastic/elasticsearch/issues/20941
  * https://github.com/elastic/elasticsearch/pull/22201
  **/
-export const getConvertedValueForField = (field: FieldBase, value: any) => {
+export const getConvertedValueForField = (field: IndexPatternFieldBase, value: any) => {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
     if ([1, 'true'].includes(value)) {
       return true;

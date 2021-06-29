@@ -7,7 +7,7 @@
  */
 
 import * as literal from '../node_types/literal';
-import { KueryNode, FieldBase, IndexPatternBase } from '../../..';
+import { KueryNode, IndexPatternFieldBase, IndexPatternBase } from '../../..';
 
 export function buildNodeParams(fieldName: string) {
   return {
@@ -29,7 +29,7 @@ export function toElasticsearchQuery(
     value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
   const fieldName = literal.toElasticsearchQuery(fullFieldNameArg);
-  const field = indexPattern?.fields?.find((fld: FieldBase) => fld.name === fieldName);
+  const field = indexPattern?.fields?.find((fld: IndexPatternFieldBase) => fld.name === fieldName);
 
   if (field?.scripted) {
     throw new Error(`Exists query does not support scripted fields`);

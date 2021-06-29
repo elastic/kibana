@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { FieldBase, FieldSpec, IndexPattern } from '../..';
+import { IndexPatternFieldBase, FieldSpec, IndexPattern } from '../..';
 
 /**
  * @deprecated
  * Use IndexPatternField or FieldSpec instead
  */
-export interface IFieldType extends FieldBase {
+export interface IFieldType extends IndexPatternFieldBase {
   count?: number;
   // esTypes might be undefined on old index patterns that have not been refreshed since we added
   // this prop. It is also undefined on scripted fields.
