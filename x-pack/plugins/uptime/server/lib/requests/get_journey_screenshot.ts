@@ -6,30 +6,22 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
-import { Ping } from '../../../common/runtime_types/ping';
+import { UMElasticsearchQueryFn } from '../adapters';
+import { RefResult, FullScreenshot } from '../../../common/runtime_types/ping/synthetics';
 
-export interface GetJourneyScreenshotParams {
-  checkGroup: string;
-  stepIndex: number;
+interface ResultType {
+  _source: RefResult | FullScreenshot;
 }
 
-export interface GetJourneyScreenshotResults {
-  blob: string | null;
-  mimeType: string | null;
-  stepName: string;
-  totalSteps: number;
-}
+export type ScreenshotReturnTypesUnion =
+  | ((FullScreenshot | RefResult) & { totalSteps: number })
+  | null;
 
 export const getJourneyScreenshot: UMElasticsearchQueryFn<
-  GetJourneyScreenshotParams,
-  any
-> = async ({
-  uptimeEsClient,
-  checkGroup,
-  stepIndex,
-}): Promise<GetJourneyScreenshotResults | null> => {
-  const params = {
+  { checkGroup: string; stepIndex: number },
+  ScreenshotReturnTypesUnion
+> = async ({ checkGroup, stepIndex, uptimeEsClient }) => {
+  const body = {
     track_total_hits: true,
     size: 0,
     query: {
@@ -41,8 +33,8 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
             },
           },
           {
-            term: {
-              'synthetics.type': 'step/screenshot',
+            terms: {
+              'synthetics.type': ['step/screenshot', 'step/screenshot_ref'],
             },
           },
         ] as QueryDslQueryContainer[],
@@ -59,25 +51,22 @@ export const getJourneyScreenshot: UMElasticsearchQueryFn<
           image: {
             top_hits: {
               size: 1,
-              _source: ['synthetics.blob', 'synthetics.blob_mime', 'synthetics.step.name'],
             },
           },
         },
       },
     },
   };
-  const { body: result } = await uptimeEsClient.search({ body: params });
 
-  if (result?.hits?.total.value < 1) {
-    return null;
-  }
+  const result = await uptimeEsClient.search({ body });
 
-  const stepHit = result?.aggregations?.step.image.hits.hits[0]?._source as Ping;
+  const screenshotsOrRefs =
+    (result.body.aggregations?.step.image.hits.hits as ResultType[]) ?? null;
+
+  if (screenshotsOrRefs.length === 0) return null;
 
   return {
-    blob: stepHit?.synthetics?.blob ?? null,
-    mimeType: stepHit?.synthetics?.blob_mime ?? null,
-    stepName: stepHit?.synthetics?.step?.name ?? '',
-    totalSteps: result?.hits?.total.value,
+    ...screenshotsOrRefs[0]._source,
+    totalSteps: result.body.hits.total.value,
   };
 };
