@@ -34,6 +34,7 @@ import { ALERT_DETAILS } from './translations';
 import { useIsolationPrivileges } from '../../../../common/hooks/endpoint/use_isolate_privileges';
 import { isIsolationSupported } from '../../../../../common/endpoint/service/host_isolation/utils';
 import { endpointAlertCheck } from '../../../../common/utils/endpoint_alert_check';
+import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -138,6 +139,15 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     );
   }, [showAlertDetails, isolateAction]);
 
+  const caseDetailsRefresh = useWithCaseDetailsRefresh();
+
+  const handleIsolationActionSuccess = useCallback(() => {
+    // If a case details refresh ref is defined, then refresh actions and comments
+    if (caseDetailsRefresh) {
+      caseDetailsRefresh.refreshUserActionsAndComments();
+    }
+  }, [caseDetailsRefresh]);
+
   if (!expandedEvent?.eventId) {
     return null;
   }
@@ -156,6 +166,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           <HostIsolationPanel
             details={detailsData}
             cancelCallback={showAlertDetails}
+            successCallback={handleIsolationActionSuccess}
             isolateAction={isolateAction}
           />
         ) : (
@@ -180,8 +191,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
                 <TakeActionDropdown onChange={showHostIsolationPanel} agentId={agentId} />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="l" />
-            <EuiSpacer size="l" />
           </EuiFlyoutFooter>
         )}
     </>

@@ -15,5 +15,6 @@ module.exports = {
     '<rootDir>/x-pack/plugins/enterprise_search/**/*.{ts,tsx}',
     '!<rootDir>/x-pack/plugins/enterprise_search/public/*.ts',
     '!<rootDir>/x-pack/plugins/enterprise_search/server/*.ts',
+    '!<rootDir>/x-pack/plugins/enterprise_search/public/applications/test_helpers/**/*.{ts,tsx}',
   ],
 };
