@@ -6,19 +6,11 @@
 
 import { get, size } from 'lodash';
 import React from 'react';
-// TODO add dependency for @types/react-syntax-highlighter
-// @ts-ignore
-import javascript from 'react-syntax-highlighter/dist/languages/javascript';
-// @ts-ignore
-import python from 'react-syntax-highlighter/dist/languages/python';
-// @ts-ignore
-import ruby from 'react-syntax-highlighter/dist/languages/ruby';
-// @ts-ignore
-import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
-import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
-import { xcode } from 'react-syntax-highlighter/dist/styles';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
+import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
+import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
+import { xcode } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import styled from 'styled-components';
 import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/Stackframe';
 import {
@@ -29,9 +21,9 @@ import {
   units
 } from '../../../style/variables';
 
-registerLanguage('javascript', javascript);
-registerLanguage('python', python);
-registerLanguage('ruby', ruby);
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('ruby', ruby);
 
 const ContextContainer = styled.div`
   position: relative;
