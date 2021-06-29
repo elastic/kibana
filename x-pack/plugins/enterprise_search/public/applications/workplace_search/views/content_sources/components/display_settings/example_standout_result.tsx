@@ -85,6 +85,7 @@ export const ExampleStandoutResult: React.FC = () => {
               className={classNames('example-result-content__subtitle', {
                 'example-result-field-hover': createdByFieldHover,
               })}
+              data-test-subj="CreatedByField"
             >
               Created by {result[createdByField]}
             </div>
@@ -95,6 +96,7 @@ export const ExampleStandoutResult: React.FC = () => {
                 className={classNames('example-result-content__tag', {
                   'example-result-field-hover': typeFieldHover,
                 })}
+                data-test-subj="TypeField"
               >
                 <span className="example-search-result__tag-content">{result[typeField]}</span>
               </div>
@@ -104,6 +106,7 @@ export const ExampleStandoutResult: React.FC = () => {
                 className={classNames('example-result-content__tag', {
                   'example-result-field-hover': mediaTypeFieldHover,
                 })}
+                data-test-subj="MediaTypeField"
               >
                 <span className="example-search-result__tag-content">{result[mediaTypeField]}</span>
               </div>
@@ -116,6 +119,7 @@ export const ExampleStandoutResult: React.FC = () => {
                     className={classNames('example-result-content__tag-content', {
                       'example-result-field-hover': updatedByFieldHover,
                     })}
+                    data-test-subj="UpdatedByField"
                   >
                     {' '}
                     by {result[updatedByField]}&nbsp;
