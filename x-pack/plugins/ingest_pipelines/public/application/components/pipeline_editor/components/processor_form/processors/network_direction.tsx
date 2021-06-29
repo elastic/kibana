@@ -103,7 +103,7 @@ const internalNetworkConfig: Record<
               return {
                 err: 'ERR_FIELD_MISSING',
                 path,
-                message: 'Cannot be empty'
+                message: 'A field value is required.'
               };
             }
           }
@@ -136,7 +136,7 @@ const internalNetworkConfig: Record<
               return {
                 err: 'ERR_FIELD_MISSING',
                 path,
-                message: 'Cannot be empty'
+                message: 'A field value is required.'
               };
             }
           }
@@ -168,12 +168,14 @@ export const NetworkDirection: FunctionComponent = () => {
         config={fieldsConfig.source_ip}
         component={Field}
         path="fields.source_ip"
+        data-test-subj="sourceIpField"
       />
 
       <UseField
         config={fieldsConfig.destination_ip}
         component={Field}
         path="fields.destination_ip"
+        data-test-subj="destinationIpField"
       />
 
       <TargetField
@@ -217,10 +219,12 @@ export const NetworkDirection: FunctionComponent = () => {
             <Field
               field={field}
               euiFieldProps={internalNetworkConfig[configKey].euiFieldProps}
+              data-test-subj="networkDirectionField"
               labelAppend={(
                 <EuiButtonEmpty
                   size="xs"
                   onClick={toggleCustom(field)}
+                  data-test-subj="toggleCustomField"
                 >
                   {isCustom
                     ? i18n.translate('xpack.idxMgmt.mappingsEditor.predefinedButtonLabel', {
