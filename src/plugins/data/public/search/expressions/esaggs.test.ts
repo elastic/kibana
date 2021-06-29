@@ -114,6 +114,7 @@ describe('esaggs expression function - public', () => {
       timeFields: args.timeFields,
       timeRange: undefined,
       getNow: undefined,
+      searchId: undefined,
     });
   });
 
@@ -135,6 +136,16 @@ describe('esaggs expression function - public', () => {
         filters: input.filters,
         query: input.query,
         timeRange: input.timeRange,
+      })
+    );
+  });
+
+  test('passes searchId to handleEsaggsRequest if it is available', async () => {
+    await definition().fn(null, args, { ...mockHandlers, variables: { searchId: 'mySeachId' } });
+
+    expect(handleEsaggsRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        searchId: 'mySeachId',
       })
     );
   });

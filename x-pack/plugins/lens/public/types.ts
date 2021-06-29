@@ -214,11 +214,7 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T;
   }) => T | undefined;
 
-  toExpression: (
-    state: T,
-    layerId: string,
-    searchId: string
-  ) => ExpressionAstExpression | string | null;
+  toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
