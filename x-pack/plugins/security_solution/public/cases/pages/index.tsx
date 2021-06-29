@@ -14,14 +14,14 @@ import { CasesPage } from './case';
 import { CreateCasePage } from './create_case';
 import { ConfigureCasesPage } from './configure_cases';
 import { useGetUserCasesPermissions, useKibana } from '../../common/lib/kibana';
+import { CASES_PATH } from '../../../common/constants';
 
-const casesPagePath = '';
-const caseDetailsPagePath = `${casesPagePath}/:detailName`;
+const caseDetailsPagePath = `${CASES_PATH}/:detailName`;
 const subCaseDetailsPagePath = `${caseDetailsPagePath}/sub-cases/:subCaseId`;
 const caseDetailsPagePathWithCommentId = `${caseDetailsPagePath}/:commentId`;
 const subCaseDetailsPagePathWithCommentId = `${subCaseDetailsPagePath}/:commentId`;
-const createCasePagePath = `${casesPagePath}/create`;
-const configureCasesPagePath = `${casesPagePath}/configure`;
+const createCasePagePath = `${CASES_PATH}/create`;
+const configureCasesPagePath = `${CASES_PATH}/configure`;
 
 const CaseContainerComponent: React.FC = () => {
   const userPermissions = useGetUserCasesPermissions();
@@ -63,7 +63,7 @@ const CaseContainerComponent: React.FC = () => {
       <Route path={caseDetailsPagePath}>
         <CaseDetailsPage />
       </Route>
-      <Route strict exact path={casesPagePath}>
+      <Route strict exact path={CASES_PATH}>
         <CasesPage />
       </Route>
     </Switch>

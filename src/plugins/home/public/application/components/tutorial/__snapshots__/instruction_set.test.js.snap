@@ -52,8 +52,10 @@ exports[`render 1`] = `
                 "do stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 0,
           "title": "step 1",
@@ -65,8 +67,10 @@ exports[`render 1`] = `
                 "do more stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 1,
           "title": "step 2",
@@ -129,8 +133,10 @@ exports[`statusCheckState checking status 1`] = `
                 "do stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 0,
           "title": "step 1",
@@ -142,8 +148,10 @@ exports[`statusCheckState checking status 1`] = `
                 "do more stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 1,
           "title": "step 2",
@@ -236,8 +244,10 @@ exports[`statusCheckState failed status check - error 1`] = `
                 "do stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 0,
           "title": "step 1",
@@ -249,8 +259,10 @@ exports[`statusCheckState failed status check - error 1`] = `
                 "do more stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 1,
           "title": "step 2",
@@ -347,8 +359,10 @@ exports[`statusCheckState failed status check - no data 1`] = `
                 "do stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 0,
           "title": "step 1",
@@ -360,8 +374,10 @@ exports[`statusCheckState failed status check - no data 1`] = `
                 "do more stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 1,
           "title": "step 2",
@@ -458,8 +474,10 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
                 "do stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 0,
           "title": "step 1",
@@ -471,8 +489,10 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
                 "do more stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 1,
           "title": "step 2",
@@ -565,8 +585,10 @@ exports[`statusCheckState successful status check 1`] = `
                 "do stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 0,
           "title": "step 1",
@@ -578,8 +600,10 @@ exports[`statusCheckState successful status check 1`] = `
                 "do more stuff in command line",
               ]
             }
+            isCloudEnabled={false}
             paramValues={Object {}}
             replaceTemplateStrings={[Function]}
+            variantId="OSX"
           />,
           "key": 1,
           "title": "step 2",
