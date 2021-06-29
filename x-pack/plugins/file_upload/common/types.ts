@@ -93,10 +93,6 @@ export interface HasImportPermission {
   hasImportPermission: boolean;
 }
 
-export interface HasFindFileStructurePermission {
-  hasFindFileStructurePermission: boolean;
-}
-
 export type InputData = any[];
 
 export interface ImportResponse {

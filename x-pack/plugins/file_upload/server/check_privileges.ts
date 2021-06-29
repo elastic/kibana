@@ -56,31 +56,3 @@ export const checkFileUploadPrivileges = async ({
 
   return { hasImportPermission: checkPrivilegesResp.hasAllRequested };
 };
-
-export const checkFindFileStructurePrivileges = async ({ request, authorization }: BasicDeps) => {
-  const requiresAuthz = authorization?.mode.useRbacForRequest(request) ?? false;
-
-  if (!authorization || !requiresAuthz) {
-    return { hasFindFileStructurePermission: true };
-  }
-
-  if (!request.auth.isAuthenticated) {
-    return { hasFindFileStructurePermission: false };
-  }
-
-  const checkPrivilegesPayload: CheckPrivilegesPayload = {
-    elasticsearch: {
-      cluster: ['monitor', 'monitor_text_structure'],
-      index: {},
-    },
-  };
-
-  const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(request);
-  const checkPrivilegesResp = await checkPrivileges(checkPrivilegesPayload);
-
-  const hasFindFileStructurePermission = checkPrivilegesResp.privileges.elasticsearch.cluster.some(
-    ({ authorized }) => authorized
-  );
-
-  return { hasFindFileStructurePermission };
-};

@@ -28,7 +28,7 @@ import {
   runtimeMappingsSchema,
 } from './schemas';
 import { StartDeps } from './types';
-import { checkFileUploadPrivileges, checkFindFileStructurePrivileges } from './check_privileges';
+import { checkFileUploadPrivileges } from './check_privileges';
 
 function importData(
   client: IScopedClusterClient,
@@ -84,36 +84,6 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /internal/file_data_visualizer/has_find_file_structure_permission Check permissions for find file structure endpoint
-   * @apiName HasFindFileStructurePermission
-   * @apiDescription check permissions for find file structure endpoint
-   *
-   */
-  router.get(
-    {
-      path: '/internal/file_data_visualizer/has_find_file_structure_permission',
-      validate: false,
-    },
-    async (context, request, response) => {
-      try {
-        const [, pluginsStart] = await coreSetup.getStartServices();
-
-        const { hasFindFileStructurePermission } = await checkFindFileStructurePrivileges({
-          authorization: pluginsStart.security?.authz,
-          request,
-        });
-
-        return response.ok({ body: { hasFindFileStructurePermission } });
-      } catch (e) {
-        logger.warn(`Unable to check import permission, error: ${e.message}`);
-        return response.ok({ body: { hasFindFileStructurePermission: false } });
-      }
-    }
-  );
-
-  /**
-   * @apiGroup FileDataVisualizer
-   *
    * @api {post} /internal/file_upload/analyze_file Analyze file data
    * @apiName AnalyzeFile
    * @apiDescription Performs analysis of the file data.
@@ -132,6 +102,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           accepts: ['text/*', 'application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
+        tags: ['access:fileUpload:analyzeFile'],
       },
     },
     async (context, request, response) => {
@@ -251,6 +222,9 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           query: schema.maybe(schema.any()),
           runtimeMappings: schema.maybe(runtimeMappingsSchema),
         }),
+      },
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
       },
     },
     async (context, request, response) => {

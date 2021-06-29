@@ -7,11 +7,7 @@
 
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
-import type {
-  HasImportPermission,
-  HasFindFileStructurePermission,
-  FindFileStructureResponse,
-} from '../../common';
+import type { HasImportPermission, FindFileStructureResponse } from '../../common';
 import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
 import { JsonUploadAndParseAsyncWrapper } from './json_upload_and_parse_async_wrapper';
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
@@ -23,7 +19,6 @@ export interface FileUploadStartApi {
   getMaxBytes: typeof getMaxBytes;
   getMaxBytesFormatted: typeof getMaxBytesFormatted;
   hasImportPermission: typeof hasImportPermission;
-  hasFindFileStructurePermission: typeof hasFindFileStructurePermission;
   checkIndexExists: typeof checkIndexExists;
   getTimeFieldRange: typeof getTimeFieldRange;
   analyzeFile: typeof analyzeFile;
@@ -64,19 +59,6 @@ export async function analyzeFile(
     body,
     query: params,
   });
-}
-
-export async function hasFindFileStructurePermission(): Promise<boolean> {
-  const fileUploadModules = await lazyLoadModules();
-  try {
-    const resp = await fileUploadModules.getHttp().fetch<HasFindFileStructurePermission>({
-      path: `/internal/file_data_visualizer/has_find_file_structure_permission`,
-      method: 'GET',
-    });
-    return resp.hasFindFileStructurePermission;
-  } catch (error) {
-    return false;
-  }
 }
 
 export async function hasImportPermission(params: HasImportPermissionParams): Promise<boolean> {

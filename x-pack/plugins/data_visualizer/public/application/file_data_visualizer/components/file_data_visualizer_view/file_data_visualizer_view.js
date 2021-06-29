@@ -15,11 +15,7 @@ import { isEqual } from 'lodash';
 import { AboutPanel, LoadingPanel } from '../about_panel';
 import { BottomBar } from '../bottom_bar';
 import { ResultsView } from '../results_view';
-import {
-  FileCouldNotBeRead,
-  FileTooLarge,
-  FindFileStructurePermissionDenied,
-} from './file_error_callouts';
+import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { EditFlyout } from '../edit_flyout';
 import { ExplanationFlyout } from '../explanation_flyout';
 import { ImportView } from '../import_view';
@@ -54,7 +50,6 @@ export class FileDataVisualizerView extends Component {
       isExplanationFlyoutVisible: false,
       bottomBarVisible: false,
       hasPermissionToImport: false,
-      hasFindFileStructurePermission: undefined,
     };
 
     this.overrides = {};
@@ -72,15 +67,11 @@ export class FileDataVisualizerView extends Component {
     // note, calling hasImportPermission with no arguments just checks the
     // cluster privileges, the user will still need index privileges to create and ingest
 
-    const [hasPermissionToImport, hasFindFileStructurePermission] = await Promise.all([
-      this.props.fileUpload.hasImportPermission({
-        checkCreateIndexPattern: false,
-        checkHasManagePipeline: true,
-      }),
-      this.props.fileUpload.hasFindFileStructurePermission(),
-    ]);
-
-    this.setState({ hasPermissionToImport, hasFindFileStructurePermission });
+    const hasPermissionToImport = await this.props.fileUpload.hasImportPermission({
+      checkCreateIndexPattern: false,
+      checkHasManagePipeline: true,
+    });
+    this.setState({ hasPermissionToImport });
   }
 
   onFilePickerChange = (files) => {
@@ -285,7 +276,6 @@ export class FileDataVisualizerView extends Component {
       isExplanationFlyoutVisible,
       bottomBarVisible,
       hasPermissionToImport,
-      hasFindFileStructurePermission,
     } = this.state;
 
     const fields =
@@ -297,16 +287,9 @@ export class FileDataVisualizerView extends Component {
       <div>
         {mode === MODE.READ && (
           <>
-            {!loading && !loaded && (
-              <AboutPanel
-                onFilePickerChange={this.onFilePickerChange}
-                disabled={!hasFindFileStructurePermission}
-              />
-            )}
+            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
 
             {loading && <LoadingPanel />}
-
-            {hasFindFileStructurePermission === false && <FindFileStructurePermissionDenied />}
 
             {fileTooLarge && (
               <FileTooLarge fileSize={fileSize} maxFileSize={this.maxFileUploadBytes} />
