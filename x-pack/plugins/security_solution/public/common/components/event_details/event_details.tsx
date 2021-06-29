@@ -12,6 +12,8 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingContent,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -145,6 +147,11 @@ const EventDetailsComponent: React.FC<Props> = ({
                     title: i18n.ALERT_SUMMARY,
                   }}
                 />
+                {enrichmentsLoading && (
+                  <>
+                    <EuiLoadingContent lines={2} />
+                  </>
+                )}
                 {enrichmentCount > 0 && (
                   <>
                     <ThreatSummaryView
@@ -170,6 +177,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       id,
       browserFields,
       timelineId,
+      enrichmentsLoading,
       enrichmentCount,
       allEnrichments,
       viewThreatIntelTab,
@@ -182,11 +190,16 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.threatIntelView,
             'data-test-subj': 'threatIntelTab',
-            name: `${i18n.THREAT_INTEL} (${enrichmentCount})`,
+            name: (
+              <span>
+                {`${i18n.THREAT_INTEL} `}
+                {enrichmentsLoading ? <EuiLoadingSpinner /> : `(${enrichmentCount})`}
+              </span>
+            ),
             content: <ThreatDetailsView enrichments={allEnrichments} />,
           }
         : undefined,
-    [allEnrichments, enrichmentCount, isAlert]
+    [allEnrichments, enrichmentCount, enrichmentsLoading, isAlert]
   );
 
   const tableTab = useMemo(
