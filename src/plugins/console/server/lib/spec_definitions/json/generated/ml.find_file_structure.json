@@ -21,12 +21,8 @@
       "timestamp_format": "",
       "explain": "__flag__"
     },
-    "methods": [
-      "POST"
-    ],
-    "patterns": [
-      "_ml/find_file_structure"
-    ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-find-file-structure.html"
+    "methods": [],
+    "patterns": [],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/find-structure.html"
   }
 }

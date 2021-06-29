@@ -1,5 +1,12 @@
 {
   "searchable_snapshots.stats": {
+    "url_params": {
+      "level": [
+        "cluster",
+        "indices",
+        "shards"
+      ]
+    },
     "methods": [
       "GET"
     ],
