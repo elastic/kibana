@@ -19,7 +19,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   exposeToBrowser: {
     enabled: true,
     showMapVisualizationTypes: true,
-    enableDrawingFeature: true,
     showMapsInspectorAdapter: true,
     preserveDrawingBuffer: true,
   },
