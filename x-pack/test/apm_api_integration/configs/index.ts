@@ -19,7 +19,7 @@ const apmFtrConfigs = {
     license: 'trial' as const,
     kibanaConfig: {
       'xpack.ruleRegistry.index': '.kibana-alerts',
-      'xpack.ruleRegistry.write.enable': 'true',
+      'xpack.ruleRegistry.write.enabled': 'true',
     },
   },
 };
