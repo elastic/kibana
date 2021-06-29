@@ -13,7 +13,10 @@ import type {
 } from '../../../../../src/plugins/share/public';
 import type { MlStartDependencies } from '../plugin';
 import { ML_PAGES, ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
-import type { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
+import type {
+  DataFrameAnalyticsExplorationUrlState,
+  MlUrlGeneratorState,
+} from '../../common/types/ml_url_generator';
 import {
   createAnomalyDetectionJobManagementUrl,
   createAnomalyDetectionCreateJobSelectType,
@@ -74,8 +77,10 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
       case ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB:
         return createDataFrameAnalyticsCreateJobUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_MAP:
-        // @ts-ignore // TODO: fix type
-        return createDataFrameAnalyticsMapUrl(appBasePath, mlUrlGeneratorState.pageState);
+        return createDataFrameAnalyticsMapUrl(
+          appBasePath,
+          mlUrlGeneratorState.pageState as DataFrameAnalyticsExplorationUrlState['pageState']
+        );
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         return createDataFrameAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
