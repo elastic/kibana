@@ -19,13 +19,6 @@ export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTableRowCell {
     border: none;
   }
-
-  /* TODO is this needed? */
-  .euiTableCellContent {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
 `;
 
 const StyledEuiTitle = styled(EuiTitle)`

@@ -31,26 +31,19 @@ export interface ThreatSummaryItem {
   };
 }
 
-// Overrides flex styles declared in StyledEuiInMemoryTable
-const FlexContainer = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%;
-`;
-
 const RightMargin = styled.span`
   margin-right: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
 const EnrichmentTitle: React.FC<ThreatSummaryItem['title']> = ({ title, type }) => (
-  <FlexContainer>
+  <>
     <RightMargin>
       <EnrichmentIcon type={type} />
     </RightMargin>
     <EuiTitle size="xxs">
       <h5>{title}</h5>
     </EuiTitle>
-  </FlexContainer>
+  </>
 );
 
 const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
@@ -63,7 +56,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
 }) => {
   const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${fieldName}-${value}-${index}-${provider}`;
   return (
-    <FlexContainer>
+    <>
       <RightMargin>
         <FormattedFieldValue
           key={key}
@@ -87,7 +80,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryItem['description']> = ({
           </RightMargin>
         </>
       )}
-    </FlexContainer>
+    </>
   );
 };
 
