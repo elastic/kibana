@@ -8,7 +8,7 @@
 import React, { useState, useEffect, createContext, Dispatch, SetStateAction } from 'react';
 import { useFindWorkpads } from './../hooks';
 import { FoundWorkpad } from '../../../services/workpad';
-import { Loading } from './loading';
+import { Loading } from '../loading';
 import { MyWorkpads as Component } from './my_workpads.component';
 
 interface Context {
