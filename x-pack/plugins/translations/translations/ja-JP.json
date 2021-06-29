@@ -7510,7 +7510,6 @@
     "xpack.enterpriseSearch.appSearch.documentCreation.warningsTitle": "警告!",
     "xpack.enterpriseSearch.appSearch.documentDetail.confirmDelete": "このドキュメントを削除しますか？",
     "xpack.enterpriseSearch.appSearch.documentDetail.deleteSuccess": "正常にドキュメントが削除に設定されました。",
-    "xpack.enterpriseSearch.appSearch.documentDetail.deleteSuccessDescription": "すぐに削除されます。",
     "xpack.enterpriseSearch.appSearch.documentDetail.fieldHeader": "フィールド",
     "xpack.enterpriseSearch.appSearch.documentDetail.title": "ドキュメント：{documentId}",
     "xpack.enterpriseSearch.appSearch.documentDetail.valueHeader": "値",
