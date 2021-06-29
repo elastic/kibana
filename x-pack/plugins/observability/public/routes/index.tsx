@@ -112,4 +112,18 @@ export const routes = {
       }),
     },
   },
+  // enable this to test multi series architecture
+  // '/exploratory-view/multi': {
+  //   handler: () => {
+  //     return <ExploratoryViewPage multiSeries={true} />;
+  //   },
+  //   params: {
+  //     query: t.partial({
+  //       rangeFrom: t.string,
+  //       rangeTo: t.string,
+  //       refreshPaused: jsonRt.pipe(t.boolean),
+  //       refreshInterval: jsonRt.pipe(t.number),
+  //     }),
+  //   },
+  // },
 };

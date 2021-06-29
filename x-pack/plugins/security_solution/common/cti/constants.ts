@@ -57,3 +57,15 @@ export const EVENT_ENRICHMENT_INDICATOR_FIELD_MAP = {
   'url.full': 'threatintel.indicator.url.full',
   'registry.path': 'threatintel.indicator.registry.path',
 };
+
+export const CTI_DEFAULT_SOURCES = [
+  'Abuse URL',
+  'Abuse Malware',
+  'AlienVault OTX',
+  'Anomali',
+  'Anomali ThreatStream',
+  'Malware Bazaar',
+  'MISP',
+];
+
+export const DEFAULT_CTI_SOURCE_INDEX = ['filebeat-*'];

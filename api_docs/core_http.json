@@ -8615,7 +8615,7 @@
             "plugin": "security",
             "link": {
               "path": "x-pack/plugins/security/server/saved_objects/index.ts",
-              "lineNumber": 34
+              "lineNumber": 47
             }
           }
         ],
@@ -12239,7 +12239,7 @@
           "\nThe set of supported parseable Content-Types"
         ],
         "signature": [
-          "\"application/json\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"multipart/form-data\" | \"text/*\""
+          "\"application/json\" | \"multipart/form-data\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"text/*\""
         ],
         "source": {
           "path": "src/core/server/http/router/route.ts",

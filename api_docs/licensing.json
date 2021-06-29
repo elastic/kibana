@@ -942,6 +942,41 @@
           "deprecated": true,
           "references": [
             {
+              "plugin": "licenseManagement",
+              "link": {
+                "path": "x-pack/plugins/license_management/public/plugin.ts",
+                "lineNumber": 61
+              }
+            },
+            {
+              "plugin": "security",
+              "link": {
+                "path": "x-pack/plugins/security/public/plugin.tsx",
+                "lineNumber": 86
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/public/application/license/check_license.tsx",
+                "lineNumber": 26
+              }
+            },
+            {
+              "plugin": "ml",
+              "link": {
+                "path": "x-pack/plugins/ml/public/plugin.ts",
+                "lineNumber": 138
+              }
+            },
+            {
+              "plugin": "apm",
+              "link": {
+                "path": "x-pack/plugins/apm/public/context/license/license_context.tsx",
+                "lineNumber": 19
+              }
+            },
+            {
               "plugin": "reporting",
               "link": {
                 "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.tsx",
@@ -965,50 +1000,15 @@
             {
               "plugin": "reporting",
               "link": {
-                "path": "x-pack/plugins/reporting/public/plugin.ts",
-                "lineNumber": 116
+                "path": "x-pack/plugins/reporting/public/management/report_listing.tsx",
+                "lineNumber": 55
               }
             },
             {
               "plugin": "reporting",
               "link": {
-                "path": "x-pack/plugins/reporting/public/components/report_listing.tsx",
-                "lineNumber": 61
-              }
-            },
-            {
-              "plugin": "licenseManagement",
-              "link": {
-                "path": "x-pack/plugins/license_management/public/plugin.ts",
-                "lineNumber": 61
-              }
-            },
-            {
-              "plugin": "security",
-              "link": {
-                "path": "x-pack/plugins/security/public/plugin.tsx",
-                "lineNumber": 84
-              }
-            },
-            {
-              "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/application/license/check_license.tsx",
-                "lineNumber": 26
-              }
-            },
-            {
-              "plugin": "ml",
-              "link": {
-                "path": "x-pack/plugins/ml/public/plugin.ts",
-                "lineNumber": 141
-              }
-            },
-            {
-              "plugin": "apm",
-              "link": {
-                "path": "x-pack/plugins/apm/public/context/license/license_context.tsx",
-                "lineNumber": 19
+                "path": "x-pack/plugins/reporting/public/plugin.ts",
+                "lineNumber": 122
               }
             },
             {
@@ -1022,7 +1022,7 @@
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/public/plugin.ts",
-                "lineNumber": 94
+                "lineNumber": 100
               }
             },
             {
@@ -3053,7 +3053,7 @@
               "plugin": "spaces",
               "link": {
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts",
-                "lineNumber": 431
+                "lineNumber": 437
               }
             },
             {
@@ -3074,7 +3074,7 @@
               "plugin": "security",
               "link": {
                 "path": "x-pack/plugins/security/server/plugin.ts",
-                "lineNumber": 229
+                "lineNumber": 228
               }
             },
             {
@@ -3102,7 +3102,7 @@
               "plugin": "alerting",
               "link": {
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
-                "lineNumber": 168
+                "lineNumber": 170
               }
             },
             {
@@ -3120,17 +3120,17 @@
               }
             },
             {
-              "plugin": "remoteClusters",
-              "link": {
-                "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
-                "lineNumber": 73
-              }
-            },
-            {
               "plugin": "fleet",
               "link": {
                 "path": "x-pack/plugins/fleet/server/plugin.ts",
                 "lineNumber": 214
+              }
+            },
+            {
+              "plugin": "remoteClusters",
+              "link": {
+                "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
+                "lineNumber": 73
               }
             },
             {
@@ -3200,7 +3200,7 @@
               "plugin": "spaces",
               "link": {
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.test.ts",
-                "lineNumber": 62
+                "lineNumber": 63
               }
             },
             {

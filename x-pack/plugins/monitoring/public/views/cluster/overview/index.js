@@ -16,6 +16,7 @@ import { Overview } from '../../../components/cluster/overview';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { CODE_PATH_ALL } from '../../../../common/constants';
+import { EnableAlertsModal } from '../../../alerts/enable_alerts_modal.tsx';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
@@ -82,6 +83,7 @@ uiRoutes.when('/overview', {
                     setupMode={setupMode}
                     showLicenseExpiration={showLicenseExpiration}
                   />
+                  <EnableAlertsModal />
                   {bottomBarComponent}
                 </SetupModeContext.Provider>
               )}

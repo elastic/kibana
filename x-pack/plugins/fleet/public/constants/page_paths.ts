@@ -54,6 +54,7 @@ export const FLEET_ROUTING_PATHS = {
   policy_details: '/policies/:policyId/:tabId?',
   policy_details_settings: '/policies/:policyId/settings',
   edit_integration: '/policies/:policyId/edit-integration/:packagePolicyId',
+  // TODO: Review uses and remove if it is no longer used or linked to in any UX flows
   add_integration_from_policy: '/policies/:policyId/add-integration',
   enrollment_tokens: '/enrollment-tokens',
   data_streams: '/data-streams',

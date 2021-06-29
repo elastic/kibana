@@ -18,13 +18,14 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiDescribedFormGroup,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { satisfies } from 'semver';
 
 import { OsqueryManagerPackagePolicyConfigRecord } from '../../../common/types';
-import { CodeEditorField } from '../../queries/form/code_editor_field';
+import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { Form, getUseField, Field } from '../../shared_imports';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
@@ -33,6 +34,7 @@ import {
   useScheduledQueryGroupQueryForm,
 } from './use_scheduled_query_group_query_form';
 import { ManageIntegrationLink } from '../../components/manage_integration_link';
+import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -49,6 +51,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
 }) => {
+  const [isEditMode] = useState(!!defaultValue);
   const { form } = useScheduledQueryGroupQueryForm({
     defaultValue,
     handleSubmit: (payload, isValid) =>
@@ -67,7 +70,31 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [integrationPackageVersion]
   );
 
-  const { submit } = form;
+  const { submit, setFieldValue } = form;
+
+  const handleSetQueryValue = useCallback(
+    (savedQuery) => {
+      setFieldValue('id', savedQuery.id);
+      setFieldValue('query', savedQuery.query);
+
+      if (savedQuery.description) {
+        setFieldValue('description', savedQuery.description);
+      }
+
+      if (savedQuery.interval) {
+        setFieldValue('interval', savedQuery.interval);
+      }
+
+      if (isFieldSupported && savedQuery.platform) {
+        setFieldValue('platform', savedQuery.platform);
+      }
+
+      if (isFieldSupported && savedQuery.version) {
+        setFieldValue('version', [savedQuery.version]);
+      }
+    },
+    [isFieldSupported, setFieldValue]
+  );
 
   return (
     <EuiPortal>
@@ -75,7 +102,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
-              {defaultValue ? (
+              {isEditMode ? (
                 <FormattedMessage
                   id="xpack.osquery.scheduleQueryGroup.queryFlyoutForm.editFormTitle"
                   defaultMessage="Edit query"
@@ -91,11 +118,20 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <Form form={form}>
+            {!isEditMode ? (
+              <>
+                <SavedQueriesDropdown onChange={handleSetQueryValue} />
+                <EuiSpacer />
+              </>
+            ) : null}
             <CommonUseField path="id" />
             <EuiSpacer />
             <CommonUseField path="query" component={CodeEditorField} />
             <EuiSpacer />
-            <EuiFlexGroup>
+            <EuiDescribedFormGroup
+              title={<h3>Set heading level based on context</h3>}
+              description={'Will be wrapped in a small, subdued EuiText block.'}
+            >
               <EuiFlexItem>
                 <CommonUseField
                   path="interval"
@@ -124,7 +160,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   euiFieldProps={{ disabled: !isFieldSupported }}
                 />
               </EuiFlexItem>
-            </EuiFlexGroup>
+            </EuiDescribedFormGroup>
             <EuiSpacer />
           </Form>
           {!isFieldSupported ? (

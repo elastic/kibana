@@ -87,6 +87,7 @@ export function registerTransactionDurationAnomalyAlertType({
       },
       producer: 'apm',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       executor: async ({ services, params }) => {
         if (!ml) {
           return {};

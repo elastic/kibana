@@ -7,29 +7,25 @@
 
 import React from 'react';
 
-import {
-  EuiButton,
-  EuiLink,
-  EuiPageHeader,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { DOCS_PREFIX, ENGINE_CRAWLER_PATH } from '../../routes';
-import { generateEnginePath } from '../engine';
+import { generateEnginePath, getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
 import './crawler_landing.scss';
 import { CRAWLER_TITLE } from '.';
 
 export const CrawlerLanding: React.FC = () => (
-  <div data-test-subj="CrawlerLanding" className="crawlerLanding">
-    <EuiPageHeader pageTitle={CRAWLER_TITLE} />
-    <EuiSpacer />
-    <EuiPanel grow paddingSize="l" className="crawlerLanding__panel">
+  <AppSearchPageTemplate
+    pageChrome={getEngineBreadcrumbs([CRAWLER_TITLE])}
+    pageHeader={{ pageTitle: CRAWLER_TITLE }}
+    className="crawlerLanding"
+    data-test-subj="CrawlerLanding"
+  >
+    <EuiPanel hasBorder paddingSize="l" className="crawlerLanding__panel">
       <div className="crawlerLanding__wrapper">
         <EuiTitle size="s">
           <h2>
@@ -67,7 +63,7 @@ export const CrawlerLanding: React.FC = () => (
           iconType="popout"
           fill
           color="primary"
-          href={getAppSearchUrl(generateEnginePath(ENGINE_CRAWLER_PATH))}
+          href={getAppSearchUrl(`#${generateEnginePath(ENGINE_CRAWLER_PATH)}`)}
           target="_blank"
           data-test-subj="CrawlerStandaloneLink"
         >
@@ -81,5 +77,5 @@ export const CrawlerLanding: React.FC = () => (
         <EuiSpacer size="xl" />
       </div>
     </EuiPanel>
-  </div>
+  </AppSearchPageTemplate>
 );

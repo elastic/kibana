@@ -101,6 +101,8 @@ export async function getPackageSavedObjects(
   });
 }
 
+export const getInstallations = getPackageSavedObjects;
+
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -112,9 +114,17 @@ export async function getPackageInfo(options: {
     Registry.fetchFindLatestPackage(pkgName),
   ]);
 
+  // If no package version is provided, use the installed version in the response
+  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
+
+  // If no installed version of the given package exists, default to the latest version of the package
+  if (!responsePkgVersion) {
+    responsePkgVersion = latestPackage.version;
+  }
+
   const getPackageRes = await getPackageFromSource({
     pkgName,
-    pkgVersion,
+    pkgVersion: responsePkgVersion,
     savedObjectsClient,
     installedPkg: savedObject?.attributes,
   });

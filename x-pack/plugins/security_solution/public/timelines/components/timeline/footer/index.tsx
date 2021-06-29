@@ -24,15 +24,14 @@ import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import { LoadingPanel } from '../../loading';
 import { OnChangePage } from '../events';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME } from '../helpers';
 
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
-import { useManageTimeline } from '../../manage_timeline';
-import { LastUpdatedAt } from '../../../../common/components/last_updated';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 
@@ -42,12 +41,13 @@ interface FixedWidthLastUpdatedContainerProps {
 
 const FixedWidthLastUpdatedContainer = React.memo<FixedWidthLastUpdatedContainerProps>(
   ({ updatedAt }) => {
+    const { timelines } = useKibana().services;
     const width = useEventDetailsWidthContext();
     const compact = useMemo(() => isCompactFooter(width), [width]);
 
     return (
       <FixedWidthLastUpdated data-test-subj="fixed-width-last-updated" compact={compact}>
-        <LastUpdatedAt updatedAt={updatedAt} compact={compact} />
+        {timelines.getLastUpdated({ updatedAt, compact })}
       </FixedWidthLastUpdated>
     );
   }
@@ -259,14 +259,16 @@ export const FooterComponent = ({
   totalCount,
 }: FooterProps) => {
   const dispatch = useDispatch();
+  const { timelines } = useKibana().services;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
 
-  const { getManageTimelineById } = useManageTimeline();
-  const { documentType, loadingText, footerText } = useMemo(() => getManageTimelineById(id), [
-    getManageTimelineById,
-    id,
-  ]);
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const {
+    documentType = i18n.TOTAL_COUNT_OF_EVENTS,
+    loadingText = i18n.LOADING_EVENTS,
+    footerText = i18n.TOTAL_COUNT_OF_EVENTS,
+  } = useDeepEqualSelector((state) => getManageTimeline(state, id));
 
   const handleChangePageClick = useCallback(
     (nextPage: number) => {
@@ -322,13 +324,13 @@ export const FooterComponent = ({
   if (isLoading && !paginationLoading) {
     return (
       <LoadingPanelContainer>
-        <LoadingPanel
-          data-test-subj="LoadingPanelTimeline"
-          height="35px"
-          showBorder={false}
-          text={`${loadingText}...`}
-          width="100%"
-        />
+        {timelines.getLoadingPanel({
+          dataTestSubj: 'LoadingPanelTimeline',
+          height: '35px',
+          showBorder: false,
+          text: loadingText,
+          width: '100%',
+        })}
       </LoadingPanelContainer>
     );
   }

@@ -8,7 +8,7 @@
 import { setMockValues } from '../../../__mocks__/kea_logic';
 
 jest.mock('../../../shared/layout', () => ({
-  generateNavLink: jest.fn(({ to }) => ({ href: to })),
+  generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 jest.mock('../engine/engine_nav', () => ({
   useEngineNav: () => [],
@@ -100,8 +100,8 @@ describe('useAppSearchNav', () => {
           },
           {
             id: 'usersRoles',
-            name: 'Users & roles',
-            href: '/role_mappings',
+            name: 'Users and roles',
+            href: '/users_and_roles',
           },
         ],
       },
