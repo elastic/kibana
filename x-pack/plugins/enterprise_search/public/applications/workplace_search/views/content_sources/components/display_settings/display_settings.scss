@@ -22,13 +22,13 @@
     0 0 20px $euiColorLightestShade;
 }
 
-@mixin search_result_tag {
+@mixin searchResultTag {
   height: 20px;
   border-radius: 2px;
   display: inline-flex;
   align-items: center;
   padding: 0 .25rem;
-  background: #e9edf2;
+  background: #E9EDF2;
   color: #647487;
   font-size: 10px;
   font-weight: 600;
@@ -92,7 +92,7 @@
   }
 
   &__tag {
-    @include search_result_tag;
+    @include searchResultTag;
   }
 
   &__tag-content {
@@ -109,15 +109,8 @@
     flex-flow: row nowrap;
     align-items: center;
     margin-top: .5rem;
-    font-size: 0.8em;
+    font-size: .8em;
     overflow: hidden;
-  }
-
-  &__meta-content {
-    @include font-size(.875);
-    color: color(gray, 7);
-    padding-bottom: 1px;
-    @include truncate;
   }
 }
 
