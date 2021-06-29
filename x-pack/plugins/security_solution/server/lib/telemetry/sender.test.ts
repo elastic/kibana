@@ -41,6 +41,7 @@ describe('TelemetryEventsSender', () => {
             version: '100',
           },
           file: {
+            extension: '.exe',
             size: 3,
             created: 0,
             path: 'X',
@@ -72,6 +73,7 @@ describe('TelemetryEventsSender', () => {
             name: 'foo.exe',
             nope: 'nope',
             executable: null, // null fields are never allowlisted
+            working_directory: '/some/usr/dir',
           },
           Target: {
             process: {
@@ -101,6 +103,7 @@ describe('TelemetryEventsSender', () => {
             version: '100',
           },
           file: {
+            extension: '.exe',
             size: 3,
             created: 0,
             path: 'X',
@@ -126,6 +129,7 @@ describe('TelemetryEventsSender', () => {
           },
           process: {
             name: 'foo.exe',
+            working_directory: '/some/usr/dir',
           },
           Target: {
             process: {

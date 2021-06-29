@@ -9,7 +9,7 @@ import { generatePath } from 'react-router-dom';
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ENGINE_PATH } from '../../routes';
@@ -85,7 +85,7 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
       const { navigateToUrl } = KibanaLogic.values;
       const enginePath = generatePath(ENGINE_PATH, { engineName: name });
 
-      setQueuedSuccessMessage(ENGINE_CREATION_SUCCESS_MESSAGE);
+      flashSuccessToast(ENGINE_CREATION_SUCCESS_MESSAGE(name));
       navigateToUrl(enginePath);
     },
   }),
