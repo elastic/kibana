@@ -63,13 +63,6 @@ function RevealImageComponent({
   }, [imgRef, handlers]);
 
   useEffect(() => {
-    handlers.done();
-    return () => {
-      handlers.event({ name: 'destroy' });
-    };
-  }, [handlers]);
-
-  useEffect(() => {
     updateImageView();
   }, [parentNodeDimensions, updateImageView]);
 
