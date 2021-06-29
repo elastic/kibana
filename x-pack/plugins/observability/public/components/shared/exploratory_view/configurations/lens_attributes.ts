@@ -63,8 +63,9 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
   let columnLabel;
 
   const metricOptions = seriesConfig.metricOptions ?? [];
-  if (metricOptions.length > 0) {
-    if (selectedMetricField) {
+
+  if (selectedMetricField) {
+    if (metricOptions) {
       const currField = metricOptions.find(
         ({ field, id }) => field === selectedMetricField || id === selectedMetricField
       );
@@ -72,15 +73,15 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
       columnFilters = currField?.columnFilters;
       timeScale = currField?.timeScale;
       columnLabel = currField?.label;
-    } else if (metricOptions?.[0].field || metricOptions?.[0].id) {
-      const firstMetricOption = metricOptions?.[0];
-
-      selectedMetricField = firstMetricOption.field || firstMetricOption.id;
-      columnType = firstMetricOption.columnType;
-      columnFilters = firstMetricOption.columnFilters;
-      timeScale = firstMetricOption.timeScale;
-      columnLabel = firstMetricOption.label;
     }
+  } else if (metricOptions?.[0].field || metricOptions?.[0].id) {
+    const firstMetricOption = metricOptions?.[0];
+
+    selectedMetricField = firstMetricOption.field || firstMetricOption.id;
+    columnType = firstMetricOption.columnType;
+    columnFilters = firstMetricOption.columnFilters;
+    timeScale = firstMetricOption.timeScale;
+    columnLabel = firstMetricOption.label;
   }
 
   return { fieldName: selectedMetricField!, columnType, columnFilters, timeScale, columnLabel };
