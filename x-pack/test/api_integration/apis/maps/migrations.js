@@ -52,13 +52,13 @@ export default function ({ getService }) {
     describe('embeddable migrations', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/maps/data.json'
+          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/maps/data.json'
+          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
         );
       });
 

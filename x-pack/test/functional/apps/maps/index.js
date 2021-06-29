@@ -18,7 +18,7 @@ export default function ({ loadTestFile, getService }) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps/data.json'
+        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
       );
       //Find the missing references manually, use the below API to delete it after successful import.
       log.info('Delete index pattern');
@@ -50,7 +50,7 @@ export default function ({ loadTestFile, getService }) {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps/data.json'
+        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
       );
     });
 
