@@ -2,10 +2,6 @@ $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
 
 .kbnPageTemplateSolutionNav {
   @include euiYScroll;
-  background:
-    linear-gradient(160deg, $euiSideNavEmphasizedBackgroundColor 0, $euiSideNavEmphasizedBackgroundColor $euiSizeXL, rgba(#FFF, 0) 0),
-    linear-gradient(175deg, $euiSideNavEmphasizedBackgroundColor 0, $euiSideNavEmphasizedBackgroundColor $euiSize, rgba(#FFF, 0) 0),
-    $euiPageBackgroundColor;
 
   @include euiBreakpoint('m') {
     width: $euiPageSidebarMinWidth + ($euiSizeL * 2);
