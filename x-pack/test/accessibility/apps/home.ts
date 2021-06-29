@@ -86,22 +86,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('Dock the side nav', async () => {
-      await testSubjects.click('toggleNavButton');
-      await PageObjects.home.dockTheSideNav();
-      await a11y.testAppSnapshot();
-    });
-
     it('click on collapse on observability in side nav to test a11y of collapse button', async () => {
       await find.clickByCssSelector(
         '[data-test-subj="collapsibleNavGroup-observability"] .euiCollapsibleNavGroup__title'
       );
-      await a11y.testAppSnapshot();
-    });
-
-    // TODO https://github.com/elastic/kibana/issues/77828
-    it.skip('undock the side nav', async () => {
-      await PageObjects.home.dockTheSideNav();
       await a11y.testAppSnapshot();
     });
 
