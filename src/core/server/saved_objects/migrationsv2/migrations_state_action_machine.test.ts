@@ -5,18 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
+import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { LoggerAdapter } from '../../logging/logger_adapter';
 import { AllControlStates, State } from './types';
-import { createInitialState } from './model';
+import { createInitialState } from './initial_state';
 
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
 describe('migrationsStateActionMachine', () => {
   beforeAll(() => {
     jest
@@ -28,6 +31,7 @@ describe('migrationsStateActionMachine', () => {
   });
 
   const mockLogger = loggingSystemMock.create();
+  const typeRegistry = typeRegistryMock.create();
 
   const initialState = createInitialState({
     kibanaVersion: '7.11.0',
@@ -42,6 +46,7 @@ describe('migrationsStateActionMachine', () => {
       enableV2: true,
       retryAttempts: 5,
     },
+    typeRegistry,
   });
 
   const next = jest.fn((s: State) => {
@@ -257,6 +262,7 @@ describe('migrationsStateActionMachine', () => {
                 "currentAlias": ".my-so-index",
                 "indexPrefix": ".my-so-index",
                 "kibanaVersion": "7.11.0",
+                "knownTypes": Array [],
                 "legacyIndex": ".my-so-index",
                 "logs": Array [
                   Object {
@@ -350,6 +356,7 @@ describe('migrationsStateActionMachine', () => {
                 "currentAlias": ".my-so-index",
                 "indexPrefix": ".my-so-index",
                 "kibanaVersion": "7.11.0",
+                "knownTypes": Array [],
                 "legacyIndex": ".my-so-index",
                 "logs": Array [
                   Object {
@@ -541,6 +548,7 @@ describe('migrationsStateActionMachine', () => {
                 "currentAlias": ".my-so-index",
                 "indexPrefix": ".my-so-index",
                 "kibanaVersion": "7.11.0",
+                "knownTypes": Array [],
                 "legacyIndex": ".my-so-index",
                 "logs": Array [
                   Object {
@@ -629,6 +637,7 @@ describe('migrationsStateActionMachine', () => {
                 "currentAlias": ".my-so-index",
                 "indexPrefix": ".my-so-index",
                 "kibanaVersion": "7.11.0",
+                "knownTypes": Array [],
                 "legacyIndex": ".my-so-index",
                 "logs": Array [
                   Object {

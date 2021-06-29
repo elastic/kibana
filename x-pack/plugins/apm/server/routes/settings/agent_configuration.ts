@@ -206,16 +206,24 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       throw Boom.notFound();
     }
 
-    logger.info(`Config was found for ${service.name}/${service.environment}`);
-
-    // update `applied_by_agent` field
-    // when `markAsAppliedByAgent` is true (Jaeger agent doesn't have etags)
-    // or if etags match.
-    // this happens in the background and doesn't block the response
-    if (
+    // whether to update `applied_by_agent` field
+    // It will be set to true of the etags match or if `markAsAppliedByAgent=true`
+    // `markAsAppliedByAgent=true` means "force setting it to true regardless of etag". This is needed for Jaeger agent that doesn't have etags
+    const willMarkAsApplied =
       (markAsAppliedByAgent || etag === config._source.etag) &&
-      !config._source.applied_by_agent
-    ) {
+      !config._source.applied_by_agent;
+
+    logger.debug(
+      `[Central configuration] Config was found for:
+        service.name = ${service.name},
+        service.environment = ${service.environment},
+        etag (requested) = ${etag},
+        etag (existing) = ${config._source.etag},
+        markAsAppliedByAgent = ${markAsAppliedByAgent},
+        willMarkAsApplied = ${willMarkAsApplied}`
+    );
+
+    if (willMarkAsApplied) {
       markAppliedByAgent({ id: config._id, body: config._source, setup });
     }
 
