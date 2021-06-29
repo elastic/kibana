@@ -104,7 +104,7 @@ To quickly create many copies of a percentile metric that shows distribution of 
 . From the *Chart Type* dropdown, select *Line*.
 +
 [role="screenshot"]
-image::images/lens_advanced_2_1.png[Chart type menu with Line selected]
+image::images/lens_advanced_2_1.png[Chart type menu with Line selected, width=50%]
 
 . From the *Available fields* list, drag and drop *products.price* to the visualization builder.
 
@@ -239,12 +239,11 @@ For each category type that you want to break down, create a filter.
 Change the legend position to the top of the chart.
 
 . From the *Legend* dropdown, select the top position.
-
 +
 [role="screenshot"]
 image::images/lens_advanced_4_1.png[Prices share by category]
 
- Click *Save and return*.
+. Click *Save and return*.
 
 [discrete]
 [[view-the-cumulative-number-of-products-sold-on-weekends]]
@@ -299,7 +298,8 @@ image::images/lens_advanced_5_2.png[Line chart with cumulative sum of orders mad
 [[compare-time-ranges]]
 === Compare time ranges
 
-*Lens* allows you to compare the currently selected time range with historical data using the *Time shift* option.
+*Lens* allows you to compare the currently selected time range with historical data using the *Time shift* option. To calculate the percent
+change, use *Formula*.
 
 Time shifts can be used on any metric. The special shift *previous* will show the time window preceding the currently selected one, spanning the same duration.
 For example, if *Last 7 days* is selected in the time filter, *previous* will show data from 14 days ago to 7 days ago.
@@ -326,9 +326,32 @@ To compare current sales numbers with sales from a week ago, follow these steps:
 .. Click *Time shift*
 
 .. Click the *1 week* option. You can also define custom shifts by typing amount followed by time unit (like *1w* for a one week shift), then hit enter.
-
++
 [role="screenshot"]
-image::images/lens_time_shift.png[Line chart with week-over-week sales comparison]
+image::images/lens_time_shift.png[Line chart with week-over-week sales comparison, width=50%]
+
+. Click *Save and return*.
+
+[float]
+[[compare-time-as-percent]]
+==== Compare time ranges as a percent change
+
+To view the percent change in sales between the current time and the previous week, use a *Formula*:
+
+. Open *Lens*.
+
+. From the *Available fields* list, drag and drop *Records* to the visualization builder.
+
+. Click *Count of Records*, then click *Formula*.
+
+. Type `count() / count(shift='1w') - 1`. To learn more about the formula
+syntax, click *Help*.
+
+. Click *Value format* and select *Percent* with 0 decimals.
+
+. In the *Display name* field, enter `Percent change`, then click *Close*.
+
+. Click *Save and return*.
 
 [discrete]
 [[view-customers-over-time-by-continents]]
@@ -366,17 +389,13 @@ To split the customers count by continent:
 . From the *Available fields* list, drag and drop *geoip.continent_name* to the *Columns* field of the editor.
 +
 [role="screenshot"]
-image::images/lens_advanced_6_1.png[Table with daily customers by continent configuration]
+image::images/lens_advanced_6_1.png[Table with daily customers by continent configuration, width=50%]
 
 . Click *Save and return*.
 
+
 [discrete]
 === Save the dashboard
-
-By default the dashboard attempts to match the palette across panels, but in this case there's no need for that, so it can be disabled.
-
-[role="screenshot"]
-image::images/lens_advanced_7_1.png[Disable palette sync in dashboard]
 
 Now that you have a complete overview of your ecommerce sales data, save the dashboard.
 

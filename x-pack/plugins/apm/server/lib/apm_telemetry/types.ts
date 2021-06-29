@@ -52,6 +52,7 @@ export interface APMUsage {
     provider: string[];
     region: string[];
   };
+  host: { os: { platform: string[] } };
   counts: {
     transaction: TimeframeMap;
     span: TimeframeMap;
@@ -132,6 +133,7 @@ export interface APMUsage {
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
+    | 'host'
     | 'processor_events'
     | 'agent_configuration'
     | 'services'
