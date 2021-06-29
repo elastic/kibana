@@ -32,10 +32,6 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { APP_WRAPPER_CLASS } from '../../../../../../../src/core/public';
 import { inventoryTitle } from '../../../translations';
 
-const metricsTitle = i18n.translate('xpack.infra.header.logsTitle', {
-  defaultMessage: 'Metrics',
-});
-
 export const SnapshotPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const {

@@ -7,11 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
+import { METRICS_APP } from '../../../../common/constants';
 import { EuiTheme, withTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { DocumentTitle } from '../../../components/document_title';
-import { Header } from '../../../components/header';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from './hooks/use_metadata';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { Source } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { findInventoryModel } from '../../../../common/inventory_models';
@@ -21,7 +22,9 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { useLinkProps } from '../../../hooks/use_link_props';
+import { useReadOnlyBadge } from '../../../hooks/use_readOnly_badge';
 import { MetricsPageTemplate } from '../page_template';
+import { inventoryTitle } from '../../../translations';
 
 interface Props {
   theme: EuiTheme | undefined;
@@ -70,20 +73,25 @@ export const MetricDetail = withMetricPageProviders(
       [sideNav]
     );
 
-    const metricsLinkProps = useLinkProps({
+    useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
+
+    const inventoryLinkProps = useLinkProps({
       app: 'metrics',
-      pathname: '/',
+      pathname: '/inventory',
     });
 
-    const breadcrumbs = [
-      {
-        ...metricsLinkProps,
-        text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-          defaultMessage: 'Metrics',
-        }),
-      },
-      { text: name },
-    ];
+    useBreadcrumbs(
+      [
+        {
+          ...inventoryLinkProps,
+          text: inventoryTitle,
+        },
+        {
+          text: name,
+        },
+      ],
+      METRICS_APP
+    );
 
     if (metadataLoading && !filteredRequiredMetrics.length) {
       return (
@@ -101,7 +109,6 @@ export const MetricDetail = withMetricPageProviders(
 
     return (
       <>
-        <Header breadcrumbs={breadcrumbs} readOnlyBadge={!uiCapabilities?.infrastructure?.save} />
         <DocumentTitle
           title={i18n.translate('xpack.infra.metricDetailPage.documentTitle', {
             defaultMessage: 'Infrastructure | Metrics | {name}',
