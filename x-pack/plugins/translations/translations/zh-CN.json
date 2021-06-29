@@ -542,7 +542,6 @@
     "core.ui.chrome.headerGlobalNav.helpMenuTitle": "帮助",
     "core.ui.chrome.headerGlobalNav.helpMenuVersion": "v {version}",
     "core.ui.chrome.headerGlobalNav.logoAriaLabel": "Elastic 徽标",
-    "core.ui.EmptyRecentlyViewed": "没有最近查看的项目",
     "core.ui.enterpriseSearchNavList.label": "企业搜索",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage": "在{advancedSettingsLink}中启用“{storeInSessionStorageParam}”选项或简化屏幕视觉效果。",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage.advancedSettingsLinkText": "高级设置",
