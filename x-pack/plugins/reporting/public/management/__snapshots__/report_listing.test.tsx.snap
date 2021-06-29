@@ -627,44 +627,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -776,23 +745,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -828,7 +780,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -843,44 +802,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -992,23 +920,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -1044,7 +955,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -1059,44 +977,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -1208,23 +1095,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -1260,7 +1130,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -1276,44 +1153,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -1426,23 +1272,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -1459,7 +1288,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -1814,44 +1650,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -1963,23 +1768,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -2015,7 +1803,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -2030,44 +1825,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -2179,23 +1943,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -2231,7 +1978,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -2246,44 +2000,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -2395,23 +2118,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -2447,7 +2153,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -2463,44 +2176,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -2613,23 +2295,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -2646,7 +2311,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -3001,44 +2673,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -3150,23 +2791,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -3202,7 +2826,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -3264,44 +2895,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -3413,23 +3013,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -3465,7 +3048,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -3480,44 +3070,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -3629,23 +3188,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -3681,7 +3223,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -3697,44 +3246,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -3847,23 +3365,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -3880,7 +3381,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -4262,44 +3770,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -4411,23 +3888,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -4465,7 +3925,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -4527,44 +3994,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -4676,23 +4112,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -4730,7 +4149,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -4745,44 +4171,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -4894,23 +4289,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -4948,7 +4326,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -4964,44 +4349,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -5114,23 +4468,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -5147,7 +4484,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -5502,44 +4846,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -5651,23 +4964,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -5703,7 +4999,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -5765,44 +5068,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -5914,23 +5186,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -5966,7 +5221,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -5981,44 +5243,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -6130,23 +5361,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -6182,7 +5396,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -6198,44 +5419,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -6348,23 +5538,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -6381,7 +5554,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -6736,44 +5916,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -6885,23 +6034,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -6937,7 +6069,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -6999,44 +6138,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -7148,23 +6256,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -7200,7 +6291,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -7215,44 +6313,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -7364,23 +6431,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -7416,7 +6466,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -7432,44 +6489,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -7582,23 +6608,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -7615,7 +6624,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -7970,44 +6986,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -8119,23 +7104,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -8171,7 +7139,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -8233,44 +7208,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -8382,23 +7326,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -8434,7 +7361,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -8449,44 +7383,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -8598,23 +7501,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -8650,7 +7536,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -8666,44 +7559,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -8816,23 +7678,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -8849,7 +7694,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -9204,44 +8056,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -9353,23 +8174,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -9405,7 +8209,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -9467,44 +8278,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -9616,23 +8396,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -9668,7 +8431,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -9683,44 +8453,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -9832,23 +8571,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -9884,7 +8606,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -9900,44 +8629,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -10050,23 +8748,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -10083,7 +8764,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -10438,44 +9126,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -10587,23 +9244,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -10639,7 +9279,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -10701,44 +9348,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -10850,23 +9466,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -10902,7 +9501,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={
@@ -10917,44 +9523,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   apiClient={
                                     Object {
                                       "list": [Function],
+                                      "migrateReportingIndicesIlmPolicy": [MockFunction],
                                       "total": [Function],
-                                    }
-                                  }
-                                  history={
-                                    Object {
-                                      "action": "POP",
-                                      "block": [Function],
-                                      "canGo": [Function],
-                                      "createHref": [Function],
-                                      "entries": Array [
-                                        Object {
-                                          "hash": "",
-                                          "key": "5tm7eg",
-                                          "pathname": "/",
-                                          "search": "",
-                                          "state": undefined,
-                                        },
-                                      ],
-                                      "go": [Function],
-                                      "goBack": [Function],
-                                      "goForward": [Function],
-                                      "index": 0,
-                                      "length": 1,
-                                      "listen": [Function],
-                                      "location": Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                      "push": [Function],
-                                      "replace": [Function],
                                     }
                                   }
                                   ilmPolicyContextValue={
                                     Object {
-                                      "isLoading": true,
+                                      "isLoading": false,
                                       "recheckStatus": [Function],
                                       "status": undefined,
                                     }
@@ -11066,23 +9641,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                       "subscribe": [Function],
                                     }
                                   }
-                                  location={
-                                    Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    }
-                                  }
-                                  match={
-                                    Object {
-                                      "isExact": true,
-                                      "params": Object {},
-                                      "path": "/",
-                                      "url": "/",
-                                    }
-                                  }
                                   navigateToUrl={[MockFunction]}
                                   pollConfig={
                                     Object {
@@ -11118,7 +9676,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                   redirect={[MockFunction]}
                                   toasts={
                                     Object {
+                                      "add": [MockFunction],
                                       "addDanger": [MockFunction],
+                                      "addError": [MockFunction],
+                                      "addInfo": [MockFunction],
+                                      "addSuccess": [MockFunction],
+                                      "addWarning": [MockFunction],
+                                      "get$": [MockFunction],
+                                      "remove": [MockFunction],
                                     }
                                   }
                                   urlService={
@@ -11134,44 +9699,13 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 apiClient={
                                   Object {
                                     "list": [Function],
+                                    "migrateReportingIndicesIlmPolicy": [MockFunction],
                                     "total": [Function],
-                                  }
-                                }
-                                history={
-                                  Object {
-                                    "action": "POP",
-                                    "block": [Function],
-                                    "canGo": [Function],
-                                    "createHref": [Function],
-                                    "entries": Array [
-                                      Object {
-                                        "hash": "",
-                                        "key": "5tm7eg",
-                                        "pathname": "/",
-                                        "search": "",
-                                        "state": undefined,
-                                      },
-                                    ],
-                                    "go": [Function],
-                                    "goBack": [Function],
-                                    "goForward": [Function],
-                                    "index": 0,
-                                    "length": 1,
-                                    "listen": [Function],
-                                    "location": Object {
-                                      "hash": "",
-                                      "key": "5tm7eg",
-                                      "pathname": "/",
-                                      "search": "",
-                                      "state": undefined,
-                                    },
-                                    "push": [Function],
-                                    "replace": [Function],
                                   }
                                 }
                                 ilmPolicyContextValue={
                                   Object {
-                                    "isLoading": true,
+                                    "isLoading": false,
                                     "recheckStatus": [Function],
                                     "status": undefined,
                                   }
@@ -11284,23 +9818,6 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                     "subscribe": [Function],
                                   }
                                 }
-                                location={
-                                  Object {
-                                    "hash": "",
-                                    "key": "5tm7eg",
-                                    "pathname": "/",
-                                    "search": "",
-                                    "state": undefined,
-                                  }
-                                }
-                                match={
-                                  Object {
-                                    "isExact": true,
-                                    "params": Object {},
-                                    "path": "/",
-                                    "url": "/",
-                                  }
-                                }
                                 navigateToUrl={[MockFunction]}
                                 pollConfig={
                                   Object {
@@ -11317,7 +9834,14 @@ exports[`ReportListing Report job listing with some items 1`] = `
                                 redirect={[MockFunction]}
                                 toasts={
                                   Object {
+                                    "add": [MockFunction],
                                     "addDanger": [MockFunction],
+                                    "addError": [MockFunction],
+                                    "addInfo": [MockFunction],
+                                    "addSuccess": [MockFunction],
+                                    "addWarning": [MockFunction],
+                                    "get$": [MockFunction],
+                                    "remove": [MockFunction],
                                   }
                                 }
                                 urlService={

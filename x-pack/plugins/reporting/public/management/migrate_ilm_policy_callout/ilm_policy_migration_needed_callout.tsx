@@ -77,13 +77,15 @@ export const IlmPolicyMigrationNeededCallOut: FunctionComponent<Props> = ({
   };
 
   return (
-    <>
-      <EuiCallOut data-test-subj="migrateReportingIndicesPolicyCallOut" title={i18nTexts.title}>
-        <p>{i18nTexts.description}</p>
-        <EuiButton isLoading={isMigratingIndices} onClick={() => migrateReportingIndices()}>
-          {i18nTexts.buttonLabel}
-        </EuiButton>
-      </EuiCallOut>
-    </>
+    <EuiCallOut data-test-subj="migrateReportingIndicesPolicyCallOut" title={i18nTexts.title}>
+      <p>{i18nTexts.description}</p>
+      <EuiButton
+        data-test-subj="migrateReportingIndicesButton"
+        isLoading={isMigratingIndices}
+        onClick={migrateReportingIndices}
+      >
+        {i18nTexts.buttonLabel}
+      </EuiButton>
+    </EuiCallOut>
   );
 };

@@ -22,26 +22,16 @@ interface Props {
 export const MigrateIlmPolicyCallOut: FunctionComponent<Props> = ({ toasts }) => {
   const { isLoading, recheckStatus, status } = useIlmPolicyStatus();
 
-  const renderContent = () => {
-    if (!status) {
-      return null;
-    }
-
-    return (
-      <EuiFlexItem>
-        <IlmPolicyMigrationNeededCallOut toasts={toasts} onMigrationDone={recheckStatus} />
-      </EuiFlexItem>
-    );
-  };
-
-  if (!status || status === 'ok') {
+  if (isLoading || !status || status === 'ok') {
     return null;
   }
 
   return (
     <>
       <EuiSpacer size="m" />
-      {!isLoading && renderContent()}
+      <EuiFlexItem>
+        <IlmPolicyMigrationNeededCallOut toasts={toasts} onMigrationDone={recheckStatus} />
+      </EuiFlexItem>
     </>
   );
 };
