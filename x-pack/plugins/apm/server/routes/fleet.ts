@@ -41,10 +41,10 @@ const hasFleetDataRoute = createApmServerRoute({
 
 const saveApmServerSchemaRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/fleet/apm_server_schema',
-  options: { tags: ['access:apm', 'access:apm_write'], useStrictParams: false },
+  options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     body: t.type({
-      schema: t.UnknownRecord,
+      schema: t.record(t.string, t.unknown),
     }),
   }),
   handler: async (resources) => {

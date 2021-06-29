@@ -40,7 +40,6 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canCreateJob'
     >;
     body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
-    useStrictParams?: boolean;
   };
 }
 
