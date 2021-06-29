@@ -34,7 +34,7 @@ export const FieldExamples: FC<Props> = ({ fieldExamples }) => {
         <EuiCodeBlock
           fontSize="s"
           paddingSize="none"
-          transparentBackground={true}
+          transparentBackground
           style={{ maxHeight: '200px' }} // Don't use overflowHeight as don't want to show the fullscreen button
         >
           {example}
