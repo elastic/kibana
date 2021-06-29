@@ -11,7 +11,7 @@ import { first, map } from 'rxjs/operators';
 import { pick } from '@kbn/std';
 
 import type { RequestHandlerContext } from 'src/core/server';
-import type { ExecutionContextSetup } from '../execution_context';
+import type { InternalExecutionContextSetup } from '../execution_context';
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
@@ -42,7 +42,7 @@ import {
 
 interface SetupDeps {
   context: ContextSetup;
-  executionContext: ExecutionContextSetup;
+  executionContext: InternalExecutionContextSetup;
 }
 
 /** @internal */
