@@ -17,7 +17,7 @@ export const BREADCRUMB_TITLE = i18n.translate(
 export const PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.detectionsPageTitle',
   {
-    defaultMessage: 'Detection alerts',
+    defaultMessage: 'Alerts',
   }
 );
 
@@ -37,7 +37,7 @@ export const SIGNAL = i18n.translate('xpack.securitySolution.detectionEngine.sig
 });
 
 export const ALERT = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
-  defaultMessage: 'Detection alerts',
+  defaultMessage: 'Alerts',
 });
 
 export const BUTTON_MANAGE_RULES = i18n.translate(

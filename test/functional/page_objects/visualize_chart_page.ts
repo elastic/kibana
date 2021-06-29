@@ -37,7 +37,8 @@ export class VisualizeChartPageObject extends FtrService {
   public async isNewChartsLibraryEnabled(): Promise<boolean> {
     const legacyChartsLibrary =
       Boolean(
-        await this.kibanaServer.uiSettings.get('visualization:visualize:legacyChartsLibrary')
+        (await this.kibanaServer.uiSettings.get('visualization:visualize:legacyChartsLibrary')) &&
+          (await this.kibanaServer.uiSettings.get('visualization:visualize:legacyPieChartsLibrary'))
       ) ?? true;
     const enabled = !legacyChartsLibrary;
     this.log.debug(`-- isNewChartsLibraryEnabled = ${enabled}`);

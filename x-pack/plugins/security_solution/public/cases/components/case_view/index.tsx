@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { SearchResponse } from 'elasticsearch';
 import { isEmpty } from 'lodash';
@@ -19,15 +19,11 @@ import {
   useFormatUrl,
 } from '../../../common/components/link_to';
 import { Ecs } from '../../../../common/ecs';
-import { Case } from '../../../../../cases/common';
+import { Case, CaseViewRefreshPropInterface } from '../../../../../cases/common';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { KibanaServices, useKibana } from '../../../common/lib/kibana';
-import {
-  APP_ID,
-  CASES_APP_ID,
-  DETECTION_ENGINE_QUERY_SIGNALS_URL,
-} from '../../../../common/constants';
+import { APP_ID, DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -38,6 +34,7 @@ import { SEND_ALERT_TO_TIMELINE } from './translations';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
+import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 
 interface Props {
   caseId: string;
@@ -131,7 +128,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
   const dispatch = useDispatch();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
-    SecurityPageName.detections
+    SecurityPageName.rules
   );
 
   const allCasesLink = getCaseUrl(search);
@@ -176,16 +173,21 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
       })
     );
   }, [dispatch]);
+
+  const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+
   return (
-    <>
+    <CaseDetailsRefreshContext.Provider value={refreshRef}>
       {casesUi.getCaseView({
+        refreshRef,
         allCasesNavigation: {
           href: formattedAllCasesLink,
           onClick: async (e) => {
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(CASES_APP_ID, {
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
               path: allCasesLink,
             });
           },
@@ -196,7 +198,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(CASES_APP_ID, {
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
               path: getCaseDetailsUrl({ id: caseId }),
             });
           },
@@ -208,7 +211,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(CASES_APP_ID, {
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.case,
               path: getConfigureCasesUrl(search),
             });
           },
@@ -222,7 +226,8 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
             if (e) {
               e.preventDefault();
             }
-            return navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
+            return navigateToApp(APP_ID, {
+              deepLinkId: SecurityPageName.rules,
               path: getRuleDetailsUrl(ruleId ?? ''),
             });
           },
@@ -247,7 +252,7 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         userCanCrud,
       })}
       <SpyRoute state={spyState} pageName={SecurityPageName.case} />
-    </>
+    </CaseDetailsRefreshContext.Provider>
   );
 });
 

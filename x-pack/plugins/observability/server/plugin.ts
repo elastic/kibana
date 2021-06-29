@@ -24,7 +24,7 @@ import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { CASES_APP_ID, OBSERVABILITY } from '../common/const';
+import { casesFeatureId, observabilityFeatureId } from '../common';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -40,41 +40,41 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
   public setup(core: CoreSetup, plugins: PluginSetup) {
     plugins.features.registerKibanaFeature({
-      id: CASES_APP_ID,
+      id: casesFeatureId,
       name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
         defaultMessage: 'Cases',
       }),
       order: 1100,
       category: DEFAULT_APP_CATEGORIES.observability,
-      app: [CASES_APP_ID, 'kibana'],
-      catalogue: [OBSERVABILITY],
-      cases: [OBSERVABILITY],
+      app: [casesFeatureId, 'kibana'],
+      catalogue: [observabilityFeatureId],
+      cases: [observabilityFeatureId],
       privileges: {
         all: {
-          app: [CASES_APP_ID, 'kibana'],
-          catalogue: [OBSERVABILITY],
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
           cases: {
-            all: [OBSERVABILITY],
+            all: [observabilityFeatureId],
           },
           api: [],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['crud_cases', 'read_cases'], // uiCapabilities[CASES_APP_ID].crud_cases or read_cases
+          ui: ['crud_cases', 'read_cases'], // uiCapabilities[casesFeatureId].crud_cases or read_cases
         },
         read: {
-          app: [CASES_APP_ID, 'kibana'],
-          catalogue: [OBSERVABILITY],
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
           cases: {
-            read: [OBSERVABILITY],
+            read: [observabilityFeatureId],
           },
           api: [],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['read_cases'], // uiCapabilities[uiCapabilities[CASES_APP_ID]].read_cases
+          ui: ['read_cases'], // uiCapabilities[uiCapabilities[casesFeatureId]].read_cases
         },
       },
     });

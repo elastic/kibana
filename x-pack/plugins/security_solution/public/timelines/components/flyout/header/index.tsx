@@ -206,11 +206,12 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   const description = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
   );
-
   return (
     <EuiText size="s" data-test-subj="timeline-description">
       {description.length ? (
-        <LineClamp key={description.length} content={description} lineClampHeight={4.5} />
+        <LineClamp key={description.length} lineClampHeight={4.5}>
+          {description}
+        </LineClamp>
       ) : (
         commonI18n.DESCRIPTION
       )}
