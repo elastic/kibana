@@ -12,12 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractESSource } from '../es_source';
-import {
-  getHttp,
-  getMapAppConfig,
-  getSearchService,
-  getTimeFilter,
-} from '../../../kibana_services';
+import { getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
 import {
   addFieldToDSL,
   getField,
@@ -424,9 +419,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   async supportsFeatureEditing(): Promise<boolean> {
-    if (!getMapAppConfig().enableDrawingFeature) {
-      return false;
-    }
     await this.getIndexPattern();
     if (!(this.indexPattern && this.indexPattern.title)) {
       return false;

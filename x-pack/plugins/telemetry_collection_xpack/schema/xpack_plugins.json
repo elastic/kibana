@@ -31,10 +31,10 @@
             "__index": {
               "type": "long"
             },
-            "__swimlane": {
+            "__pagerduty": {
               "type": "long"
             },
-            "__pagerduty": {
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -71,10 +71,10 @@
             "__index": {
               "type": "long"
             },
-            "__swimlane": {
+            "__pagerduty": {
               "type": "long"
             },
-            "__pagerduty": {
+            "__swimlane": {
               "type": "long"
             },
             "__server-log": {
@@ -1260,6 +1260,20 @@
             }
           }
         },
+        "host": {
+          "properties": {
+            "os": {
+              "properties": {
+                "platform": {
+                  "type": "array",
+                  "items": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
         "counts": {
           "properties": {
             "transaction": {
@@ -1542,6 +1556,17 @@
               }
             },
             "cloud": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
               "properties": {
                 "took": {
                   "properties": {
@@ -5762,6 +5787,12 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
+        },
+        "apiCalls.disableLegacyUrlAliases.total": {
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
           }
         }
       }

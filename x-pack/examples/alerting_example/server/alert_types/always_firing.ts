@@ -53,6 +53,7 @@ export const alertType: AlertType<
   ],
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },
