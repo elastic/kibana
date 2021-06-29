@@ -48,6 +48,7 @@ filegroup(
       "//packages/kbn-securitysolution-hook-utils:build",
       "//packages/kbn-server-http-tools:build",
       "//packages/kbn-server-route-repository:build",
+      "//packages/kbn-spec-to-console:build",
       "//packages/kbn-std:build",
       "//packages/kbn-storybook:build",
       "//packages/kbn-telemetry-tools:build",

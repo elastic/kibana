@@ -503,6 +503,12 @@ export interface CoreServicesUsageData {
             storeSizeBytes: number;
             primaryStoreSizeBytes: number;
         }[];
+        legacyUrlAliases: {
+            activeCount: number;
+            inactiveCount: number;
+            disabledCount: number;
+            totalCount: number;
+        };
     };
 }
 
@@ -765,6 +771,16 @@ export interface CoreUsageStats {
     'apiCalls.savedObjectsUpdate.namespace.default.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsUpdate.total'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.aliasMatch'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.conflict'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.exactMatch'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.notFound'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.total'?: number;
 }
 
 // @public (undocumented)
@@ -2925,7 +2941,6 @@ export interface SavedObjectsResolveImportErrorsOptions {
 export interface SavedObjectsResolveResponse<T = unknown> {
     aliasTargetId?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-    // (undocumented)
     saved_object: SavedObject<T>;
 }
 

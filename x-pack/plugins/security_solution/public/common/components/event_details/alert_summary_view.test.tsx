@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
+import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
 import { TestProviders } from '../../mock';
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -19,9 +19,9 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('../../../detections/containers/detection_engine/rules/use_rule_async', () => {
+jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
   return {
-    useRuleAsync: jest.fn(),
+    useRuleWithFallback: jest.fn(),
   };
 });
 
@@ -37,7 +37,7 @@ describe('AlertSummaryView', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRuleAsync as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
       rule: {
         note: 'investigation guide',
       },
@@ -64,7 +64,7 @@ describe('AlertSummaryView', () => {
   });
 
   test("render no investigation guide if it doesn't exist", async () => {
-    (useRuleAsync as jest.Mock).mockReturnValue({
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
       rule: {
         note: null,
       },
