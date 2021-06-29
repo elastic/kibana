@@ -153,7 +153,7 @@ export class AlertingPlugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
-    this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
