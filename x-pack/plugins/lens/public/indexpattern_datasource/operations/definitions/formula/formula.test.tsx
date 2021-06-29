@@ -440,6 +440,47 @@ describe('formula', () => {
       });
     });
 
+    it('should create a valid formula expression for numeric literals', () => {
+      expect(
+        regenerateLayerFromAst(
+          '0',
+          layer,
+          'col1',
+          currentColumn,
+          indexPattern,
+          operationDefinitionMap
+        ).newLayer
+      ).toEqual({
+        ...layer,
+        columnOrder: ['col1X0', 'col1'],
+        columns: {
+          ...layer.columns,
+          col1: {
+            ...currentColumn,
+            label: '0',
+            references: ['col1X0'],
+            params: {
+              ...currentColumn.params,
+              formula: '0',
+              isFormulaBroken: false,
+            },
+          },
+          col1X0: {
+            customLabel: true,
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Part of 0',
+            operationType: 'math',
+            params: {
+              tinymathAst: 0,
+            },
+            references: [],
+            scale: 'ratio',
+          },
+        },
+      });
+    });
+
     it('returns no change but error if the formula cannot be parsed', () => {
       const formulas = [
         '+',
