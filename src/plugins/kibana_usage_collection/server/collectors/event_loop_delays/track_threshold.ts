@@ -29,10 +29,18 @@ export function startTrackingEventLoopDelaysThreshold(
   eventLoopCounter: UsageCounter,
   logger: Logger,
   stopMonitoringEventLoop$: Observable<void>,
-  warnThreshold = MONITOR_EVENT_LOOP_WARN_THRESHOLD,
-  collectionStartDelay = MONITOR_EVENT_LOOP_THRESHOLD_START,
-  collectionInterval = MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL
+  configs: {
+    warnThreshold?: number;
+    collectionStartDelay?: number;
+    collectionInterval?: number;
+  } = {}
 ) {
+  const {
+    warnThreshold = MONITOR_EVENT_LOOP_WARN_THRESHOLD,
+    collectionStartDelay = MONITOR_EVENT_LOOP_THRESHOLD_START,
+    collectionInterval = MONITOR_EVENT_LOOP_THRESHOLD_INTERVAL,
+  } = configs;
+
   const eventLoopDelaysCollector = new EventLoopDelaysCollector();
   timer(collectionStartDelay, collectionInterval)
     .pipe(
@@ -47,7 +55,8 @@ export function startTrackingEventLoopDelaysThreshold(
 
       if (meanDurationMs > warnThreshold) {
         logger.warn(
-          `Average event loop delay threshold exceeded ${warnThreshold}ms. Received ${meanDurationMs}ms.`
+          `Average event loop delay threshold exceeded ${warnThreshold}ms. Received ${meanDurationMs}ms. ` +
+            `See https://ela.st/kibana-scaling-considerations for more information about scaling Kibana.`
         );
 
         eventLoopCounter.incrementCounter({

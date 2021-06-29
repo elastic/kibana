@@ -27,11 +27,9 @@ describe('startTrackingEventLoopDelaysUsage', () => {
 
   it('initializes EventLoopDelaysCollector and starts timer', () => {
     const collectionStartDelay = 1000;
-    startTrackingEventLoopDelaysUsage(
-      mockInternalRepository,
-      stopMonitoringEventLoop$,
-      collectionStartDelay
-    );
+    startTrackingEventLoopDelaysUsage(mockInternalRepository, stopMonitoringEventLoop$, {
+      collectionStartDelay,
+    });
 
     expect(monitorEventLoopDelay).toBeCalledTimes(1);
     expect(mockMonitorPercentile).toBeCalledTimes(0);
@@ -42,12 +40,10 @@ describe('startTrackingEventLoopDelaysUsage', () => {
   it('stores event loop delays every collectionInterval duration', () => {
     const collectionStartDelay = 100;
     const collectionInterval = 1000;
-    startTrackingEventLoopDelaysUsage(
-      mockInternalRepository,
-      stopMonitoringEventLoop$,
+    startTrackingEventLoopDelaysUsage(mockInternalRepository, stopMonitoringEventLoop$, {
       collectionStartDelay,
-      collectionInterval
-    );
+      collectionInterval,
+    });
 
     expect(mockInternalRepository.create).toBeCalledTimes(0);
     jest.advanceTimersByTime(collectionStartDelay);
@@ -62,13 +58,11 @@ describe('startTrackingEventLoopDelaysUsage', () => {
     const collectionStartDelay = 0;
     const collectionInterval = 1000;
     const histogramReset = 5000;
-    startTrackingEventLoopDelaysUsage(
-      mockInternalRepository,
-      stopMonitoringEventLoop$,
+    startTrackingEventLoopDelaysUsage(mockInternalRepository, stopMonitoringEventLoop$, {
       collectionStartDelay,
       collectionInterval,
-      histogramReset
-    );
+      histogramReset,
+    });
 
     expect(mockMonitorReset).toBeCalledTimes(0);
     jest.advanceTimersByTime(collectionInterval * 5);

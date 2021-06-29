@@ -25,13 +25,21 @@ import { EventLoopDelaysCollector } from './event_loop_delays';
 export function startTrackingEventLoopDelaysUsage(
   internalRepository: ISavedObjectsRepository,
   stopMonitoringEventLoop$: Observable<void>,
-  collectionStartDelay = MONITOR_EVENT_LOOP_DELAYS_START,
-  collectionInterval = MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
-  histogramReset = MONITOR_EVENT_LOOP_DELAYS_RESET
+  configs: {
+    collectionStartDelay?: number;
+    collectionInterval?: number;
+    histogramReset?: number;
+  } = {}
 ) {
-  const eventLoopDelaysCollector = new EventLoopDelaysCollector();
+  const {
+    collectionStartDelay = MONITOR_EVENT_LOOP_DELAYS_START,
+    collectionInterval = MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
+    histogramReset = MONITOR_EVENT_LOOP_DELAYS_RESET,
+  } = configs;
 
+  const eventLoopDelaysCollector = new EventLoopDelaysCollector();
   const resetOnCount = Math.ceil(histogramReset / collectionInterval);
+
   timer(collectionStartDelay, collectionInterval)
     .pipe(
       map((i) => (i + 1) % resetOnCount === 0),

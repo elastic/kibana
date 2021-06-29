@@ -28,14 +28,11 @@ describe('startTrackingEventLoopDelaysThreshold', () => {
 
   it('initializes EventLoopDelaysCollector and starts timer', () => {
     const collectionStartDelay = 1000;
-    const collectionWarnThreshold = 1000;
-    startTrackingEventLoopDelaysThreshold(
-      mockEventLoopCounter,
-      logger,
-      stopMonitoringEventLoop$,
-      collectionWarnThreshold,
-      collectionStartDelay
-    );
+    const warnThreshold = 1000;
+    startTrackingEventLoopDelaysThreshold(mockEventLoopCounter, logger, stopMonitoringEventLoop$, {
+      warnThreshold,
+      collectionStartDelay,
+    });
 
     expect(monitorEventLoopDelay).toBeCalledTimes(1);
     expect(mockMonitorPercentile).toBeCalledTimes(0);
@@ -46,16 +43,13 @@ describe('startTrackingEventLoopDelaysThreshold', () => {
   it('logs a warning and increments usage counter when the mean delay exceeds the threshold', () => {
     const collectionStartDelay = 100;
     const collectionInterval = 1000;
-    const collectionWarnThreshold = 10;
+    const warnThreshold = 10;
 
-    startTrackingEventLoopDelaysThreshold(
-      mockEventLoopCounter,
-      logger,
-      stopMonitoringEventLoop$,
-      collectionWarnThreshold,
+    startTrackingEventLoopDelaysThreshold(mockEventLoopCounter, logger, stopMonitoringEventLoop$, {
+      warnThreshold,
       collectionStartDelay,
-      collectionInterval
-    );
+      collectionInterval,
+    });
 
     expect(logger.warn).toBeCalledTimes(0);
     expect(mockEventLoopCounter.incrementCounter).toBeCalledTimes(0);
@@ -79,15 +73,12 @@ describe('startTrackingEventLoopDelaysThreshold', () => {
 
   it('does not log warning or increment usage if threshold did not exceed mean delay', () => {
     const collectionStartDelay = 100;
-    const collectionWarnThreshold = 15;
+    const warnThreshold = 15;
 
-    startTrackingEventLoopDelaysThreshold(
-      mockEventLoopCounter,
-      logger,
-      stopMonitoringEventLoop$,
-      collectionWarnThreshold,
-      collectionStartDelay
-    );
+    startTrackingEventLoopDelaysThreshold(mockEventLoopCounter, logger, stopMonitoringEventLoop$, {
+      warnThreshold,
+      collectionStartDelay,
+    });
 
     expect(logger.warn).toBeCalledTimes(0);
     expect(mockEventLoopCounter.incrementCounter).toBeCalledTimes(0);
