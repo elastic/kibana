@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
+import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
@@ -336,16 +336,17 @@ export class TOCEntry extends Component<Props, State> {
 
         {this.props.editModeActiveForLayer && (
           <div className="mapTocEntry-isInEditingMode__row">
-            <EuiButtonEmpty
-              size="xs"
-              color="danger"
-              iconType="vector"
-              flush="left"
-              onClick={this.props.cancelEditing}
-            >
+            <EuiIcon type="vector" size="s" />
+            <span className="mapTocEntry-isInEditingMode__editFeatureText">
+              <FormattedMessage
+                id="xpack.maps.layerControl.tocEntry.EditFeature"
+                defaultMessage="Edit feature"
+              />
+            </span>
+            <EuiButtonEmpty size="xs" flush="both" onClick={this.props.cancelEditing}>
               <FormattedMessage
                 id="xpack.maps.layerControl.tocEntry.exitEditModeAriaLabel"
-                defaultMessage="Exit feature editing"
+                defaultMessage="Exit"
               />
             </EuiButtonEmpty>
           </div>

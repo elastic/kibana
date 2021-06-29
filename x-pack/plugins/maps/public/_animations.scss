@@ -1,4 +1,4 @@
-@keyframes headShake {
+@keyframes mapAnimationHeadShake {
   0% {
     transform: translateX(0);
   }
@@ -24,7 +24,7 @@
   }
 }
 
-@keyframes pulse {
+@keyframes mapAnimationPulse {
   from {
     transform: scale3d(1, 1, 1);
   }
