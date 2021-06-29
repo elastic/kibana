@@ -407,7 +407,6 @@ export class Listing extends Component {
     const hasStandaloneCluster = !!clusters.find(
       (cluster) => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
     );
-    console.log('clusters passed to table rows', clusters);
 
     return (
       <EuiPage>
