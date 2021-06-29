@@ -73,12 +73,15 @@ export const CreateDockerUBI: Task = {
   description: 'Creating Docker UBI image',
 
   async run(config, log, build) {
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      context: false,
-      ubi: true,
-      image: true,
-    });
+    if (!build.isOss()) {
+      await runDockerGenerator(config, log, build, {
+        architecture: 'x64',
+        context: false,
+        ubi: true,
+        image: true,
+        dockerBuildDate,
+      });
+    }
   },
 };
 
@@ -92,15 +95,19 @@ export const CreateDockerContexts: Task = {
       dockerBuildDate,
     });
 
-    await runDockerGenerator(config, log, build, {
-      ubi: true,
-      context: true,
-      image: false,
-    });
-    await runDockerGenerator(config, log, build, {
-      ironbank: true,
-      context: true,
-      image: false,
-    });
+    if (!build.isOss()) {
+      await runDockerGenerator(config, log, build, {
+        ubi: true,
+        context: true,
+        image: false,
+        dockerBuildDate,
+      });
+      await runDockerGenerator(config, log, build, {
+        ironbank: true,
+        context: true,
+        image: false,
+        dockerBuildDate,
+      });
+    }
   },
 };

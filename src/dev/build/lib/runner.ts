@@ -16,6 +16,7 @@ import { Config } from './config';
 interface Options {
   config: Config;
   log: ToolingLog;
+  buildOssDist: boolean;
   buildDefaultDist: boolean;
 }
 
@@ -31,7 +32,7 @@ export interface Task {
   run(config: Config, log: ToolingLog, build: Build): Promise<void>;
 }
 
-export function createRunner({ config, log, buildDefaultDist }: Options) {
+export function createRunner({ config, log, buildOssDist, buildDefaultDist }: Options) {
   async function execTask(desc: string, task: Task | GlobalTask, lastArg: any) {
     log.info(desc);
     log.indent(4);
@@ -63,7 +64,10 @@ export function createRunner({ config, log, buildDefaultDist }: Options) {
 
   const builds: Build[] = [];
   if (buildDefaultDist) {
-    builds.push(new Build(config));
+    builds.push(new Build(config, false));
+  }
+  if (buildOssDist) {
+    builds.push(new Build(config, true));
   }
 
   /**
