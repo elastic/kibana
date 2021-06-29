@@ -163,7 +163,7 @@ export const FindFileStructurePermissionDenied: FC = () => {
       >
         <FormattedMessage
           id="xpack.dataVisualizer.file.fileErrorCallouts.findFileStructurePermissionDenied.description"
-          defaultMessage="To enable this feature, please use a role which has all Discover features enabled"
+          defaultMessage="You do not have sufficient privileges to analyze files."
         />
       </EuiCallOut>
     </>
