@@ -19,7 +19,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
+import { APP_SLM_CLUSTER_PRIVILEGES, SNAPSHOT_LIST_MAX_SIZE } from '../../../../../common';
 import { WithPrivileges, PageLoading, PageError, Error } from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
@@ -54,7 +54,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     resendRequest: reload,
   } = useLoadSnapshots();
 
-  const { uiMetricService } = useServices();
+  const { uiMetricService, i18n } = useServices();
   const { docLinks } = useCore();
 
   const openSnapshotDetailsUrl = (
@@ -138,6 +138,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
           iconType="managementApp"
+          data-test-subj="repositoryErrorsPrompt"
           title={
             <h1 data-test-subj="title">
               <FormattedMessage
@@ -319,7 +320,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     );
   } else {
     const repositoryErrorsWarning = Object.keys(errors).length ? (
-      <Fragment>
+      <>
         <EuiCallOut
           title={
             <FormattedMessage
@@ -329,6 +330,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           }
           color="warning"
           iconType="alert"
+          data-test-subj="repositoryErrorsWarning"
         >
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryWarningDescription"
@@ -346,12 +348,47 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           />
         </EuiCallOut>
         <EuiSpacer />
-      </Fragment>
+      </>
     ) : null;
+
+    const maxSnapshotsWarning = snapshots.length === SNAPSHOT_LIST_MAX_SIZE && (
+      <>
+        <EuiCallOut
+          color="warning"
+          iconType="help"
+          data-test-subj="maxSnapshotsWarning"
+          title={i18n.translate('xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedTitle', {
+            defaultMessage: 'Cannot show the full list of snapshots',
+          })}
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDescription"
+            defaultMessage="You've reached the maximum number of viewable snapshots. To view all of your snapshots, use {docLink}."
+            values={{
+              docLink: (
+                <EuiLink
+                  href={docLinks.links.snapshotRestore.getSnapshot}
+                  target="_blank"
+                  data-test-subj="documentationLink"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotsList.maxSnapshotsDisplayedDocLinkText"
+                    defaultMessage="the Elasticsearch API"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer size="l" />
+      </>
+    );
 
     content = (
       <section data-test-subj="snapshotList">
         {repositoryErrorsWarning}
+
+        {maxSnapshotsWarning}
 
         <SnapshotTable
           snapshots={snapshots}
