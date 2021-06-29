@@ -62,20 +62,23 @@ export const useStepWaterfallMetrics = ({ checkGroup }: Props) => {
         }
       }
     });
-    metricDocs.forEach(({ fields }) => {
-      if (fields['browser.relative_trace.type']?.[0] === 'mark') {
-        const {
-          'browser.relative_trace.name': metricType,
-          'browser.relative_trace.start.us': metricValue,
-        } = fields;
-        if (metricType?.[0] !== 'navigationStart') {
-          metrics.push({
-            id: metricType?.[0],
-            offset: (metricValue?.[0] - navigationStart) / 1000,
-          });
+
+    if (navigationStart > 0) {
+      metricDocs.forEach(({ fields }) => {
+        if (fields['browser.relative_trace.type']?.[0] === 'mark') {
+          const {
+            'browser.relative_trace.name': metricType,
+            'browser.relative_trace.start.us': metricValue,
+          } = fields;
+          if (metricType?.[0] !== 'navigationStart') {
+            metrics.push({
+              id: metricType?.[0],
+              offset: (metricValue?.[0] - navigationStart) / 1000,
+            });
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   return { metrics, loading };
