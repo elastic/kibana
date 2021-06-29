@@ -9,6 +9,9 @@
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
+import gulpBrotli from 'gulp-brotli';
+// @ts-expect-error
+import gulpGzip from 'gulp-gzip';
 // @ts-expect-error
 import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
@@ -16,12 +19,15 @@ import gulpTerser from 'gulp-terser';
 import terser from 'terser';
 import vfs from 'vinyl-fs';
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { Task, Build } from '../lib';
 
 const asyncPipeline = promisify(pipeline);
 
-const minifyKbnUiSharedDepsCSS = async (build: Build) => {
+const minifyKbnUiSharedDepsCSS = async (log: ToolingLog, build: Build) => {
   const buildRoot = build.resolvePath();
+
+  log.debug('Minify CSS');
 
   await asyncPipeline(
     vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.css'], {
@@ -40,12 +46,14 @@ const minifyKbnUiSharedDepsCSS = async (build: Build) => {
       }),
     ]),
 
-    vfs.dest(buildRoot)
+    vfs.dest('node_modules/@kbn/ui-shared-deps/shared_built_assets', { cwd: buildRoot })
   );
 };
 
-const minifyKbnUiSharedDepsJS = async (build: Build) => {
+const minifyKbnUiSharedDepsJS = async (log: ToolingLog, build: Build) => {
   const buildRoot = build.resolvePath();
+
+  log.debug('Minify JS');
 
   await asyncPipeline(
     vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.js'], {
@@ -60,20 +68,55 @@ const minifyKbnUiSharedDepsJS = async (build: Build) => {
       terser.minify
     ),
 
-    vfs.dest(buildRoot)
+    vfs.dest('node_modules/@kbn/ui-shared-deps/shared_built_assets', { cwd: buildRoot })
   );
 };
 
-const generateKbnUiSharedDepsOptimizedAssets = async (build: Build) => {
-  await minifyKbnUiSharedDepsCSS(build);
-  await minifyKbnUiSharedDepsJS(build);
+const brotliCompressKbnUiSharedDeps = async (log: ToolingLog, build: Build) => {
+  const buildRoot = build.resolvePath();
+
+  log.debug('Brotli compress');
+
+  await asyncPipeline(
+    vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.{js,css}'], {
+      cwd: buildRoot,
+    }),
+
+    gulpBrotli(),
+
+    vfs.dest('node_modules/@kbn/ui-shared-deps/shared_built_assets', { cwd: buildRoot })
+  );
+};
+
+const gzipCompressKbnUiSharedDeps = async (log: ToolingLog, build: Build) => {
+  const buildRoot = build.resolvePath();
+
+  log.debug('GZip compress');
+
+  await asyncPipeline(
+    vfs.src(['node_modules/@kbn/ui-shared-deps/shared_built_assets/**/*.{js,css}'], {
+      cwd: buildRoot,
+    }),
+
+    gulpGzip(),
+
+    vfs.dest('node_modules/@kbn/ui-shared-deps/shared_built_assets', { cwd: buildRoot })
+  );
+};
+
+const generateKbnUiSharedDepsOptimizedAssets = async (log: ToolingLog, build: Build) => {
+  log.info('Creating optimized assets for @kbn/ui-shared-deps');
+  await minifyKbnUiSharedDepsCSS(log, build);
+  await minifyKbnUiSharedDepsJS(log, build);
+  await brotliCompressKbnUiSharedDeps(log, build);
+  await gzipCompressKbnUiSharedDeps(log, build);
 };
 
 export const GeneratePackagesOptimizedAssets: Task = {
-  description: 'Generate Optimized Assets for Packages',
+  description: 'Generates Optimized Assets for Packages',
 
   async run(config, log, build) {
     // Create optimized assets for @kbn/ui-shared-deps
-    await generateKbnUiSharedDepsOptimizedAssets(build);
+    await generateKbnUiSharedDepsOptimizedAssets(log, build);
   },
 };

@@ -7,18 +7,26 @@
  */
 
 const Path = require('path');
-
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
 const { RawSource } = require('webpack-sources');
 
 const UiSharedDeps = require('./src/index');
 
+const FSEVENTS_SRC = require.resolve('fsevents');
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
+const WEBPACK_SRC = require.resolve('webpack');
 
 module.exports = {
+  node: {
+    child_process: 'empty',
+    fs: 'empty',
+  },
+  externals: {
+    module: 'module',
+    fsevents: 'fsevents',
+  },
   mode: 'production',
   entry: {
     'kbn-ui-shared-deps': './src/entry.js',
@@ -37,10 +45,11 @@ module.exports = {
     devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
+    futureEmitAssets: true,
   },
 
   module: {
-    noParse: [MOMENT_SRC],
+    noParse: [FSEVENTS_SRC, MOMENT_SRC, WEBPACK_SRC],
     rules: [
       {
         include: [require.resolve('./src/entry.js')],
@@ -130,18 +139,6 @@ module.exports = {
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name].css',
-    }),
-    new CompressionPlugin({
-      algorithm: 'brotliCompress',
-      filename: '[path].br',
-      test: /\.(js|css)$/,
-      cache: false,
-    }),
-    new CompressionPlugin({
-      algorithm: 'gzip',
-      filename: '[path].gz',
-      test: /\.(js|css)$/,
-      cache: false,
     }),
     new (class MetricsPlugin {
       apply(compiler) {

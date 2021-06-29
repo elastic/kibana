@@ -43,7 +43,6 @@ SRC_DEPS = [
   "@npm//abortcontroller-polyfill",
   "@npm//angular",
   "@npm//babel-loader",
-  "@npm//compression-webpack-plugin",
   "@npm//core-js",
   "@npm//css-loader",
   "@npm//fflate",
