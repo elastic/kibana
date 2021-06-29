@@ -98,6 +98,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
 |  [Plugin](./kibana-plugin-core-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
+|  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)<!-- -->. |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
 |  [SavedObjectError](./kibana-plugin-core-public.savedobjecterror.md) |  |
@@ -126,6 +127,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsImportUnknownError](./kibana-plugin-core-public.savedobjectsimportunknownerror.md) | Represents a failure to import due to an unknown reason. |
 |  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-core-public.savedobjectsimportunsupportedtypeerror.md) | Represents a failure to import due to having an unsupported saved object type. |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-core-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
+|  [SavedObjectsResolveResponse](./kibana-plugin-core-public.savedobjectsresolveresponse.md) |  |
 |  [SavedObjectsStart](./kibana-plugin-core-public.savedobjectsstart.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-public.savedobjectsupdateoptions.md) |  |
 |  [ToastOptions](./kibana-plugin-core-public.toastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs. |
