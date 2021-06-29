@@ -77,7 +77,7 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
       ],
       [
         {
-          title: 'Elastic agent status',
+          title: i18n.FLEET_AGENT_STATUS,
           description:
             data != null && data.elasticAgentStatus ? (
               <>

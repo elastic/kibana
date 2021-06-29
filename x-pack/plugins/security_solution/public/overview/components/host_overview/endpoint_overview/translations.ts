@@ -27,3 +27,10 @@ export const SENSORVERSION = i18n.translate(
     defaultMessage: 'Sensor Version',
   }
 );
+
+export const FLEET_AGENT_STATUS = i18n.translate(
+  'xpack.securitySolution.host.details.endpoint.fleetAgentStatus',
+  {
+    defaultMessage: 'Fleet agent status',
+  }
+);
