@@ -455,3 +455,31 @@ export const getCreateVisualizationButtonTitle = () =>
   i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
     defaultMessage: 'Create visualization',
   });
+
+export const noItemsStrings = {
+  getReadonlyTitle: () =>
+    i18n.translate('dashboard.listing.readonlyNoItemsTitle', {
+      defaultMessage: 'No dashboards to view',
+    }),
+  getReadonlyBody: () =>
+    i18n.translate('dashboard.listing.readonlyNoItemsBody', {
+      defaultMessage: `There are no available dashboards. To change your permissions to view the dashboards in this space, contact your administrator.`,
+    }),
+  getReadEditTitle: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.title', {
+      defaultMessage: 'Create your first dashboard',
+    }),
+  getReadEditDashboardDescription: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription', {
+      defaultMessage:
+        'You can combine data views from any Kibana app into one dashboard and see everything in one place.',
+    }),
+  getSampleDataLinkText: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.sampleDataInstallLinkText', {
+      defaultMessage: `Install some sample data`,
+    }),
+  getCreateNewDashboardText: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.createButtonLabel', {
+      defaultMessage: `Create new dashboard`,
+    }),
+};

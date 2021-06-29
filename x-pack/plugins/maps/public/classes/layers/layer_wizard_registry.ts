@@ -38,6 +38,7 @@ export type LayerWizard = {
   prerequisiteSteps?: Array<{ id: string; label: string }>;
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
+  showFeatureEditTools?: boolean;
 };
 
 export type LayerWizardWithMeta = LayerWizard & {
