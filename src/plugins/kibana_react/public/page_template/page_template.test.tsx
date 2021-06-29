@@ -125,4 +125,20 @@ describe('KibanaPageTemplate', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
+  test('render sidebar classes', () => {
+    const component = shallow(
+      <KibanaPageTemplate
+        solutionNav={{
+          name: 'Solution',
+          icon: 'solution',
+          items: navItems,
+        }}
+        pageSideBarProps={{ className: 'customClass' }}
+      />
+    );
+    expect(component.prop('pageSideBarProps').className).toEqual(
+      'kbnPageTemplate__pageSideBar customClass'
+    );
+  });
 });
