@@ -15,4 +15,4 @@ export const mockAPIClient = {
   downloadReport: jest.fn(),
 };
 
-jest.mock('../lib/reporting_api_client', () => mockAPIClient);
+jest.mock('./reporting_api_client', () => mockAPIClient);

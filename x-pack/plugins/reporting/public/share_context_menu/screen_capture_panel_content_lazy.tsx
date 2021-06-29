@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { lazy, Suspense, FC } from 'react';
+import { FC, lazy, Suspense } from 'react';
 import { PanelSpinner } from './panel_spinner';
 import type { Props } from './screen_capture_panel_content';
 
