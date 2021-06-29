@@ -76,7 +76,7 @@ const fleetAgentsRoute = createApmServerRoute({
         return {
           id: agent.id,
           name: agent.name,
-          apmServerUrl: apmServerCompiledInputs?.host,
+          apmServerUrl: apmServerCompiledInputs?.url,
           secretToken: apmServerCompiledInputs?.secret_token,
         };
       }),
