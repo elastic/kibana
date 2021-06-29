@@ -45,7 +45,6 @@ export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternC
   operationType: 'date_histogram';
   params: {
     interval: string;
-    timeZone?: string;
   };
 }
 
@@ -106,12 +105,6 @@ export const dateHistogramOperation: OperationDefinition<
   },
   getDefaultLabel: (column, indexPattern) => getSafeName(column.sourceField, indexPattern),
   buildColumn({ field }, columnParams) {
-    let interval = columnParams?.interval ?? autoInterval;
-    let timeZone: string | undefined;
-    if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
-      interval = restrictedInterval(field.aggregationRestrictions) as string;
-      timeZone = field.aggregationRestrictions.date_histogram.time_zone;
-    }
     return {
       label: field.displayName,
       dataType: 'date',
@@ -120,8 +113,7 @@ export const dateHistogramOperation: OperationDefinition<
       isBucketed: true,
       scale: 'interval',
       params: {
-        interval,
-        timeZone,
+        interval: columnParams?.interval ?? autoInterval,
       },
     };
   },
@@ -135,28 +127,6 @@ export const dateHistogramOperation: OperationDefinition<
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.date_histogram)
     );
   },
-  transfer: (column, newIndexPattern) => {
-    const newField = newIndexPattern.getFieldByName(column.sourceField);
-
-    if (newField?.aggregationRestrictions?.date_histogram) {
-      const restrictions = newField.aggregationRestrictions.date_histogram;
-
-      return {
-        ...column,
-        params: {
-          ...column.params,
-          timeZone: restrictions.time_zone,
-          // TODO this rewrite logic is simplified - if the current interval is a multiple of
-          // the restricted interval, we could carry it over directly. However as the current
-          // UI does not allow to select multiples of an interval anyway, this is not included yet.
-          // If the UI allows to pick more complicated intervals, this should be re-visited.
-          interval: restrictedInterval(newField.aggregationRestrictions) as string,
-        },
-      };
-    }
-
-    return column;
-  },
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
@@ -166,14 +136,24 @@ export const dateHistogramOperation: OperationDefinition<
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const usedField = indexPattern.getFieldByName(column.sourceField);
+    let timeZone: string | undefined;
+    let interval = column.params?.interval ?? autoInterval;
+    if (
+      usedField &&
+      usedField.aggregationRestrictions &&
+      usedField.aggregationRestrictions.date_histogram
+    ) {
+      interval = restrictedInterval(usedField.aggregationRestrictions) as string;
+      timeZone = usedField.aggregationRestrictions.date_histogram.time_zone;
+    }
     return buildExpressionFunction<AggFunctionsMapping['aggDateHistogram']>('aggDateHistogram', {
       id: columnId,
       enabled: true,
       schema: 'segment',
       field: column.sourceField,
-      time_zone: column.params.timeZone,
+      time_zone: timeZone,
       useNormalizedEsInterval: !usedField?.aggregationRestrictions?.date_histogram,
-      interval: column.params.interval,
+      interval,
       drop_partials: false,
       min_doc_count: 0,
       extended_bounds: JSON.stringify({}),
@@ -244,7 +224,7 @@ export const dateHistogramOperation: OperationDefinition<
                 id="xpack.lens.indexPattern.dateHistogram.restrictedInterval"
                 defaultMessage="Interval fixed to {intervalValue} due to aggregation restrictions."
                 values={{
-                  intervalValue: currentColumn.params.interval,
+                  intervalValue: restrictedInterval(field!.aggregationRestrictions),
                 }}
               />
             ) : (

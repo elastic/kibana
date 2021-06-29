@@ -55,6 +55,10 @@ const setup = (
     navigate: jest.fn(async () => {}),
     getUrl: jest.fn(),
     useUrl: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
+    telemetry: jest.fn(),
+    migrations: {},
   };
 
   const plugins: PluginDeps = {

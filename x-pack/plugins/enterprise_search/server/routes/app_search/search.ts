@@ -22,8 +22,8 @@ export function registerSearchRoutes({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
-  router.get(
-    {
+  router.post(
+    skipBodyValidation({
       path: '/api/app_search/engines/{engineName}/search',
       validate: {
         params: schema.object({
@@ -33,19 +33,15 @@ export function registerSearchRoutes({
           query: schema.string(),
         }),
       },
-    },
+    }),
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:engineName/search.json',
+      path: '/as/engines/:engineName/dashboard_search',
     })
   );
 
-  // For the Search UI routes below, Search UI always uses the full API path, like:
-  // "/api/as/v1/engines/{engineName}/search.json". We only have control over the base path
-  // in Search UI, so we created a common basepath of "/api/app_search/search-ui" here that
-  // Search UI can use.
-  //
-  // Search UI *also* uses the click tracking and query suggestion endpoints, however, since the
-  // App Search plugin doesn't use that portion of Search UI, we only set up a proxy for the search endpoint below.
+  // Search UI always posts it's requests to {some_configured_base_url}/api/as/v1/engines/{engineName}/search.json
+  // For that reason, we have to create a proxy url with that same suffix below, so that we can proxy Search UI
+  // requests through Kibana's server.
   router.post(
     skipBodyValidation({
       path: '/api/app_search/search-ui/api/as/v1/engines/{engineName}/search.json',
@@ -56,7 +52,7 @@ export function registerSearchRoutes({
       },
     }),
     enterpriseSearchRequestHandler.createRequest({
-      path: '/api/as/v1/engines/:engineName/search.json',
+      path: '/as/engines/:engineName/dashboard_search',
     })
   );
 }
