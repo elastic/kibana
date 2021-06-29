@@ -77,13 +77,12 @@ const fleetAgentsRoute = createApmServerRoute({
       cloudStandaloneSetup,
       fleetAgents: fleetAgents.map((agent) => {
         const packagePolicy = policiesGroupedById[agent.id];
-        const apmServerCompiledInputs =
-          packagePolicy.inputs[0].compiled_input['apm-server'];
+        const packagePolicyVars = packagePolicy.inputs[0]?.vars;
         return {
           id: agent.id,
           name: agent.name,
-          apmServerUrl: apmServerCompiledInputs?.url,
-          secretToken: apmServerCompiledInputs?.secret_token,
+          apmServerUrl: packagePolicyVars?.url?.value,
+          secretToken: packagePolicyVars?.secret_token?.value,
         };
       }),
     };
