@@ -67,7 +67,7 @@ export const useEndpointActionItems = (
 
       const isolationActions = [];
 
-      if (isIsolated && isolationSupported) {
+      if (isIsolated) {
         // Un-isolate is always available to users regardless of license level
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',

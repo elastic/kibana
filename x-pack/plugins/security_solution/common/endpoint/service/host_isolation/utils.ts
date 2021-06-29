@@ -13,7 +13,7 @@ export const isVersionSupported = ({
   minVersionRequired: string;
 }) => {
   const parsedCurrentVersion = currentVersion.includes('-SNAPSHOT')
-    ? currentVersion.substring(0, currentVersion.length - 9)
+    ? currentVersion.substring(0, currentVersion.indexOf('-'))
     : currentVersion;
   const tokenizedCurrent = parsedCurrentVersion
     .split('.')

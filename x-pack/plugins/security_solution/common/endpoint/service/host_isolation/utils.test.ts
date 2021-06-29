@@ -9,15 +9,17 @@ import { isVersionSupported, isOsSupported, isIsolationSupported } from './utils
 
 describe('Host Isolation utils isVersionSupported', () => {
   test.each`
-    a                    | b           | expected
-    ${'8.14.0'}          | ${'7.13.0'} | ${true}
-    ${'7.14.0'}          | ${'7.13.0'} | ${true}
-    ${'7.14.1'}          | ${'7.14.0'} | ${true}
-    ${'8.14.0'}          | ${'9.14.0'} | ${false}
-    ${'7.13.0'}          | ${'7.14.0'} | ${false}
-    ${'7.14.0'}          | ${'7.14.1'} | ${false}
-    ${'7.14.0'}          | ${'7.14.0'} | ${true}
-    ${'7.14.0-SNAPSHOT'} | ${'7.14.0'} | ${true}
+    a                         | b           | expected
+    ${'8.14.0'}               | ${'7.13.0'} | ${true}
+    ${'7.14.0'}               | ${'7.13.0'} | ${true}
+    ${'7.14.1'}               | ${'7.14.0'} | ${true}
+    ${'8.14.0'}               | ${'9.14.0'} | ${false}
+    ${'7.13.0'}               | ${'7.14.0'} | ${false}
+    ${'7.14.0'}               | ${'7.14.1'} | ${false}
+    ${'7.14.0'}               | ${'7.14.0'} | ${true}
+    ${'7.14.0-SNAPSHOT'}      | ${'7.14.0'} | ${true}
+    ${'7.14.0-SNAPSHOT-beta'} | ${'7.14.0'} | ${true}
+    ${'7.14.0-alpha'}         | ${'7.14.0'} | ${true}
   `('should validate that version $a is compatible($expected) to $b', ({ a, b, expected }) => {
     expect(
       isVersionSupported({
