@@ -4,6 +4,7 @@ exports[`EditableTitle it renders 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="none"
+  responsive={false}
 >
   <EuiFlexItem
     grow={false}
