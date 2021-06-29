@@ -7,9 +7,18 @@
 
 import React from 'react';
 import { Observable } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
-import { ILicense } from '../../../licensing/public';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { UnwrapPromise } from '@kbn/utility-types';
+import { act } from 'react-dom/test-utils';
+
+import { registerTestBed } from '@kbn/test/jest';
+
+import type { SharePluginSetup, LocatorPublic } from '../../../../../src/plugins/share/public';
+import { httpServiceMock } from '../../../../../src/core/public/mocks';
+
+import type { ILicense } from '../../../licensing/public';
+
+import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
+import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   return {
@@ -17,7 +26,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
   };
 });
 
-import { ReportListing } from './report_listing';
+import { ReportListing, Props } from './report_listing';
 
 const reportingAPIClient = {
   list: () =>
@@ -64,22 +73,63 @@ const mockPollConfig = {
 };
 
 describe('ReportListing', () => {
-  it('Report job listing with some items', () => {
-    const wrapper = mountWithIntl(
-      <ReportListing
-        apiClient={reportingAPIClient as ReportingAPIClient}
-        license$={license$}
-        pollConfig={mockPollConfig}
-        redirect={jest.fn()}
-        toasts={toasts}
-      />
-    );
-    wrapper.update();
-    const input = wrapper.find('[data-test-subj="reportJobListing"]');
-    expect(input).toMatchSnapshot();
+  let httpService: ReturnType<typeof httpServiceMock.createSetupContract>;
+  let ilmLocator: LocatorPublic<any>;
+  let urlService: SharePluginSetup['url'];
+  let testBed: UnwrapPromise<ReturnType<typeof setup>>;
+
+  const createTestBed = registerTestBed((props?: Partial<Props>) => (
+    <InternalApiClientClientProvider
+      apiClient={reportingAPIClient as ReportingAPIClient}
+      http={httpService}
+    >
+      <IlmPolicyStatusContextProvider>
+        <ReportListing
+          license$={license$}
+          pollConfig={mockPollConfig}
+          redirect={jest.fn()}
+          navigateToUrl={jest.fn()}
+          urlService={urlService}
+          toasts={toasts}
+          {...props}
+        />
+      </IlmPolicyStatusContextProvider>
+    </InternalApiClientClientProvider>
+  ));
+
+  const setup = async (props?: Partial<Props>) => {
+    const tb = await createTestBed(props);
+
+    return {
+      ...tb,
+    };
+  };
+
+  beforeEach(async () => {
+    httpService = httpServiceMock.createSetupContract();
+    ilmLocator = ({
+      getUrl: jest.fn(),
+    } as unknown) as LocatorPublic<any>;
+
+    urlService = ({
+      locators: {
+        get: () => ilmLocator,
+      },
+    } as unknown) as SharePluginSetup['url'];
+
+    await act(async () => {
+      testBed = await setup();
+      testBed.component.update();
+    });
   });
 
-  it('subscribes to license changes, and unsubscribes on dismount', () => {
+  it('Report job listing with some items', () => {
+    const { find } = testBed;
+    const table = find('reportJobListing');
+    expect(table).toMatchSnapshot();
+  });
+
+  it('subscribes to license changes, and unsubscribes on dismount', async () => {
     const unsubscribeMock = jest.fn();
     const subMock = {
       subscribe: jest.fn().mockReturnValue({
@@ -87,19 +137,13 @@ describe('ReportListing', () => {
       }),
     } as any;
 
-    const wrapper = mountWithIntl(
-      <ReportListing
-        apiClient={reportingAPIClient as ReportingAPIClient}
-        license$={subMock as Observable<ILicense>}
-        pollConfig={mockPollConfig}
-        redirect={jest.fn()}
-        toasts={toasts}
-      />
-    );
-    wrapper.update();
+    await act(async () => {
+      testBed = await setup({ license$: subMock });
+      testBed.component.mount();
+    });
     expect(subMock.subscribe).toHaveBeenCalled();
     expect(unsubscribeMock).not.toHaveBeenCalled();
-    wrapper.unmount();
+    testBed.component.unmount();
     expect(unsubscribeMock).toHaveBeenCalled();
   });
 });

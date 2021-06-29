@@ -27,7 +27,11 @@ import { JOB_STATUSES as JobStatuses } from '../../common/constants';
 import { Poller } from '../../common/poller';
 import { durationToNumber } from '../../common/schema_utils';
 import { checkLicense } from '../lib/license_check';
-import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
+import {
+  JobQueueEntry,
+  ReportingAPIClient,
+  useInternalApiClient,
+} from '../lib/reporting_api_client';
 import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
 import type { SharePluginSetup } from '../shared_imports';
 import { ClientConfigType } from '../plugin';
@@ -170,7 +174,7 @@ class ReportListingUi extends Component<Props, State> {
               <EuiLoadingSpinner />
             ) : (
               showIlmPolicyLink && (
-                <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator} />
+                <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator!} />
               )
             )}
           </EuiFlexItem>
@@ -555,7 +559,16 @@ class ReportListingUi extends Component<Props, State> {
 
 const PrivateReportListing = injectI18n(ReportListingUi);
 
-export const ReportListing = (props: Omit<Props, 'ilmPolicyContextValue' | 'intl'>) => {
+export const ReportListing = (
+  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient'>
+) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
-  return <PrivateReportListing {...props} ilmPolicyContextValue={ilmPolicyStatusValue} />;
+  const { apiClient } = useInternalApiClient();
+  return (
+    <PrivateReportListing
+      {...props}
+      apiClient={apiClient}
+      ilmPolicyContextValue={ilmPolicyStatusValue}
+    />
+  );
 };

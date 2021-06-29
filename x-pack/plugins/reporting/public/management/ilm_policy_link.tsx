@@ -12,11 +12,11 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { ApplicationStart } from 'src/core/public';
 
 import { ILM_POLICY_NAME } from '../../common/constants';
-import { LocatorPublic } from '../shared_imports';
+import { LocatorPublic, SerializableState } from '../shared_imports';
 
 interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
-  locator: LocatorPublic<unknown>;
+  locator: LocatorPublic<SerializableState>;
 }
 
 const i18nTexts = {
