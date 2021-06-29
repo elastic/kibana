@@ -16,11 +16,21 @@ import { LastUpdatedAtProps, LoadingPanelProps } from '../components';
 const TimelineLazy = lazy(() => import('../components'));
 export const getTGridLazy = (
   props: TGridProps,
-  { store, storage, data }: { store?: Store; storage: Storage; data: DataPublicPluginStart }
+  {
+    store,
+    storage,
+    data,
+    setStore,
+  }: {
+    store?: Store;
+    storage: Storage;
+    data: DataPublicPluginStart;
+    setStore: (store: Store) => void;
+  }
 ) => {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <TimelineLazy {...props} store={store} storage={storage} data={data} />
+      <TimelineLazy {...props} store={store} storage={storage} data={data} setStore={setStore} />
     </Suspense>
   );
 };

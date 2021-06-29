@@ -13,18 +13,16 @@ import {
   ALERT_SEVERITY_LEVEL,
   ALERT_STATUS,
   ALERT_START,
-  RULE_ID,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
-import { format, parse } from 'url';
 
 import type { CellValueElementProps, TimelineNonEcsData } from '../../../../timelines/common';
 import { TimestampTooltip } from '../../components/shared/timestamp_tooltip';
-import { asDuration, asPercent } from '../../../common/utils/formatters';
+import { asDuration } from '../../../common/utils/formatters';
 import { SeverityBadge } from './severity_badge';
-import { parseTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
-import { usePluginContext } from '../../hooks/use_plugin_context';
 import { TopAlert } from '.';
+import { decorateResponse } from './decorate_response';
+import { usePluginContext } from '../../hooks/use_plugin_context';
 
 const getMappedNonEcsValue = ({
   data,
@@ -86,41 +84,15 @@ export const getRenderCellValue = ({
       case ALERT_SEVERITY_LEVEL:
         return <SeverityBadge severityLevel={value ?? undefined} />;
       case RULE_NAME:
-        const dataFieldEs = data.reduce<TopAlert>(
-          (acc, d) => ({ ...acc, [d.field]: d.value }),
-          {} as TopAlert
+        const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
+        const decoratedAlerts = decorateResponse(
+          [dataFieldEs] ?? [],
+          observabilityRuleTypeRegistry
         );
-        const parsedFields = parseTechnicalFields(dataFieldEs);
-        const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
-        const formatted = {
-          link: undefined,
-          reason: parsedFields[RULE_NAME]!,
-          ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
-        };
-
-        const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
-
-        const alert = {
-          ...formatted,
-          fields: parsedFields,
-          link: parsedLink
-            ? format({
-                ...parsedLink,
-                query: {
-                  ...parsedLink.query,
-                  rangeFrom,
-                  rangeTo,
-                },
-              })
-            : undefined,
-          active: parsedFields[ALERT_STATUS] !== 'closed',
-          start: new Date(parsedFields[ALERT_START]!).getTime(),
-        };
+        const alert = decoratedAlerts[0];
 
         return (
-          <EuiLink onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>
-            {formatted.reason}
-          </EuiLink>
+          <EuiLink onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>{alert.reason}</EuiLink>
         );
       default:
         return <>{value}</>;

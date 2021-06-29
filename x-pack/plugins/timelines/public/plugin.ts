@@ -39,6 +39,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
         return getTGridLazy(props, {
           store: this._store,
           storage: this._storage,
+          setStore: this.setStore.bind(this),
           data,
         });
       },
@@ -60,11 +61,14 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getUseDraggableKeyboardWrapper: () => {
         return useDraggableKeyboardWrapper;
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setTGridEmbeddedStore: (store: any) => {
-        this._store = store;
+      setTGridEmbeddedStore: (store: Store) => {
+        this.setStore(store);
       },
     };
+  }
+
+  private setStore(store: Store) {
+    this._store = store;
   }
 
   public stop() {}

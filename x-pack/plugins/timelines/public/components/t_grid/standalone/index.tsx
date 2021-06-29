@@ -103,7 +103,9 @@ export interface TGridStandaloneProps {
   columns: ColumnHeaderOptions[];
   deletedEventIds: Readonly<string[]>;
   end: string;
+  loadingText?: React.ReactNode;
   filters: Filter[];
+  footerText?: React.ReactNode;
   headerFilterGroup?: React.ReactNode;
   height?: number;
   indexNames: string[];
@@ -120,13 +122,17 @@ export interface TGridStandaloneProps {
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
   data?: DataPublicPluginStart;
+  unit?: (total: number) => React.ReactNode;
 }
+const basicUnit = (n: number) => i18n.UNIT(n);
 
 const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   columns,
   deletedEventIds,
   end,
+  loadingText,
   filters,
+  footerText,
   headerFilterGroup,
   indexNames,
   itemsPerPage,
@@ -142,6 +148,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   leadingControlColumns,
   trailingControlColumns,
   data,
+  unit = basicUnit,
 }) => {
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -155,7 +162,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     queryFields,
     title,
   } = useDeepEqualSelector((state) => getTGrid(state, STANDALONE_ID ?? ''));
-  const unit = useMemo(() => (n: number) => i18n.UNIT(n), []);
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id: STANDALONE_ID, isLoading: isQueryLoading }));
   }, [dispatch, isQueryLoading]);
@@ -266,6 +272,14 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
         itemsPerPage,
         itemsPerPageOptions,
         showCheckboxes: false,
+      })
+    );
+    dispatch(
+      tGridActions.initializeTGridSettings({
+        footerText,
+        id: STANDALONE_ID,
+        loadingText,
+        unit,
       })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

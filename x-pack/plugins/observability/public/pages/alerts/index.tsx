@@ -13,14 +13,10 @@ import { ParsedTechnicalFields } from '../../../../rule_registry/common/parse_te
 import type { AlertStatus } from '../../../common/typings';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useFetcher } from '../../hooks/use_fetcher';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
-import { callObservabilityApi } from '../../services/call_observability_api';
 import type { ObservabilityAPIReturnType } from '../../services/call_observability_api/types';
-import { getAbsoluteDateRange } from '../../utils/date';
 import { AlertsSearchBar } from './alerts_search_bar';
-// import { AlertsTable } from './alerts_table';
 import { AlertsTableTGrid } from './alerts_table_t_grid';
 import { StatusFilter } from './status_filter';
 
@@ -58,29 +54,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
   // observability. For now link to the settings page.
   const manageDetectionRulesHref = prepend(
     '/app/management/insightsAndAlerting/triggersActions/alerts'
-  );
-
-  const { data: alerts } = useFetcher(
-    ({ signal }) => {
-      const { start, end } = getAbsoluteDateRange({ rangeFrom, rangeTo });
-
-      if (!start || !end) {
-        return;
-      }
-      return callObservabilityApi({
-        signal,
-        endpoint: 'GET /api/observability/rules/alerts/top',
-        params: {
-          query: {
-            start,
-            end,
-            kuery,
-            status,
-          },
-        },
-      });
-    },
-    [kuery, rangeFrom, rangeTo, status]
   );
 
   function setStatusFilter(value: AlertStatus) {
@@ -162,9 +135,6 @@ export function AlertsPage({ routeParams }: AlertsPageProps) {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {/* <EuiFlexItem>
-            <AlertsTable items={topAlerts ?? []} />
-          </EuiFlexItem> */}
           <EuiFlexItem>
             <AlertsTableTGrid
               rangeFrom={rangeFrom}

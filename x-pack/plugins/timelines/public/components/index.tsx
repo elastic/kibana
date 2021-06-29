@@ -26,13 +26,15 @@ type TGridComponent = TGridProps & {
   store?: Store;
   storage: Storage;
   data?: DataPublicPluginStart;
+  setStore: (store: Store) => void;
 };
 
 export const TGrid = (props: TGridComponent) => {
-  const { store, storage, ...tGridProps } = props;
+  const { store, storage, setStore, ...tGridProps } = props;
   let tGridStore = store;
   if (!tGridStore && props.type === 'standalone') {
     tGridStore = createStore(initialTGridState, storage);
+    setStore(tGridStore);
   }
   let browserFields = EMPTY_BROWSER_FIELDS;
   if ((tGridProps as TGridIntegratedProps).browserFields != null) {

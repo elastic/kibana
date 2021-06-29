@@ -26,12 +26,13 @@ export interface TGridModelSettings {
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
   filterManager?: FilterManager;
-  footerText: string;
-  loadingText: string;
+  footerText?: string | React.ReactNode;
+  loadingText?: string | React.ReactNode;
   queryFields: string[];
   selectAll: boolean;
   showCheckboxes?: boolean;
   title: string;
+  unit?: (n: number) => string | React.ReactNode;
 }
 export interface TGridModel extends TGridModelSettings {
   /** The columns displayed in the timeline */

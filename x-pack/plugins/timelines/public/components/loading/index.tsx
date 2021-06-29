@@ -17,7 +17,7 @@ SpinnerFlexItem.displayName = 'SpinnerFlexItem';
 
 export interface LoadingPanelProps {
   dataTestSubj?: string;
-  text: string;
+  text: string | React.ReactNode;
   height: number | string;
   showBorder?: boolean;
   width: number | string;

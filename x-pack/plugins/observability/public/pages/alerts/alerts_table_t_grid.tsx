@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY_LEVEL,
   ALERT_STATUS,
   ALERT_START,
-  RULE_ID,
   RULE_NAME,
 } from '@kbn/rule-data-utils/target/technical_field_names';
-import { format, parse } from 'url';
 
 import type { TimelinesUIStart } from '../../../../timelines/public';
 import type { TopAlert } from './';
-import { AlertsFlyout } from './alerts_flyout';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type { ActionProps, ColumnHeaderOptions, RowRenderer } from '../../../../timelines/common';
 import { getRenderCellValue } from './render_cell_value';
-import { parseTechnicalFields } from '../../../../rule_registry/common/parse_technical_fields';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { asDuration, asPercent } from '../../../common/utils/formatters';
+import { decorateResponse } from './decorate_response';
+import { LazyAlertsFlyout } from '../..';
 
 interface AlertsTableTGridProps {
   rangeFrom: string;
@@ -87,14 +84,7 @@ export const columns: Array<
 
 const NO_ROW_RENDER: RowRenderer[] = [];
 
-const trailingControlColumns = [];
-//  [ {
-//     id: 'actions',
-//     width: 40,
-//     headerCellRender: () => null,
-//     rowCellRender: RowCellActionsRender,
-//   },
-// ];
+const trailingControlColumns: never[] = [];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const { core, observabilityRuleTypeRegistry } = usePluginContext();
@@ -110,36 +100,12 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       width: 40,
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
-        const dataFieldEs = data.reduce<TopAlert>(
-          (acc, d) => ({ ...acc, [d.field]: d.value }),
-          {} as TopAlert
+        const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
+        const decoratedAlerts = decorateResponse(
+          [dataFieldEs] ?? [],
+          observabilityRuleTypeRegistry
         );
-        const parsedFields = parseTechnicalFields(dataFieldEs);
-        const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
-        const formatted = {
-          link: undefined,
-          reason: parsedFields[RULE_NAME]!,
-          ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
-        };
-
-        const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
-
-        const alert = {
-          ...formatted,
-          fields: parsedFields,
-          link: parsedLink
-            ? format({
-                ...parsedLink,
-                query: {
-                  ...parsedLink.query,
-                  rangeFrom,
-                  rangeTo,
-                },
-              })
-            : undefined,
-          active: parsedFields[ALERT_STATUS] !== 'closed',
-          start: new Date(parsedFields[ALERT_START]!).getTime(),
-        };
+        const alert = decoratedAlerts[0];
         return (
           <EuiButtonIcon
             size="s"
@@ -156,31 +122,17 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       headerCellRender: () => null,
       rowCellRender: ({ data }: ActionProps) => {
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
-        const parsedFields = parseTechnicalFields(dataFieldEs);
-        const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[RULE_ID]!);
-        const formatted = {
-          link: undefined,
-          reason: parsedFields[RULE_NAME]!,
-          ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
-        };
-
-        const parsedLink = formatted.link ? parse(formatted.link, true) : undefined;
-        const link = parsedLink
-          ? format({
-              ...parsedLink,
-              query: {
-                ...parsedLink.query,
-                rangeFrom,
-                rangeTo,
-              },
-            })
-          : undefined;
+        const decoratedAlerts = decorateResponse(
+          [dataFieldEs] ?? [],
+          observabilityRuleTypeRegistry
+        );
+        const alert = decoratedAlerts[0];
         return (
           <EuiButtonIcon
             size="s"
             target="_blank"
             rel="nofollow noreferrer"
-            href={prepend(link ?? '')}
+            href={prepend(alert.link ?? '')}
             iconType="inspect"
             color="text"
           />
@@ -191,7 +143,15 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   return (
     <>
-      {flyoutAlert && <AlertsFlyout alert={flyoutAlert} onClose={handleFlyoutClose} />}
+      {flyoutAlert && (
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alert={flyoutAlert}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={handleFlyoutClose}
+          />
+        </Suspense>
+      )}
       {timelines.getTGrid<'standalone'>({
         type: 'standalone',
         columns,
