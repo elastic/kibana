@@ -247,6 +247,10 @@ export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfi
   return isPopulatedObject(arg, ['AggFormComponent']);
 }
 
+export function isPivotAggConfigTopMetric(arg: unknown): arg is PivotAggsConfigTopMetrics {
+  return isPivotAggsWithExtendedForm(arg) && arg.agg === PIVOT_SUPPORTED_AGGS.TOP_METRICS;
+}
+
 export function isPivotAggsConfigPercentiles(arg: unknown): arg is PivotAggsConfigPercentiles {
   return (
     isPopulatedObject(arg, ['agg', 'field', 'percents']) &&

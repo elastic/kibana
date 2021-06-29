@@ -13,8 +13,9 @@ import { dictionaryToArray } from '../../../../../../../common/types/common';
 
 import { useToastNotifications } from '../../../../../app_dependencies';
 import {
-  getRequestPayload,
   DropDownLabel,
+  getRequestPayload,
+  isPivotGroupByConfigWithUiSupport,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -26,9 +27,14 @@ import {
   StepDefineExposedState,
 } from '../common';
 import { StepDefineFormProps } from '../step_define_form';
-import { isPivotAggsWithExtendedForm } from '../../../../../common/pivot_aggs';
+import {
+  isPivotAggConfigTopMetric,
+  isPivotAggsWithExtendedForm,
+} from '../../../../../common/pivot_aggs';
 import { TransformPivotConfig } from '../../../../../../../common/types/transform';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
+import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/common';
+import { isPivotAggConfigWithUiSupport } from '../../../../../common/pivot_group_by';
 
 /**
  * Clones aggregation configuration and updates parent references
@@ -169,6 +175,30 @@ export const usePivotConfig = (
 
       let aggName: AggName = config.aggName;
 
+      if (isPivotAggConfigTopMetric(config)) {
+        let suggestedSortField = [
+          ...new Set(
+            Object.values(groupByList).map((v) =>
+              isPivotGroupByConfigWithUiSupport(v) ? v.field : undefined
+            )
+          ),
+        ].find((v) => fields.find((x) => x.name === v)?.type === KBN_FIELD_TYPES.DATE);
+
+        if (!suggestedSortField) {
+          suggestedSortField = [
+            ...new Set(
+              Object.values(aggList)
+                .map((v) => (isPivotAggConfigWithUiSupport(v) ? v.field : undefined))
+                .flat()
+            ),
+          ].find((v) => fields.find((x) => x.name === v)?.type === KBN_FIELD_TYPES.DATE);
+        }
+
+        if (suggestedSortField) {
+          config.aggConfig.sortField = suggestedSortField;
+        }
+      }
+
       if (aggList[aggName] && aggName === PIVOT_SUPPORTED_AGGS.TOP_METRICS) {
         // handle special case for naming top_metric aggs
         const regExp = new RegExp(`^${PIVOT_SUPPORTED_AGGS.TOP_METRICS}(\\d)*$`);
@@ -196,7 +226,7 @@ export const usePivotConfig = (
       aggList[aggName] = config;
       setAggList({ ...aggList });
     },
-    [aggList, aggOptionsData, groupByList, toastNotifications]
+    [aggList, aggOptionsData, groupByList, toastNotifications, fields]
   );
 
   /**
