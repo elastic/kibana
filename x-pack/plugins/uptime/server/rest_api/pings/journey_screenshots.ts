@@ -6,8 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import {
+  isRefResult,
+  isFullScreenshot,
+  ScreenshotBlockDoc,
+} from '../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
+import { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
 import { UMRestApiRouteFactory } from '../types';
+
+function getSharedHeaders(stepName: string, totalSteps: number) {
+  return {
+    'cache-control': 'max-age=600',
+    'caption-name': stepName,
+    'max-steps': String(totalSteps),
+  };
+}
 
 export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -25,23 +39,49 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
   handler: async ({ uptimeEsClient, request, response }) => {
     const { checkGroup, stepIndex } = request.params;
 
-    const result = await libs.requests.getJourneyScreenshot({
-      uptimeEsClient,
-      checkGroup,
-      stepIndex,
-    });
-
-    if (result === null || !result.blob) {
-      return response.notFound();
+    let result: ScreenshotReturnTypesUnion | null = null;
+    try {
+      result = await libs.requests.getJourneyScreenshot({
+        uptimeEsClient,
+        checkGroup,
+        stepIndex,
+      });
+    } catch (e) {
+      return response.customError({ body: { message: e }, statusCode: 500 });
     }
-    return response.ok({
-      body: Buffer.from(result.blob, 'base64'),
-      headers: {
-        'content-type': result.mimeType || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
-        'cache-control': 'max-age=600',
-        'caption-name': result.stepName,
-        'max-steps': result.totalSteps,
-      },
-    });
+
+    if (isFullScreenshot(result)) {
+      if (!result.synthetics.blob) {
+        return response.notFound();
+      }
+
+      return response.ok({
+        body: Buffer.from(result.synthetics.blob, 'base64'),
+        headers: {
+          'content-type': result.synthetics.blob_mime || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
+          ...getSharedHeaders(result.synthetics.step.name, result.totalSteps),
+        },
+      });
+    } else if (isRefResult(result)) {
+      const blockIds = result.screenshot_ref.blocks.map(({ hash }) => hash);
+      let blocks: ScreenshotBlockDoc[];
+      try {
+        blocks = await libs.requests.getJourneyScreenshotBlocks({
+          uptimeEsClient,
+          blockIds,
+        });
+      } catch (e: unknown) {
+        return response.custom({ statusCode: 500, body: { message: e } });
+      }
+      return response.ok({
+        body: {
+          screenshotRef: result,
+          blocks,
+        },
+        headers: getSharedHeaders(result.synthetics.step.name, result.totalSteps ?? 0),
+      });
+    }
+
+    return response.notFound();
   },
 });
