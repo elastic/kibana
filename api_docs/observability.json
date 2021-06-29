@@ -79,7 +79,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-          "lineNumber": 39
+          "lineNumber": 41
         },
         "deprecated": false,
         "children": [
@@ -103,7 +103,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 39
+              "lineNumber": 41
             },
             "deprecated": false,
             "isRequired": true
@@ -120,7 +120,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
-              "lineNumber": 39
+              "lineNumber": 41
             },
             "deprecated": false,
             "isRequired": true
@@ -2198,7 +2198,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/plugin.ts",
-          "lineNumber": 44
+          "lineNumber": 47
         },
         "deprecated": false,
         "children": [
@@ -2220,7 +2220,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 45
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -2242,7 +2242,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 46
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -2265,7 +2265,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 47
+              "lineNumber": 50
             },
             "deprecated": false
           }
@@ -2281,7 +2281,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/plugin.ts",
-          "lineNumber": 50
+          "lineNumber": 53
         },
         "deprecated": false,
         "children": [
@@ -2303,7 +2303,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 51
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -2326,7 +2326,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 52
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -2348,7 +2348,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 53
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -2370,7 +2370,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 54
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -2392,7 +2392,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/plugin.ts",
-              "lineNumber": 55
+              "lineNumber": 58
             },
             "deprecated": false
           }
@@ -2447,7 +2447,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-          "lineNumber": 74
+          "lineNumber": 71
         },
         "deprecated": false,
         "children": [
@@ -2463,7 +2463,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 75
+              "lineNumber": 72
             },
             "deprecated": false
           },
@@ -2479,7 +2479,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 79
+              "lineNumber": 76
             },
             "deprecated": false
           },
@@ -2496,7 +2496,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 80
+              "lineNumber": 77
             },
             "deprecated": false
           },
@@ -2512,7 +2512,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 81
+              "lineNumber": 78
             },
             "deprecated": false
           },
@@ -2528,7 +2528,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 82
+              "lineNumber": 79
             },
             "deprecated": false
           },
@@ -2544,7 +2544,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 83
+              "lineNumber": 80
             },
             "deprecated": false
           },
@@ -2560,7 +2560,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 84
+              "lineNumber": 81
             },
             "deprecated": false
           },
@@ -2576,7 +2576,23 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 85
+              "lineNumber": 82
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SeriesUrl.selectedMetricField",
+            "type": "string",
+            "tags": [],
+            "label": "selectedMetricField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+              "lineNumber": 83
             },
             "deprecated": false
           },
@@ -2592,7 +2608,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
-              "lineNumber": 86
+              "lineNumber": 84
             },
             "deprecated": false
           }
@@ -3443,7 +3459,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 42
+        "lineNumber": 45
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -3469,7 +3485,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 58
+        "lineNumber": 61
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -4439,7 +4455,59 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.casesFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "casesFeatureId",
+        "description": [],
+        "signature": [
+          "\"observabilityCases\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/common/index.ts",
+          "lineNumber": 8
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.observabilityAppId",
+        "type": "string",
+        "tags": [],
+        "label": "observabilityAppId",
+        "description": [],
+        "signature": [
+          "\"observability-overview\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/common/index.ts",
+          "lineNumber": 13
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.observabilityFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "observabilityFeatureId",
+        "description": [],
+        "signature": [
+          "\"observability\""
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/common/index.ts",
+          "lineNumber": 16
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

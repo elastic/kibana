@@ -378,7 +378,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 25
+          "lineNumber": 26
         },
         "deprecated": false,
         "children": [
@@ -394,7 +394,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -407,7 +407,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false
           }
@@ -768,7 +768,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 221
+          "lineNumber": 222
         },
         "deprecated": false,
         "children": [
@@ -790,7 +790,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 222
+              "lineNumber": 223
             },
             "deprecated": false
           },
@@ -812,7 +812,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 223
+              "lineNumber": 224
             },
             "deprecated": false
           }
@@ -1133,6 +1133,19 @@
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
               "lineNumber": 148
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.AlertType.isExportable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isExportable",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/server/types.ts",
+              "lineNumber": 149
             },
             "deprecated": false
           }
@@ -1500,7 +1513,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 30
+          "lineNumber": 31
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1693,7 +1706,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 181
+          "lineNumber": 182
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2055,7 +2068,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 25
+          "lineNumber": 26
         },
         "deprecated": false,
         "children": [
@@ -2071,7 +2084,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "deprecated": false
           },
@@ -2084,7 +2097,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/common/alert_type.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "deprecated": false
           }
@@ -3359,6 +3372,19 @@
               "lineNumber": 22
             },
             "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertType.isExportable",
+            "type": "boolean",
+            "tags": [],
+            "label": "isExportable",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert_type.ts",
+              "lineNumber": 23
+            },
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3492,7 +3518,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_type.ts",
-          "lineNumber": 30
+          "lineNumber": 31
         },
         "deprecated": false,
         "initialIsOpen": false

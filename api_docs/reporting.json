@@ -640,7 +640,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/reporting/public/plugin.ts",
-          "lineNumber": 78
+          "lineNumber": 79
         },
         "deprecated": false,
         "children": [
@@ -656,7 +656,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "deprecated": false,
             "children": [
@@ -679,7 +679,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 96
+                  "lineNumber": 97
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -716,7 +716,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 116
+              "lineNumber": 117
             },
             "deprecated": false,
             "children": [
@@ -739,7 +739,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 116
+                  "lineNumber": 117
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -756,7 +756,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 116
+                  "lineNumber": 117
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -791,7 +791,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 199
+              "lineNumber": 200
             },
             "deprecated": false,
             "children": [
@@ -813,7 +813,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/reporting/public/plugin.ts",
-                  "lineNumber": 199
+                  "lineNumber": 200
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -833,7 +833,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/reporting/public/plugin.ts",
-              "lineNumber": 218
+              "lineNumber": 219
             },
             "deprecated": false,
             "children": [],

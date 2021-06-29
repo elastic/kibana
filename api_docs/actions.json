@@ -971,7 +971,7 @@
           },
           "<Record<string, unknown>>>; execute: ({ actionId, params, source, relatedSavedObjects, }: Pick<",
           "ExecuteOptions",
-          "<unknown>, \"source\" | \"params\" | \"actionId\" | \"relatedSavedObjects\">) => Promise<",
+          "<unknown>, \"source\" | \"params\" | \"actionId\" | \"taskInfo\" | \"relatedSavedObjects\">) => Promise<",
           {
             "pluginId": "actions",
             "scope": "common",

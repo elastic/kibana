@@ -78,7 +78,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 48
+        "lineNumber": 47
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -96,7 +96,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/public/plugin.ts",
-        "lineNumber": 50
+        "lineNumber": 49
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -433,7 +433,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/apm/server/routes/typings.ts",
-          "lineNumber": 45
+          "lineNumber": 46
         },
         "deprecated": false,
         "children": [
@@ -456,7 +456,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 46
+              "lineNumber": 47
             },
             "deprecated": false
           },
@@ -472,7 +472,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "deprecated": false
           },
@@ -488,7 +488,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "deprecated": false
           },
@@ -506,7 +506,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 53
+              "lineNumber": 54
             },
             "deprecated": false
           },
@@ -522,7 +522,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 54
+              "lineNumber": 55
             },
             "deprecated": false
           },
@@ -554,7 +554,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             },
             "deprecated": false
           },
@@ -786,7 +786,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 59
+              "lineNumber": 60
             },
             "deprecated": false
           },
@@ -808,7 +808,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/apm/server/routes/typings.ts",
-              "lineNumber": 65
+              "lineNumber": 66
             },
             "deprecated": false
           }
@@ -3579,47 +3579,21 @@
           "ArtifactSourceMap",
           "[]; } | undefined, ",
           "APMRouteCreateOptions",
-          ">; } & { \"POST /api/apm/sourcemaps/{serviceName}/{serviceVersion}\": ",
+          ">; } & { \"POST /api/apm/sourcemaps\": ",
           "ServerRoute",
-          "<\"POST /api/apm/sourcemaps/{serviceName}/{serviceVersion}\", ",
+          "<\"POST /api/apm/sourcemaps\", ",
           "TypeC",
-          "<{ path: ",
+          "<{ body: ",
           "TypeC",
-          "<{ serviceName: ",
+          "<{ service_name: ",
           "StringC",
-          "; serviceVersion: ",
+          "; service_version: ",
           "StringC",
-          "; }>; body: ",
-          "TypeC",
-          "<{ bundleFilepath: ",
+          "; bundle_filepath: ",
           "StringC",
-          "; sourceMap: ",
-          "IntersectionC",
-          "<[",
-          "TypeC",
-          "<{ version: ",
-          "NumberC",
-          "; sources: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; mappings: ",
-          "StringC",
-          "; }>, ",
-          "PartialC",
-          "<{ names: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; file: ",
-          "StringC",
-          "; sourceRoot: ",
-          "StringC",
-          "; sourcesContent: ",
-          "ArrayC",
-          "<",
-          "StringC",
-          ">; }>]>; }>; }>, ",
+          "; sourcemap: ",
+          "Type",
+          "<{ version: number; sources: string[]; mappings: string; } & { names?: string[] | undefined; file?: string | undefined; sourceRoot?: string | undefined; sourcesContent?: string[] | undefined; }, string, unknown>; }>; }>, ",
           {
             "pluginId": "apm",
             "scope": "server",
@@ -3655,11 +3629,35 @@
           },
           ", void, ",
           "APMRouteCreateOptions",
+          ">; } & { \"GET /api/apm/fleet/has_data\": ",
+          "ServerRoute",
+          "<\"GET /api/apm/fleet/has_data\", undefined, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { hasData: boolean; }, ",
+          "APMRouteCreateOptions",
+          ">; } & { \"GET /api/apm/fleet/agents\": ",
+          "ServerRoute",
+          "<\"GET /api/apm/fleet/agents\", undefined, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { cloudStandaloneSetup: { apmServerUrl: string | undefined; secretToken: string | undefined; } | undefined; fleetAgents: { id: string; name: string; apmServerUrl: any; secretToken: any; }[]; }, ",
+          "APMRouteCreateOptions",
           ">; }>"
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/routes/get_global_apm_server_route_repository.ts",
-          "lineNumber": 62
+          "lineNumber": 64
         },
         "deprecated": false,
         "initialIsOpen": false

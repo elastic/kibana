@@ -8519,27 +8519,6 @@
                   "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts",
                   "lineNumber": 32
                 }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/escount.ts",
-                  "lineNumber": 33
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/esdocs.ts",
-                  "lineNumber": 36
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/essql.ts",
-                  "lineNumber": 32
-                }
               }
             ]
           }
@@ -19097,27 +19076,6 @@
                 "plugin": "canvas",
                 "link": {
                   "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts",
-                  "lineNumber": 32
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/escount.ts",
-                  "lineNumber": 33
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/esdocs.ts",
-                  "lineNumber": 36
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/essql.ts",
                   "lineNumber": 32
                 }
               }
@@ -31797,27 +31755,6 @@
                 "plugin": "canvas",
                 "link": {
                   "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts",
-                  "lineNumber": 32
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/escount.ts",
-                  "lineNumber": 33
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/esdocs.ts",
-                  "lineNumber": 36
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/essql.ts",
                   "lineNumber": 32
                 }
               }

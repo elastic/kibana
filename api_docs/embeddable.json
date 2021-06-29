@@ -3328,7 +3328,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-          "lineNumber": 91
+          "lineNumber": 108
         },
         "deprecated": false,
         "children": [
@@ -3344,7 +3344,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 98
+              "lineNumber": 115
             },
             "deprecated": false,
             "children": [
@@ -3360,7 +3360,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 98
+                  "lineNumber": 115
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3380,7 +3380,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 155
+              "lineNumber": 182
             },
             "deprecated": false,
             "children": [],
@@ -3398,7 +3398,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 189
+              "lineNumber": 216
             },
             "deprecated": false,
             "children": [],
@@ -3416,7 +3416,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 201
+              "lineNumber": 228
             },
             "deprecated": false,
             "children": [
@@ -3432,7 +3432,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 201
+                  "lineNumber": 228
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3452,7 +3452,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 205
+              "lineNumber": 232
             },
             "deprecated": false,
             "children": [
@@ -3468,7 +3468,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-                  "lineNumber": 205
+                  "lineNumber": 232
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3488,7 +3488,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 211
+              "lineNumber": 238
             },
             "deprecated": false,
             "children": [],
@@ -3506,7 +3506,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 253
+              "lineNumber": 285
             },
             "deprecated": false,
             "children": [],
@@ -3524,7 +3524,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/panel/embeddable_panel.tsx",
-              "lineNumber": 276
+              "lineNumber": 308
             },
             "deprecated": false,
             "children": [],
@@ -4727,7 +4727,7 @@
         ],
         "source": {
           "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-          "lineNumber": 82
+          "lineNumber": 142
         },
         "deprecated": false,
         "children": [
@@ -4752,7 +4752,7 @@
             ],
             "source": {
               "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
-              "lineNumber": 83
+              "lineNumber": 143
             },
             "deprecated": false,
             "isRequired": true
@@ -5896,6 +5896,67 @@
                 "deprecated": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.useEmbeddableFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "useEmbeddableFactory",
+        "description": [],
+        "signature": [
+          "({\n  input,\n  factory,\n  onInputUpdated,\n}: EmbeddableRendererWithFactory<I>) => readonly [",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ErrorEmbeddable",
+            "text": "ErrorEmbeddable"
+          },
+          " | ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.IEmbeddable",
+            "text": "IEmbeddable"
+          },
+          "<I, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.EmbeddableOutput",
+            "text": "EmbeddableOutput"
+          },
+          "> | undefined, boolean, string | undefined]"
+        ],
+        "source": {
+          "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
+          "lineNumber": 43
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useEmbeddableFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  input,\n  factory,\n  onInputUpdated,\n}",
+            "description": [],
+            "signature": [
+              "EmbeddableRendererWithFactory<I>"
+            ],
+            "source": {
+              "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
+              "lineNumber": 43
+            },
+            "deprecated": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

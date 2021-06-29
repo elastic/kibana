@@ -681,6 +681,20 @@
         "deprecated": true,
         "references": [
           {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
+              "lineNumber": 16
+            }
+          },
+          {
+            "plugin": "visualizations",
+            "link": {
+              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
+              "lineNumber": 35
+            }
+          },
+          {
             "plugin": "discover",
             "link": {
               "path": "src/plugins/discover/public/saved_searches/saved_searches.ts",
@@ -706,20 +720,6 @@
             "link": {
               "path": "src/plugins/discover/public/plugin.tsx",
               "lineNumber": 122
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 16
-            }
-          },
-          {
-            "plugin": "visualizations",
-            "link": {
-              "path": "src/plugins/visualizations/public/saved_visualizations/find_list_items.ts",
-              "lineNumber": 35
             }
           },
           {
@@ -803,7 +803,7 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/plugin.tsx",
-              "lineNumber": 127
+              "lineNumber": 130
             }
           },
           {
@@ -817,7 +817,7 @@
             "plugin": "dashboard",
             "link": {
               "path": "src/plugins/dashboard/public/url_generator.ts",
-              "lineNumber": 95
+              "lineNumber": 101
             }
           },
           {
@@ -983,7 +983,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
@@ -1892,7 +1892,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2116,7 +2116,15 @@
                     "section": "def-public.SavedObjectsBatchResponse",
                     "text": "SavedObjectsBatchResponse"
                   },
-                  "<unknown>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
+                  "<unknown>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-public.ResolvedSimpleSavedObject",
+                    "text": "ResolvedSimpleSavedObject"
+                  },
+                  "<T>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -2569,20 +2577,6 @@
             }
           },
           {
-            "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
-              "lineNumber": 9
-            }
-          },
-          {
-            "plugin": "discover",
-            "link": {
-              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
-              "lineNumber": 61
-            }
-          },
-          {
             "plugin": "visualizations",
             "link": {
               "path": "src/plugins/visualizations/public/types.ts",
@@ -2594,6 +2588,20 @@
             "link": {
               "path": "src/plugins/visualizations/public/types.ts",
               "lineNumber": 41
+            }
+          },
+          {
+            "plugin": "discover",
+            "link": {
+              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
+              "lineNumber": 9
+            }
+          },
+          {
+            "plugin": "discover",
+            "link": {
+              "path": "src/plugins/discover/public/saved_searches/_saved_search.ts",
+              "lineNumber": 61
             }
           },
           {

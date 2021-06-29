@@ -703,6 +703,14 @@
             "section": "def-common.LocatorPublic",
             "text": "LocatorPublic"
           },
+          "<P> extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PersistableState",
+            "text": "PersistableState"
+          },
           "<P>"
         ],
         "source": {
@@ -2239,6 +2247,14 @@
             "docId": "kibSharePluginApi",
             "section": "def-common.LocatorPublic",
             "text": "LocatorPublic"
+          },
+          "<P> extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PersistableState",
+            "text": "PersistableState"
           },
           "<P>"
         ],

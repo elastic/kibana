@@ -942,41 +942,6 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.tsx",
-                "lineNumber": 40
-              }
-            },
-            {
-              "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/share_context_menu/register_csv_reporting.tsx",
-                "lineNumber": 33
-              }
-            },
-            {
-              "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/share_context_menu/register_pdf_png_reporting.tsx",
-                "lineNumber": 81
-              }
-            },
-            {
-              "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/plugin.ts",
-                "lineNumber": 121
-              }
-            },
-            {
-              "plugin": "reporting",
-              "link": {
-                "path": "x-pack/plugins/reporting/public/components/report_listing.tsx",
-                "lineNumber": 60
-              }
-            },
-            {
               "plugin": "licenseManagement",
               "link": {
                 "path": "x-pack/plugins/license_management/public/plugin.ts",
@@ -1009,6 +974,41 @@
               "link": {
                 "path": "x-pack/plugins/apm/public/context/license/license_context.tsx",
                 "lineNumber": 19
+              }
+            },
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/public/panel_actions/get_csv_panel_action.tsx",
+                "lineNumber": 40
+              }
+            },
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/public/share_context_menu/register_csv_reporting.tsx",
+                "lineNumber": 33
+              }
+            },
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/public/share_context_menu/register_pdf_png_reporting.tsx",
+                "lineNumber": 81
+              }
+            },
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/public/management/report_listing.tsx",
+                "lineNumber": 55
+              }
+            },
+            {
+              "plugin": "reporting",
+              "link": {
+                "path": "x-pack/plugins/reporting/public/plugin.ts",
+                "lineNumber": 122
               }
             },
             {
@@ -3053,7 +3053,7 @@
               "plugin": "spaces",
               "link": {
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts",
-                "lineNumber": 431
+                "lineNumber": 437
               }
             },
             {
@@ -3200,7 +3200,7 @@
               "plugin": "spaces",
               "link": {
                 "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.test.ts",
-                "lineNumber": 62
+                "lineNumber": 63
               }
             },
             {

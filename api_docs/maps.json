@@ -57,7 +57,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-          "lineNumber": 93
+          "lineNumber": 94
         },
         "deprecated": false,
         "children": [
@@ -70,7 +70,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "deprecated": false
           },
@@ -86,7 +86,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 115
+              "lineNumber": 116
             },
             "deprecated": false,
             "children": [
@@ -102,7 +102,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 115
+                  "lineNumber": 116
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -125,7 +125,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 115
+                  "lineNumber": 116
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -165,7 +165,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 115
+                  "lineNumber": 116
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -194,7 +194,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 194
+              "lineNumber": 195
             },
             "deprecated": false,
             "children": [
@@ -216,7 +216,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 195
+                  "lineNumber": 196
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -238,7 +238,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 200
+              "lineNumber": 201
             },
             "deprecated": false,
             "children": [],
@@ -258,7 +258,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 208
+              "lineNumber": 209
             },
             "deprecated": false,
             "children": [],
@@ -276,7 +276,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 213
+              "lineNumber": 214
             },
             "deprecated": false,
             "children": [],
@@ -294,7 +294,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 217
+              "lineNumber": 218
             },
             "deprecated": false,
             "children": [],
@@ -314,7 +314,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 221
+              "lineNumber": 222
             },
             "deprecated": false,
             "children": [
@@ -330,7 +330,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 221
+                  "lineNumber": 222
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -352,7 +352,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 225
+              "lineNumber": 226
             },
             "deprecated": false,
             "children": [
@@ -368,7 +368,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 225
+                  "lineNumber": 226
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -395,7 +395,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 229
+              "lineNumber": 230
             },
             "deprecated": false,
             "children": [],
@@ -413,7 +413,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 233
+              "lineNumber": 234
             },
             "deprecated": false,
             "children": [],
@@ -439,7 +439,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 273
+              "lineNumber": 274
             },
             "deprecated": false,
             "children": [],
@@ -457,7 +457,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 281
+              "lineNumber": 282
             },
             "deprecated": false,
             "children": [],
@@ -475,7 +475,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 291
+              "lineNumber": 292
             },
             "deprecated": false,
             "children": [
@@ -488,7 +488,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 291
+                  "lineNumber": 292
                 },
                 "deprecated": false,
                 "children": [
@@ -501,7 +501,7 @@
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                      "lineNumber": 291
+                      "lineNumber": 292
                     },
                     "deprecated": false
                   }
@@ -522,7 +522,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 311
+              "lineNumber": 312
             },
             "deprecated": false,
             "children": [
@@ -538,7 +538,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 311
+                  "lineNumber": 312
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -560,7 +560,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 329
+              "lineNumber": 330
             },
             "deprecated": false,
             "children": [
@@ -576,7 +576,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 329
+                  "lineNumber": 330
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -598,7 +598,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 355
+              "lineNumber": 357
             },
             "deprecated": false,
             "children": [
@@ -615,7 +615,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 355
+                  "lineNumber": 357
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -643,7 +643,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 372
+              "lineNumber": 374
             },
             "deprecated": false,
             "children": [
@@ -659,7 +659,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 372
+                  "lineNumber": 374
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -676,7 +676,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 372
+                  "lineNumber": 374
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -699,7 +699,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 372
+                  "lineNumber": 374
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -727,7 +727,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 386
+              "lineNumber": 388
             },
             "deprecated": false,
             "children": [
@@ -750,7 +750,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 386
+                  "lineNumber": 388
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -767,7 +767,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-                  "lineNumber": 386
+                  "lineNumber": 388
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -795,7 +795,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 398
+              "lineNumber": 400
             },
             "deprecated": false,
             "children": [],
@@ -821,7 +821,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 419
+              "lineNumber": 421
             },
             "deprecated": false,
             "children": [],
@@ -839,7 +839,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 430
+              "lineNumber": 432
             },
             "deprecated": false,
             "children": [],
@@ -857,7 +857,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 466
+              "lineNumber": 468
             },
             "deprecated": false,
             "children": [],
@@ -875,7 +875,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 480
+              "lineNumber": 482
             },
             "deprecated": false,
             "children": [],
@@ -893,7 +893,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 496
+              "lineNumber": 498
             },
             "deprecated": false,
             "children": [],
@@ -911,7 +911,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-              "lineNumber": 502
+              "lineNumber": 504
             },
             "deprecated": false,
             "children": [],
@@ -1906,7 +1906,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 175
+          "lineNumber": 176
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1920,7 +1920,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 223
+          "lineNumber": 224
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -1934,7 +1934,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 304
+          "lineNumber": 300
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2011,20 +2011,6 @@
       },
       {
         "parentPluginId": "maps",
-        "id": "def-common.FORMAT_TYPE",
-        "type": "Enum",
-        "tags": [],
-        "label": "FORMAT_TYPE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 267
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "maps",
         "id": "def-common.GEO_JSON_TYPE",
         "type": "Enum",
         "tags": [],
@@ -2046,7 +2032,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 192
+          "lineNumber": 193
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2060,7 +2046,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 279
+          "lineNumber": 275
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2074,7 +2060,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 236
+          "lineNumber": 237
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2088,7 +2074,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 217
+          "lineNumber": 218
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2116,7 +2102,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 286
+          "lineNumber": 282
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2130,7 +2116,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 299
+          "lineNumber": 295
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2144,7 +2130,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 272
+          "lineNumber": 268
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2158,7 +2144,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 186
+          "lineNumber": 187
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2172,7 +2158,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 260
+          "lineNumber": 261
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2200,7 +2186,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 212
+          "lineNumber": 213
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2214,7 +2200,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 231
+          "lineNumber": 232
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2228,7 +2214,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 292
+          "lineNumber": 288
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2242,7 +2228,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 245
+          "lineNumber": 246
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2261,7 +2247,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 174
+          "lineNumber": 175
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2357,7 +2343,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 228
+          "lineNumber": 229
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2371,7 +2357,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 206
+          "lineNumber": 207
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2388,7 +2374,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 210
+          "lineNumber": 211
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2422,7 +2408,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 243
+          "lineNumber": 244
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2490,7 +2476,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 204
+          "lineNumber": 205
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2507,7 +2493,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 308
+          "lineNumber": 304
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2762,7 +2748,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 319
+          "lineNumber": 315
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2779,7 +2765,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 320
+          "lineNumber": 316
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2796,7 +2782,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 318
+          "lineNumber": 314
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2872,7 +2858,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 312
+          "lineNumber": 308
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2920,7 +2906,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 201
+          "lineNumber": 202
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2937,7 +2923,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 200
+          "lineNumber": 201
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -2996,7 +2982,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 314
+          "lineNumber": 310
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3208,7 +3194,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 316
+          "lineNumber": 312
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3361,7 +3347,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 229
+          "lineNumber": 230
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3395,7 +3381,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 310
+          "lineNumber": 306
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3471,7 +3457,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 277
+          "lineNumber": 273
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3488,7 +3474,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 199
+          "lineNumber": 200
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -3522,7 +3508,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/maps/common/constants.ts",
-          "lineNumber": 203
+          "lineNumber": 204
         },
         "deprecated": false,
         "initialIsOpen": false

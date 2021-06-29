@@ -305,7 +305,7 @@
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
-          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; }"
+          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; isExportable: boolean; }"
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
@@ -414,7 +414,7 @@
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
-          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; }"
+          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; isExportable: boolean; }"
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",

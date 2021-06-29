@@ -10835,14 +10835,14 @@
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx",
-                  "lineNumber": 538
+                  "lineNumber": 530
                 }
               },
               {
                 "plugin": "maps",
                 "link": {
                   "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx",
-                  "lineNumber": 822
+                  "lineNumber": 819
                 }
               }
             ],
@@ -12377,7 +12377,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/extract_references.ts",
-          "lineNumber": 13
+          "lineNumber": 15
         },
         "deprecated": false,
         "children": [
@@ -12399,7 +12399,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/extract_references.ts",
-              "lineNumber": 14
+              "lineNumber": 16
             },
             "deprecated": false,
             "isRequired": true
