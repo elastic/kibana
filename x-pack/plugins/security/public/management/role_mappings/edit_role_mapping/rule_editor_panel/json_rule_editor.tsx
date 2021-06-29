@@ -1,27 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import React, { useState, Fragment } from 'react';
 
 import 'brace/mode/json';
 import 'brace/theme/github';
-import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiButton, EuiCodeEditor, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { DocumentationLinksService } from '../../documentation_links';
-import { Rule, RuleBuilderError, generateRulesFromRaw } from '../../model';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import type { Rule } from '../../model';
+import { generateRulesFromRaw, RuleBuilderError } from '../../model';
 
 interface Props {
   rules: Rule | null;
   onChange: (updatedRules: Rule | null) => void;
   onValidityChange: (isValid: boolean) => void;
-  docLinks: DocumentationLinksService;
 }
 
 export const JSONRuleEditor = (props: Props) => {
+  const docLinks = useKibana().services.docLinks!;
   const [rawRules, setRawRules] = useState(
     JSON.stringify(props.rules ? props.rules.toRaw() : {}, null, 2)
   );
@@ -108,7 +112,7 @@ export const JSONRuleEditor = (props: Props) => {
               values={{
                 roleMappingAPI: (
                   <EuiLink
-                    href={props.docLinks.getRoleMappingAPIDocUrl()}
+                    href={docLinks.links.apis.createRoleMapping}
                     external={true}
                     target="_blank"
                   >

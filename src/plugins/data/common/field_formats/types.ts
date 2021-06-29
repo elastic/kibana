@@ -1,24 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { GetConfigFn } from '../types';
 import { FieldFormat } from './field_format';
-export { FieldFormat };
+import { FieldFormatsRegistry } from './field_formats_registry';
 
 /** @public **/
 export type FieldFormatsContentType = 'html' | 'text';
@@ -26,6 +16,7 @@ export type FieldFormatsContentType = 'html' | 'text';
 /** @internal **/
 export interface HtmlContextTypeOptions {
   field?: any;
+  indexPattern?: any;
   hit?: Record<string, any>;
 }
 
@@ -65,6 +56,7 @@ export enum FIELD_FORMAT_IDS {
   STRING = 'string',
   TRUNCATE = 'truncate',
   URL = 'url',
+  HISTOGRAM = 'histogram',
 }
 
 export interface FieldFormatConfig {
@@ -73,19 +65,21 @@ export interface FieldFormatConfig {
   es?: boolean;
 }
 
-export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn = GetConfigFn;
 
-export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+export type IFieldFormat = FieldFormat;
 
 /**
  * @string id type is needed for creating custom converters.
  */
 export type FieldFormatId = FIELD_FORMAT_IDS | string;
 
-export type IFieldFormatType = (new (
+/** @internal **/
+export type FieldFormatInstanceType = (new (
   params?: any,
   getConfig?: FieldFormatsGetConfigFn
 ) => FieldFormat) & {
+  // Static properties:
   id: FieldFormatId;
   title: string;
   fieldType: string | string[];
@@ -99,3 +93,5 @@ export interface IFieldFormatMetaParams {
     basePath?: string;
   };
 }
+
+export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' & 'register'>;

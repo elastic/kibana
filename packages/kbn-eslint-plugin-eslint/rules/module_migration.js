@@ -1,28 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const path = require('path');
 const KIBANA_ROOT = path.resolve(__dirname, '../../..');
 
-function checkModuleNameNode(context, mappings, node) {
+function checkModuleNameNode(context, mappings, node, desc = 'Imported') {
   const mapping = mappings.find(
-    mapping => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
+    (mapping) => mapping.from === node.value || node.value.startsWith(`${mapping.from}/`)
   );
 
   if (!mapping) {
@@ -53,7 +42,7 @@ function checkModuleNameNode(context, mappings, node) {
   }
 
   context.report({
-    message: `Imported module "${node.value}" should be "${newSource}"`,
+    message: `${desc} module "${node.value}" should be "${newSource}"`,
     loc: node.loc,
     fix(fixer) {
       return fixer.replaceText(node, `'${newSource}'`);
@@ -105,12 +94,17 @@ module.exports = {
       },
     ],
   },
-  create: context => {
+  create: (context) => {
     const mappings = context.options[0];
 
     return {
       ImportDeclaration(node) {
         checkModuleNameNode(context, mappings, node.source);
+      },
+      ExportNamedDeclaration(node) {
+        if (node.source) {
+          checkModuleNameNode(context, mappings, node.source, 'Re-exported');
+        }
       },
       CallExpression(node) {
         if (

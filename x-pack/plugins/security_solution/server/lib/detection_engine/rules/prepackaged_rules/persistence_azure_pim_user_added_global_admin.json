@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an Azure Active Directory (AD) Global Administrator role addition to a Privileged Identity Management (PIM) user account. PIM is a service that enables you to manage, control, and monitor access to important resources in an organization. Users who are assigned to the Global administrator role can read and modify any administrative setting in your Azure AD organization.",
+  "false_positives": [
+    "Global administrator additions may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Global administrator additions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Global Administrator Role Addition to PIM User",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.auditlogs and azure.auditlogs.properties.category:RoleManagement and\n    azure.auditlogs.operation_name:(\"Add eligible member to role in PIM completed (permanent)\" or\n                                    \"Add member to role in PIM completed (timebound)\") and\n    azure.auditlogs.properties.target_resources.*.display_name:\"Global Administrator\" and\n    event.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/active-directory/users-groups-roles/directory-assign-admin-roles"
+  ],
+  "risk_score": 73,
+  "rule_id": "ed9ecd27-e3e6-4fd9-8586-7754803f7fc8",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import '../../../es_ui_shared/console_lang/mocks';
 
 import { act } from 'react-dom/test-utils';
+import moment from 'moment';
+import { getWatchHistory } from '../../__fixtures__';
+import { ROUTES, WATCH_STATES, ACTION_STATES } from '../../common/constants';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { WatchStatusTestBed } from './helpers/watch_status.helpers';
-import { WATCH } from './helpers/constants';
-import { getWatchHistory } from '../../test/fixtures';
-import moment from 'moment';
-import { ROUTES } from '../../common/constants';
-import { WATCH_STATES, ACTION_STATES } from '../../common/constants';
+import { WATCH } from './helpers/jest_constants';
 
 const { API_ROOT } = ROUTES;
 
@@ -72,7 +71,7 @@ describe('<WatchStatus />', () => {
         const { find } = testBed;
 
         expect(find('tab').length).toBe(2);
-        expect(find('tab').map(t => t.text())).toEqual(['Execution history', 'Action statuses']);
+        expect(find('tab').map((t) => t.text())).toEqual(['Execution history', 'Action statuses']);
       });
 
       test('should navigate to the "Action statuses" tab', () => {
@@ -269,7 +268,7 @@ describe('<WatchStatus />', () => {
 
         const { tableCellsValues } = table.getMetaData('watchActionStatusTable');
 
-        tableCellsValues.forEach(row => {
+        tableCellsValues.forEach((row) => {
           expect(row).toEqual([ACTION_ID, ACTION_STATES.ACKNOWLEDGED, '']);
         });
       });

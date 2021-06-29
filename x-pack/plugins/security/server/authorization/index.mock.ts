@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Actions } from '.';
-import { AuthorizationMode } from './mode';
+import { actionsMock } from './actions/actions.mock';
+import type { AuthorizationMode } from './mode';
 
 export const authorizationMock = {
   create: ({
     version = 'mock-version',
     applicationName = 'mock-application',
   }: { version?: string; applicationName?: string } = {}) => ({
-    actions: new Actions(version),
+    actions: actionsMock.create(version),
     checkPrivilegesWithRequest: jest.fn(),
+    checkElasticsearchPrivilegesWithRequest: jest.fn(),
     checkPrivilegesDynamicallyWithRequest: jest.fn(),
     checkSavedObjectsPrivilegesWithRequest: jest.fn(),
     applicationName,

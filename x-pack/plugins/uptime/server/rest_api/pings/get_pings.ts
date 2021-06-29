@@ -1,48 +1,43 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 export const createGetPingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/pings',
+  path: API_URLS.PINGS,
   validate: {
     query: schema.object({
-      dateRangeStart: schema.string(),
-      dateRangeEnd: schema.string(),
-      location: schema.maybe(schema.string()),
+      from: schema.string(),
+      to: schema.string(),
+      locations: schema.maybe(schema.string()),
       monitorId: schema.maybe(schema.string()),
+      index: schema.maybe(schema.number()),
       size: schema.maybe(schema.number()),
       sort: schema.maybe(schema.string()),
       status: schema.maybe(schema.string()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
-  options: {
-    tags: ['access:uptime'],
-  },
-  handler: async ({ callES }, _context, request, response): Promise<any> => {
-    const { dateRangeStart, dateRangeEnd, location, monitorId, size, sort, status } = request.query;
+  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
+    const { from, to, index, monitorId, status, sort, size, locations } = request.query;
 
-    const result = await libs.requests.getPings({
-      callES,
-      dateRangeStart,
-      dateRangeEnd,
+    return await libs.requests.getPings({
+      uptimeEsClient,
+      dateRange: { from, to },
+      index,
       monitorId,
       status,
       sort,
       size,
-      location,
-    });
-
-    return response.ok({
-      body: {
-        ...result,
-      },
+      locations: locations ? JSON.parse(locations) : [],
     });
   },
 });

@@ -1,0 +1,91 @@
+$ilmTimelineBarHeight: $euiSizeS;
+
+.ilmTimeline {
+  overflow: hidden;
+  width: 100%;
+
+  &__phasesContainer {
+    /*
+    * Let the delete icon sit on the same line as the phase color bars
+    */
+    display: inline-block;
+    width: 100%;
+
+    &__phase:first-child {
+      padding-left: 0;
+      padding-right: $euiSizeS;
+    }
+
+    &__phase:last-child {
+      padding-left: $euiSizeS;
+      padding-right: 0;
+    }
+
+    &__phase:only-child {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    &__phase {
+      /*
+      * Let the phase color bars sit horizontally
+      */
+      display: inline-block;
+
+      padding-left: $euiSizeS;
+      padding-right: $euiSizeS;
+    }
+  }
+
+  &__deleteIconContainer {
+    /*
+    * Create a bit of space between the timeline and the delete icon
+    */
+    padding: $euiSizeM;
+    margin-left: $euiSizeM;
+    background-color: $euiColorLightestShade;
+    color: $euiColorDarkShade;
+    border-radius: 50%;
+  }
+
+  &__colorBar {
+    display: inline-block;
+    height: $ilmTimelineBarHeight;
+    margin-top: $euiSizeS;
+    margin-bottom: $euiSizeXS;
+    border-radius: calc(#{$ilmTimelineBarHeight} / 2);
+    width: 100%;
+  }
+
+  &__hotPhase {
+    width: var(--ilm-timeline-hot-phase-width);
+
+    &__colorBar {
+      background-color: $euiColorVis9;
+    }
+  }
+
+  &__warmPhase {
+    width: var(--ilm-timeline-warm-phase-width);
+
+    &__colorBar {
+      background-color: $euiColorVis5;
+    }
+  }
+
+  &__coldPhase {
+    width: var(--ilm-timeline-cold-phase-width);
+
+    &__colorBar {
+      background-color: $euiColorVis1;
+    }
+  }
+
+  &__frozenPhase {
+    width: var(--ilm-timeline-frozen-phase-width);
+
+    &__colorBar {
+      background-color: $euiColorVis4;
+    }
+  }
+}

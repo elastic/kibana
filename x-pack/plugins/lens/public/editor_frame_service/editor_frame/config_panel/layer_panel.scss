@@ -1,0 +1,143 @@
+.lnsLayerPanel {
+  margin-bottom: $euiSizeS;
+
+  // disable focus ring for mouse clicks, leave it for keyboard users
+  &:focus:not(:focus-visible) {
+    animation: none !important; // sass-lint:disable-line no-important
+  }
+}
+
+.lnsLayerPanel__sourceFlexItem {
+  max-width: calc(100% - #{$euiSize * 3.625});
+}
+
+.lnsLayerPanel__settingsFlexItem:empty + .lnsLayerPanel__sourceFlexItem {
+  max-width: calc(100% - #{$euiSizeS});
+}
+
+.lnsLayerPanel__settingsFlexItem:empty {
+  margin: 0;
+}
+
+.lnsLayerPanel__row {
+  background: $euiColorLightestShade;
+  padding: $euiSizeS 0;
+  border-radius: $euiBorderRadius;
+
+  // Add margin to the top of the next same panel
+  & + & {
+    margin-top: $euiSize;
+  }
+}
+
+.lnsLayerPanel__row--notSupportsMoreColumns {
+  padding-bottom: 0;
+}
+
+.lnsLayerPanel__group {
+  padding: $euiSizeS 0;
+  margin-bottom: $euiSizeS;
+}
+
+.lnsLayerPanel__group:empty {
+  padding: 0;
+}
+
+.lnsLayerPanel__groupLabel {
+  padding: 0 $euiSizeS;
+}
+
+.lnsLayerPanel__error {
+  padding: 0 $euiSizeS;
+}
+
+.lnsLayerPanel__dimension {
+  @include euiFontSizeS;
+  border-radius: $euiBorderRadius;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  min-height: $euiSizeXXL;
+  position: relative;
+
+  // NativeRenderer is messing this up
+  > div {
+    flex-grow: 1;
+  }
+}
+
+.lnsLayerPanel__dimension--empty {
+  &:focus,
+  &:focus-within {
+    @include euiFocusRing;
+  }
+}
+
+.lnsLayerPanel__dimensionContainer {
+  margin: 0 $euiSizeS $euiSizeS;
+  position: relative;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.lnsLayerPanel__dimensionRemove {
+  margin-right: $euiSizeS;
+}
+
+.lnsLayerPanel__triggerText {
+  width: 100%;
+  padding: $euiSizeS;
+  min-height: $euiSizeXXL - 2;
+  word-break: break-word;
+}
+
+.lnsLayerPanel__triggerTextLabel {
+  transition: background-color $euiAnimSpeedFast ease-in-out;
+}
+
+.lnsLayerPanel__triggerTextContent {
+  // Make EUI button content not centered
+  justify-content: flex-start;
+  padding: 0 !important; // sass-lint:disable-line no-important
+  color: $euiTextSubduedColor;
+}
+
+.lnsLayerPanel__styleEditor {
+  padding: 0 $euiSizeS $euiSizeS;
+}
+
+.lnsLayerPanel__colorIndicator {
+  margin-left: $euiSizeS;
+}
+
+.lnsLayerPanel__paletteContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.lnsLayerPanel__palette {
+  border-radius: 0 0 ($euiBorderRadius - 1px) ($euiBorderRadius - 1px);
+
+  &::after {
+    border: none;
+  }
+}
+
+// Added .lnsLayerPanel__dimension specificity required for animation style override
+.lnsLayerPanel__dimension .lnsLayerPanel__dimensionLink {
+  width: 100%;
+
+  &:focus {
+    background-color: transparent;
+    animation: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus .lnsLayerPanel__triggerTextLabel,
+  &:focus-within .lnsLayerPanel__triggerTextLabel {
+    background-color: transparentize($euiColorVis1, .9);
+  }
+}

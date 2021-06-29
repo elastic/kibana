@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render update source editor (fields _should_ be included) 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Source settings"
+          id="xpack.maps.mvtSource.sourceSettings"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <MVTSingleLayerSourceSettings
+      fields={Array []}
+      handleChange={[Function]}
+      layerName="foobar"
+      maxSourceZoom={14}
+      minSourceZoom={4}
+      showFields={true}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Tooltip fields"
+          id="xpack.maps.mvtSource.tooltipsTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <TooltipSelector
+      fields={Array []}
+      onChange={[Function]}
+      tooltipFields={Array []}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

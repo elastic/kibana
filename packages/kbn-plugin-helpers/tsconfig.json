@@ -1,4 +1,19 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["lib/index.d.ts"]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "incremental": true,
+    "outDir": "target",
+    "target": "ES2018",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-plugin-helpers/src",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

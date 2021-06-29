@@ -1,50 +1,74 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import './login_page.scss';
+
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import classNames from 'classnames';
 import { BehaviorSubject } from 'rxjs';
 import { parse } from 'url';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CoreStart, FatalErrorsStart, HttpStart } from 'src/core/public';
-import { LoginLayout } from '../../../common/licensing';
-import { BasicLoginForm, DisabledLoginForm } from './components';
-import { LoginState } from './login_state';
+import type { CoreStart, FatalErrorsStart, HttpStart, NotificationsStart } from 'src/core/public';
+
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
+import type { LoginState } from '../../../common/login_state';
+import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 
 interface Props {
   http: HttpStart;
+  notifications: NotificationsStart;
   fatalErrors: FatalErrorsStart;
   loginAssistanceMessage: string;
-  requiresSecureConnection: boolean;
 }
 
 interface State {
   loginState: LoginState | null;
 }
 
-const infoMessageMap = new Map([
+const messageMap = new Map([
   [
     'SESSION_EXPIRED',
-    i18n.translate('xpack.security.login.sessionExpiredDescription', {
-      defaultMessage: 'Your session has timed out. Please log in again.',
-    }),
+    {
+      type: LoginFormMessageType.Info,
+      content: i18n.translate('xpack.security.login.sessionExpiredDescription', {
+        defaultMessage: 'Your session has timed out. Please log in again.',
+      }),
+    },
   ],
   [
     'LOGGED_OUT',
-    i18n.translate('xpack.security.login.loggedOutDescription', {
-      defaultMessage: 'You have logged out of Kibana.',
-    }),
+    {
+      type: LoginFormMessageType.Info,
+      content: i18n.translate('xpack.security.login.loggedOutDescription', {
+        defaultMessage: 'You have logged out of Elastic.',
+      }),
+    },
+  ],
+  [
+    'UNAUTHENTICATED',
+    {
+      type: LoginFormMessageType.Danger,
+      content: i18n.translate('xpack.security.unauthenticated.errorDescription', {
+        defaultMessage:
+          "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator.",
+      }),
+    },
   ],
 ]);
 
 export class LoginPage extends Component<Props, State> {
-  state = { loginState: null };
+  state = { loginState: null } as State;
 
   public async componentDidMount() {
     const loadingCount$ = new BehaviorSubject(1);
@@ -67,12 +91,10 @@ export class LoginPage extends Component<Props, State> {
     }
 
     const isSecureConnection = !!window.location.protocol.match(/^https/);
-    const { allowLogin, layout } = loginState;
+    const { allowLogin, layout, requiresSecureConnection } = loginState;
 
     const loginIsSupported =
-      this.props.requiresSecureConnection && !isSecureConnection
-        ? false
-        : allowLogin && layout === 'form';
+      requiresSecureConnection && !isSecureConnection ? false : allowLogin && layout === 'form';
 
     const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
       ['loginWelcome__contentDisabledForm']: !loginIsSupported,
@@ -88,30 +110,22 @@ export class LoginPage extends Component<Props, State> {
           <div className={contentHeaderClasses}>
             <EuiSpacer size="xxl" />
             <span className="loginWelcome__logo">
-              <EuiIcon type="logoKibana" size="xxl" />
+              <EuiIcon type="logoElastic" size="xxl" />
             </span>
-            <EuiTitle size="l" className="loginWelcome__title">
+            <EuiTitle size="m" className="loginWelcome__title">
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"
-                  defaultMessage="Welcome to Kibana"
+                  defaultMessage="Welcome to Elastic"
                 />
               </h1>
             </EuiTitle>
-            <EuiText size="s" color="subdued" className="loginWelcome__subtitle">
-              <p>
-                <FormattedMessage
-                  id="xpack.security.loginPage.welcomeDescription"
-                  defaultMessage="Your window into the Elastic Stack"
-                />
-              </p>
-            </EuiText>
             <EuiSpacer size="xl" />
           </div>
         </header>
         <div className={contentBodyClasses}>
           <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem>{this.getLoginForm({ isSecureConnection, layout })}</EuiFlexItem>
+            <EuiFlexItem>{this.getLoginForm({ ...loginState, isSecureConnection })}</EuiFlexItem>
           </EuiFlexGroup>
         </div>
       </div>
@@ -119,13 +133,33 @@ export class LoginPage extends Component<Props, State> {
   }
 
   private getLoginForm = ({
-    isSecureConnection,
     layout,
-  }: {
-    isSecureConnection: boolean;
-    layout: LoginLayout;
-  }) => {
-    if (this.props.requiresSecureConnection && !isSecureConnection) {
+    requiresSecureConnection,
+    isSecureConnection,
+    selector,
+    loginHelp,
+  }: LoginState & { isSecureConnection: boolean }) => {
+    const isLoginExplicitlyDisabled = selector.providers.length === 0;
+    if (isLoginExplicitlyDisabled) {
+      return (
+        <DisabledLoginForm
+          title={
+            <FormattedMessage
+              id="xpack.security.loginPage.noLoginMethodsAvailableTitle"
+              defaultMessage="Login is disabled."
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.security.loginPage.noLoginMethodsAvailableMessage"
+              defaultMessage="Contact your system administrator."
+            />
+          }
+        />
+      );
+    }
+
+    if (requiresSecureConnection && !isSecureConnection) {
       return (
         <DisabledLoginForm
           title={
@@ -144,69 +178,76 @@ export class LoginPage extends Component<Props, State> {
       );
     }
 
-    switch (layout) {
-      case 'form':
-        return (
-          <BasicLoginForm
-            http={this.props.http}
-            infoMessage={infoMessageMap.get(
-              parse(window.location.href, true).query.msg?.toString()
-            )}
-            loginAssistanceMessage={this.props.loginAssistanceMessage}
-          />
-        );
-      case 'error-es-unavailable':
-        return (
-          <DisabledLoginForm
-            title={
-              <FormattedMessage
-                id="xpack.security.loginPage.esUnavailableTitle"
-                defaultMessage="Cannot connect to the Elasticsearch cluster"
-              />
-            }
-            message={
-              <FormattedMessage
-                id="xpack.security.loginPage.esUnavailableMessage"
-                defaultMessage="See the Kibana logs for details and try reloading the page."
-              />
-            }
-          />
-        );
-      case 'error-xpack-unavailable':
-        return (
-          <DisabledLoginForm
-            title={
-              <FormattedMessage
-                id="xpack.security.loginPage.xpackUnavailableTitle"
-                defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
-              />
-            }
-            message={
-              <FormattedMessage
-                id="xpack.security.loginPage.xpackUnavailableMessage"
-                defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
-              />
-            }
-          />
-        );
-      default:
-        return (
-          <DisabledLoginForm
-            title={
-              <FormattedMessage
-                id="xpack.security.loginPage.unknownLayoutTitle"
-                defaultMessage="Unsupported login form layout."
-              />
-            }
-            message={
-              <FormattedMessage
-                id="xpack.security.loginPage.unknownLayoutMessage"
-                defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
-              />
-            }
-          />
-        );
+    if (layout === 'error-es-unavailable') {
+      return (
+        <DisabledLoginForm
+          title={
+            <FormattedMessage
+              id="xpack.security.loginPage.esUnavailableTitle"
+              defaultMessage="Cannot connect to the Elasticsearch cluster"
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.security.loginPage.esUnavailableMessage"
+              defaultMessage="See the Kibana logs for details and try reloading the page."
+            />
+          }
+        />
+      );
     }
+
+    if (layout === 'error-xpack-unavailable') {
+      return (
+        <DisabledLoginForm
+          title={
+            <FormattedMessage
+              id="xpack.security.loginPage.xpackUnavailableTitle"
+              defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.security.loginPage.xpackUnavailableMessage"
+              defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
+            />
+          }
+        />
+      );
+    }
+
+    if (layout !== 'form') {
+      return (
+        <DisabledLoginForm
+          title={
+            <FormattedMessage
+              id="xpack.security.loginPage.unknownLayoutTitle"
+              defaultMessage="Unsupported login form layout."
+            />
+          }
+          message={
+            <FormattedMessage
+              id="xpack.security.loginPage.unknownLayoutMessage"
+              defaultMessage="See the Kibana logs for details and try reloading the page."
+            />
+          }
+        />
+      );
+    }
+
+    const query = parse(window.location.href, true).query;
+    return (
+      <LoginForm
+        http={this.props.http}
+        notifications={this.props.notifications}
+        selector={selector}
+        // @ts-expect-error Map.get is ok with getting `undefined`
+        message={messageMap.get(query[LOGOUT_REASON_QUERY_STRING_PARAMETER]?.toString())}
+        loginAssistanceMessage={this.props.loginAssistanceMessage}
+        loginHelp={loginHelp}
+        authProviderHint={query[AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER]?.toString()}
+      />
+    );
   };
 }
 

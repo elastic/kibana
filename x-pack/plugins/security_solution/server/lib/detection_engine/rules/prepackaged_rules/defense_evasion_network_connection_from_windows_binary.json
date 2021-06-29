@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies network activity from unexpected system applications. This may indicate adversarial activity as these applications are often leveraged by adversaries to execute code and evade detection.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Unusual Network Activity from a Windows System Binary",
+  "query": "sequence by process.entity_id with maxspan=5m\n  [process where event.type in (\"start\", \"process_started\") and\n\n     /* known applocker bypasses */\n     (process.name : \"bginfo.exe\" or\n      process.name : \"cdb.exe\" or\n      process.name : \"control.exe\" or\n      process.name : \"cmstp.exe\" or\n      process.name : \"csi.exe\" or\n      process.name : \"dnx.exe\" or\n      process.name : \"fsi.exe\" or\n      process.name : \"ieexec.exe\" or\n      process.name : \"iexpress.exe\" or\n      process.name : \"installutil.exe\" or\n      process.name : \"Microsoft.Workflow.Compiler.exe\" or\n      process.name : \"MSBuild.exe\" or\n      process.name : \"msdt.exe\" or\n      process.name : \"mshta.exe\" or\n      process.name : \"msiexec.exe\" or\n      process.name : \"msxsl.exe\" or\n      process.name : \"odbcconf.exe\" or\n      process.name : \"rcsi.exe\" or\n      process.name : \"regsvr32.exe\" or\n      process.name : \"xwizard.exe\")]\n  [network where\n     (process.name : \"bginfo.exe\" or\n      process.name : \"cdb.exe\" or\n      process.name : \"control.exe\" or\n      process.name : \"cmstp.exe\" or\n      process.name : \"csi.exe\" or\n      process.name : \"dnx.exe\" or\n      process.name : \"fsi.exe\" or\n      process.name : \"ieexec.exe\" or\n      process.name : \"iexpress.exe\" or\n      process.name : \"installutil.exe\" or\n      process.name : \"Microsoft.Workflow.Compiler.exe\" or\n      process.name : \"MSBuild.exe\" or\n      process.name : \"msdt.exe\" or\n      process.name : \"mshta.exe\" or\n      process.name : \"msiexec.exe\" or\n      process.name : \"msxsl.exe\" or\n      process.name : \"odbcconf.exe\" or\n      process.name : \"rcsi.exe\" or\n      process.name : \"regsvr32.exe\" or\n      process.name : \"xwizard.exe\")]\n",
+  "risk_score": 21,
+  "rule_id": "1fe3b299-fbb5-4657-a937-1d746f2c711a",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1127",
+          "name": "Trusted Developer Utilities Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1127/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 2
+}

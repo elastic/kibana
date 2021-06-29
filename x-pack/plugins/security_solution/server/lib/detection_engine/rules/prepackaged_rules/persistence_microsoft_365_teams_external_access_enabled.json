@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when external access is enabled in Microsoft Teams. External access lets Teams and Skype for Business users communicate with other users that are outside their organization. An adversary may enable external access or add an allowed domain to exfiltrate data or maintain persistence in an environment.",
+  "false_positives": [
+    "Teams external access may be enabled by a system or network administrator. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "from": "now-30m",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Microsoft 365 Teams External Access Enabled",
+  "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:o365.audit and event.provider:(SkypeForBusiness or MicrosoftTeams) and\nevent.category:web and event.action:\"Set-CsTenantFederationConfiguration\" and\no365.audit.Parameters.AllowFederatedUsers:True and event.outcome:success\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/microsoftteams/manage-external-access"
+  ],
+  "risk_score": 47,
+  "rule_id": "27f7c15a-91f8-4c3d-8b9e-1f99cc030a51",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

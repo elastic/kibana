@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -9,9 +10,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import { get } from 'lodash';
 import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
-import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchHistoryItem } from '../../../models/watch_history_item/index';
 
@@ -44,13 +43,17 @@ function fetchHistoryItems(dataClient: IScopedClusterClient, watchId: any, start
     params.body.query.bool.must.push(timeRangeQuery);
   }
 
-  return dataClient
-    .callAsCurrentUser('search', params)
-    .then((response: any) => fetchAllFromScroll(response, dataClient));
+  return dataClient.asCurrentUser
+    .search(params)
+    .then((response) => fetchAllFromScroll(response.body, dataClient));
 }
 
-export function registerHistoryRoute(deps: RouteDependencies) {
-  deps.router.get(
+export function registerHistoryRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
+  router.get(
     {
       path: '/api/watcher/watch/{watchId}/history',
       validate: {
@@ -58,12 +61,12 @@ export function registerHistoryRoute(deps: RouteDependencies) {
         query: querySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { watchId } = request.params;
       const { startTime } = request.query;
 
       try {
-        const hits = await fetchHistoryItems(ctx.watcher!.client, watchId, startTime);
+        const hits = await fetchHistoryItems(ctx.core.elasticsearch.client, watchId, startTime);
         const watchHistoryItems = hits.map((hit: any) => {
           const id = get(hit, '_id');
           const watchHistoryItemJson = get(hit, '_source');
@@ -87,13 +90,7 @@ export function registerHistoryRoute(deps: RouteDependencies) {
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        return response.internalError({ body: e });
+        return handleEsError({ error: e, response });
       }
     })
   );

@@ -1,0 +1,12 @@
+{
+  "id": "telemetryManagementSection",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "requiredBundles": ["usageCollection"],
+  "optionalPlugins": ["usageCollection"],
+  "requiredPlugins": [
+    "advancedSettings",
+    "telemetry"
+  ]
+}

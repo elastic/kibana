@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import chalk from 'chalk';
@@ -30,15 +19,18 @@ import {
   mergeConfigs,
 } from './i18n/tasks';
 
-const skipNoTranslations = ({ config }: { config: I18nConfig }) => !config.translations.length;
+const skipOnNoTranslations = ({ config }: { config: I18nConfig }) =>
+  !config.translations.length && 'No translations found.';
 
 run(
   async ({
     flags: {
       'ignore-incompatible': ignoreIncompatible,
+      'ignore-malformed': ignoreMalformed,
       'ignore-missing': ignoreMissing,
       'ignore-unused': ignoreUnused,
       'include-config': includeConfig,
+      'ignore-untracked': ignoreUntracked,
       fix = false,
       path,
     },
@@ -48,12 +40,14 @@ run(
       fix &&
       (ignoreIncompatible !== undefined ||
         ignoreUnused !== undefined ||
-        ignoreMissing !== undefined)
+        ignoreMalformed !== undefined ||
+        ignoreMissing !== undefined ||
+        ignoreUntracked !== undefined)
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} none of the --ignore-incompatible, --ignore-unused or --ignore-missing is allowed when --fix is set.`
+        )} none of the --ignore-incompatible, --ignore-malformed, --ignore-unused or --ignore-missing,  --ignore-untracked is allowed when --fix is set.`
       );
     }
 
@@ -81,24 +75,26 @@ run(
         },
         {
           title: 'Checking For Untracked Messages based on .i18nrc.json',
-          skip: skipNoTranslations,
+          enabled: (_) => !ignoreUntracked,
+          skip: skipOnNoTranslations,
           task: ({ config }) =>
             new Listr(extractUntrackedMessages(srcPaths), { exitOnError: true }),
         },
         {
           title: 'Validating Default Messages',
-          skip: skipNoTranslations,
+          skip: skipOnNoTranslations,
           task: ({ config }) =>
             new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
         },
         {
           title: 'Compatibility Checks',
-          skip: skipNoTranslations,
+          skip: skipOnNoTranslations,
           task: ({ config }) =>
             new Listr(
               checkCompatibility(
                 config,
                 {
+                  ignoreMalformed: !!ignoreMalformed,
                   ignoreIncompatible: !!ignoreIncompatible,
                   ignoreUnused: !!ignoreUnused,
                   ignoreMissing: !!ignoreMissing,

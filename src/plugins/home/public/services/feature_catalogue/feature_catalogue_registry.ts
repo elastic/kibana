@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Capabilities } from 'src/core/public';
@@ -35,6 +24,8 @@ export interface FeatureCatalogueEntry {
   readonly title: string;
   /** {@link FeatureCatalogueCategory} to display this feature in. */
   readonly category: FeatureCatalogueCategory;
+  /** A tagline of feature displayed to the user. */
+  readonly subtitle?: string;
   /** One-line description of feature displayed to the user. */
   readonly description: string;
   /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
@@ -43,11 +34,38 @@ export interface FeatureCatalogueEntry {
   readonly path: string;
   /** Whether or not this link should be shown on the front page of Kibana. */
   readonly showOnHomePage: boolean;
+  /** An ordinal used to sort features relative to one another for display on the home page */
+  readonly order?: number;
+  /** Optional function to control visibility of this feature. */
+  readonly visible?: () => boolean;
+  /** Unique string identifier of the solution this feature belongs to */
+  readonly solutionId?: string;
+}
+
+/** @public */
+export interface FeatureCatalogueSolution {
+  /** Unique string identifier for this solution. */
+  readonly id: string;
+  /** Title of solution displayed to the user. */
+  readonly title: string;
+  /** The tagline of the solution displayed to the user. */
+  readonly subtitle: string;
+  /** One-line description of the solution displayed to the user. */
+  readonly description?: string;
+  /** A list of use cases for this solution displayed to the user. */
+  readonly appDescriptions: string[];
+  /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
+  readonly icon: IconType;
+  /** URL path to link to this future. Should not include the basePath. */
+  readonly path: string;
+  /** An ordinal used to sort solutions relative to one another for display on the home page */
+  readonly order?: number;
 }
 
 export class FeatureCatalogueRegistry {
   private capabilities: Capabilities | null = null;
   private readonly features = new Map<string, FeatureCatalogueEntry>();
+  private readonly solutions = new Map<string, FeatureCatalogueSolution>();
 
   public setup() {
     return {
@@ -60,6 +78,15 @@ export class FeatureCatalogueRegistry {
 
         this.features.set(feature.id, feature);
       },
+      registerSolution: (solution: FeatureCatalogueSolution) => {
+        if (this.solutions.has(solution.id)) {
+          throw new Error(
+            `Solution with id [${solution.id}] has already been registered. Use a unique id.`
+          );
+        }
+
+        this.solutions.set(solution.id, solution);
+      },
     };
   }
 
@@ -67,14 +94,31 @@ export class FeatureCatalogueRegistry {
     this.capabilities = capabilities;
   }
 
-  public get(): readonly FeatureCatalogueEntry[] {
+  public get(): FeatureCatalogueEntry[] {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
     }
     const capabilities = this.capabilities;
     return [...this.features.values()]
-      .filter(entry => capabilities.catalogue[entry.id] !== false)
+      .filter(
+        (entry) =>
+          capabilities.catalogue[entry.id] !== false && (entry.visible ? entry.visible() : true)
+      )
       .sort(compareByKey('title'));
+  }
+
+  public getSolutions(): FeatureCatalogueSolution[] {
+    if (this.capabilities === null) {
+      throw new Error('Catalogue entries are only available after start phase');
+    }
+    const capabilities = this.capabilities;
+    return [...this.solutions.values()]
+      .filter((solution) => capabilities.catalogue[solution.id] !== false)
+      .sort(compareByKey('title'));
+  }
+
+  public removeFeature(appId: string) {
+    this.features.delete(appId);
   }
 }
 

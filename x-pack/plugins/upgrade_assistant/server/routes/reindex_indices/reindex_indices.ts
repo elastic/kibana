@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../../common/constants';
 import {
-  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   kibanaResponseFactory,
   Logger,
   SavedObjectsClient,
@@ -38,7 +41,7 @@ import { GetBatchQueueResponse, PostBatchResponse } from './types';
 
 interface CreateReindexWorker {
   logger: Logger;
-  elasticsearchService: ElasticsearchServiceSetup;
+  elasticsearchService: ElasticsearchServiceStart;
   credentialStore: CredentialStore;
   savedObjects: SavedObjectsClient;
   licensing: LicensingPluginSetup;
@@ -51,8 +54,8 @@ export function createReindexWorker({
   savedObjects,
   licensing,
 }: CreateReindexWorker) {
-  const { adminClient } = elasticsearchService;
-  return new ReindexWorker(savedObjects, credentialStore, adminClient, logger, licensing);
+  const esClient = elasticsearchService.client;
+  return new ReindexWorker(savedObjects, credentialStore, esClient, logger, licensing);
 }
 
 const mapAnyErrorToKibanaHttpResponse = (e: any) => {
@@ -64,7 +67,7 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         return kibanaResponseFactory.notFound({ body: e.message });
       case CannotCreateIndex:
       case ReindexTaskCannotBeDeleted:
-        return kibanaResponseFactory.internalError({ body: e.message });
+        throw e;
       case ReindexTaskFailed:
         // Bad data
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
@@ -76,14 +79,14 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
       // nothing matched
     }
   }
-  return kibanaResponseFactory.internalError({ body: e });
+  throw e;
 };
 
 export function registerReindexIndicesRoutes(
   { credentialStore, router, licensing, log }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
-  const BASE_PATH = '/api/upgrade_assistant/reindex';
+  const BASE_PATH = `${API_BASE_PATH}/reindex`;
 
   // Start reindex for an index
   router.post(
@@ -100,7 +103,7 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: { dataClient },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -110,7 +113,7 @@ export function registerReindexIndicesRoutes(
         try {
           const result = await reindexHandler({
             savedObjects: savedObjectsClient,
-            dataClient,
+            dataClient: esClient,
             indexName,
             log,
             licensing,
@@ -140,7 +143,7 @@ export function registerReindexIndicesRoutes(
     async (
       {
         core: {
-          elasticsearch: { dataClient },
+          elasticsearch: { client: esClient },
           savedObjects,
         },
       },
@@ -148,13 +151,13 @@ export function registerReindexIndicesRoutes(
       response
     ) => {
       const { client } = savedObjects;
-      const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+      const callAsCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
       try {
         const inProgressOps = await reindexActions.findAllByStatus(ReindexStatus.inProgress);
         const { queue } = sortAndOrderReindexOperations(inProgressOps);
         const result: GetBatchQueueResponse = {
-          queue: queue.map(savedObject => savedObject.attributes),
+          queue: queue.map((savedObject) => savedObject.attributes),
         };
         return response.ok({
           body: result,
@@ -180,7 +183,7 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects: { client: savedObjectsClient },
-            elasticsearch: { dataClient },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -195,13 +198,15 @@ export function registerReindexIndicesRoutes(
           try {
             const result = await reindexHandler({
               savedObjects: savedObjectsClient,
-              dataClient,
+              dataClient: esClient,
               indexName,
               log,
               licensing,
               headers: request.headers,
               credentialStore,
-              enqueue: true,
+              reindexOptions: {
+                enqueue: true,
+              },
             });
             results.enqueued.push(result);
           } catch (e) {
@@ -237,7 +242,7 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects,
-            elasticsearch: { dataClient },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -245,14 +250,9 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { client } = savedObjects;
         const { indexName } = request.params;
-        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
-        const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
-        const reindexService = reindexServiceFactory(
-          callAsCurrentUser,
-          reindexActions,
-          log,
-          licensing
-        );
+        const asCurrentUser = esClient.asCurrentUser;
+        const reindexActions = reindexActionsFactory(client, asCurrentUser);
+        const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
         try {
           const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
@@ -293,7 +293,7 @@ export function registerReindexIndicesRoutes(
         {
           core: {
             savedObjects,
-            elasticsearch: { dataClient },
+            elasticsearch: { client: esClient },
           },
         },
         request,
@@ -301,7 +301,7 @@ export function registerReindexIndicesRoutes(
       ) => {
         const { indexName } = request.params;
         const { client } = savedObjects;
-        const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+        const callAsCurrentUser = esClient.asCurrentUser;
         const reindexActions = reindexActionsFactory(client, callAsCurrentUser);
         const reindexService = reindexServiceFactory(
           callAsCurrentUser,

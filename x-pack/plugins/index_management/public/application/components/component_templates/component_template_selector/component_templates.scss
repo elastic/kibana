@@ -1,0 +1,36 @@
+
+/**
+ * [1] Will center vertically the empty search result
+ */
+
+$heightHeader: $euiSizeL * 2;
+
+.componentTemplates {
+  border: $euiBorderThin;
+  border-radius: $euiBorderRadius;
+  border-top: none;
+  height: 100%;
+
+  &__header {
+    height: $heightHeader;
+
+    .euiFormControlLayout {
+      max-width: initial;
+    }
+  }
+
+  &__searchBox {
+    border-bottom: $euiBorderThin;
+    border-top: $euiBorderThin;
+    box-shadow: none;
+    max-width: initial;
+  }
+
+  &__listWrapper {
+    height: calc(100% - #{$heightHeader});
+
+    &--is-empty {
+      display: flex; // [1]
+    }
+  }
+}

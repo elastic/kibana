@@ -1,0 +1,44 @@
+{
+  "anomaly_threshold": 25,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Looks for commands related to system network configuration discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used by a threat actor to engage in system network configuration discovery in order to increase their understanding of connected networks and hosts. This information may be used to shape follow-up behaviors such as lateral movement or additional discovery.",
+  "false_positives": [
+    "Uncommon user command activity can be due to an engineer logging onto a server instance in order to perform manual troubleshooting or reconfiguration."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "linux_network_configuration_discovery",
+  "name": "Unusual Linux System Network Configuration Discovery",
+  "risk_score": 21,
+  "rule_id": "f9590f47-6bd5-4a49-bd49-a2f886476fb9",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1016",
+          "name": "System Network Configuration Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1016/"
+        }
+      ]
+    }
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

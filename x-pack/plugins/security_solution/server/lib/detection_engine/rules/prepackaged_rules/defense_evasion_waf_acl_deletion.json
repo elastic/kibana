@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of a specified AWS Web Application Firewall (WAF) access control list.",
+  "false_positives": [
+    "Firewall ACL's may be deleted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Web ACL deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS WAF Access Control List Deletion",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.action:DeleteWebACL and event.outcome:success\n",
+  "references": [
+    "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/waf-regional/delete-web-acl.html",
+    "https://docs.aws.amazon.com/waf/latest/APIReference/API_wafRegional_DeleteWebACL.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "91d04cd4-47a9-4334-ab14-084abe274d49",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Network Security"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/",
+          "subtechnique": [
+            {
+              "id": "T1562.001",
+              "name": "Disable or Modify Tools",
+              "reference": "https://attack.mitre.org/techniques/T1562/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 6
+}

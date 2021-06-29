@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the desktopimgdownldr utility being used to download a remote file. An adversary may use desktopimgdownldr to download arbitrary files as an alternative to certutil.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Remote File Download via Desktopimgdownldr Utility",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"desktopimgdownldr.exe\" or process.pe.original_file_name == \"desktopimgdownldr.exe\") and\n  process.args : \"/lockscreenurl:http*\"\n",
+  "references": [
+    "https://labs.sentinelone.com/living-off-windows-land-a-new-native-file-downldr/"
+  ],
+  "risk_score": 47,
+  "rule_id": "15c0b7a7-9c34-4869-b25b-fa6518414899",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Command and Control"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1105",
+          "name": "Ingress Tool Transfer",
+          "reference": "https://attack.mitre.org/techniques/T1105/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 5
+}

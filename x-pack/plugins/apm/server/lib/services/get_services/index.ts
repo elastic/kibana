@@ -1,38 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
-import { PromiseReturnType } from '../../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../../helpers/setup_request';
-import { hasHistoricalAgentData } from './has_historical_agent_data';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getLegacyDataStatus } from './get_legacy_data_status';
 import { getServicesItems } from './get_services_items';
+import { hasHistoricalAgentData } from './has_historical_agent_data';
 
-export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
+export async function getServices({
+  environment,
+  kuery,
+  setup,
+  searchAggregatedTransactions,
+  logger,
+}: {
+  environment?: string;
+  kuery?: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+  logger: Logger;
+}) {
+  return withApmSpan('get_services', async () => {
+    const [items, hasLegacyData] = await Promise.all([
+      getServicesItems({
+        environment,
+        kuery,
+        setup,
+        searchAggregatedTransactions,
+        logger,
+      }),
+      getLegacyDataStatus(setup),
+    ]);
 
-export async function getServices(
-  setup: Setup & SetupTimeRange & SetupUIFilters
-) {
-  const [items, hasLegacyData] = await Promise.all([
-    getServicesItems(setup),
-    getLegacyDataStatus(setup)
-  ]);
+    const noDataInCurrentTimeRange = isEmpty(items);
+    const hasHistoricalData = noDataInCurrentTimeRange
+      ? await hasHistoricalAgentData(setup)
+      : true;
 
-  const noDataInCurrentTimeRange = isEmpty(items);
-  const hasHistoricalData = noDataInCurrentTimeRange
-    ? await hasHistoricalAgentData(setup)
-    : true;
-
-  return {
-    items,
-    hasHistoricalData,
-    hasLegacyData
-  };
+    return {
+      items,
+      hasHistoricalData,
+      hasLegacyData,
+    };
+  });
 }

@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const overview = getService('monitoringClusterOverview');
   const pipelinesList = getService('monitoringLogstashPipelines');
   const lsClusterSummaryStatus = getService('monitoringLogstashSummaryStatus');
 
-  describe.skip('Logstash pipelines', () => {
+  describe('Logstash pipelines', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/logstash-pipelines', {
+      await setup('x-pack/test/functional/es_archives/monitoring/logstash_pipelines', {
         from: 'Jan 22, 2018 @ 09:10:00.000',
         to: 'Jan 22, 2018 @ 09:41:00.000',
       });
@@ -50,10 +51,10 @@ export default function({ getService, getPageObjects }) {
       const pipelinesAll = await pipelinesList.getPipelinesAll();
 
       const tableData = [
-        { id: 'main', eventsEmittedRate: '108.3 e/s', nodeCount: '1' },
-        { id: 'nginx_logs', eventsEmittedRate: '29.2 e/s', nodeCount: '1' },
+        { id: 'main', eventsEmittedRate: '162.5 e/s', nodeCount: '1' },
+        { id: 'nginx_logs', eventsEmittedRate: '62.5 e/s', nodeCount: '1' },
         { id: 'test_interpolation', eventsEmittedRate: '0 e/s', nodeCount: '1' },
-        { id: 'tweets_about_labradoodles', eventsEmittedRate: '0.6 e/s', nodeCount: '1' },
+        { id: 'tweets_about_labradoodles', eventsEmittedRate: '1.2 e/s', nodeCount: '1' },
       ];
 
       // check the all data in the table
@@ -74,9 +75,9 @@ export default function({ getService, getPageObjects }) {
 
       const tableData = [
         { id: 'test_interpolation', eventsEmittedRate: '0 e/s', nodeCount: '1' },
-        { id: 'tweets_about_labradoodles', eventsEmittedRate: '0.6 e/s', nodeCount: '1' },
-        { id: 'nginx_logs', eventsEmittedRate: '29.2 e/s', nodeCount: '1' },
-        { id: 'main', eventsEmittedRate: '108.3 e/s', nodeCount: '1' },
+        { id: 'tweets_about_labradoodles', eventsEmittedRate: '1.2 e/s', nodeCount: '1' },
+        { id: 'nginx_logs', eventsEmittedRate: '62.5 e/s', nodeCount: '1' },
+        { id: 'main', eventsEmittedRate: '162.5 e/s', nodeCount: '1' },
       ];
 
       // check the all data in the table

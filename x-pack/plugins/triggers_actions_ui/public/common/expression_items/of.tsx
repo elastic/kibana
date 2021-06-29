@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiExpression,
   EuiPopover,
-  EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -17,11 +18,14 @@ import {
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
+import { IErrorObject } from '../../types';
+import { ClosablePopoverTitle } from './components';
+import './of.scss';
 
-interface OfExpressionProps {
+export interface OfExpressionProps {
   aggType: string;
   aggField?: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedAggField: (selectedAggType?: string) => void;
   fields: Record<string, any>;
   customAggTypesOptions?: {
@@ -40,6 +44,8 @@ interface OfExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+  display?: 'fullWidth' | 'inline';
+  helpText?: string | JSX.Element;
 }
 
 export const OfExpression = ({
@@ -48,8 +54,10 @@ export const OfExpression = ({
   errors,
   onChangeSelectedAggField,
   fields,
+  display = 'inline',
   customAggTypesOptions,
   popupPosition,
+  helpText,
 }: OfExpressionProps) => {
   const [aggFieldPopoverOpen, setAggFieldPopoverOpen] = useState(false);
   const firstFieldOption = {
@@ -83,34 +91,41 @@ export const OfExpression = ({
               defaultMessage: 'of',
             }
           )}
+          data-test-subj="ofExpressionPopover"
+          display={display === 'inline' ? 'inline' : 'columns'}
           value={aggField || firstFieldOption.text}
           isActive={aggFieldPopoverOpen || !aggField}
           onClick={() => {
             setAggFieldPopoverOpen(true);
           }}
-          color={aggField ? 'secondary' : 'danger'}
+          isInvalid={!aggField}
         />
       }
       isOpen={aggFieldPopoverOpen}
       closePopover={() => {
         setAggFieldPopoverOpen(false);
       }}
-      withTitle
+      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
+      repositionOnScroll
     >
       <div>
-        <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.common.expressionItems.of.popoverTitle', {
-            defaultMessage: 'of',
-          })}
-        </EuiPopoverTitle>
+        <ClosablePopoverTitle onClose={() => setAggFieldPopoverOpen(false)}>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.common.expressionItems.of.popoverTitle"
+            defaultMessage="of"
+          />
+        </ClosablePopoverTitle>
         <EuiFlexGroup>
-          <EuiFlexItem grow={false} className="watcherThresholdAlertAggFieldContainer">
+          <EuiFlexItem grow={false} className="actOf__aggFieldContainer">
             <EuiFormRow
+              id="ofField"
               fullWidth
               isInvalid={errors.aggField.length > 0 && aggField !== undefined}
               error={errors.aggField}
+              data-test-subj="availablefieldsOptionsFormRow"
+              helpText={helpText}
             >
               <EuiComboBox
                 fullWidth
@@ -121,11 +136,13 @@ export const OfExpression = ({
                 options={availablefieldsOptions}
                 noSuggestions={!availablefieldsOptions.length}
                 selectedOptions={aggField ? [{ label: aggField }] : []}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   onChangeSelectedAggField(
                     selectedOptions.length === 1 ? selectedOptions[0].label : undefined
                   );
-                  setAggFieldPopoverOpen(false);
+                  if (selectedOptions.length > 0) {
+                    setAggFieldPopoverOpen(false);
+                  }
                 }}
               />
             </EuiFormRow>
@@ -135,3 +152,6 @@ export const OfExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { OfExpression as default };

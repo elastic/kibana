@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 
 import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
 import { generateNewIndexName } from '../../../plugins/upgrade_assistant/server/lib/reindexing/index_settings';
+import { getIndexState } from '../../../plugins/upgrade_assistant/common/get_index_state';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   // Utility function that keeps polling API until reindex operation has completed or failed.
-  const waitForReindexToComplete = async indexName => {
+  const waitForReindexToComplete = async (indexName) => {
     console.log(`Waiting for reindex to complete...`);
     let lastState;
 
@@ -26,7 +28,7 @@ export default function({ getService }) {
       if (lastState.status !== ReindexStatus.inProgress && lastState.locked === null) {
         break;
       }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     return lastState;
@@ -50,7 +52,7 @@ export default function({ getService }) {
     });
 
     it('should create a new index with the same documents', async () => {
-      await esArchiver.load('upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
         .set('kbn-xsrf', 'xxx')
@@ -64,14 +66,16 @@ export default function({ getService }) {
       expect(lastState.status).to.equal(ReindexStatus.completed);
 
       const { newIndexName } = lastState;
-      const indexSummary = await es.indices.get({ index: 'dummydata' });
+      const { body: indexSummary } = await es.indices.get({ index: 'dummydata' });
 
       // The new index was created
       expect(indexSummary[newIndexName]).to.be.an('object');
       // The original index name is aliased to the new one
       expect(indexSummary[newIndexName].aliases.dummydata).to.be.an('object');
+      // Verify mappings exist on new index
+      expect(indexSummary[newIndexName].mappings.properties).to.be.an('object');
       // The number of documents in the new index matches what we expect
-      expect((await es.count({ index: lastState.newIndexName })).count).to.be(3);
+      expect((await es.count({ index: lastState.newIndexName })).body.count).to.be(3);
 
       // Cleanup newly created index
       await es.indices.delete({
@@ -80,7 +84,7 @@ export default function({ getService }) {
     });
 
     it('should update any aliases', async () => {
-      await esArchiver.load('upgrade_assistant/reindex');
+      await esArchiver.load('x-pack/test/functional/es_archives/upgrade_assistant/reindex');
 
       // Add aliases and ensure each returns the right number of docs
       await es.indices.updateAliases({
@@ -94,9 +98,9 @@ export default function({ getService }) {
           ],
         },
       });
-      expect((await es.count({ index: 'myAlias' })).count).to.be(3);
-      expect((await es.count({ index: 'wildcardAlias' })).count).to.be(3);
-      expect((await es.count({ index: 'myHttpsAlias' })).count).to.be(2);
+      expect((await es.count({ index: 'myAlias' })).body.count).to.be(3);
+      expect((await es.count({ index: 'wildcardAlias' })).body.count).to.be(3);
+      expect((await es.count({ index: 'myHttpsAlias' })).body.count).to.be(2);
 
       // Reindex
       await supertest
@@ -106,10 +110,10 @@ export default function({ getService }) {
       const lastState = await waitForReindexToComplete('dummydata');
 
       // The regular aliases should still return 3 docs
-      expect((await es.count({ index: 'myAlias' })).count).to.be(3);
-      expect((await es.count({ index: 'wildcardAlias' })).count).to.be(3);
+      expect((await es.count({ index: 'myAlias' })).body.count).to.be(3);
+      expect((await es.count({ index: 'wildcardAlias' })).body.count).to.be(3);
       // The filtered alias should still return 2 docs
-      expect((await es.count({ index: 'myHttpsAlias' })).count).to.be(2);
+      expect((await es.count({ index: 'myHttpsAlias' })).body.count).to.be(2);
 
       // Cleanup newly created index
       await es.indices.delete({
@@ -160,7 +164,7 @@ export default function({ getService }) {
       const test2 = 'batch-reindex-test2';
       const test3 = 'batch-reindex-test3';
 
-      const cleanupReindex = async indexName => {
+      const cleanupReindex = async (indexName) => {
         try {
           await es.indices.delete({ index: generateNewIndexName(indexName) });
         } catch (e) {
@@ -178,6 +182,8 @@ export default function({ getService }) {
         await es.indices.create({ index: test2 });
         await es.indices.create({ index: test3 });
 
+        await es.indices.close({ index: test1 });
+
         const result = await supertest
           .post(`/api/upgrade_assistant/reindex/batch`)
           .set('kbn-xsrf', 'xxx')
@@ -186,6 +192,8 @@ export default function({ getService }) {
 
         expect(result.body.enqueued.length).to.equal(3);
         expect(result.body.errors.length).to.equal(0);
+
+        const [{ newIndexName: nameOfIndexThatShouldBeClosed }] = result.body.enqueued;
 
         await assertQueueState(test1, 3);
         await waitForReindexToComplete(test1);
@@ -197,6 +205,14 @@ export default function({ getService }) {
         await waitForReindexToComplete(test3);
 
         await assertQueueState(undefined, 0);
+
+        // Check that the closed index is still closed after reindexing
+        const { body: resolvedIndices } = await es.indices.resolveIndex({
+          name: nameOfIndexThatShouldBeClosed,
+        });
+
+        const test1ReindexedState = getIndexState(nameOfIndexThatShouldBeClosed, resolvedIndices);
+        expect(test1ReindexedState).to.be('closed');
       } finally {
         await cleanupReindex(test1);
         await cleanupReindex(test2);

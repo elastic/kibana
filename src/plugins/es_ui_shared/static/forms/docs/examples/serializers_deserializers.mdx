@@ -1,0 +1,104 @@
+---
+id: formLibExampleSerializersDeserializers
+slug: /form-lib/examples/serializers-deserializers
+title: Serializers & Deserializers
+summary: No need for a 1:1 map of your API with your form fields, be creative!
+tags: ['forms', 'kibana', 'dev']
+date: 2021-04-14
+---
+
+Forms help users edit data. This data is often persisted, for example saved in Elasticsearch. When it's persisted, the shape of the data typically reflects the concerns of the domain or the persistence medium. When it's edited in a form, the shape of the data reflects different concerns, such as UI state. Data is **deserialized** from its persisted shape to its form-editable shape and **serialized** from its form-editable shape to its persisted shape.
+
+With that in mind, you can pass the following handlers to the form
+
+* **deserializer**: A function that converts the persisted shape to the form-editable shape.
+* **serializer**: A function that converts the form-editable shape to the persisted shape.
+
+Let's see it through an example.
+
+```js
+// This is the persisted shape of our data
+interface MyForm {
+  name: string;
+  customLabel: string;
+}
+
+// This is the internal fields we will need in our form
+interface MyFormUI {
+  name: string;
+  customLabel: string;
+  showAdvancedSettings: boolean;
+}
+
+const formDeserializer = ({ name, customLabel }: MyForm): MyFormUI => {
+  // Show the advanced settings if a custom label is provided
+  const showAdvancedSettings = Boolean(customLabel);
+
+  return {
+    name,
+    customLabel,
+    showAdvancedSettings,
+  };
+};
+
+const formSerializer = ({ name, customLabel }: MyFormUI): MyForm => {
+  // We don't forward the "showAdvancedSettings" field
+  return { name, customLabel };
+};
+
+
+const schema: FormSchema<MyFormUI> = {
+  name: { label: 'Name' },
+  customLabel: { label: 'CustomLabel' },
+  showAdvancedSettings: {
+    label: 'Show advanced settings',
+    defaultValue: false,
+  },
+};
+
+export const SerializersAndDeserializers = () => {
+  // Data coming from the server
+  const fetchedData: MyForm = {
+    name: 'My resource',
+    customLabel: 'My custom label',
+  };
+
+  const { form } = useForm<MyForm, MyFormUI>({
+    defaultValue: fetchedData,
+    schema,
+    deserializer: formDeserializer,
+    serializer: formSerializer,
+  });
+
+  const [{ showAdvancedSettings }] = useFormData({
+    form,
+    watch: ['showAdvancedSettings'],
+  });
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      console.log(data);
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <UseField path="name" component={TextField} />
+      <UseField path="showAdvancedSettings" component={ToggleField} />
+
+      <EuiSpacer />
+
+      {/* We don't remove it from the DOM as we would lose the value entered in the field. */}
+      <div style={{ display: showAdvancedSettings ? 'block' : 'none' }}>
+        <UseField path="customLabel" component={TextField} />
+      </div>
+      <EuiSpacer />
+
+      <EuiButton onClick={submitForm} fill disabled={form.isSubmitted && form.isValid === false}>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+```

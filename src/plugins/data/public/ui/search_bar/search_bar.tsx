@@ -1,42 +1,28 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
+import { EuiIconProps } from '@elastic/eui';
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
-import {
-  IDataPluginServices,
-  TimeRange,
-  Query,
-  Filter,
-  IIndexPattern,
-  FilterBar,
-  SavedQuery,
-} from '../..';
-import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
-import { SavedQueryAttributes, TimeHistoryContract } from '../../query';
-import { SavedQueryMeta, SavedQueryManagementComponent, SaveQueryForm } from '..';
+
+import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
+import { IDataPluginServices } from '../../types';
+import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
+import { FilterBar } from '../filter_bar/filter_bar';
+import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import { SavedQueryManagementComponent } from '../saved_query_management';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -81,6 +67,13 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  indicateNoData?: boolean;
+
+  placeholder?: string;
+  isClearable?: boolean;
+  iconType?: EuiIconProps['type'];
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -106,8 +99,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private services = this.props.kibana.services;
   private savedQueryService = this.services.data.query.savedQueries;
-  public filterBarRef: Element | null = null;
-  public filterBarWrapperRef: Element | null = null;
 
   public static getDerivedStateFromProps(nextProps: SearchBarProps, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
@@ -218,21 +209,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
-  public setFilterBarHeight = () => {
-    requestAnimationFrame(() => {
-      const height =
-        this.filterBarRef && this.state.isFiltersVisible ? this.filterBarRef.clientHeight : 0;
-      if (this.filterBarWrapperRef) {
-        this.filterBarWrapperRef.setAttribute('style', `height: ${height}px`);
-      }
-    });
-  };
-
-  // member-ordering rules conflict with use-before-declaration rules
-  /* eslint-disable */
-  public ro = new ResizeObserver(this.setFilterBarHeight);
-  /* eslint-enable */
-
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
 
@@ -336,6 +312,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             },
           });
         }
+        this.services.usageCollection?.reportUiCounter(
+          this.services.appName,
+          METRIC_TYPE.CLICK,
+          'query_submitted'
+        );
       }
     );
   };
@@ -354,20 +335,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.props.onSavedQueryUpdated(savedQuery);
     }
   };
-
-  public componentDidMount() {
-    if (this.filterBarRef) {
-      this.setFilterBarHeight();
-      this.ro.observe(this.filterBarRef);
-    }
-  }
-
-  public componentDidUpdate() {
-    if (this.filterBarRef) {
-      this.setFilterBarHeight();
-      this.ro.unobserve(this.filterBarRef);
-    }
-  }
 
   public render() {
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
@@ -408,6 +375,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataTestSubj={this.props.dataTestSubj}
+          indicateNoData={this.props.indicateNoData}
+          placeholder={this.props.placeholder}
+          isClearable={this.props.isClearable}
+          iconType={this.props.iconType}
+          nonKqlMode={this.props.nonKqlMode}
+          nonKqlModeHelpText={this.props.nonKqlModeHelpText}
         />
       );
     }
@@ -415,34 +388,24 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let filterBar;
     if (this.shouldRenderFilterBar()) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
       filterBar = (
-        <div
-          id="GlobalFilterGroup"
-          ref={node => {
-            this.filterBarWrapperRef = node;
-          }}
-          className={filterGroupClasses}
-        >
-          <div
-            ref={node => {
-              this.filterBarRef = node;
-            }}
-          >
-            <FilterBar
-              className="globalFilterGroup__filterBar"
-              filters={this.props.filters!}
-              onFiltersUpdated={this.props.onFiltersUpdated}
-              indexPatterns={this.props.indexPatterns!}
-            />
-          </div>
+        <div id="GlobalFilterGroup" className={filterGroupClasses}>
+          <FilterBar
+            className="globalFilterGroup__filterBar"
+            filters={this.props.filters!}
+            onFiltersUpdated={this.props.onFiltersUpdated}
+            indexPatterns={this.props.indexPatterns!}
+            appName={this.services.appName}
+          />
         </div>
       );
     }
 
     return (
-      <div className="globalQueryBar">
+      <div className="globalQueryBar" data-test-subj="globalQueryBar">
         {queryBar}
         {filterBar}
 
@@ -459,7 +422,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
             savedQueryService={this.savedQueryService}
-            onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
+            onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
             showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
@@ -470,4 +433,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 }
 
-export const SearchBar = injectI18n(withKibana(SearchBarUI));
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default injectI18n(withKibana(SearchBarUI));

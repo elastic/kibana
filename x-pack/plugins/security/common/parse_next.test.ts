@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { parseNext } from './parse_next';
@@ -32,6 +33,15 @@ describe('parseNext', () => {
       const hash = '/discover/New-Saved-Search';
       const href = `${basePath}/login?next=${next}#${hash}`;
       expect(parseNext(href, basePath)).toEqual(`${next}#${hash}`);
+    });
+
+    it('should properly handle multiple next with hash', () => {
+      const basePath = '/iqf';
+      const next1 = `${basePath}/app/kibana`;
+      const next2 = `${basePath}/app/ml`;
+      const hash = '/discover/New-Saved-Search';
+      const href = `${basePath}/login?next=${next1}&next=${next2}#${hash}`;
+      expect(parseNext(href, basePath)).toEqual(`${next1}#${hash}`);
     });
 
     it('should properly decode special characters', () => {
@@ -116,6 +126,14 @@ describe('parseNext', () => {
       const hash = '/discover/New-Saved-Search';
       const href = `/login?next=${next}#${hash}`;
       expect(parseNext(href)).toEqual(`${next}#${hash}`);
+    });
+
+    it('should properly handle multiple next with hash', () => {
+      const next1 = '/app/kibana';
+      const next2 = '/app/ml';
+      const hash = '/discover/New-Saved-Search';
+      const href = `/login?next=${next1}&next=${next2}#${hash}`;
+      expect(parseNext(href)).toEqual(`${next1}#${hash}`);
     });
 
     it('should properly decode special characters', () => {

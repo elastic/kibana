@@ -1,0 +1,52 @@
+{
+  "task": {
+    "properties": {
+      "taskType": {
+        "type": "keyword"
+      },
+      "scheduledAt": {
+        "type": "date"
+      },
+      "runAt": {
+        "type": "date"
+      },
+      "startedAt": {
+        "type": "date"
+      },
+      "retryAt": {
+        "type": "date"
+      },
+      "schedule": {
+        "properties": {
+          "interval": {
+            "type": "keyword"
+          }
+        }
+      },
+      "attempts": {
+        "type": "integer"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "traceparent": {
+        "type": "text"
+      },
+      "params": {
+        "type": "text"
+      },
+      "state": {
+        "type": "text"
+      },
+      "user": {
+        "type": "keyword"
+      },
+      "scope": {
+        "type": "keyword"
+      },
+      "ownerId": {
+        "type": "keyword"
+      }
+    }
+  }
+}

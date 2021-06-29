@@ -1,56 +1,45 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContentHeader,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-
 import { remoteClustersUrl } from '../../../services/documentation';
 
-export const RemoteClusterPageTitle = ({ title }) => (
-  <Fragment>
-    <EuiSpacer size="xs" />
+import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-    <EuiPageContentHeader>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="l" data-test-subj="remoteClusterPageTitle">
-            <h1>{title}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
+export const RemoteClusterPageTitle = ({ title, description }) => (
+  <>
+    <EuiPageHeader
+      bottomBorder
+      pageTitle={<span data-test-subj="remoteClusterPageTitle">{title}</span>}
+      rightSideItems={[
+        <EuiButtonEmpty
+          size="s"
+          flush="right"
+          href={remoteClustersUrl}
+          target="_blank"
+          iconType="help"
+          data-test-subj="remoteClusterDocsButton"
+        >
+          <FormattedMessage
+            id="xpack.remoteClusters.readDocsButtonLabel"
+            defaultMessage="Remote cluster docs"
+          />
+        </EuiButtonEmpty>,
+      ]}
+      description={description}
+    />
 
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={remoteClustersUrl}
-            target="_blank"
-            iconType="help"
-            data-test-subj="remoteClusterDocsButton"
-          >
-            <FormattedMessage
-              id="xpack.remoteClusters.readDocsButtonLabel"
-              defaultMessage="Remote cluster docs"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPageContentHeader>
-  </Fragment>
+    <EuiSpacer size="l" />
+  </>
 );
 
 RemoteClusterPageTitle.propTypes = {
   title: PropTypes.node.isRequired,
+  description: PropTypes.node,
 };

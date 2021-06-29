@@ -1,31 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiPopover,
-  EuiPopoverProps,
   EuiSpacer,
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment, lazy, Suspense } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, Component, Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { isReservedSpace } from '../../../../common';
-import { Space } from '../../../../common/model/space';
-import { SpaceAvatar } from '../../../space_avatar';
-import { SpaceValidator, toSpaceIdentifier } from '../../lib';
+import { getSpaceAvatarComponent } from '../../../space_avatar';
+import type { SpaceValidator } from '../../lib';
+import { toSpaceIdentifier } from '../../lib';
 import { SectionPanel } from '../section_panel';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { SpaceIdentifier } from './space_identifier';
+
+// No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
+const LazySpaceAvatar = lazy(() =>
+  getSpaceAvatarComponent().then((component) => ({ default: component }))
+);
 
 interface Props {
   validator: SpaceValidator;
@@ -60,7 +69,7 @@ export class CustomizeSpace extends Component<Props, State> {
     };
 
     return (
-      <SectionPanel collapsible={false} title={panelTitle} description={panelTitle}>
+      <SectionPanel title={panelTitle} description={panelTitle}>
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="xs">
@@ -75,65 +84,27 @@ export class CustomizeSpace extends Component<Props, State> {
           description={this.getPanelDescription()}
           fullWidth
         >
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('xpack.spaces.management.manageSpacePage.nameFormRowLabel', {
-                  defaultMessage: 'Name',
-                })}
-                {...validator.validateSpaceName(this.props.space)}
-                fullWidth
-              >
-                <EuiFieldText
-                  name="name"
-                  placeholder={i18n.translate(
-                    'xpack.spaces.management.manageSpacePage.awesomeSpacePlaceholder',
-                    {
-                      defaultMessage: 'Awesome space',
-                    }
-                  )}
-                  value={name}
-                  onChange={this.onNameChange}
-                  fullWidth
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFormRow
-                label={i18n.translate(
-                  'xpack.spaces.management.manageSpacePage.avatarFormRowLabel',
-                  {
-                    defaultMessage: 'Avatar',
-                  }
-                )}
-              >
-                <EuiPopover
-                  id="customizeAvatarPopover"
-                  button={
-                    <button
-                      title={i18n.translate(
-                        'xpack.spaces.management.manageSpacePage.clickToCustomizeTooltip',
-                        {
-                          defaultMessage: 'Click to customize this space avatar',
-                        }
-                      )}
-                      onClick={this.togglePopover}
-                    >
-                      <SpaceAvatar space={this.props.space} size="l" />
-                    </button>
-                  }
-                  closePopover={this.closePopover}
-                  {...extraPopoverProps}
-                  ownFocus={true}
-                  isOpen={this.state.customizingAvatar}
-                >
-                  <div style={{ maxWidth: 240 }}>
-                    <CustomizeSpaceAvatar space={this.props.space} onChange={this.onAvatarChange} />
-                  </div>
-                </EuiPopover>
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFormRow
+            label={i18n.translate('xpack.spaces.management.manageSpacePage.nameFormRowLabel', {
+              defaultMessage: 'Name',
+            })}
+            {...validator.validateSpaceName(this.props.space)}
+            fullWidth
+          >
+            <EuiFieldText
+              name="name"
+              data-test-subj="addSpaceName"
+              placeholder={i18n.translate(
+                'xpack.spaces.management.manageSpacePage.awesomeSpacePlaceholder',
+                {
+                  defaultMessage: 'Awesome space',
+                }
+              )}
+              value={name}
+              onChange={this.onNameChange}
+              fullWidth
+            />
+          </EuiFormRow>
 
           <EuiSpacer />
 
@@ -149,6 +120,7 @@ export class CustomizeSpace extends Component<Props, State> {
           )}
 
           <EuiFormRow
+            data-test-subj="optionalDescription"
             label={i18n.translate(
               'xpack.spaces.management.manageSpacePage.spaceDescriptionFormRowLabel',
               {
@@ -165,12 +137,46 @@ export class CustomizeSpace extends Component<Props, State> {
             fullWidth
           >
             <EuiTextArea
+              data-test-subj="descriptionSpaceText"
               name="description"
               value={description}
               onChange={this.onDescriptionChange}
               fullWidth
               rows={2}
             />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('xpack.spaces.management.manageSpacePage.avatarFormRowLabel', {
+              defaultMessage: 'Avatar',
+            })}
+          >
+            <EuiPopover
+              id="customizeAvatarPopover"
+              button={
+                <button
+                  title={i18n.translate(
+                    'xpack.spaces.management.manageSpacePage.clickToCustomizeTooltip',
+                    {
+                      defaultMessage: 'Click to customize this space avatar',
+                    }
+                  )}
+                  onClick={this.togglePopover}
+                >
+                  <Suspense fallback={<EuiLoadingSpinner />}>
+                    <LazySpaceAvatar space={this.props.space} size="l" />
+                  </Suspense>
+                </button>
+              }
+              closePopover={this.closePopover}
+              {...extraPopoverProps}
+              ownFocus={true}
+              isOpen={this.state.customizingAvatar}
+            >
+              <div style={{ maxWidth: 240 }}>
+                <CustomizeSpaceAvatar space={this.props.space} onChange={this.onAvatarChange} />
+              </div>
+            </EuiPopover>
           </EuiFormRow>
         </EuiDescribedFormGroup>
       </SectionPanel>

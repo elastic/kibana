@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
 
-import { keyCodes } from '@elastic/eui';
+import { keys } from '@elastic/eui';
 import { PanelContextProvider } from '../context';
 import { Resizer, ResizerMouseEvent, ResizerKeyDownEvent } from '../components/resizer';
 import { PanelRegistry } from '../registry';
@@ -70,16 +59,16 @@ export function PanelsContainer({
 
   const handleKeyDown = useCallback(
     (ev: ResizerKeyDownEvent) => {
-      const { keyCode } = ev;
+      const { key } = ev;
 
-      if (keyCode === keyCodes.LEFT || keyCode === keyCodes.RIGHT) {
+      if (key === keys.ARROW_LEFT || key === keys.ARROW_RIGHT) {
         ev.preventDefault();
 
         const { current: registry } = registryRef;
         const [left, right] = registry.getPanels();
 
-        const leftPercent = left.width - (keyCode === keyCodes.LEFT ? 1 : -1);
-        const rightPercent = right.width - (keyCode === keyCodes.RIGHT ? 1 : -1);
+        const leftPercent = left.width - (key === keys.ARROW_LEFT ? 1 : -1);
+        const rightPercent = right.width - (key === keys.ARROW_RIGHT ? 1 : -1);
 
         left.setWidth(leftPercent);
         right.setWidth(rightPercent);
@@ -121,7 +110,7 @@ export function PanelsContainer({
         className={className}
         ref={containerRef}
         style={{ display: 'flex', height: '100%', width: '100%' }}
-        onMouseMove={event => {
+        onMouseMove={(event) => {
           if (state.isDragging) {
             const { clientX: x } = event;
             const { current: registry } = registryRef;

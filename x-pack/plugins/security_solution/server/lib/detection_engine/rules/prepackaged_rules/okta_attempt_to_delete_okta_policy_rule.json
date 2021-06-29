@@ -1,0 +1,37 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects attempts to delete a rule within an Okta policy. An adversary may attempt to delete an Okta policy rule in order to weaken an organization's security controls.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if Okta MFA rules are regularly modified in your organization."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-okta*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Attempt to Delete an Okta Policy Rule",
+  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:okta.system and event.action:policy.rule.delete\n",
+  "references": [
+    "https://help.okta.com/en/prod/Content/Topics/Security/Security_Policies.htm",
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "d5d86bf5-cf0c-4c06-b688-53fdc072fdfd",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Monitoring"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

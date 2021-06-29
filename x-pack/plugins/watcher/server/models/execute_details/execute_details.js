@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { omit, isUndefined } from 'lodash';
+import { omitBy, isUndefined } from 'lodash';
 
 export class ExecuteDetails {
   constructor(props) {
@@ -22,14 +23,14 @@ export class ExecuteDetails {
     };
 
     const result = {
-      trigger_data: omit(triggerData, isUndefined),
+      trigger_data: omitBy(triggerData, isUndefined),
       ignore_condition: this.ignoreCondition,
       alternative_input: this.alternativeInput,
       action_modes: this.actionModes,
       record_execution: this.recordExecution,
     };
 
-    return omit(result, isUndefined);
+    return omitBy(result, isUndefined);
   }
 
   // generate ExecuteDetails object from kibana response

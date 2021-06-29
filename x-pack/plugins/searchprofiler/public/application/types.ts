@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface BreakdownItem {
@@ -49,7 +50,14 @@ export interface Operation {
   parent: Operation | null;
   children: Operation[];
 
-  // Only exists on top level
+  /**
+   * Only exists on top level.
+   *
+   * @remark
+   * For now, when we init profile data for rendering we take a top-level
+   * operation and designate it the root of the operations tree - this is not
+   * information we get from ES.
+   */
   treeRoot?: Operation;
 
   depth?: number;

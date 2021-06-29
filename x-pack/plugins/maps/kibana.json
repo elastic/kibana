@@ -1,0 +1,42 @@
+{
+  "id": "maps",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "maps"
+  ],
+  "requiredPlugins": [
+    "licensing",
+    "features",
+    "inspector",
+    "data",
+    "fileUpload",
+    "uiActions",
+    "navigation",
+    "visualizations",
+    "dashboard",
+    "embeddable",
+    "mapsEms",
+    "usageCollection",
+    "savedObjects",
+    "share",
+    "presentationUtil"
+  ],
+  "optionalPlugins": [
+    "home",
+    "savedObjectsTagging",
+    "charts"
+  ],
+  "ui": true,
+  "server": true,
+  "extraPublicDirs": [
+    "common/constants"
+  ],
+  "requiredBundles": [
+    "kibanaReact",
+    "kibanaUtils",
+    "home",
+    "mapsEms"
+  ]
+}

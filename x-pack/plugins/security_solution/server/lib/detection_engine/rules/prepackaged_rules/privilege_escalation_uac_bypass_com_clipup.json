@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies attempts to bypass User Account Control (UAC) by abusing an elevated COM Interface to launch a rogue Windows ClipUp program. Attackers may attempt to bypass UAC to stealthily execute code with elevated permissions.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "UAC Bypass Attempt with IEditionUpgradeManager Elevated COM Interface",
+  "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"Clipup.exe\" and\n  not process.executable : \"C:\\\\Windows\\\\System32\\\\ClipUp.exe\" and process.parent.name : \"dllhost.exe\" and\n  /* CLSID of the Elevated COM Interface IEditionUpgradeManager */\n  process.parent.args : \"/Processid:{BD54C901-076B-434E-B6C7-17C531F4AB41}\"\n",
+  "references": [
+    "https://github.com/hfiref0x/UACME"
+  ],
+  "risk_score": 73,
+  "rule_id": "b90cdde7-7e0d-4359-8bf0-2c112ce2008a",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/",
+          "subtechnique": [
+            {
+              "id": "T1548.002",
+              "name": "Bypass User Access Control",
+              "reference": "https://attack.mitre.org/techniques/T1548/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

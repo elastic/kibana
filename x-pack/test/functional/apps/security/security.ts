@@ -1,30 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
   const spaces = getService('spaces');
 
-  describe('Security', function() {
-    this.tags('smoke');
+  describe('Security', function () {
+    this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {
-        await esArchiver.load('empty_kibana');
+        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
         await PageObjects.security.forceLogout();
       });
 
       after(async () => {
-        await esArchiver.unload('empty_kibana');
+        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
       });
 
       afterEach(async () => {
@@ -40,7 +41,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
           expectSuccess: false,
         });
         const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
-        expect(errorMessage).to.be('Invalid username or password. Please try again.');
+        expect(errorMessage).to.be('Username or password is incorrect. Please try again.');
       });
 
       it('displays message acknowledging logout', async () => {
@@ -48,7 +49,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.security.logout();
 
         const logoutMessage = await testSubjects.getVisibleText('loginInfoMessage');
-        expect(logoutMessage).to.eql('You have logged out of Kibana.');
+        expect(logoutMessage).to.eql('You have logged out of Elastic.');
       });
 
       describe('within a non-default space', async () => {
@@ -67,7 +68,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('logging out of a non-default space redirects to the login page at the server root', async () => {
-          await PageObjects.security.login(null, null, {
+          await PageObjects.security.login(undefined, undefined, {
             expectSpaceSelector: true,
           });
 

@@ -1,0 +1,158 @@
+/**
+ * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
+ */
+// stylelint-disable selector-no-qualifying-type
+doc-table {
+  @include euiScrollBar;
+  overflow: auto;
+  flex: 1 1 100%;
+  flex-direction: column; /* 1 */
+
+  th {
+    text-align: left;
+    font-weight: bold;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: $euiZLevel1;
+    opacity: .5;
+  }
+}
+
+.kbnDocTable__container.loading {
+  opacity: .5;
+}
+
+.kbnDocTable {
+  font-size: $euiFontSizeXS;
+
+  th {
+    white-space: nowrap;
+    padding-right: $euiSizeS;
+
+    .fa {
+      font-size: 1.1em;
+    }
+  }
+}
+
+.kbn-table,
+.kbnDocTable {
+  /**
+  *  Style ES document _source in table view <dt>key:<dt><dd>value</dd>
+  *  Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
+  *  row in the Context Log.
+  */
+
+  dl.source {
+    margin-bottom: 0;
+    line-height: 2em;
+    word-break: break-word;
+
+    dt,
+    dd {
+      display: inline;
+    }
+
+    dt {
+      background-color: transparentize(shade($euiColorPrimary, 20%), .9);
+      color: $euiTextColor;
+      padding: ($euiSizeXS / 2) $euiSizeXS;
+      margin-right: $euiSizeXS;
+      word-break: normal;
+      border-radius: $euiBorderRadius;
+    }
+  }
+}
+
+.kbnDocTable__row {
+  td {
+    position: relative;
+
+    &:hover {
+      .kbnDocTableRowFilterButton {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.kbnDocTable__row--highlight {
+  td,
+  .kbnDocTableRowFilterButton {
+    background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  }
+}
+
+.kbnDocTable__bar {
+  margin: $euiSizeXS $euiSizeXS 0;
+}
+
+.kbnDocTable__bar--footer {
+  position: relative;
+  margin: -($euiSize * 3) $euiSizeXS 0;
+}
+
+.kbnDocTable__padBottom {
+  padding-bottom: $euiSizeXL;
+}
+
+.kbnDocTable__error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 0 100%;
+  text-align: center;
+}
+
+.truncate-by-height {
+  overflow: hidden;
+}
+
+.table {
+  // Nesting
+  .table {
+    background-color: $euiColorEmptyShade;
+  }
+}
+
+.kbn-table {
+  // sub tables should not have a leading border
+  .table .table {
+    margin-bottom: 0;
+
+    tr:first-child > td {
+      border-top: none;
+    }
+
+    td.field-name {
+      font-weight: $euiFontWeightBold;
+    }
+  }
+}
+
+table {
+  th {
+    i.fa-sort {
+      color: $euiColorLightShade;
+    }
+
+    button.fa-sort-asc,
+    button.fa-sort-down,
+    i.fa-sort-asc,
+    i.fa-sort-down {
+      color: $euiColorPrimary;
+    }
+
+    button.fa-sort-desc,
+    button.fa-sort-up,
+    i.fa-sort-desc,
+    i.fa-sort-up {
+      color: $euiColorPrimary;
+    }
+  }
+}

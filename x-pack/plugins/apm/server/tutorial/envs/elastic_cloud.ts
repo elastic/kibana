@@ -1,11 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
+import {
+  INSTRUCTION_VARIANT,
+  TutorialSchema,
+  InstructionSetSchema,
+} from '../../../../../../src/plugins/home/server';
 
 import {
   createNodeAgentInstructions,
@@ -16,11 +21,14 @@ import {
   createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
-  createDotNetAgentInstructions
+  createDotNetAgentInstructions,
+  createPhpAgentInstructions,
 } from '../instructions/apm_agent_instructions';
 import { CloudSetup } from '../../../../cloud/server';
 
-export function createElasticCloudInstructions(cloudSetup?: CloudSetup) {
+export function createElasticCloudInstructions(
+  cloudSetup?: CloudSetup
+): TutorialSchema['elasticCloud'] {
   const apmServerUrl = cloudSetup?.apm.url;
   const instructionSets = [];
 
@@ -31,15 +39,17 @@ export function createElasticCloudInstructions(cloudSetup?: CloudSetup) {
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 
   return {
-    instructionSets
+    instructionSets,
   };
 }
 
-function getApmServerInstructionSet(cloudSetup?: CloudSetup) {
+function getApmServerInstructionSet(
+  cloudSetup?: CloudSetup
+): InstructionSetSchema {
   const cloudId = cloudSetup?.cloudId;
   return {
     title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
-      defaultMessage: 'APM Server'
+      defaultMessage: 'APM Server',
     }),
     instructionVariants: [
       {
@@ -50,60 +60,66 @@ function getApmServerInstructionSet(cloudSetup?: CloudSetup) {
             textPre: i18n.translate('xpack.apm.tutorial.elasticCloud.textPre', {
               defaultMessage:
                 'To enable the APM Server go to [the Elastic Cloud console](https://cloud.elastic.co/deployments?q={cloudId}) and enable APM in the deployment settings. Once enabled, refresh this page.',
-              values: { cloudId }
-            })
-          }
-        ]
-      }
-    ]
+              values: { cloudId },
+            }),
+          },
+        ],
+      },
+    ],
   };
 }
 
-function getApmAgentInstructionSet(cloudSetup?: CloudSetup) {
+function getApmAgentInstructionSet(
+  cloudSetup?: CloudSetup
+): InstructionSetSchema {
   const apmServerUrl = cloudSetup?.apm.url;
   const secretToken = cloudSetup?.apm.secretToken;
 
   return {
     title: i18n.translate('xpack.apm.tutorial.elasticCloudInstructions.title', {
-      defaultMessage: 'APM Agents'
+      defaultMessage: 'APM Agents',
     }),
     instructionVariants: [
       {
         id: INSTRUCTION_VARIANT.NODE,
-        instructions: createNodeAgentInstructions(apmServerUrl, secretToken)
+        instructions: createNodeAgentInstructions(apmServerUrl, secretToken),
       },
       {
         id: INSTRUCTION_VARIANT.DJANGO,
-        instructions: createDjangoAgentInstructions(apmServerUrl, secretToken)
+        instructions: createDjangoAgentInstructions(apmServerUrl, secretToken),
       },
       {
         id: INSTRUCTION_VARIANT.FLASK,
-        instructions: createFlaskAgentInstructions(apmServerUrl, secretToken)
+        instructions: createFlaskAgentInstructions(apmServerUrl, secretToken),
       },
       {
         id: INSTRUCTION_VARIANT.RAILS,
-        instructions: createRailsAgentInstructions(apmServerUrl, secretToken)
+        instructions: createRailsAgentInstructions(apmServerUrl, secretToken),
       },
       {
         id: INSTRUCTION_VARIANT.RACK,
-        instructions: createRackAgentInstructions(apmServerUrl, secretToken)
+        instructions: createRackAgentInstructions(apmServerUrl, secretToken),
       },
       {
         id: INSTRUCTION_VARIANT.JS,
-        instructions: createJsAgentInstructions(apmServerUrl)
+        instructions: createJsAgentInstructions(apmServerUrl),
       },
       {
         id: INSTRUCTION_VARIANT.GO,
-        instructions: createGoAgentInstructions(apmServerUrl, secretToken)
+        instructions: createGoAgentInstructions(apmServerUrl, secretToken),
       },
       {
         id: INSTRUCTION_VARIANT.JAVA,
-        instructions: createJavaAgentInstructions(apmServerUrl, secretToken)
+        instructions: createJavaAgentInstructions(apmServerUrl, secretToken),
       },
       {
         id: INSTRUCTION_VARIANT.DOTNET,
-        instructions: createDotNetAgentInstructions(apmServerUrl, secretToken)
-      }
-    ]
+        instructions: createDotNetAgentInstructions(apmServerUrl, secretToken),
+      },
+      {
+        id: INSTRUCTION_VARIANT.PHP,
+        instructions: createPhpAgentInstructions(apmServerUrl, secretToken),
+      },
+    ],
   };
 }

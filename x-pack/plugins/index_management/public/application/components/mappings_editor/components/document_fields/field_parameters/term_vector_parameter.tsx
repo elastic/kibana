@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -39,7 +40,7 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
       defaultToggleValue={defaultToggleValue}
     >
       <FormDataProvider pathsToWatch="term_vector">
-        {formData => (
+        {(formData) => (
           <>
             <UseField
               path="term_vector"
@@ -56,14 +57,17 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
             {formData.term_vector === 'with_positions_offsets' && (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut color="warning">
-                  <p>
-                    {i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldWarningMessage', {
+                <EuiCallOut
+                  size="s"
+                  color="warning"
+                  title={i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.termVectorFieldWarningMessage',
+                    {
                       defaultMessage:
                         'Setting "With positions and offsets" will double the size of a field’s index.',
-                    })}
-                  </p>
-                </EuiCallOut>
+                    }
+                  )}
+                />
               </>
             )}
           </>

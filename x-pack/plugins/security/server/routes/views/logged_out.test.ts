@@ -1,34 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  RequestHandler,
-  RouteConfig,
-  kibanaResponseFactory,
-} from '../../../../../../src/core/server';
-import { Authentication } from '../../authentication';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
+import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
+
+import type { Session } from '../../session_management';
+import { sessionMock } from '../../session_management/session.mock';
+import { routeDefinitionParamsMock } from '../index.mock';
 import { defineLoggedOutRoutes } from './logged_out';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
-import { routeDefinitionParamsMock } from '../index.mock';
-
 describe('LoggedOut view routes', () => {
-  let authc: jest.Mocked<Authentication>;
-  let routeHandler: RequestHandler<any, any, any, 'get'>;
+  let session: jest.Mocked<PublicMethodsOf<Session>>;
+  let routeHandler: HttpResourcesRequestHandler<any, any, any>;
   let routeConfig: RouteConfig<any, any, any, 'get'>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
-    authc = routeParamsMock.authc;
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
 
     defineLoggedOutRoutes(routeParamsMock);
 
     const [
       loggedOutRouteConfig,
       loggedOutRouteHandler,
-    ] = routeParamsMock.router.get.mock.calls.find(
+    ] = routeParamsMock.httpResources.register.mock.calls.find(
       ([{ path }]) => path === '/security/logged_out'
     )!;
 
@@ -42,42 +42,28 @@ describe('LoggedOut view routes', () => {
   });
 
   it('redirects user to the root page if they have a session already.', async () => {
-    authc.getSessionInfo.mockResolvedValue({
-      provider: 'basic',
-      now: 0,
-      idleTimeoutExpiration: null,
-      lifespanExpiration: null,
-    });
+    session.get.mockResolvedValue(sessionMock.createValue());
 
     const request = httpServerMock.createKibanaRequest();
 
-    await expect(routeHandler({} as any, request, kibanaResponseFactory)).resolves.toEqual({
-      options: { headers: { location: '/mock-server-basepath/' } },
-      status: 302,
+    const responseFactory = httpResourcesMock.createResponseFactory();
+    await routeHandler({} as any, request, responseFactory);
+
+    expect(responseFactory.redirected).toHaveBeenCalledWith({
+      headers: { location: '/mock-server-basepath/' },
     });
 
-    expect(authc.getSessionInfo).toHaveBeenCalledWith(request);
+    expect(session.get).toHaveBeenCalledWith(request);
   });
 
   it('renders view if user does not have an active session.', async () => {
-    authc.getSessionInfo.mockResolvedValue(null);
+    session.get.mockResolvedValue(null);
 
     const request = httpServerMock.createKibanaRequest();
-    const contextMock = coreMock.createRequestHandlerContext();
+    const responseFactory = httpResourcesMock.createResponseFactory();
+    await routeHandler({} as any, request, responseFactory);
 
-    await expect(
-      routeHandler({ core: contextMock } as any, request, kibanaResponseFactory)
-    ).resolves.toEqual({
-      options: {
-        headers: {
-          'content-security-policy':
-            "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-        },
-      },
-      status: 200,
-    });
-
-    expect(authc.getSessionInfo).toHaveBeenCalledWith(request);
-    expect(contextMock.rendering.render).toHaveBeenCalledWith({ includeUserSettings: false });
+    expect(session.get).toHaveBeenCalledWith(request);
+    expect(responseFactory.renderAnonymousCoreApp).toHaveBeenCalledWith();
   });
 });

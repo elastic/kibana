@@ -1,36 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { Observable } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
-import { mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { mountWithI18nProvider, shallowWithI18nProvider } from '@kbn/test/jest';
 import dedent from 'dedent';
-import { UiSettingsParams, UserProvidedValues, UiSettingsType } from '../../../../core/public';
+import {
+  PublicUiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+} from '../../../../core/public';
 import { FieldSetting } from './types';
-import { AdvancedSettingsComponent } from './advanced_settings';
+import { AdvancedSettings } from './advanced_settings';
 import { notificationServiceMock, docLinksServiceMock } from '../../../../core/public/mocks';
 import { ComponentRegistry } from '../component_registry';
-
-jest.mock('ui/new_platform', () => ({
-  npStart: mockConfig(),
-}));
+import { Search } from './components/search';
 
 jest.mock('./components/field', () => ({
   Field: () => {
@@ -68,8 +58,7 @@ function mockConfig() {
     remove: (key: string) => Promise.resolve(true),
     isCustom: (key: string) => false,
     isOverridden: (key: string) => Boolean(config.getAll()[key].isOverridden),
-    getRegistered: () => ({} as Readonly<Record<string, UiSettingsParams>>),
-    overrideLocalDefault: (key: string, value: any) => {},
+    getRegistered: () => ({} as Readonly<Record<string, PublicUiSettingsParams>>),
     getUpdate$: () =>
       new Observable<{
         key: string;
@@ -89,7 +78,7 @@ function mockConfig() {
     getUpdateErrors$: () => new Observable<Error>(),
     get: (key: string, defaultOverride?: any): any => config.getAll()[key] || defaultOverride,
     get$: (key: string) => new Observable<any>(config.get(key)),
-    getAll: (): Readonly<Record<string, UiSettingsParams & UserProvidedValues>> => {
+    getAll: (): Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>> => {
       return {
         'test:array:setting': {
           ...defaultConfig,
@@ -233,10 +222,30 @@ function mockConfig() {
 }
 
 describe('AdvancedSettings', () => {
+  const defaultQuery = 'test:string:setting';
+  const mockHistory = {
+    listen: jest.fn(),
+  } as any;
+  const locationSpy = jest.spyOn(window, 'location', 'get');
+
+  afterAll(() => {
+    locationSpy.mockRestore();
+  });
+
+  const mockQuery = (query = defaultQuery) => {
+    locationSpy.mockImplementation(
+      () =>
+        ({
+          search: `?query=${query}`,
+        } as any)
+    );
+  };
+
   it('should render specific setting if given setting key', async () => {
+    mockQuery();
     const component = mountWithI18nProvider(
-      <AdvancedSettingsComponent
-        queryText="test:string:setting"
+      <AdvancedSettings
+        history={mockHistory}
         enableSaving={true}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
@@ -249,16 +258,16 @@ describe('AdvancedSettings', () => {
       component
         .find('Field')
         .filterWhere(
-          (n: ReactWrapper) =>
-            (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === defaultQuery
         )
     ).toHaveLength(1);
   });
 
   it('should render read-only when saving is disabled', async () => {
+    mockQuery();
     const component = mountWithI18nProvider(
-      <AdvancedSettingsComponent
-        queryText="test:string:setting"
+      <AdvancedSettings
+        history={mockHistory}
         enableSaving={false}
         toasts={notificationServiceMock.createStartContract().toasts}
         dockLinks={docLinksServiceMock.createStartContract().links}
@@ -271,10 +280,31 @@ describe('AdvancedSettings', () => {
       component
         .find('Field')
         .filterWhere(
-          (n: ReactWrapper) =>
-            (n.prop('setting') as Record<string, string>).name === 'test:string:setting'
+          (n: ReactWrapper) => (n.prop('setting') as Record<string, string>).name === defaultQuery
         )
         .prop('enableSaving')
     ).toBe(false);
+  });
+
+  it('should render unfiltered with query parsing error', async () => {
+    const badQuery = 'category:(accessibility))';
+    mockQuery(badQuery);
+    const { toasts } = notificationServiceMock.createStartContract();
+    const getComponent = () =>
+      shallowWithI18nProvider(
+        <AdvancedSettings
+          history={mockHistory}
+          enableSaving={false}
+          toasts={toasts}
+          dockLinks={docLinksServiceMock.createStartContract().links}
+          uiSettings={mockConfig().core.uiSettings}
+          componentRegistry={new ComponentRegistry().start}
+        />
+      );
+
+    expect(getComponent).not.toThrow();
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    const component = getComponent();
+    expect(component.find(Search).prop('query').text).toEqual('');
   });
 });

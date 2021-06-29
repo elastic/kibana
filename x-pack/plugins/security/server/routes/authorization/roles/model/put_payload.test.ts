@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getPutPayloadSchema } from './put_payload';
@@ -28,7 +29,7 @@ describe('Put payload schema', () => {
         kibana: [{ feature: { foo: ['!foo'] } }],
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"[kibana.0.feature.foo]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
+      `"[kibana.0.feature.foo.0]: only a-z, A-Z, 0-9, '_', and '-' are allowed"`
     );
   });
 

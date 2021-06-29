@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { KibanaPrivileges, Role } from '../../../../../../common/model';
+
+import type { Role } from '../../../../../../common/model';
+import { KibanaPrivileges } from '../../../model';
 import { RoleValidator } from '../../validate_role';
 import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { SimplePrivilegeSection } from './simple_privilege_section';
@@ -39,12 +42,15 @@ const buildProps = (customProps = {}) => {
       },
     ],
     features: [],
-    kibanaPrivileges: new KibanaPrivileges({
-      global: {},
-      space: {},
-      features: {},
-      reserved: {},
-    }),
+    kibanaPrivileges: new KibanaPrivileges(
+      {
+        global: {},
+        space: {},
+        features: {},
+        reserved: {},
+      },
+      []
+    ),
     intl: null as any,
     uiCapabilities: {
       navLinks: {},
@@ -57,6 +63,7 @@ const buildProps = (customProps = {}) => {
     editable: true,
     onChange: jest.fn(),
     validator: new RoleValidator(),
+    canCustomizeSubFeaturePrivileges: true,
     ...customProps,
   };
 };

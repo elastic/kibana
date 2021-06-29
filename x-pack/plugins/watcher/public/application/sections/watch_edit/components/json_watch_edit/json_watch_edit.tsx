@@ -1,20 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useState } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageContent,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ExecuteDetails } from '../../../../models/execute_details';
 import { getActionType } from '../../../../../../common/lib/get_action_type';
@@ -63,7 +56,7 @@ const EXECUTE_DETAILS_INITIAL_STATE = {
 
 function getActions(watch: BaseWatch) {
   const actions = (watch.watch && watch.watch.actions) || {};
-  return Object.keys(actions).map(actionKey => ({
+  return Object.keys(actions).map((actionKey) => ({
     actionId: actionKey,
     type: getActionType(actions[actionKey]),
     actionMode: ACTION_MODES.SIMULATE,
@@ -93,38 +86,33 @@ export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   );
   const executeWatchErrors = executeDetails.validate();
   const hasExecuteWatchErrors = !!Object.keys(executeWatchErrors).find(
-    errorKey => executeWatchErrors[errorKey].length >= 1
+    (errorKey) => executeWatchErrors[errorKey].length >= 1
   );
+
   return (
-    <EuiPageContent>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h1 data-test-subj="pageTitle">{pageTitle}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiTabs>
-        {WATCH_TABS.map((tab, index) => (
-          <EuiTab
-            onClick={() => {
-              setSelectedTab(tab.id);
-              setExecuteDetails(
-                new ExecuteDetails({
-                  ...executeDetails,
-                  actionModes: getActionModes(watchActions),
-                })
-              );
-            }}
-            isSelected={tab.id === selectedTab}
-            key={index}
-            data-test-subj="tab"
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={<span data-test-subj="pageTitle">{pageTitle}</span>}
+        bottomBorder
+        tabs={WATCH_TABS.map((tab, index) => ({
+          onClick: () => {
+            setSelectedTab(tab.id);
+            setExecuteDetails(
+              new ExecuteDetails({
+                ...executeDetails,
+                actionModes: getActionModes(watchActions),
+              })
+            );
+          },
+          isSelected: tab.id === selectedTab,
+          key: index,
+          'data-test-subj': 'tab',
+          label: tab.name,
+        }))}
+      />
+
       <EuiSpacer size="l" />
+
       {selectedTab === WATCH_SIMULATE_TAB && (
         <JsonWatchEditSimulate
           executeDetails={executeDetails}
@@ -134,7 +122,8 @@ export const JsonWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
           watchActions={watchActions}
         />
       )}
+
       {selectedTab === WATCH_EDIT_TAB && <JsonWatchEditForm />}
-    </EuiPageContent>
+    </EuiPageContentBody>
   );
 };

@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Observable, Subscription, combineLatest, of } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Server } from 'hapi';
+import { pick } from '@kbn/std';
 
+import type { RequestHandlerContext } from 'src/core/server';
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
@@ -29,7 +19,7 @@ import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
 import { CspConfigType, config as cspConfig } from '../csp';
 
-import { Router } from './router';
+import { IRouter, Router } from './router';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
@@ -38,18 +28,24 @@ import {
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   InternalHttpServiceSetup,
-  HttpServiceStart,
+  InternalHttpServiceStart,
+  InternalNotReadyHttpServiceSetup,
 } from './types';
 
-import { RequestHandlerContext } from '../../server';
 import { registerCoreHandlers } from './lifecycle_handlers';
+import {
+  ExternalUrlConfigType,
+  config as externalUrlConfig,
+  ExternalUrlConfig,
+} from '../external_url';
 
 interface SetupDeps {
   context: ContextSetup;
 }
 
 /** @internal */
-export class HttpService implements CoreService<InternalHttpServiceSetup, HttpServiceStart> {
+export class HttpService
+  implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
@@ -58,7 +54,8 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
   private readonly env: Env;
-  private notReadyServer?: Server;
+  private notReadyServer?: HttpServer;
+  private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -70,8 +67,10 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
-    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
-    this.httpServer = new HttpServer(logger, 'Kibana');
+      configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
+    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
+    const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
+    this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
@@ -89,32 +88,49 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    if (this.shouldListen(config)) {
-      await this.runNotReadyServer(config);
-    }
+    const notReadyServer = await this.setupNotReadyService({ config, context: deps.context });
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
 
     registerCoreHandlers(serverContract, config, this.env);
 
-    const contract: InternalHttpServiceSetup = {
+    this.internalSetup = {
       ...serverContract,
 
-      createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
+      notReadyServer,
+
+      externalUrl: new ExternalUrlConfig(config.externalUrl),
+
+      createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>(
+        path: string,
+        pluginId: PluginOpaqueId = this.coreContext.coreId
+      ) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
-        const router = new Router(path, this.log, enhanceHandler);
+        const router = new Router<Context>(path, this.log, enhanceHandler);
         registerRouter(router);
         return router;
       },
 
-      registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(
+      registerRouteHandlerContext: <
+        Context extends RequestHandlerContext,
+        ContextName extends keyof Context
+      >(
         pluginOpaqueId: PluginOpaqueId,
-        contextName: T,
-        provider: RequestHandlerContextProvider<T>
+        contextName: ContextName,
+        provider: RequestHandlerContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
-    return contract;
+    return this.internalSetup;
+  }
+
+  // this method exists because we need the start contract to create the `CoreStart` used to start
+  // the `plugin` and `legacy` services.
+  public getStartContract(): InternalHttpServiceStart {
+    return {
+      ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo']),
+      isListening: () => this.httpServer.isListening(),
+    };
   }
 
   public async start() {
@@ -134,21 +150,17 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
       await this.httpServer.start();
     }
 
-    return {
-      isListening: () => this.httpServer.isListening(),
-    };
+    return this.getStartContract();
   }
 
   /**
-   * Indicates if http server has configured to start listening on a configured port.
-   * We shouldn't start http service in two cases:
-   * 1. If `server.autoListen` is explicitly set to `false`.
-   * 2. When the process is run as dev cluster master in which case cluster manager
-   * will fork a dedicated process where http service will be set up instead.
+   * Indicates if http server is configured to start listening on a configured port.
+   * (if `server.autoListen` is not explicitly set to `false`.)
+   *
    * @internal
    * */
   private shouldListen(config: HttpConfig) {
-    return !this.coreContext.env.isDevClusterMaster && config.autoListen;
+    return config.autoListen;
   }
 
   public async stop() {
@@ -156,7 +168,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
       return;
     }
 
-    this.configSubscription.unsubscribe();
+    this.configSubscription?.unsubscribe();
     this.configSubscription = undefined;
 
     if (this.notReadyServer) {
@@ -166,14 +178,51 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     await this.httpsRedirectServer.stop();
   }
 
+  private async setupNotReadyService({
+    config,
+    context,
+  }: {
+    config: HttpConfig;
+    context: ContextSetup;
+  }): Promise<InternalNotReadyHttpServiceSetup | undefined> {
+    if (!this.shouldListen(config)) {
+      return;
+    }
+
+    const notReadySetup = await this.runNotReadyServer(config);
+
+    // We cannot use the real context container since the core services may not yet be ready
+    const fakeContext: RequestHandlerContextContainer = new Proxy(
+      context.createContextContainer(),
+      {
+        get: (target, property, receiver) => {
+          if (property === 'createHandler') {
+            return Reflect.get(target, property, receiver);
+          }
+          throw new Error(`Unexpected access from fake context: ${String(property)}`);
+        },
+      }
+    );
+
+    return {
+      registerRoutes: (path: string, registerCallback: (router: IRouter) => void) => {
+        const router = new Router(
+          path,
+          this.log,
+          fakeContext.createHandler.bind(null, this.coreContext.coreId)
+        );
+
+        registerCallback(router);
+        notReadySetup.registerRouterAfterListening(router);
+      },
+    };
+  }
+
   private async runNotReadyServer(config: HttpConfig) {
     this.log.debug('starting NotReady server');
-    const httpServer = new HttpServer(this.logger, 'NotReady');
-    const { server } = await httpServer.setup(config);
-    this.notReadyServer = server;
-    // use hapi server while KibanaResponseFactory doesn't allow specifying custom headers
-    // https://github.com/elastic/kibana/issues/33779
-    this.notReadyServer.route({
+    this.notReadyServer = new HttpServer(this.logger, 'NotReady', of(config.shutdownTimeout));
+    const notReadySetup = await this.notReadyServer.setup(config);
+    notReadySetup.server.route({
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
@@ -189,5 +238,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
       },
     });
     await this.notReadyServer.start();
+
+    return notReadySetup;
   }
 }

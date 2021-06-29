@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get, map, pick } from 'lodash';
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { Action } from '../../../common/models/action';
 import { WatchStatus } from '../watch_status';
 import { i18n } from '@kbn/i18n';
@@ -60,7 +61,7 @@ export class BaseWatch {
       isSystemWatch: this.isSystemWatch,
       watchStatus: this.watchStatus ? this.watchStatus.downstreamJson : undefined,
       watchErrors: this.watchErrors ? this.watchErrors.downstreamJson : undefined,
-      actions: map(this.actions, action => action.downstreamJson),
+      actions: map(this.actions, (action) => action.downstreamJson),
     };
 
     return json;
@@ -68,7 +69,7 @@ export class BaseWatch {
 
   // from Kibana
   static getPropsFromDownstreamJson(json) {
-    const actions = map(json.actions, action => {
+    const actions = map(json.actions, (action) => {
       return Action.fromDownstreamJson(action);
     });
 

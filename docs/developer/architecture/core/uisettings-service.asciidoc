@@ -1,0 +1,40 @@
+[[ui-settings-service]]
+== UI settings service
+
+NOTE: The UI settings service is available both server and client side.
+
+=== Server side usage
+
+The program interface to <<advanced-options, UI settings>>.
+It makes it possible for Kibana plugins to extend Kibana UI Settings Management with custom settings.
+
+See:
+
+- {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[UI settings service Setup API docs]
+
+[source,typescript]
+----
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup,Plugin } from 'kibana/server';
+
+export class MyPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.uiSettings.register({
+      custom: { 
+        value: '42',
+        schema: schema.string(),
+      },
+    });
+    const router = core.http.createRouter();
+    router.get({
+      path: 'my_plugin/{id}',
+      validate: …,
+    },
+    async (context, request, response) => {
+      const customSetting = await context.uiSettings.client.get('custom');
+      …
+    });
+  }
+}
+
+----

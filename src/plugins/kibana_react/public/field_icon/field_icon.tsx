@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 import classNames from 'classnames';
 import { EuiToken, EuiTokenProps } from '@elastic/eui';
@@ -25,11 +15,14 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'boolean'
     | 'conflict'
     | 'date'
+    | 'date_range'
     | 'geo_point'
     | 'geo_shape'
     | 'ip'
+    | 'ip_range'
     | 'murmur3'
     | 'number'
+    | 'number_range'
     | '_source'
     | 'string'
     | string
@@ -44,14 +37,17 @@ const defaultIcon = { iconType: 'questionInCircle', color: 'gray' };
 export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   boolean: { iconType: 'tokenBoolean' },
   // icon for an index pattern mapping conflict in discover
-  conflict: { iconType: 'alert', color: 'euiVisColor9' },
+  conflict: { iconType: 'alert', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
+  date_range: { iconType: 'tokenDate' },
   geo_point: { iconType: 'tokenGeo' },
   geo_shape: { iconType: 'tokenGeo' },
   ip: { iconType: 'tokenIP' },
+  ip_range: { iconType: 'tokenIP' },
   // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
   murmur3: { iconType: 'tokenFile' },
   number: { iconType: 'tokenNumber' },
+  number_range: { iconType: 'tokenNumber' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   string: { iconType: 'tokenString' },
   nested: { iconType: 'tokenNested' },

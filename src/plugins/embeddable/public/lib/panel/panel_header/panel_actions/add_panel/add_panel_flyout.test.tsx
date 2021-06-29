@@ -1,25 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as React from 'react';
+import { EuiFlyout } from '@elastic/eui';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { GetEmbeddableFactory } from '../../../../types';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
@@ -27,11 +16,11 @@ import {
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { ContainerInput } from '../../../../containers';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { coreMock } from '../../../../../../../../core/public/mocks';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { embeddablePluginMock } from '../../../../../mocks';
 
 function DummySavedObjectFinder(props: { children: React.ReactNode }) {
   return (
@@ -43,10 +32,10 @@ function DummySavedObjectFinder(props: { children: React.ReactNode }) {
 }
 
 test('createNewEmbeddable() add embeddable to container', async () => {
+  const { setup, doStart } = embeddablePluginMock.createInstance();
   const core = coreMock.createStart();
   const { overlays } = core;
   const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-    {},
     (() => null) as any,
     overlays
   );
@@ -55,7 +44,9 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       firstName: 'foo',
       lastName: 'bar',
     } as any);
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
+  setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
+  const start = doStart();
+  const getEmbeddableFactory = start.getEmbeddableFactory;
   const input: ContainerInput<{ firstName: string; lastName: string }> = {
     id: '1',
     panels: {},
@@ -67,15 +58,19 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       container={container}
       onClose={onClose}
       getFactory={getEmbeddableFactory}
-      getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
+      getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
       SavedObjectFinder={() => null}
+      showCreateNewMenu
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
+  // https://github.com/elastic/kibana/issues/64789
+  expect(component.exists(EuiFlyout)).toBe(false);
+
   expect(Object.values(container.getInput().panels).length).toBe(0);
   component.instance().createNewEmbeddable(CONTACT_CARD_EMBEDDABLE);
-  await new Promise(r => setTimeout(r, 1));
+  await new Promise((r) => setTimeout(r, 1));
 
   const ids = Object.keys(container.getInput().panels);
   const embeddableId = ids[0];
@@ -88,10 +83,10 @@ test('createNewEmbeddable() add embeddable to container', async () => {
 });
 
 test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()', async () => {
+  const { setup, doStart } = embeddablePluginMock.createInstance();
   const core = coreMock.createStart();
   const { overlays } = core;
   const contactCardEmbeddableFactory = new ContactCardEmbeddableFactory(
-    {},
     (() => null) as any,
     overlays
   );
@@ -100,7 +95,10 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       firstName: 'foo',
       lastName: 'bar',
     } as any);
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => contactCardEmbeddableFactory;
+
+  setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, contactCardEmbeddableFactory);
+  const start = doStart();
+  const getEmbeddableFactory = start.getEmbeddableFactory;
   const input: ContainerInput<{ firstName: string; lastName: string }> = {
     id: '1',
     panels: {},
@@ -112,11 +110,12 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       container={container}
       onClose={onClose}
       getFactory={getEmbeddableFactory}
-      getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
+      getAllFactories={start.getEmbeddableFactories}
       notifications={core.notifications}
-      SavedObjectFinder={props => <DummySavedObjectFinder {...props} />}
+      SavedObjectFinder={(props) => <DummySavedObjectFinder {...props} />}
+      showCreateNewMenu
     />
-  ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
+  ) as ReactWrapper<any, {}, AddPanelFlyout>;
 
   const spy = jest.fn();
   component.instance().createNewEmbeddable = spy;

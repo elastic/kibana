@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Windows services typically run as SYSTEM and can be used as a privilege escalation opportunity. Malware or penetration testers may run a shell as a service to gain SYSTEM permissions.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "System Shells via Services",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"services.exe\" and\n  process.name : (\"cmd.exe\", \"powershell.exe\") and\n  \n  /* Third party FP's */\n  not process.args : \"NVDisplay.ContainerLocalSystem\"\n",
+  "risk_score": 47,
+  "rule_id": "0022d47d-39c7-4f69-a232-4fe9dc7a3acd",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 9
+}

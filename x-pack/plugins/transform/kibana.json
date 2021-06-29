@@ -7,11 +7,26 @@
     "data",
     "home",
     "licensing",
-    "management"
+    "management",
+    "features",
+    "savedObjects",
+    "share"
   ],
   "optionalPlugins": [
     "security",
     "usageCollection"
   ],
-  "configPath": ["xpack", "transform"]
+  "configPath": ["xpack", "transform"],
+  "requiredBundles": [
+    "esUiShared",
+    "discover",
+    "kibanaUtils",
+    "kibanaReact",
+    "ml"
+  ],
+  "owner": {
+    "name": "Machine Learning UI",
+    "githubTeam": "ml-ui"
+  },
+  "description": "This plugin provides access to the transforms features provided by Elastic. Transforms enable you to convert existing Elasticsearch indices into summarized indices, which provide opportunities for new insights and analytics."
 }

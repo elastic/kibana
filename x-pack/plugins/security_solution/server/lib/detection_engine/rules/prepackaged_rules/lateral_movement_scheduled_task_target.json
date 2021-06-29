@@ -1,0 +1,61 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies remote scheduled task creations on a target host. This could be indicative of adversary lateral movement.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Remote Scheduled Task Creation",
+  "note": "## Triage and analysis\n\nDecode the base64 encoded tasks actions registry value to investigate the task configured action.",
+  "query": "/* Task Scheduler service incoming connection followed by TaskCache registry modification  */\n\nsequence by host.id, process.entity_id with maxspan = 1m\n   [network where process.name : \"svchost.exe\" and\n   network.direction == \"incoming\" and source.port >= 49152 and destination.port >= 49152 and\n   source.address != \"127.0.0.1\" and source.address != \"::1\"\n   ]\n   [registry where registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Schedule\\\\TaskCache\\\\Tasks\\\\*\\\\Actions\"]\n",
+  "risk_score": 47,
+  "rule_id": "954ee7c8-5437-49ae-b2d6-2960883898e9",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Lateral Movement"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "reference": "https://attack.mitre.org/techniques/T1053/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 3
+}

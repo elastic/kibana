@@ -1,10 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -14,37 +13,44 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageHeader,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart } from 'src/core/public';
-import { RoleMapping, Role } from '../../../../common/model';
-import { EmptyPrompt } from './empty_prompt';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  ApplicationStart,
+  DocLinksStart,
+  NotificationsStart,
+  ScopedHistory,
+} from 'src/core/public';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { Role, RoleMapping } from '../../../../common/model';
+import { DisabledBadge, EnabledBadge } from '../../badges';
+import { EDIT_ROLE_MAPPING_PATH, getEditRoleMappingHref } from '../../management_urls';
+import { RoleTableDisplay } from '../../role_table_display';
+import type { RolesAPIClient } from '../../roles';
 import {
-  NoCompatibleRealms,
   DeleteProvider,
+  NoCompatibleRealms,
   PermissionDenied,
   SectionLoading,
 } from '../components';
-import { getCreateRoleMappingHref, getEditRoleMappingHref } from '../../management_urls';
-import { DocumentationLinksService } from '../documentation_links';
-import { RoleMappingsAPIClient } from '../role_mappings_api_client';
-import { RoleTableDisplay } from '../../role_table_display';
-import { RolesAPIClient } from '../../roles';
-import { EnabledBadge, DisabledBadge } from '../../badges';
+import type { RoleMappingsAPIClient } from '../role_mappings_api_client';
+import { EmptyPrompt } from './empty_prompt';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   notifications: NotificationsStart;
-  docLinks: DocumentationLinksService;
+  docLinks: DocLinksStart;
+  history: ScopedHistory;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
 interface State {
@@ -118,68 +124,63 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     if (loadState === 'finished' && roleMappings && roleMappings.length === 0) {
       return (
-        <EuiPageContent>
-          <EmptyPrompt />
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+          <EmptyPrompt history={this.props.history} />
         </EuiPageContent>
       );
     }
 
     return (
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.security.management.roleMappings.roleMappingTitle"
-                  defaultMessage="Role Mappings"
-                />
-              </h2>
-            </EuiTitle>
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.security.management.roleMappings.roleMappingDescription"
-                  defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
-                  values={{
-                    learnMoreLink: (
-                      <EuiLink
-                        href={this.props.docLinks.getRoleMappingDocUrl()}
-                        external={true}
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.security.management.roleMappings.learnMoreLinkText"
-                          defaultMessage="Learn more."
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
-            <EuiButton data-test-subj="createRoleMappingButton" href={getCreateRoleMappingHref()}>
+      <>
+        <EuiPageHeader
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.security.management.roleMappings.roleMappingTitle"
+              defaultMessage="Role Mappings"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="xpack.security.management.roleMappings.roleMappingDescription"
+              defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={this.props.docLinks.links.security.mappingRoles} external={true}>
+                    <FormattedMessage
+                      id="xpack.security.management.roleMappings.learnMoreLinkText"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+          rightSideItems={[
+            <EuiButton
+              fill
+              iconType="plusInCircleFilled"
+              data-test-subj="createRoleMappingButton"
+              {...reactRouterNavigate(this.props.history, EDIT_ROLE_MAPPING_PATH)}
+            >
               <FormattedMessage
                 id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
                 defaultMessage="Create role mapping"
               />
-            </EuiButton>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody>
-          <Fragment>
-            {!this.state.hasCompatibleRealms && (
-              <>
-                <NoCompatibleRealms docLinks={this.props.docLinks} />
-                <EuiSpacer />
-              </>
-            )}
-            {this.renderTable()}
-          </Fragment>
-        </EuiPageContentBody>
-      </EuiPageContent>
+            </EuiButton>,
+          ]}
+        />
+
+        <EuiSpacer size="l" />
+
+        {!this.state.hasCompatibleRealms && (
+          <>
+            <NoCompatibleRealms />
+            <EuiSpacer />
+          </>
+        )}
+        {this.renderTable()}
+      </>
     );
   }
 
@@ -192,9 +193,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           id="xpack.security.management.roleMappings.roleMappingTableLoadingMessage"
           defaultMessage="Loading role mappings…"
         />
-      ) : (
-        undefined
-      );
+      ) : undefined;
 
     const sorting = {
       sort: {
@@ -222,7 +221,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           roleMappingsAPI={this.props.roleMappingsAPI}
           notifications={this.props.notifications}
         >
-          {deleteRoleMappingsPrompt => {
+          {(deleteRoleMappingsPrompt) => {
             return (
               <EuiButton
                 onClick={() => deleteRoleMappingsPrompt(selectedItems, this.onRoleMappingsDeleted)}
@@ -240,9 +239,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             );
           }}
         </DeleteProvider>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       toolsRight: (
         <EuiButton
           color="secondary"
@@ -294,7 +291,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         render: (roleMappingName: string) => {
           return (
             <EuiLink
-              href={getEditRoleMappingHref(roleMappingName)}
+              {...reactRouterNavigate(this.props.history, getEditRoleMappingHref(roleMappingName))}
               data-test-subj="roleMappingName"
             >
               {roleMappingName}
@@ -325,11 +322,19 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           }
           const roleLinks = assignedRoleNames.map((rolename, index) => {
             const role: Role | string =
-              this.state.roles?.find(r => r.name === rolename) ?? rolename;
+              this.state.roles?.find((r) => r.name === rolename) ?? rolename;
 
-            return <RoleTableDisplay role={role} key={rolename} />;
+            return (
+              <EuiFlexItem grow={false} key={rolename}>
+                <RoleTableDisplay role={role} navigateToApp={this.props.navigateToApp} />
+              </EuiFlexItem>
+            );
           });
-          return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
+          return (
+            <EuiFlexGroup gutterSize="s" data-test-subj="roleMappingRoles" wrap>
+              {roleLinks}
+            </EuiFlexGroup>
+          );
         },
       },
       {
@@ -371,7 +376,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                     iconType="pencil"
                     color="primary"
                     data-test-subj={`editRoleMappingButton-${record.name}`}
-                    href={getEditRoleMappingHref(record.name)}
+                    {...reactRouterNavigate(
+                      this.props.history,
+                      getEditRoleMappingHref(record.name)
+                    )}
                   />
                 </EuiToolTip>
               );
@@ -386,7 +394,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                       roleMappingsAPI={this.props.roleMappingsAPI}
                       notifications={this.props.notifications}
                     >
-                      {deleteRoleMappingPrompt => {
+                      {(deleteRoleMappingPrompt) => {
                         return (
                           <EuiToolTip
                             content={i18n.translate(
@@ -399,7 +407,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                                 'xpack.security.management.roleMappings.actionDeleteAriaLabel',
                                 {
                                   defaultMessage: `Delete '{name}'`,
-                                  values: { name },
+                                  values: { name: record.name },
                                 }
                               )}
                               iconType="trash"

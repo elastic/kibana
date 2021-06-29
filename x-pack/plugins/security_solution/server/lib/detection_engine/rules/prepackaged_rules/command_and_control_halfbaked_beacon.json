@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Halfbaked is a malware family used to establish persistence in a contested network. This rule detects a network activity algorithm leveraged by Halfbaked implant beacons for command and control.",
+  "false_positives": [
+    "This rule should be tailored to exclude systems, either as sources or destinations, in which this behavior is expected."
+  ],
+  "index": [
+    "packetbeat-*"
+  ],
+  "language": "lucene",
+  "license": "Elastic License v2",
+  "name": "Halfbaked Command and Control Beacon",
+  "note": "## Threat intel\n\nThis activity has been observed in FIN7 campaigns.",
+  "query": "event.category:(network OR network_traffic) AND network.protocol:http AND\n  network.transport:tcp AND url.full:/http:\\/\\/[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}\\/cd/ AND\n  destination.port:(53 OR 80 OR 8080 OR 443)\n",
+  "references": [
+    "https://www.fireeye.com/blog/threat-research/2017/04/fin7-phishing-lnk.html",
+    "https://attack.mitre.org/software/S0151/"
+  ],
+  "risk_score": 73,
+  "rule_id": "2e580225-2a58-48ef-938b-572933be06fe",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "Command and Control"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1071",
+          "name": "Application Layer Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1071/"
+        },
+        {
+          "id": "T1568",
+          "name": "Dynamic Resolution",
+          "reference": "https://attack.mitre.org/techniques/T1568/",
+          "subtechnique": [
+            {
+              "id": "T1568.002",
+              "name": "Domain Generation Algorithms",
+              "reference": "https://attack.mitre.org/techniques/T1568/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

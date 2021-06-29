@@ -1,5 +1,9 @@
-@include euiBreakpoint('xs', 's', 'm') {
-  .homHome__synopsisItem {
-    flex-basis: 100% !important;
+.homData--expanded {
+  flex-direction: column;
+
+  &,
+  & > * {
+    margin-bottom: 0 !important;
+    margin-top: 0 !important;
   }
 }

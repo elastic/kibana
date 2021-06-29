@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies InstallUtil.exe making outbound network connections. This may indicate adversarial activity as InstallUtil is often leveraged by adversaries to execute code and evade detection.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "InstallUtil Process Making Network Connections",
+  "query": "/* the benefit of doing this as an eql sequence vs kql is this will limit to alerting only on the first network connection */\n\nsequence by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"installutil.exe\"]\n  [network where process.name : \"installutil.exe\" and network.direction == \"outgoing\"]\n",
+  "risk_score": 21,
+  "rule_id": "a13167f1-eec2-4015-9631-1fee60406dcf",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.004",
+              "name": "InstallUtil",
+              "reference": "https://attack.mitre.org/techniques/T1218/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 3
+}

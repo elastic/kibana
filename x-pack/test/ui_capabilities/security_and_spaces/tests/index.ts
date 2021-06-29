@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -14,7 +15,7 @@ export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrPro
   const spacesService = getService('spaces');
   const featuresService: FeaturesService = getService('features');
 
-  describe('ui capabilities', function() {
+  describe('ui capabilities', function () {
     this.tags('ciGroup9');
 
     before(async () => {
@@ -34,7 +35,7 @@ export default function uiCapabilitiesTests({ loadTestFile, getService }: FtrPro
         await securityService.user.create(user.username, {
           password: user.password,
           full_name: user.fullName,
-          roles: roles.map(role => role.name),
+          roles: roles.map((role) => role.name),
         });
 
         for (const role of roles) {

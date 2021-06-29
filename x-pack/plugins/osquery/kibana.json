@@ -1,0 +1,35 @@
+{
+  "configPath": [
+    "xpack",
+    "osquery"
+  ],
+  "extraPublicDirs": [
+    "common"
+  ],
+  "id": "osquery",
+  "kibanaVersion": "kibana",
+  "optionalPlugins": [
+    "home",
+    "usageCollection",
+    "lens"
+  ],
+  "requiredBundles": [
+    "esUiShared",
+    "kibanaUtils",
+    "kibanaReact"
+  ],
+  "requiredPlugins": [
+    "actions",
+    "data",
+    "dataEnhanced",
+    "discover",
+    "features",
+    "fleet",
+    "navigation",
+    "triggersActionsUi",
+    "security"
+  ],
+  "server": true,
+  "ui": true,
+  "version": "8.0.0"
+}

@@ -1,0 +1,37 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects attempts to modify an Okta application. An adversary may attempt to modify, deactivate, or delete an Okta application in order to weaken an organization's security controls or disrupt their business operations.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if your organization's Okta applications are regularly modified and the behavior is expected."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-okta*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Attempt to Modify an Okta Application",
+  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:okta.system and event.action:application.lifecycle.update\n",
+  "references": [
+    "https://help.okta.com/en/prod/Content/Topics/Apps/Apps_Apps.htm",
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "c74fd275-ab2c-4d49-8890-e2943fa65c09",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Monitoring"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

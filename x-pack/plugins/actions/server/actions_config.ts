@@ -1,43 +1,46 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
-import { URL } from 'url';
+import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfigType } from './types';
+import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
+import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
+import { ActionTypeDisabledError } from './lib';
+import { ProxySettings, ResponseSettings, SSLSettings } from './types';
+import { getSSLSettingsFromConfig } from './builtin_action_types/lib/get_node_ssl_options';
 
-export enum WhitelistedHosts {
-  Any = '*',
-}
+export { AllowedHosts, EnabledActionTypes } from './config';
 
-export enum EnabledActionTypes {
-  Any = '*',
-}
-
-enum WhitelistingField {
-  url = 'url',
+enum AllowListingField {
+  URL = 'url',
   hostname = 'hostname',
 }
 
 export interface ActionsConfigurationUtilities {
-  isWhitelistedHostname: (hostname: string) => boolean;
-  isWhitelistedUri: (uri: string) => boolean;
+  isHostnameAllowed: (hostname: string) => boolean;
+  isUriAllowed: (uri: string) => boolean;
   isActionTypeEnabled: (actionType: string) => boolean;
-  ensureWhitelistedHostname: (hostname: string) => void;
-  ensureWhitelistedUri: (uri: string) => void;
+  ensureHostnameAllowed: (hostname: string) => void;
+  ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
+  getSSLSettings: () => SSLSettings;
+  getProxySettings: () => undefined | ProxySettings;
+  getResponseSettings: () => ResponseSettings;
+  getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
 }
 
-function whitelistingErrorMessage(field: WhitelistingField, value: string) {
-  return i18n.translate('xpack.actions.urlWhitelistConfigurationError', {
+function allowListErrorMessage(field: AllowListingField, value: string) {
+  return i18n.translate('xpack.actions.urlAllowedHostsConfigurationError', {
     defaultMessage:
-      'target {field} "{value}" is not whitelisted in the Kibana config xpack.actions.whitelistedHosts',
+      'target {field} "{value}" is not added to the Kibana config xpack.actions.allowedHosts',
     values: {
       value,
       field,
@@ -55,24 +58,24 @@ function disabledActionTypeErrorMessage(actionType: string) {
   });
 }
 
-function isWhitelisted({ whitelistedHosts }: ActionsConfigType, hostname: string): boolean {
-  const whitelisted = new Set(whitelistedHosts);
-  if (whitelisted.has(WhitelistedHosts.Any)) return true;
-  if (whitelisted.has(hostname)) return true;
+function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): boolean {
+  const allowed = new Set(allowedHosts);
+  if (allowed.has(AllowedHosts.Any)) return true;
+  if (hostname && allowed.has(hostname)) return true;
   return false;
 }
 
-function isWhitelistedHostnameInUri(config: ActionsConfigType, uri: string): boolean {
+function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
-    tryCatch(() => new URL(uri)),
-    map(url => url.hostname),
-    mapNullable(hostname => isWhitelisted(config, hostname)),
+    tryCatch(() => url.parse(uri)),
+    map((parsedUrl) => parsedUrl.hostname),
+    mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)
   );
 }
 
 function isActionTypeEnabledInConfig(
-  { enabledActionTypes }: ActionsConfigType,
+  { enabledActionTypes }: ActionsConfig,
   actionType: string
 ): boolean {
   const enabled = new Set(enabledActionTypes);
@@ -81,30 +84,85 @@ function isActionTypeEnabledInConfig(
   return false;
 }
 
+function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySettings {
+  if (!config.proxyUrl) {
+    return undefined;
+  }
+
+  return {
+    proxyUrl: config.proxyUrl,
+    proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
+    proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
+    proxyHeaders: config.proxyHeaders,
+    proxySSLSettings: getSSLSettingsFromConfig(
+      config.ssl?.proxyVerificationMode,
+      config.proxyRejectUnauthorizedCertificates
+    ),
+  };
+}
+
+function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
+  if (!arr) return;
+  return new Set(arr);
+}
+
+function getResponseSettingsFromConfig(config: ActionsConfig): ResponseSettings {
+  return {
+    maxContentLength: config.maxResponseContentLength.getValueInBytes(),
+    timeout: config.responseTimeout.asMilliseconds(),
+  };
+}
+
+function getCustomHostSettings(
+  config: ActionsConfig,
+  targetUrl: string
+): CustomHostSettings | undefined {
+  const customHostSettings = config.customHostSettings;
+  if (!customHostSettings) {
+    return;
+  }
+
+  let parsedUrl: URL | undefined;
+  try {
+    parsedUrl = new URL(targetUrl);
+  } catch (err) {
+    // presumably this bad URL is reported elsewhere
+    return;
+  }
+
+  const canonicalUrl = getCanonicalCustomHostUrl(parsedUrl);
+  return customHostSettings.find((settings) => settings.url === canonicalUrl);
+}
+
 export function getActionsConfigurationUtilities(
-  config: ActionsConfigType
+  config: ActionsConfig
 ): ActionsConfigurationUtilities {
-  const isWhitelistedHostname = curry(isWhitelisted)(config);
-  const isWhitelistedUri = curry(isWhitelistedHostnameInUri)(config);
+  const isHostnameAllowed = curry(isAllowed)(config);
+  const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
   return {
-    isWhitelistedHostname,
-    isWhitelistedUri,
+    isHostnameAllowed,
+    isUriAllowed,
     isActionTypeEnabled,
-    ensureWhitelistedUri(uri: string) {
-      if (!isWhitelistedUri(uri)) {
-        throw new Error(whitelistingErrorMessage(WhitelistingField.url, uri));
+    getProxySettings: () => getProxySettingsFromConfig(config),
+    getResponseSettings: () => getResponseSettingsFromConfig(config),
+    getSSLSettings: () =>
+      getSSLSettingsFromConfig(config.ssl?.verificationMode, config.rejectUnauthorized),
+    ensureUriAllowed(uri: string) {
+      if (!isUriAllowed(uri)) {
+        throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
       }
     },
-    ensureWhitelistedHostname(hostname: string) {
-      if (!isWhitelistedHostname(hostname)) {
-        throw new Error(whitelistingErrorMessage(WhitelistingField.hostname, hostname));
+    ensureHostnameAllowed(hostname: string) {
+      if (!isHostnameAllowed(hostname)) {
+        throw new Error(allowListErrorMessage(AllowListingField.hostname, hostname));
       }
     },
     ensureActionTypeEnabled(actionType: string) {
       if (!isActionTypeEnabled(actionType)) {
-        throw new Error(disabledActionTypeErrorMessage(actionType));
+        throw new ActionTypeDisabledError(disabledActionTypeErrorMessage(actionType), 'config');
       }
     },
+    getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
   };
 }

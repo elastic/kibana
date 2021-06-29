@@ -4,16 +4,27 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "features",
-    "apm",
     "usageCollection",
     "spaces",
-    "home",
+    "embeddable",
     "data",
     "dataEnhanced",
-    "metrics",
-    "alerting"
+    "visTypeTimeseries",
+    "alerting",
+    "triggersActionsUi",
+    "observability"
   ],
+  "optionalPlugins": ["ml", "home", "embeddable"],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "infra"]
+  "configPath": ["xpack", "infra"],
+  "requiredBundles": [
+    "observability",
+    "licenseManagement",
+    "kibanaUtils",
+    "kibanaReact",
+    "home",
+    "ml",
+    "embeddable"
+  ]
 }

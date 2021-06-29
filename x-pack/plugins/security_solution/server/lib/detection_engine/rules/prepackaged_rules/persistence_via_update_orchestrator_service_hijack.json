@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies potential hijacking of the Microsoft Update Orchestrator Service to establish persistence with an integrity level of SYSTEM.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Persistence via Update Orchestrator Service Hijack",
+  "query": "process where event.type == \"start\" and\n  process.parent.executable : \"C:\\\\Windows\\\\System32\\\\svchost.exe\" and\n  process.parent.args : \"UsoSvc\" and\n  not process.executable :\n         (\n          \"C:\\\\Windows\\\\System32\\\\UsoClient.exe\",\n          \"C:\\\\Windows\\\\System32\\\\MusNotification.exe\",\n          \"C:\\\\Windows\\\\System32\\\\MusNotificationUx.exe\",\n          \"C:\\\\Windows\\\\System32\\\\MusNotifyIcon.exe\",\n          \"C:\\\\Windows\\\\System32\\\\WerFault.exe\",\n          \"C:\\\\Windows\\\\System32\\\\WerMgr.exe\"\n          )\n",
+  "references": [
+    "https://github.com/irsl/CVE-2020-1313"
+  ],
+  "risk_score": 73,
+  "rule_id": "265db8f5-fc73-4d0d-b434-6483b56372e2",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1543",
+          "name": "Create or Modify System Process",
+          "reference": "https://attack.mitre.org/techniques/T1543/",
+          "subtechnique": [
+            {
+              "id": "T1543.003",
+              "name": "Windows Service",
+              "reference": "https://attack.mitre.org/techniques/T1543/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

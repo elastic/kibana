@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
 import {
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
@@ -19,9 +20,10 @@ export interface InfraCloudMetricsAdapterResponse {
 
 export const getCloudMetricsMetadata = async (
   framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  requestContext: InfraPluginRequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
-  instanceId: string
+  instanceId: string,
+  timeRange: { from: number; to: number }
 ): Promise<InfraCloudMetricsAdapterResponse> => {
   const metricQuery = {
     allowNoIndices: true,
@@ -30,8 +32,19 @@ export const getCloudMetricsMetadata = async (
     body: {
       query: {
         bool: {
-          filter: [{ match: { 'cloud.instance.id': instanceId } }],
-          should: CLOUD_METRICS_MODULES.map(module => ({ match: { 'event.module': module } })),
+          filter: [
+            { match: { 'cloud.instance.id': instanceId } },
+            {
+              range: {
+                [sourceConfiguration.fields.timestamp]: {
+                  gte: timeRange.from,
+                  lte: timeRange.to,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+          should: CLOUD_METRICS_MODULES.map((module) => ({ match: { 'event.module': module } })),
         },
       },
       size: 0,

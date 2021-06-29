@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const mockResponse = `155ae63f0bb47050e0c31b4f8c17dadc79dcfa8e8f4ec9e3974fd7592afa9a4f  node-v8.9.4-aix-ppc64.tar.gz
@@ -70,11 +59,12 @@ jest.mock('axios', () => ({
   },
 }));
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { getNodeShasums } from './node_shasums';
 
 describe('src/dev/build/tasks/nodejs/node_shasums', () => {
   it('resolves to an object with shasums for node downloads for version', async () => {
-    const shasums = await getNodeShasums('8.9.4');
+    const shasums = await getNodeShasums(new ToolingLog(), '8.9.4');
     expect(shasums).toEqual(
       expect.objectContaining({
         'node-v8.9.4.tar.gz': '729b44b32b2f82ecd5befac4f7518de0c4e3add34e8fe878f745740a66cbbc01',

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'header']);
   const overview = getService('monitoringClusterOverview');
   const indicesList = getService('monitoringElasticsearchIndices');
@@ -23,10 +24,13 @@ export default function({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: 'Oct 5, 2017 @ 20:31:48.354',
-          to: 'Oct 5, 2017 @ 20:35:12.176',
-        });
+        await setup(
+          'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
+          {
+            from: 'Oct 5, 2017 @ 20:31:48.354',
+            to: 'Oct 5, 2017 @ 20:35:12.176',
+          }
+        );
 
         // go to indices listing
         await overview.clickEsIndices();

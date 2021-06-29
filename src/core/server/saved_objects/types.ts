@@ -1,111 +1,86 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsTypeMappingDefinition, SavedObjectsTypeMappingDefinitions } from './mappings';
+import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
-import { PropertyValidators } from './validation';
-import { SavedObjectsManagementDefinition } from './management';
+import { SavedObjectsExportTransform } from './export';
+import { SavedObjectsImportHook } from './import/types';
 
-export {
+export type {
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportWarning,
 } from './import/types';
 
-import { LegacyConfig } from '../legacy';
-import { SavedObjectUnsanitizedDoc } from './serialization';
-import { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
-export {
+import { SavedObject } from '../../types';
+
+type KueryNode = any;
+
+export type {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectAttributeSingle,
+  SavedObject,
+  SavedObjectError,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
 } from '../../types';
 
 /**
- * Information about the migrations that have been applied to this SavedObject.
- * When Kibana starts up, KibanaMigrator detects outdated documents and
- * migrates them based on this value. For each migration that has been applied,
- * the plugin's name is used as a key and the latest migration version as the
- * value.
- *
- * @example
- * migrationVersion: {
- *   dashboard: '7.1.1',
- *   space: '6.6.6',
- * }
+ * Meta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.
  *
  * @public
  */
-export interface SavedObjectsMigrationVersion {
-  [pluginName: string]: string;
-}
-
-/**
- * @public
- */
-export interface SavedObject<T = unknown> {
-  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
-  id: string;
-  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
-  type: string;
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
-  version?: string;
-  /** Timestamp of the last time this document had been updated.  */
-  updated_at?: string;
-  error?: {
-    message: string;
-    statusCode: number;
+export interface SavedObjectStatusMeta {
+  migratedIndices: {
+    [status: string]: number;
+    skipped: number;
+    migrated: number;
   };
-  /** {@inheritdoc SavedObjectAttributes} */
-  attributes: T;
-  /** {@inheritdoc SavedObjectReference} */
-  references: SavedObjectReference[];
-  /** {@inheritdoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
 }
 
 /**
- * A reference to another saved object.
- *
  * @public
  */
-export interface SavedObjectReference {
-  name: string;
+export interface SavedObjectsFindOptionsReference {
   type: string;
   id: string;
 }
 
 /**
+ * @public
+ */
+export interface SavedObjectsPitParams {
+  id: string;
+  keepAlive?: string;
+}
+
+/**
  *
  * @public
  */
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
   type: string | string[];
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: estypes.SearchSortOrder;
   /**
    * An array of fields to include in the results
    * @example
@@ -116,9 +91,68 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
-  hasReference?: { type: string; id: string };
+  /**
+   * Use the sort values from the previous page to retrieve the next page of results.
+   */
+  searchAfter?: estypes.Id[];
+  /**
+   * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
+   * be modified. If used in conjunction with `searchFields`, both are concatenated together.
+   */
+  rootSearchFields?: string[];
+
+  /**
+   * Search for documents having a reference to the specified objects.
+   * Use `hasReferenceOperator` to specify the operator to use when searching for multiple references.
+   */
+  hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+  /**
+   * The operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`
+   */
+  hasReferenceOperator?: 'AND' | 'OR';
+
+  /**
+   * The search operator to use with the provided filter. Defaults to `OR`
+   */
   defaultSearchOperator?: 'AND' | 'OR';
-  filter?: string;
+  filter?: string | KueryNode;
+  /**
+   * A record of aggregations to perform.
+   * The API currently only supports a limited set of metrics and bucket aggregation types.
+   * Additional aggregation types can be contributed to Core.
+   *
+   * @example
+   * Aggregating on SO attribute field
+   * ```ts
+   * const aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
+   * return client.find({ type: 'dashboard', aggs })
+   * ```
+   *
+   * @example
+   * Aggregating on SO root field
+   * ```ts
+   * const aggs = { latest_update: { max: { field: 'dashboard.updated_at' } } };
+   * return client.find({ type: 'dashboard', aggs })
+   * ```
+   *
+   * @alpha
+   */
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
+  namespaces?: string[];
+  /**
+   * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
+   * object client wrapper.
+   * If this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query.
+   * Any types that are not included in this map will be excluded entirely.
+   * If a type is included but its value is undefined, the operation will search for that type in the Default namespace.
+   */
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
+  /** An optional ES preference value to be used for the query **/
+  preference?: string;
+  /**
+   * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
+   */
+  pit?: SavedObjectsPitParams;
 }
 
 /**
@@ -193,15 +227,6 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  * takes special care to ensure that 404 errors are generic and don't distinguish
  * between index missing or document missing.
  *
- * ### 503s from missing index
- *
- * Unlike all other methods, create requests are supposed to succeed even when
- * the Kibana index does not exist because it will be automatically created by
- * elasticsearch. When that is not the case it is because Elasticsearch's
- * `action.auto_create_index` setting prevents it from being created automatically
- * so we throw a special 503 with the intention of informing the user that their
- * Elasticsearch settings need to be updated.
- *
  * See {@link SavedObjectsClient}
  * See {@link SavedObjectsErrorHelpers}
  *
@@ -210,11 +235,25 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 /**
+ * The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:
+ *  * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.
+ *  * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.
+ *  * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be
+ *    unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being
+ *    converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be *share-capable*,
+ *    but will not actually be shareable until the namespace type is changed to "multiple".
+ *  * agnostic: This type of saved object is global.
+ *
+ * @public
+ */
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
+
+/**
  * @remarks This is only internal for now, and will only be public when we expose the registerType API
  *
  * @public
  */
-export interface SavedObjectsType {
+export interface SavedObjectsType<Attributes = any> {
   /**
    * The name of the type, which is also used as the internal id.
    */
@@ -227,9 +266,9 @@ export interface SavedObjectsType {
    */
   hidden: boolean;
   /**
-   * Is the type global (true), or namespaced (false).
+   * The {@link SavedObjectsNamespaceType | namespace type} for the type.
    */
-  namespaceAgnostic: boolean;
+  namespaceType: SavedObjectsNamespaceType;
   /**
    * If defined, the type instances will be stored in the given index instead of the default one.
    */
@@ -243,72 +282,208 @@ export interface SavedObjectsType {
    */
   mappings: SavedObjectsTypeMappingDefinition;
   /**
-   * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   * An optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
    */
-  migrations?: SavedObjectMigrationMap;
+  migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
+  /**
+   * If defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this
+   * version.
+   *
+   * Requirements:
+   *
+   *  1. This string value must be a valid semver version
+   *  2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}
+   *  3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`} *or*
+   *     {@link SavedObjectsNamespaceType | `namespaceType: 'multiple-isolated'`}
+   *
+   * Example of a single-namespace type in 7.12:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'single',
+   *   mappings: {...}
+   * }
+   * ```
+   *
+   * Example after converting to a multi-namespace (isolated) type in 8.0:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'multiple-isolated',
+   *   mappings: {...},
+   *   convertToMultiNamespaceTypeVersion: '8.0.0'
+   * }
+   * ```
+   *
+   * Example after converting to a multi-namespace (shareable) type in 8.1:
+   *
+   * ```ts
+   * {
+   *   name: 'foo',
+   *   hidden: false,
+   *   namespaceType: 'multiple',
+   *   mappings: {...},
+   *   convertToMultiNamespaceTypeVersion: '8.0.0'
+   * }
+   * ```
+   *
+   * Note: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process.
+   */
+  convertToMultiNamespaceTypeVersion?: string;
+  /**
+   * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
+   */
+  management?: SavedObjectsTypeManagementDefinition<Attributes>;
 }
 
 /**
- * @internal
- * @deprecated
+ * Configuration options for the {@link SavedObjectsType | type}'s management section.
+ *
+ * @public
  */
-export interface SavedObjectsLegacyUiExports {
-  savedObjectMappings: SavedObjectsLegacyMapping[];
-  savedObjectMigrations: SavedObjectsLegacyMigrationDefinitions;
-  savedObjectSchemas: SavedObjectsLegacySchemaDefinitions;
-  savedObjectValidations: PropertyValidators;
-  savedObjectsManagement: SavedObjectsManagementDefinition;
+export interface SavedObjectsTypeManagementDefinition<Attributes = any> {
+  /**
+   * Is the type importable or exportable. Defaults to `false`.
+   */
+  importableAndExportable?: boolean;
+  /**
+   * The default search field to use for this type. Defaults to `id`.
+   */
+  defaultSearchField?: string;
+  /**
+   * The eui icon name to display in the management table.
+   * If not defined, the default icon will be used.
+   */
+  icon?: string;
+  /**
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
+   */
+  getTitle?: (savedObject: SavedObject<Attributes>) => string;
+  /**
+   * Function returning the url to use to redirect to the editing page of this object.
+   * If not defined, editing will not be allowed.
+   */
+  getEditUrl?: (savedObject: SavedObject<Attributes>) => string;
+  /**
+   * Function returning the url to use to redirect to this object from the management section.
+   * If not defined, redirecting to the object will not be allowed.
+   *
+   * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
+   *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
+   *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
+   */
+  getInAppUrl?: (
+    savedObject: SavedObject<Attributes>
+  ) => { path: string; uiCapabilitiesPath: string };
+  /**
+   * An optional export transform function that can be used transform the objects of the registered type during
+   * the export process.
+   *
+   * It can be used to either mutate the exported objects, or add additional objects (of any type) to the export list.
+   *
+   * See {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.
+   *
+   * When implementing both `isExportable` and `onExport`, it is mandatory that
+   * `isExportable` returns the same value for an object before and after going
+   * though the export transform.
+   * E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
+   *
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  onExport?: SavedObjectsExportTransform<Attributes>;
+  /**
+   * An optional {@link SavedObjectsImportHook | import hook} to use when importing given type.
+   *
+   * Import hooks are executed during the savedObjects import process and allow to interact
+   * with the imported objects. See the {@link SavedObjectsImportHook | hook documentation}
+   * for more info.
+   *
+   * @example
+   * Registering a hook displaying a warning about a specific type of object
+   * ```ts
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType({
+   *        ...myType,
+   *        management: {
+   *          ...myType.management,
+   *          onImport: (objects) => {
+   *            if(someActionIsNeeded(objects)) {
+   *              return {
+   *                 warnings: [
+   *                   {
+   *                     type: 'action_required',
+   *                     message: 'Objects need to be manually enabled after import',
+   *                     actionPath: '/app/my-app/require-activation',
+   *                   },
+   *                 ]
+   *              }
+   *            }
+   *            return {};
+   *          }
+   *        },
+   *     });
+   *   }
+   * }
+   * ```
+   *
+   * @remarks messages returned in the warnings are user facing and must be translated.
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  onImport?: SavedObjectsImportHook<Attributes>;
+
+  /**
+   * Optional hook to specify whether an object should be exportable.
+   *
+   * If specified, `isExportable` will be called during export for each
+   * of this type's objects in the export, and the ones not matching the
+   * predicate will be excluded from the export.
+   *
+   * When implementing both `isExportable` and `onExport`, it is mandatory that
+   * `isExportable` returns the same value for an object before and after going
+   * though the export transform.
+   * E.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`
+   *
+   * @example
+   * Registering a type with a per-object exportability predicate
+   * ```ts
+   * // src/plugins/my_plugin/server/plugin.ts
+   * import { myType } from './saved_objects';
+   *
+   * export class Plugin() {
+   *   setup: (core: CoreSetup) => {
+   *     core.savedObjects.registerType({
+   *        ...myType,
+   *        management: {
+   *          ...myType.management,
+   *          isExportable: (object) => {
+   *            if (object.attributes.myCustomAttr === 'foo') {
+   *              return false;
+   *            }
+   *            return true;
+   *          }
+   *        },
+   *     });
+   *   }
+   * }
+   * ```
+   *
+   * @remarks `importableAndExportable` must be `true` to specify this property.
+   */
+  isExportable?: SavedObjectsExportablePredicate<Attributes>;
 }
 
 /**
- * @internal
- * @deprecated
+ * @public
  */
-export interface SavedObjectsLegacyMapping {
-  pluginId: string;
-  properties: SavedObjectsTypeMappingDefinitions;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacyMigrationDefinitions {
-  [type: string]: SavedObjectLegacyMigrationMap;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectLegacyMigrationMap {
-  [version: string]: SavedObjectLegacyMigrationFn;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export type SavedObjectLegacyMigrationFn = (
-  doc: SavedObjectUnsanitizedDoc,
-  log: SavedObjectsMigrationLogger
-) => SavedObjectUnsanitizedDoc;
-
-/**
- * @internal
- * @deprecated
- */
-interface SavedObjectsLegacyTypeSchema {
-  isNamespaceAgnostic?: boolean;
-  hidden?: boolean;
-  indexPattern?: ((config: LegacyConfig) => string) | string;
-  convertToAliasScript?: string;
-}
-
-/**
- * @internal
- * @deprecated
- */
-export interface SavedObjectsLegacySchemaDefinitions {
-  [type: string]: SavedObjectsLegacyTypeSchema;
-}
+export type SavedObjectsExportablePredicate<Attributes = unknown> = (
+  obj: SavedObject<Attributes>
+) => boolean;

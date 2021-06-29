@@ -1,0 +1,61 @@
+.timCell {
+  display: inline-block;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  border: 2px dashed transparent;
+  // sass-lint:disable-block no-important
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-bottom: $euiSizeM;
+
+  &.active {
+    border-color: $euiColorLightShade;
+  }
+}
+
+.timCell.running {
+  opacity: .5;
+}
+
+.timCell__actions {
+  position: absolute;
+  bottom: $euiSizeXS;
+  left: $euiSizeXS;
+
+  > .timCell__action,
+  > .timCell__id {
+    @include euiFontSizeXS;
+    font-weight: $euiFontWeightBold;
+    color: $euiColorMediumShade;
+    display: inline-block;
+    text-align: center;
+    width: $euiSizeL;
+    height: $euiSizeL;
+    border-radius: $euiSizeL / 2;
+    border: $euiBorderThin;
+    background-color: $euiColorLightestShade;
+    z-index: $euiZLevel1;
+  }
+
+  > .timCell__action {
+    opacity: 0;
+
+    &:focus {
+      opacity: 1;
+    }
+
+    &:hover,
+    &:focus {
+      color: $euiTextColor;
+      border-color: $euiColorMediumShade;
+      background-color: $euiColorLightShade;
+    }
+  }
+}
+
+.timCell:hover {
+  .timCell__action {
+    opacity: 1;
+  }
+}

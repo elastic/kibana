@@ -1,0 +1,14 @@
+{
+  "cluster.put_component_template": {
+    "url_params": {
+      "create": "__flag__",
+      "master_timeout": ""
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_component_template/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-component-template.html"  }
+}

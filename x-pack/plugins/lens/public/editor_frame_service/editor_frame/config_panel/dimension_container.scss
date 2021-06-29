@@ -1,0 +1,74 @@
+@import '@elastic/eui/src/components/flyout/variables';
+@import '@elastic/eui/src/components/flyout/mixins';
+
+.lnsDimensionContainer {
+  // Use the EuiFlyout style
+  @include euiFlyout;
+  // But with custom positioning to keep it within the sidebar contents
+  position: absolute;
+  left: 0;
+  animation: euiFlyout $euiAnimSpeedNormal $euiAnimSlightResistance;
+
+  @include euiBreakpoint('l', 'xl') {
+    top: 0 !important;
+    height: 100% !important;
+  }
+
+  @include euiBreakpoint('xs', 's', 'm') {
+    @include euiFlyout;
+  }
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    border-left: $euiBorderThin; // Force border regardless of theme in fullscreen
+    box-shadow: none;
+  }
+}
+
+.lnsDimensionContainer__footer {
+  padding: $euiSizeS;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
+  }
+}
+
+.lnsDimensionContainer__header {
+  padding: $euiSizeS $euiSizeXS;
+
+  .lnsFrameLayout__sidebar-isFullscreen & {
+    display: none;
+  }
+}
+
+.lnsDimensionContainer__headerTitle {
+  padding: $euiSizeS $euiSizeXS;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.lnsDimensionContainer__headerLink {
+  &:focus-within {
+    background-color: transparentize($euiColorVis1, .9);
+
+    .lnsDimensionContainer__headerTitle {
+      text-decoration: underline;
+    }
+  }
+}
+
+.lnsDimensionContainer__backIcon {
+  &:hover {
+    transform: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus {
+    background-color: transparent;
+  }
+}
+
+.lnsBody--overflowHidden {
+  overflow: hidden;
+}

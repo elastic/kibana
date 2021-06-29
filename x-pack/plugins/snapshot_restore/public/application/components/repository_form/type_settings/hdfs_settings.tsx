@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState } from 'react';
@@ -20,7 +21,7 @@ import {
 
 import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
-import { textService } from '../../../services/text';
+import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: HDFSRepository | SourceRepository<HDFSRepository>;
@@ -37,6 +38,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
   settingErrors,
 }) => {
   const {
+    name,
     settings: {
       delegateType,
       uri,
@@ -52,6 +54,11 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
     },
   } = repository;
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
+  const updateSettings = (settingName: string, value: string) => {
+    updateRepositorySettings({
+      [settingName]: value,
+    });
+  };
 
   const [additionalConf, setAdditionalConf] = useState<string>(JSON.stringify(rest, null, 2));
   const [isConfInvalid, setIsConfInvalid] = useState<boolean>(false);
@@ -98,7 +105,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             }
             defaultValue={uri ? uri.split('hdfs://')[1] : ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 uri: e.target.value ? `hdfs://${e.target.value}` : '',
               });
@@ -143,7 +150,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={path || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 path: e.target.value,
               });
@@ -187,7 +194,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!(loadDefaults === false)}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 loadDefaults: e.target.checked,
               });
@@ -231,7 +238,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!(compress === false)}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 compress: e.target.checked,
               });
@@ -242,49 +249,12 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
 
       {/* Chunk size field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeHDFS.chunkSizeTitle"
-                defaultMessage="Chunk size"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeHDFS.chunkSizeDescription"
-            defaultMessage="Breaks files into smaller units when taking snapshots."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeHDFS.chunkSizeLabel"
-              defaultMessage="Chunk size"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
-          error={settingErrors.chunkSize}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={chunkSize || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                chunkSize: e.target.value,
-              });
-            }}
-            data-test-subj="chunkSizeInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <ChunkSizeField
+        isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+        error={settingErrors.chunkSize}
+        defaultValue={chunkSize || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Security principal field */}
       <EuiDescribedFormGroup
@@ -320,7 +290,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={securityPrincipal || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 'security.principal': e.target.value,
               });
@@ -427,94 +397,20 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
 
       {/* Max snapshot bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxSnapshotBytesTitle"
-                defaultMessage="Max snapshot bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxSnapshotBytesDescription"
-            defaultMessage="The rate for creating snapshots for each node."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxSnapshotBytesLabel"
-              defaultMessage="Max snapshot bytes per second"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
-          error={settingErrors.maxSnapshotBytesPerSec}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={maxSnapshotBytesPerSec || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                maxSnapshotBytesPerSec: e.target.value,
-              });
-            }}
-            data-test-subj="maxSnapshotBytesInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <MaxSnapshotsField
+        isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+        error={settingErrors.maxSnapshotBytesPerSec}
+        defaultValue={maxSnapshotBytesPerSec || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Max restore bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxRestoreBytesTitle"
-                defaultMessage="Max restore bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxRestoreBytesDescription"
-            defaultMessage="The snapshot restore rate for each node."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxRestoreBytesLabel"
-              defaultMessage="Max restore bytes per second"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
-          error={settingErrors.maxRestoreBytesPerSec}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={maxRestoreBytesPerSec || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                maxRestoreBytesPerSec: e.target.value,
-              });
-            }}
-            data-test-subj="maxRestoreBytesInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <MaxRestoreField
+        isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+        error={settingErrors.maxRestoreBytesPerSec}
+        defaultValue={maxRestoreBytesPerSec || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Readonly field */}
       <EuiDescribedFormGroup
@@ -550,7 +446,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!!readonly}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 readonly: e.target.checked,
               });

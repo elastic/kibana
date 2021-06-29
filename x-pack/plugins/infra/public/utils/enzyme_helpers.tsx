@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
@@ -44,7 +46,7 @@ export const mountHook = <Args extends {}, HookValue extends any>(
   const hookValueCallback = jest.fn();
   let component!: ReactWrapper;
 
-  const act: ReactHookWrapper<Args, HookValue>['act'] = actor => {
+  const act: ReactHookWrapper<Args, HookValue>['act'] = (actor) => {
     reactAct(() => {
       actor(getLastHookValue(), (args: Args) => component.setProps(args));
       component.update();
@@ -63,7 +65,7 @@ export const mountHook = <Args extends {}, HookValue extends any>(
     hookValueCallback(body(props));
     return null;
   };
-  const TestComponent: React.FunctionComponent<Args> = args =>
+  const TestComponent: React.FunctionComponent<Args> = (args) =>
     WrapperComponent ? (
       <WrapperComponent>
         <HookComponent {...args} />

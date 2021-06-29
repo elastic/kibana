@@ -1,0 +1,11 @@
+{
+  "id": "kbnTpCustomVisualizations",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "expressions",
+    "visualizations"
+  ],
+  "server": false,
+  "ui": true
+}

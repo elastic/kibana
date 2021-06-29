@@ -1,0 +1,43 @@
+/* Fixed width so we can align it with the padding of the AUC ROC chart. */
+$labelColumnWidth: 80px;
+
+/*
+  Workaround for EuiDataGrid within a Flex Layout,
+  this tricks browsers treating the width as a px value instead of %
+*/
+.mlDataFrameAnalyticsClassification {
+  width: 100%;
+}
+
+.mlDataFrameAnalyticsClassification__evaluateSectionContent {
+  padding: 0 5%;
+}
+
+/*
+  The following two classes are a workaround to avoid having EuiDataGrid in a flex layout
+  and just uses a legacy approach for a two column layout so we don't break IE11.
+*/
+.mlDataFrameAnalyticsClassification__evaluateSectionContent:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.mlDataFrameAnalyticsClassification__actualLabel {
+  float: left;
+  width: $labelColumnWidth;
+  padding-top: $euiSize * 4;
+}
+
+/*
+  Gives EuiDataGrid a min-width of 480px, otherwise the columns options will disappear if you hide all columns.
+*/
+.mlDataFrameAnalyticsClassification__dataGridMinWidth {
+  float: left;
+  min-width: 480px;
+  width: calc(100% - #{$labelColumnWidth});
+
+  .euiDataGridRowCell--boolean {
+    text-transform: none;
+  }
+}

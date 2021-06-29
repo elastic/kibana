@@ -1,45 +1,41 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsLegacyService,
-  SavedObject,
-} from 'src/core/server';
-import { Readable } from 'stream';
-import { SavedObjectsClientProviderOptions } from 'src/core/server';
-import { spaceIdToNamespace } from '../utils/namespace';
-import { CopyOptions, CopyResponse } from './types';
-import { getEligibleTypes } from './lib/get_eligible_types';
-import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
-import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
-import { readStreamToCompletion } from './lib/read_stream_to_completion';
+import type { Readable } from 'stream';
 
-export const COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS: SavedObjectsClientProviderOptions = {
-  excludedWrappers: ['spaces'],
-};
+import type { CoreStart, KibanaRequest, SavedObject } from 'src/core/server';
+
+import { ALL_SPACES_ID } from '../../../common/constants';
+import { spaceIdToNamespace } from '../utils/namespace';
+import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
+import { getIneligibleTypes } from './lib/get_ineligible_types';
+import { readStreamToCompletion } from './lib/read_stream_to_completion';
+import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
+import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
+import type { CopyOptions, CopyResponse } from './types';
 
 export function copySavedObjectsToSpacesFactory(
-  savedObjectsClient: SavedObjectsClientContract,
-  savedObjectsService: SavedObjectsLegacyService
+  savedObjects: CoreStart['savedObjects'],
+  request: KibanaRequest
 ) {
-  const { importExport, types, schema } = savedObjectsService;
-  const eligibleTypes = getEligibleTypes({ types, schema });
+  const { getTypeRegistry, getScopedClient, createExporter, createImporter } = savedObjects;
 
-  const exportRequestedObjects = async (
-    sourceSpaceId: string,
-    options: Pick<CopyOptions, 'includeReferences' | 'objects'>
-  ) => {
-    const objectStream = await importExport.getSortedObjectsForExport({
+  const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
+  const savedObjectsExporter = createExporter(savedObjectsClient);
+  const savedObjectsImporter = createImporter(savedObjectsClient);
+
+  const exportRequestedObjects = async (sourceSpaceId: string, options: CopyOptions) => {
+    const objectStream = await savedObjectsExporter.exportByObjects({
+      request,
       namespace: spaceIdToNamespace(sourceSpaceId),
       includeReferencesDeep: options.includeReferences,
+      includeNamespaces: !options.createNewCopies, // if we are not creating new copies, then include namespaces; this will ensure we can check for objects that already exist in the destination space below
       excludeExportDetails: true,
       objects: options.objects,
-      savedObjectsClient,
-      exportSizeLimit: importExport.objectLimit,
     });
 
     return readStreamToCompletion<SavedObject>(objectStream);
@@ -51,18 +47,17 @@ export function copySavedObjectsToSpacesFactory(
     options: CopyOptions
   ) => {
     try {
-      const importResponse = await importExport.importSavedObjects({
+      const importResponse = await savedObjectsImporter.import({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: importExport.objectLimit,
         overwrite: options.overwrite,
-        savedObjectsClient,
-        supportedTypes: eligibleTypes,
         readStream: objectsStream,
+        createNewCopies: options.createNewCopies,
       });
 
       return {
         success: importResponse.success,
         successCount: importResponse.successCount,
+        successResults: importResponse.successResults,
         errors: importResponse.errors,
       };
     } catch (error) {
@@ -78,11 +73,25 @@ export function copySavedObjectsToSpacesFactory(
     const response: CopyResponse = {};
 
     const exportedSavedObjects = await exportRequestedObjects(sourceSpaceId, options);
+    const ineligibleTypes = getIneligibleTypes(getTypeRegistry());
+    const filteredObjects = exportedSavedObjects.filter(
+      ({ type, namespaces }) =>
+        // Don't attempt to copy ineligible types or objects that already exist in all spaces
+        !ineligibleTypes.includes(type) && !namespaces?.includes(ALL_SPACES_ID)
+    );
 
     for (const spaceId of destinationSpaceIds) {
+      const objectsToImport: SavedObject[] = [];
+      for (const { namespaces, ...object } of filteredObjects) {
+        if (!namespaces?.includes(spaceId)) {
+          // We check to ensure that each object doesn't already exist in the destination. If we don't do this, the consumer will see a
+          // conflict and have the option to skip or overwrite the object, both of which are effectively a no-op.
+          objectsToImport.push(object);
+        }
+      }
       response[spaceId] = await importObjectsToSpace(
         spaceId,
-        createReadableStreamFromArray(exportedSavedObjects),
+        createReadableStreamFromArray(objectsToImport),
         options
       );
     }

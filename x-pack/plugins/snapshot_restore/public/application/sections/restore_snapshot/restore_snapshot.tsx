@@ -1,19 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import { SectionError, Error, PageError } from '../../../shared_imports';
 import { BASE_PATH } from '../../constants';
-import { SectionError, SectionLoading, RestoreSnapshotForm, Error } from '../../components';
+import { PageLoading, RestoreSnapshotForm } from '../../components';
 import { useServices } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useLoadSnapshot, executeRestore } from '../../services/http';
+import { useDecodedParams } from '../../lib';
 
 interface MatchParams {
   repositoryName: string;
@@ -21,12 +25,10 @@ interface MatchParams {
 }
 
 export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { repositoryName, snapshotId },
-  },
   history,
 }) => {
   const { i18n } = useServices();
+  const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -74,12 +76,12 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
 
   const renderLoading = () => {
     return (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.restoreSnapshot.loadingSnapshotDescription"
           defaultMessage="Loading snapshot details…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   };
 
@@ -101,8 +103,9 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
           },
         }
       : snapshotError;
+
     return (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreSnapshot.loadingSnapshotErrorTitle"
@@ -132,15 +135,30 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
     setSaveError(null);
   };
 
-  const renderContent = () => {
-    if (loadingSnapshot) {
-      return renderLoading();
-    }
-    if (snapshotError) {
-      return renderError();
-    }
+  if (loadingSnapshot) {
+    return renderLoading();
+  }
 
-    return (
+  if (snapshotError) {
+    return renderError();
+  }
+
+  return (
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreSnapshotTitle"
+              defaultMessage="Restore '{snapshot}'"
+              values={{ snapshot: snapshotId }}
+            />
+          </span>
+        }
+      />
+
+      <EuiSpacer size="l" />
+
       <RestoreSnapshotForm
         snapshotDetails={snapshotDetails as SnapshotDetails}
         isSaving={isSaving}
@@ -148,24 +166,6 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
         clearSaveError={clearSaveError}
         onSave={onSave}
       />
-    );
-  };
-
-  return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="m">
-          <h1>
-            <FormattedMessage
-              id="xpack.snapshotRestore.restoreSnapshotTitle"
-              defaultMessage="Restore '{snapshot}'"
-              values={{ snapshot: snapshotId }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {renderContent()}
-      </EuiPageContent>
-    </EuiPageBody>
+    </EuiPageContentBody>
   );
 };

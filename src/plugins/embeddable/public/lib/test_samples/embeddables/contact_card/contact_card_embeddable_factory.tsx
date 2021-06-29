@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -23,26 +12,23 @@ import { UiActionsStart } from 'src/plugins/ui_actions/public';
 
 import { CoreStart } from 'src/core/public';
 import { toMountPoint } from '../../../../../../kibana_react/public';
-import { EmbeddableFactory } from '../../../embeddables';
+import { EmbeddableFactoryDefinition } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { ContactCardInitializer } from './contact_card_initializer';
-import { EmbeddableFactoryOptions } from '../../../embeddables/embeddable_factory';
 
 export const CONTACT_CARD_EMBEDDABLE = 'CONTACT_CARD_EMBEDDABLE';
 
-export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardEmbeddableInput> {
+export class ContactCardEmbeddableFactory
+  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 
   constructor(
-    options: EmbeddableFactoryOptions<any>,
     private readonly execTrigger: UiActionsStart['executeTriggerActions'],
     private readonly overlays: CoreStart['overlays']
-  ) {
-    super(options);
-  }
+  ) {}
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 
@@ -52,13 +38,14 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
     });
   }
 
-  public getExplicitInput(): Promise<Partial<ContactCardEmbeddableInput>> {
-    return new Promise(resolve => {
+  public getExplicitInput = (): Promise<Partial<ContactCardEmbeddableInput>> => {
+    return new Promise((resolve) => {
       const modalSession = this.overlays.openModal(
         toMountPoint(
           <ContactCardInitializer
             onCancel={() => {
               modalSession.close();
+              // @ts-expect-error
               resolve(undefined);
             }}
             onCreate={(input: { firstName: string; lastName?: string }) => {
@@ -72,9 +59,9 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
         }
       );
     });
-  }
+  };
 
-  public async create(initialInput: ContactCardEmbeddableInput, parent?: Container) {
+  public create = async (initialInput: ContactCardEmbeddableInput, parent?: Container) => {
     return new ContactCardEmbeddable(
       initialInput,
       {
@@ -82,5 +69,5 @@ export class ContactCardEmbeddableFactory extends EmbeddableFactory<ContactCardE
       },
       parent
     );
-  }
+  };
 }

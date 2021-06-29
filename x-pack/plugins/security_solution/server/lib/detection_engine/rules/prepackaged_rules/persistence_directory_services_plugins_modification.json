@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation or modification of a DirectoryService PlugIns (dsplug) file. The DirectoryService daemonlaunches on each system boot and automatically reloads after crash. It scans and executes bundles that are located in the DirectoryServices PlugIns folder and can be abused by adversaries to maintain persistence.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Persistence via DirectoryService Plugin Modification",
+  "query": "event.category:file and not event.type:deletion and\n  file.path:/Library/DirectoryServices/PlugIns/*.dsplug\n",
+  "references": [
+    "https://blog.chichou.me/2019/11/21/two-macos-persistence-tricks-abusing-plugins/"
+  ],
+  "risk_score": 47,
+  "rule_id": "89fa6cb7-6b53-4de2-b604-648488841ab8",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

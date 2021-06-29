@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -24,11 +25,11 @@ export default function getActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle get action request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -37,29 +38,33 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .get(`${getUrlPrefix(space.id)}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: createdAction.id,
-                actionTypeId: 'test.index-record',
+                is_preconfigured: false,
+                connector_type_id: 'test.index-record',
+                is_missing_secrets: false,
                 name: 'My action',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -73,11 +78,11 @@ export default function getActionTests({ getService }: FtrProviderContext) {
 
         it(`action shouldn't be acessible from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -86,29 +91,65 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/action/${createdAction.id}`)
+            .get(`${getUrlPrefix('other')}/api/actions/connector/${createdAction.id}`)
             .auth(user.username, user.password);
 
-          expect(response.statusCode).to.eql(404);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
                 message: `Saved object [action/${createdAction.id}] not found`,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle get preconfigured action request appropriately', async () => {
+          const response = await supertestWithoutAuth
+            .get(`${getUrlPrefix(space.id)}/api/actions/connector/my-slack1`)
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to get actions',
+              });
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                id: 'my-slack1',
+                connector_type_id: '.slack',
+                name: 'Slack#xyz',
+                is_preconfigured: true,
               });
               break;
             default:

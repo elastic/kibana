@@ -1,36 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { readdir, stat } from 'fs';
-import { resolve } from 'path';
-import { bindNodeCallback, from, merge } from 'rxjs';
-import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
+import { from, merge } from 'rxjs';
+import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
 import { PluginWrapper } from '../plugin';
-import { createPluginInitializerContext } from '../plugin_context';
+import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
-
-const fsReadDir$ = bindNodeCallback<string, string[]>(readdir);
-const fsStat$ = bindNodeCallback(stat);
+import { scanPluginSearchPaths } from './scan_plugin_search_paths';
 
 /**
  * Tries to discover all possible plugins based on the provided plugin config.
@@ -42,7 +27,11 @@ const fsStat$ = bindNodeCallback(stat);
  * @param coreContext Kibana core values.
  * @internal
  */
-export function discover(config: PluginsConfig, coreContext: CoreContext) {
+export function discover(
+  config: PluginsConfig,
+  coreContext: CoreContext,
+  instanceInfo: InstanceInfo
+) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
@@ -54,11 +43,19 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
 
   const discoveryResults$ = merge(
     from(config.additionalPluginPaths),
-    processPluginSearchPaths$(config.pluginSearchPaths, log)
+    scanPluginSearchPaths(config.pluginSearchPaths, log)
   ).pipe(
-    mergeMap(pluginPathOrError => {
+    toArray(),
+    mergeMap((pathAndErrors) => {
+      return pathAndErrors.sort((a, b) => {
+        const pa = typeof a === 'string' ? a : a.path;
+        const pb = typeof b === 'string' ? b : b.path;
+        return pa < pb ? -1 : pa > pb ? 1 : 0;
+      });
+    }),
+    concatMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, coreContext)
+        ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo)
         : [pluginPathOrError];
     }),
     shareReplay()
@@ -75,35 +72,6 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
 }
 
 /**
- * Iterates over every plugin search path and returns a merged stream of all
- * sub-directories. If directory cannot be read or it's impossible to get stat
- * for any of the nested entries then error is added into the stream instead.
- * @param pluginDirs List of the top-level directories to process.
- * @param log Plugin discovery logger instance.
- */
-function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
-  return from(pluginDirs).pipe(
-    mergeMap(dir => {
-      log.debug(`Scanning "${dir}" for plugin sub-directories...`);
-
-      return fsReadDir$(dir).pipe(
-        mergeMap((subDirs: string[]) => subDirs.map(subDir => resolve(dir, subDir))),
-        mergeMap(path =>
-          fsStat$(path).pipe(
-            // Filter out non-directory entries from target directories, it's expected that
-            // these directories may contain files (e.g. `README.md` or `package.json`).
-            // We shouldn't silently ignore the entries we couldn't get stat for though.
-            mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
-            catchError(err => [PluginDiscoveryError.invalidPluginPath(path, err)])
-          )
-        ),
-        catchError(err => [PluginDiscoveryError.invalidSearchPath(dir, err)])
-      );
-    })
-  );
-}
-
-/**
  * Tries to load and parse the plugin manifest file located at the provided plugin
  * directory path and produces an error result if it fails to do so or plugin manifest
  * isn't valid.
@@ -111,18 +79,28 @@ function processPluginSearchPaths$(pluginDirs: readonly string[], log: Logger) {
  * @param log Plugin discovery logger instance.
  * @param coreContext Kibana core context.
  */
-function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
-  return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
-    map(manifest => {
+function createPlugin$(
+  path: string,
+  log: Logger,
+  coreContext: CoreContext,
+  instanceInfo: InstanceInfo
+) {
+  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
+    map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);
       return new PluginWrapper({
         path,
         manifest,
         opaqueId,
-        initializerContext: createPluginInitializerContext(coreContext, opaqueId, manifest),
+        initializerContext: createPluginInitializerContext(
+          coreContext,
+          opaqueId,
+          manifest,
+          instanceInfo
+        ),
       });
     }),
-    catchError(err => [err])
+    catchError((err) => [err])
   );
 }

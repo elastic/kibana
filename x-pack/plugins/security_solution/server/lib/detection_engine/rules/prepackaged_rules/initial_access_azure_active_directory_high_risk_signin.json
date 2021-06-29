@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic",
+    "Willem D'Haese"
+  ],
+  "description": "Identifies high risk Azure Active Directory (AD) sign-ins by leveraging Microsoft's Identity Protection machine learning and heuristics. Identity Protection categorizes risk into three tiers: low, medium, and high. While Microsoft does not provide specific details about how risk is calculated, each level brings higher confidence that the user or sign-in is compromised.",
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Active Directory High Risk Sign-in",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.signinlogs and\n  azure.signinlogs.properties.risk_level_during_signin:high and\n  event.outcome:(success or Success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/howto-conditional-access-policy-risk",
+    "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/overview-identity-protection",
+    "https://docs.microsoft.com/en-us/azure/active-directory/identity-protection/howto-identity-protection-investigate-risk"
+  ],
+  "risk_score": 73,
+  "rule_id": "37994bca-0611-4500-ab67-5588afe73b77",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

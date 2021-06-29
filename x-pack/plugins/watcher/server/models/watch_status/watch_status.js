@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { get, map, forEach, max } from 'lodash';
-import { badRequest } from 'boom';
+import { get, map, forEach, maxBy } from 'lodash';
+import { badRequest } from '@hapi/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ActionStatus } from '../action_status';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
@@ -14,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 function getActionStatusTotals(watchStatus) {
   const result = {};
 
-  forEach(ACTION_STATES, state => {
+  forEach(ACTION_STATES, (state) => {
     result[state] = 0;
   });
-  forEach(watchStatus.actionStatuses, actionStatus => {
+  forEach(watchStatus.actionStatuses, (actionStatus) => {
     result[actionStatus.state] = result[actionStatus.state] + 1;
   });
 
@@ -43,6 +44,7 @@ export class WatchStatus {
         id,
         actionStatusJson,
         errors: this.watchErrors.actions && this.watchErrors.actions[id],
+        lastCheckedRawFormat: get(this.watchStatusJson, 'last_checked'),
       };
       return ActionStatus.fromUpstreamJson(json);
     });
@@ -118,7 +120,7 @@ export class WatchStatus {
   }
 
   get lastFired() {
-    const actionStatus = max(this.actionStatuses, 'lastExecution');
+    const actionStatus = maxBy(this.actionStatuses, 'lastExecution');
     if (actionStatus) {
       return actionStatus.lastExecution;
     }
@@ -134,7 +136,7 @@ export class WatchStatus {
       lastChecked: this.lastChecked,
       lastMetCondition: this.lastMetCondition,
       lastFired: this.lastFired,
-      actionStatuses: map(this.actionStatuses, actionStatus => actionStatus.downstreamJson),
+      actionStatuses: map(this.actionStatuses, (actionStatus) => actionStatus.downstreamJson),
     };
 
     return json;

@@ -1,35 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    snapshotRestore?: SnapshotRestoreContext;
-  }
-}
 
-import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import {
-  CoreSetup,
-  Plugin,
-  Logger,
-  PluginInitializerContext,
-  IScopedClusterClient,
-} from 'kibana/server';
+import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'kibana/server';
 
-import { PLUGIN } from '../common';
+import { PLUGIN, APP_REQUIRED_CLUSTER_PRIVILEGES } from '../common';
 import { License } from './services';
 import { ApiRoutes } from './routes';
-import { isEsError, wrapEsError } from './lib';
-import { elasticsearchJsPlugin } from './client/elasticsearch_sr';
-import { Dependencies } from './types';
+import { wrapEsError } from './lib';
+import { handleEsError } from './shared_imports';
+import type { Dependencies } from './types';
 import { SnapshotRestoreConfig } from './config';
-
-export interface SnapshotRestoreContext {
-  client: IScopedClusterClient;
-}
 
 export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
@@ -43,14 +28,11 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
-  public async setup(
-    { http, elasticsearch }: CoreSetup,
-    { licensing, security, cloud }: Dependencies
-  ): Promise<void> {
-    const pluginConfig = await this.context.config
-      .create<SnapshotRestoreConfig>()
-      .pipe(first())
-      .toPromise();
+  public setup(
+    { http, getStartServices }: CoreSetup,
+    { licensing, features, security, cloud }: Dependencies
+  ): void {
+    const pluginConfig = this.context.config.get<SnapshotRestoreConfig>();
 
     if (!pluginConfig.enabled) {
       return;
@@ -72,34 +54,34 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       }
     );
 
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    const snapshotRestoreESClient = elasticsearch.createClient('snapshotRestore', esClientConfig);
-    http.registerRouteHandlerContext('snapshotRestore', (ctx, request) => {
-      return {
-        client: snapshotRestoreESClient.asScoped(request),
-      };
+    features.registerElasticsearchFeature({
+      id: PLUGIN.id,
+      management: {
+        data: [PLUGIN.id],
+      },
+      catalogue: [PLUGIN.id],
+      privileges: [
+        {
+          requiredClusterPrivileges: [...APP_REQUIRED_CLUSTER_PRIVILEGES],
+          ui: [],
+        },
+      ],
     });
 
     this.apiRoutes.setup({
       router,
       license: this.license,
       config: {
-        isSecurityEnabled: security !== undefined,
+        isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
         isCloudEnabled: cloud !== undefined && cloud.isCloudEnabled,
-        isSlmEnabled: pluginConfig.slmUi.enabled,
+        isSlmEnabled: pluginConfig.slm_ui.enabled,
       },
       lib: {
-        isEsError,
+        handleEsError,
         wrapEsError,
       },
     });
   }
 
-  public start() {
-    this.logger.debug('Starting plugin');
-  }
-
-  public stop() {
-    this.logger.debug('Stopping plugin');
-  }
+  public start() {}
 }

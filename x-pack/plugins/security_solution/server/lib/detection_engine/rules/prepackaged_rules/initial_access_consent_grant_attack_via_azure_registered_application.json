@@ -1,0 +1,72 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects when a user grants permissions to an Azure-registered application or when an administrator grants tenant-wide permissions to an application. An adversary may create an Azure-registered application that requests access to data such as contact information, email, or documents.",
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Possible Consent Grant Attack via Azure-Registered Application",
+  "note": "## Triage and analysis\n\n- In a consent grant attack, an attacker tricks an end user into granting a malicious application consent to access their data, usually via a phishing attack. After the malicious application has been granted consent, it has account-level access to data without the need for an organizational account.\n- Normal remediation steps, like resetting passwords for breached accounts or requiring Multi-Factor Authentication (MFA) on accounts, are not effective against this type of attack, since these are third-party applications and are external to the organization.\n- Security analysts should review the list of trusted applications for any suspicious items.\n\n\n## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(azure.activitylogs or azure.auditlogs or o365.audit) and \n  (\n    azure.activitylogs.operation_name:\"Consent to application\" or\n    azure.auditlogs.operation_name:\"Consent to application\" or\n    o365.audit.Operation:\"Consent to application.\"\n  ) and\n  event.outcome:(Success or success)\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/microsoft-365/security/office-365-security/detect-and-remediate-illicit-consent-grants?view=o365-worldwide"
+  ],
+  "risk_score": 47,
+  "rule_id": "1c6a8c7a-5cb6-4a82-ba27-d5a5b8a40a38",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1566",
+          "name": "Phishing",
+          "reference": "https://attack.mitre.org/techniques/T1566/",
+          "subtechnique": [
+            {
+              "id": "T1566.002",
+              "name": "Spearphishing Link",
+              "reference": "https://attack.mitre.org/techniques/T1566/002/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0006",
+        "name": "Credential Access",
+        "reference": "https://attack.mitre.org/tactics/TA0006/"
+      },
+      "technique": [
+        {
+          "id": "T1528",
+          "name": "Steal Application Access Token",
+          "reference": "https://attack.mitre.org/techniques/T1528/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

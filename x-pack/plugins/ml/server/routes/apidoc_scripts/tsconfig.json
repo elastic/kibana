@@ -1,0 +1,14 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target",
+    "target": "es6",
+    "moduleResolution": "node"
+  },
+  "include": [
+    "schema_worker.ts",
+    "schema_parser.ts",
+    "schema_extractor.ts",
+    "version_filter.ts"
+  ]
+}

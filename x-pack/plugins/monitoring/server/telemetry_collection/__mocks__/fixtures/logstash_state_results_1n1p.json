@@ -1,0 +1,168 @@
+[
+  {
+  "hits" : {
+      "hits": [
+        {
+          "_index" : ".monitoring-logstash-7-2021.02.01",
+          "_type" : "_doc",
+          "_id" : "ezNjX3cB1VO1nvgv72Wz",
+          "_score" : 0.0,
+          "_source" : {
+            "logstash_state" : {
+              "pipeline" : {
+                "batch_size" : 125,
+                "workers" : 1,
+                "representation" : {
+                  "graph" : {
+                    "vertices" : [
+                      {
+                        "config_name" : "stdin",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "input"
+                      },
+                      {
+                        "config_name" : "elasticsearch",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "input"
+                      },
+                      {
+                        "config_name" : "mutate",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "ruby",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "split",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "elasticsearch",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "ruby",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "ruby",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "mutate",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "aggregate",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "drop",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        }
+                      },
+                      {
+                        "config_name" : "mutate",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "filter"
+                      },
+                      {
+                        "config_name" : "elasticsearch",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "output"
+                      },
+                      {
+                        "config_name" : "stdout",
+                        "meta" : {
+                          "source" : {
+                            "protocol" : "file"
+                          }
+                        },
+                        "plugin_type" : "output"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "type" : "logstash_state",
+            "timestamp" : "2021-02-01T15:58:40.943-0500"
+          },
+          "fields" : {
+            "logstash_state.pipeline.ephemeral_id" : [
+              "994e68cd-d607-40e6-a54c-02a51caa17e0"
+            ]
+          }
+        }
+      ]
+  }
+}
+]

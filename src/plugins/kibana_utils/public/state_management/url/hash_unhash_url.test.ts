@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { mockStorage } from '../../storage/hashed_item_store/mock';
@@ -70,12 +59,12 @@ describe('hash unhash url', () => {
       });
 
       it('if hash is just a path', () => {
-        const url = 'https://localhost:5601/app/kibana#/discover';
+        const url = 'https://localhost:5601/app/discover#/';
         expect(hashUrl(url)).toBe(url);
       });
 
       it('if hash does not have matching query string vals', () => {
-        const url = 'https://localhost:5601/app/kibana#/discover?foo=bar';
+        const url = 'https://localhost:5601/app/discover#/?foo=bar';
         expect(hashUrl(url)).toBe(url);
       });
     });
@@ -84,10 +73,10 @@ describe('hash unhash url', () => {
       it('if uses single state param', () => {
         const stateParamKey = '_g';
         const stateParamValue = '(yes:!t)';
-        const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey}=${stateParamValue}`;
+        const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey}=${stateParamValue}`;
         const result = hashUrl(url);
         expect(result).toMatchInlineSnapshot(
-          `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=h@4e60e02"`
+          `"https://localhost:5601/app/discover#/?foo=bar&_g=h@4e60e02"`
         );
         expect(mockStorage.getItem('kbn.hashedItemsIndex.v1')).toBeTruthy();
         expect(mockStorage.getItem('h@4e60e02')).toEqual(JSON.stringify({ yes: true }));
@@ -100,10 +89,10 @@ describe('hash unhash url', () => {
         const stateParamValue2 = '(yes:!f)';
         const stateParamKey3 = '_b';
         const stateParamValue3 = '(yes:!f)';
-        const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValue1}&${stateParamKey2}=${stateParamValue2}&${stateParamKey3}=${stateParamValue3}`;
+        const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey1}=${stateParamValue1}&${stateParamKey2}=${stateParamValue2}&${stateParamKey3}=${stateParamValue3}`;
         const result = hashUrl(url);
         expect(result).toMatchInlineSnapshot(
-          `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=h@4e60e02&_a=h@61fa078&_b=(yes:!f)"`
+          `"https://localhost:5601/app/discover#/?foo=bar&_g=h@4e60e02&_a=h@61fa078&_b=(yes:!f)"`
         );
         expect(mockStorage.getItem('h@4e60e02')).toEqual(JSON.stringify({ yes: true }));
         expect(mockStorage.getItem('h@61fa078')).toEqual(JSON.stringify({ yes: false }));
@@ -116,17 +105,17 @@ describe('hash unhash url', () => {
         expect(mockStorage.length).toBe(3);
       });
 
-      it('hashes only whitelisted properties', () => {
+      it('hashes only allow-listed properties', () => {
         const stateParamKey1 = '_g';
         const stateParamValue1 = '(yes:!t)';
         const stateParamKey2 = '_a';
         const stateParamValue2 = '(yes:!f)';
         const stateParamKey3 = '_someother';
         const stateParamValue3 = '(yes:!f)';
-        const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValue1}&${stateParamKey2}=${stateParamValue2}&${stateParamKey3}=${stateParamValue3}`;
+        const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey1}=${stateParamValue1}&${stateParamKey2}=${stateParamValue2}&${stateParamKey3}=${stateParamValue3}`;
         const result = hashUrl(url);
         expect(result).toMatchInlineSnapshot(
-          `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=h@4e60e02&_a=h@61fa078&_someother=(yes:!f)"`
+          `"https://localhost:5601/app/discover#/?foo=bar&_g=h@4e60e02&_a=h@61fa078&_someother=(yes:!f)"`
         );
 
         expect(mockStorage.length).toBe(3); // 2 hashes + HashedItemStoreSingleton.PERSISTED_INDEX_KEY
@@ -138,7 +127,7 @@ describe('hash unhash url', () => {
       const stateParamValue1 = '(yes:!t)';
       mockStorage.setStubbedSizeLimit(1);
 
-      const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValue1}`;
+      const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey1}=${stateParamValue1}`;
       expect(() => hashUrl(url)).toThrowError();
     });
   });
@@ -177,19 +166,19 @@ describe('hash unhash url', () => {
       });
 
       it('if hash is just a path', () => {
-        const url = 'https://localhost:5601/app/kibana#/discover';
+        const url = 'https://localhost:5601/app/discover#/';
         expect(unhashUrl(url)).toBe(url);
       });
 
       it('if hash does not have matching query string vals', () => {
-        const url = 'https://localhost:5601/app/kibana#/discover?foo=bar';
+        const url = 'https://localhost:5601/app/discover#/?foo=bar';
         expect(unhashUrl(url)).toBe(url);
       });
 
       it("if hash has matching query, but it isn't hashed", () => {
         const stateParamKey = '_g';
         const stateParamValue = '(yes:!t)';
-        const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey}=${stateParamValue}`;
+        const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey}=${stateParamValue}`;
         expect(unhashUrl(url)).toBe(url);
       });
     });
@@ -201,10 +190,10 @@ describe('hash unhash url', () => {
         const state = { yes: true };
         mockStorage.setItem(stateParamValueHashed, JSON.stringify(state));
 
-        const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey}=${stateParamValueHashed}`;
+        const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey}=${stateParamValueHashed}`;
         const result = unhashUrl(url);
         expect(result).toMatchInlineSnapshot(
-          `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=(yes:!t)"`
+          `"https://localhost:5601/app/discover#/?foo=bar&_g=(yes:!t)"`
         );
       });
 
@@ -220,14 +209,14 @@ describe('hash unhash url', () => {
         mockStorage.setItem(stateParamValueHashed1, JSON.stringify(state1));
         mockStorage.setItem(stateParamValueHashed2, JSON.stringify(state2));
 
-        const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValueHashed1}&${stateParamKey2}=${stateParamValueHashed2}`;
+        const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey1}=${stateParamValueHashed1}&${stateParamKey2}=${stateParamValueHashed2}`;
         const result = unhashUrl(url);
         expect(result).toMatchInlineSnapshot(
-          `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=(yes:!t)&_a=(yes:!f)"`
+          `"https://localhost:5601/app/discover#/?foo=bar&_g=(yes:!t)&_a=(yes:!f)"`
         );
       });
 
-      it('unhashes only whitelisted properties', () => {
+      it('un-hashes only allow-listed properties', () => {
         const stateParamKey1 = '_g';
         const stateParamValueHashed1 = 'h@4e60e02';
         const state1 = { yes: true };
@@ -244,10 +233,10 @@ describe('hash unhash url', () => {
         mockStorage.setItem(stateParamValueHashed2, JSON.stringify(state2));
         mockStorage.setItem(stateParamValueHashed3, JSON.stringify(state3));
 
-        const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValueHashed1}&${stateParamKey2}=${stateParamValueHashed2}&${stateParamKey3}=${stateParamValueHashed3}`;
+        const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey1}=${stateParamValueHashed1}&${stateParamKey2}=${stateParamValueHashed2}&${stateParamKey3}=${stateParamValueHashed3}`;
         const result = unhashUrl(url);
         expect(result).toMatchInlineSnapshot(
-          `"https://localhost:5601/app/kibana#/discover?foo=bar&_g=(yes:!t)&_a=(yes:!f)&_someother=h@61fa078"`
+          `"https://localhost:5601/app/discover#/?foo=bar&_g=(yes:!t)&_a=(yes:!f)&_someother=h@61fa078"`
         );
       });
     });
@@ -256,7 +245,7 @@ describe('hash unhash url', () => {
       const stateParamKey1 = '_g';
       const stateParamValueHashed1 = 'h@4e60e02';
 
-      const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValueHashed1}`;
+      const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey1}=${stateParamValueHashed1}`;
       expect(() => unhashUrl(url)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to completely restore the URL, be sure to use the share functionality."`
       );
@@ -271,7 +260,7 @@ describe('hash unhash url', () => {
       const stateParamValue2 = '(yes:!f)';
       const stateParamKey3 = '_someother';
       const stateParamValue3 = '(yes:!f)';
-      const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=${stateParamValue1}&${stateParamKey2}=${stateParamValue2}&${stateParamKey3}=${stateParamValue3}`;
+      const url = `https://localhost:5601/app/discover#/?foo=bar&${stateParamKey1}=${stateParamValue1}&${stateParamKey2}=${stateParamValue2}&${stateParamKey3}=${stateParamValue3}`;
       const result = unhashUrl(hashUrl(url));
       expect(url).toEqual(result);
     });

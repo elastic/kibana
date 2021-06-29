@@ -1,39 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ESFilter } from '../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import {
   ERROR_GROUP_ID,
-  PROCESSOR_EVENT,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../helpers/range_filter';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../../helpers/setup_request';
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
+  environment,
+  kuery,
   serviceName,
   groupId,
   bucketSize,
-  setup
+  setup,
 }: {
+  environment?: string;
+  kuery?: string;
   serviceName: string;
   groupId?: string;
   bucketSize: number;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
-  const { start, end, uiFiltersES, client, indices } = setup;
+  const { start, end, apmEventClient } = setup;
   const filter: ESFilter[] = [
-    { term: { [PROCESSOR_EVENT]: 'error' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
-    ...uiFiltersES
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+    ...kqlQuery(kuery),
   ];
 
   if (groupId) {
@@ -41,13 +46,15 @@ export async function getBuckets({
   }
 
   const params = {
-    index: indices['apm_oss.errorIndices'],
+    apm: {
+      events: [ProcessorEvent.error],
+    },
     body: {
       size: 0,
       query: {
         bool: {
-          filter
-        }
+          filter,
+        },
       },
       aggs: {
         distribution: {
@@ -57,25 +64,28 @@ export async function getBuckets({
             interval: bucketSize,
             extended_bounds: {
               min: start,
-              max: end
-            }
-          }
-        }
-      }
-    }
+              max: end,
+            },
+          },
+        },
+      },
+    },
   };
 
-  const resp = await client.search(params);
+  const resp = await apmEventClient.search(
+    'get_error_distribution_buckets',
+    params
+  );
 
   const buckets = (resp.aggregations?.distribution.buckets || []).map(
-    bucket => ({
+    (bucket) => ({
       key: bucket.key,
-      count: bucket.doc_count
+      count: bucket.doc_count,
     })
   );
 
   return {
     noHits: resp.hits.total.value === 0,
-    buckets
+    buckets: resp.hits.total.value > 0 ? buckets : [],
   };
 }

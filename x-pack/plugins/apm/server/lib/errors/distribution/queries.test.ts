@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getErrorDistribution } from './get_distribution';
 import {
   SearchParamsMock,
-  inspectSearchParams
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+  inspectSearchParams,
+} from '../../../utils/test_helpers';
 
 describe('error distribution queries', () => {
   let mock: SearchParamsMock;
@@ -18,10 +19,10 @@ describe('error distribution queries', () => {
   });
 
   it('fetches an error distribution', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorDistribution({
         serviceName: 'serviceName',
-        setup
+        setup,
       })
     );
 
@@ -29,11 +30,11 @@ describe('error distribution queries', () => {
   });
 
   it('fetches an error distribution with a group id', async () => {
-    mock = await inspectSearchParams(setup =>
+    mock = await inspectSearchParams((setup) =>
       getErrorDistribution({
         serviceName: 'serviceName',
         groupId: 'foo',
-        setup
+        setup,
       })
     );
 

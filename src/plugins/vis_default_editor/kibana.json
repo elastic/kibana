@@ -1,0 +1,12 @@
+{
+  "id": "visDefaultEditor",
+  "version": "kibana",
+  "ui": true,
+  "optionalPlugins": ["visualize"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"],
+  "owner": {
+    "name": "Kibana App",
+    "githubTeam": "kibana-app"
+  },
+  "description": "The default editor used in most aggregation-based visualizations."
+}

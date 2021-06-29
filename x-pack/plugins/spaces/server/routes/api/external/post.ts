@@ -1,16 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import Boom from 'boom';
+
+import Boom from '@hapi/boom';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
-import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
+import type { ExternalRouteDeps } from './';
 
 export function initPostSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, log, spacesService, getSavedObjects } = deps;
+  const { externalRouter, log, getSpacesService } = deps;
 
   externalRouter.post(
     {
@@ -21,8 +25,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside POST /api/spaces/space`);
-      const { SavedObjectsClient } = getSavedObjects();
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       const space = request.body;
 
@@ -31,7 +34,7 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
         const createdSpace = await spacesClient.create(space);
         return response.ok({ body: createdSpace });
       } catch (error) {
-        if (SavedObjectsClient.errors.isConflictError(error)) {
+        if (SavedObjectsErrorHelpers.isConflictError(error)) {
           const { body } = wrapError(
             Boom.conflict(`A space with the identifier ${space.id} already exists.`)
           );

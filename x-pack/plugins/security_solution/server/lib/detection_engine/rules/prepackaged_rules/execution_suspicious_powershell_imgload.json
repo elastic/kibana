@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the PowerShell engine being invoked by unexpected processes. Rather than executing PowerShell functionality with powershell.exe, some attackers do this to operate more stealthily.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious PowerShell Engine ImageLoad",
+  "query": "library where dll.name : (\"System.Management.Automation.ni.dll\", \"System.Management.Automation.dll\") and\n/* add false positives relevant to your environment here */\nnot process.executable : (\"C:\\\\Windows\\\\System32\\\\RemoteFXvGPUDisablement.exe\", \"C:\\\\Windows\\\\System32\\\\sdiagnhost.exe\", \"C:\\\\Program Files*\\\\*.exe\") and\n  not process.name :\n  (\n    \"Altaro.SubAgent.exe\",\n    \"AppV_Manage.exe\",\n    \"azureadconnect.exe\",\n    \"CcmExec.exe\",\n    \"configsyncrun.exe\",\n    \"choco.exe\",\n    \"ctxappvservice.exe\",\n    \"DVLS.Console.exe\",\n    \"edgetransport.exe\",\n    \"exsetup.exe\",\n    \"forefrontactivedirectoryconnector.exe\",\n    \"InstallUtil.exe\",\n    \"JenkinsOnDesktop.exe\",\n    \"Microsoft.EnterpriseManagement.ServiceManager.UI.Console.exe\",\n    \"mmc.exe\",\n    \"mscorsvw.exe\",\n    \"msexchangedelivery.exe\",\n    \"msexchangefrontendtransport.exe\",\n    \"msexchangehmworker.exe\",\n    \"msexchangesubmission.exe\",\n    \"msiexec.exe\",\n    \"MsiExec.exe\",\n    \"noderunner.exe\",\n    \"NServiceBus.Host.exe\",\n    \"NServiceBus.Host32.exe\",\n    \"NServiceBus.Hosting.Azure.HostProcess.exe\",\n    \"OuiGui.WPF.exe\",\n    \"powershell.exe\",\n    \"powershell_ise.exe\",\n    \"pwsh.exe\",\n    \"SCCMCliCtrWPF.exe\",\n    \"ScriptEditor.exe\",\n    \"ScriptRunner.exe\",\n    \"sdiagnhost.exe\",\n    \"servermanager.exe\",\n    \"setup100.exe\",\n    \"ServiceHub.VSDetouredHost.exe\",\n    \"SPCAF.Client.exe\",\n    \"SPCAF.SettingsEditor.exe\",\n    \"SQLPS.exe\",\n    \"telemetryservice.exe\",\n    \"UMWorkerProcess.exe\",\n    \"w3wp.exe\",\n    \"wsmprovhost.exe\"\n  )\n",
+  "risk_score": 47,
+  "rule_id": "852c1f19-68e8-43a6-9dce-340771fe1be3",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

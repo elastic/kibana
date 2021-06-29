@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
-import { Role, RoleIndexPrivilege, copyRole } from '../../../common/model';
+import type { HttpStart } from 'src/core/public';
+
+import type { Role, RoleIndexPrivilege } from '../../../common/model';
+import { copyRole } from '../../../common/model';
 import { isGlobalPrivilegeDefinition } from './edit_role/privilege_utils';
 
 export class RolesAPIClient {
@@ -34,24 +37,25 @@ export class RolesAPIClient {
     const isPlaceholderPrivilege = (indexPrivilege: RoleIndexPrivilege) =>
       indexPrivilege.names.length === 0;
     role.elasticsearch.indices = role.elasticsearch.indices.filter(
-      indexPrivilege => !isPlaceholderPrivilege(indexPrivilege)
+      (indexPrivilege) => !isPlaceholderPrivilege(indexPrivilege)
     );
 
     // Remove any placeholder query entries
-    role.elasticsearch.indices.forEach(index => index.query || delete index.query);
+    role.elasticsearch.indices.forEach((index) => index.query || delete index.query);
 
     // If spaces are disabled, then do not persist any space privileges
     if (!spacesEnabled) {
       role.kibana = role.kibana.filter(isGlobalPrivilegeDefinition);
     }
 
-    role.kibana.forEach(kibanaPrivilege => {
+    role.kibana.forEach((kibanaPrivilege) => {
       // If a base privilege is defined, then do not persist feature privileges
       if (kibanaPrivilege.base.length > 0) {
         kibanaPrivilege.feature = {};
       }
     });
 
+    // @ts-expect-error
     delete role.name;
     delete role.transient_metadata;
     delete role._unrecognized_applications;

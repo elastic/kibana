@@ -1,0 +1,429 @@
+{
+  "mappings": {
+    "properties": {
+      "signal": {
+        "properties": {
+          "_meta": {
+            "properties": {
+              "version": {
+                "type": "long"
+              }
+            }
+          },
+          "parent": {
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
+          },
+          "parents": {
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
+          },
+          "ancestors": {
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
+          },
+          "group": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "integer"
+              }
+            }
+          },
+          "rule": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "rule_id": {
+                "type": "keyword"
+              },
+              "author": {
+                "type": "keyword"
+              },
+              "building_block_type": {
+                "type": "keyword"
+              },
+              "false_positives": {
+                "type": "keyword"
+              },
+              "saved_id": {
+                "type": "keyword"
+              },
+              "timeline_id": {
+                "type": "keyword"
+              },
+              "timeline_title": {
+                "type": "keyword"
+              },
+              "max_signals": {
+                "type": "keyword"
+              },
+              "risk_score": {
+                "type": "float"
+              },
+              "risk_score_mapping": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "operator": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "output_index": {
+                "type": "keyword"
+              },
+              "description": {
+                "type": "keyword"
+              },
+              "from": {
+                "type": "keyword"
+              },
+              "immutable": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "interval": {
+                "type": "keyword"
+              },
+              "language": {
+                "type": "keyword"
+              },
+              "license": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "rule_name_override": {
+                "type": "keyword"
+              },
+              "query": {
+                "type": "keyword"
+              },
+              "references": {
+                "type": "keyword"
+              },
+              "severity": {
+                "type": "keyword"
+              },
+              "severity_mapping": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "operator": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "keyword"
+                  },
+                  "severity": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "tags": {
+                "type": "keyword"
+              },
+              "threat": {
+                "properties": {
+                  "framework": {
+                    "type": "keyword"
+                  },
+                  "tactic": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "technique": {
+                    "properties": {
+                      "id": {
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "reference": {
+                        "type": "keyword"
+                      },
+                      "subtechnique": {
+                        "properties": {
+                          "id": {
+                            "type": "keyword"
+                          },
+                          "name": {
+                            "type": "keyword"
+                          },
+                          "reference": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "threshold": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "float"
+                  }
+                }
+              },
+              "threat_mapping": {
+                "properties": {
+                  "entries": {
+                    "properties": {
+                      "field": {
+                        "type": "keyword"
+                      },
+                      "value": {
+                        "type": "keyword"
+                      },
+                      "type": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "threat_filters": {
+                "type": "object"
+              },
+              "threat_indicator_path": {
+                "type": "keyword"
+              },
+              "threat_query": {
+                "type": "keyword"
+              },
+              "threat_index": {
+                "type": "keyword"
+              },
+              "threat_language": {
+                "type": "keyword"
+              },
+              "note": {
+                "type": "text"
+              },
+              "timestamp_override": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "size": {
+                "type": "keyword"
+              },
+              "to": {
+                "type": "keyword"
+              },
+              "enabled": {
+                "type": "keyword"
+              },
+              "filters": {
+                "type": "object"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "updated_at": {
+                "type": "date"
+              },
+              "created_by": {
+                "type": "keyword"
+              },
+              "updated_by": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              }
+            }
+          },
+          "original_time": {
+            "type": "date"
+          },
+          "original_signal": {
+            "type": "object",
+            "dynamic": false,
+            "enabled": false
+          },
+          "original_event": {
+            "properties": {
+              "action": {
+                "type": "keyword"
+              },
+              "category": {
+                "type": "keyword"
+              },
+              "code": {
+                "type": "keyword"
+              },
+              "created": {
+                "type": "date"
+              },
+              "dataset": {
+                "type": "keyword"
+              },
+              "duration": {
+                "type": "long"
+              },
+              "end": {
+                "type": "date"
+              },
+              "hash": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "kind": {
+                "type": "keyword"
+              },
+              "module": {
+                "type": "keyword"
+              },
+              "original": {
+                "doc_values": false,
+                "index": false,
+                "type": "keyword"
+              },
+              "outcome": {
+                "type": "keyword"
+              },
+              "provider": {
+                "type": "keyword"
+              },
+              "risk_score": {
+                "type": "float"
+              },
+              "risk_score_norm": {
+                "type": "float"
+              },
+              "sequence": {
+                "type": "long"
+              },
+              "severity": {
+                "type": "long"
+              },
+              "start": {
+                "type": "date"
+              },
+              "timezone": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              }
+            }
+          },
+          "status": {
+            "type": "keyword"
+          },
+          "threshold_count": {
+            "type": "float"
+          },
+          "threshold_result": {
+            "properties": {
+              "from": {
+                "type": "date"
+              },
+              "terms": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "cardinality": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "long"
+                  }
+                }
+              },
+              "count": {
+                "type": "long"
+              }
+            }
+          },
+          "depth": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when an Azure Automation webhook is created. Azure Automation runbooks can be configured to execute via a webhook. A webhook uses a custom URL passed to Azure Automation along with a data payload specific to the runbook. An adversary may create a webhook in order to trigger a runbook that contains malicious code.",
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Automation Webhook Created",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.activitylogs and\n  azure.activitylogs.operation_name:\n    (\n      \"MICROSOFT.AUTOMATION/AUTOMATIONACCOUNTS/WEBHOOKS/ACTION\" or\n      \"MICROSOFT.AUTOMATION/AUTOMATIONACCOUNTS/WEBHOOKS/WRITE\"\n    ) and\n  event.outcome:(Success or success)\n",
+  "references": [
+    "https://powerzure.readthedocs.io/en/latest/Functions/operational.html#create-backdoor",
+    "https://github.com/hausec/PowerZure",
+    "https://posts.specterops.io/attacking-azure-azure-ad-and-introducing-powerzure-ca70b330511a",
+    "https://www.ciraltos.com/webhooks-and-azure-automation-runbooks/"
+  ],
+  "risk_score": 21,
+  "rule_id": "e9ff9c1c-fe36-4d0d-b3fd-9e0bf4853a62",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

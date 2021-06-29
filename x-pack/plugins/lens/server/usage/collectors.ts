@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -10,19 +11,28 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 
 import { LensUsage, LensTelemetryState } from './types';
+import { lensUsageSchema } from './schema';
+
+const emptyUsageCollection = {
+  saved_overall: {},
+  saved_30_days: {},
+  saved_90_days: {},
+  saved_overall_total: 0,
+  saved_30_days_total: 0,
+  saved_90_days_total: 0,
+  events_30_days: {},
+  events_90_days: {},
+  suggestion_events_30_days: {},
+  suggestion_events_90_days: {},
+};
 
 export function registerLensUsageCollector(
   usageCollection: UsageCollectionSetup,
   taskManager: Promise<TaskManagerStartContract>
 ) {
-  let isCollectorReady = false;
-  taskManager.then(() => {
-    // mark lensUsageCollector as ready to collect when the TaskManager is ready
-    isCollectorReady = true;
-  });
-  const lensUsageCollector = usageCollection.makeUsageCollector({
+  const lensUsageCollector = usageCollection.makeUsageCollector<LensUsage>({
     type: 'lens',
-    fetch: async (): Promise<LensUsage> => {
+    async fetch() {
       try {
         const docs = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
@@ -32,6 +42,7 @@ export function registerLensUsageCollector(
         const suggestions = getDataByDate(state.suggestionsByDate);
 
         return {
+          ...emptyUsageCollection,
           ...state.saved,
           events_30_days: events.last30,
           events_90_days: events.last90,
@@ -39,29 +50,21 @@ export function registerLensUsageCollector(
           suggestion_events_90_days: suggestions.last90,
         };
       } catch (err) {
-        return {
-          saved_overall_total: 0,
-          saved_30_days_total: 0,
-          saved_90_days_total: 0,
-          saved_overall: {},
-          saved_30_days: {},
-          saved_90_days: {},
-
-          events_30_days: {},
-          events_90_days: {},
-          suggestion_events_30_days: {},
-          suggestion_events_90_days: {},
-        };
+        return emptyUsageCollection;
       }
     },
-    isReady: () => isCollectorReady,
+    isReady: async () => {
+      await taskManager;
+      return true;
+    },
+    schema: lensUsageSchema,
   });
 
   usageCollection.registerCollector(lensUsageCollector);
 }
 
 function addEvents(prevEvents: Record<string, number>, newEvents: Record<string, number>) {
-  Object.keys(newEvents).forEach(key => {
+  Object.keys(newEvents).forEach((key) => {
     prevEvents[key] = (prevEvents[key] || 0) + newEvents[key];
   });
 }
@@ -88,19 +91,15 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
 }
 
 function getDataByDate(dates: Record<string, Record<string, number>>) {
-  const byDate = Object.keys(dates || {}).map(dateStr => parseInt(dateStr, 10));
+  const byDate = Object.keys(dates || {}).map((dateStr) => parseInt(dateStr, 10));
 
   const last30: Record<string, number> = {};
   const last90: Record<string, number> = {};
 
-  const last30Timestamp = moment()
-    .subtract(30, 'days')
-    .unix();
-  const last90Timestamp = moment()
-    .subtract(90, 'days')
-    .unix();
+  const last30Timestamp = moment().subtract(30, 'days').unix();
+  const last90Timestamp = moment().subtract(90, 'days').unix();
 
-  byDate.forEach(dateKey => {
+  byDate.forEach((dateKey) => {
     if (dateKey >= last30Timestamp) {
       addEvents(last30, dates[dateKey]);
       addEvents(last90, dates[dateKey]);

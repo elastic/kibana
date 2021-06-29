@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the use of the Exchange PowerShell cmdlet, New-MailBoxExportRequest, to export the contents of a primary mailbox or archive to a .pst file. Adversaries may target user email to collect sensitive information.",
+  "false_positives": [
+    "Legitimate exchange system administration activity."
+  ],
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Exporting Exchange Mailbox via PowerShell",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name: (\"powershell.exe\", \"pwsh.exe\") and process.args : \"New-MailboxExportRequest*\"\n",
+  "references": [
+    "https://www.volexity.com/blog/2020/12/14/dark-halo-leverages-solarwinds-compromise-to-breach-organizations/",
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/new-mailboxexportrequest?view=exchange-ps"
+  ],
+  "risk_score": 47,
+  "rule_id": "6aace640-e631-4870-ba8e-5fdda09325db",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Collection"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0009",
+        "name": "Collection",
+        "reference": "https://attack.mitre.org/tactics/TA0009/"
+      },
+      "technique": [
+        {
+          "id": "T1114",
+          "name": "Email Collection",
+          "reference": "https://attack.mitre.org/techniques/T1114/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

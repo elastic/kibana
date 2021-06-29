@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { pick } from 'lodash';
-import { filterOptions } from '../../../routes/settings/custom_link';
-import { APMIndexDocumentParams } from '../../helpers/es_client';
+import {
+  CustomLink,
+  CustomLinkES,
+} from '../../../../common/custom_link/custom_link_types';
 import { Setup } from '../../helpers/setup_request';
-import { CustomLink } from './custom_link_types';
+import { toESFormat } from './helper';
+import { APMIndexDocumentParams } from '../../helpers/create_es_client/create_internal_es_client';
 
-export async function createOrUpdateCustomLink({
+export function createOrUpdateCustomLink({
   customLinkId,
   customLink,
-  setup
+  setup,
 }: {
   customLinkId?: string;
   customLink: Omit<CustomLink, '@timestamp'>;
@@ -21,15 +24,13 @@ export async function createOrUpdateCustomLink({
 }) {
   const { internalClient, indices } = setup;
 
-  const params: APMIndexDocumentParams<CustomLink> = {
+  const params: APMIndexDocumentParams<CustomLinkES> = {
     refresh: true,
     index: indices.apmCustomLinkIndex,
     body: {
       '@timestamp': Date.now(),
-      label: customLink.label,
-      url: customLink.url,
-      ...pick(customLink, filterOptions)
-    }
+      ...toESFormat(customLink),
+    },
   };
 
   // by specifying an id elasticsearch will delete the previous doc and insert the updated doc
@@ -37,5 +38,5 @@ export async function createOrUpdateCustomLink({
     params.id = customLinkId;
   }
 
-  return internalClient.index(params);
+  return internalClient.index('create_or_update_custom_link', params);
 }

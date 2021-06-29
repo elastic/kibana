@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { diffMappings } from './build_active_mappings';
@@ -52,6 +41,8 @@ export class IndexMigrator {
 
       pollInterval: context.pollInterval,
 
+      setStatus: context.setStatus,
+
       async isMigrated() {
         return !(await requiresMigration(context));
       },
@@ -71,13 +62,14 @@ export class IndexMigrator {
  * Determines what action the migration system needs to take (none, patch, migrate).
  */
 async function requiresMigration(context: Context): Promise<boolean> {
-  const { callCluster, alias, documentMigrator, dest, log } = context;
+  const { client, alias, documentMigrator, dest, kibanaVersion, log } = context;
 
   // Have all of our known migrations been run against the index?
   const hasMigrations = await Index.migrationsUpToDate(
-    callCluster,
+    client,
     alias,
-    documentMigrator.migrationVersion
+    documentMigrator.migrationVersion,
+    kibanaVersion
   );
 
   if (!hasMigrations) {
@@ -85,7 +77,7 @@ async function requiresMigration(context: Context): Promise<boolean> {
   }
 
   // Is our index aliased?
-  const refreshedSource = await Index.fetchInfo(callCluster, alias);
+  const refreshedSource = await Index.fetchInfo(client, alias);
 
   if (!refreshedSource.aliases[alias]) {
     return true;
@@ -109,19 +101,19 @@ async function requiresMigration(context: Context): Promise<boolean> {
  */
 async function migrateIndex(context: Context): Promise<MigrationResult> {
   const startTime = Date.now();
-  const { callCluster, alias, source, dest, log } = context;
+  const { client, alias, source, dest, log } = context;
 
   await deleteIndexTemplates(context);
 
   log.info(`Creating index ${dest.indexName}.`);
 
-  await Index.createIndex(callCluster, dest.indexName, dest.mappings);
+  await Index.createIndex(client, dest.indexName, dest.mappings);
 
   await migrateSourceToDest(context);
 
   log.info(`Pointing alias ${alias} to ${dest.indexName}.`);
 
-  await Index.claimAlias(callCluster, dest.indexName, alias);
+  await Index.claimAlias(client, dest.indexName, alias);
 
   const result: MigrationResult = {
     status: 'migrated',
@@ -139,12 +131,12 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
  * If the obsoleteIndexTemplatePattern option is specified, this will delete any index templates
  * that match it.
  */
-async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePattern }: Context) {
+async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern }: Context) {
   if (!obsoleteIndexTemplatePattern) {
     return;
   }
 
-  const templates = await callCluster('cat.templates', {
+  const { body: templates } = await client.cat.templates({
     format: 'json',
     name: obsoleteIndexTemplatePattern,
   });
@@ -153,11 +145,11 @@ async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePat
     return;
   }
 
-  const templateNames = templates.map(t => t.name);
+  const templateNames = templates.map((t) => t.name);
 
   log.info(`Removing index templates: ${templateNames}`);
 
-  return Promise.all(templateNames.map(name => callCluster('indices.deleteTemplate', { name })));
+  return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name: name! })));
 }
 
 /**
@@ -166,7 +158,7 @@ async function deleteIndexTemplates({ callCluster, log, obsoleteIndexTemplatePat
  * a situation where the alias moves out from under us as we're migrating docs.
  */
 async function migrateSourceToDest(context: Context) {
-  const { callCluster, alias, dest, source, batchSize } = context;
+  const { client, alias, dest, source, batchSize } = context;
   const { scrollDuration, documentMigrator, log, serializer } = context;
 
   if (!source.exists) {
@@ -176,10 +168,10 @@ async function migrateSourceToDest(context: Context) {
   if (!source.aliases[alias]) {
     log.info(`Reindexing ${alias} to ${source.indexName}`);
 
-    await Index.convertToAlias(callCluster, source, alias, batchSize, context.convertToAliasScript);
+    await Index.convertToAlias(client, source, alias, batchSize, context.convertToAliasScript);
   }
 
-  const read = Index.reader(callCluster, source.indexName, { batchSize, scrollDuration });
+  const read = Index.reader(client, source.indexName, { batchSize, scrollDuration });
 
   log.info(`Migrating ${source.indexName} saved objects to ${dest.indexName}`);
 
@@ -190,12 +182,13 @@ async function migrateSourceToDest(context: Context) {
       return;
     }
 
-    log.debug(`Migrating saved objects ${docs.map(d => d._id).join(', ')}`);
+    log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
 
     await Index.write(
-      callCluster,
+      client,
       dest.indexName,
-      migrateRawDocs(serializer, documentMigrator.migrate, docs)
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      await migrateRawDocs(serializer, documentMigrator.migrateAndConvert, docs)
     );
   }
 }

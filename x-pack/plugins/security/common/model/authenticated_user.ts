@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { User } from './user';
+import type { AuthenticationProvider } from './authentication_provider';
+import type { User } from './user';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
 
-interface UserRealm {
+export interface UserRealm {
   name: string;
   type: string;
 }
@@ -28,11 +30,21 @@ export interface AuthenticatedUser extends User {
   lookup_realm: UserRealm;
 
   /**
-   * Name of the Kibana authentication provider that used to authenticate user.
+   * The authentication provider that used to authenticate user.
    */
-  authentication_provider: string;
+  authentication_provider: AuthenticationProvider;
+
+  /**
+   * The AuthenticationType used by ES to authenticate the user.
+   *
+   * @example "realm" | "api_key" | "token" | "anonymous" | "internal"
+   */
+  authentication_type: string;
 }
 
 export function canUserChangePassword(user: AuthenticatedUser) {
-  return REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type);
+  return (
+    REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(user.authentication_realm.type) &&
+    user.authentication_provider.type !== 'anonymous'
+  );
 }

@@ -1,0 +1,88 @@
+[[execute-connector-api]]
+=== Execute connector API
+++++
+<titleabbrev>Execute connector</titleabbrev>
+++++
+
+Executes a connector by ID.
+
+[[execute-connector-api-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/actions/connector/<id>/_execute`
+
+`POST <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>/_execute`
+
+[[execute-connector-api-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the connector.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[execute-connector-api-request-body]]
+==== Request body
+
+`params`::
+  (Required, object) The parameters of the connector. Parameter properties vary depending on
+  the connector type. For information about the parameter properties, refer to <<action-types,Action and connector types>>.
+
+[[execute-connector-api-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[execute-connector-api-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execute  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+{
+  "params": {
+    "documents": [
+      {
+        "id": "test_doc_id",
+        "name": "test_doc_name",
+        "message": "hello, world"
+      }
+    ]
+  }
+}'
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "status": "ok",
+  "data": {
+    "took": 197,
+    "errors": false,
+    "items": [
+      {
+        "index": {
+          "_index": "updated-index",
+          "_id": "iKyijHcBKCsmXNFrQe3T",
+          "_version": 1,
+          "result": "created",
+          "_shards": {
+            "total": 2,
+            "successful": 1,
+            "failed": 0
+          },
+          "_seq_no": 0,
+          "_primary_term": 1,
+          "status": 201
+        }
+      }
+    ]
+  },
+  "connector_id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad"
+}
+--------------------------------------------------

@@ -1,23 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { get, has, set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get, has } from 'lodash';
 import { SavedObject as SavedObjectType } from '../../server';
 import { SavedObjectsClientContract } from './saved_objects_client';
 
@@ -37,12 +27,28 @@ export class SimpleSavedObject<T = unknown> {
   public id: SavedObjectType<T>['id'];
   public type: SavedObjectType<T>['type'];
   public migrationVersion: SavedObjectType<T>['migrationVersion'];
+  public coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
+  /**
+   * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
+   * `namespaceType: 'agnostic'`.
+   */
+  public namespaces: SavedObjectType<T>['namespaces'];
 
   constructor(
     private client: SavedObjectsClientContract,
-    { id, type, version, attributes, error, references, migrationVersion }: SavedObjectType<T>
+    {
+      id,
+      type,
+      version,
+      attributes,
+      error,
+      references,
+      migrationVersion,
+      coreMigrationVersion,
+      namespaces,
+    }: SavedObjectType<T>
   ) {
     this.id = id;
     this.type = type;
@@ -50,6 +56,8 @@ export class SimpleSavedObject<T = unknown> {
     this.references = references || [];
     this._version = version;
     this.migrationVersion = migrationVersion;
+    this.coreMigrationVersion = coreMigrationVersion;
+    this.namespaces = namespaces;
     if (error) {
       this.error = error;
     }
@@ -60,7 +68,7 @@ export class SimpleSavedObject<T = unknown> {
   }
 
   public set(key: string, value: any): T {
-    return set(this.attributes, key, value);
+    return set(this.attributes as any, key, value);
   }
 
   public has(key: string): boolean {
@@ -70,12 +78,12 @@ export class SimpleSavedObject<T = unknown> {
   public save(): Promise<SimpleSavedObject<T>> {
     if (this.id) {
       return this.client.update(this.type, this.id, this.attributes, {
-        migrationVersion: this.migrationVersion,
         references: this.references,
       });
     } else {
       return this.client.create(this.type, this.attributes, {
         migrationVersion: this.migrationVersion,
+        coreMigrationVersion: this.coreMigrationVersion,
         references: this.references,
       });
     }

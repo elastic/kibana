@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { RuleGroupEditor } from './rule_group_editor';
-import { shallowWithIntl, mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { AllRule, FieldRule, AnyRule, ExceptAnyRule } from '../../model';
-import { FieldRuleEditor } from './field_rule_editor';
-import { AddRuleButton } from './add_rule_button';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+
+import { AllRule, AnyRule, ExceptAnyRule, FieldRule } from '../../model';
+import { AddRuleButton } from './add_rule_button';
+import { FieldRuleEditor } from './field_rule_editor';
+import { RuleGroupEditor } from './rule_group_editor';
 
 describe('RuleGroupEditor', () => {
   it('renders an empty group', () => {
@@ -48,7 +50,7 @@ describe('RuleGroupEditor', () => {
     await nextTick();
     wrapper.update();
 
-    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere(menuItem => {
+    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere((menuItem) => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
@@ -76,13 +78,11 @@ describe('RuleGroupEditor', () => {
 
     const anyRule = new AnyRule();
 
-    findTestSubject(wrapper, 'ruleGroupTitle')
-      .first()
-      .simulate('click');
+    findTestSubject(wrapper, 'ruleGroupTitle').first().simulate('click');
     await nextTick();
     wrapper.update();
 
-    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere(menuItem => {
+    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere((menuItem) => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 
@@ -116,13 +116,11 @@ describe('RuleGroupEditor', () => {
 
     const anyRule = new AnyRule();
 
-    findTestSubject(wrapper, 'ruleGroupTitle')
-      .first()
-      .simulate('click');
+    findTestSubject(wrapper, 'ruleGroupTitle').first().simulate('click');
     await nextTick();
     wrapper.update();
 
-    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere(menuItem => {
+    const anyRuleOption = wrapper.find(EuiContextMenuItem).filterWhere((menuItem) => {
       return menuItem.text() === anyRule.getDisplayTitle();
     });
 

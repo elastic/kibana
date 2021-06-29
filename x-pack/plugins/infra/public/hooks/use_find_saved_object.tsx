@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState, useCallback } from 'react';
@@ -48,7 +49,7 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
     const objects = await savedObjectsClient.find<SavedObjectType>({
       type,
     });
-    return objects.savedObjects.filter(o => o.attributes.name === name).length > 0;
+    return objects.savedObjects.find((o) => o.attributes.name === name);
   };
 
   return {

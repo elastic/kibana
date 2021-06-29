@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
   const pieChart = getService('pieChart');
+  const security = getService('security');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -30,13 +32,13 @@ export default function({ getService, getPageObjects }) {
   const dashboardName = 'Dashboard View Mode Test Dashboard';
   const savedSearchName = 'Saved search for dashboard';
 
-  describe('Dashboard View Mode', function() {
+  describe('Dashboard View Mode', function () {
     this.tags(['skipFirefox']);
 
     before('initialize tests', async () => {
       log.debug('Dashboard View Mode:initTests');
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('dashboard_view_mode');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/dashboard_view_mode');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await browser.setWindowSize(1600, 1000);
 
@@ -46,10 +48,10 @@ export default function({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.addVisualizations(
         PageObjects.dashboard.getTestVisualizationNames()
       );
-      await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.saveDashboard(dashboardName);
     });
 
@@ -67,55 +69,51 @@ export default function({ getService, getPageObjects }) {
 
       before('Create dashboard only mode user', async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.security.clickUsersSection();
-        await PageObjects.security.clickCreateNewUser();
-        await testSubjects.setValue('userFormUserNameInput', 'dashuser');
-        await testSubjects.setValue('passwordInput', '123456');
-        await testSubjects.setValue('passwordConfirmationInput', '123456');
-        await testSubjects.setValue('userFormFullNameInput', 'dashuser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('logstash-data');
-
-        await PageObjects.security.clickSaveEditUser();
+        await PageObjects.security.createUser({
+          username: 'dashuser',
+          password: '123456',
+          confirm_password: '123456',
+          email: 'example@example.com',
+          full_name: 'dashuser',
+          roles: ['kibana_dashboard_only_user', 'logstash-data'],
+        });
       });
 
       before('Create user with mixes roles', async () => {
-        await PageObjects.security.clickCreateNewUser();
-
-        await testSubjects.setValue('userFormUserNameInput', 'mixeduser');
-        await testSubjects.setValue('passwordInput', '123456');
-        await testSubjects.setValue('passwordConfirmationInput', '123456');
-        await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('kibana_admin');
-        await PageObjects.security.assignRoleToUser('logstash-data');
-
-        await PageObjects.security.clickSaveEditUser();
+        await PageObjects.security.createUser({
+          username: 'mixeduser',
+          password: '123456',
+          confirm_password: '123456',
+          email: 'example@example.com',
+          full_name: 'mixeduser',
+          roles: ['kibana_dashboard_only_user', 'kibana_admin', 'logstash-data'],
+        });
       });
 
       before('Create user with dashboard and superuser role', async () => {
-        await PageObjects.security.clickCreateNewUser();
-
-        await testSubjects.setValue('userFormUserNameInput', 'mysuperuser');
-        await testSubjects.setValue('passwordInput', '123456');
-        await testSubjects.setValue('passwordConfirmationInput', '123456');
-        await testSubjects.setValue('userFormFullNameInput', 'mixeduser');
-        await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-        await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
-        await PageObjects.security.assignRoleToUser('superuser');
-
-        await PageObjects.security.clickSaveEditUser();
+        await PageObjects.security.createUser({
+          username: 'mysuperuser',
+          password: '123456',
+          confirm_password: '123456',
+          email: 'example@example.com',
+          full_name: 'mixeduser',
+          roles: ['kibana_dashboard_only_user', 'superuser'],
+        });
       });
 
-      after('logout', async () => {
-        await PageObjects.security.forceLogout();
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('shows only the dashboard app link', async () => {
+        await security.testUser.setRoles(
+          ['test_logstash_reader', 'kibana_dashboard_only_user'],
+          false
+        );
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.security.forceLogout();
-        await PageObjects.security.login('dashuser', '123456');
+        await PageObjects.security.login('test_user', 'changeme');
 
         const appLinks = await appsMenu.readLinks();
         expect(appLinks).to.have.length(1);
@@ -194,19 +192,23 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login('mixeduser', '123456');
+        await security.testUser.setRoles([
+          'test_logstash_reader',
+          'kibana_dashboard_only_user',
+          'kibana_admin',
+        ]);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (await appsMenu.linkExists('Management')) {
+        if (await appsMenu.linkExists('Stack Management')) {
           throw new Error('Expected management nav link to not be shown');
         }
       });
 
       it('is not loaded for a user who is assigned a superuser role', async () => {
-        await PageObjects.security.forceLogout();
-        await PageObjects.security.login('mysuperuser', '123456');
+        await security.testUser.setRoles(['kibana_dashboard_only_user', 'superuser']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
-        if (!(await appsMenu.linkExists('Management'))) {
+        if (!(await appsMenu.linkExists('Stack Management'))) {
           throw new Error('Expected management nav link to be shown');
         }
       });

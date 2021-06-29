@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { InspectPanelAction } from './inspect_panel_action';
@@ -26,35 +15,29 @@ import {
   FilterableEmbeddable,
   ContactCardEmbeddable,
 } from '../../../test_samples';
-// eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
-import {
-  EmbeddableFactory,
-  EmbeddableOutput,
-  isErrorEmbeddable,
-  ErrorEmbeddable,
-} from '../../../embeddables';
-import { GetEmbeddableFactory } from '../../../types';
+import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
+import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { embeddablePluginMock } from '../../../../mocks';
+import { EmbeddableStart } from '../../../../plugin';
 
-const setup = async () => {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-  const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+const setupTests = async () => {
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+  const getFactory = doStart().getEmbeddableFactory;
   const container = new FilterableContainer(
     {
       id: 'hello',
       panels: {},
       filters: [
         {
-          $state: { store: esFilters.FilterStateStore.APP_STATE },
+          $state: { store: 'appState' },
           meta: { disabled: false, alias: 'name', negate: false },
           query: { match: {} },
         },
       ],
     },
-    getFactory
+    getFactory as EmbeddableStart['getEmbeddableFactory']
   );
 
   const embeddable: FilterableEmbeddable | ErrorEmbeddable = await container.addNewEmbeddable<
@@ -79,7 +62,7 @@ test('Is compatible when inspector adapters are available', async () => {
   const inspector = inspectorPluginMock.createStartContract();
   inspector.isAvailable.mockImplementation(() => true);
 
-  const { embeddable } = await setup();
+  const { embeddable } = await setupTests();
   const inspectAction = new InspectPanelAction(inspector);
 
   expect(await inspectAction.isCompatible({ embeddable })).toBe(true);
@@ -114,7 +97,7 @@ test('Executes when inspector adapters are available', async () => {
   const inspector = inspectorPluginMock.createStartContract();
   inspector.isAvailable.mockImplementation(() => true);
 
-  const { embeddable } = await setup();
+  const { embeddable } = await setupTests();
   const inspectAction = new InspectPanelAction(inspector);
 
   expect(inspector.open).toHaveBeenCalledTimes(0);

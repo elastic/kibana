@@ -1,33 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart, ActionType } from 'src/plugins/ui_actions/public';
-import { Trigger, GetEmbeddableFactory, ViewMode } from '../types';
-import { EmbeddableFactory, isErrorEmbeddable } from '../embeddables';
+import { Action, UiActionsStart } from '../../../../ui_actions/public';
+import { Trigger, ViewMode } from '../types';
+import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
 import { createEditModeAction } from '../test_samples/actions';
 import {
@@ -40,30 +28,30 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-// eslint-disable-next-line
-import { inspectorPluginMock } from 'src/plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { EuiBadge } from '@elastic/eui';
+import { embeddablePluginMock } from '../../mocks';
+import { applicationServiceMock } from '../../../../../core/public/mocks';
 
-const actionRegistry = new Map<string, Action<object | undefined | string | number>>();
+const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+
+const { setup, doStart } = embeddablePluginMock.createInstance();
 
 const editModeAction = createEditModeAction();
 const trigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
 };
-const embeddableFactory = new ContactCardEmbeddableFactory(
-  {} as any,
-  (() => null) as any,
-  {} as any
-);
+const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+const applicationMock = applicationServiceMock.createStartContract();
 
 actionRegistry.set(editModeAction.id, editModeAction);
 triggerRegistry.set(trigger.id, trigger);
-embeddableFactories.set(embeddableFactory.type, embeddableFactory);
+setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
 
-test('HelloWorldContainer initializes embeddables', async done => {
+const start = doStart();
+const getEmbeddableFactory = start.getEmbeddableFactory;
+test('HelloWorldContainer initializes embeddables', async (done) => {
   const container = new HelloWorldContainer(
     {
       id: '123',
@@ -157,9 +145,10 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
       <EmbeddablePanel
         embeddable={embeddable}
         getActions={() => Promise.resolve([])}
-        getAllEmbeddableFactories={(() => []) as any}
-        getEmbeddableFactory={(() => undefined) as any}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
+        application={applicationMock}
         overlays={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
@@ -195,10 +184,11 @@ const renderInEditModeAndOpenContextMenu = async (
       <EmbeddablePanel
         embeddable={embeddable}
         getActions={getActions}
-        getAllEmbeddableFactories={(() => []) as any}
-        getEmbeddableFactory={(() => undefined) as any}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -213,13 +203,17 @@ const renderInEditModeAndOpenContextMenu = async (
 };
 
 test('HelloWorldContainer in edit mode hides disabledActions', async () => {
-  const action: Action = {
+  const action = {
     id: 'FOO',
-    type: 'FOO' as ActionType,
+    type: 'FOO',
     getIconType: () => undefined,
     getDisplayName: () => 'foo',
     isCompatible: async () => true,
     execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
   };
   const getActions = () => Promise.resolve([action]);
 
@@ -245,13 +239,17 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
 });
 
 test('HelloWorldContainer hides disabled badges', async () => {
-  const action: Action = {
+  const action = {
     id: 'BAR',
-    type: 'BAR' as ActionType,
+    type: 'BAR',
     getIconType: () => undefined,
     getDisplayName: () => 'bar',
     isCompatible: async () => true,
     execute: async () => {},
+    order: 10,
+    getHref: () => {
+      return Promise.resolve(undefined);
+    },
   };
   const getActions = () => Promise.resolve([action]);
 
@@ -293,10 +291,11 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
       <EmbeddablePanel
         embeddable={embeddable}
         getActions={() => Promise.resolve([])}
-        getAllEmbeddableFactories={(() => []) as any}
-        getEmbeddableFactory={(() => undefined) as any}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -333,6 +332,88 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
   // expect(action.length).toBe(1);
 });
 
+test('Panel title customize link does not exist in view mode', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Vayon',
+    lastName: 'Poole',
+  });
+
+  const component = mountWithIntl(
+    <EmbeddablePanel
+      embeddable={embeddable}
+      getActions={() => Promise.resolve([])}
+      getAllEmbeddableFactories={start.getEmbeddableFactories}
+      getEmbeddableFactory={start.getEmbeddableFactory}
+      notifications={{} as any}
+      overlays={{} as any}
+      application={applicationMock}
+      inspector={inspector}
+      SavedObjectFinder={() => null}
+    />
+  );
+
+  const titleLink = findTestSubject(component, 'embeddablePanelTitleLink');
+  expect(titleLink.length).toBe(0);
+});
+
+test('Runs customize panel action on title click when in edit mode', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.EDIT, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Vayon',
+    lastName: 'Poole',
+  });
+
+  const component = mountWithIntl(
+    <EmbeddablePanel
+      embeddable={embeddable}
+      getActions={() => Promise.resolve([])}
+      getAllEmbeddableFactories={start.getEmbeddableFactories}
+      getEmbeddableFactory={start.getEmbeddableFactory}
+      notifications={{} as any}
+      overlays={{} as any}
+      application={applicationMock}
+      inspector={inspector}
+      SavedObjectFinder={() => null}
+    />
+  );
+
+  const titleExecute = jest.fn();
+  component.setState((s: any) => ({
+    ...s,
+    universalActions: {
+      ...s.universalActions,
+      customizePanelTitle: { execute: titleExecute, isCompatible: jest.fn() },
+    },
+  }));
+
+  const titleLink = findTestSubject(component, 'embeddablePanelTitleLink');
+  expect(titleLink.length).toBe(1);
+  titleLink.simulate('click');
+  await nextTick();
+  expect(titleExecute).toHaveBeenCalledTimes(1);
+});
+
 test('Updates when hidePanelTitles is toggled', async () => {
   const inspector = inspectorPluginMock.createStartContract();
 
@@ -355,10 +436,11 @@ test('Updates when hidePanelTitles is toggled', async () => {
       <EmbeddablePanel
         embeddable={embeddable}
         getActions={() => Promise.resolve([])}
-        getAllEmbeddableFactories={(() => []) as any}
-        getEmbeddableFactory={(() => undefined) as any}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
       />
@@ -407,10 +489,11 @@ test('Check when hide header option is false', async () => {
       <EmbeddablePanel
         embeddable={embeddable}
         getActions={() => Promise.resolve([])}
-        getAllEmbeddableFactories={(() => []) as any}
-        getEmbeddableFactory={(() => undefined) as any}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={false}
@@ -444,10 +527,11 @@ test('Check when hide header option is true', async () => {
       <EmbeddablePanel
         embeddable={embeddable}
         getActions={() => Promise.resolve([])}
-        getAllEmbeddableFactories={(() => []) as any}
-        getEmbeddableFactory={(() => undefined) as any}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
         notifications={{} as any}
         overlays={{} as any}
+        application={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={true}
@@ -457,4 +541,41 @@ test('Check when hide header option is true', async () => {
 
   const title = findTestSubject(component, `embeddablePanelHeading-HelloAryaStark`);
   expect(title.length).toBe(0);
+});
+
+test('Should work in minimal way rendering only the inspector action', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  inspector.isAvailable = jest.fn(() => true);
+
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Arya',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        inspector={inspector}
+        hideHeader={false}
+      />
+    </I18nProvider>
+  );
+
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
+  await nextTick();
+  component.update();
+  expect(findTestSubject(component, `embeddablePanelAction-openInspector`).length).toBe(1);
+  const action = findTestSubject(component, `embeddablePanelAction-ACTION_CUSTOMIZE_PANEL`);
+  expect(action.length).toBe(0);
 });

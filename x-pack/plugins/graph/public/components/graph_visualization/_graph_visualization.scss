@@ -1,0 +1,67 @@
+.gphVisualization {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.gphGraph {
+  flex: 1;
+  overflow: hidden;
+}
+
+.gphEdge {
+  fill: $euiColorMediumShade;
+  stroke: $euiColorMediumShade;
+  stroke-width: 2;
+  stroke-opacity: .5;
+
+  &:hover {
+    stroke-opacity: .95;
+    cursor: pointer;
+  }
+
+  &--selected {
+    stroke: $euiColorDarkShade;
+    stroke-opacity: .95;
+  }
+}
+
+.gphNode {
+  cursor: pointer;
+}
+
+.gphNode__label {
+  @include gphSvgText;
+  cursor: pointer;
+  &--html {
+    @include euiTextTruncate;
+    text-align: center;
+  }
+}
+
+.gphNode__markerCircle {
+  fill: $euiColorDarkShade;
+  stroke: $euiColorEmptyShade;
+}
+
+.gphNode__markerText {
+  @include gphSvgText;
+  font-size: $euiSizeS - 2px;
+  fill: $euiColorEmptyShade;
+}
+
+.gphNode__circle {
+  fill: $euiColorMediumShade;
+  &--selected {
+    stroke-width: $euiSizeXS;
+    stroke: transparentize($euiColorPrimary, .25);
+  }
+}
+
+.gphNode__text {
+  fill: $euiColorInk;
+
+  &--inverse {
+    fill: $euiColorGhost;
+  }
+}

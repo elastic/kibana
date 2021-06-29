@@ -1,0 +1,190 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "space:default",
+    "index": ".kibana_1",
+    "source": {
+      "space": {
+        "_reserved": true,
+        "color": "#00bfb3",
+        "description": "This is your default space!",
+        "name": "Default"
+      },
+      "type": "space",
+      "updated_at": "2018-11-06T18:20:26.703Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "canvas-workpad:workpad-1705f884-6224-47de-ba49-ca224fe6ec31",
+    "index": ".kibana_1",
+    "source": {
+      "canvas-workpad": {
+        "@created": "2018-11-19T19:17:12.646Z",
+        "@timestamp": "2018-11-19T19:36:28.499Z",
+        "assets": {
+        },
+        "colors": [
+          "#37988d",
+          "#c19628",
+          "#b83c6f",
+          "#3f9939",
+          "#1785b0",
+          "#ca5f35",
+          "#45bdb0",
+          "#f2bc33",
+          "#e74b8b",
+          "#4fbf48",
+          "#1ea6dc",
+          "#fd7643",
+          "#72cec3",
+          "#f5cc5d",
+          "#ec77a8",
+          "#7acf74",
+          "#4cbce4",
+          "#fd986f",
+          "#a1ded7",
+          "#f8dd91",
+          "#f2a4c5",
+          "#a6dfa2",
+          "#86d2ed",
+          "#fdba9f",
+          "#000000",
+          "#444444",
+          "#777777",
+          "#BBBBBB",
+          "#FFFFFF",
+          "rgba(255,255,255,0)"
+        ],
+        "height": 920,
+        "id": "workpad-1705f884-6224-47de-ba49-ca224fe6ec31",
+        "isWriteable": true,
+        "name": "Test Workpad",
+        "page": 0,
+        "pages": [
+          {
+            "elements": [
+              {
+                "expression": "savedLens id=\"my-lens-vis\" timerange={timerange from=\"2014-01-01\" to=\"2018-01-01\"}",
+                "id": "element-8f64a10a-01f3-4a71-a682-5b627cbe4d0e",
+                "position": {
+                  "angle": 0,
+                  "height": 238,
+                  "left": 33.5,
+                  "top": 20,
+                  "width": 338
+                }
+              }
+            ],
+            "id": "page-c38cd459-10fe-45f9-847b-2cbd7ec74319",
+            "style": {
+              "background": "#fff"
+            },
+            "transition": {
+            }
+          }
+        ],
+        "width": 840
+      },
+      "type": "canvas-workpad",
+      "updated_at": "2018-11-19T19:36:28.511Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "lens:my-lens-vis",
+    "index": ".kibana_1",
+    "source": {
+      "lens": {
+        "expression": "",
+        "state": {
+          "datasourceMetaData": {
+            "filterableIndexPatterns": [
+              {
+                "id": "logstash-lens",
+                "title": "logstash-lens"
+              }
+            ]
+          },
+          "datasourceStates": {
+            "indexpattern": {
+              "currentIndexPatternId": "logstash-lens",
+              "layers": {
+                "c61a8afb-a185-4fae-a064-fb3846f6c451": {
+                  "columnOrder": [
+                    "2cd09808-3915-49f4-b3b0-82767eba23f7"
+                  ],
+                  "columns": {
+                    "2cd09808-3915-49f4-b3b0-82767eba23f7": {
+                      "dataType": "number",
+                      "isBucketed": false,
+                      "label": "Maximum of bytes",
+                      "operationType": "max",
+                      "scale": "ratio",
+                      "sourceField": "bytes"
+                    }
+                  },
+                  "indexPatternId": "logstash-lens"
+                }
+              }
+            }
+          },
+          "filters": [],
+          "query": {
+            "language": "kuery",
+            "query": ""
+          },
+          "visualization": {
+            "accessor": "2cd09808-3915-49f4-b3b0-82767eba23f7",
+            "layerId": "c61a8afb-a185-4fae-a064-fb3846f6c451"
+          }
+        },
+        "title": "Artistpreviouslyknownaslens",
+        "visualizationType": "lnsMetric"
+      },
+      "references": [],
+      "type": "lens",
+      "updated_at": "2019-10-16T00:28:08.979Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logstash-lens",
+    "id": "1",
+    "source": {
+      "@timestamp": "2015-09-20T02:00:00.000Z",
+      "bytes": 16788
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:logstash-lens",
+    "index": ".kibana_1",
+    "source": {
+      "index-pattern" : {
+        "title" : "logstash-lens",
+        "timeFieldName" : "@timestamp",
+        "fields" : "[]"
+      },
+      "type" : "index-pattern",
+      "references" : [ ],
+      "migrationVersion" : {
+        "index-pattern" : "7.6.0"
+      },
+      "updated_at" : "2020-08-19T08:39:09.998Z"
+    },
+    "type": "_doc"
+  }
+}

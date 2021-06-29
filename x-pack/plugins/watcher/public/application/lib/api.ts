@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { HttpSetup, SavedObjectsClientContract } from 'kibana/public';
 
 import { Settings } from '../models/settings';
@@ -35,23 +37,34 @@ export const getSavedObjectsClient = () => savedObjectsClient;
 
 const basePath = ROUTES.API_ROOT;
 
+const loadWatchesDeserializer = ({ watches = [] }: { watches: any[] }) => {
+  return watches.map((watch: any) => Watch.fromUpstreamJson(watch));
+};
+
 export const useLoadWatches = (pollIntervalMs: number) => {
   return useRequest({
     path: `${basePath}/watches`,
     method: 'get',
     pollIntervalMs,
-    deserializer: ({ watches = [] }: { watches: any[] }) => {
-      return watches.map((watch: any) => Watch.fromUpstreamJson(watch));
-    },
+    deserializer: loadWatchesDeserializer,
   });
 };
+
+const loadWatchDetailDeserializer = ({ watch = {} }: { watch: any }) =>
+  Watch.fromUpstreamJson(watch);
 
 export const useLoadWatchDetail = (id: string) => {
   return useRequest({
     path: `${basePath}/watch/${id}`,
     method: 'get',
-    deserializer: ({ watch = {} }: { watch: any }) => Watch.fromUpstreamJson(watch),
+    deserializer: loadWatchDetailDeserializer,
   });
+};
+
+const loadWatchHistoryDeserializer = ({ watchHistoryItems = [] }: { watchHistoryItems: any }) => {
+  return watchHistoryItems.map((historyItem: any) =>
+    WatchHistoryItem.fromUpstreamJson(historyItem)
+  );
 };
 
 export const useLoadWatchHistory = (id: string, startTime: string) => {
@@ -59,20 +72,18 @@ export const useLoadWatchHistory = (id: string, startTime: string) => {
     query: startTime ? { startTime } : undefined,
     path: `${basePath}/watch/${id}/history`,
     method: 'get',
-    deserializer: ({ watchHistoryItems = [] }: { watchHistoryItems: any }) => {
-      return watchHistoryItems.map((historyItem: any) =>
-        WatchHistoryItem.fromUpstreamJson(historyItem)
-      );
-    },
+    deserializer: loadWatchHistoryDeserializer,
   });
 };
+
+const loadWatchHistoryDetailDeserializer = ({ watchHistoryItem }: { watchHistoryItem: any }) =>
+  WatchHistoryItem.fromUpstreamJson(watchHistoryItem);
 
 export const useLoadWatchHistoryDetail = (id: string | undefined) => {
   return useRequest({
     path: !id ? '' : `${basePath}/history/${id}`,
     method: 'get',
-    deserializer: ({ watchHistoryItem }: { watchHistoryItem: any }) =>
-      WatchHistoryItem.fromUpstreamJson(watchHistoryItem),
+    deserializer: loadWatchHistoryDetailDeserializer,
   });
 };
 
@@ -148,6 +159,8 @@ export const loadIndexPatterns = async () => {
   return savedObjects;
 };
 
+const getWatchVisualizationDataDeserializer = (data: { visualizeData: any }) => data?.visualizeData;
+
 export const useGetWatchVisualizationData = (watchModel: BaseWatch, visualizeOptions: any) => {
   return useRequest({
     path: `${basePath}/watch/visualize`,
@@ -156,21 +169,23 @@ export const useGetWatchVisualizationData = (watchModel: BaseWatch, visualizeOpt
       watch: watchModel.upstreamJson,
       options: visualizeOptions.upstreamJson,
     }),
-    deserializer: (data: { visualizeData: any }) => data?.visualizeData,
+    deserializer: getWatchVisualizationDataDeserializer,
   });
 };
+
+const loadSettingsDeserializer = (data: {
+  action_types: {
+    [key: string]: {
+      enabled: boolean;
+    };
+  };
+}) => Settings.fromUpstreamJson(data);
 
 export const useLoadSettings = () => {
   return useRequest({
     path: `${basePath}/settings`,
     method: 'get',
-    deserializer: (data: {
-      action_types: {
-        [key: string]: {
-          enabled: boolean;
-        };
-      };
-    }) => Settings.fromUpstreamJson(data),
+    deserializer: loadSettingsDeserializer,
   });
 };
 

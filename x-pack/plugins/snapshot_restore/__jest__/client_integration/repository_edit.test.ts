@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
@@ -12,15 +13,8 @@ import { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';
 import { RepositoryAddTestSubjects } from './helpers/repository_add.helpers';
 import { REPOSITORY_EDIT } from './helpers/constant';
 
-jest.mock('ui/new_platform');
-
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
-
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
 
 describe('<RepositoryEdit />', () => {
   let testBed: TestBed<RepositoryEditTestSubjects>;

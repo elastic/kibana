@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -13,8 +14,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FixedDatePicker } from '../../../fixed_datepicker';
+import { TimeRangeValidationError } from './validation';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',
@@ -48,15 +50,35 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
   setEndTime: (endTime: number | undefined) => void;
   startTime: number | undefined;
   endTime: number | undefined;
-}> = ({ disabled = false, setStartTime, setEndTime, startTime, endTime }) => {
-  const now = useMemo(() => moment(), []);
+  validationErrors?: TimeRangeValidationError[];
+}> = ({
+  disabled = false,
+  setStartTime,
+  setEndTime,
+  startTime,
+  endTime,
+  validationErrors = [],
+}) => {
+  const [now] = useState(() => moment());
   const selectedEndTimeIsToday = !endTime || moment(endTime).isSame(now, 'day');
+
   const startTimeValue = useMemo(() => {
     return startTime ? moment(startTime) : undefined;
   }, [startTime]);
   const endTimeValue = useMemo(() => {
     return endTime ? moment(endTime) : undefined;
   }, [endTime]);
+
+  const startTimeValidationErrorMessages = useMemo(
+    () => getStartTimeValidationErrorMessages(validationErrors),
+    [validationErrors]
+  );
+
+  const endTimeValidationErrorMessages = useMemo(
+    () => getEndTimeValidationErrorMessages(validationErrors),
+    [validationErrors]
+  );
+
   return (
     <EuiDescribedFormGroup
       title={
@@ -74,7 +96,12 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
         />
       }
     >
-      <EuiFormRow error={false} fullWidth isInvalid={false} label={startTimeLabel}>
+      <EuiFormRow
+        error={startTimeValidationErrorMessages}
+        fullWidth
+        isInvalid={startTimeValidationErrorMessages.length > 0}
+        label={startTimeLabel}
+      >
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
             clear={startTime && !disabled ? { onClick: () => setStartTime(undefined) } : undefined}
@@ -84,14 +111,19 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
               disabled={disabled}
               showTimeSelect
               selected={startTimeValue}
-              onChange={date => setStartTime(selectedDateToParam(date))}
+              onChange={(date) => setStartTime(selectedDateToParam(date))}
               placeholder={startTimeDefaultDescription}
               maxDate={now}
             />
           </EuiFormControlLayout>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiFormRow error={false} fullWidth isInvalid={false} label={endTimeLabel}>
+      <EuiFormRow
+        error={endTimeValidationErrorMessages}
+        fullWidth
+        isInvalid={endTimeValidationErrorMessages.length > 0}
+        label={endTimeLabel}
+      >
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
             clear={endTime && !disabled ? { onClick: () => setEndTime(undefined) } : undefined}
@@ -101,20 +133,12 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
               disabled={disabled}
               showTimeSelect
               selected={endTimeValue}
-              onChange={date => setEndTime(selectedDateToParam(date))}
+              onChange={(date) => setEndTime(selectedDateToParam(date))}
               placeholder={endTimeDefaultDescription}
               openToDate={now}
               minDate={startTimeValue}
-              minTime={
-                selectedEndTimeIsToday
-                  ? now
-                  : moment()
-                      .hour(0)
-                      .minutes(0)
-              }
-              maxTime={moment()
-                .hour(23)
-                .minutes(59)}
+              minTime={selectedEndTimeIsToday ? now : moment().hour(0).minutes(0)}
+              maxTime={moment().hour(23).minutes(59)}
             />
           </EuiFormControlLayout>
         </EuiFlexGroup>
@@ -122,3 +146,31 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
     </EuiDescribedFormGroup>
   );
 };
+
+const getStartTimeValidationErrorMessages = (validationErrors: TimeRangeValidationError[]) =>
+  validationErrors.flatMap((validationError) => {
+    switch (validationError.error) {
+      case 'INVALID_TIME_RANGE':
+        return [
+          i18n.translate('xpack.infra.analysisSetup.startTimeBeforeEndTimeErrorMessage', {
+            defaultMessage: 'The start time must be before the end time.',
+          }),
+        ];
+      default:
+        return [];
+    }
+  });
+
+const getEndTimeValidationErrorMessages = (validationErrors: TimeRangeValidationError[]) =>
+  validationErrors.flatMap((validationError) => {
+    switch (validationError.error) {
+      case 'INVALID_TIME_RANGE':
+        return [
+          i18n.translate('xpack.infra.analysisSetup.endTimeAfterStartTimeErrorMessage', {
+            defaultMessage: 'The end time must be after the start time.',
+          }),
+        ];
+      default:
+        return [];
+    }
+  });

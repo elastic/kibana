@@ -1,26 +1,13 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Container, isErrorEmbeddable } from '../../../..';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { CustomizePanelTitleAction } from './customize_panel_action';
 import {
   ContactCardEmbeddable,
@@ -32,19 +19,19 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
-import { GetEmbeddableFactory } from '../../../../types';
-import { EmbeddableFactory } from '../../../../embeddables';
+import { embeddablePluginMock } from '../../../../../mocks';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
-  embeddableFactories.set(
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => {}) as any, {} as any)
+    new ContactCardEmbeddableFactory((() => {}) as any, {} as any)
   );
+  const getEmbeddableFactory = doStart().getEmbeddableFactory;
+
   return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
 }
 
@@ -66,7 +53,7 @@ beforeEach(async () => {
   }
 });
 
-test('Updates the embeddable title when given', async done => {
+test('Updates the embeddable title when given', async (done) => {
   const getUserData = () => Promise.resolve({ title: 'What is up?' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
   expect(embeddable.getInput().title).toBeUndefined();

@@ -1,33 +1,32 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings']);
-
-  const testSubjects = getService('testSubjects');
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const PageObjects = getPageObjects(['common', 'settings', 'header']);
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const a11y = getService('a11y');
+  const testSubjects = getService('testSubjects');
 
   describe('Management', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('settings');
+      await esArchiver.load('test/functional/fixtures/es_archiver/discover');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
+      await PageObjects.settings.navigateTo();
+    });
+
+    after(async () => {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('main view', async () => {
@@ -41,18 +40,49 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('Single indexpattern view', async () => {
       await PageObjects.settings.clickIndexPatternLogstash();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await a11y.testAppSnapshot();
     });
 
-    it('Create Index pattern wizard', async () => {
+    it('Index pattern field editor - initial view', async () => {
+      await PageObjects.settings.clickAddField();
+      await a11y.testAppSnapshot();
+    });
+
+    it('Index pattern field editor - all options shown', async () => {
+      await PageObjects.settings.setFieldName('test');
+      await PageObjects.settings.setFieldType('Keyword');
+      await PageObjects.settings.setFieldScript("emit('hello world')");
+      await PageObjects.settings.toggleRow('formatRow');
+      await PageObjects.settings.setFieldFormat('string');
+      await PageObjects.settings.toggleRow('customLabelRow');
+      await PageObjects.settings.setCustomLabel('custom label');
+      await testSubjects.click('toggleAdvancedSetting');
+
+      await a11y.testAppSnapshot();
+
+      await testSubjects.click('euiFlyoutCloseButton');
+      await PageObjects.settings.closeIndexPatternFieldEditor();
+    });
+
+    it('Open create index pattern wizard', async () => {
       await PageObjects.settings.clickKibanaIndexPatterns();
-      await (await testSubjects.find('createIndexPatternButton')).click();
+      await PageObjects.settings.clickAddNewIndexPatternButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await a11y.testAppSnapshot();
     });
 
-    it('Saved objects view', async () => {
-      await PageObjects.settings.clickKibanaSavedObjects();
+    // We are navigating back to index pattern page to test field formatters
+    it('Navigate back to logstash index page', async () => {
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await a11y.testAppSnapshot();
+    });
+
+    it('Edit field type', async () => {
+      await PageObjects.settings.clickEditFieldFormat();
+      await a11y.testAppSnapshot();
+      await PageObjects.settings.clickCloseEditFieldFormatFlyout();
     });
 
     it('Advanced settings', async () => {

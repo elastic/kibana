@@ -1,0 +1,59 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects the use of the default Cobalt Strike Team Server TLS certificate. Cobalt Strike is software for Adversary Simulations and Red Team Operations which are security assessments that replicate the tactics and techniques of an advanced adversary in a network. If using Filebeat, this rule requires the Suricata or Zeek modules. Modifications to the Packetbeat configuration can be made to include MD5 and SHA256 hashing algorithms (the default is SHA1) - see the Reference section for additional information on module configuration.",
+  "index": [
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Default Cobalt Strike Team Server Certificate",
+  "note": "## Threat intel\n\nWhile Cobalt Strike is intended to be used for penetration tests and IR training, it is frequently used by actual threat actors (TA) such as APT19, APT29, APT32, APT41, FIN6, DarkHydrus, CopyKittens, Cobalt Group, Leviathan, and many other unnamed criminal TAs. This rule uses high-confidence atomic indicators, alerts should be investigated rapidly.",
+  "query": "event.category:(network or network_traffic) and (tls.server.hash.md5:950098276A495286EB2A2556FBAB6D83 or\n  tls.server.hash.sha1:6ECE5ECE4192683D2D84E25B0BA7E04F9CB7EB7C or\n  tls.server.hash.sha256:87F2085C32B6A2CC709B365F55873E207A9CAA10BFFECF2FD16D3CF9D94D390C)\n",
+  "references": [
+    "https://attack.mitre.org/software/S0154/",
+    "https://www.cobaltstrike.com/help-setup-collaboration",
+    "https://www.elastic.co/guide/en/beats/packetbeat/current/configuration-tls.html",
+    "https://www.elastic.co/guide/en/beats/filebeat/7.9/filebeat-module-suricata.html",
+    "https://www.elastic.co/guide/en/beats/filebeat/7.9/filebeat-module-zeek.html"
+  ],
+  "risk_score": 99,
+  "rule_id": "e7075e8d-a966-458e-a183-85cd331af255",
+  "severity": "critical",
+  "tags": [
+    "Command and Control",
+    "Post-Execution",
+    "Threat Detection",
+    "Elastic",
+    "Network"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1071",
+          "name": "Application Layer Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1071/",
+          "subtechnique": [
+            {
+              "id": "T1071.001",
+              "name": "Web Protocols",
+              "reference": "https://attack.mitre.org/techniques/T1071/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

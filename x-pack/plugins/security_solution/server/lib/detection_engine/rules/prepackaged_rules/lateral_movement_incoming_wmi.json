@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies processes executed via Windows Management Instrumentation (WMI) on a remote host. This could be indicative of adversary lateral movement, but could be noisy if administrators use WMI to remotely manage hosts.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "WMI Incoming Lateral Movement",
+  "query": "sequence by host.id with maxspan = 2s\n\n /* Accepted Incoming RPC connection by Winmgmt service */\n\n  [network where process.name : \"svchost.exe\" and network.direction == \"incoming\" and\n   source.address != \"127.0.0.1\" and source.address != \"::1\" and \n   source.port >= 49152 and destination.port >= 49152\n  ]\n\n  /* Excluding Common FPs Nessus and SCCM */\n\n  [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"WmiPrvSE.exe\" and\n   not process.args : (\"C:\\\\windows\\\\temp\\\\nessus_*.txt\", \n                       \"C:\\\\windows\\\\TEMP\\\\nessus_*.TMP\", \n                       \"C:\\\\Windows\\\\CCM\\\\SystemTemp\\\\*\", \n                       \"C:\\\\Windows\\\\CCMCache\\\\*\", \n                       \"C:\\\\CCM\\\\Cache\\\\*\")\n   ]\n",
+  "risk_score": 47,
+  "rule_id": "f3475224-b179-4f78-8877-c2bd64c26b88",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Lateral Movement"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": []
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1047",
+          "name": "Windows Management Instrumentation",
+          "reference": "https://attack.mitre.org/techniques/T1047/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 2
+}

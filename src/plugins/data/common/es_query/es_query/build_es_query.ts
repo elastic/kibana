@@ -1,35 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { groupBy, has } from 'lodash';
+import { groupBy, has, isEqual } from 'lodash';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
-import { IIndexPattern } from '../../index_patterns';
 import { Filter } from '../filters';
 import { Query } from '../../query/types';
+import { IndexPatternBase } from './types';
 
 export interface EsQueryConfig {
   allowLeadingWildcards: boolean;
   queryStringOptions: Record<string, any>;
   ignoreFilterIfFieldNotInIndex: boolean;
   dateFormatTZ?: string;
+}
+
+function removeMatchAll<T>(filters: T[]) {
+  return filters.filter(
+    (filter) => !filter || typeof filter !== 'object' || !isEqual(filter, { match_all: {} })
+  );
 }
 
 /**
@@ -41,7 +36,7 @@ export interface EsQueryConfig {
  * config contains dateformat:tz
  */
 export function buildEsQuery(
-  indexPattern: IIndexPattern | undefined,
+  indexPattern: IndexPatternBase | undefined,
   queries: Query | Query[],
   filters: Filter | Filter[],
   config: EsQueryConfig = {
@@ -53,7 +48,7 @@ export function buildEsQuery(
   queries = Array.isArray(queries) ? queries : [queries];
   filters = Array.isArray(filters) ? filters : [filters];
 
-  const validQueries = queries.filter(query => has(query, 'query'));
+  const validQueries = queries.filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
   const kueryQuery = buildQueryFromKuery(
     indexPattern,
@@ -74,9 +69,9 @@ export function buildEsQuery(
 
   return {
     bool: {
-      must: [...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must],
-      filter: [...kueryQuery.filter, ...luceneQuery.filter, ...filterQuery.filter],
-      should: [...kueryQuery.should, ...luceneQuery.should, ...filterQuery.should],
+      must: removeMatchAll([...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must]),
+      filter: removeMatchAll([...kueryQuery.filter, ...luceneQuery.filter, ...filterQuery.filter]),
+      should: removeMatchAll([...kueryQuery.should, ...luceneQuery.should, ...filterQuery.should]),
       must_not: [...kueryQuery.must_not, ...luceneQuery.must_not, ...filterQuery.must_not],
     },
   };

@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies use of whoami.exe which displays user, group, and privileges information for the user who is currently logged on to the local system.",
+  "false_positives": [
+    "Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools and frameworks. Usage by non-engineers and ordinary users is unusual."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Whoami Process Activity",
+  "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"whoami.exe\"\n",
+  "risk_score": 21,
+  "rule_id": "ef862985-3f13-4262-a686-5f357bbb9bc2",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1033",
+          "name": "System Owner/User Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1033/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 7
+}

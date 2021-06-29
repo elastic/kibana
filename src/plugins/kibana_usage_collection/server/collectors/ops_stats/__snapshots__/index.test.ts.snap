@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`telemetry_ops_stats should return something when there is a metric 1`] = `
+Object {
+  "concurrent_connections": 20,
+  "os": Object {
+    "load": Object {
+      "15m": 3,
+      "1m": 0.5,
+      "5m": 1,
+    },
+    "memory": Object {
+      "free_in_bytes": 10,
+      "total_in_bytes": 10,
+      "used_in_bytes": 10,
+    },
+    "platform": "darwin",
+    "platformRelease": "test",
+    "uptime_in_millis": 1000,
+  },
+  "process": Object {
+    "event_loop_delay": 10,
+    "memory": Object {
+      "heap": Object {
+        "size_limit": 0,
+        "total_in_bytes": 0,
+        "used_in_bytes": 0,
+      },
+      "resident_set_size_in_bytes": 0,
+    },
+    "uptime_in_millis": 1000,
+  },
+  "requests": Object {
+    "disconnects": 10,
+    "total": 100,
+  },
+  "response_times": Object {
+    "average": 100,
+    "max": 200,
+  },
+  "timestamp": Any<String>,
+}
+`;

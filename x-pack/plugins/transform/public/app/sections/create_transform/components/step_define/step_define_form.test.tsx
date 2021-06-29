@@ -1,48 +1,90 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { render, wait } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import { render } from '@testing-library/react';
 
-import { Providers } from '../../../../app_dependencies.mock';
+import { I18nProvider } from '@kbn/i18n/react';
+
+import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
+
+import { coreMock } from '../../../../../../../../../src/core/public/mocks';
+import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
+const startMock = coreMock.createStart();
+
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
+
 import {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
-  PIVOT_SUPPORTED_AGGS,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
-import { StepDefineForm, getAggNameConflictToastMessages } from './step_define_form';
+import { getAggNameConflictToastMessages } from './common';
+import { StepDefineForm } from './step_define_form';
 
-jest.mock('ui/new_platform');
 jest.mock('../../../../../shared_imports');
+jest.mock('../../../../../app/app_dependencies');
+
+import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { getMlSharedImports } from '../../../../../shared_imports';
+
+const createMockWebStorage = () => ({
+  clear: jest.fn(),
+  getItem: jest.fn(),
+  key: jest.fn(),
+  removeItem: jest.fn(),
+  setItem: jest.fn(),
+  length: 0,
+});
+
+const createMockStorage = () => ({
+  storage: createMockWebStorage(),
+  get: jest.fn(),
+  set: jest.fn(),
+  remove: jest.fn(),
+  clear: jest.fn(),
+});
 
 describe('Transform: <DefinePivotForm />', () => {
-  // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async done => {
+  test('Minimal initialization', async () => {
     // Arrange
+    const mlSharedImports = await getMlSharedImports();
+
     const searchItems = {
       indexPattern: {
         title: 'the-index-pattern-title',
         fields: [] as any[],
       } as SearchItems['indexPattern'],
     };
-    const { getByLabelText } = render(
-      <Providers>
-        <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
-      </Providers>
+
+    // mock services for QueryStringInput
+    const services = {
+      ...startMock,
+      data: dataPluginMock.createStartContract(),
+      appName: 'the-test-app',
+      storage: createMockStorage(),
+    };
+
+    const { getByText } = render(
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <MlSharedContext.Provider value={mlSharedImports}>
+            <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+          </MlSharedContext.Provider>
+        </KibanaContextProvider>
+      </I18nProvider>
     );
 
     // Act
     // Assert
-    expect(getByLabelText('Index pattern')).toBeInTheDocument();
-    await wait();
-    done();
+    expect(getByText('Index pattern')).toBeInTheDocument();
+    expect(getByText(searchItems.indexPattern.title)).toBeInTheDocument();
   });
 });
 

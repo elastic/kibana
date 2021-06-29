@@ -1,0 +1,42 @@
+kbn-agg-table,
+kbn-agg-table-group {
+  display: block;
+}
+
+.kbnAggTable {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.kbnAggTable__paginated {
+  flex: 1 1 auto;
+  overflow: auto;
+
+  th {
+    text-align: left;
+    font-weight: $euiFontWeightBold;
+  }
+
+  tr:hover td,
+  .kbnTableCellFilter {
+    background-color: $euiColorLightestShade;
+  }
+}
+
+.kbnAggTable__controls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  margin: $euiSizeS $euiSizeXS;
+
+  > paginate-controls {
+    flex: 1 0 auto;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.small {
+  font-size: .9em !important;
+}

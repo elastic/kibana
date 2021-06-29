@@ -1,0 +1,29 @@
+.canvasEmbeddable {
+  .embPanel {
+    border: none;
+    background: none;
+
+    .embPanel__title {
+      margin-bottom: $euiSizeXS;
+    }
+
+    .embPanel__optionsMenuButton {
+      border-radius: $euiBorderRadius;
+    }
+
+    .canvas-isFullscreen & {
+      .embPanel__optionsMenuButton {
+        opacity: 0;
+      }
+
+      &:focus .embPanel__optionsMenuButton,
+      &:hover .embPanel__optionsMenuButton {
+        opacity: 1;
+      }
+    }
+  }
+
+  .euiTable {
+    background: none;
+  }
+}

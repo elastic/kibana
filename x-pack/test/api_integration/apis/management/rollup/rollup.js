@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,9 +10,8 @@ import { API_BASE_PATH, ROLLUP_INDEX_NAME } from './constants';
 
 import { registerHelpers } from './rollup.test_helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
 
   const {
     createIndexWithMappings,
@@ -22,7 +22,7 @@ export default function({ getService }) {
     startJob,
     stopJob,
     cleanUp,
-  } = registerHelpers({ supertest, es });
+  } = registerHelpers(getService);
 
   describe('jobs', () => {
     after(() => cleanUp());
@@ -45,12 +45,26 @@ export default function({ getService }) {
 
         const { body } = await supertest.get(uri).expect(200);
 
-        expect(body).to.eql({
-          dateFields: ['testCreatedField'],
-          keywordFields: ['testTagField'],
-          numericFields: ['testTotalField'],
-          doesMatchIndices: true,
-          doesMatchRollupIndices: false,
+        expect(Object.keys(body)).to.eql([
+          'doesMatchIndices',
+          'doesMatchRollupIndices',
+          'dateFields',
+          'numericFields',
+          'keywordFields',
+        ]);
+
+        expect(body.doesMatchIndices).to.be(true);
+        expect(body.doesMatchRollupIndices).to.be(false);
+        expect(body.dateFields).to.eql(['testCreatedField']);
+        // '_tier' is an expected metadata field from ES
+        // Order is not guaranteed, so we assert against individual field names
+        ['_tier', 'testTagField'].forEach((keywordField) => {
+          expect(body.keywordFields.includes(keywordField)).to.be(true);
+        });
+        // '_doc_count' is an expected metadata field from ES
+        // Order is not guaranteed, so we assert against individual field names
+        ['_doc_count', 'testTotalField'].forEach((numericField) => {
+          expect(body.numericFields.includes(numericField)).to.be(true);
         });
       });
 
@@ -113,7 +127,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          const job = jobs.find(job => job.config.id === payload.job.id);
+          const job = jobs.find((job) => job.config.id === payload.job.id);
 
           expect(job).not.be(undefined);
           expect(job.config.index_pattern).to.eql(payload.job.index_pattern);
@@ -218,7 +232,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === payload.job.id);
+          job = jobs.find((job) => job.config.id === payload.job.id);
         });
 
         it('should start the job', async () => {
@@ -233,7 +247,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === jobId);
+          job = jobs.find((job) => job.config.id === jobId);
           expect(job.status.job_state).to.eql('started');
         });
 
@@ -254,7 +268,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === payload.job.id);
+          job = jobs.find((job) => job.config.id === payload.job.id);
         });
 
         it('should stop the job', async () => {
@@ -268,7 +282,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === jobId);
+          job = jobs.find((job) => job.config.id === jobId);
           expect(job.status.job_state).to.eql('stopped');
         });
 

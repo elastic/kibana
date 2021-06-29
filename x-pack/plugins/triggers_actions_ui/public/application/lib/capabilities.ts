@@ -1,8 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { AlertType } from '../../types';
+import { InitialAlert } from '../sections/alert_form/alert_reducer';
 
 /**
  * NOTE: Applications that want to show the alerting UIs will need to add
@@ -10,44 +14,18 @@
  * will possibly go away with https://github.com/elastic/kibana/issues/52300.
  */
 
-export function hasShowAlertsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['alerting:show']) {
-    return true;
-  }
-  return false;
-}
+type Capabilities = Record<string, any>;
 
-export function hasShowActionsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['actions:show']) {
-    return true;
-  }
-  return false;
-}
+export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
+export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
+export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.execute;
+export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
+  capabilities?.actions?.delete;
 
-export function hasSaveAlertsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['alerting:save']) {
-    return true;
-  }
-  return false;
+export function hasAllPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
+  return alertType?.authorizedConsumers[alert.consumer]?.all ?? false;
 }
-
-export function hasSaveActionsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['actions:save']) {
-    return true;
-  }
-  return false;
-}
-
-export function hasDeleteAlertsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['alerting:delete']) {
-    return true;
-  }
-  return false;
-}
-
-export function hasDeleteActionsCapability(capabilities: any): boolean {
-  if (capabilities.siem && capabilities.siem['actions:delete']) {
-    return true;
-  }
-  return false;
+export function hasReadPrivilege(alert: InitialAlert, alertType?: AlertType): boolean {
+  return alertType?.authorizedConsumers[alert.consumer]?.read ?? false;
 }

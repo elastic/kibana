@@ -1,0 +1,34 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A netcat process is engaging in network activity on a Linux host. Netcat is often used as a persistence mechanism by exporting a reverse shell or by serving a shell on a listening port. Netcat is also sometimes used for data exfiltration.",
+  "false_positives": [
+    "Netcat is a dual-use tool that can be used for benign or malicious activity. Netcat is included in some Linux distributions so its presence is not necessarily suspicious. Some normal use of this program, while uncommon, may originate from scripts, automation tools, and frameworks."
+  ],
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Netcat Network Activity",
+  "query": "sequence by process.entity_id\n  [process where (process.name == \"nc\" or process.name == \"ncat\" or process.name == \"netcat\" or\n                  process.name == \"netcat.openbsd\" or process.name == \"netcat.traditional\") and\n     event.type == \"start\"]\n  [network where (process.name == \"nc\" or process.name == \"ncat\" or process.name == \"netcat\" or\n                  process.name == \"netcat.openbsd\" or process.name == \"netcat.traditional\")]\n",
+  "references": [
+    "http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet",
+    "https://www.sans.org/security-resources/sec560/netcat_cheat_sheet_v1.pdf",
+    "https://en.wikipedia.org/wiki/Netcat"
+  ],
+  "risk_score": 47,
+  "rule_id": "adb961e0-cb74-42a0-af9e-29fc41f88f5f",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection"
+  ],
+  "type": "eql",
+  "version": 6
+}

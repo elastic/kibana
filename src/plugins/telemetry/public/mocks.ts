@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -23,36 +12,54 @@ import { overlayServiceMock } from '../../../core/public/overlays/overlay_servic
 import { httpServiceMock } from '../../../core/public/http/http_service.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { notificationServiceMock } from '../../../core/public/notifications/notifications_service.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { injectedMetadataServiceMock } from '../../../core/public/injected_metadata/injected_metadata_service.mock';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
-import { TelemetryPluginStart } from './plugin';
+import { TelemetryPluginStart, TelemetryPluginSetup, TelemetryPluginConfig } from './plugin';
+
+// The following is to be able to access private methods
+/* eslint-disable dot-notation */
+
+export interface TelemetryServiceMockOptions {
+  reportOptInStatusChange?: boolean;
+  currentKibanaVersion?: string;
+  isScreenshotMode?: boolean;
+  config?: Partial<TelemetryPluginConfig>;
+}
 
 export function mockTelemetryService({
   reportOptInStatusChange,
-}: { reportOptInStatusChange?: boolean } = {}) {
-  const injectedMetadata = injectedMetadataServiceMock.createStartContract();
-  injectedMetadata.getInjectedVar.mockImplementation((key: string) => {
-    switch (key) {
-      case 'telemetryNotifyUserAboutOptInDefault':
-        return true;
-      case 'allowChangingOptInStatus':
-        return true;
-      case 'telemetryOptedIn':
-        return true;
-      default: {
-        throw Error(`Unhandled getInjectedVar key "${key}".`);
-      }
-    }
-  });
+  currentKibanaVersion = 'mockKibanaVersion',
+  isScreenshotMode = false,
+  config: configOverride = {},
+}: TelemetryServiceMockOptions = {}) {
+  const config = {
+    enabled: true,
+    url: 'http://localhost',
+    optInStatusUrl: 'http://localhost',
+    sendUsageFrom: 'browser' as const,
+    optIn: true,
+    banner: true,
+    allowChangingOptInStatus: true,
+    telemetryNotifyUserAboutOptInDefault: true,
+    userCanChangeSettings: true,
+    ...configOverride,
+  };
 
-  return new TelemetryService({
-    injectedMetadata,
+  const telemetryService = new TelemetryService({
+    config,
     http: httpServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    isScreenshotMode,
+    currentKibanaVersion,
     reportOptInStatusChange,
   });
+
+  const originalReportOptInStatus = telemetryService['reportOptInStatus'];
+  telemetryService['reportOptInStatus'] = jest.fn().mockImplementation((optInPayload) => {
+    return originalReportOptInStatus(optInPayload); // Actually calling the original method
+  });
+
+  return telemetryService;
 }
 
 export function mockTelemetryNotifications({
@@ -61,25 +68,41 @@ export function mockTelemetryNotifications({
   telemetryService: TelemetryService;
 }) {
   return new TelemetryNotifications({
+    http: httpServiceMock.createSetupContract(),
     overlays: overlayServiceMock.createStartContract(),
     telemetryService,
   });
 }
 
-export type Setup = jest.Mocked<TelemetryPluginStart>;
+export type Setup = jest.Mocked<TelemetryPluginSetup>;
+export type Start = jest.Mocked<TelemetryPluginStart>;
 
 export const telemetryPluginMock = {
   createSetupContract,
+  createStartContract,
 };
 
 function createSetupContract(): Setup {
   const telemetryService = mockTelemetryService();
-  const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
 
   const setupContract: Setup = {
     telemetryService,
-    telemetryNotifications,
   };
 
   return setupContract;
+}
+
+function createStartContract(): Start {
+  const telemetryService = mockTelemetryService();
+  const telemetryNotifications = mockTelemetryNotifications({ telemetryService });
+
+  const startContract: Start = {
+    telemetryService,
+    telemetryNotifications,
+    telemetryConstants: {
+      getPrivacyStatementUrl: jest.fn(),
+    },
+  };
+
+  return startContract;
 }

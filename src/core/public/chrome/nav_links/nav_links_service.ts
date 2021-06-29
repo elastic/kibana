@@ -1,29 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { sortBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
-import { InternalApplicationStart } from '../../application';
-import { HttpStart } from '../../http';
-import { ChromeNavLink, ChromeNavLinkUpdateableFields, NavLinkWrapper } from './nav_link';
+import { InternalApplicationStart, PublicAppDeepLinkInfo, PublicAppInfo } from '../../application';
+import { HttpStart, IBasePath } from '../../http';
+import { ChromeNavLink, NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
 interface StartDeps {
@@ -70,18 +59,6 @@ export interface ChromeNavLinks {
   showOnly(id: string): void;
 
   /**
-   * Update the navlink for the given id with the updated attributes.
-   * Returns the updated navlink or `undefined` if it does not exist.
-   *
-   * @deprecated Uses the {@link AppBase.updater$} property when registering
-   * your application with {@link ApplicationSetup.register} instead.
-   *
-   * @param id
-   * @param values
-   */
-  update(id: string, values: ChromeNavLinkUpdateableFields): ChromeNavLink | undefined;
-
-  /**
    * Enable forced navigation mode, which will trigger a page refresh
    * when a nav link is clicked and only the hash is updated.
    *
@@ -108,11 +85,17 @@ export class NavLinksService {
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.applications$.pipe(
-      map(apps => {
+      map((apps) => {
         return new Map(
           [...apps]
             .filter(([, app]) => !app.chromeless)
-            .map(([appId, app]) => [appId, toNavLink(app, http.basePath)])
+            .reduce((navLinks: Array<[string, NavLinkWrapper]>, [appId, app]) => {
+              navLinks.push(
+                [appId, toNavLink(app, http.basePath)],
+                ...toNavDeepLinks(app, app.deepLinks, http.basePath)
+              );
+              return navLinks;
+            }, [])
         );
       })
     );
@@ -120,6 +103,7 @@ export class NavLinksService {
     // now that availableApps$ is an observable, we need to keep record of all
     // manual link modifications to be able to re-apply then after every
     // availableApps$ changes.
+    // Only in use by `showOnly` API, can be removed once dashboard_mode is removed in 8.0
     const linkUpdaters$ = new BehaviorSubject<LinksUpdater[]>([]);
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(new Map());
 
@@ -129,7 +113,7 @@ export class NavLinksService {
           return linkUpdaters.reduce((links, updater) => updater(links), appLinks);
         })
       )
-      .subscribe(navlinks => {
+      .subscribe((navlinks) => {
         navLinks$.next(navlinks);
       });
 
@@ -158,29 +142,10 @@ export class NavLinksService {
           return;
         }
 
-        const updater: LinksUpdater = navLinks =>
+        const updater: LinksUpdater = (navLinks) =>
           new Map([...navLinks.entries()].filter(([linkId]) => linkId === id));
 
         linkUpdaters$.next([...linkUpdaters$.value, updater]);
-      },
-
-      update(id: string, values: ChromeNavLinkUpdateableFields) {
-        if (!this.has(id)) {
-          return;
-        }
-
-        const updater: LinksUpdater = navLinks =>
-          new Map(
-            [...navLinks.entries()].map(([linkId, link]) => {
-              return [linkId, link.id === id ? link.update(values) : link] as [
-                string,
-                NavLinkWrapper
-              ];
-            })
-          );
-
-        linkUpdaters$.next([...linkUpdaters$.value, updater]);
-        return this.get(id);
       },
 
       enableForcedAppSwitcherNavigation() {
@@ -200,7 +165,25 @@ export class NavLinksService {
 
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
   return sortBy(
-    [...navLinks.values()].map(link => link.properties),
+    [...navLinks.values()].map((link) => link.properties),
     'order'
   );
+}
+
+function toNavDeepLinks(
+  app: PublicAppInfo,
+  deepLinks: PublicAppDeepLinkInfo[],
+  basePath: IBasePath
+): Array<[string, NavLinkWrapper]> {
+  if (!deepLinks) {
+    return [];
+  }
+  return deepLinks.reduce((navDeepLinks: Array<[string, NavLinkWrapper]>, deepLink) => {
+    const id = `${app.id}:${deepLink.id}`;
+    if (deepLink.path) {
+      navDeepLinks.push([id, toNavLink(app, basePath, { ...deepLink, id })]);
+    }
+    navDeepLinks.push(...toNavDeepLinks(app, deepLink.deepLinks, basePath));
+    return navDeepLinks;
+  }, []);
 }

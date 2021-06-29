@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects attempts to establish persistence on an endpoint by installing a rogue Microsoft Outlook VBA Template.",
+  "false_positives": [
+    "A legitimate VBA for Outlook is usually configured interactively via OUTLOOK.EXE."
+  ],
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Persistence via Microsoft Outlook VBA",
+  "query": "file where event.type != \"deletion\" and\n file.path : \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Outlook\\\\VbaProject.OTM\"\n",
+  "references": [
+    "https://www.mdsec.co.uk/2020/11/a-fresh-outlook-on-mail-based-persistence/",
+    "https://www.linkedin.com/pulse/outlook-backdoor-using-vba-samir-b-/"
+  ],
+  "risk_score": 47,
+  "rule_id": "397945f3-d39a-4e6f-8bcb-9656c2031438",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1137",
+          "name": "Office Application Startup",
+          "reference": "https://attack.mitre.org/techniques/T1137/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

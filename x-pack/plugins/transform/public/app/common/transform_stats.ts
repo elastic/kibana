@@ -1,68 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TransformId, TRANSFORM_STATE } from '../../../common';
+import { TRANSFORM_STATE } from '../../../common/constants';
 
 import { TransformListRow } from './transform_list';
+import {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../common/api_schemas/transforms';
 
-export enum TRANSFORM_MODE {
-  BATCH = 'batch',
-  CONTINUOUS = 'continuous',
-}
+type TransformItem = Omit<TransformListRow, 'config'> & {
+  config:
+    | TransformListRow['config']
+    | PutTransformsLatestRequestSchema
+    | PutTransformsPivotRequestSchema;
+};
 
-export interface TransformStats {
-  id: TransformId;
-  checkpointing: {
-    last: {
-      checkpoint: number;
-      timestamp_millis?: number;
-    };
-    next?: {
-      checkpoint: number;
-      checkpoint_progress?: {
-        total_docs: number;
-        docs_remaining: number;
-        percent_complete: number;
-      };
-    };
-    operations_behind: number;
-  };
-  node?: {
-    id: string;
-    name: string;
-    ephemeral_id: string;
-    transport_address: string;
-    attributes: Record<string, any>;
-  };
-  stats: {
-    documents_indexed: number;
-    documents_processed: number;
-    index_failures: number;
-    index_time_in_ms: number;
-    index_total: number;
-    pages_processed: number;
-    search_failures: number;
-    search_time_in_ms: number;
-    search_total: number;
-    trigger_count: number;
-  };
-  reason?: string;
-  state: TRANSFORM_STATE;
-}
-
-export function isTransformStats(arg: any): arg is TransformStats {
-  return (
-    typeof arg === 'object' &&
-    arg !== null &&
-    {}.hasOwnProperty.call(arg, 'state') &&
-    Object.values(TRANSFORM_STATE).includes(arg.state)
-  );
-}
-
-export function getTransformProgress(item: TransformListRow) {
+export function getTransformProgress(item: TransformItem) {
   if (isCompletedBatchTransform(item)) {
     return 100;
   }
@@ -71,7 +29,7 @@ export function getTransformProgress(item: TransformListRow) {
   return progress !== undefined ? Math.round(progress) : undefined;
 }
 
-export function isCompletedBatchTransform(item: TransformListRow) {
+export function isCompletedBatchTransform(item: TransformItem) {
   // If `checkpoint=1`, `sync` is missing from the config and state is stopped,
   // then this is a completed batch transform.
   return (

@@ -1,26 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
-  PROCESSOR_EVENT,
   TRACE_ID,
   PARENT_ID,
   TRANSACTION_DURATION,
   SPAN_DURATION,
   TRANSACTION_ID,
-  ERROR_LOG_LEVEL
+  ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { APMError } from '../../../typings/es_schemas/ui/apm_error';
-import { rangeFilter } from '../helpers/range_filter';
+import { rangeQuery } from '../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { PromiseValueType } from '../../../typings/common';
 
-interface ErrorsPerTransaction {
+export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 
@@ -28,23 +28,24 @@ export async function getTraceItems(
   traceId: string,
   setup: Setup & SetupTimeRange
 ) {
-  const { start, end, client, config, indices } = setup;
+  const { start, end, apmEventClient, config } = setup;
   const maxTraceItems = config['xpack.apm.ui.maxTraceItems'];
   const excludedLogLevels = ['debug', 'info', 'warning'];
 
-  const errorResponsePromise = client.search({
-    index: indices['apm_oss.errorIndices'],
+  const errorResponsePromise = apmEventClient.search('get_trace_items', {
+    apm: {
+      events: [ProcessorEvent.error],
+    },
     body: {
       size: maxTraceItems,
       query: {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { term: { [PROCESSOR_EVENT]: 'error' } },
-            { range: rangeFilter(start, end) }
+            ...rangeQuery(start, end),
           ],
-          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } }
-        }
+          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
+        },
       },
       aggs: {
         by_transaction_id: {
@@ -52,76 +53,69 @@ export async function getTraceItems(
             field: TRANSACTION_ID,
             size: maxTraceItems,
             // high cardinality
-            execution_hint: 'map' as const
-          }
-        }
-      }
-    }
+            execution_hint: 'map' as const,
+          },
+        },
+      },
+    },
   });
 
-  const traceResponsePromise = client.search({
-    index: [
-      indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices']
-    ],
+  const traceResponsePromise = apmEventClient.search('get_trace_span_items', {
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
     body: {
       size: maxTraceItems,
       query: {
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
-            { terms: { [PROCESSOR_EVENT]: ['span', 'transaction'] } },
-            { range: rangeFilter(start, end) }
-          ],
+            ...rangeQuery(start, end),
+          ] as QueryDslQueryContainer[],
           should: {
-            exists: { field: PARENT_ID }
-          }
-        }
+            exists: { field: PARENT_ID },
+          },
+        },
       },
       sort: [
         { _score: { order: 'asc' as const } },
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
-        { [SPAN_DURATION]: { order: 'desc' as const } }
+        { [SPAN_DURATION]: { order: 'desc' as const } },
       ],
-      track_total_hits: true
-    }
+      track_total_hits: true,
+    },
   });
 
   const [errorResponse, traceResponse]: [
     // explicit intermediary types to avoid TS "excessively deep" error
     PromiseValueType<typeof errorResponsePromise>,
     PromiseValueType<typeof traceResponsePromise>
-    // @ts-ignore
-  ] = await Promise.all([errorResponsePromise, traceResponsePromise]);
+  ] = (await Promise.all([errorResponsePromise, traceResponsePromise])) as any;
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
 
-  const items = (traceResponse.hits.hits as Array<{
-    _source: Transaction | Span;
-  }>).map(hit => hit._source);
+  const items = traceResponse.hits.hits.map((hit) => hit._source);
 
   const errorFrequencies: {
     errorsPerTransaction: ErrorsPerTransaction;
     errorDocs: APMError[];
   } = {
-    errorDocs: errorResponse.hits.hits.map(
-      ({ _source }) => _source as APMError
-    ),
+    errorDocs: errorResponse.hits.hits.map(({ _source }) => _source),
     errorsPerTransaction:
       errorResponse.aggregations?.by_transaction_id.buckets.reduce(
         (acc, current) => {
           return {
             ...acc,
-            [current.key]: current.doc_count
+            [current.key]: current.doc_count,
           };
         },
         {} as ErrorsPerTransaction
-      ) ?? {}
+      ) ?? {},
   };
 
   return {
     items,
     exceedsMax,
-    ...errorFrequencies
+    ...errorFrequencies,
   };
 }

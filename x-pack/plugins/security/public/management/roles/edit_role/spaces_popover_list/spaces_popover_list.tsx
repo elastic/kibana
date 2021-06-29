@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import './spaces_popover_list.scss';
 
 import {
   EuiButtonEmpty,
@@ -12,15 +15,19 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
-import React, { Component } from 'react';
-import { Space, SpaceAvatar } from '../../../../../../spaces/public';
+import React, { Component, memo } from 'react';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import type { Space } from 'src/plugins/spaces_oss/common';
+import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../../../spaces/common';
 
 interface Props {
   spaces: Space[];
-  intl: InjectedIntl;
   buttonText: string;
+  spacesApiUi: SpacesApiUi;
 }
 
 interface State {
@@ -59,15 +66,13 @@ export class SpacesPopoverList extends Component<Props, State> {
   }
 
   private getMenuPanel = () => {
-    const { intl } = this.props;
     const { searchTerm } = this.state;
 
     const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
       className: 'spcMenu',
-      title: intl.formatMessage({
-        id: 'xpack.security.management.editRole.spacesPopoverList.popoverTitle',
+      title: i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
         defaultMessage: 'Spaces',
       }),
       watchedItemProps: ['data-search-term'],
@@ -104,7 +109,7 @@ export class SpacesPopoverList extends Component<Props, State> {
 
     let filteredSpaces = spaces;
     if (searchTerm) {
-      filteredSpaces = spaces.filter(space => {
+      filteredSpaces = spaces.filter((space) => {
         const { name, description = '' } = space;
         return (
           name.toLowerCase().indexOf(searchTerm) >= 0 ||
@@ -141,15 +146,16 @@ export class SpacesPopoverList extends Component<Props, State> {
   };
 
   private renderSearchField = () => {
-    const { intl } = this.props;
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         {
           <EuiFieldSearch
-            placeholder={intl.formatMessage({
-              id: 'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
-              defaultMessage: 'Find a space',
-            })}
+            placeholder={i18n.translate(
+              'xpack.security.management.editRole.spacesPopoverList.findSpacePlaceholder',
+              {
+                defaultMessage: 'Find a space',
+              }
+            )}
             incremental={true}
             onSearch={this.onSearch}
             onKeyDown={this.onSearchKeyDown}
@@ -189,7 +195,8 @@ export class SpacesPopoverList extends Component<Props, State> {
   };
 
   private renderSpaceMenuItem = (space: Space): JSX.Element => {
-    const icon = <SpaceAvatar space={space} size={'s'} />;
+    const LazySpaceAvatar = memo(this.props.spacesApiUi.components.getSpaceAvatar);
+    const icon = <LazySpaceAvatar space={space} size={'s'} />; // wrapped in a Suspense above
     return (
       <EuiContextMenuItem
         key={space.id}

@@ -1,28 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { EuiFieldText } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
+
+import { EuiFieldPassword } from '@elastic/eui';
+import type { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { User } from '../../../../../common/model';
+
+import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import type { User } from '../../../../../common/model';
+import { userAPIClientMock } from '../../index.mock';
 import { ChangePasswordForm } from './change_password_form';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { userAPIClientMock } from '../../index.mock';
-
 function getCurrentPasswordField(wrapper: ReactWrapper<any>) {
-  return wrapper.find(EuiFieldText).filter('[data-test-subj="currentPassword"]');
+  return wrapper.find(EuiFieldPassword).filter('[data-test-subj="currentPassword"]');
 }
 
 function getNewPasswordField(wrapper: ReactWrapper<any>) {
-  return wrapper.find(EuiFieldText).filter('[data-test-subj="newPassword"]');
+  return wrapper.find(EuiFieldPassword).filter('[data-test-subj="newPassword"]');
 }
 
 function getConfirmPasswordField(wrapper: ReactWrapper<any>) {
-  return wrapper.find(EuiFieldText).filter('[data-test-subj="confirmNewPassword"]');
+  return wrapper.find(EuiFieldPassword).filter('[data-test-subj="confirmNewPassword"]');
 }
 
 describe('<ChangePasswordForm>', () => {

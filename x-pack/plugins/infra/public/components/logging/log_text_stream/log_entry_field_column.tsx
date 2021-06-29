@@ -1,108 +1,66 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
-import { darken, transparentize } from 'polished';
-import React, { useMemo } from 'react';
-
-import { euiStyled, css } from '../../../../../observability/public';
-import {
-  isFieldColumn,
-  isHighlightFieldColumn,
-  LogEntryColumn,
-  LogEntryHighlightColumn,
-} from '../../../utils/log_entry';
-import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
+import React from 'react';
+import { JsonValue } from '@kbn/common-utils';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { LogColumn } from '../../../../common/log_entry';
+import { isFieldColumn, isHighlightFieldColumn } from '../../../utils/log_entry';
+import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
+import {
+  longWrappedContentStyle,
+  preWrappedContentStyle,
+  unwrappedContentStyle,
+  WrapMode,
+} from './text_styles';
 
 interface LogEntryFieldColumnProps {
-  columnValue: LogEntryColumn;
-  highlights: LogEntryHighlightColumn[];
+  columnValue: LogColumn;
+  highlights: LogColumn[];
   isActiveHighlight: boolean;
-  isHighlighted: boolean;
-  isHovered: boolean;
-  isWrapped: boolean;
+  wrapMode: WrapMode;
+  render?: (value: JsonValue) => React.ReactNode;
 }
 
 export const LogEntryFieldColumn: React.FunctionComponent<LogEntryFieldColumnProps> = ({
   columnValue,
   highlights: [firstHighlight], // we only support one highlight for now
   isActiveHighlight,
-  isHighlighted,
-  isHovered,
-  isWrapped,
+  wrapMode,
+  render,
 }) => {
-  const value = useMemo(() => (isFieldColumn(columnValue) ? JSON.parse(columnValue.value) : null), [
-    columnValue,
-  ]);
-  const formattedValue = Array.isArray(value) ? (
-    <ul>
-      {value.map((entry, i) => (
-        <CommaSeparatedLi key={`LogEntryFieldColumn-${i}`}>
-          {highlightFieldValue(
-            entry,
-            isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
-            isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
-          )}
-        </CommaSeparatedLi>
-      ))}
-    </ul>
-  ) : (
-    highlightFieldValue(
-      typeof value === 'object' && value != null ? stringify(value) : value,
-      isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : [],
-      isActiveHighlight ? ActiveHighlightMarker : HighlightMarker
-    )
-  );
-
-  return (
-    <FieldColumnContent isHighlighted={isHighlighted} isHovered={isHovered} isWrapped={isWrapped}>
-      {formattedValue}
-    </FieldColumnContent>
-  );
+  if (isFieldColumn(columnValue)) {
+    return (
+      <FieldColumnContent wrapMode={wrapMode}>
+        <FieldValue
+          highlightTerms={isHighlightFieldColumn(firstHighlight) ? firstHighlight.highlights : []}
+          isActiveHighlight={isActiveHighlight}
+          value={columnValue.value}
+          render={render}
+        />
+      </FieldColumnContent>
+    );
+  } else {
+    return null;
+  }
 };
 
-const hoveredContentStyle = css`
-  background-color: ${props =>
-    props.theme.darkMode
-      ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
-      : darken(0.05, props.theme.eui.euiColorHighlight)};
-`;
-
-const wrappedContentStyle = css`
-  overflow: visible;
-  white-space: pre-wrap;
-  word-break: break-all;
-`;
-
-const unwrappedContentStyle = css`
-  overflow: hidden;
-  white-space: pre;
-`;
-
-const CommaSeparatedLi = euiStyled.li`
-  display: inline;
-  &:not(:last-child) {
-    margin-right: 1ex;
-    &::after {
-      content: ',';
-    }
-  }
-`;
-
 interface LogEntryColumnContentProps {
-  isHighlighted: boolean;
-  isHovered: boolean;
-  isWrapped?: boolean;
+  wrapMode: WrapMode;
 }
 
 const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnContentProps>`
-  background-color: ${props => props.theme.eui.euiColorEmptyShade};
   text-overflow: ellipsis;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
-  ${props => (props.isWrapped ? wrappedContentStyle : unwrappedContentStyle)};
+  ${(props) =>
+    props.wrapMode === 'long'
+      ? longWrappedContentStyle
+      : props.wrapMode === 'pre-wrapped'
+      ? preWrappedContentStyle
+      : unwrappedContentStyle};
 `;

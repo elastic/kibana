@@ -1,28 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
-import { npStart } from '../../../../legacy_singletons';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { getJobIdPrefix } from '../../../../../common/log_analysis';
+import type { HttpHandler } from 'src/core/public';
 
-export const callSetupMlModuleAPI = async (
-  moduleId: string,
-  start: number | undefined,
-  end: number | undefined,
-  spaceId: string,
-  sourceId: string,
-  indexPattern: string,
-  jobOverrides: SetupMlModuleJobOverrides[] = [],
-  datafeedOverrides: SetupMlModuleDatafeedOverrides[] = []
-) => {
-  const response = await npStart.http.fetch(`/api/ml/modules/setup/${moduleId}`, {
+import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../../common/log_analysis';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
+
+interface RequestArgs {
+  moduleId: string;
+  start?: number;
+  end?: number;
+  spaceId: string;
+  sourceId: string;
+  indexPattern: string;
+  jobOverrides?: SetupMlModuleJobOverrides[];
+  datafeedOverrides?: SetupMlModuleDatafeedOverrides[];
+  query?: object;
+  useDedicatedIndex?: boolean;
+}
+
+export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
+  const {
+    moduleId,
+    start,
+    end,
+    spaceId,
+    sourceId,
+    indexPattern,
+    jobOverrides = [],
+    datafeedOverrides = [],
+    query,
+    useDedicatedIndex = false,
+  } = requestArgs;
+
+  const response = await fetch(`/api/ml/modules/setup/${moduleId}`, {
     method: 'POST',
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
@@ -33,14 +49,13 @@ export const callSetupMlModuleAPI = async (
         startDatafeed: true,
         jobOverrides,
         datafeedOverrides,
+        query,
+        useDedicatedIndex,
       })
     ),
   });
 
-  return pipe(
-    setupMlModuleResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(setupMlModuleResponsePayloadRT)(response);
 };
 
 const setupMlModuleTimeParamsRT = rt.partial({
@@ -48,7 +63,10 @@ const setupMlModuleTimeParamsRT = rt.partial({
   end: rt.number,
 });
 
-const setupMlModuleJobOverridesRT = rt.object;
+const setupMlModuleJobOverridesRT = rt.type({
+  job_id: rt.string,
+  custom_settings: jobCustomSettingsRT,
+});
 
 export type SetupMlModuleJobOverrides = rt.TypeOf<typeof setupMlModuleJobOverridesRT>;
 
@@ -56,21 +74,40 @@ const setupMlModuleDatafeedOverridesRT = rt.object;
 
 export type SetupMlModuleDatafeedOverrides = rt.TypeOf<typeof setupMlModuleDatafeedOverridesRT>;
 
-const setupMlModuleRequestParamsRT = rt.type({
-  indexPatternName: rt.string,
-  prefix: rt.string,
-  startDatafeed: rt.boolean,
-  jobOverrides: rt.array(setupMlModuleJobOverridesRT),
-  datafeedOverrides: rt.array(setupMlModuleDatafeedOverridesRT),
-});
+const setupMlModuleRequestParamsRT = rt.intersection([
+  rt.strict({
+    indexPatternName: rt.string,
+    prefix: rt.string,
+    startDatafeed: rt.boolean,
+    jobOverrides: rt.array(setupMlModuleJobOverridesRT),
+    datafeedOverrides: rt.array(setupMlModuleDatafeedOverridesRT),
+    useDedicatedIndex: rt.boolean,
+  }),
+  rt.exact(
+    rt.partial({
+      query: rt.object,
+    })
+  ),
+]);
 
 const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleTimeParamsRT,
   setupMlModuleRequestParamsRT,
 ]);
 
+const setupErrorRT = rt.type({
+  reason: rt.string,
+  type: rt.string,
+});
+
 const setupErrorResponseRT = rt.type({
-  msg: rt.string,
+  status: rt.number,
+  error: rt.intersection([
+    setupErrorRT,
+    rt.type({
+      root_cause: rt.array(setupErrorRT),
+    }),
+  ]),
 });
 
 const datafeedSetupResponseRT = rt.intersection([

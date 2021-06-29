@@ -9,9 +9,9 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
 [[saved-objects-api-find-request]]
 ==== Request
 
-`GET /api/saved_objects/_find`
+`GET <kibana host>:<port>/api/saved_objects/_find`
 
-`GET /s/<space_id>/api/saved_objects/_find`
+`GET <kibana host>:<port>/s/<space_id>/api/saved_objects/_find`
 
 [[saved-objects-api-find-path-params]]
 ==== Path parameters
@@ -41,18 +41,26 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
   (Optional, array|string) The fields to perform the `simple_query_string` parsed query against.
 
 `fields`::
-  (Optional, array|string) The fields to return in the response.
+  (Optional, array|string) The fields to return in the `attributes` key of the response.
 
 `sort_field`::
-  (Optional, string) The field that sorts the response.
+  (Optional, string) Sorts the response. Includes "root" and "type" fields. "root" fields exist for all saved objects, such as "updated_at".
+  "type" fields are specific to an object type, such as fields returned in the `attributes` key of the response. When a single type is
+  defined in the `type` parameter, the "root" and "type" fields are allowed, and validity checks are made in that order. When multiple types
+  are defined in the `type` parameter, only "root" fields are allowed.
 
 `has_reference`::
   (Optional, object) Filters to objects that have a relationship with the type and ID combination.
 
 `filter`::
-  (Optional, string) The filter is a KQL string with the caveat that if you filter with an attribute from your type saved object.
-  It should look like that savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object like `updatedAt`,
-  you will have to define your filter like that savedObjectType.updatedAt > 2018-12-22.
+  (Optional, string) The filter is a KQL string with the caveat that if you filter with an attribute from your saved object type,
+  it should look like that: `savedObjectType.attributes.title: "myTitle"`. However, If you use a root attribute of a saved 
+  object such as `updated_at`, you will have to define your filter like that: `savedObjectType.updated_at > 2018-12-22`.
+
+`aggs`::
+  (Optional, string) **experimental** An aggregation structure, serialized as a string. The field format is similar to `filter`, meaning
+  that to use a saved object type attribute in the aggregation, the `savedObjectType.attributes.title`: "myTitle"` format
+  must be used. For root fields, the syntax is `savedObjectType.rootField`
 
 NOTE: As objects change in {kib}, the results on each page of the response also
 change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
@@ -67,15 +75,15 @@ change. Use the find API for traditional paginated results, but avoid using it t
 
 Find index patterns with titles that start with `my`:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-GET api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*
+$ curl -X GET api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*
 --------------------------------------------------
 // KIBANA
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "total": 1,
@@ -95,8 +103,8 @@ The API returns the following:
 For parameters that accept multiple values (e.g. `fields`), repeat the
 query parameter for each value:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-GET api/saved_objects/_find?fields=id&fields=title
+$ curl -X GET api/saved_objects/_find?fields=id&fields=title
 --------------------------------------------------
 // KIBANA

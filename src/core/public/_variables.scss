@@ -1,0 +1,8 @@
+@import '@elastic/eui/src/global_styling/variables/header';
+
+// height of the header banner
+$kbnHeaderBannerHeight: $euiSizeXL;
+// total height of the header (when the banner is *not* present)
+$kbnHeaderOffset: $euiHeaderHeightCompensation * 2;
+// total height of the header when the banner is present
+$kbnHeaderOffsetWithBanner: $kbnHeaderOffset + $kbnHeaderBannerHeight;

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -24,7 +13,7 @@ export default function help(command, spaces) {
     return command.outputHelp();
   }
 
-  const defCmd = _.find(command.commands, function(cmd) {
+  const defCmd = _.find(command.commands, function (cmd) {
     return cmd._name === 'serve';
   });
 
@@ -53,12 +42,12 @@ function indent(str, n) {
 
 function commandsSummary(program) {
   const cmds = _.compact(
-    program.commands.map(function(cmd) {
+    program.commands.map(function (cmd) {
       const name = cmd._name;
       if (name === '*') return;
       const opts = cmd.options.length ? ' [options]' : '';
       const args = cmd._args
-        .map(function(arg) {
+        .map(function (arg) {
           return humanReadableArgName(arg);
         })
         .join(' ');
@@ -67,12 +56,12 @@ function commandsSummary(program) {
     })
   );
 
-  const cmdLColWidth = cmds.reduce(function(width, cmd) {
+  const cmdLColWidth = cmds.reduce(function (width, cmd) {
     return Math.max(width, cmd[0].length);
   }, 0);
 
-  return cmds.reduce(function(help, cmd) {
-    return `${help || ''}${_.padRight(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
+  return cmds.reduce(function (help, cmd) {
+    return `${help || ''}${_.padEnd(cmd[0], cmdLColWidth)} ${cmd[1] || ''}\n`;
   }, '');
 }
 

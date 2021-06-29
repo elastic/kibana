@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A suspicious Zoom child process was detected, which may indicate an attempt to run unnoticed. Verify process details such as command line, network connections, file writes and associated file signature details as well.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious Zoom Child Process",
+  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n process.parent.name : \"Zoom.exe\" and process.name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\")\n",
+  "risk_score": 47,
+  "rule_id": "97aba1ef-6034-4bd3-8c1a-1e0996b27afa",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        },
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

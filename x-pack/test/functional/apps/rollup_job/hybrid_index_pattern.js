@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
-export default function({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
+export default function ({ getService, getPageObjects }) {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'settings']);
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('hybrid index pattern', function() {
+  describe('hybrid index pattern', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `hybrid-index-pattern-test-rollup-job-${Date.now()}`;
@@ -32,7 +35,7 @@ export default function({ getService, getPageObjects }) {
     it('create hybrid index pattern', async () => {
       //Create data for rollup job to recognize.
       //Index past data to be used in the test.
-      await pastDates.map(async day => {
+      await pastDates.map(async (day) => {
         await es.index(mockIndices(day, rollupSourceIndexPrefix));
       });
 
@@ -40,7 +43,7 @@ export default function({ getService, getPageObjects }) {
         'waiting for 3 records to be loaded into elasticsearch.',
         10000,
         async () => {
-          const response = await es.indices.get({
+          const { body: response } = await es.indices.get({
             index: `${rollupSourceIndexPrefix}*`,
             allow_no_indices: false,
           });
@@ -50,9 +53,8 @@ export default function({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
-        await es.transport.request({
-          path: `/_rollup/job/${rollupJobName}`,
-          method: 'PUT',
+        await es.rollup.putJob({
+          id: rollupJobName,
           body: {
             index_pattern: `${rollupSourceIndexPrefix}*`,
             rollup_index: rollupTargetIndexName,
@@ -70,7 +72,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      await pastDates.map(async day => {
+      await pastDates.map(async (day) => {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 
@@ -81,23 +83,35 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.settings.createIndexPattern(rollupIndexPatternName, '@timestamp', false);
 
       await PageObjects.settings.clickKibanaIndexPatterns();
-      const indexPattern = (await PageObjects.settings.getIndexPatternList()).pop();
-      const indexPatternText = await indexPattern.getVisibleText();
-      expect(indexPatternText).to.contain(rollupIndexPatternName);
-      expect(indexPatternText).to.contain('Rollup');
+      const indexPatternNames = await PageObjects.settings.getAllIndexPatternNames();
+      //The assertion is going to check that the string has the right name and that the text Rollup
+      //is included (since there is a Rollup tag).
+      const filteredIndexPatternNames = indexPatternNames.filter(
+        (i) => i.includes(rollupIndexPatternName) && i.includes('Rollup')
+      );
+      expect(filteredIndexPatternNames.length).to.be(1);
+
+      // make sure there are no toasts which might be showing unexpected errors
+      const toastShown = await find.existsByCssSelector('.euiToast');
+      expect(toastShown).to.be(false);
+
+      // ensure all fields are available
+      await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
+      const fields = await PageObjects.settings.getFieldNames();
+      expect(fields).to.eql(['@timestamp', '_id', '_index', '_score', '_source', '_type']);
     });
 
     after(async () => {
       // Delete the rollup job.
-      await es.transport.request({
-        path: `/_rollup/job/${rollupJobName}`,
-        method: 'DELETE',
-      });
+      await es.rollup.deleteJob({ id: rollupJobName });
 
-      await es.indices.delete({ index: rollupTargetIndexName });
-      await es.indices.delete({ index: `${regularIndexPrefix}*` });
-      await es.indices.delete({ index: `${rollupSourceIndexPrefix}*` });
-      await esArchiver.load('empty_kibana');
+      await esDeleteAllIndices([
+        rollupTargetIndexName,
+        `${regularIndexPrefix}*`,
+        `${rollupSourceIndexPrefix}*`,
+      ]);
+
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
   });
 }

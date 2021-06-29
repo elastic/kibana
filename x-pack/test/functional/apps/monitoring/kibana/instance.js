@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const instances = getService('monitoringKibanaInstances');
   const instance = getService('monitoringKibanaInstance');
@@ -16,7 +17,7 @@ export default function({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/singlecluster-yellow-platinum', {
+      await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum', {
         from: 'Aug 29, 2017 @ 17:24:14.254',
         to: 'Aug 29, 2017 @ 17:25:44.142',
       });

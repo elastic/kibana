@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export interface RestoreSettings {
@@ -13,6 +14,7 @@ export interface RestoreSettings {
   indexSettings?: string;
   ignoreIndexSettings?: string[];
   ignoreUnavailable?: boolean;
+  includeAliases?: boolean;
 }
 
 export interface RestoreSettingsEs {
@@ -24,6 +26,7 @@ export interface RestoreSettingsEs {
   index_settings?: { [key: string]: any };
   ignore_index_settings?: string[];
   ignore_unavailable?: boolean;
+  include_aliases?: boolean;
 }
 
 export interface SnapshotRestore {

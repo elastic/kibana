@@ -1,0 +1,109 @@
+.ml-influencers-list {
+  line-height: 1.45; // SASSTODO: Calc proper value
+
+  .field-label {
+    font-size: $euiFontSizeXS;
+    text-align: left;
+    max-height: $euiFontSizeS;
+    max-width: calc(100% - 102px); // SASSTODO: Calc proper value
+
+    .field-value {
+      @include euiTextTruncate;
+      display: inline-block;
+      vertical-align: bottom;
+    }
+  }
+
+  .progress {
+    display: inline-block;
+    width: calc(100% - 34px); // SASSTODO: Calc proper value
+    height: 22px;
+    min-width: 70px;
+    margin-bottom: 0;
+    color: $euiColorDarkShade;
+    background-color: transparent;
+
+    .progress-bar-holder {
+      width: calc(100% - 28px); // SASSTODO: Calc proper value
+    }
+
+    .progress-bar {
+      height: $euiSizeXS / 2;
+      margin-top: $euiSizeM;
+      text-align: right;
+      line-height: 18px; // SASSTODO: Calc proper value
+      display: inline-block;
+      transition: none;
+    }
+  }
+
+  // SASSTODO: This range of color is too large, needs to be rewritten and variablized
+  .progress.critical {
+    .progress-bar {
+      background-color: $mlColorCritical;
+    }
+
+    .score-label {
+      border-color: $mlColorCritical;
+    }
+  }
+
+  .progress.major {
+    .progress-bar {
+      background-color: $mlColorMajor;
+    }
+
+    .score-label {
+      border-color: $mlColorMajor;
+    }
+  }
+
+  .progress.minor {
+    .progress-bar {
+      background-color: $mlColorMinor;
+    }
+
+    .score-label {
+      border-color: $mlColorMinor;
+    }
+  }
+
+  .progress.warning {
+    .progress-bar {
+      background-color: $mlColorWarning;
+    }
+
+    .score-label {
+      border-color: $mlColorWarning;
+    }
+  }
+
+  .score-label {
+    text-align: center;
+    line-height: 14px;
+    white-space: nowrap;
+    font-size: $euiFontSizeXS;
+    display: inline;
+    margin-left: $euiSizeXS;
+  }
+
+  // SASSTODO: Brittle sizing
+  .total-score-label {
+    width: $euiSizeXL;
+    vertical-align: top;
+    text-align: center;
+    color: $euiColorDarkShade;
+    font-size: 11px;
+    line-height: 14px;
+    border-radius: $euiBorderRadius;
+    padding: $euiSizeXS / 2;
+    margin-top: $euiSizeXS;
+    display: inline-block;
+    border: $euiBorderThin;
+  }
+}
+
+// SASSTODO: Can .eui-textBreakAll
+.ml-influencers-list-tooltip {
+  word-break: break-all;
+}

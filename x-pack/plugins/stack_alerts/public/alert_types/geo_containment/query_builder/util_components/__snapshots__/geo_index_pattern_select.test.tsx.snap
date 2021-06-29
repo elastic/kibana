@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render with error when index pattern does not have geo_point field 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error="Index pattern does not contain any allowed geospatial fields. Must have one of type geo_point."
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={true}
+    label="Index pattern"
+    labelType="label"
+  >
+    <MockIndexPatternSelectComponent
+      fieldTypes={
+        Array [
+          "geo_point",
+        ]
+      }
+      indexPatternId="foobar_without_geopoint"
+      isClearable={false}
+      isDisabled={false}
+      isInvalid={true}
+      onChange={[Function]}
+      onNoIndexPatterns={[Function]}
+      placeholder="Select index pattern"
+    />
+  </EuiFormRow>
+</Fragment>
+`;
+
+exports[`should render without error after mounting 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    error=""
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label="Index pattern"
+    labelType="label"
+  >
+    <MockIndexPatternSelectComponent
+      fieldTypes={
+        Array [
+          "geo_point",
+        ]
+      }
+      indexPatternId="foobar_with_geopoint"
+      isClearable={false}
+      isDisabled={false}
+      isInvalid={false}
+      onChange={[Function]}
+      onNoIndexPatterns={[Function]}
+      placeholder="Select index pattern"
+    />
+  </EuiFormRow>
+</Fragment>
+`;

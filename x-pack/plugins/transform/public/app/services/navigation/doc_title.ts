@@ -1,14 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { textService } from '../text';
 
-class DocTitleService {
-  private changeDocTitle: any = () => {};
+type ChangeDocTitle = (docTitle: string) => void;
 
-  public init(changeDocTitle: any): void {
+class DocTitleService {
+  private changeDocTitle: ChangeDocTitle = () => {};
+
+  public init(changeDocTitle: ChangeDocTitle): void {
     this.changeDocTitle = changeDocTitle;
   }
 

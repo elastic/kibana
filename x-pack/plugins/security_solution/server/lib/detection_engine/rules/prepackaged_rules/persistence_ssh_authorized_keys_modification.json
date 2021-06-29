@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "The Secure Shell (SSH) authorized_keys file specifies which users are allowed to log into a server using public key authentication. Adversaries may modify it to maintain persistence on a victim host by adding their own public key(s).",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "SSH Authorized Keys File Modification",
+  "query": "event.category:file and event.type:(change or creation) and \n file.name:(\"authorized_keys\" or \"authorized_keys2\") and \n not process.executable:\n             (/Library/Developer/CommandLineTools/usr/bin/git or \n              /usr/local/Cellar/maven/*/libexec/bin/mvn or \n              /Library/Java/JavaVirtualMachines/jdk*.jdk/Contents/Home/bin/java or \n              /usr/bin/vim or \n              /usr/local/Cellar/coreutils/*/bin/gcat or \n              /usr/bin/bsdtar or\n              /usr/bin/nautilus or \n              /usr/bin/scp or\n              /usr/bin/touch or \n              /var/lib/docker/*)\n",
+  "risk_score": 47,
+  "rule_id": "2215b8bd-1759-4ffa-8ab8-55c8e6b32e7f",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "macOS",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/",
+          "subtechnique": [
+            {
+              "id": "T1098.004",
+              "name": "SSH Authorized Keys",
+              "reference": "https://attack.mitre.org/techniques/T1098/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

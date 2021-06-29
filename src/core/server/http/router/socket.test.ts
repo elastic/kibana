@@ -1,31 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { Socket } from 'net';
 import { DetailedPeerCertificate, TLSSocket } from 'tls';
 import { KibanaSocket } from './socket';
 
 describe('KibanaSocket', () => {
   describe('getPeerCertificate', () => {
-    it('returns null for net.Socket instance', () => {
+    it('returns `null` for net.Socket instance', () => {
       const socket = new KibanaSocket(new Socket());
 
-      expect(socket.getPeerCertificate()).toBe(null);
+      expect(socket.getPeerCertificate()).toBeNull();
     });
 
     it('delegates a call to tls.Socket instance', () => {
@@ -40,20 +30,82 @@ describe('KibanaSocket', () => {
       expect(result).toBe(cert);
     });
 
-    it('returns null if tls.Socket getPeerCertificate returns null', () => {
+    it('returns `null` if tls.Socket getPeerCertificate returns null', () => {
       const tlsSocket = new TLSSocket(new Socket());
       jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => null as any);
       const socket = new KibanaSocket(tlsSocket);
 
-      expect(socket.getPeerCertificate()).toBe(null);
+      expect(socket.getPeerCertificate()).toBeNull();
     });
 
-    it('returns null if tls.Socket getPeerCertificate returns empty object', () => {
+    it('returns `null` if tls.Socket getPeerCertificate returns empty object', () => {
       const tlsSocket = new TLSSocket(new Socket());
       jest.spyOn(tlsSocket, 'getPeerCertificate').mockImplementation(() => ({} as any));
       const socket = new KibanaSocket(tlsSocket);
 
-      expect(socket.getPeerCertificate()).toBe(null);
+      expect(socket.getPeerCertificate()).toBeNull();
+    });
+  });
+
+  describe('getProtocol', () => {
+    it('returns `null` for net.Socket instance', () => {
+      const socket = new KibanaSocket(new Socket());
+
+      expect(socket.getProtocol()).toBeNull();
+    });
+
+    it('delegates a call to tls.Socket instance', () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      const protocol = 'TLSv1.2';
+      const spy = jest.spyOn(tlsSocket, 'getProtocol').mockImplementation(() => protocol);
+      const socket = new KibanaSocket(tlsSocket);
+      const result = socket.getProtocol();
+
+      expect(spy).toBeCalledTimes(1);
+      expect(result).toBe(protocol);
+    });
+
+    it('returns `null` if tls.Socket getProtocol returns null', () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      jest.spyOn(tlsSocket, 'getProtocol').mockImplementation(() => null as any);
+      const socket = new KibanaSocket(tlsSocket);
+
+      expect(socket.getProtocol()).toBeNull();
+    });
+  });
+
+  describe('renegotiate', () => {
+    it('throws error for net.Socket instance', async () => {
+      const socket = new KibanaSocket(new Socket());
+
+      expect(() => socket.renegotiate({})).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot renegotiate a connection when TLS is not enabled."`
+      );
+    });
+
+    it('delegates a call to tls.Socket instance', async () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      const result = Symbol();
+      const spy = jest.spyOn(tlsSocket, 'renegotiate').mockImplementation((_, callback) => {
+        callback(result as any);
+        return undefined;
+      });
+      const socket = new KibanaSocket(tlsSocket);
+
+      expect(socket.renegotiate({})).resolves.toBe(result);
+      expect(spy).toBeCalledTimes(1);
+    });
+
+    it('throws error if tls.Socket renegotiate returns error', async () => {
+      const tlsSocket = new TLSSocket(new Socket());
+      const error = new Error('Oh no!');
+      jest.spyOn(tlsSocket, 'renegotiate').mockImplementation((_, callback) => {
+        callback(error);
+        return undefined;
+      });
+      const socket = new KibanaSocket(tlsSocket);
+
+      expect(() => socket.renegotiate({})).rejects.toThrow(error);
     });
   });
 
@@ -68,12 +120,11 @@ describe('KibanaSocket', () => {
       const tlsSocket = new TLSSocket(new Socket());
 
       tlsSocket.authorized = true;
-      let socket = new KibanaSocket(tlsSocket);
+      const socket = new KibanaSocket(tlsSocket);
       expect(tlsSocket.authorized).toBe(true);
       expect(socket.authorized).toBe(true);
 
       tlsSocket.authorized = false;
-      socket = new KibanaSocket(tlsSocket);
       expect(tlsSocket.authorized).toBe(false);
       expect(socket.authorized).toBe(false);
     });
@@ -90,13 +141,12 @@ describe('KibanaSocket', () => {
       const tlsSocket = new TLSSocket(new Socket());
       tlsSocket.authorizationError = undefined as any;
 
-      let socket = new KibanaSocket(tlsSocket);
+      const socket = new KibanaSocket(tlsSocket);
       expect(tlsSocket.authorizationError).toBeUndefined();
       expect(socket.authorizationError).toBeUndefined();
 
       const authorizationError = new Error('some error');
       tlsSocket.authorizationError = authorizationError;
-      socket = new KibanaSocket(tlsSocket);
 
       expect(tlsSocket.authorizationError).toBe(authorizationError);
       expect(socket.authorizationError).toBe(authorizationError);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -10,7 +11,7 @@ import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } 
 
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { RepositorySettingsValidation } from '../../../services/validation';
-import { textService } from '../../../services/text';
+import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: GCSRepository;
@@ -39,6 +40,12 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
     },
   } = repository;
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
+
+  const updateSettings = (name: string, value: string) => {
+    updateRepositorySettings({
+      [name]: value,
+    });
+  };
 
   return (
     <Fragment>
@@ -76,7 +83,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={client || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 client: e.target.value,
               });
@@ -120,7 +127,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={bucket || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 bucket: e.target.value,
               });
@@ -164,7 +171,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           <EuiFieldText
             defaultValue={basePath || ''}
             fullWidth
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 basePath: e.target.value,
               });
@@ -208,7 +215,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!(compress === false)}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 compress: e.target.checked,
               });
@@ -219,139 +226,28 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
 
       {/* Chunk size field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeGCS.chunkSizeTitle"
-                defaultMessage="Chunk size"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeGCS.chunkSizeDescription"
-            defaultMessage="Breaks files into smaller units when taking snapshots."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.chunkSizeLabel"
-              defaultMessage="Chunk size"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
-          error={settingErrors.chunkSize}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={chunkSize || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                chunkSize: e.target.value,
-              });
-            }}
-            data-test-subj="chunkSizeInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <ChunkSizeField
+        isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+        error={settingErrors.chunkSize}
+        defaultValue={chunkSize || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Max snapshot bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeGCS.maxSnapshotBytesTitle"
-                defaultMessage="Max snapshot bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeGCS.maxSnapshotBytesDescription"
-            defaultMessage="The rate for creating snapshots for each node."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.maxSnapshotBytesLabel"
-              defaultMessage="Max snapshot bytes per second"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
-          error={settingErrors.maxSnapshotBytesPerSec}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={maxSnapshotBytesPerSec || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                maxSnapshotBytesPerSec: e.target.value,
-              });
-            }}
-            data-test-subj="maxSnapshotBytesInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <MaxSnapshotsField
+        isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+        error={settingErrors.maxSnapshotBytesPerSec}
+        defaultValue={maxSnapshotBytesPerSec || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Max restore bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeGCS.maxRestoreBytesTitle"
-                defaultMessage="Max restore bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeGCS.maxRestoreBytesDescription"
-            defaultMessage="The snapshot restore rate for each node."
-          />
-        }
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.maxRestoreBytesLabel"
-              defaultMessage="Max restore bytes per second"
-            />
-          }
-          fullWidth
-          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
-          error={settingErrors.maxRestoreBytesPerSec}
-          helpText={textService.getSizeNotationHelpText()}
-        >
-          <EuiFieldText
-            defaultValue={maxRestoreBytesPerSec || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                maxRestoreBytesPerSec: e.target.value,
-              });
-            }}
-            data-test-subj="maxRestoreBytesInput"
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+      <MaxRestoreField
+        isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+        error={settingErrors.maxRestoreBytesPerSec}
+        defaultValue={maxRestoreBytesPerSec || ''}
+        updateSettings={updateSettings}
+      />
 
       {/* Readonly field */}
       <EuiDescribedFormGroup
@@ -387,7 +283,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
               />
             }
             checked={!!readonly}
-            onChange={e => {
+            onChange={(e) => {
               updateRepositorySettings({
                 readonly: e.target.checked,
               });

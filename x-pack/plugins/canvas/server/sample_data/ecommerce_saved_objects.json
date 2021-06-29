@@ -28,7 +28,7 @@
                 "height": 510,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" \n| mapColumn \"maleCount\" exp={getCell \"customer_gender\" | if {compare to=\"MALE\"} then=1 else=0} | math \"sum(maleCount) / count(maleCount)\" \n| revealImage origin=\"bottom\" image={asset \"asset-aaa14d64-2c1c-47f2-95c0-21306ee18cba\"} emptyImage={asset \"asset-960c8c6e-da72-412d-9d04-34a98cdb5760\"}"
+              "expression": "essql query=\"select COUNT(*) as total_count, SUM(CASE WHEN customer_gender='MALE' THEN 1 else 0 END) as male_count from kibana_sample_data_ecommerce\"\n| math \"male_count / total_count\" \n| revealImage origin=\"bottom\" image={asset \"asset-aaa14d64-2c1c-47f2-95c0-21306ee18cba\"} emptyImage={asset \"asset-960c8c6e-da72-412d-9d04-34a98cdb5760\"}"
             },
             {
               "id": "element-4a3fef74-5d8c-4bbe-8f3f-fe55afdd4b60",
@@ -50,7 +50,7 @@
                 "height": 520,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\"\n| mapColumn \"maleCount\" exp={getCell \"customer_gender\" | if {compare to=\"FEMALE\"} then=1 else=0}\n| math \"sum(maleCount) / count(maleCount)\"\n| revealImage origin=\"bottom\" image={asset \"asset-2f64bd10-953d-4163-90e9-a55e9ca4c52a\"} emptyImage={asset \"asset-3a26727a-b756-44be-a82c-273dd85bda09\"}",
+              "expression": "essql query=\"select COUNT(*) as total_count, SUM(CASE WHEN customer_gender='FEMALE' THEN 1 else 0 END) as female_count from kibana_sample_data_ecommerce\"\n| math \"female_count / total_count\" \n| revealImage origin=\"bottom\" image={asset \"asset-2f64bd10-953d-4163-90e9-a55e9ca4c52a\"} emptyImage={asset \"asset-3a26727a-b756-44be-a82c-273dd85bda09\"}",
               "filter": null
             },
             {
@@ -194,7 +194,7 @@
                 "height": 56,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" | mapColumn \"femaleCount\" exp={getCell \"customer_gender\" | if {compare to=\"FEMALE\"} then=1 else=0} | math \"round(100 * sum(femaleCount) / count(femaleCount))\" | markdown {context} \"%\" font={font family=\"Avenir\" size=48 align=\"center\" color=\"#eb6c66\" weight=\"normal\" underline=false italic=false}"
+              "expression": "essql query=\"select COUNT(*) as total_count, SUM(CASE WHEN customer_gender='FEMALE' THEN 1 else 0 END) as female_count from kibana_sample_data_ecommerce\"\n| math \"round(100 * female_count / total_count)\" | markdown {context} \"%\" font={font family=\"Avenir\" size=48 align=\"center\" color=\"#eb6c66\" weight=\"normal\" underline=false italic=false}"
             },
             {
               "id": "element-9e0b6230-2bc9-4995-8207-043e3063faeb",
@@ -205,7 +205,7 @@
                 "height": 56,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" | mapColumn \"maleCount\" exp={getCell \"customer_gender\" | if {compare to=\"MALE\"} then=1 else=0} | math \"round(100 * sum(maleCount) / count(maleCount))\" | markdown {context} \"%\" font={font family=\"Avenir\" size=48 align=\"center\" color=\"#f8bd4a\" weight=\"normal\" underline=false italic=false}"
+              "expression": "essql query=\"select COUNT(*) as total_count, SUM(CASE WHEN customer_gender='MALE' THEN 1 else 0 END) as male_count from kibana_sample_data_ecommerce\"\n| math \"round(100 * male_count / total_count)\" | markdown {context} \"%\" font={font family=\"Avenir\" size=48 align=\"center\" color=\"#f8bd4a\" weight=\"normal\" underline=false italic=false}"
             },
             {
               "id": "element-2185edff-ac50-4162-b583-3bfd6469e925",
@@ -216,7 +216,7 @@
                 "height": 721,
                 "angle": 0
               },
-              "expression": "filters | demodata | markdown \"\" | render containerStyle={containerStyle backgroundColor=\"#ede9e7\"}"
+              "expression": "markdown \"\" | render containerStyle={containerStyle backgroundColor=\"#ede9e7\"}"
             },
             {
               "id": "element-71b63f54-0961-4ed2-a85d-45584b48a631",
@@ -535,7 +535,7 @@
                 "height": 202,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" \n| mapColumn \"maleCount\" exp={getCell \"customer_gender\" | if {compare to=\"MALE\"} then=1 else=0} | math \"sum(maleCount) / count(maleCount)\" \n| revealImage origin=\"bottom\" image={asset \"asset-803ec373-2608-4f6f-8cf9-0dbb2f6437ce\"} emptyImage={asset \"asset-18070a2a-cd01-410a-ba89-a4505e2fbc5b\"}"
+              "expression": "essql query=\"select COUNT(*) as total_count, SUM(CASE WHEN customer_gender='MALE' THEN 1 else 0 END) as male_count from kibana_sample_data_ecommerce\"\n| math \"male_count / total_count\" \n| revealImage origin=\"bottom\" image={asset \"asset-803ec373-2608-4f6f-8cf9-0dbb2f6437ce\"} emptyImage={asset \"asset-18070a2a-cd01-410a-ba89-a4505e2fbc5b\"}"
             },
             {
               "id": "element-2379c3ca-2c31-4948-8412-d14115500efc",
@@ -546,7 +546,7 @@
                 "height": 202,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" \n| mapColumn \"maleCount\" exp={getCell \"customer_gender\" | if {compare to=\"FEMALE\"} then=1 else=0} | math \"sum(maleCount) / count(maleCount)\" \n| revealImage origin=\"bottom\" image={asset \"asset-e644a484-4097-40b9-a08e-7250ba963059\"} emptyImage={asset \"asset-7e4f7119-b2d8-4527-9bd8-887cb25974e7\"}"
+              "expression": "essql query=\"select COUNT(*) as total_count, SUM(CASE WHEN customer_gender='FEMALE' THEN 1 else 0 END) as female_count from kibana_sample_data_ecommerce\"\n| math \"female_count / total_count\" \n| revealImage origin=\"bottom\" image={asset \"asset-e644a484-4097-40b9-a08e-7250ba963059\"} emptyImage={asset \"asset-7e4f7119-b2d8-4527-9bd8-887cb25974e7\"}"
             },
             {
               "id": "element-3f52813f-7d0e-4ec7-9aad-c731b670d88d",
@@ -964,7 +964,7 @@
                 "height": 63,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" | mapColumn \"femaleCount\" exp={getCell \"customer_gender\" | if {compare to=\"FEMALE\"} then=1 else=0} | math \"round(100 * sum(femaleCount) / count(femaleCount))\" | markdown {context} font={font family=\"nexa bold, Avenir\" size=48 align=\"center\" color=\"#F05A24\" weight=\"bold\" underline=false italic=false}"
+              "expression": "essql query=\"select COUNT(*) as total_count, SUM(CASE WHEN customer_gender='FEMALE' THEN 1 else 0 END) as female_count from kibana_sample_data_ecommerce\"\n| math \"round(100 * female_count / total_count)\" | markdown {context} font={font family=\"nexa bold, Avenir\" size=48 align=\"center\" color=\"#F05A24\" weight=\"bold\" underline=false italic=false}"
             },
             {
               "id": "element-86b06b67-893e-4555-ad38-7fba9ea3153b",
@@ -975,7 +975,7 @@
                 "height": 72,
                 "angle": 0
               },
-              "expression": "esdocs index=\"kibana_sample_data_ecommerce\" sort=\"order_date, desc\" fields=\"customer_gender\" | mapColumn \"maleCount\" exp={getCell \"customer_gender\" | if {compare to=\"MALE\"} then=1 else=0} | math \"round(100 * sum(maleCount) / count(maleCount))\" | markdown {context} font={font family=\"nexa bold, Avenir\" size=48 align=\"center\" color=\"#00A89C\" weight=\"bold\" underline=false italic=false}"
+              "expression": "essql query=\"select COUNT(*) as total_count, SUM(CASE WHEN customer_gender='MALE' THEN 1 else 0 END) as male_count from kibana_sample_data_ecommerce\"\n| math \"round(100 * male_count / total_count)\" | markdown {context} font={font family=\"nexa bold, Avenir\" size=48 align=\"center\" color=\"#00A89C\" weight=\"bold\" underline=false italic=false}"
             },
             {
               "id": "element-507337d9-6e0e-4752-8770-6ebe88e9b3da",

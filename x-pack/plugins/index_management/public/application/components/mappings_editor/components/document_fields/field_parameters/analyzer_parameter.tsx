@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +18,7 @@ import {
   SelectOption,
   SuperSelectOption,
 } from '../../../types';
-import { useIndexSettings } from '../../../index_settings_context';
+import { useConfig } from '../../../config_context';
 import { AnalyzerParameterSelects } from './analyzer_parameter_selects';
 
 interface Props {
@@ -25,6 +27,7 @@ interface Props {
   label?: string;
   config?: FieldConfig;
   allowsIndexDefaultOption?: boolean;
+  'data-test-subj'?: string;
 }
 
 const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
@@ -49,7 +52,7 @@ const getCustomAnalyzers = (indexSettings: IndexSettings): SelectOption[] | unde
   // We wrap inside a try catch as the index settings are written in JSON
   // and who knows what the user has entered.
   try {
-    return Object.keys(settings.analysis!.analyzer).map(value => ({ value, text: value }));
+    return Object.keys(settings.analysis!.analyzer).map((value) => ({ value, text: value }));
   } catch {
     return undefined;
   }
@@ -68,10 +71,12 @@ export const AnalyzerParameter = ({
   label,
   config,
   allowsIndexDefaultOption = true,
+  'data-test-subj': dataTestSubj,
 }: Props) => {
-  const indexSettings = useIndexSettings();
+  const {
+    value: { indexSettings },
+  } = useConfig();
   const customAnalyzers = getCustomAnalyzers(indexSettings);
-
   const analyzerOptions = allowsIndexDefaultOption
     ? ANALYZER_OPTIONS
     : ANALYZER_OPTIONS_WITHOUT_DEFAULT;
@@ -131,6 +136,11 @@ export const AnalyzerParameter = ({
     !isDefaultValueInOptions && !isDefaultValueInSubOptions
   );
 
+  const [selectsDefaultValue, setSelectsDefaultValue] = useState({
+    main: mainValue,
+    sub: subValue,
+  });
+
   const fieldConfig = config ? config : getFieldConfig('analyzer');
   const fieldConfigWithLabel = label !== undefined ? { ...fieldConfig, label } : fieldConfig;
 
@@ -142,18 +152,20 @@ export const AnalyzerParameter = ({
     }
 
     field.reset({ resetValue: false });
+    setSelectsDefaultValue({ main: undefined, sub: undefined });
 
     setIsCustom(!isCustom);
   };
 
   return (
     <UseField path={path} config={fieldConfigWithLabel}>
-      {field => (
+      {(field) => (
         <div className="mappingsEditor__selectWithCustom">
           <EuiButtonEmpty
             size="xs"
             onClick={toggleCustom(field)}
             className="mappingsEditor__selectWithCustom__button"
+            data-test-subj={`${dataTestSubj}-toggleCustomButton`}
           >
             {isCustom
               ? i18n.translate('xpack.idxMgmt.mappingsEditor.predefinedButtonLabel', {
@@ -169,17 +181,18 @@ export const AnalyzerParameter = ({
             // around the field.
             <EuiFlexGroup>
               <EuiFlexItem>
-                <TextField field={field} />
+                <TextField field={field} data-test-subj={`${dataTestSubj}-custom`} />
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : (
             <AnalyzerParameterSelects
               onChange={field.setValue}
-              mainDefaultValue={mainValue}
-              subDefaultValue={subValue}
+              mainDefaultValue={selectsDefaultValue.main}
+              subDefaultValue={selectsDefaultValue.sub}
               config={fieldConfigWithLabel}
               options={fieldOptions}
               mapOptionsToSubOptions={mapOptionsToSubOptions}
+              data-test-subj={dataTestSubj}
             />
           )}
         </div>

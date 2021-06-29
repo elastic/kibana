@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent, Fragment } from 'react';
@@ -22,18 +11,18 @@ import classNames from 'classnames';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
+import 'brace/mode/json';
 
 import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
+  EuiColorPicker,
   EuiScreenReaderOnly,
-  // @ts-ignore
   EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
-  // @ts-ignore
   EuiFilePicker,
   EuiFormRow,
   EuiIconTip,
@@ -50,13 +39,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
-import {
-  UiSettingsType,
-  ImageValidation,
-  StringValidationRegex,
-  DocLinksStart,
-  ToastsStart,
-} from '../../../../../../core/public';
+import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 interface FieldProps {
   setting: FieldSetting;
@@ -177,7 +160,7 @@ export class Field extends PureComponent<FieldProps> {
     this.onFieldChange(e.target.value);
 
   onFieldChange = (targetValue: any) => {
-    const { type, validation, value, defVal } = this.props.setting;
+    const { type, value, defVal } = this.props.setting;
     let newUnsavedValue;
 
     switch (type) {
@@ -195,20 +178,8 @@ export class Field extends PureComponent<FieldProps> {
         newUnsavedValue = targetValue;
     }
 
-    let errorParams = {};
-
-    if ((validation as StringValidationRegex)?.regex) {
-      if (!(validation as StringValidationRegex).regex!.test(newUnsavedValue.toString())) {
-        errorParams = {
-          error: (validation as StringValidationRegex).message,
-          isInvalid: true,
-        };
-      }
-    }
-
     this.handleChange({
       value: newUnsavedValue,
-      ...errorParams,
     });
   };
 
@@ -223,30 +194,15 @@ export class Field extends PureComponent<FieldProps> {
     }
 
     const file = files[0];
-    const { maxSize } = this.props.setting.validation as ImageValidation;
     try {
       let base64Image = '';
       if (file instanceof File) {
         base64Image = (await this.getImageAsBase64(file)) as string;
       }
 
-      let errorParams = {};
-      const isInvalid = !!(maxSize?.length && base64Image.length > maxSize.length);
-      if (isInvalid) {
-        errorParams = {
-          isInvalid,
-          error: i18n.translate('advancedSettings.field.imageTooLargeErrorMessage', {
-            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-            values: {
-              maxSizeDescription: maxSize.description,
-            },
-          }),
-        };
-      }
       this.handleChange({
         changeImage: true,
         value: base64Image,
-        ...errorParams,
       });
     } catch (err) {
       this.props.toasts.addDanger(
@@ -264,9 +220,9 @@ export class Field extends PureComponent<FieldProps> {
 
     return new Promise((resolve, reject) => {
       reader.onload = () => {
-        resolve(reader.result || undefined);
+        resolve(reader.result!);
       };
-      reader.onerror = err => {
+      reader.onerror = (err) => {
         reject(err);
       };
     });
@@ -289,7 +245,7 @@ export class Field extends PureComponent<FieldProps> {
     }
   };
 
-  renderField(id: string, setting: FieldSetting) {
+  renderField(setting: FieldSetting, ariaDescribedBy?: string) {
     const { enableSaving, unsavedChanges, loading } = this.props;
     const {
       name,
@@ -301,10 +257,10 @@ export class Field extends PureComponent<FieldProps> {
       defVal,
       ariaName,
     } = setting;
-    const a11yProps: { [key: string]: string } = unsavedChanges
+    const a11yProps: { [key: string]: string } = ariaDescribedBy
       ? {
           'aria-label': ariaName,
-          'aria-describedby': id,
+          'aria-describedby': ariaDescribedBy,
         }
       : {
           'aria-label': ariaName,
@@ -337,6 +293,7 @@ export class Field extends PureComponent<FieldProps> {
           <div data-test-subj={`advancedSetting-editField-${name}`}>
             <EuiCodeEditor
               {...a11yProps}
+              name={`advancedSetting-editField-${name}-editor`}
               mode={type}
               theme="textmate"
               value={currentValue}
@@ -370,6 +327,7 @@ export class Field extends PureComponent<FieldProps> {
               ref={this.changeImageForm}
               fullWidth
               data-test-subj={`advancedSetting-editField-${name}`}
+              aria-label={name}
             />
           );
         }
@@ -378,7 +336,7 @@ export class Field extends PureComponent<FieldProps> {
           <EuiSelect
             {...a11yProps}
             value={currentValue}
-            options={(options as string[]).map(option => {
+            options={(options as string[]).map((option) => {
               return {
                 text: optionLabels.hasOwnProperty(option) ? optionLabels[option] : option,
                 value: option,
@@ -400,6 +358,17 @@ export class Field extends PureComponent<FieldProps> {
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
             fullWidth
+            data-test-subj={`advancedSetting-editField-${name}`}
+          />
+        );
+      case 'color':
+        return (
+          <EuiColorPicker
+            {...a11yProps}
+            color={currentValue}
+            onChange={this.onFieldChange}
+            disabled={loading || isOverridden || !enableSaving}
+            format="hex"
             data-test-subj={`advancedSetting-editField-${name}`}
           />
         );
@@ -664,13 +633,17 @@ export class Field extends PureComponent<FieldProps> {
     const isInvalid = unsavedChanges?.isInvalid;
 
     const className = classNames('mgtAdvancedSettings__field', {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--unsaved': unsavedChanges,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--invalid': isInvalid,
     });
-    const id = setting.name;
+    const groupId = `${setting.name}-group`;
+    const unsavedId = `${setting.name}-unsaved`;
 
     return (
       <EuiDescribedFormGroup
+        id={groupId}
         className={className}
         title={this.renderTitle(setting)}
         description={this.renderDescription(setting)}
@@ -686,10 +659,10 @@ export class Field extends PureComponent<FieldProps> {
           fullWidth
         >
           <>
-            {this.renderField(id, setting)}
+            {this.renderField(setting, unsavedChanges ? `${groupId} ${unsavedId}` : undefined)}
             {unsavedChanges && (
               <EuiScreenReaderOnly>
-                <p id={id}>
+                <p id={`${unsavedId}`}>
                   {unsavedChanges.error
                     ? unsavedChanges.error
                     : i18n.translate('advancedSettings.field.settingIsUnsaved', {

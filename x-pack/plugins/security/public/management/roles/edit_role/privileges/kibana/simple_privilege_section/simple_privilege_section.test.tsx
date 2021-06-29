@@ -1,30 +1,63 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiButtonGroup, EuiButtonGroupProps, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Feature } from '../../../../../../../../features/public';
-import { KibanaPrivileges, Role } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+
+import type { Role } from '../../../../../../../common/model';
+import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
 
 const buildProps = (customProps: any = {}) => {
-  const kibanaPrivileges = new KibanaPrivileges({
-    features: {
-      feature1: {
-        all: ['*'],
-        read: ['read'],
+  const features = [
+    new SecuredFeature({
+      id: 'feature1',
+      name: 'Feature 1',
+      app: ['app'],
+      category: { id: 'foo', label: 'foo' },
+      privileges: {
+        all: {
+          app: ['app'],
+          savedObject: {
+            all: ['foo'],
+            read: [],
+          },
+          ui: ['app-ui'],
+        },
+        read: {
+          app: ['app'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['app-ui'],
+        },
       },
+    }),
+  ] as SecuredFeature[];
+
+  const kibanaPrivileges = new KibanaPrivileges(
+    {
+      features: {
+        feature1: {
+          all: ['*'],
+          read: ['read'],
+        },
+      },
+      global: {},
+      space: {},
+      reserved: {},
     },
-    global: {},
-    space: {},
-    reserved: {},
-  });
+    features
+  );
 
   const role = {
     name: '',
@@ -40,34 +73,9 @@ const buildProps = (customProps: any = {}) => {
   return {
     editable: true,
     kibanaPrivileges,
-    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(kibanaPrivileges),
-    features: [
-      {
-        id: 'feature1',
-        name: 'Feature 1',
-        app: ['app'],
-        icon: 'spacesApp',
-        privileges: {
-          all: {
-            app: ['app'],
-            savedObject: {
-              all: ['foo'],
-              read: [],
-            },
-            ui: ['app-ui'],
-          },
-          read: {
-            app: ['app'],
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['app-ui'],
-          },
-        },
-      },
-    ] as Feature[],
+    features,
     onChange: jest.fn(),
+    canCustomizeSubFeaturePrivileges: true,
     ...customProps,
     role,
   };
@@ -189,7 +197,7 @@ describe('<SimplePrivilegeForm>', () => {
 
     const featurePrivilegeToggles = wrapper.find(EuiButtonGroup);
     expect(featurePrivilegeToggles).toHaveLength(1);
-    expect(featurePrivilegeToggles.find('button')).toHaveLength(3);
+    expect(featurePrivilegeToggles.find('input')).toHaveLength(3);
 
     (featurePrivilegeToggles.props() as EuiButtonGroupProps).onChange('feature1_all', null);
 

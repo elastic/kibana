@@ -1,23 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteWorkpadRoute } from './delete';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
-import {
-  savedObjectsClientMock,
-  httpServiceMock,
-  httpServerMock,
-  loggingServiceMock,
-} from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = ({
   core: {
@@ -31,14 +23,10 @@ describe('DELETE workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-    initializeDeleteWorkpadRoute({
-      router,
-      logger: loggingServiceMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeDeleteWorkpadRoute(routerDeps);
 
-    routeHandler = router.delete.mock.calls[0][1];
+    routeHandler = routerDeps.router.delete.mock.calls[0][1];
   });
 
   it(`returns 200 ok when the workpad is deleted`, async () => {

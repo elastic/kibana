@@ -1,32 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
 
 import {
+  CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   EuiEmptyPrompt,
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Moment } from 'moment';
+
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../../common/constants';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
@@ -35,18 +37,19 @@ import {
   PageError,
   DeleteWatchesModal,
   WatchStatus,
-  SectionError,
   SectionLoading,
   Error,
 } from '../../../components';
 import { useLoadWatches } from '../../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../../lib/navigation';
 import { useAppContext } from '../../../app_context';
+import { PageError as GenericPageError } from '../../../shared_imports';
 
 export const WatchList = () => {
   // hooks
   const {
     setBreadcrumbs,
+    history,
     links: { watcherGettingStartedUrl },
   } = useAppContext();
   const [selection, setSelection] = useState([]);
@@ -54,6 +57,11 @@ export const WatchList = () => {
   // Filter out deleted watches on the client, because the API will return 200 even though some watches
   // may not really be deleted until after they're done firing and this could take some time.
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: PAGINATION.initialPageSize,
+  });
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     setBreadcrumbs([listBreadcrumb]);
@@ -163,20 +171,35 @@ export const WatchList = () => {
 
   if (isWatchesLoading) {
     return (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.watcher.sections.watchList.loadingWatchesDescription"
-          defaultMessage="Loading watches…"
-        />
-      </SectionLoading>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.loadingWatchesDescription"
+            defaultMessage="Loading watches…"
+          />
+        </SectionLoading>
+      </EuiPageContent>
     );
   }
 
-  if (getPageErrorCode(error)) {
+  const errorCode = getPageErrorCode(error);
+  if (errorCode) {
     return (
-      <EuiPageContent>
-        <PageError />
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <PageError errorCode={errorCode} />
       </EuiPageContent>
+    );
+  } else if (error) {
+    return (
+      <GenericPageError
+        title={
+          <FormattedMessage
+            id="xpack.watcher.sections.watchList.errorTitle"
+            defaultMessage="Error loading watches"
+          />
+        }
+        error={(error as unknown) as Error}
+      />
     );
   }
 
@@ -196,7 +219,7 @@ export const WatchList = () => {
     );
 
     return (
-      <EuiPageContent>
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <EuiEmptyPrompt
           iconType="managementApp"
           title={
@@ -217,19 +240,7 @@ export const WatchList = () => {
 
   let content;
 
-  if (error) {
-    content = (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.watcher.sections.watchList.errorTitle"
-            defaultMessage="Error loading watches"
-          />
-        }
-        error={(error as unknown) as Error}
-      />
-    );
-  } else if (availableWatches) {
+  if (availableWatches) {
     const columns = [
       {
         field: 'id',
@@ -242,7 +253,7 @@ export const WatchList = () => {
           return (
             <EuiLink
               data-test-subj={`watchIdColumn-${id}`}
-              href={`#/management/elasticsearch/watcher/watches/watch/${id}/status`}
+              {...reactRouterNavigate(history, `/watches/watch/${id}/status`)}
             >
               {id}
             </EuiLink>
@@ -326,7 +337,7 @@ export const WatchList = () => {
                     )}
                     iconType="pencil"
                     color="primary"
-                    href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/edit`}
+                    {...reactRouterNavigate(history, `/watches/watch/${watch.id}/edit`)}
                     data-test-subj="editWatchButton"
                   />
                 </EuiToolTip>
@@ -376,111 +387,123 @@ export const WatchList = () => {
           : '',
     };
 
+    const handleOnChange = (search: { queryText: string }) => {
+      setQuery(search.queryText);
+      return true;
+    };
+
     const searchConfig = {
+      query,
+      onChange: handleOnChange,
       box: {
         incremental: true,
       },
-      toolsLeft: selection.length && (
-        <EuiButton
-          data-test-subj="btnDeleteWatches"
-          onClick={() => {
-            setWatchesToDelete(selection.map((selected: any) => selected.id));
-          }}
-          color="danger"
-        >
-          {selection.length > 1 ? (
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
-              defaultMessage="Delete watches"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
-              defaultMessage="Delete watch"
-            />
-          )}
-        </EuiButton>
-      ),
+      toolsLeft:
+        selection.length > 0 ? (
+          <EuiButton
+            data-test-subj="btnDeleteWatches"
+            onClick={() => {
+              setWatchesToDelete(selection.map((selected: any) => selected.id));
+            }}
+            color="danger"
+          >
+            {selection.length > 1 ? (
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
+                defaultMessage="Delete watches"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
+                defaultMessage="Delete watch"
+              />
+            )}
+          </EuiButton>
+        ) : undefined,
       toolsRight: createWatchContextMenu,
     };
 
     content = (
-      <EuiInMemoryTable
-        items={availableWatches}
-        itemId="id"
-        columns={columns}
-        search={searchConfig}
-        pagination={PAGINATION}
-        sorting={true}
-        selection={selectionConfig}
-        isSelectable={true}
-        message={
-          <FormattedMessage
-            id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
-            defaultMessage="No watches to show"
-          />
-        }
-        rowProps={() => ({
-          'data-test-subj': 'row',
-        })}
-        cellProps={() => ({
-          'data-test-subj': 'cell',
-        })}
-        data-test-subj="watchesTable"
-      />
-    );
-  }
-
-  if (content) {
-    return (
-      <EuiPageContent>
-        <DeleteWatchesModal
-          callback={(deleted?: string[]) => {
-            if (deleted) {
-              setDeletedWatches([...deletedWatches, ...watchesToDelete]);
-            }
-            setWatchesToDelete([]);
+      <div data-test-subj="watchesTableContainer">
+        <EuiInMemoryTable
+          onTableChange={({ page: { index, size } }: CriteriaWithPagination<never>) =>
+            setPagination({ pageIndex: index, pageSize: size })
+          }
+          items={availableWatches}
+          itemId="id"
+          columns={columns}
+          search={searchConfig}
+          pagination={{
+            ...PAGINATION,
+            pageIndex: pagination.pageIndex,
+            pageSize: pagination.pageSize,
           }}
-          watchesToDelete={watchesToDelete}
+          sorting={{
+            sort: {
+              field: 'name',
+              direction: 'asc',
+            },
+          }}
+          selection={selectionConfig}
+          isSelectable={true}
+          message={
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
+              defaultMessage="No watches to show"
+            />
+          }
+          rowProps={() => ({
+            'data-test-subj': 'row',
+          })}
+          cellProps={() => ({
+            'data-test-subj': 'cell',
+          })}
+          data-test-subj="watchesTable"
         />
-
-        <EuiTitle size="l">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={true}>
-              <h1 data-test-subj="appTitle">
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchList.header"
-                  defaultMessage="Watcher"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={watcherGettingStartedUrl}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
-                  defaultMessage="Watcher docs"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-
-        <EuiSpacer size="s" />
-
-        <EuiText color="subdued">
-          <p>{watcherDescriptionText}</p>
-        </EuiText>
-
-        <EuiSpacer size="xl" />
-
-        {content}
-      </EuiPageContent>
+      </div>
     );
   }
-  return null;
+
+  return (
+    <>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="appTitle">
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.header"
+              defaultMessage="Watcher"
+            />
+          </span>
+        }
+        bottomBorder
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={watcherGettingStartedUrl}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.watcherGettingStartedDocsLinkText"
+              defaultMessage="Watcher docs"
+            />
+          </EuiButtonEmpty>,
+        ]}
+        description={watcherDescriptionText}
+      />
+      <DeleteWatchesModal
+        callback={(deleted?: string[]) => {
+          if (deleted) {
+            setDeletedWatches([...deletedWatches, ...watchesToDelete]);
+          }
+          setWatchesToDelete([]);
+        }}
+        watchesToDelete={watchesToDelete}
+      />
+
+      <EuiSpacer size="l" />
+
+      {content}
+    </>
+  );
 };

@@ -2,15 +2,15 @@
 
 exports[`transaction queries fetches a transaction 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
           Object {
             "term": Object {
               "transaction.id": "foo",
@@ -35,12 +35,16 @@ Object {
     },
     "size": 1,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches breakdown data for transactions 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "by_date": Object {
@@ -147,11 +151,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -161,8 +160,20 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "exists": Object {
+                    "field": "span.self_time.sum.us",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "transaction.breakdown.count",
+                  },
+                },
+              ],
             },
           },
         ],
@@ -170,12 +181,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches breakdown data for transactions for a transaction name 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "by_date": Object {
@@ -282,11 +297,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "metric",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -296,8 +306,20 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "exists": Object {
+                    "field": "span.self_time.sum.us",
+                  },
+                },
+                Object {
+                  "exists": Object {
+                    "field": "transaction.breakdown.count",
+                  },
+                },
+              ],
             },
           },
           Object {
@@ -310,307 +332,20 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
-}
-`;
-
-exports[`transaction queries fetches transaction charts 1`] = `
-Object {
-  "body": Object {
-    "aggs": Object {
-      "overall_avg_duration": Object {
-        "avg": Object {
-          "field": "transaction.duration.us",
-        },
-      },
-      "response_times": Object {
-        "aggs": Object {
-          "avg": Object {
-            "avg": Object {
-              "field": "transaction.duration.us",
-            },
-          },
-          "pct": Object {
-            "percentiles": Object {
-              "field": "transaction.duration.us",
-              "percents": Array [
-                95,
-                99,
-              ],
-            },
-          },
-        },
-        "date_histogram": Object {
-          "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
-          },
-          "field": "@timestamp",
-          "fixed_interval": "10800s",
-          "min_doc_count": 0,
-        },
-      },
-      "transaction_results": Object {
-        "aggs": Object {
-          "timeseries": Object {
-            "date_histogram": Object {
-              "extended_bounds": Object {
-                "max": 1528977600000,
-                "min": 1528113600000,
-              },
-              "field": "@timestamp",
-              "fixed_interval": "10800s",
-              "min_doc_count": 0,
-            },
-          },
-        },
-        "terms": Object {
-          "field": "transaction.result",
-          "missing": "",
-        },
-      },
-    },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
-        ],
-      },
-    },
-    "size": 0,
-  },
-  "index": "myIndex",
-}
-`;
-
-exports[`transaction queries fetches transaction charts for a transaction type 1`] = `
-Object {
-  "body": Object {
-    "aggs": Object {
-      "overall_avg_duration": Object {
-        "avg": Object {
-          "field": "transaction.duration.us",
-        },
-      },
-      "response_times": Object {
-        "aggs": Object {
-          "avg": Object {
-            "avg": Object {
-              "field": "transaction.duration.us",
-            },
-          },
-          "pct": Object {
-            "percentiles": Object {
-              "field": "transaction.duration.us",
-              "percents": Array [
-                95,
-                99,
-              ],
-            },
-          },
-        },
-        "date_histogram": Object {
-          "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
-          },
-          "field": "@timestamp",
-          "fixed_interval": "10800s",
-          "min_doc_count": 0,
-        },
-      },
-      "transaction_results": Object {
-        "aggs": Object {
-          "timeseries": Object {
-            "date_histogram": Object {
-              "extended_bounds": Object {
-                "max": 1528977600000,
-                "min": 1528113600000,
-              },
-              "field": "@timestamp",
-              "fixed_interval": "10800s",
-              "min_doc_count": 0,
-            },
-          },
-        },
-        "terms": Object {
-          "field": "transaction.result",
-          "missing": "",
-        },
-      },
-    },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "transaction.name": "bar",
-            },
-          },
-        ],
-      },
-    },
-    "size": 0,
-  },
-  "index": "myIndex",
-}
-`;
-
-exports[`transaction queries fetches transaction charts for a transaction type and transaction name 1`] = `
-Object {
-  "body": Object {
-    "aggs": Object {
-      "overall_avg_duration": Object {
-        "avg": Object {
-          "field": "transaction.duration.us",
-        },
-      },
-      "response_times": Object {
-        "aggs": Object {
-          "avg": Object {
-            "avg": Object {
-              "field": "transaction.duration.us",
-            },
-          },
-          "pct": Object {
-            "percentiles": Object {
-              "field": "transaction.duration.us",
-              "percents": Array [
-                95,
-                99,
-              ],
-            },
-          },
-        },
-        "date_histogram": Object {
-          "extended_bounds": Object {
-            "max": 1528977600000,
-            "min": 1528113600000,
-          },
-          "field": "@timestamp",
-          "fixed_interval": "10800s",
-          "min_doc_count": 0,
-        },
-      },
-      "transaction_results": Object {
-        "aggs": Object {
-          "timeseries": Object {
-            "date_histogram": Object {
-              "extended_bounds": Object {
-                "max": 1528977600000,
-                "min": 1528113600000,
-              },
-              "field": "@timestamp",
-              "fixed_interval": "10800s",
-              "min_doc_count": 0,
-            },
-          },
-        },
-        "terms": Object {
-          "field": "transaction.result",
-          "missing": "",
-        },
-      },
-    },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.name": "foo",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
-              },
-            },
-          },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "transaction.name": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "transaction.type": "baz",
-            },
-          },
-        ],
-      },
-    },
-    "size": 0,
-  },
-  "index": "myIndex",
 }
 `;
 
 exports[`transaction queries fetches transaction distribution 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "stats": Object {
-        "extended_stats": Object {
+        "max": Object {
           "field": "transaction.duration.us",
         },
       },
@@ -621,11 +356,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
             },
           },
           Object {
@@ -647,16 +377,10 @@ Object {
               },
             },
           },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
         ],
       },
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;

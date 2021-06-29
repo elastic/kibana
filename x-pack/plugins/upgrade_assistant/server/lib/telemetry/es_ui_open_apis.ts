@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsServiceStart } from 'src/core/server';
@@ -23,11 +24,9 @@ async function incrementUIOpenOptionCounter({
 }: IncrementUIOpenDependencies) {
   const internalRepository = savedObjects.createInternalRepository();
 
-  await internalRepository.incrementCounter(
-    UPGRADE_ASSISTANT_TYPE,
-    UPGRADE_ASSISTANT_DOC_ID,
-    `ui_open.${uiOpenOptionCounter}`
-  );
+  await internalRepository.incrementCounter(UPGRADE_ASSISTANT_TYPE, UPGRADE_ASSISTANT_DOC_ID, [
+    `ui_open.${uiOpenOptionCounter}`,
+  ]);
 }
 
 type UpsertUIOpenOptionDependencies = UIOpen & { savedObjects: SavedObjectsServiceStart };
@@ -37,6 +36,7 @@ export async function upsertUIOpenOption({
   cluster,
   indices,
   savedObjects,
+  kibana,
 }: UpsertUIOpenOptionDependencies): Promise<UIOpen> {
   if (overview) {
     await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'overview' });
@@ -50,9 +50,14 @@ export async function upsertUIOpenOption({
     await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'indices' });
   }
 
+  if (kibana) {
+    await incrementUIOpenOptionCounter({ savedObjects, uiOpenOptionCounter: 'kibana' });
+  }
+
   return {
     overview,
     cluster,
     indices,
+    kibana,
   };
 }

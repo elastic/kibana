@@ -1,45 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
+
+import type { RouteDefinitionParams } from '../';
+import {
+  LOGOUT_REASON_QUERY_STRING_PARAMETER,
+  NEXT_URL_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
+import type { LoginState } from '../../../common/login_state';
+import { shouldProviderUseLoginForm } from '../../../common/model';
 import { parseNext } from '../../../common/parse_next';
-import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for the Login view.
  */
 export function defineLoginRoutes({
+  config,
   router,
   logger,
-  authc,
-  csp,
+  httpResources,
   basePath,
   license,
 }: RouteDefinitionParams) {
-  router.get(
+  httpResources.register(
     {
       path: '/login',
       validate: {
         query: schema.object(
           {
-            next: schema.maybe(schema.string()),
-            msg: schema.maybe(schema.string()),
+            [NEXT_URL_QUERY_STRING_PARAMETER]: schema.maybe(schema.string()),
+            [LOGOUT_REASON_QUERY_STRING_PARAMETER]: schema.maybe(schema.string()),
           },
-          { allowUnknowns: true }
+          { unknowns: 'allow' }
         ),
       },
-      options: { authRequired: false },
+      options: { authRequired: 'optional' },
     },
     async (context, request, response) => {
       // Default to true if license isn't available or it can't be resolved for some reason.
       const shouldShowLogin = license.isEnabled() ? license.getFeatures().showLogin : true;
-
-      // Authentication flow isn't triggered automatically for this route, so we should explicitly
-      // check whether user has an active session already.
-      const isUserAlreadyLoggedIn = (await authc.getSessionInfo(request)) !== null;
+      const isUserAlreadyLoggedIn = request.auth.isAuthenticated;
       if (isUserAlreadyLoggedIn || !shouldShowLogin) {
         logger.debug('User is already authenticated, redirecting...');
         return response.redirected({
@@ -47,18 +52,41 @@ export function defineLoginRoutes({
         });
       }
 
-      return response.ok({
-        body: await context.core.rendering.render({ includeUserSettings: false }),
-        headers: { 'content-security-policy': csp.header },
-      });
+      return response.renderAnonymousCoreApp();
     }
   );
 
   router.get(
     { path: '/internal/security/login_state', validate: false, options: { authRequired: false } },
     async (context, request, response) => {
-      const { showLogin, allowLogin, layout = 'form' } = license.getFeatures();
-      return response.ok({ body: { showLogin, allowLogin, layout } });
+      const { allowLogin, layout = 'form' } = license.getFeatures();
+      const { sortedProviders, selector } = config.authc;
+
+      const providers = sortedProviders.map(({ type, name }) => {
+        // Since `config.authc.sortedProviders` is based on `config.authc.providers` config we can
+        // be sure that config is present for every provider in `config.authc.sortedProviders`.
+        const { showInSelector, description, hint, icon } = config.authc.providers[type]?.[name]!;
+        const usesLoginForm = shouldProviderUseLoginForm(type);
+        return {
+          type,
+          name,
+          usesLoginForm,
+          showInSelector: showInSelector && (usesLoginForm || selector.enabled),
+          description,
+          hint,
+          icon,
+        };
+      });
+
+      const loginState: LoginState = {
+        allowLogin,
+        layout,
+        requiresSecureConnection: config.secureCookies,
+        loginHelp: config.loginHelp,
+        selector: { enabled: selector.enabled, providers },
+      };
+
+      return response.ok({ body: loginState });
     }
   );
 }

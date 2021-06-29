@@ -1,32 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchResponse, GenericParams } from 'elasticsearch';
-import { Lifecycle } from 'hapi';
+import { GenericParams, SearchResponse } from 'elasticsearch';
+import { Lifecycle } from '@hapi/hapi';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { RouteMethod, RouteConfig } from '../../../../../../../src/core/server';
+import { JsonArray, JsonValue } from '@kbn/common-utils';
+import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../../../../src/plugins/data/server';
+import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
+import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
-import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
-import { APMPluginContract } from '../../../../../../plugins/apm/server';
-import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
-import { PluginSetupContract as AlertingPluginContract } from '../../../../../../plugins/alerting/server';
+import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';
+import { MlPluginSetup } from '../../../../../ml/server';
 
-// NP_TODO: Compose real types from plugins we depend on, no "any"
-export interface InfraServerPluginDeps {
+export interface InfraServerPluginSetupDeps {
+  data: DataPluginSetup;
   home: HomeServerPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
-  metrics: VisTypeTimeseriesSetup;
-  indexPatterns: {
-    indexPatternsServiceFactory: any;
-  };
+  visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
-  apm: APMPluginContract;
   alerting: AlertingPluginContract;
+  ml?: MlPluginSetup;
+}
+
+export interface InfraServerPluginStartDeps {
+  data: DataPluginStart;
 }
 
 export interface CallWithRequestParams extends GenericParams {
@@ -38,6 +45,9 @@ export interface CallWithRequestParams extends GenericParams {
   size?: number;
   terminate_after?: number;
   fields?: string | string[];
+  path?: string;
+  query?: string | object;
+  track_total_hits?: boolean | number;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
@@ -60,6 +70,7 @@ export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
     skipped: number;
     failed: number;
   };
+  timed_out: boolean;
   aggregations?: Aggregations;
   hits: {
     total: {
@@ -109,7 +120,10 @@ export type SearchHit = SearchResponse<object>['hits']['hits'][0];
 export interface SortedSearchHit extends SearchHit {
   sort: any[];
   _source: {
-    [field: string]: any;
+    [field: string]: JsonValue;
+  };
+  fields: {
+    [field: string]: JsonArray;
   };
 }
 
@@ -152,23 +166,6 @@ export interface InfraFieldDef {
   [type: string]: InfraFieldDetails;
 }
 
-export interface InfraTSVBResponse {
-  [key: string]: InfraTSVBPanel;
-}
-
-export interface InfraTSVBPanel {
-  id: string;
-  series: InfraTSVBSeries[];
-}
-
-export interface InfraTSVBSeries {
-  id: string;
-  label: string;
-  data: InfraTSVBDataPoint[];
-}
-
-export type InfraTSVBDataPoint = [number, number];
-
-export type InfraRouteConfig<params, query, body, method extends RouteMethod> = {
+export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & RouteConfig<params, query, body, method>;
+} & RouteConfig<Params, Query, Body, Method>;

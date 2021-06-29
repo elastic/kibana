@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+    "isolatedModules": true
+  },
+  "include": [
+    "server/**/*",
+    "common/*"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../../plugins/usage_collection/tsconfig.json" }
+  ]
+}

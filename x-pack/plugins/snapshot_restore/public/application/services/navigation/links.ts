@@ -1,71 +1,68 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { BASE_PATH } from '../../constants';
-
 export function linkToHome() {
-  return `#${BASE_PATH}`;
+  return `/`;
 }
 
 export function linkToRepositories() {
-  return `#${BASE_PATH}/repositories`;
+  return `/repositories`;
 }
 
 export function linkToRepository(repositoryName: string) {
-  return `#${BASE_PATH}/repositories/${encodeURIComponent(repositoryName)}`;
+  return encodeURI(`/repositories/${encodeURIComponent(repositoryName)}`);
 }
 
 export function linkToEditRepository(repositoryName: string) {
-  return `#${BASE_PATH}/edit_repository/${encodeURIComponent(repositoryName)}`;
+  return encodeURI(`/edit_repository/${encodeURIComponent(repositoryName)}`);
 }
 
 export function linkToAddRepository(redirect?: string) {
-  return `#${BASE_PATH}/add_repository${
-    redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''
-  }`;
+  return encodeURI(`/add_repository${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`);
 }
 
 export function linkToSnapshots(repositoryName?: string, policyName?: string) {
   if (repositoryName) {
-    return `#${BASE_PATH}/snapshots?repository=${encodeURIComponent(repositoryName)}`;
+    return encodeURI(`/snapshots?repository=${encodeURIComponent(repositoryName)}`);
   }
   if (policyName) {
-    return `#${BASE_PATH}/snapshots?policy=${encodeURIComponent(policyName)}`;
+    return encodeURI(`/snapshots?policy=${encodeURIComponent(policyName)}`);
   }
-  return `#${BASE_PATH}/snapshots`;
+  return `/snapshots`;
 }
 
 export function linkToSnapshot(repositoryName: string, snapshotName: string) {
-  return `#${BASE_PATH}/snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
-    snapshotName
-  )}`;
+  return encodeURI(
+    `/snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(snapshotName)}`
+  );
 }
 
 export function linkToRestoreSnapshot(repositoryName: string, snapshotName: string) {
-  return `#${BASE_PATH}/restore/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
-    snapshotName
-  )}`;
+  return encodeURI(
+    `/restore/${encodeURIComponent(repositoryName)}/${encodeURIComponent(snapshotName)}`
+  );
 }
 
 export function linkToPolicies() {
-  return `#${BASE_PATH}/policies`;
+  return `/policies`;
 }
 
 export function linkToPolicy(policyName: string) {
-  return `#${BASE_PATH}/policies/${encodeURIComponent(policyName)}`;
+  return encodeURI(`/policies/${encodeURIComponent(policyName)}`);
 }
 
 export function linkToEditPolicy(policyName: string) {
-  return `#${BASE_PATH}/edit_policy/${encodeURIComponent(policyName)}`;
+  return encodeURI(`/edit_policy/${encodeURIComponent(policyName)}`);
 }
 
 export function linkToAddPolicy() {
-  return `#${BASE_PATH}/add_policy`;
+  return `/add_policy`;
 }
 
 export function linkToRestoreStatus() {
-  return `#${BASE_PATH}/restore_status`;
+  return `/restore_status`;
 }

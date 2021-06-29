@@ -1,0 +1,24 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Elastic Endgame prevented Ransomware. Click the Elastic Endgame icon in the event.module column or the link in the rule.reference column for additional information.",
+  "from": "now-15m",
+  "index": [
+    "endgame-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Ransomware - Prevented - Elastic Endgame",
+  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:prevention and (event.action:ransomware_event or endgame.event_subtype_full:ransomware_event)\n",
+  "risk_score": 73,
+  "rule_id": "e3c5d5cb-41d5-4206-805c-f30561eae3ac",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Elastic Endgame"
+  ],
+  "type": "query",
+  "version": 6
+}

@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies execution of a suspicious program via scheduled tasks by looking at process lineage and command line usage.",
+  "false_positives": [
+    "Legitimate scheduled tasks running third party software."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious Execution via Scheduled Task",
+  "query": "process where event.type == \"start\" and\n    /* Schedule service cmdline on Win10+ */\n    process.parent.name : \"svchost.exe\" and process.parent.args : \"Schedule\" and\n    /* add suspicious programs here */\n    process.pe.original_file_name in\n                                (\n                                  \"cscript.exe\",\n                                  \"wscript.exe\",\n                                  \"PowerShell.EXE\",\n                                  \"Cmd.Exe\",\n                                  \"MSHTA.EXE\",\n                                  \"RUNDLL32.EXE\",\n                                  \"REGSVR32.EXE\",\n                                  \"MSBuild.exe\",\n                                  \"InstallUtil.exe\",\n                                  \"RegAsm.exe\",\n                                  \"RegSvcs.exe\",\n                                  \"msxsl.exe\",\n                                  \"CONTROL.EXE\",\n                                  \"EXPLORER.EXE\",\n                                  \"Microsoft.Workflow.Compiler.exe\",\n                                  \"msiexec.exe\"\n                                  ) and\n    /* add suspicious paths here */\n    process.args : (\n       \"C:\\\\Users\\\\*\",\n       \"C:\\\\ProgramData\\\\*\", \n       \"C:\\\\Windows\\\\Temp\\\\*\", \n       \"C:\\\\Windows\\\\Tasks\\\\*\", \n       \"C:\\\\PerfLogs\\\\*\", \n       \"C:\\\\Intel\\\\*\", \n       \"C:\\\\Windows\\\\Debug\\\\*\", \n       \"C:\\\\HP\\\\*\")\n",
+  "risk_score": 47,
+  "rule_id": "5d1d6907-0747-4d5d-9b24-e4a18853dc0a",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "reference": "https://attack.mitre.org/techniques/T1053/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

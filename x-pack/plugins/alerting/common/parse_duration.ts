@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 const SECONDS_REGEX = /^[1-9][0-9]*s$/;
 const MINUTES_REGEX = /^[1-9][0-9]*m$/;
 const HOURS_REGEX = /^[1-9][0-9]*h$/;
@@ -23,6 +25,15 @@ export function parseDuration(duration: string): number {
   throw new Error(
     `Invalid duration "${duration}". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"`
   );
+}
+
+export function getDurationNumberInItsUnit(duration: string): number {
+  return parseInt(duration.replace(/[^0-9.]/g, ''), 0);
+}
+
+export function getDurationUnitValue(duration: string): string {
+  const durationNumber = getDurationNumberInItsUnit(duration);
+  return duration.replace(durationNumber.toString(), '');
 }
 
 export function validateDurationSchema(duration: string) {

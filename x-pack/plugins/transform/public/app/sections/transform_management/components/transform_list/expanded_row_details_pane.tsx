@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC } from 'react';
@@ -54,8 +55,8 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sectio
       <EuiFlexGroup>
         <EuiFlexItem style={{ width: '50%' }}>
           {sections
-            .filter(s => s.position === 'left')
-            .map(s => (
+            .filter((s) => s.position === 'left')
+            .map((s) => (
               <Fragment key={s.title}>
                 <EuiSpacer size="s" />
                 <Section section={s} />
@@ -64,8 +65,8 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ sectio
         </EuiFlexItem>
         <EuiFlexItem style={{ width: '50%' }}>
           {sections
-            .filter(s => s.position === 'right')
-            .map(s => (
+            .filter((s) => s.position === 'right')
+            .map((s) => (
               <Fragment key={s.title}>
                 <EuiSpacer size="s" />
                 <Section section={s} />

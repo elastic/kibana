@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import React from 'react';
 
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
@@ -24,30 +14,35 @@ import {
   withEmbeddableSubscription,
   ContainerInput,
   ContainerOutput,
+  EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
-import { EmbeddableListItem } from './embeddable_list_item';
 
 interface Props {
   embeddable: IContainer;
   input: ContainerInput;
   output: ContainerOutput;
+  embeddableServices: EmbeddableStart;
 }
 
-function renderList(embeddable: IContainer, panels: ContainerInput['panels']) {
+function renderList(
+  embeddable: IContainer,
+  panels: ContainerInput['panels'],
+  embeddableServices: EmbeddableStart
+) {
   let number = 0;
-  const list = Object.values(panels).map(panel => {
+  const list = Object.values(panels).map((panel) => {
     const child = embeddable.getChild(panel.explicitInput.id);
     number++;
     return (
       <EuiPanel key={number.toString()}>
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiText>
               <h3>{number}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EmbeddableListItem embeddable={child} />
+            <embeddableServices.EmbeddablePanel embeddable={child} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
@@ -56,12 +51,12 @@ function renderList(embeddable: IContainer, panels: ContainerInput['panels']) {
   return list;
 }
 
-export function ListContainerComponentInner(props: Props) {
+export function ListContainerComponentInner({ embeddable, input, embeddableServices }: Props) {
   return (
     <div>
-      <h2 data-test-subj="listContainerTitle">{props.embeddable.getTitle()}</h2>
+      <h2 data-test-subj="listContainerTitle">{embeddable.getTitle()}</h2>
       <EuiSpacer size="l" />
-      {renderList(props.embeddable, props.input.panels)}
+      {renderList(embeddable, input.panels, embeddableServices)}
     </div>
   );
 }
@@ -71,4 +66,9 @@ export function ListContainerComponentInner(props: Props) {
 // anything on input or output state changes.  If you don't want that to happen (for example
 // if you expect something on input or output state to change frequently that your react
 // component does not care about, then you should probably hook this up manually).
-export const ListContainerComponent = withEmbeddableSubscription(ListContainerComponentInner);
+export const ListContainerComponent = withEmbeddableSubscription<
+  ContainerInput,
+  ContainerOutput,
+  IContainer,
+  { embeddableServices: EmbeddableStart }
+>(ListContainerComponentInner);

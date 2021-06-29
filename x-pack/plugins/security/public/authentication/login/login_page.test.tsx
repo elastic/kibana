@@ -1,22 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
 import { act } from '@testing-library/react';
-import { nextTick } from 'test_utils/enzyme_helpers';
-import { LoginState } from './login_state';
+import { shallow } from 'enzyme';
+import React from 'react';
+
+import { nextTick } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../../common/constants';
+import type { LoginState } from '../../../common/login_state';
+import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
 import { LoginPage } from './login_page';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { DisabledLoginForm, BasicLoginForm } from './components';
 
 const createLoginState = (options?: Partial<LoginState>) => {
   return {
     allowLogin: true,
     layout: 'form',
+    requiresSecureConnection: false,
+    selector: {
+      enabled: false,
+      providers: [{ type: 'basic', name: 'basic1', usesLoginForm: true }],
+    },
     ...options,
   } as LoginState;
 };
@@ -32,19 +41,13 @@ describe('LoginPage', () => {
     httpMock.addLoadingCountSource.mockReset();
   };
 
-  beforeAll(() => {
+  beforeEach(() => {
     Object.defineProperty(window, 'location', {
       value: { href: 'http://some-host/bar', protocol: 'http' },
       writable: true,
     });
-  });
 
-  beforeEach(() => {
     resetHttpMock();
-  });
-
-  afterAll(() => {
-    delete (window as any).location;
   });
 
   describe('page', () => {
@@ -55,9 +58,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -74,14 +77,14 @@ describe('LoginPage', () => {
   describe('disabled form states', () => {
     it('renders as expected when secure connection is required but not present', async () => {
       const coreStartMock = coreMock.createStart();
-      httpMock.get.mockResolvedValue(createLoginState());
+      httpMock.get.mockResolvedValue(createLoginState({ requiresSecureConnection: true }));
 
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={true}
         />
       );
 
@@ -100,9 +103,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -121,9 +124,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -144,9 +147,32 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(DisabledLoginForm)).toMatchSnapshot();
+    });
+
+    it('renders as expected when login is not enabled', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(
+        createLoginState({ selector: { enabled: false, providers: [] } })
+      );
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
         />
       );
 
@@ -167,9 +193,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -179,20 +205,20 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
 
-    it('renders as expected when info message is set', async () => {
+    it('properly passes query string parameters to the form', async () => {
       const coreStartMock = coreMock.createStart();
       httpMock.get.mockResolvedValue(createLoginState());
-      window.location.href = 'http://some-host/bar?msg=SESSION_EXPIRED';
+      window.location.href = `http://some-host/bar?msg=SESSION_EXPIRED&${AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER}=basic1`;
 
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -202,7 +228,12 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      const { authProviderHint, message } = wrapper.find(LoginForm).props();
+      expect(authProviderHint).toBe('basic1');
+      expect(message).toEqual({
+        type: LoginFormMessageType.Info,
+        content: 'Your session has timed out. Please log in again.',
+      });
     });
 
     it('renders as expected when loginAssistanceMessage is set', async () => {
@@ -212,9 +243,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage="This is an *important* message"
-          requiresSecureConnection={false}
         />
       );
 
@@ -224,7 +255,29 @@ describe('LoginPage', () => {
         resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
       });
 
-      expect(wrapper.find(BasicLoginForm)).toMatchSnapshot();
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
+    });
+
+    it('renders as expected when loginHelp is set', async () => {
+      const coreStartMock = coreMock.createStart();
+      httpMock.get.mockResolvedValue(createLoginState({ loginHelp: '**some-help**' }));
+
+      const wrapper = shallow(
+        <LoginPage
+          http={httpMock}
+          notifications={coreStartMock.notifications}
+          fatalErrors={coreStartMock.fatalErrors}
+          loginAssistanceMessage=""
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+        resetHttpMock(); // so the calls don't show in the BasicLoginForm snapshot
+      });
+
+      expect(wrapper.find(LoginForm)).toMatchSnapshot();
     });
   });
 
@@ -236,9 +289,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 
@@ -261,9 +314,9 @@ describe('LoginPage', () => {
       const wrapper = shallow(
         <LoginPage
           http={httpMock}
+          notifications={coreStartMock.notifications}
           fatalErrors={coreStartMock.fatalErrors}
           loginAssistanceMessage=""
-          requiresSecureConnection={false}
         />
       );
 

@@ -1,9 +1,14 @@
 {
-  "id": "resolver_test",
+  "id": "resolverTest",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "resolver_test"],
-  "requiredPlugins": ["embeddable"],
+  "configPath": ["xpack", "resolverTest"],
+  "requiredPlugins": [
+    "securitySolution"
+  ],
+  "requiredBundles": [
+    "kibanaReact"
+  ],
   "server": false,
   "ui": true
 }

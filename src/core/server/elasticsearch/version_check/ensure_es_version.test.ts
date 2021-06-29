@@ -1,36 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { mapNodesVersionCompatibility, pollEsNodesVersion, NodesInfo } from './ensure_es_version';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import { elasticsearchClientMock } from '../client/mocks';
 import { take, delay } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { of } from 'rxjs';
 
-const mockLoggerFactory = loggingServiceMock.create();
+const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 const KIBANA_VERSION = '5.1.0';
 
+const createEsSuccess = elasticsearchClientMock.createSuccessTransportRequestPromise;
+const createEsErrorReturn = (err: any) =>
+  elasticsearchClientMock.createErrorTransportRequestPromise(err);
+
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
   versions
-    .map(version => {
+    .map((version) => {
       return {
         version,
         http: {
@@ -108,28 +103,59 @@ describe('mapNodesVersionCompatibility', () => {
       `"You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.1.1 @ http_address (ip)"`
     );
   });
+
+  it('returns isCompatible=false without an extended message when a nodesInfoRequestError is not provided', async () => {
+    const result = mapNodesVersionCompatibility({ nodes: {} }, KIBANA_VERSION, false);
+    expect(result.isCompatible).toBe(false);
+    expect(result.nodesInfoRequestError).toBeUndefined();
+    expect(result.message).toMatchInlineSnapshot(
+      `"Unable to retrieve version information from Elasticsearch nodes."`
+    );
+  });
+
+  it('returns isCompatible=false with an extended message when a nodesInfoRequestError is present', async () => {
+    const result = mapNodesVersionCompatibility(
+      { nodes: {}, nodesInfoRequestError: new Error('connection refused') },
+      KIBANA_VERSION,
+      false
+    );
+    expect(result.isCompatible).toBe(false);
+    expect(result.nodesInfoRequestError).toBeTruthy();
+    expect(result.message).toMatchInlineSnapshot(
+      `"Unable to retrieve version information from Elasticsearch nodes. connection refused"`
+    );
+  });
 });
 
 describe('pollEsNodesVersion', () => {
-  const callWithInternalUser = jest.fn();
+  let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
   const getTestScheduler = () =>
     new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });
 
   beforeEach(() => {
-    callWithInternalUser.mockClear();
+    internalClient = elasticsearchClientMock.createInternalClient();
   });
 
-  it('returns iscCompatible=false and keeps polling when a poll request throws', done => {
+  const nodeInfosSuccessOnce = (infos: NodesInfo) => {
+    internalClient.nodes.info.mockImplementationOnce(() => createEsSuccess(infos));
+  };
+  const nodeInfosErrorOnce = (error: any) => {
+    internalClient.nodes.info.mockImplementationOnce(() => createEsErrorReturn(new Error(error)));
+  };
+
+  it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
     expect.assertions(3);
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
-    callWithInternalUser.mockRejectedValueOnce(new Error('mock request error'));
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
+
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0'));
+    nodeInfosErrorOnce('mock request error');
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'));
+
     pollEsNodesVersion({
-      callWithInternalUser,
+      internalClient,
       esVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
@@ -137,7 +163,7 @@ describe('pollEsNodesVersion', () => {
     })
       .pipe(take(3))
       .subscribe({
-        next: result => {
+        next: (result) => {
           expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
         },
         complete: done,
@@ -145,12 +171,18 @@ describe('pollEsNodesVersion', () => {
       });
   });
 
-  it('returns compatibility results', done => {
-    expect.assertions(1);
-    const nodes = createNodes('5.1.0', '5.2.0', '5.0.0');
-    callWithInternalUser.mockResolvedValueOnce(nodes);
+  it('returns the error from a failed nodes.info call when a poll request throws', (done) => {
+    expect.assertions(2);
+    const expectedCompatibilityResults = [false];
+    const expectedMessageResults = [
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+    ];
+    jest.clearAllMocks();
+
+    nodeInfosErrorOnce('mock request error');
+
     pollEsNodesVersion({
-      callWithInternalUser,
+      internalClient,
       esVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
@@ -158,25 +190,65 @@ describe('pollEsNodesVersion', () => {
     })
       .pipe(take(1))
       .subscribe({
-        next: result => {
-          expect(result).toEqual(mapNodesVersionCompatibility(nodes, KIBANA_VERSION, false));
+        next: (result) => {
+          expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+          expect(result.message).toBe(expectedMessageResults.shift());
         },
         complete: done,
         error: done,
       });
   });
 
-  it('only emits if the node versions changed since the previous poll', done => {
+  it('only emits if the error from a failed nodes.info call changed from the previous poll', (done) => {
     expect.assertions(4);
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.1', '5.2.0', '5.0.0')); // emit
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // emit
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
-    callWithInternalUser.mockResolvedValueOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
+    const expectedCompatibilityResults = [false, false];
+    const expectedMessageResults = [
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error 2',
+    ];
+    jest.clearAllMocks();
+
+    nodeInfosErrorOnce('mock request error'); // emit
+    nodeInfosErrorOnce('mock request error'); // ignore, same error message
+    nodeInfosErrorOnce('mock request error 2'); // emit
 
     pollEsNodesVersion({
-      callWithInternalUser,
+      internalClient,
+      esVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(2))
+      .subscribe({
+        next: (result) => {
+          expect(result.message).toBe(expectedMessageResults.shift());
+          expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('returns isCompatible=false and keeps polling when a poll request throws, only responding again if the error message has changed', (done) => {
+    expect.assertions(8);
+    const expectedCompatibilityResults = [false, false, true, false];
+    const expectedMessageResults = [
+      'This version of Kibana (v5.1.0) is incompatible with the following Elasticsearch nodes in your cluster: v5.0.0 @ http_address (ip)',
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+      "You're running Kibana 5.1.0 with some different versions of Elasticsearch. Update Kibana or Elasticsearch to the same version to prevent compatibility issues: v5.2.0 @ http_address (ip), v5.1.1-Beta1 @ http_address (ip)",
+      'Unable to retrieve version information from Elasticsearch nodes. mock request error',
+    ];
+    jest.clearAllMocks();
+
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
+    nodeInfosErrorOnce('mock request error'); // emit
+    nodeInfosErrorOnce('mock request error'); // ignore
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.1.1-Beta1')); // emit
+    nodeInfosErrorOnce('mock request error'); // emit
+
+    pollEsNodesVersion({
+      internalClient,
       esVersionCheckInterval: 1,
       ignoreVersionMismatch: false,
       kibanaVersion: KIBANA_VERSION,
@@ -184,7 +256,57 @@ describe('pollEsNodesVersion', () => {
     })
       .pipe(take(4))
       .subscribe({
-        next: result => expect(result).toBeDefined(),
+        next: (result) => {
+          expect(result.isCompatible).toBe(expectedCompatibilityResults.shift());
+          expect(result.message).toBe(expectedMessageResults.shift());
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('returns compatibility results', (done) => {
+    expect.assertions(1);
+    const nodes = createNodes('5.1.0', '5.2.0', '5.0.0');
+
+    nodeInfosSuccessOnce(nodes);
+
+    pollEsNodesVersion({
+      internalClient,
+      esVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(1))
+      .subscribe({
+        next: (result) => {
+          expect(result).toEqual(mapNodesVersionCompatibility(nodes, KIBANA_VERSION, false));
+        },
+        complete: done,
+        error: done,
+      });
+  });
+
+  it('only emits if the node versions changed since the previous poll', (done) => {
+    expect.assertions(4);
+    nodeInfosSuccessOnce(createNodes('5.1.0', '5.2.0', '5.0.0')); // emit
+    nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // ignore, same versions, different ordering
+    nodeInfosSuccessOnce(createNodes('5.1.1', '5.2.0', '5.0.0')); // emit
+    nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // emit
+    nodeInfosSuccessOnce(createNodes('5.1.1', '5.1.2', '5.1.3')); // ignore
+    nodeInfosSuccessOnce(createNodes('5.0.0', '5.1.0', '5.2.0')); // emit, different from previous version
+
+    pollEsNodesVersion({
+      internalClient,
+      esVersionCheckInterval: 1,
+      ignoreVersionMismatch: false,
+      kibanaVersion: KIBANA_VERSION,
+      log: mockLogger,
+    })
+      .pipe(take(4))
+      .subscribe({
+        next: (result) => expect(result).toBeDefined(),
         complete: done,
         error: done,
       });
@@ -192,14 +314,21 @@ describe('pollEsNodesVersion', () => {
 
   it('starts polling immediately and then every esVersionCheckInterval', () => {
     expect.assertions(1);
-    callWithInternalUser.mockReturnValueOnce([createNodes('5.1.0', '5.2.0', '5.0.0')]);
-    callWithInternalUser.mockReturnValueOnce([createNodes('5.1.1', '5.2.0', '5.0.0')]);
+
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.nodes.info.mockReturnValueOnce([
+      { body: createNodes('5.1.0', '5.2.0', '5.0.0') },
+    ]);
+    // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+    internalClient.nodes.info.mockReturnValueOnce([
+      { body: createNodes('5.1.1', '5.2.0', '5.0.0') },
+    ]);
 
     getTestScheduler().run(({ expectObservable }) => {
       const expected = 'a 99ms (b|)';
 
       const esNodesCompatibility$ = pollEsNodesVersion({
-        callWithInternalUser,
+        internalClient,
         esVersionCheckInterval: 100,
         ignoreVersionMismatch: false,
         kibanaVersion: KIBANA_VERSION,
@@ -227,15 +356,17 @@ describe('pollEsNodesVersion', () => {
     getTestScheduler().run(({ expectObservable }) => {
       const expected = '100ms a 99ms (b|)';
 
-      callWithInternalUser.mockReturnValueOnce(
-        of(createNodes('5.1.0', '5.2.0', '5.0.0')).pipe(delay(100))
+      internalClient.nodes.info.mockReturnValueOnce(
+        // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+        of({ body: createNodes('5.1.0', '5.2.0', '5.0.0') }).pipe(delay(100))
       );
-      callWithInternalUser.mockReturnValueOnce(
-        of(createNodes('5.1.1', '5.2.0', '5.0.0')).pipe(delay(100))
+      internalClient.nodes.info.mockReturnValueOnce(
+        // @ts-expect-error we need to return an incompatible type to use the testScheduler here
+        of({ body: createNodes('5.1.1', '5.2.0', '5.0.0') }).pipe(delay(100))
       );
 
       const esNodesCompatibility$ = pollEsNodesVersion({
-        callWithInternalUser,
+        internalClient,
         esVersionCheckInterval: 10,
         ignoreVersionMismatch: false,
         kibanaVersion: KIBANA_VERSION,
@@ -256,6 +387,6 @@ describe('pollEsNodesVersion', () => {
       });
     });
 
-    expect(callWithInternalUser).toHaveBeenCalledTimes(2);
+    expect(internalClient.nodes.info).toHaveBeenCalledTimes(2);
   });
 });

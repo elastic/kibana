@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'timelion', 'security', 'spaceSelector']);
@@ -14,14 +16,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('timelion', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('timelion/feature_controls');
+        await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -31,14 +33,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('timelion/feature_controls');
+        await esArchiver.unload('x-pack/test/functional/es_archives/timelion/feature_controls');
       });
 
       it('shows timelion navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Timelion');
       });
 
@@ -52,7 +54,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('timelion/feature_controls');
+        await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -62,14 +64,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('timelion/feature_controls');
+        await esArchiver.unload('x-pack/test/functional/es_archives/timelion/feature_controls');
       });
 
       it(`doesn't show timelion navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Timelion');
       });
 
@@ -80,7 +82,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -97,7 +99,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -114,7 +116,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

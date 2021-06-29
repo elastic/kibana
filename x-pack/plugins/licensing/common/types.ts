@@ -1,15 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-export enum LICENSE_CHECK_STATE {
-  Unavailable = 'UNAVAILABLE',
-  Invalid = 'INVALID',
-  Expired = 'EXPIRED',
-  Valid = 'VALID',
-}
+export type LicenseCheckState = 'unavailable' | 'invalid' | 'valid' | 'expired';
 
 export enum LICENSE_TYPE {
   basic = 10,
@@ -90,7 +86,7 @@ export interface LicenseCheck {
   /**
    * The state of checking the results of a license type meeting the license minimum.
    */
-  state: LICENSE_CHECK_STATE;
+  state: LicenseCheckState;
   /**
    * A message containing the reason for a license type not being valid.
    */

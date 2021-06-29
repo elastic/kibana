@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a new role is assigned to a management group in Microsoft 365. An adversary may attempt to add a role in order to maintain persistence in an environment.",
+  "false_positives": [
+    "A new role may be assigned to a management group by a system or network administrator. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "from": "now-30m",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Microsoft 365 Exchange Management Group Role Assignment",
+  "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"New-ManagementRoleAssignment\" and event.outcome:success\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/new-managementroleassignment?view=exchange-ps",
+    "https://docs.microsoft.com/en-us/microsoft-365/admin/add-users/about-admin-roles?view=o365-worldwide"
+  ],
+  "risk_score": 47,
+  "rule_id": "98995807-5b09-4e37-8a54-5cae5dc932d7",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

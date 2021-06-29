@@ -1,27 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Fragment, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import {
+  htmlIdGenerator,
   EuiButton,
+  EuiCheckbox,
   EuiCodeEditor,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
 
+import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
+import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
+
 import {
-  AggName,
   dateHistogramIntervalFormatRegex,
   getEsAggFromGroupByConfig,
   isGroupByDateHistogram,
@@ -37,7 +43,7 @@ import {
 } from '../../../../common';
 
 export function isIntervalValid(
-  interval: optionalInterval,
+  interval: OptionalInterval,
   intervalType: PivotSupportedGroupByAggsWithInterval
 ) {
   if (interval !== '' && interval !== undefined) {
@@ -73,7 +79,7 @@ interface SelectOption {
   text: string;
 }
 
-type optionalInterval = string | undefined;
+type OptionalInterval = string | undefined;
 
 function getDefaultInterval(defaultData: PivotGroupByConfig): string | undefined {
   if (isGroupByDateHistogram(defaultData)) {
@@ -93,6 +99,8 @@ interface Props {
 }
 
 export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
+  const { esAggsCompositeMissingBucket } = useDocumentationLinks();
+
   const isUnsupportedAgg = !isPivotGroupByConfigWithUiSupport(defaultData);
 
   const [agg, setAgg] = useState(defaultData.agg);
@@ -101,9 +109,14 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
     isPivotGroupByConfigWithUiSupport(defaultData) ? defaultData.field : ''
   );
   const [interval, setInterval] = useState(getDefaultInterval(defaultData));
+  const [missingBucket, setMissingBucket] = useState(
+    isPivotGroupByConfigWithUiSupport(defaultData) && defaultData.missing_bucket
+  );
+
+  const missingBucketSwitchId = useMemo(() => htmlIdGenerator()(), []);
 
   function getUpdatedItem(): PivotGroupByConfig {
-    const updatedItem = { ...defaultData, agg, aggName, field };
+    const updatedItem = { ...defaultData, agg, aggName, field, missing_bucket: missingBucket };
 
     if (isGroupByHistogram(updatedItem) && interval !== undefined) {
       updatedItem.interval = interval;
@@ -122,13 +135,15 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   if (!isUnsupportedAgg) {
     const optionsArr = dictionaryToArray(options);
     optionsArr
-      .filter(o => o.agg === defaultData.agg)
-      .forEach(o => {
+      .filter((o) => o.agg === defaultData.agg)
+      .forEach((o) => {
         availableFields.push({ text: o.field });
       });
     optionsArr
-      .filter(o => isPivotGroupByConfigWithUiSupport(defaultData) && o.field === defaultData.field)
-      .forEach(o => {
+      .filter(
+        (o) => isPivotGroupByConfigWithUiSupport(defaultData) && o.field === defaultData.field
+      )
+      .forEach((o) => {
         availableAggs.push({ text: o.agg });
       });
   }
@@ -179,7 +194,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         <EuiFieldText
           defaultValue={aggName}
           isInvalid={!validAggName}
-          onChange={e => setAggName(e.target.value)}
+          onChange={(e) => setAggName(e.target.value)}
         />
       </EuiFormRow>
       {availableAggs.length > 0 && (
@@ -191,7 +206,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           <EuiSelect
             options={availableAggs}
             value={agg}
-            onChange={e => setAgg(e.target.value as PivotSupportedGroupByAggs)}
+            onChange={(e) => setAgg(e.target.value as PivotSupportedGroupByAggs)}
           />
         </EuiFormRow>
       )}
@@ -204,7 +219,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           <EuiSelect
             options={availableFields}
             value={field}
-            onChange={e => setField(e.target.value)}
+            onChange={(e) => setField(e.target.value)}
           />
         </EuiFormRow>
       )}
@@ -222,12 +237,12 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             defaultMessage: 'Interval',
           })}
         >
-          <Fragment>
+          <>
             {isGroupByHistogram(defaultData) && (
               <EuiFieldText
                 defaultValue={interval}
                 isInvalid={!validInterval}
-                onChange={e => setInterval(e.target.value)}
+                onChange={(e) => setInterval(e.target.value)}
               />
             )}
             {isGroupByDateHistogram(defaultData) && (
@@ -242,14 +257,46 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
                   { value: '1y', text: '1y' },
                 ]}
                 value={interval}
-                onChange={e => setInterval(e.target.value)}
+                onChange={(e) => setInterval(e.target.value)}
               />
             )}
-          </Fragment>
+          </>
+        </EuiFormRow>
+      )}
+      {!isUnsupportedAgg && (
+        <EuiFormRow
+          helpText={
+            <>
+              {i18n.translate('xpack.transform.groupBy.popoverForm.missingBucketCheckboxHelpText', {
+                defaultMessage: 'Select to include documents without a value.',
+              })}
+              <br />
+              <EuiLink href={esAggsCompositeMissingBucket} target="_blank">
+                {i18n.translate(
+                  'xpack.transform.stepDetailsForm.missingBucketCheckboxHelpTextLink',
+                  {
+                    defaultMessage: `Learn more`,
+                  }
+                )}
+              </EuiLink>
+            </>
+          }
+        >
+          <EuiCheckbox
+            id={missingBucketSwitchId}
+            label={i18n.translate(
+              'xpack.transform.groupby.popoverForm.missingBucketCheckboxLabel',
+              {
+                defaultMessage: 'Include missing buckets',
+              }
+            )}
+            checked={missingBucket}
+            onChange={() => setMissingBucket(!missingBucket)}
+          />
         </EuiFormRow>
       )}
       {isUnsupportedAgg && (
-        <Fragment>
+        <>
           <EuiSpacer size="m" />
           <EuiCodeEditor
             mode="json"
@@ -261,7 +308,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             isReadOnly
             aria-label="Read only code editor"
           />
-        </Fragment>
+        </>
       )}
       <EuiFormRow hasEmptyLabelSpace>
         <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>

@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a suspicious child process of the Windows virtual system process, which could indicate code injection.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Unusual Child Process from a System Virtual Process",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.pid == 4 and\n  not process.executable : (\"Registry\", \"MemCompression\", \"?:\\\\Windows\\\\System32\\\\smss.exe\")\n",
+  "risk_score": 73,
+  "rule_id": "de9bd7e0-49e9-4e92-a64d-53ade2e66af1",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 import { objectValuesToArrays } from '../../lib/helper';
+import { API_URLS } from '../../../common/constants';
 
 const arrayOrStringType = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -15,7 +17,7 @@ const arrayOrStringType = schema.maybe(
 
 export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/filters',
+  path: API_URLS.FILTERS,
   validate: {
     query: schema.object({
       dateRangeStart: schema.string(),
@@ -25,13 +27,10 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       schemes: arrayOrStringType,
       ports: arrayOrStringType,
       tags: arrayOrStringType,
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
-
-  options: {
-    tags: ['access:uptime'],
-  },
-  handler: async ({ callES }, _context, request, response) => {
+  handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, locations, schemes, search, ports, tags } = request.query;
 
     let parsedSearch: Record<string, any> | undefined;
@@ -43,8 +42,8 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
       }
     }
 
-    const filtersResponse = await libs.requests.getFilterBar({
-      callES,
+    return await libs.requests.getFilterBar({
+      uptimeEsClient,
       dateRangeStart,
       dateRangeEnd,
       search: parsedSearch,
@@ -55,7 +54,5 @@ export const createGetOverviewFilters: UMRestApiRouteFactory = (libs: UMServerLi
         tags,
       }),
     });
-
-    return response.ok({ body: { ...filtersResponse } });
   },
 });

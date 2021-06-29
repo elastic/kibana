@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious .NET code execution. connections.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious .NET Code Compilation",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"csc.exe\", \"vbc.exe\") and\n  process.parent.name : (\"wscript.exe\", \"mshta.exe\", \"cscript.exe\", \"wmic.exe\", \"svchost.exe\", \"rundll32.exe\", \"cmstp.exe\", \"regsvr32.exe\")\n",
+  "risk_score": 47,
+  "rule_id": "201200f1-a99b-43fb-88ed-f65a45c4972c",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

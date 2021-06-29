@@ -1,0 +1,36 @@
+// Charts themes available app-wide
+@import '@elastic/charts/dist/theme';
+@import '@elastic/eui/src/themes/charts/theme';
+
+// Grab some nav-specific EUI vars
+@import '@elastic/eui/src/components/collapsible_nav/variables';
+
+// We apply brute force focus states to anything not coming from Eui
+// which has focus states designed at the component level.
+// You can also use "kbn-resetFocusState" to not apply the default focus
+// state. This is useful when you've already hand crafted your own
+// focus states in Kibana.
+:focus {
+  &:not([class^='eui']):not(.kbn-resetFocusState) {
+    @include euiFocusRing;
+  }
+}
+
+// A necessary hack so that the above focus policy doesn't pollute some EUI
+// entrenched inputs.
+.euiComboBox {
+  // :not() specificity needed to override the above
+  input:not([class^='eui']):focus {
+    animation: none !important;
+  }
+}
+
+.euiBody--collapsibleNavIsDocked .euiBottomBar {
+  margin-left: 320px; // Hard-coded for now -- @cchaos
+}
+
+// Temporary fix for EuiPageHeader with a bottom border but no tabs or padding
+// Will fix in EUI -- @cchaos
+.euiPageHeader--bottomBorder:not(.euiPageHeader--tabsAtBottom):not([class*='euiPageHeader--padding']) {
+  padding-bottom: $euiSizeL;
+}

@@ -1,17 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, AppMountParameters, HttpSetup } from 'src/core/public';
-import { ConfigType } from '../../config';
+import type {
+  ApplicationSetup,
+  AppMountParameters,
+  HttpSetup,
+  StartServicesAccessor,
+} from 'src/core/public';
+
+import type { ConfigType } from '../../config';
 
 interface CreateDeps {
-  application: CoreSetup['application'];
+  application: ApplicationSetup;
   http: HttpSetup;
-  getStartServices: CoreSetup['getStartServices'];
+  getStartServices: StartServicesAccessor;
   config: Pick<ConfigType, 'loginAssistanceMessage'>;
 }
 
@@ -31,11 +38,9 @@ export const loginApp = Object.freeze({
         ]);
         return renderLoginPage(coreStart.i18n, element, {
           http: coreStart.http,
+          notifications: coreStart.notifications,
           fatalErrors: coreStart.fatalErrors,
           loginAssistanceMessage: config.loginAssistanceMessage,
-          requiresSecureConnection: coreStart.injectedMetadata.getInjectedVar(
-            'secureCookies'
-          ) as boolean,
         });
       },
     });

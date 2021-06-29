@@ -1,35 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageBody,
-  EuiPageContent,
-} from '@elastic/eui';
-import React from 'react';
-
-import { FlexPage } from './page';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { ReactNode } from 'react';
+import { PageTemplate } from './page_template';
 
 interface LoadingPageProps {
-  message?: string | JSX.Element;
+  message?: ReactNode;
+  'data-test-subj'?: string;
 }
 
-export const LoadingPage = ({ message }: LoadingPageProps) => (
-  <FlexPage>
-    <EuiPageBody>
-      <EuiPageContent verticalPosition="center" horizontalPosition="center">
-        <EuiFlexGroup alignItems="center">
+// Represents a fully constructed page, including page template.
+export const LoadingPage = ({
+  message,
+  'data-test-subj': dataTestSubj = 'loadingPage',
+}: LoadingPageProps) => {
+  return (
+    <PageTemplate isEmptyState={true} data-test-subj={dataTestSubj}>
+      <LoadingPrompt message={message} />
+    </PageTemplate>
+  );
+};
+
+export const LoadingPrompt = ({ message }: LoadingPageProps) => {
+  return (
+    <EuiEmptyPrompt
+      body={
+        <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
+            <EuiLoadingSpinner size="xl" style={{ marginRight: '8px' }} />
           </EuiFlexItem>
           <EuiFlexItem>{message}</EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContent>
-    </EuiPageBody>
-  </FlexPage>
-);
+      }
+    />
+  );
+};

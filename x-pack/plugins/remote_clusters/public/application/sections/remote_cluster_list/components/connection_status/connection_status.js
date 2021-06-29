@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,7 +11,9 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiText } from '@elastic/eui';
 
-export function ConnectionStatus({ isConnected }) {
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
+
+export function ConnectionStatus({ isConnected, mode }) {
   let icon;
   let message;
 
@@ -38,22 +41,23 @@ export function ConnectionStatus({ isConnected }) {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-
-          <EuiFlexItem className="remoteClustersConnectionStatus__message">
-            <EuiText>{message}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <span className="eui-displayBlock">{icon}</span>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiIconTip color="subdued" content={seedNodeTooltip} />
+      <EuiFlexItem grow={false} className="remoteClustersConnectionStatus__message">
+        <EuiText size="s">{message}</EuiText>
       </EuiFlexItem>
+
+      {!isConnected && mode === SNIFF_MODE && (
+        <EuiFlexItem grow={false}>
+          <EuiIconTip color="subdued" content={seedNodeTooltip} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
 
 ConnectionStatus.propTypes = {
   isConnected: PropTypes.bool,
+  mode: PropTypes.oneOf([SNIFF_MODE, PROXY_MODE]),
 };

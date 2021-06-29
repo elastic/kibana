@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -27,7 +28,7 @@ export class WatchStatus {
     }
 
     const actionStatuses = get(props, 'actionStatuses', []);
-    this.actionStatuses = actionStatuses.map(actionStatus =>
+    this.actionStatuses = actionStatuses.map((actionStatus) =>
       ActionStatus.fromUpstreamJson(actionStatus)
     );
   }

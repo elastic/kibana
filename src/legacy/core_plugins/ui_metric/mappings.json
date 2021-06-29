@@ -1,9 +1,0 @@
-{
-  "ui-metric": {
-    "properties": {
-      "count": {
-        "type": "integer"
-      }
-    }
-  }
-}

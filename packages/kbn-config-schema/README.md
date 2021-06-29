@@ -239,7 +239,7 @@ __Output type:__ `{ [K in keyof TProps]: TypeOf<TProps[K]> } as TObject`
 __Options:__
   * `defaultValue: TObject | Reference<TObject> | (() => TObject)` - defines a default value, see [Default values](#default-values) section for more details.
   * `validate: (value: TObject) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
-  * `allowUnknowns: boolean` - indicates whether unknown object properties should be allowed. It's `false` by default.
+  * `unknowns: 'allow' | 'ignore' | 'forbid'` - indicates whether unknown object properties should be allowed, ignored, or forbidden. It's `forbid` by default.
 
 __Usage:__
 ```typescript
@@ -250,7 +250,7 @@ const valueSchema = schema.object({
 ```
 
 __Notes:__
-* Using `allowUnknowns` is discouraged and should only be used in exceptional circumstances. Consider using `schema.recordOf()` instead.
+* Using `unknowns: 'allow'` is discouraged and should only be used in exceptional circumstances. Consider using `schema.recordOf()` instead.
 * Currently `schema.object()` always has a default value of `{}`, but this may change in the near future. Try to not rely on this behaviour and specify default value explicitly or use `schema.maybe()` if the value is optional.
 * `schema.object()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
 

@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Elasticsearch nodes that do not have Transport Layer Security (TLS), and/or lack authentication, and are accepting inbound network connections over the default Elasticsearch port.",
+  "false_positives": [
+    "If you have front-facing proxies that provide authentication and TLS, this rule would need to be tuned to eliminate the source IP address of your reverse-proxy."
+  ],
+  "index": [
+    "packetbeat-*"
+  ],
+  "language": "lucene",
+  "license": "Elastic License v2",
+  "name": "Inbound Connection to an Unsecure Elasticsearch Node",
+  "note": "## Config\n\nThis rule requires the addition of port `9200` and `send_all_headers` to the `HTTP` protocol configuration in `packetbeat.yml`. See the References section for additional configuration documentation.",
+  "query": "event.category:network_traffic AND network.protocol:http AND status:OK AND destination.port:9200 AND network.direction:inbound AND NOT http.response.headers.content-type:\"image/x-icon\" AND NOT _exists_:http.request.headers.authorization\n",
+  "references": [
+    "https://www.elastic.co/guide/en/elasticsearch/reference/current/configuring-security.html",
+    "https://www.elastic.co/guide/en/beats/packetbeat/current/packetbeat-http-options.html#_send_all_headers"
+  ],
+  "risk_score": 47,
+  "rule_id": "31295df3-277b-4c56-a1fb-84e31b4222a9",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "Initial Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

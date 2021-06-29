@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import {
   getDetailPanelIndexName,
   getPageOfIndices,
   getPager,
   getFilter,
   isDetailPanelOpen,
-  showSystemIndices,
   getSortField,
   isSortAscending,
   getIndicesAsArray,
@@ -26,7 +27,6 @@ import {
   pageChanged,
   pageSizeChanged,
   sortChanged,
-  showSystemIndicesChanged,
   loadIndices,
   reloadIndices,
   toggleChanged,
@@ -34,15 +34,14 @@ import {
 
 import { IndexTable as PresentationComponent } from './index_table';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, props) => {
   return {
     allIndices: getIndicesAsArray(state),
     isDetailPanelOpen: isDetailPanelOpen(state),
     detailPanelIndexName: getDetailPanelIndexName(state),
-    indices: getPageOfIndices(state),
-    pager: getPager(state),
+    indices: getPageOfIndices(state, props),
+    pager: getPager(state, props),
     filter: getFilter(state),
-    showSystemIndices: showSystemIndices(state),
     sortField: getSortField(state),
     isSortAscending: isSortAscending(state),
     indicesLoading: indicesLoading(state),
@@ -51,27 +50,24 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    filterChanged: filter => {
+    filterChanged: (filter) => {
       dispatch(filterChanged({ filter }));
     },
-    pageChanged: pageNumber => {
+    pageChanged: (pageNumber) => {
       dispatch(pageChanged({ pageNumber }));
     },
-    pageSizeChanged: pageSize => {
+    pageSizeChanged: (pageSize) => {
       dispatch(pageSizeChanged({ pageSize }));
     },
     sortChanged: (sortField, isSortAscending) => {
       dispatch(sortChanged({ sortField, isSortAscending }));
     },
-    showSystemIndicesChanged: showSystemIndices => {
-      dispatch(showSystemIndicesChanged({ showSystemIndices }));
-    },
     toggleChanged: (toggleName, toggleValue) => {
       dispatch(toggleChanged({ toggleName, toggleValue }));
     },
-    openDetailPanel: indexName => {
+    openDetailPanel: (indexName) => {
       dispatch(openDetailPanel({ indexName }));
     },
     closeDetailPanel: () => {
@@ -80,10 +76,12 @@ const mapDispatchToProps = dispatch => {
     loadIndices: () => {
       dispatch(loadIndices());
     },
-    reloadIndices: () => {
-      dispatch(reloadIndices());
+    reloadIndices: (indexNames, options) => {
+      dispatch(reloadIndices(indexNames, options));
     },
   };
 };
 
-export const IndexTable = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);
+export const IndexTable = withRouter(
+  connect(mapStateToProps, mapDispatchToProps)(PresentationComponent)
+);

@@ -1,26 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import _ from 'lodash';
-import { EsResponse, SavedObject, SavedObjectConfig } from '../../types';
-import { parseSearchSource } from './parse_search_source';
-import { expandShorthand, SavedObjectNotFound } from '../../../../kibana_utils/public';
-import { IndexPattern } from '../../../../data/public';
+import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from '../../types';
+import { SavedObjectNotFound } from '../../../../kibana_utils/public';
+import {
+  IndexPattern,
+  injectSearchSourceReferences,
+  parseSearchSourceJSON,
+} from '../../../../data/public';
+import { expandShorthand } from './field_mapping';
 
 /**
  * A given response of and ElasticSearch containing a plain saved object is applied to the given
@@ -29,15 +23,14 @@ import { IndexPattern } from '../../../../data/public';
 export async function applyESResp(
   resp: EsResponse,
   savedObject: SavedObject,
-  config: SavedObjectConfig
+  config: SavedObjectConfig,
+  dependencies: SavedObjectKibanaServices
 ) {
-  const mapping = expandShorthand(config.mapping);
-  const esType = config.type || '';
+  const mapping = expandShorthand(config.mapping ?? {});
+  const savedObjectType = config.type || '';
   savedObject._source = _.cloneDeep(resp._source);
-  const injectReferences = config.injectReferences;
-  const hydrateIndexPattern = savedObject.hydrateIndexPattern!;
   if (typeof resp.found === 'boolean' && !resp.found) {
-    throw new SavedObjectNotFound(esType, savedObject.id || '');
+    throw new SavedObjectNotFound(savedObjectType, savedObject.id || '');
   }
 
   const meta = resp._source.kibanaSavedObjectMeta || {};
@@ -64,13 +57,47 @@ export async function applyESResp(
   _.assign(savedObject, savedObject._source);
   savedObject.lastSavedTitle = savedObject.title;
 
-  await parseSearchSource(savedObject, esType, meta.searchSourceJSON, resp.references);
-  await hydrateIndexPattern();
+  if (meta.searchSourceJSON) {
+    try {
+      let searchSourceValues = parseSearchSourceJSON(meta.searchSourceJSON);
+
+      if (config.searchSource) {
+        searchSourceValues = injectSearchSourceReferences(
+          searchSourceValues as any,
+          resp.references
+        );
+        savedObject.searchSource = await dependencies.search.searchSource.create(
+          searchSourceValues
+        );
+      } else {
+        savedObject.searchSourceFields = searchSourceValues;
+      }
+    } catch (error) {
+      if (
+        error.constructor.name === 'SavedObjectNotFound' &&
+        error.savedObjectType === 'index-pattern'
+      ) {
+        // if parsing the search source fails because the index pattern wasn't found,
+        // remember the reference - this is required for error handling on legacy imports
+        savedObject.unresolvedIndexPatternReference = {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          id: JSON.parse(meta.searchSourceJSON).index,
+          type: 'index-pattern',
+        };
+      }
+
+      throw error;
+    }
+  }
+
+  const injectReferences = config.injectReferences;
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);
   }
+
   if (typeof config.afterESResp === 'function') {
     savedObject = await config.afterESResp(savedObject);
   }
+
   return savedObject;
 }

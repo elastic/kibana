@@ -1,0 +1,27 @@
+.monPipelineViewer__metric {
+  text-align: right;
+
+  &--cpuTime {
+    width: $euiSizeXXL;
+  }
+
+  &--events,
+  &--eventsEmitted {
+    width: $euiSizeXXL * 4;
+  }
+
+  &--eventMillis {
+    width: $euiSizeXXL * 2;
+  }
+}
+
+@include euiBreakpoint('m') {
+  .monPipelineViewer__metricFlexItem {
+    margin-bottom: $euiSizeXS !important; // sass-lint:disable-line no-important
+  }
+
+  .monPipelineViewer__metric {
+    text-align: left;
+    padding-left: $euiSizeXL;
+  }
+}

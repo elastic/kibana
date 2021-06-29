@@ -1,0 +1,30 @@
+{
+  "anomaly_threshold": 75,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Looks for anomalous access to the cloud platform metadata service by an unusual user. The metadata service may be targeted in order to harvest credentials or user data scripts containing secrets.",
+  "false_positives": [
+    "A newly installed program, or one that runs under a new or rarely used user context, could trigger this detection rule. Manual interrogation of the metadata service during debugging or troubleshooting could trigger this rule."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": [
+    "linux_rare_metadata_user",
+    "v2_linux_rare_metadata_user"
+  ],
+  "name": "Unusual Linux User Calling the Metadata Service",
+  "risk_score": 21,
+  "rule_id": "1faec04b-d902-4f89-8aff-92cd9043c16f",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 3
+}

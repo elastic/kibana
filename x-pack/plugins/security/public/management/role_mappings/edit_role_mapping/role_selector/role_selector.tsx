@@ -1,18 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import React, { Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
-import { RoleMapping, Role, isRoleDeprecated } from '../../../../../common/model';
-import { RolesAPIClient } from '../../../roles';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import type { Role, RoleMapping } from '../../../../../common/model';
+import { isRoleDeprecated } from '../../../../../common/model';
+import { RoleComboBox } from '../../../role_combo_box';
+import type { RolesAPIClient } from '../../../roles';
 import { AddRoleTemplateButton } from './add_role_template_button';
 import { RoleTemplateEditor } from './role_template_editor';
-import { RoleComboBox } from '../../../role_combo_box';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
@@ -59,7 +64,7 @@ export class RoleSelector extends React.Component<Props, State> {
         isLoading={this.state.roles.length === 0}
         availableRoles={this.state.roles}
         selectedRoleNames={roles}
-        onChange={selectedRoles => {
+        onChange={(selectedRoles) => {
           this.props.onChange({
             ...this.props.roleMapping,
             roles: selectedRoles,
@@ -80,7 +85,7 @@ export class RoleSelector extends React.Component<Props, State> {
               canUseStoredScripts={this.props.canUseStoredScripts}
               canUseInlineScripts={this.props.canUseInlineScripts}
               roleTemplate={rt}
-              onChange={updatedTemplate => {
+              onChange={(updatedTemplate) => {
                 const templates = [...(this.props.roleMapping.role_templates || [])];
                 templates.splice(index, 1, updatedTemplate);
                 this.props.onChange({
@@ -103,7 +108,7 @@ export class RoleSelector extends React.Component<Props, State> {
         <AddRoleTemplateButton
           canUseStoredScripts={this.props.canUseStoredScripts}
           canUseInlineScripts={this.props.canUseInlineScripts}
-          onClick={type => {
+          onClick={(type) => {
             switch (type) {
               case 'inline': {
                 const templates = this.props.roleMapping.role_templates || [];
@@ -147,8 +152,8 @@ export class RoleSelector extends React.Component<Props, State> {
 
   private hasDeprecatedRolesAssigned = () => {
     return (
-      this.props.roleMapping.roles?.some(r =>
-        this.state.roles.some(role => role.name === r && isRoleDeprecated(role))
+      this.props.roleMapping.roles?.some((r) =>
+        this.state.roles.some((role) => role.name === r && isRoleDeprecated(role))
       ) ?? false
     );
   };

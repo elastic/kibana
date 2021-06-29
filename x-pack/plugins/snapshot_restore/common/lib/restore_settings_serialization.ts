@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { RestoreSettings, RestoreSettingsEs } from '../types';
 
 const removeUndefinedSettings = (settings: RestoreSettingsEs): RestoreSettingsEs => {
@@ -24,6 +26,7 @@ export function serializeRestoreSettings(restoreSettings: RestoreSettings): Rest
     indexSettings,
     ignoreIndexSettings,
     ignoreUnavailable,
+    includeAliases,
   } = restoreSettings;
 
   let parsedIndexSettings: RestoreSettingsEs['index_settings'] | undefined;
@@ -45,32 +48,7 @@ export function serializeRestoreSettings(restoreSettings: RestoreSettings): Rest
     index_settings: parsedIndexSettings,
     ignore_index_settings: ignoreIndexSettings,
     ignore_unavailable: ignoreUnavailable,
-  };
-
-  return removeUndefinedSettings(settings);
-}
-
-export function deserializeRestoreSettings(restoreSettingsEs: RestoreSettingsEs): RestoreSettings {
-  const {
-    indices,
-    rename_pattern: renamePattern,
-    rename_replacement: renameReplacement,
-    include_global_state: includeGlobalState,
-    partial,
-    index_settings: indexSettings,
-    ignore_index_settings: ignoreIndexSettings,
-    ignore_unavailable: ignoreUnavailable,
-  } = restoreSettingsEs;
-
-  const settings: RestoreSettings = {
-    indices,
-    renamePattern,
-    renameReplacement,
-    includeGlobalState,
-    partial,
-    indexSettings: indexSettings ? JSON.stringify(indexSettings) : undefined,
-    ignoreIndexSettings,
-    ignoreUnavailable,
+    include_aliases: includeAliases,
   };
 
   return removeUndefinedSettings(settings);

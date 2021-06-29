@@ -1,35 +1,43 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
+  const retry = getService('retry');
+  const security = getService('security');
+
+  const PageObjects = getPageObjects([
+    'visualize',
+    'visualBuilder',
+    'timePicker',
+    'visChart',
+    'common',
+  ]);
 
   describe('visual builder', function describeIndexTests() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
+
+    before(async () => {
+      await PageObjects.visualize.initTests();
+    });
+
     beforeEach(async () => {
+      await security.testUser.setRoles(
+        ['kibana_admin', 'test_logstash_reader', 'kibana_sample_admin'],
+        false
+      );
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -40,6 +48,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
+        await PageObjects.visualBuilder.clickDataTab('metric');
       });
 
       it('should not have inspector enabled', async () => {
@@ -71,7 +83,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/46677
     describe('gauge', () => {
       beforeEach(async () => {
         await PageObjects.visualBuilder.resetPage();
@@ -79,12 +90,18 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkGaugeTabIsPresent();
       });
 
+      it('should "Entire time range" selected as timerange mode for new visualization', async () => {
+        await PageObjects.visualBuilder.clickPanelOptions('gauge');
+        await PageObjects.visualBuilder.checkSelectedDataTimerangeMode('Entire time range');
+        await PageObjects.visualBuilder.clickDataTab('gauge');
+      });
+
       it('should verify gauge label and count display', async () => {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
-        expect(gaugeCount).to.be('156');
+        expect(gaugeCount).to.be('13,830');
       });
     });
 
@@ -93,6 +110,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickTopN();
         await PageObjects.visualBuilder.checkTopNTabIsPresent();
+        await PageObjects.visualBuilder.clickPanelOptions('topN');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
+        await PageObjects.visualBuilder.clickDataTab('topN');
       });
 
       it('should verify topN label and count display', async () => {
@@ -105,28 +126,134 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('switch index patterns', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded(
+          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+        );
+      });
+
       beforeEach(async () => {
-        log.debug('Load kibana_sample_data_flights data');
-        await esArchiver.loadIfNeeded('kibana_sample_data_flights');
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
-      });
-      after(async () => {
-        await esArchiver.unload('kibana_sample_data_flights');
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
+        await PageObjects.visualBuilder.clickDataTab('metric');
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 22, 2019 @ 00:00:00.000',
+          'Sep 23, 2019 @ 00:00:00.000'
+        );
       });
 
-      it('should be able to switch between index patterns', async () => {
-        const value = await PageObjects.visualBuilder.getMetricValue();
-        expect(value).to.eql('156');
+      after(async () => {
+        await security.testUser.restoreDefaults();
+        await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+        await PageObjects.visualize.initTests();
+      });
+
+      const switchIndexTest = async (useKibanaIndexes: boolean) => {
         await PageObjects.visualBuilder.clickPanelOptions('metric');
-        const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
-        const toTime = 'Oct 28, 2018 @ 23:59:59.999';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
-        await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        await PageObjects.visualBuilder.setIndexPatternValue('', false);
+
+        const value = await PageObjects.visualBuilder.getMetricValue();
+        expect(value).to.eql('0');
+
+        // Sometimes popovers take some time to appear in Firefox (#71979)
+        await retry.tryForTime(20000, async () => {
+          await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndexes);
+          await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
+          await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
+        });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        expect(newValue).to.eql('10');
+        expect(newValue).to.eql('1');
+      };
+
+      it('should be able to switch using text mode selection', async () => {
+        await switchIndexTest(false);
+      });
+
+      it('should be able to switch combo box mode selection', async () => {
+        await switchIndexTest(true);
+      });
+    });
+
+    describe('browser history changes', () => {
+      it('should activate previous/next chart tab and panel config', async () => {
+        await PageObjects.visualBuilder.resetPage();
+
+        log.debug('Click metric chart');
+        await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('metric');
+
+        log.debug('Click Top N chart');
+        await PageObjects.visualBuilder.clickTopN();
+        await PageObjects.visualBuilder.checkTopNTabIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('top_n');
+
+        log.debug('Go back in browser history');
+        await browser.goBack();
+
+        log.debug('Check metric chart and panel config is rendered');
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('metric');
+        await PageObjects.visualBuilder.checkPanelConfigIsPresent('metric');
+
+        log.debug('Go back in browser history');
+        await browser.goBack();
+
+        log.debug('Check timeseries chart and panel config is rendered');
+        await retry.try(async () => {
+          await PageObjects.visualBuilder.checkTimeSeriesChartIsPresent();
+          await PageObjects.visualBuilder.checkTabIsSelected('timeseries');
+          await PageObjects.visualBuilder.checkPanelConfigIsPresent('timeseries');
+        });
+
+        log.debug('Go forward in browser history');
+        await browser.goForward();
+
+        log.debug('Check metric chart and panel config is rendered');
+        await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.checkTabIsSelected('metric');
+        await PageObjects.visualBuilder.checkPanelConfigIsPresent('metric');
+      });
+
+      it('should update panel config', async () => {
+        await PageObjects.visualBuilder.resetPage();
+
+        const initialLegendItems = ['Count: 156'];
+        const finalLegendItems = ['jpg: 106', 'css: 22', 'png: 14', 'gif: 8', 'php: 6'];
+
+        log.debug('Group metrics by terms: extension.raw');
+        await PageObjects.visualBuilder.clickPanelOptions('timeSeries');
+        await PageObjects.visualBuilder.setDropLastBucket(true);
+        await PageObjects.visualBuilder.clickDataTab('timeSeries');
+        await PageObjects.visualBuilder.setMetricsGroupByTerms('extension.raw');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const legendItems1 = await PageObjects.visualBuilder.getLegendItemsContent();
+        expect(legendItems1).to.eql(finalLegendItems);
+
+        log.debug('Go back in browser history');
+        await browser.goBack();
+        const isTermsSelected = await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue(
+          'Terms'
+        );
+        expect(isTermsSelected).to.be(true);
+
+        log.debug('Go back in browser history');
+        await browser.goBack();
+        await PageObjects.visualBuilder.checkSelectedMetricsGroupByValue('Everything');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const legendItems2 = await PageObjects.visualBuilder.getLegendItemsContent();
+        expect(legendItems2).to.eql(initialLegendItems);
+
+        log.debug('Go forward twice in browser history');
+        await browser.goForward();
+        await browser.goForward();
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
+        const legendItems3 = await PageObjects.visualBuilder.getLegendItemsContent();
+        expect(legendItems3).to.eql(finalLegendItems);
       });
     });
   });

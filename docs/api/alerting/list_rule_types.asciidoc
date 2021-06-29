@@ -1,0 +1,143 @@
+[[list-rule-types-api]]
+=== List rule types API
+++++
+<titleabbrev>List rule types</titleabbrev>
+++++
+
+Retrieve a list of alerting rule types that the user is authorized to access.
+
+Each rule type includes a list of consumer features. Within these features, users are authorized to perform either `read` or `all` operations on rules of that type. This helps determine which rule types users can read, but not create or modify.
+
+NOTE: Some rule types are limited to specific features.  These rule types are not available when <<create-edit-rules, defining rules>> in <<management,Stack Management>>.
+
+[[list-rule-types-api-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/alerting/rule_types`
+
+`GET <kibana host>:<port>/s/<space_id>/api/alerting/rule_types`
+
+[[list-rule-types-api-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[list-rule-types-api-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[list-rule-types-api-example]]
+==== Example
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/alerting/rule_types
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+[
+   {
+      "id":".index-threshold",
+      "name":"Index threshold",
+      "action_groups":[
+         {
+            "id":"threshold met",
+            "name":"Threshold met"
+         },
+         {
+            "id":"recovered",
+            "name":"Recovered"
+         }
+      ],
+      "recovery_action_group":{
+         "id":"recovered",
+         "name":"Recovered"
+      },
+      "default_action_group_id":"threshold met",
+      "action_variables":{
+         "context":[
+            {
+               "name":"message",
+               "description":"A pre-constructed message for the alert."
+            },
+         ],
+         "state":[],
+         "params":[
+            {
+               "name":"threshold",
+               "description":"An array of values to use as the threshold; 'between' and 'notBetween' require two values, the others require one."
+            },
+            {
+               "name":"index",
+               "description":"index"
+            },
+         ]
+      },
+      "producer":"stackAlerts",
+      "minimum_license_required":"basic",
+      "is_exportable":true,
+      "enabled_in_license":true,
+      "authorized_consumers":{
+         "alerts":{
+            "read":true,
+            "all":true
+         },
+         "stackAlerts":{
+            "read":true,
+            "all":true
+         },
+         "uptime":{
+            "read":true,
+            "all":true
+         }
+      }
+   }
+]
+--------------------------------------------------
+
+Each rule type contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `name`
+| The descriptive name of the rule type.
+
+| `id`
+| The unique ID of the rule type.
+
+| `minimum_license_required`
+| The license required to use the rule type.
+
+| `is_exportable`
+| Whether the rule type is exportable through the Saved Objects Management UI.
+
+| `enabled_in_license`
+| Whether the rule type is enabled or disabled based on the license.
+
+| `action_groups`
+| An explicit list of groups for which the rule type can schedule actions, each with the action group's unique ID and human readable name. Rule `actions` validation will use this configuration to ensure that groups are valid. Use `kbn-i18n` to translate the names of the action group when registering the rule type.
+
+| `recovery_action_group`
+| An action group to use when an alert goes from an active state, to an inactive one. Do not specify this action group under the `action_groups` property. If `recovery_action_group` is not specified, the default `recovered` action group is used.
+
+| `default_action_group_od`
+| The default ID for the rule type group.
+
+| `action_variables`
+| An explicit list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description. The Rule UI  will use this information to prompt users for these variables in action parameter editors. Use `kbn-i18n` to translate the descriptions.
+
+| `producer`
+| The ID of the application producing this rule type.
+
+| `authorized_consumers`
+| The list of the plugins IDs that have access to the rule type.
+
+|===

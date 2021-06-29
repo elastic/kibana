@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import ccrFixture from './fixtures/ccr';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('ccr', () => {
-    const archive = 'monitoring/ccr';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/ccr';
     const timeRange = {
       min: '2018-09-19T00:00:00.000Z',
       max: '2018-09-19T23:59:59.000Z',

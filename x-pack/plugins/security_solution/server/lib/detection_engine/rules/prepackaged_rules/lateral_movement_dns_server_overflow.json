@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Specially crafted DNS requests can manipulate a known overflow vulnerability in some Windows DNS servers which result in Remote Code Execution (RCE) or a Denial of Service (DoS) from crashing the service.",
+  "false_positives": [
+    "Environments that leverage DNS responses over 60k bytes will result in false positives - if this traffic is predictable and expected, it should be filtered out. Additionally, this detection rule could be triggered by an authorized vulnerability scan or compromise assessment."
+  ],
+  "index": [
+    "packetbeat-*",
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Abnormally Large DNS Response",
+  "note": "## Triage and analysis\n\n### Investigating Large DNS Responses\nDetection alerts from this rule indicate an attempt was made to exploit CVE-2020-1350 (SigRed) through the use of large DNS responses on a Windows DNS server. Here are some possible avenues of investigation:\n- Investigate any corresponding Intrusion Detection Signatures (IDS) alerts that can validate this detection alert.\n- Examine the `dns.question_type` network fieldset with a protocol analyzer, such as Zeek, Packetbeat, or Suricata, for `SIG` or `RRSIG` data.\n- Validate the patch level and OS of the targeted DNS server to validate the observed activity was not large-scale Internet vulnerability scanning.\n- Validate that the source of the network activity was not from an authorized vulnerability scan or compromise assessment.",
+  "query": "event.category:(network or network_traffic) and destination.port:53 and\n  (event.dataset:zeek.dns or type:dns or event.type:connection) and network.bytes > 60000\n",
+  "references": [
+    "https://research.checkpoint.com/2020/resolving-your-way-into-domain-admin-exploiting-a-17-year-old-bug-in-windows-dns-servers/",
+    "https://msrc-blog.microsoft.com/2020/07/14/july-2020-security-update-cve-2020-1350-vulnerability-in-windows-domain-name-system-dns-server/",
+    "https://github.com/maxpl0it/CVE-2020-1350-DoS"
+  ],
+  "risk_score": 47,
+  "rule_id": "11013227-0301-4a8c-b150-4db924484475",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "Lateral Movement"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1210",
+          "name": "Exploitation of Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1210/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

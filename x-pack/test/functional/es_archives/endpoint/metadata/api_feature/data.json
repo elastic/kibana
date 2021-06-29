@@ -2,25 +2,47 @@
   "type": "doc",
   "value": {
     "id": "3KVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579881969541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "failure"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T16:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d14",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86",
         "hostname": "cadmann-4.example.com",
+        "name": "cadmann-4.example.com",
         "id": "1fb3e58f-6ab0-4406-9d2a-91911207a712",
         "ip": [
           "10.192.213.130",
@@ -34,8 +56,12 @@
         "os": {
           "full": "Windows 10",
           "name": "windows 10.0",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "10.0",
-          "variant" : "Windows Pro"
+          "Ext": {
+            "variant" : "Windows Pro"
+          }
         }
       }
     }
@@ -46,25 +72,47 @@
   "type": "doc",
   "value": {
     "id": "3aVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579881969541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T16:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d15",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86_64",
         "hostname": "thurlow-9.example.com",
+        "name": "thurlow-9.example.com",
         "id": "2f735e3d-be14-483b-9822-bad06e9045ca",
         "ip": [
           "10.46.229.234"
@@ -77,8 +125,12 @@
         "os": {
           "full": "Windows Server 2016",
           "name": "windows 10.0",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "10.0",
-          "variant" : "Windows Server"
+          "Ext": {
+            "variant" : "Windows Server"
+          }
         }
       }
     }
@@ -89,24 +141,46 @@
   "type": "doc",
   "value": {
     "id": "3qVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579881969541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "Default",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T16:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d16",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "hostname": "rezzani-7.example.com",
+        "name": "rezzani-7.example.com",
         "id": "fc0ff548-feba-41b6-8367-65e8790d0eaf",
         "ip": [
           "10.101.149.26",
@@ -118,8 +192,12 @@
         "os": {
           "full": "Windows 10",
           "name": "windows 10.0",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "10.0",
-          "variant" : "Windows Pro"
+          "Ext": {
+            "variant" : "Windows Pro"
+          }
         }
       }
     }
@@ -130,25 +208,47 @@
   "type": "doc",
   "value": {
     "id": "36VN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579878369541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "failure"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T15:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d18",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86",
         "hostname": "cadmann-4.example.com",
+        "name": "cadmann-4.example.com",
         "id": "1fb3e58f-6ab0-4406-9d2a-91911207a712",
         "ip": [
           "10.192.213.130",
@@ -162,8 +262,12 @@
         "os": {
           "full": "Windows Server 2016",
           "name": "windows 10.0",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "10.0",
-          "variant" : "Windows Server 2016"
+          "Ext": {
+            "variant" : "Windows Server 2016"
+          }
         }
       }
     }
@@ -174,24 +278,46 @@
   "type": "doc",
   "value": {
     "id": "4KVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579878369541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T15:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d19",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "hostname": "thurlow-9.example.com",
+        "name": "thurlow-9.example.com",
         "id": "2f735e3d-be14-483b-9822-bad06e9045ca",
         "ip": [
           "10.46.229.234"
@@ -204,8 +330,12 @@
         "os": {
           "full": "Windows Server 2012",
           "name": "windows 6.2",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }
@@ -216,25 +346,47 @@
   "type": "doc",
   "value": {
     "id": "4aVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579878369541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T15:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d39",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86",
         "hostname": "rezzani-7.example.com",
+        "name": "rezzani-7.example.com",
         "id": "fc0ff548-feba-41b6-8367-65e8790d0eaf",
         "ip": [
           "10.101.149.26",
@@ -246,8 +398,12 @@
         "os": {
           "full": "Windows Server 2012",
           "name": "windows 6.2",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }
@@ -258,24 +414,46 @@
   "type": "doc",
   "value": {
     "id": "4qVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579874769541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "963b081e-60d1-482c-befd-a5815fa8290f",
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "failure"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T14:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d31",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "hostname": "cadmann-4.example.com",
+        "name": "cadmann-4.example.com",
         "id": "1fb3e58f-6ab0-4406-9d2a-91911207a712",
         "ip": [
           "10.192.213.130",
@@ -289,8 +467,12 @@
         "os": {
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "6.3",
-          "variant" : "Windows Server 2012 R2"
+          "Ext": {
+            "variant" : "Windows Server 2012 R2"
+          }
         }
       }
     }
@@ -301,24 +483,46 @@
   "type": "doc",
   "value": {
     "id": "46VN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579874769541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
+          "applied": {
+            "name": "Default",
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "status": "success"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T14:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d23",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "hostname": "thurlow-9.example.com",
+        "name": "thurlow-9.example.com",
         "id": "2f735e3d-be14-483b-9822-bad06e9045ca",
         "ip": [
           "10.46.229.234"
@@ -331,8 +535,12 @@
         "os": {
           "full": "Windows Server 2012R2",
           "name": "windows 6.3",
+          "platform": "Windows",
+          "family": "Windows",
           "version": "6.3",
-          "variant" : "Windows Server 2012 R2"
+          "Ext": {
+            "variant" : "Windows Server 2012 R2"
+          }
         }
       }
     }
@@ -343,25 +551,47 @@
   "type": "doc",
   "value": {
     "id": "5KVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint.metadata-default",
     "source": {
-      "@timestamp": 1579874769541,
+      "@timestamp": 1618841405309,
       "agent": {
         "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
       },
-      "endpoint": {
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
+      },
+      "Endpoint": {
+        "status": "enrolled",
         "policy": {
-          "id": "00000000-0000-0000-0000-000000000000"
+          "applied": {
+            "name": "With Eventing",
+            "id": "00000000-0000-0000-0000-000000000000",
+            "status": "success"
+          }
         }
       },
       "event": {
-        "created": "2020-01-24T14:06:09.541Z"
+        "created": 1618841405309,
+        "id": "32f5fda2-48e4-4fae-b89e-a18038294d35",
+        "kind": "metric",
+        "category": [
+          "host"
+        ],
+        "type": [
+          "info"
+        ],
+        "module": "endpoint",
+        "action": "endpoint_metadata",
+        "dataset": "endpoint.metadata"
       },
       "host": {
         "architecture": "x86",
         "hostname": "rezzani-7.example.com",
+        "name": "rezzani-7.example.com",
         "id": "fc0ff548-feba-41b6-8367-65e8790d0eaf",
         "ip": [
           "10.101.149.26",
@@ -374,7 +604,11 @@
           "full": "Windows Server 2012",
           "name": "windows 6.2",
           "version": "6.2",
-          "variant" : "Windows Server 2012"
+          "platform": "Windows",
+          "family": "Windows",
+          "Ext": {
+            "variant" : "Windows Server 2012"
+          }
         }
       }
     }

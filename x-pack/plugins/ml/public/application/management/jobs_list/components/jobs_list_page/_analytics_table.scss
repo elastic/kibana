@@ -1,0 +1,32 @@
+
+.mlAnalyticsTable {
+  // Using an override as a last resort because we cannot set custom classes on
+  // nested upstream components. The opening animation limits the height
+  // of the expanded row to 1000px which turned out to be not predictable.
+  // The animation could also result in flickering with expanded rows
+  // where the inner content would result in the DOM changing the height.
+  .euiTableRow-isExpandedRow .euiTableCellContent {
+    animation: none !important;
+    .euiTableCellContent__text {
+      width: 100%;
+    }
+  }
+  // Another override: Because an update to the table replaces the DOM, the same
+  // icon would still again fade in with an animation. If the table refreshes with
+  // e.g. 1s this would result in a blinking icon effect.
+  .euiIcon-isLoaded {
+    animation: none !important;
+  }
+}
+
+.mlTaskStateBadge {
+  max-width: 100px;
+}
+
+.mlKibanaManagement__analyticsSpacer {
+  clear: both;
+}
+
+.mlKibanaManagement__analyticsRefreshButton {
+  float: right;
+}

@@ -1,0 +1,22 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "references": [
+    { "path": "../features/tsconfig.json" },
+    { "path": "../licensing/tsconfig.json" },
+    { "path": "../../../src/plugins/advanced_settings/tsconfig.json" },
+    { "path": "../../../src/plugins/home/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    { "path": "../../../src/plugins/management/tsconfig.json" },
+    { "path": "../../../src/plugins/saved_objects_management/tsconfig.json" },
+    { "path": "../../../src/plugins/spaces_oss/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects the successful hijack of Microsoft Compatibility Appraiser scheduled task to establish persistence with an integrity level of system.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Persistence via TelemetryController Scheduled Task Hijack",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"CompatTelRunner.exe\" and process.args : \"-cv*\" and\n  not process.name : (\"conhost.exe\",\n                      \"DeviceCensus.exe\",\n                      \"CompatTelRunner.exe\",\n                      \"DismHost.exe\",\n                      \"rundll32.exe\",\n                      \"powershell.exe\")\n",
+  "references": [
+    "https://www.trustedsec.com/blog/abusing-windows-telemetry-for-persistence/?utm_content=131234033&utm_medium=social&utm_source=twitter&hss_channel=tw-403811306"
+  ],
+  "risk_score": 73,
+  "rule_id": "68921d85-d0dc-48b3-865f-43291ca2c4f2",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1053",
+          "name": "Scheduled Task/Job",
+          "reference": "https://attack.mitre.org/techniques/T1053/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 5
+}

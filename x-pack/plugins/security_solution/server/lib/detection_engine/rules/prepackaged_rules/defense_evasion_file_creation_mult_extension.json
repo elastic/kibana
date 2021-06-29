@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Masquerading can allow an adversary to evade defenses and better blend in with the environment. One way it occurs is when the name or location of a file is manipulated as a means of tricking a user into executing what they think is a benign file type but is actually executable code.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Executable File Creation with Multiple Extensions",
+  "query": "file where event.type == \"creation\" and file.extension:\"exe\" and\n  file.name:\n  (\n    \"*.vbs.exe\",\n    \"*.vbe.exe\",\n    \"*.bat.exe\",\n    \"*.js.exe\",\n    \"*.cmd.exe\",\n    \"*.wsh.exe\",\n    \"*.ps1.exe\",\n    \"*.pdf.exe\",\n    \"*.docx.exe\",\n    \"*.doc.exe\",\n    \"*.xlsx.exe\",\n    \"*.xls.exe\",\n    \"*.pptx.exe\",\n    \"*.ppt.exe\",\n    \"*.txt.exe\",\n    \"*.rtf.exe\",\n    \"*.gif.exe\",\n    \"*.jpg.exe\",\n    \"*.png.exe\",\n    \"*.bmp.exe\",\n    \"*.hta.exe\",\n    \"*.txt.exe\",\n    \"*.img.exe\",\n    \"*.iso.exe\"\n  )\n",
+  "risk_score": 47,
+  "rule_id": "8b2b3a62-a598-4293-bc14-3d5fa22bb98f",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/",
+          "subtechnique": [
+            {
+              "id": "T1036.004",
+              "name": "Masquerade Task or Service",
+              "reference": "https://attack.mitre.org/techniques/T1036/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

@@ -1,39 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
-import { Template, TemplateEs } from '../../../../common/types';
-import { serializeTemplate } from '../../../../common/lib';
+import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
 import { templateSchema } from './validate_schemas';
+import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 
-export function registerCreateRoute({ router, license, lib }: RouteDependencies) {
-  router.put(
-    { path: addBasePath('/templates'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
-      const template = req.body as Template;
-      const serializedTemplate = serializeTemplate(template) as TemplateEs;
-
+export function registerCreateRoute({ router, lib }: RouteDependencies) {
+  router.post(
+    { path: addBasePath('/index_templates'), validate: { body: bodySchema } },
+    async (ctx, req, res) => {
+      const { callAsCurrentUser } = ctx.dataManagement!.client;
+      const template = req.body as TemplateDeserialized;
       const {
-        name,
-        order,
-        index_patterns,
-        version,
-        settings,
-        mappings,
-        aliases,
-      } = serializedTemplate;
+        _kbnMeta: { isLegacy },
+      } = template;
 
       // Check that template with the same name doesn't already exist
-      const templateExists = await callAsCurrentUser('indices.existsTemplate', { name });
+      const templateExists = await doesTemplateExist({
+        name: template.name,
+        callAsCurrentUser,
+        isLegacy,
+      });
 
       if (templateExists) {
         return res.conflict({
@@ -41,7 +38,7 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
             i18n.translate('xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage', {
               defaultMessage: "There is already a template with name '{name}'.",
               values: {
-                name,
+                name: template.name,
               },
             })
           ),
@@ -50,29 +47,23 @@ export function registerCreateRoute({ router, license, lib }: RouteDependencies)
 
       try {
         // Otherwise create new index template
-        const response = await callAsCurrentUser('indices.putTemplate', {
-          name,
-          order,
-          body: {
-            index_patterns,
-            version,
-            settings,
-            mappings,
-            aliases,
-          },
-        });
+        const response = await saveTemplate({ template, callAsCurrentUser, isLegacy });
 
         return res.ok({ body: response });
       } catch (e) {
         if (lib.isEsError(e)) {
+          const error = lib.parseEsError(e.response);
           return res.customError({
             statusCode: e.statusCode,
-            body: e,
+            body: {
+              message: error.message,
+              attributes: error,
+            },
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

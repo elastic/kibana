@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects attempts to reset an Okta user's enrolled multi-factor authentication (MFA) factors. An adversary may attempt to reset the MFA factors for an Okta user's account in order to register new MFA factors and abuse the account to blend in with normal activity in the victim's environment.",
+  "false_positives": [
+    "Consider adding exceptions to this rule to filter false positives if the MFA factors for Okta user accounts are regularly reset in your organization."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-okta*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Attempt to Reset MFA Factors for an Okta User Account",
+  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:okta.system and event.action:user.mfa.factor.reset_all\n",
+  "references": [
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 21,
+  "rule_id": "729aa18d-06a6-41c7-b175-b65b739b1181",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 6
+}

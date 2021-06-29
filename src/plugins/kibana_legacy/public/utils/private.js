@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 /**
  * # `Private()`
  * Private module loader, used to merge angular and require js dependency styles
@@ -98,13 +88,7 @@ import _ from 'lodash';
 const nextId = _.partial(_.uniqueId, 'privateProvider#');
 
 function name(fn) {
-  return (
-    fn.name ||
-    fn
-      .toString()
-      .split('\n')
-      .shift()
-  );
+  return fn.name || fn.toString().split('\n').shift();
 }
 
 export function PrivateProvider() {
@@ -124,12 +108,12 @@ export function PrivateProvider() {
     else return (fn.$$id = nextId());
   }
 
-  provider.stub = function(fn, instance) {
+  provider.stub = function (fn, instance) {
     cache[identify(fn)] = instance;
     return instance;
   };
 
-  provider.swap = function(fn, prov) {
+  provider.swap = function (fn, prov) {
     const id = identify(fn);
     swaps[id] = prov;
   };
@@ -139,7 +123,7 @@ export function PrivateProvider() {
     function PrivateFactory($injector) {
       // prevent circular deps by tracking where we came from
       const privPath = [];
-      const pathToString = function() {
+      const pathToString = function () {
         return privPath.map(name).join(' -> ');
       };
 

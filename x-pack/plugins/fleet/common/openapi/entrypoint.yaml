@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Ingest Manager
+  version: '0.2'
+  contact:
+    name: Ingest Team
+  license:
+    name: Elastic
+servers:
+  - url: 'http://localhost:5601/api/fleet'
+    description: local
+paths:
+  /agent_policies:
+    $ref: paths/agent_policies.yaml
+  '/agent_policies/{agentPolicyId}':
+    $ref: 'paths/agent_policies@{agent_policy_id}.yaml'
+  '/agent_policies/{agentPolicyId}/copy':
+    $ref: 'paths/agent_policies@{agent_policy_id}@copy.yaml'
+  /agent_policies/delete:
+    $ref: paths/agent_policies@delete.yaml
+  /agent-status:
+    $ref: paths/agent_status.yaml
+  /agents:
+    $ref: paths/agents.yaml
+  '/agents/{agentId}/unenroll':
+    $ref: 'paths/agents@{agent_id}@unenroll.yaml'
+  '/agents/{agentId}/upgrade':
+    $ref: 'paths/agents@{agent_id}@upgrade.yaml'
+  /agents/bulk_upgrade:
+    $ref: paths/agents@bulk_upgrade.yaml
+  /agents/setup:
+    $ref: paths/agents@setup.yaml
+  /enrollment-api-keys:
+    $ref: paths/enrollment_api_keys.yaml
+  '/enrollment-api-keys/{keyId}':
+    $ref: 'paths/enrollment_api_keys@{key_id}.yaml'
+  /epm/categories:
+    $ref: paths/epm@categories.yaml
+  /epm/packages:
+    $ref: paths/epm@packages.yaml
+  '/epm/packages/{pkgkey}':
+    $ref: 'paths/epm@packages@{pkgkey}.yaml'
+  '/agents/{agentId}':
+    $ref: 'paths/agents@{agent_id}.yaml'
+  '/install/{osType}':
+    $ref: 'paths/install@{os_type}.yaml'
+  /package_policies:
+    $ref: paths/package_policies.yaml
+  '/package_policies/{packagePolicyId}':
+    $ref: 'paths/package_policies@{package_policy_id}.yaml'
+  /setup:
+    $ref: paths/setup.yaml
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    Enrollment API Key:
+      name: Authorization
+      type: apiKey
+      in: header
+      description: 'e.g. Authorization: ApiKey base64EnrollmentApiKey'
+    Access API Key:
+      name: Authorization
+      type: apiKey
+      in: header
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
+security:
+  - basicAuth: []

@@ -1,0 +1,100 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// --------------------------------------------------
+// View: Adding a Source flow
+// --------------------------------------------------
+
+.adding-a-source {
+  ul {
+    padding: 0;
+  }
+
+  li + li {
+    margin-top: auto !important;
+  }
+
+  &__acl-tooltip {
+    cursor: not-allowed;
+
+    .euiSwitch__label {
+      cursor: not-allowed;
+    }
+  }
+
+  &__icon {
+    width: 3.5em;
+    height: 3.5em;
+  }
+
+  &__category {
+    text-transform: capitalize;
+
+    &:after {
+      content: ', ';
+    }
+
+    &:last-child:after {
+      content: '';
+    }
+  }
+
+  &__intro-image {
+    background-color: #22272E;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+
+  &__intro-image img {
+    width: auto;
+    height: auto;
+  }
+
+  &__intro-step {
+    width: 80px;
+    height: 100%;
+    display: flex;
+    background: transparent;
+    border-radius: 0;
+    border-right: 2px solid #DBE2EB;
+    padding: 0 18px 0 0;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &__config-steps {
+    p {
+      margin: 0;
+    }
+  }
+
+  &__button-row {
+    .euiFlexItem:first-child {
+      align-self: flex-end;
+    }
+    .euiFlexItem:last-child {
+      align-self: flex-start;
+    }
+  }
+
+  &__connect-an-instance {
+    flex-basis: auto;
+  }
+
+  &__features-list {
+    flex-basis: 100%;
+  }
+
+  &__feature-image {
+    width: 2.5em;
+    margin: 0;
+    background: transparent;
+  }
+}

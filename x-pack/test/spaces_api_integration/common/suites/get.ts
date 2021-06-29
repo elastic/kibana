@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { SuperAgent } from 'superagent';
-import { getUrlPrefix } from '../lib/space_test_utils';
+import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
 interface GetTest {
@@ -69,7 +71,7 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
         disabledFeatures: [],
       },
     ];
-    expect(resp.body).to.eql(allSpaces.find(space => space.id === spaceId));
+    expect(resp.body).to.eql(allSpaces.find((space) => space.id === spaceId));
   };
 
   const makeGetTest = (describeFn: DescribeFn) => (
@@ -77,15 +79,25 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperAgent<any>)
     { user = {}, currentSpaceId, spaceId, tests }: GetTestDefinition
   ) => {
     describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/test/spaces_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
+        )
+      );
 
-      it(`should return ${tests.default.statusCode}`, async () => {
-        return supertest
-          .get(`${getUrlPrefix(currentSpaceId)}/api/spaces/space/${spaceId}`)
-          .auth(user.username, user.password)
-          .expect(tests.default.statusCode)
-          .then(tests.default.response);
+      getTestScenariosForSpace(currentSpaceId).forEach(({ urlPrefix, scenario }) => {
+        it(`should return ${tests.default.statusCode} ${scenario}`, async () => {
+          return supertest
+            .get(`${urlPrefix}/api/spaces/space/${spaceId}`)
+            .auth(user.username, user.password)
+            .expect(tests.default.statusCode)
+            .then(tests.default.response);
+        });
       });
     });
   };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -13,8 +14,18 @@ import { UserScenarios } from '../scenarios';
 export default function catalogueTests({ getService }: FtrProviderContext) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
+  const esFeatureExceptions = [
+    'security',
+    'index_lifecycle_management',
+    'snapshot_restore',
+    'rollup_jobs',
+    'reporting',
+    'transform',
+    'watcher',
+  ];
+
   describe('catalogue', () => {
-    UserScenarios.forEach(scenario => {
+    UserScenarios.forEach((scenario) => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
           credentials: {
@@ -32,15 +43,38 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             break;
           }
           case 'all':
+          case 'dual_privileges_all': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything except ml, monitoring, and ES features are enabled
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) =>
+                catalogueId !== 'ml' &&
+                catalogueId !== 'monitoring' &&
+                catalogueId !== 'ml_file_data_visualizer' &&
+                !esFeatureExceptions.includes(catalogueId)
+            );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
           case 'read':
-          case 'dual_privileges_all':
           case 'dual_privileges_read': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except ml and monitoring is enabled
+            // everything except ml and monitoring and enterprise search is enabled
+            const exceptions = [
+              'ml',
+              'ml_file_data_visualizer',
+              'monitoring',
+              'enterpriseSearch',
+              'appSearch',
+              'workplaceSearch',
+              ...esFeatureExceptions,
+            ];
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
-              (enabled, catalogueId) => catalogueId !== 'ml' && catalogueId !== 'monitoring'
+              (enabled, catalogueId) => !exceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;

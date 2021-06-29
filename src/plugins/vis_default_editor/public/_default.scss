@@ -1,0 +1,99 @@
+.visEditor--default {
+  flex: 1 1 auto;
+  display: flex;
+}
+
+/**
+ * Collapsible sidebar container
+ */
+
+.visEditor__collapsibleSidebar {
+  flex-grow: 1;
+}
+
+// !importants on width and height are required to override resizable panel inline widths
+.visEditor__collapsibleSidebar-isClosed {
+  min-width: 0;
+  width: $euiSizeXL !important; // Just enough room for the collapse button
+
+  .visEditorSidebar {
+    display: none;
+    padding-left: 0;
+  }
+}
+
+.visEditor__collapsibleSidebarButton {
+  position: absolute;
+  right: $euiSizeXS;
+  top: $euiSizeS;
+}
+
+/**
+ * Resizer
+ */
+
+.visEditor__resizer-isHidden {
+  display: none;
+}
+
+/**
+ * Canvas area
+ */
+
+.visEditor__visualization__wrapper-expanded {
+  width: 100% !important;
+}
+
+.visEditor__visualization {
+  display: flex;
+  flex: 1 1 auto; // Fixes IE bug: the editor overflows a visualization on small screens
+  overflow: hidden;
+}
+
+.visEditor__canvas {
+  background-color: $euiColorEmptyShade;
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+  flex-shrink: 1;
+  flex-basis: 100%;
+
+  &.embedded {
+    flex-shrink: 1;
+    flex-basis: 100%;
+  }
+
+  .visChart {
+    position: relative;
+  }
+}
+
+/**
+ * If we are on a small screen we change the editor layout
+ */
+@include euiBreakpoint('xs', 's', 'm') {
+  .visEditor--default {
+    flex-direction: column; // change the editor direction to column
+  }
+
+  .visEditor__collapsibleSidebar {
+    width: 100% !important; // force the editor to take 100% width
+    flex-grow: 0;
+  }
+
+  .visEditor__collapsibleSidebar-isClosed {
+    height: $euiSizeXXL !important; // Just enough room for the collapse button
+  }
+
+  .visEditor__resizer {
+    display: none; // hide the resizer button
+  }
+
+  .visEditor__visualization__wrapper {
+    // force the visualization to take 100% width.
+    width: 100% !important;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+}

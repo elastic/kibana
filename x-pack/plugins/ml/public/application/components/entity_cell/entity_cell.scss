@@ -1,0 +1,26 @@
+.field-value-short {
+  @include euiTextTruncate;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.field-value-long {
+  overflow-wrap: break-word;
+}
+
+.filter-button {
+  opacity: .5;
+  width: $euiSize;
+  height: $euiSize;
+  -webkit-transform: translateY(-1px);
+  transform: translateY(-1px);
+
+  .euiIcon {
+    width: $euiFontSizeXS;
+    height: $euiFontSizeXS;
+  }
+}
+
+.filter-button:hover {
+  opacity: 1;
+}

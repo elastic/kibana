@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -23,11 +12,10 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
-import { IEmbeddableStart } from '../../../src/plugins/embeddable/public';
+import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from '../../../src/plugins/inspector/public';
 import {
-  AppMountContext,
   AppMountParameters,
   CoreStart,
   SavedObjectsStart,
@@ -38,6 +26,7 @@ import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
+import { EmbeddableExamplesStart } from '../../embeddable_examples/public/plugin';
 
 interface PageDef {
   title: string;
@@ -46,12 +35,12 @@ interface PageDef {
 }
 
 type NavProps = RouteComponentProps & {
-  navigateToApp: AppMountContext['core']['application']['navigateToApp'];
+  navigateToApp: CoreStart['application']['navigateToApp'];
   pages: PageDef[];
 };
 
 const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
-  const navItems = pages.map(page => ({
+  const navItems = pages.map((page) => ({
     id: page.id,
     name: page.title,
     onClick: () => history.push(`/${page.id}`),
@@ -74,66 +63,65 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
 interface Props {
   basename: string;
   navigateToApp: CoreStart['application']['navigateToApp'];
-  embeddableApi: IEmbeddableStart;
+  embeddableApi: EmbeddableStart;
   uiActionsApi: UiActionsStart;
   overlays: OverlayStart;
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   savedObject: SavedObjectsStart;
   uiSettingsClient: IUiSettingsClient;
+  embeddableExamples: EmbeddableExamplesStart;
 }
 
 const EmbeddableExplorerApp = ({
   basename,
   navigateToApp,
   embeddableApi,
-  inspector,
-  uiSettingsClient,
-  savedObject,
-  overlays,
-  uiActionsApi,
-  notifications,
+  embeddableExamples,
 }: Props) => {
   const pages: PageDef[] = [
     {
       title: 'Hello world embeddable',
       id: 'helloWorldEmbeddableSection',
       component: (
-        <HelloWorldEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
+        <HelloWorldEmbeddableExample
+          helloWorldEmbeddableFactory={embeddableExamples.factories.getHelloWorldEmbeddableFactory()}
+        />
       ),
     },
     {
       title: 'Todo embeddable',
       id: 'todoEmbeddableSection',
       component: (
-        <TodoEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
+        <TodoEmbeddableExample
+          todoEmbeddableFactory={embeddableExamples.factories.getTodoEmbeddableFactory()}
+        />
       ),
     },
     {
       title: 'List container embeddable',
       id: 'listContainerSection',
-      component: <ListContainerExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />,
+      component: (
+        <ListContainerExample
+          listContainerEmbeddableFactory={embeddableExamples.factories.getListContainerEmbeddableFactory()}
+          searchableListContainerEmbeddableFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
+        />
+      ),
     },
     {
       title: 'Dynamically adding children to a container',
-      id: 'embeddablePanelExamplae',
+      id: 'embeddablePanelExample',
       component: (
         <EmbeddablePanelExample
-          uiActionsApi={uiActionsApi}
-          getAllEmbeddableFactories={embeddableApi.getEmbeddableFactories}
-          getEmbeddableFactory={embeddableApi.getEmbeddableFactory}
-          overlays={overlays}
-          uiSettingsClient={uiSettingsClient}
-          savedObject={savedObject}
-          notifications={notifications}
-          inspector={inspector}
+          embeddableServices={embeddableApi}
+          searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
         />
       ),
     },
   ];
 
   const routes = pages.map((page, i) => (
-    <Route key={i} path={`/${page.id}`} render={props => page.component} />
+    <Route key={i} path={`/${page.id}`} render={(props) => page.component} />
   ));
 
   return (

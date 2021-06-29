@@ -1,18 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import {
-  INDEX_NAMES,
-  UNNAMED_LOCATION,
-} from '../../../../../legacy/plugins/uptime/common/constants';
-import {
-  MonitorLocations,
-  MonitorLocation,
-} from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { MonitorLocations, MonitorLocation } from '../../../common/runtime_types';
+import { UNNAMED_LOCATION } from '../../../common/constants';
 
 /**
  * Fetch data for the monitor page title.
@@ -29,52 +24,65 @@ export interface GetMonitorLocationsParams {
 export const getMonitorLocations: UMElasticsearchQueryFn<
   GetMonitorLocationsParams,
   MonitorLocations
-> = async ({ callES, monitorId, dateStart, dateEnd }) => {
-  const params = {
-    index: INDEX_NAMES.HEARTBEAT,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                'monitor.id': monitorId,
-              },
-            },
-            {
-              exists: {
-                field: 'summary',
-              },
-            },
-            {
-              range: {
-                '@timestamp': {
-                  gte: dateStart,
-                  lte: dateEnd,
-                },
-              },
-            },
-          ],
-        },
+> = async ({ uptimeEsClient, monitorId, dateStart, dateEnd }) => {
+  const sortOptions = [
+    {
+      '@timestamp': {
+        order: 'desc' as const,
       },
-      aggs: {
-        location: {
-          terms: {
-            field: 'observer.geo.name',
-            missing: '__location_missing__',
+    },
+  ];
+
+  const params = {
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.id': monitorId,
+            },
           },
-          aggs: {
-            most_recent: {
-              top_hits: {
-                size: 1,
-                sort: {
-                  '@timestamp': {
-                    order: 'desc',
-                  },
-                },
-                _source: ['monitor', 'summary', 'observer', '@timestamp'],
+          {
+            exists: {
+              field: 'summary',
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: dateStart,
+                lte: dateEnd,
               },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      location: {
+        terms: {
+          field: 'observer.geo.name',
+          missing: '__location_missing__',
+        },
+        aggs: {
+          most_recent: {
+            top_hits: {
+              size: 1,
+              sort: sortOptions,
+              _source: ['monitor', 'summary', 'observer', '@timestamp'],
+            },
+          },
+          down_history: {
+            sum: {
+              field: 'summary.down',
+              missing: 0,
+            },
+          },
+          up_history: {
+            sum: {
+              field: 'summary.up',
+              missing: 0,
             },
           },
         },
@@ -82,7 +90,8 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     },
   };
 
-  const result = await callES('search', params);
+  const { body: result } = await uptimeEsClient.search({ body: params });
+
   const locations = result?.aggregations?.location?.buckets ?? [];
 
   const getGeo = (locGeo: { name: string; location?: string }) => {
@@ -105,10 +114,18 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     }
   };
 
+  let totalUps = 0;
+  let totalDowns = 0;
+
   const monLocs: MonitorLocation[] = [];
-  locations.forEach((loc: any) => {
-    const mostRecentLocation = loc.most_recent.hits.hits[0]._source;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  locations.forEach(({ most_recent: mostRecent, up_history, down_history }: any) => {
+    const mostRecentLocation = mostRecent.hits.hits[0]._source;
+    totalUps += up_history.value;
+    totalDowns += down_history.value;
     const location: MonitorLocation = {
+      up_history: up_history.value ?? 0,
+      down_history: down_history.value ?? 0,
       summary: mostRecentLocation?.summary,
       geo: getGeo(mostRecentLocation?.observer?.geo),
       timestamp: mostRecentLocation['@timestamp'],
@@ -119,5 +136,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
   return {
     monitorId,
     locations: monLocs,
+    up_history: totalUps,
+    down_history: totalDowns,
   };
 };

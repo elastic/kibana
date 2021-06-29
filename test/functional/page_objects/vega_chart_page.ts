@@ -1,91 +1,109 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function VegaChartPageProvider({
-  getService,
-  getPageObjects,
-  updateBaselines,
-}: FtrProviderContext & { updateBaselines: boolean }) {
-  const find = getService('find');
-  const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
-  const screenshot = getService('screenshots');
-  const log = getService('log');
-  const { visEditor, visChart } = getPageObjects(['visEditor', 'visChart']);
+const compareSpecs = (first: string, second: string) => {
+  const normalizeSpec = (spec: string) => spec.replace(/[\n ]/g, '');
+  return normalizeSpec(first) === normalizeSpec(second);
+};
 
-  class VegaChartPage {
-    public async getSpec() {
-      // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
-      const editor = await testSubjects.find('vega-editor');
-      const lines = await editor.findAllByClassName('ace_line_group');
-      const linesText = await Promise.all(
-        lines.map(async line => {
-          return await line.getVisibleText();
-        })
-      );
-      return linesText.join('\n');
-    }
+export class VegaChartPageObject extends FtrService {
+  private readonly find = this.ctx.getService('find');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly retry = this.ctx.getService('retry');
 
-    public async getViewContainer() {
-      return await find.byCssSelector('div.vgaVis__view');
-    }
-
-    public async getControlContainer() {
-      return await find.byCssSelector('div.vgaVis__controls');
-    }
-
-    /**
-     * Removes chrome and takes a small screenshot of a vis to compare against a baseline.
-     * @param {string} name The name of the baseline image.
-     * @param {object} opts Options object.
-     * @param {number} opts.threshold Threshold for allowed variance when comparing images.
-     */
-    public async expectVisToMatchScreenshot(name: string, opts = { threshold: 0.05 }) {
-      log.debug(`expectVisToMatchScreenshot(${name})`);
-
-      // Collapse sidebar and inject some CSS to hide the nav so we have a focused screenshot
-      await visEditor.clickEditorSidebarCollapse();
-      await visChart.waitForVisualizationRenderingStabilized();
-      await browser.execute(`
-          var el = document.createElement('style');
-          el.id = '__data-test-style';
-          el.innerHTML = '[data-test-subj="headerGlobalNav"] { display: none; } ';
-          el.innerHTML += '[data-test-subj="top-nav"] { display: none; } ';
-          el.innerHTML += '[data-test-subj="experimentalVisInfo"] { display: none; } ';
-          document.body.appendChild(el);
-        `);
-
-      const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
-
-      // Reset the chart to its original state
-      await browser.execute(`
-          var el = document.getElementById('__data-test-style');
-          document.body.removeChild(el);
-        `);
-      await visEditor.clickEditorSidebarCollapse();
-      await visChart.waitForVisualizationRenderingStabilized();
-      expect(percentDifference).to.be.lessThan(opts.threshold);
-    }
+  public getEditor() {
+    return this.testSubjects.find('vega-editor');
   }
 
-  return new VegaChartPage();
+  public getViewContainer() {
+    return this.find.byCssSelector('div.vgaVis__view');
+  }
+
+  public getControlContainer() {
+    return this.find.byCssSelector('div.vgaVis__controls');
+  }
+
+  public getYAxisContainer() {
+    return this.find.byCssSelector('[aria-label^="Y-axis"]');
+  }
+
+  public async getAceGutterContainer() {
+    const editor = await this.getEditor();
+    return editor.findByClassName('ace_gutter');
+  }
+
+  public async getRawSpec() {
+    // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
+    const editor = await this.getEditor();
+    const lines = await editor.findAllByClassName('ace_line_group');
+
+    return await Promise.all(
+      lines.map(async (line) => {
+        return await line.getVisibleText();
+      })
+    );
+  }
+
+  public async getSpec() {
+    return (await this.getRawSpec()).join('\n');
+  }
+
+  public async focusEditor() {
+    const editor = await this.getEditor();
+    const textarea = await editor.findByClassName('ace_content');
+
+    await textarea.click();
+  }
+
+  public async fillSpec(newSpec: string) {
+    await this.retry.try(async () => {
+      await this.cleanSpec();
+      await this.focusEditor();
+      await this.browser.pressKeys(newSpec);
+
+      expect(compareSpecs(await this.getSpec(), newSpec)).to.be(true);
+    });
+  }
+
+  public async typeInSpec(text: string) {
+    const aceGutter = await this.getAceGutterContainer();
+
+    await aceGutter.doubleClick();
+    await this.browser.pressKeys(this.browser.keys.RIGHT);
+    await this.browser.pressKeys(this.browser.keys.LEFT);
+    await this.browser.pressKeys(this.browser.keys.LEFT);
+    await this.browser.pressKeys(text);
+  }
+
+  public async cleanSpec() {
+    const aceGutter = await this.getAceGutterContainer();
+
+    await this.retry.try(async () => {
+      await aceGutter.doubleClick();
+      await this.browser.pressKeys(this.browser.keys.BACK_SPACE);
+
+      expect(await this.getSpec()).to.be('');
+    });
+  }
+
+  public async getYAxisLabels() {
+    const yAxis = await this.getYAxisContainer();
+    const tickGroup = await yAxis.findByClassName('role-axis-label');
+    const labels = await tickGroup.findAllByCssSelector('text');
+    const labelTexts: string[] = [];
+
+    for (const label of labels) {
+      labelTexts.push(await label.getVisibleText());
+    }
+    return labelTexts;
+  }
 }

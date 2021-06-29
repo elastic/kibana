@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { createContext, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart, ScopedHistory } from '../../../../../src/core/public';
 import { ClientConfigType } from '../types';
 import { HttpService, UiMetricService } from './services';
 
@@ -19,6 +20,7 @@ export interface AppDependencies {
     httpService: HttpService;
     uiMetricService: UiMetricService;
     i18n: typeof i18n;
+    history: ScopedHistory;
   };
   config: ClientConfigType;
 }

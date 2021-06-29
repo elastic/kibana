@@ -1,0 +1,23 @@
+parameters:
+  - schema:
+      type: string
+    name: agentId
+    in: path
+    required: true
+post:
+  summary: Fleet - Agent - Unenroll
+  tags: []
+  responses: {}
+  operationId: post-fleet-agents-unenroll
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            revoke:
+              type: boolean
+            force:
+              type: boolean

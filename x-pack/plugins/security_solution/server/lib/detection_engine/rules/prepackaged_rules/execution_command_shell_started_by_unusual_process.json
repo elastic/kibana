@@ -1,0 +1,46 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from an unusual process.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Unusual Parent Process for cmd.exe",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"cmd.exe\" and\n  process.parent.name : (\"lsass.exe\",\n                         \"csrss.exe\",\n                         \"epad.exe\",\n                         \"regsvr32.exe\",\n                         \"dllhost.exe\",\n                         \"LogonUI.exe\",\n                         \"wermgr.exe\",\n                         \"spoolsv.exe\",\n                         \"jucheck.exe\",\n                         \"jusched.exe\",\n                         \"ctfmon.exe\",\n                         \"taskhostw.exe\",\n                         \"GoogleUpdate.exe\",\n                         \"sppsvc.exe\",\n                         \"sihost.exe\",\n                         \"slui.exe\",\n                         \"SIHClient.exe\",\n                         \"SearchIndexer.exe\",\n                         \"SearchProtocolHost.exe\",\n                         \"FlashPlayerUpdateService.exe\",\n                         \"WerFault.exe\",\n                         \"WUDFHost.exe\",\n                         \"unsecapp.exe\",\n                         \"wlanext.exe\" )\n",
+  "risk_score": 47,
+  "rule_id": "3b47900d-e793-49e8-968f-c90dc3526aa1",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 4
+}

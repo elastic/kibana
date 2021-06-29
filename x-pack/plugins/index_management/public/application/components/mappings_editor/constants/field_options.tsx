@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 
@@ -244,7 +246,7 @@ const DATE_FORMATS = [
   { label: 'year_month_day', strict: true },
 ];
 
-const STRICT_DATE_FORMAT_OPTIONS = DATE_FORMATS.filter(format => format.strict).map(
+const STRICT_DATE_FORMAT_OPTIONS = DATE_FORMATS.filter((format) => format.strict).map(
   ({ label }) => ({
     label: `strict_${label}`,
   })

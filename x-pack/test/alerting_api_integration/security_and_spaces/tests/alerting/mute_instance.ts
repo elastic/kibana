@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -13,6 +14,8 @@ import {
   getUrlPrefix,
   getTestAlertData,
   ObjectRemover,
+  getConsumerUnauthorizedErrorMessage,
+  getProducerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -31,12 +34,34 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
 
       describe(scenario.id, () => {
         it('should handle mute alert instance request appropriately', async () => {
-          const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData({ enabled: false }))
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                enabled: false,
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
 
@@ -44,23 +69,226 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'muteAlert',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to execute actions`,
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle mute alert instance request appropriately when consumer is the same as producer', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                enabled: false,
+                rule_type_id: 'test.restricted-noop',
+                consumer: 'alertsRestrictedFixture',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+          const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'muteAlert',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle mute alert instance request appropriately when consumer is not the producer', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                enabled: false,
+                rule_type_id: 'test.unrestricted-noop',
+                consumer: 'alertsFixture',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+          const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'muteAlert',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'muteAlert',
+                  'test.unrestricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
+              // Ensure AAD isn't broken
+              await checkAAD({
+                supertest,
+                spaceId: space.id,
+                type: 'alert',
+                id: createdAlert.id,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle mute alert instance request appropriately when consumer is "alerts"', async () => {
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                enabled: false,
+                rule_type_id: 'test.restricted-noop',
+                consumer: 'alerts',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+          const response = await alertUtils.getMuteInstanceRequest(createdAlert.id, '1');
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'muteAlert',
+                  'test.restricted-noop',
+                  'alerts'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'muteAlert',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(204);
+              expect(response.body).to.eql('');
+              const { body: updatedAlert } = await supertestWithoutAuth
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .expect(200);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -76,14 +304,14 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
 
         it('should handle mute alert instance request appropriately and not duplicate mutedInstanceIds when muting an instance already muted', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData({ enabled: false }))
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}/alert_instance/1/_mute`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/alert/1/_mute`)
             .set('kbn-xsrf', 'foo')
             .expect(204, '');
 
@@ -93,23 +321,29 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
             case 'global_read at space1':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'muteAlert',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               const { body: updatedAlert } = await supertestWithoutAuth
-                .get(`${getUrlPrefix(space.id)}/api/alert/${createdAlert.id}`)
+                .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}`)
                 .set('kbn-xsrf', 'foo')
                 .auth(user.username, user.password)
                 .expect(200);
-              expect(updatedAlert.mutedInstanceIds).to.eql(['1']);
+              expect(updatedAlert.muted_alert_ids).to.eql(['1']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

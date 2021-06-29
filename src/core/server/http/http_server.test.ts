@@ -1,25 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Server } from 'http';
-import { readFileSync } from 'fs';
+import { rmdir, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
+import { omit } from 'lodash';
+import { join } from 'path';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
@@ -31,11 +22,13 @@ import {
   RouteValidationResultFactory,
   RouteValidationFunction,
 } from './router';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'kibana/server';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import moment from 'moment';
+import { of } from 'rxjs';
 
 const cookieOptions = {
   name: 'sid',
@@ -48,16 +41,16 @@ let server: HttpServer;
 let config: HttpConfig;
 let configWithSSL: HttpConfig;
 
-const loggingService = loggingServiceMock.create();
+const loggingService = loggingSystemMock.create();
 const logger = loggingService.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 let certificate: string;
 let key: string;
 
-beforeAll(() => {
-  certificate = readFileSync(KBN_CERT_PATH, 'utf8');
-  key = readFileSync(KBN_KEY_PATH, 'utf8');
+beforeAll(async () => {
+  certificate = await readFile(KBN_CERT_PATH, 'utf8');
+  key = await readFile(KBN_KEY_PATH, 'utf8');
 });
 
 beforeEach(() => {
@@ -68,21 +61,29 @@ beforeEach(() => {
     port: 10002,
     ssl: { enabled: false },
     compression: { enabled: true },
-  } as HttpConfig;
+    requestId: {
+      allowFromAnyIp: true,
+      ipAllowlist: [],
+    },
+    cors: {
+      enabled: false,
+    },
+    shutdownTimeout: moment.duration(500, 'ms'),
+  } as any;
 
   configWithSSL = {
     ...config,
     ssl: {
       enabled: true,
       certificate,
-      cipherSuites: ['cipherSuite'],
+      cipherSuites: ['TLS_AES_256_GCM_SHA384'],
       getSecureOptions: () => 0,
       key,
       redirectHttpFromPort: config.port + 1,
     },
   } as HttpConfig;
 
-  server = new HttpServer(loggingService, 'tests');
+  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
 });
 
 afterEach(async () => {
@@ -97,7 +98,7 @@ test('log listening address after started', async () => {
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002",
@@ -113,7 +114,7 @@ test('log listening address after started when configured with BasePath and rewr
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002",
@@ -129,13 +130,47 @@ test('log listening address after started when configured with BasePath and rewr
   await server.start();
 
   expect(server.isListening()).toBe(true);
-  expect(loggingServiceMock.collect(loggingService).info).toMatchInlineSnapshot(`
+  expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
     Array [
       Array [
         "http server running at http://127.0.0.1:10002/bar",
       ],
     ]
   `);
+});
+
+test('does not allow router registration after server is listening', async () => {
+  expect(server.isListening()).toBe(false);
+
+  const { registerRouter } = await server.setup(config);
+
+  const router1 = new Router('/foo', logger, enhanceWithContext);
+  expect(() => registerRouter(router1)).not.toThrowError();
+
+  await server.start();
+
+  expect(server.isListening()).toBe(true);
+
+  const router2 = new Router('/bar', logger, enhanceWithContext);
+  expect(() => registerRouter(router2)).toThrowErrorMatchingInlineSnapshot(
+    `"Routers can be registered only when HTTP server is stopped."`
+  );
+});
+
+test('allows router registration after server is listening via `registerRouterAfterListening`', async () => {
+  expect(server.isListening()).toBe(false);
+
+  const { registerRouterAfterListening } = await server.setup(config);
+
+  const router1 = new Router('/foo', logger, enhanceWithContext);
+  expect(() => registerRouterAfterListening(router1)).not.toThrowError();
+
+  await server.start();
+
+  expect(server.isListening()).toBe(true);
+
+  const router2 = new Router('/bar', logger, enhanceWithContext);
+  expect(() => registerRouterAfterListening(router2)).not.toThrowError();
 });
 
 test('valid params', async () => {
@@ -163,7 +198,7 @@ test('valid params', async () => {
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.text).toBe('some-string');
     });
 });
@@ -193,7 +228,7 @@ test('invalid params', async () => {
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -228,7 +263,7 @@ test('valid query', async () => {
   await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', quux: 123 });
     });
 });
@@ -258,7 +293,7 @@ test('invalid query', async () => {
   await supertest(innerServer.listener)
     .get('/foo/?bar=test')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -297,7 +332,7 @@ test('valid body', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -335,7 +370,7 @@ test('valid body with validate function', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -378,7 +413,7 @@ test('not inline validation - specifying params', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -421,7 +456,7 @@ test('not inline validation - specifying validation handler', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -471,7 +506,7 @@ test('not inline handler - KibanaRequest', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
@@ -520,7 +555,7 @@ test('not inline handler - RequestHandler', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'TEST', baz: '123' });
     });
 });
@@ -551,7 +586,7 @@ test('invalid body', async () => {
     .post('/foo/')
     .send({ bar: 'test' })
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: 'Bad Request',
         statusCode: 400,
@@ -586,7 +621,7 @@ test('handles putting', async () => {
     .put('/foo/')
     .send({ key: 'new value' })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 'new value' });
     });
 });
@@ -616,7 +651,7 @@ test('handles deleting', async () => {
   await supertest(innerServer.listener)
     .delete('/foo/3')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 3 });
     });
 });
@@ -646,28 +681,22 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   });
 
   test('/bar => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar').expect(404);
   });
 
   test('/bar/ => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar/')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar/').expect(404);
   });
 
   test('/bar/foo => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar/foo')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar/foo').expect(404);
   });
 
   test('/ => /', async () => {
     await supertest(innerServerListener)
       .get('/')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -676,7 +705,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     await supertest(innerServerListener)
       .get('/foo')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/foo');
       });
   });
@@ -710,7 +739,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -719,7 +748,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar/')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/');
       });
   });
@@ -728,21 +757,17 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar/foo')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.text).toBe('value:/foo');
       });
   });
 
   test('/ => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/')
-      .expect(404);
+    await supertest(innerServerListener).get('/').expect(404);
   });
 
   test('/foo => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/foo')
-      .expect(404);
+    await supertest(innerServerListener).get('/foo').expect(404);
   });
 });
 
@@ -787,13 +812,9 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener)
-    .get('/with-tags')
-    .expect(200, { tags });
+  await supertest(innerServer.listener).get('/with-tags').expect(200, { tags });
 
-  await supertest(innerServer.listener)
-    .get('/without-tags')
-    .expect(200, { tags: [] });
+  await supertest(innerServer.listener).get('/without-tags').expect(200, { tags: [] });
 });
 
 test('exposes route details of incoming request to a route handler', async () => {
@@ -813,6 +834,7 @@ test('exposes route details of incoming request to a route handler', async () =>
         authRequired: true,
         xsrfRequired: false,
         tags: [],
+        timeout: {},
       },
     });
 });
@@ -835,9 +857,7 @@ describe('conditional compression', () => {
   test('with `compression.enabled: true`', async () => {
     const listener = await setupServer(config);
 
-    const response = await supertest(listener)
-      .get('/')
-      .set('accept-encoding', 'gzip');
+    const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
     expect(response.header).toHaveProperty('content-encoding', 'gzip');
   });
@@ -848,9 +868,7 @@ describe('conditional compression', () => {
       compression: { enabled: false },
     });
 
-    const response = await supertest(listener)
-      .get('/')
-      .set('accept-encoding', 'gzip');
+    const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
     expect(response.header).not.toHaveProperty('content-encoding');
   });
@@ -865,9 +883,7 @@ describe('conditional compression', () => {
     });
 
     test('enables compression for no referer', async () => {
-      const response = await supertest(listener)
-        .get('/')
-        .set('accept-encoding', 'gzip');
+      const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
 
       expect(response.header).toHaveProperty('content-encoding', 'gzip');
     });
@@ -901,6 +917,49 @@ describe('conditional compression', () => {
   });
 });
 
+describe('response headers', () => {
+  test('allows to configure "keep-alive" header', async () => {
+    const { registerRouter, server: innerServer } = await server.setup({
+      ...config,
+      keepaliveTimeout: 100_000,
+    });
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
+    registerRouter(router);
+
+    await server.start();
+    const response = await supertest(innerServer.listener)
+      .get('/')
+      .set('Connection', 'keep-alive')
+      .expect(200);
+
+    expect(response.header.connection).toBe('keep-alive');
+    expect(response.header['keep-alive']).toBe('timeout=100');
+  });
+
+  test('default headers', async () => {
+    const { registerRouter, server: innerServer } = await server.setup(config);
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
+    registerRouter(router);
+
+    await server.start();
+    const response = await supertest(innerServer.listener).get('/').expect(200);
+
+    const restHeaders = omit(response.header, ['date', 'content-length']);
+    expect(restHeaders).toMatchInlineSnapshot(`
+      Object {
+        "accept-ranges": "bytes",
+        "cache-control": "private, no-cache, no-store, must-revalidate",
+        "connection": "close",
+        "content-type": "application/json; charset=utf-8",
+      }
+    `);
+  });
+});
+
 test('exposes route details of incoming request to a route handler (POST + payload options)', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 
@@ -926,6 +985,9 @@ test('exposes route details of incoming request to a route handler (POST + paylo
         authRequired: true,
         xsrfRequired: true,
         tags: [],
+        timeout: {
+          payload: 10000,
+        },
         body: {
           parse: true, // hapi populates the default
           maxBytes: 1024, // hapi populates the default
@@ -952,14 +1014,11 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(415, {
-        statusCode: 415,
-        error: 'Unsupported Media Type',
-        message: 'Unsupported Media Type',
-      });
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(415, {
+      statusCode: 415,
+      error: 'Unsupported Media Type',
+      message: 'Unsupported Media Type',
+    });
   });
 
   test('should reject the request because the payload is too large', async () => {
@@ -977,14 +1036,11 @@ describe('body options', () => {
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(413, {
-        statusCode: 413,
-        error: 'Request Entity Too Large',
-        message: 'Payload content length greater than maximum allowed: 1',
-      });
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(413, {
+      statusCode: 413,
+      error: 'Request Entity Too Large',
+      message: 'Payload content length greater than maximum allowed: 1',
+    });
   });
 
   test('should not parse the content in the request', async () => {
@@ -998,26 +1054,250 @@ describe('body options', () => {
         options: { body: { parse: false } },
       },
       (context, req, res) => {
-        try {
-          expect(req.body).toBeInstanceOf(Buffer);
-          expect(req.body.toString()).toBe(JSON.stringify({ test: 1 }));
-          return res.ok({ body: req.route.options.body });
-        } catch (err) {
-          return res.internalError({ body: err.message });
-        }
+        expect(req.body).toBeInstanceOf(Buffer);
+        expect(req.body.toString()).toBe(JSON.stringify({ test: 1 }));
+        return res.ok({ body: req.route.options.body });
       }
     );
     registerRouter(router);
 
     await server.start();
-    await supertest(innerServer.listener)
-      .post('/')
-      .send({ test: 1 })
-      .expect(200, {
-        parse: false,
-        maxBytes: 1024, // hapi populates the default
-        output: 'data',
+    await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
+      parse: false,
+      maxBytes: 1024, // hapi populates the default
+      output: 'data',
+    });
+  });
+});
+
+describe('timeout options', () => {
+  describe('payload timeout', () => {
+    test('POST routes set the payload timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.post(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .post('/')
+        .send({ test: 1 })
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('DELETE routes set the payload timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.delete(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .delete('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('PUT routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.put(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .put('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+
+    test('PATCH routes set the payload timeout and automatically adjusts the idle socket timeout', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.patch(
+        {
+          path: '/',
+          validate: false,
+          options: {
+            timeout: {
+              payload: 300000,
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+      await server.start();
+      await supertest(innerServer.listener)
+        .patch('/')
+        .expect(200, {
+          timeout: {
+            payload: 300000,
+          },
+        });
+    });
+  });
+
+  describe('idleSocket timeout', () => {
+    test('uses server socket timeout when not specified in the route', async () => {
+      const { registerRouter, server: innerServer } = await server.setup({
+        ...config,
+        socketTimeout: 11000,
       });
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get(
+        {
+          path: '/',
+          validate: { body: schema.maybe(schema.any()) },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+
+      await server.start();
+      await supertest(innerServer.listener)
+        .get('/')
+        .send()
+        .expect(200, {
+          timeout: {
+            idleSocket: 11000,
+          },
+        });
+    });
+
+    test('sets the socket timeout when specified in the route', async () => {
+      const { registerRouter, server: innerServer } = await server.setup({
+        ...config,
+        socketTimeout: 11000,
+      });
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get(
+        {
+          path: '/',
+          validate: { body: schema.maybe(schema.any()) },
+          options: { timeout: { idleSocket: 12000 } },
+        },
+        (context, req, res) => {
+          return res.ok({
+            body: {
+              timeout: req.route.options.timeout,
+            },
+          });
+        }
+      );
+      registerRouter(router);
+
+      await server.start();
+      await supertest(innerServer.listener)
+        .get('/')
+        .send()
+        .expect(200, {
+          timeout: {
+            idleSocket: 12000,
+          },
+        });
+    });
+
+    test('idleSocket timeout can be smaller than the payload timeout', async () => {
+      const { registerRouter } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.post(
+        {
+          path: '/',
+          validate: { body: schema.any() },
+          options: {
+            timeout: {
+              payload: 1000,
+              idleSocket: 10,
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: { timeout: req.route.options.timeout } });
+        }
+      );
+
+      registerRouter(router);
+
+      await server.start();
+    });
   });
 });
 
@@ -1032,61 +1312,76 @@ test('should return a stream in the body', async () => {
       options: { body: { output: 'stream' } },
     },
     (context, req, res) => {
-      try {
-        expect(req.body).toBeInstanceOf(Readable);
-        return res.ok({ body: req.route.options.body });
-      } catch (err) {
-        return res.internalError({ body: err.message });
-      }
+      expect(req.body).toBeInstanceOf(Readable);
+      return res.ok({ body: req.route.options.body });
     }
   );
   registerRouter(router);
 
   await server.start();
-  await supertest(innerServer.listener)
-    .put('/')
-    .send({ test: 1 })
-    .expect(200, {
-      parse: true,
-      maxBytes: 1024, // hapi populates the default
-      output: 'stream',
-    });
+  await supertest(innerServer.listener).put('/').send({ test: 1 }).expect(200, {
+    parse: true,
+    maxBytes: 1024, // hapi populates the default
+    output: 'stream',
+  });
+});
+
+test('closes sockets on timeout', async () => {
+  const { registerRouter, server: innerServer } = await server.setup({
+    ...config,
+    socketTimeout: 1000,
+  });
+  const router = new Router('', logger, enhanceWithContext);
+
+  router.get({ path: '/a', validate: false }, async (context, req, res) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return res.ok({});
+  });
+  router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+
+  registerRouter(router);
+
+  registerRouter(router);
+
+  await server.start();
+
+  expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
+
+  await supertest(innerServer.listener).get('/b').expect(200);
 });
 
 describe('setup contract', () => {
   describe('#createSessionStorage', () => {
-    it('creates session storage factory', async () => {
+    test('creates session storage factory', async () => {
       const { createCookieSessionStorageFactory } = await server.setup(config);
       const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
 
       expect(sessionStorageFactory.asScoped).toBeDefined();
     });
-    it('creates session storage factory only once', async () => {
+
+    test('creates session storage factory only once', async () => {
       const { createCookieSessionStorageFactory } = await server.setup(config);
       const create = async () => await createCookieSessionStorageFactory(cookieOptions);
 
       await create();
       expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
     });
-  });
 
-  describe('#isTlsEnabled', () => {
-    it('returns "true" if TLS enabled', async () => {
-      const { isTlsEnabled } = await server.setup(configWithSSL);
-      expect(isTlsEnabled).toBe(true);
-    });
-    it('returns "false" if TLS not enabled', async () => {
-      const { isTlsEnabled } = await server.setup(config);
-      expect(isTlsEnabled).toBe(false);
+    test('does not throw if called after stop', async () => {
+      const { createCookieSessionStorageFactory } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        createCookieSessionStorageFactory(cookieOptions);
+      }).not.toThrow();
     });
   });
 
   describe('#getServerInfo', () => {
-    it('returns correct information', async () => {
+    test('returns correct information', async () => {
       let { getServerInfo } = await server.setup(config);
 
       expect(getServerInfo()).toEqual({
-        host: '127.0.0.1',
+        hostname: '127.0.0.1',
         name: 'kibana',
         port: 10002,
         protocol: 'http',
@@ -1100,17 +1395,271 @@ describe('setup contract', () => {
       }));
 
       expect(getServerInfo()).toEqual({
-        host: 'localhost',
+        hostname: 'localhost',
         name: 'custom-name',
         port: 12345,
         protocol: 'http',
       });
     });
 
-    it('returns correct protocol when ssl is enabled', async () => {
+    test('returns correct protocol when ssl is enabled', async () => {
       const { getServerInfo } = await server.setup(configWithSSL);
 
       expect(getServerInfo().protocol).toEqual('https');
     });
+  });
+
+  describe('#registerStaticDir', () => {
+    const assetFolder = join(__dirname, 'integration_tests', 'fixtures', 'static');
+    let tempDir: string;
+
+    beforeAll(async () => {
+      tempDir = await mkdtemp('cache-test');
+    });
+
+    afterAll(async () => {
+      if (tempDir) {
+        await rmdir(tempDir, { recursive: true });
+      }
+    });
+
+    test('does not throw if called after stop', async () => {
+      const { registerStaticDir } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerStaticDir('/path1/{path*}', '/path/to/resource');
+      }).not.toThrow();
+    });
+
+    test('returns correct headers for static assets', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+    });
+
+    test('returns compressed version if present', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/compression_available.json')
+        .set('accept-encoding', 'gzip')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+      expect(response.get('content-encoding')).toEqual('gzip');
+    });
+
+    test('returns uncompressed version if compressed asset is not available', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .set('accept-encoding', 'gzip')
+        .expect(200);
+
+      expect(response.get('cache-control')).toEqual('must-revalidate');
+      expect(response.get('etag')).not.toBeUndefined();
+      expect(response.get('content-encoding')).toBeUndefined();
+    });
+
+    test('returns a 304 if etag value matches', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .expect(200);
+
+      const etag = response.get('etag');
+      expect(etag).not.toBeUndefined();
+
+      await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .set('If-None-Match', etag)
+        .expect(304);
+    });
+
+    test('serves content if etag values does not match', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+
+      registerStaticDir('/static/{path*}', assetFolder);
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/static/some_json.json')
+        .set('If-None-Match', `"definitely not a valid etag"`)
+        .expect(200);
+    });
+
+    test('dynamically updates depending on the content of the file', async () => {
+      const tempFile = join(tempDir, 'some_file.json');
+
+      const { registerStaticDir, server: innerServer } = await server.setup(config);
+      registerStaticDir('/static/{path*}', tempDir);
+
+      await server.start();
+
+      await supertest(innerServer.listener).get('/static/some_file.json').expect(404);
+
+      await writeFile(tempFile, `{ "over": 9000 }`);
+
+      let response = await supertest(innerServer.listener)
+        .get('/static/some_file.json')
+        .expect(200);
+
+      const etag1 = response.get('etag');
+
+      await writeFile(tempFile, `{ "over": 42 }`);
+
+      response = await supertest(innerServer.listener).get('/static/some_file.json').expect(200);
+
+      const etag2 = response.get('etag');
+
+      expect(etag1).not.toEqual(etag2);
+    });
+  });
+
+  describe('#registerOnPreRouting', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreRouting } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreRouting((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPostAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPostAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPostAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreResponse', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreResponse } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreResponse((req, res, t) => t.next());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+});
+
+describe('Graceful shutdown', () => {
+  let shutdownTimeout: number;
+  let innerServerListener: Server;
+
+  beforeEach(async () => {
+    shutdownTimeout = config.shutdownTimeout.asMilliseconds();
+    const { registerRouter, server: innerServer } = await server.setup(config);
+    innerServerListener = innerServer.listener;
+
+    const router = new Router('', logger, enhanceWithContext);
+    router.post(
+      {
+        path: '/',
+        validate: false,
+        options: { body: { accepts: 'application/json' } },
+      },
+      async (context, req, res) => {
+        // It takes to resolve the same period of the shutdownTimeout.
+        // Since we'll trigger the stop a few ms after, it should have time to finish
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout));
+        return res.ok({ body: { ok: 1 } });
+      }
+    );
+    registerRouter(router);
+
+    await server.start();
+  });
+
+  test('any ongoing requests should be resolved with `connection: close`', async () => {
+    const [response] = await Promise.all([
+      // Trigger a request that should hold the server from stopping until fulfilled
+      supertest(innerServerListener).post('/'),
+      // Stop the server while the request is in progress
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout / 3));
+        await server.stop();
+      })(),
+    ]);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toStrictEqual({ ok: 1 });
+    // The server is about to be closed, we need to ask connections to close on their end (stop their keep-alive policies)
+    expect(response.header.connection).toBe('close');
+  });
+
+  test('any requests triggered while stopping should be rejected with 503', async () => {
+    const [, , response] = await Promise.all([
+      // Trigger a request that should hold the server from stopping until fulfilled (otherwise the server will stop straight away)
+      supertest(innerServerListener).post('/'),
+      // Stop the server while the request is in progress
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, shutdownTimeout / 3));
+        await server.stop();
+      })(),
+      // Trigger a new request while shutting down (should be rejected)
+      (async () => {
+        await new Promise((resolve) => setTimeout(resolve, (2 * shutdownTimeout) / 3));
+        return supertest(innerServerListener).post('/');
+      })(),
+    ]);
+    expect(response.status).toBe(503);
+    expect(response.body).toStrictEqual({
+      statusCode: 503,
+      error: 'Service Unavailable',
+      message: 'Kibana is shutting down and not accepting new incoming requests',
+    });
+    expect(response.header.connection).toBe('close');
+  });
+
+  test('when no ongoing connections, the server should stop without waiting any longer', async () => {
+    const preStop = Date.now();
+    await server.stop();
+    expect(Date.now() - preStop).toBeLessThan(shutdownTimeout);
   });
 });

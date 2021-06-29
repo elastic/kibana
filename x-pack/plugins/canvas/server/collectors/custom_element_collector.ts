@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
+import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { collectFns } from './collector_helpers';
 import {
   TelemetryCollector,
@@ -19,7 +20,7 @@ interface CustomElementSearch {
   [CUSTOM_ELEMENT_TYPE]: TelemetryCustomElementDocument;
 }
 
-interface CustomElementTelemetry {
+export interface CustomElementTelemetry {
   custom_elements?: {
     count: number;
     elements: {
@@ -30,6 +31,46 @@ interface CustomElementTelemetry {
     functions_in_use: string[];
   };
 }
+
+export const customElementSchema: MakeSchemaFrom<CustomElementTelemetry> = {
+  custom_elements: {
+    count: {
+      type: 'long',
+      _meta: {
+        description: 'The total number of custom Canvas elements',
+      },
+    },
+    elements: {
+      min: {
+        type: 'long',
+        _meta: {
+          description: 'The minimum number of elements used across all Canvas Custom Elements',
+        },
+      },
+      max: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of elements used across all Canvas Custom Elements',
+        },
+      },
+      avg: {
+        type: 'float',
+        _meta: {
+          description: 'The average number of elements used in Canvas Custom Element',
+        },
+      },
+    },
+    functions_in_use: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'The functions in use by Canvas Custom Elements',
+        },
+      },
+    },
+  },
+};
 
 function isCustomElement(maybeCustomElement: any): maybeCustomElement is TelemetryCustomElement {
   return (
@@ -60,7 +101,7 @@ export function summarizeCustomElements(
   const functionSet = new Set<string>();
 
   const parsedContents: TelemetryCustomElement[] = customElements
-    .map(element => element.content)
+    .map((element) => element.content)
     .map(parseJsonOrNull)
     .filter(isCustomElement);
 
@@ -76,8 +117,8 @@ export function summarizeCustomElements(
 
   let totalElements = 0;
 
-  parsedContents.map(contents => {
-    contents.selectedNodes.map(node => {
+  parsedContents.map((contents) => {
+    contents.selectedNodes.map((node) => {
       const ast = parseExpression(node.expression);
       collectFns(ast, (cFunction: string) => {
         functionSet.add(cFunction);
@@ -101,9 +142,9 @@ export function summarizeCustomElements(
 
 const customElementCollector: TelemetryCollector = async function customElementCollector(
   kibanaIndex,
-  callCluster
+  esClient
 ) {
-  const customElementParams: SearchParams = {
+  const customElementParams = {
     size: 10000,
     index: kibanaIndex,
     ignoreUnavailable: true,
@@ -111,10 +152,10 @@ const customElementCollector: TelemetryCollector = async function customElementC
     body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },
   };
 
-  const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
+  const { body: esResponse } = await esClient.search<CustomElementSearch>(customElementParams);
 
-  if (get<number>(esResponse, 'hits.hits.length') > 0) {
-    const customElements = esResponse.hits.hits.map(hit => hit._source[CUSTOM_ELEMENT_TYPE]);
+  if (get(esResponse, 'hits.hits.length') > 0) {
+    const customElements = esResponse.hits.hits.map((hit) => hit._source![CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }
 

@@ -1,0 +1,44 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Looks for commands related to system process discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used by a threat actor to engage in system process discovery in order to increase their understanding of software applications running on a target host or network. This may be a precursor to selection of a persistence mechanism or a method of privilege elevation.",
+  "false_positives": [
+    "Uncommon user command activity can be due to an engineer logging onto a server instance in order to perform manual troubleshooting or reconfiguration."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "linux_system_process_discovery",
+  "name": "Unusual Linux Process Discovery Activity",
+  "risk_score": 21,
+  "rule_id": "5c983105-4681-46c3-9890-0c66d05e776b",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1057",
+          "name": "Process Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1057/"
+        }
+      ]
+    }
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

@@ -1,180 +1,320 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
-import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
-
-import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
-  formatAnomalyScore,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiSpacer,
+} from '@elastic/eui';
+import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo } from 'react';
+import useSet from 'react-use/lib/useSet';
+import { TimeRange } from '../../../../../../common/time/time_range';
+import {
+  AnomalyType,
   getFriendlyNameForPartitionId,
+  formatOneDecimalPlace,
+  isCategoryAnomaly,
 } from '../../../../../../common/log_analysis';
-import { LogEntryRateResults } from '../../use_log_entry_rate_results';
+import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomaliesTableExpandedRow } from './expanded_row';
-import { euiStyled } from '../../../../../../../observability/public';
+import { AnomalySeverityIndicator } from '../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
+import { RegularExpressionRepresentation } from '../../../../../components/logging/log_analysis_results/category_expression';
+import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
+import {
+  Page,
+  FetchNextPage,
+  FetchPreviousPage,
+  ChangeSortOptions,
+  ChangePaginationOptions,
+  SortOptions,
+  PaginationOptions,
+  LogEntryAnomalies,
+} from '../../use_log_entry_anomalies_results';
+import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
 
 interface TableItem {
   id: string;
-  partition: string;
-  topAnomalyScore: number;
+  dataset: string;
+  anomalyScore: number;
+  startTime: number;
+  typical: number;
+  actual: number;
+  type: AnomalyType;
+  categoryRegex?: string;
 }
 
-interface SortingOptions {
-  sort: {
-    field: keyof TableItem;
-    direction: 'asc' | 'desc';
-  };
-}
-
-const collapseAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableCollapseLabel', {
-  defaultMessage: 'Collapse',
-});
-
-const expandAriaLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableExpandLabel', {
-  defaultMessage: 'Expand',
-});
-
-const partitionColumnName = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesTablePartitionColumnName',
+const anomalyScoreColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableAnomalyScoreColumnName',
   {
-    defaultMessage: 'Partition',
+    defaultMessage: 'Anomaly score',
   }
 );
 
-const maxAnomalyScoreColumnName = i18n.translate(
-  'xpack.infra.logs.analysis.anomaliesTableMaxAnomalyScoreColumnName',
+const anomalyMessageColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableAnomalyMessageName',
   {
-    defaultMessage: 'Max anomaly score',
+    defaultMessage: 'Anomaly',
+  }
+);
+
+const anomalyStartTimeColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableAnomalyStartTime',
+  {
+    defaultMessage: 'Start time',
+  }
+);
+
+const datasetColumnName = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTableAnomalyDatasetName',
+  {
+    defaultMessage: 'Dataset',
   }
 );
 
 export const AnomaliesTable: React.FunctionComponent<{
-  results: LogEntryRateResults;
-  setTimeRange: (timeRange: TimeRange) => void;
+  results: LogEntryAnomalies;
   timeRange: TimeRange;
-  jobId: string;
-}> = ({ results, timeRange, setTimeRange, jobId }) => {
+  changeSortOptions: ChangeSortOptions;
+  changePaginationOptions: ChangePaginationOptions;
+  sortOptions: SortOptions;
+  paginationOptions: PaginationOptions;
+  page: Page;
+  fetchNextPage?: FetchNextPage;
+  fetchPreviousPage?: FetchPreviousPage;
+  isLoading: boolean;
+}> = ({
+  results,
+  timeRange,
+  changeSortOptions,
+  sortOptions,
+  changePaginationOptions,
+  paginationOptions,
+  fetchNextPage,
+  fetchPreviousPage,
+  page,
+  isLoading,
+}) => {
+  const [dateFormat] = useKibanaUiSetting('dateFormat', 'Y-MM-DD HH:mm:ss');
+
+  const tableSortOptions = useMemo(() => {
+    return {
+      sort: sortOptions,
+    };
+  }, [sortOptions]);
+
   const tableItems: TableItem[] = useMemo(() => {
-    return Object.entries(results.partitionBuckets).map(([key, value]) => {
+    return results.map((anomaly) => {
       return {
-        // Note: EUI's table expanded rows won't work with a key of '' in itemIdToExpandedRowMap, so we have to use the friendly name here
-        id: getFriendlyNameForPartitionId(key),
-        // The real ID
-        partitionId: key,
-        partition: getFriendlyNameForPartitionId(key),
-        topAnomalyScore: formatAnomalyScore(value.topAnomalyScore),
+        id: anomaly.id,
+        dataset: anomaly.dataset,
+        anomalyScore: anomaly.anomalyScore,
+        startTime: anomaly.startTime,
+        type: anomaly.type,
+        typical: anomaly.typical,
+        actual: anomaly.actual,
+        categoryRegex: isCategoryAnomaly(anomaly) ? anomaly.categoryRegex : undefined,
       };
     });
   }, [results]);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, React.ReactNode>
-  >({});
+  const [expandedIds, { add: expandId, remove: collapseId }] = useSet<string>(new Set());
 
-  const [sorting, setSorting] = useState<SortingOptions>({
-    sort: {
-      field: 'topAnomalyScore',
-      direction: 'desc',
-    },
-  });
+  const expandedIdsRowContents = useMemo(
+    () =>
+      [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedRows, id) => {
+        const anomaly = results.find((_anomaly) => _anomaly.id === id);
+
+        return {
+          ...aggregatedRows,
+          [id]: anomaly ? (
+            <AnomaliesTableExpandedRow anomaly={anomaly} timeRange={timeRange} />
+          ) : null,
+        };
+      }, {}),
+    [expandedIds, results, timeRange]
+  );
 
   const handleTableChange = useCallback(
     ({ sort = {} }) => {
-      const { field, direction } = sort;
-      setSorting({
-        sort: {
-          field,
-          direction,
-        },
-      });
+      changeSortOptions(sort);
     },
-    [setSorting]
+    [changeSortOptions]
   );
 
-  const sortedTableItems = useMemo(() => {
-    let sortedItems: TableItem[] = [];
-    if (sorting.sort.field === 'partition') {
-      sortedItems = tableItems.sort((a, b) => (a.partition > b.partition ? 1 : -1));
-    } else if (sorting.sort.field === 'topAnomalyScore') {
-      sortedItems = tableItems.sort((a, b) => a.topAnomalyScore - b.topAnomalyScore);
-    }
-    return sorting.sort.direction === 'asc' ? sortedItems : sortedItems.reverse();
-  }, [tableItems, sorting]);
-
-  const toggleExpandedItems = useCallback(
-    item => {
-      if (itemIdToExpandedRowMap[item.id]) {
-        const { [item.id]: toggledItem, ...remainingExpandedRowMap } = itemIdToExpandedRowMap;
-        setItemIdToExpandedRowMap(remainingExpandedRowMap);
-      } else {
-        const newItemIdToExpandedRowMap = {
-          ...itemIdToExpandedRowMap,
-          [item.id]: (
-            <AnomaliesTableExpandedRow
-              partitionId={item.partitionId}
-              results={results}
-              topAnomalyScore={item.topAnomalyScore}
-              setTimeRange={setTimeRange}
-              timeRange={timeRange}
-              jobId={jobId}
-            />
-          ),
-        };
-        setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
-      }
-    },
-    [itemIdToExpandedRowMap, jobId, results, setTimeRange, timeRange]
+  const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
+    () => [
+      {
+        field: 'anomalyScore',
+        name: anomalyScoreColumnName,
+        sortable: true,
+        truncateText: true,
+        dataType: 'number' as const,
+        width: '130px',
+        render: (anomalyScore: number) => <AnomalySeverityIndicator anomalyScore={anomalyScore} />,
+      },
+      {
+        name: anomalyMessageColumnName,
+        truncateText: true,
+        render: (item: TableItem) => <AnomalyMessage anomaly={item} />,
+      },
+      {
+        field: 'startTime',
+        name: anomalyStartTimeColumnName,
+        sortable: true,
+        truncateText: true,
+        width: '230px',
+        render: (startTime: number) => moment(startTime).format(dateFormat),
+      },
+      {
+        field: 'dataset',
+        name: datasetColumnName,
+        sortable: true,
+        truncateText: true,
+        width: '200px',
+        render: (dataset: string) => getFriendlyNameForPartitionId(dataset),
+      },
+      {
+        align: RIGHT_ALIGNMENT,
+        width: '40px',
+        isExpander: true,
+        render: (item: TableItem) => (
+          <RowExpansionButton
+            isExpanded={expandedIds.has(item.id)}
+            item={item.id}
+            onExpand={expandId}
+            onCollapse={collapseId}
+          />
+        ),
+      },
+    ],
+    [collapseId, expandId, expandedIds, dateFormat]
   );
-
-  const columns = [
-    {
-      field: 'partition',
-      name: partitionColumnName,
-      sortable: true,
-      truncateText: true,
-    },
-    {
-      field: 'topAnomalyScore',
-      name: maxAnomalyScoreColumnName,
-      sortable: true,
-      truncateText: true,
-      dataType: 'number' as const,
-    },
-    {
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      render: (item: TableItem) => (
-        <EuiButtonIcon
-          onClick={() => toggleExpandedItems(item)}
-          aria-label={itemIdToExpandedRowMap[item.id] ? collapseAriaLabel : expandAriaLabel}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-        />
-      ),
-    },
-  ];
-
   return (
-    <StyledEuiBasicTable
-      items={sortedTableItems}
-      itemId="id"
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable={true}
-      hasActions={true}
-      columns={columns}
-      sorting={sorting}
-      onChange={handleTableChange}
-    />
+    <>
+      <LoadingOverlayWrapper isLoading={isLoading}>
+        <EuiBasicTable
+          items={tableItems}
+          itemId="id"
+          itemIdToExpandedRowMap={expandedIdsRowContents}
+          isExpandable={true}
+          hasActions={true}
+          columns={columns}
+          sorting={tableSortOptions}
+          onChange={handleTableChange}
+        />
+        <EuiSpacer size="l" />
+        <PaginationControls
+          fetchNextPage={fetchNextPage}
+          fetchPreviousPage={fetchPreviousPage}
+          page={page}
+          isLoading={isLoading}
+        />
+      </LoadingOverlayWrapper>
+    </>
   );
 };
 
-const StyledEuiBasicTable: typeof EuiBasicTable = euiStyled(EuiBasicTable as any)`
-  & .euiTable {
-    table-layout: auto;
+const AnomalyMessage = ({ anomaly }: { anomaly: TableItem }) => {
+  const { type, actual, typical } = anomaly;
+
+  const moreThanExpectedAnomalyMessage = i18n.translate(
+    'xpack.infra.logs.analysis.anomaliesTableMoreThanExpectedAnomalyMessage',
+    {
+      defaultMessage:
+        'more log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+      values: { type },
+    }
+  );
+
+  const fewerThanExpectedAnomalyMessage = i18n.translate(
+    'xpack.infra.logs.analysis.anomaliesTableFewerThanExpectedAnomalyMessage',
+    {
+      defaultMessage:
+        'fewer log messages in this {type, select, logRate {dataset} logCategory {category}} than expected',
+      values: { type },
+    }
+  );
+
+  const isMore = actual > typical;
+  const message = isMore ? moreThanExpectedAnomalyMessage : fewerThanExpectedAnomalyMessage;
+  const ratio = isMore ? actual / typical : typical / actual;
+  const icon = isMore ? 'sortUp' : 'sortDown';
+  // Edge case scenarios where actual and typical might sit at 0.
+  const useRatio = ratio !== Infinity;
+  const ratioMessage = useRatio ? `${formatOneDecimalPlace(ratio)}x` : '';
+
+  return (
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+      <EuiFlexItem grow={false} component="span">
+        <EuiIcon type={icon} />
+      </EuiFlexItem>
+      <EuiFlexItem component="span">
+        {`${ratioMessage} ${message}`}
+        {anomaly.categoryRegex && (
+          <>
+            {': '}
+            <RegularExpressionRepresentation regularExpression={anomaly.categoryRegex} />
+          </>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const previousPageLabel = i18n.translate(
+  'xpack.infra.logs.analysis.anomaliesTablePreviousPageLabel',
+  {
+    defaultMessage: 'Previous page',
   }
-` as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+);
+
+const nextPageLabel = i18n.translate('xpack.infra.logs.analysis.anomaliesTableNextPageLabel', {
+  defaultMessage: 'Next page',
+});
+
+const PaginationControls = ({
+  fetchPreviousPage,
+  fetchNextPage,
+  page,
+  isLoading,
+}: {
+  fetchPreviousPage?: () => void;
+  fetchNextPage?: () => void;
+  page: number;
+  isLoading: boolean;
+}) => {
+  return (
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup>
+          <EuiButtonIcon
+            iconType="arrowLeft"
+            isDisabled={!fetchPreviousPage || isLoading}
+            onClick={fetchPreviousPage}
+            aria-label={previousPageLabel}
+          />
+          <span>
+            <strong>{page}</strong>
+          </span>
+          <EuiButtonIcon
+            iconType="arrowRight"
+            isDisabled={!fetchNextPage || isLoading}
+            onClick={fetchNextPage}
+            aria-label={nextPageLabel}
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

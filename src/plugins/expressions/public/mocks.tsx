@@ -1,30 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
-/* eslint-disable */
 import { coreMock } from '../../../core/public/mocks';
-import { inspectorPluginMock } from '../../inspector/public/mocks';
-import { bfetchPluginMock } from '../../bfetch/public/mocks';
-/* eslint-enable */
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;
@@ -42,23 +27,6 @@ const createSetupContract = (): Setup => {
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
     run: jest.fn(),
-    __LEGACY: {
-      functions: {
-        register: () => {},
-      } as any,
-      renderers: {
-        register: () => {},
-      } as any,
-      types: {
-        register: () => {},
-      } as any,
-      getExecutor: () => ({
-        interpreter: {
-          interpretAst: (() => {}) as any,
-        },
-      }),
-      loadLegacyServerFunctionWrappers: () => Promise.resolve(),
-    },
   };
   return setupContract;
 };
@@ -70,13 +38,10 @@ const createStartContract = (): Start => {
     ExpressionRenderHandler: jest.fn(),
     fork: jest.fn(),
     getFunction: jest.fn(),
-    getFunctions: jest.fn(),
     getRenderer: jest.fn(),
-    getRenderers: jest.fn(),
     getType: jest.fn(),
-    getTypes: jest.fn(),
     loader: jest.fn(),
-    ReactExpressionRenderer: jest.fn(props => <></>),
+    ReactExpressionRenderer: jest.fn((props) => <></>),
     render: jest.fn(),
     run: jest.fn(),
   };
@@ -87,10 +52,7 @@ const createPlugin = async () => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup, {
-    bfetch: bfetchPluginMock.createSetupContract(),
-    inspector: inspectorPluginMock.createSetupContract(),
-  });
+  const setup = await plugin.setup(coreSetup);
 
   return {
     pluginInitializerContext,
@@ -98,11 +60,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () =>
-      await plugin.start(coreStart, {
-        bfetch: bfetchPluginMock.createStartContract(),
-        inspector: inspectorPluginMock.createStartContract(),
-      }),
+    doStart: async () => await plugin.start(coreStart),
   };
 };
 

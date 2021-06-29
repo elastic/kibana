@@ -1,0 +1,61 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies that a login attempt has happened from a forbidden location.",
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Auditd Login from Forbidden Location",
+  "query": "event.module:auditd and event.action:\"attempted-log-in-from-unusual-place-to\"\n",
+  "references": [
+    "https://github.com/linux-pam/linux-pam/blob/aac5a8fdc4aa3f7e56335a6343774cc1b63b408d/modules/pam_access/pam_access.c#L412"
+  ],
+  "risk_score": 73,
+  "rule_id": "cab4f01c-793f-4a54-a03e-e5d85b96d7af",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Initial Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "reference": "https://attack.mitre.org/techniques/T1078/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

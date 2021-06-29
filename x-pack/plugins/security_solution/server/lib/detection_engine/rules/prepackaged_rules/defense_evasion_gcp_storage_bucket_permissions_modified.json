@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when the Identity and Access Management (IAM) permissions are modified for a Google Cloud Platform (GCP) storage bucket. An adversary may modify the permissions on a storage bucket to weaken their target's security controls or an administrator may inadvertently modify the permissions, which could lead to data exposure or loss.",
+  "false_positives": [
+    "Storage bucket permissions may be modified by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-gcp*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "GCP Storage Bucket Permissions Modification",
+  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:\"storage.setIamPermissions\" and event.outcome:success\n",
+  "references": [
+    "https://cloud.google.com/storage/docs/access-control/iam-permissions"
+  ],
+  "risk_score": 47,
+  "rule_id": "2326d1b2-9acf-4dee-bd21-867ea7378b4d",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1222",
+          "name": "File and Directory Permissions Modification",
+          "reference": "https://attack.mitre.org/techniques/T1222/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ILicense, PublicLicense, PublicFeatures, LICENSE_CHECK_STATE } from './types';
+
+import { ILicense, PublicLicense, PublicFeatures } from './types';
 import { License } from './license';
 
 function createLicense({
@@ -51,8 +53,9 @@ const createLicenseMock = () => {
     check: jest.fn(),
     hasAtLeast: jest.fn(),
   };
-  mock.check.mockReturnValue({ state: LICENSE_CHECK_STATE.Valid });
+  mock.check.mockReturnValue({ state: 'valid' });
   mock.hasAtLeast.mockReturnValue(true);
+  mock.getFeature.mockReturnValue({ isAvailable: true, isEnabled: true });
   return mock;
 };
 export const licenseMock = {

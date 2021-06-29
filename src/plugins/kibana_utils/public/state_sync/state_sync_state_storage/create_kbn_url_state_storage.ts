@@ -1,32 +1,35 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { map, share } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map, share } from 'rxjs/operators';
 import { History } from 'history';
 import { IStateStorage } from './types';
 import {
   createKbnUrlControls,
   getStateFromKbnUrl,
+  IKbnUrlControls,
   setStateToKbnUrl,
 } from '../../state_management/url';
 
+/**
+ * KbnUrlStateStorage is a state storage for {@link syncState} utility which:
+ *
+ * 1. Keeps state in sync with the URL.
+ * 2. Serializes data and stores it in the URL in one of the supported formats:
+ *   * Rison encoded.
+ *   * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.
+ * 3. Takes care of listening to the URL updates and notifies state about the updates.
+ * 4. Takes care of batching URL updates to prevent redundant browser history records.
+ *
+ * {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}
+ * @public
+ */
 export interface IKbnUrlStateStorage extends IStateStorage {
   set: <State>(
     key: string,
@@ -36,21 +39,36 @@ export interface IKbnUrlStateStorage extends IStateStorage {
   get: <State = unknown>(key: string) => State | null;
   change$: <State = unknown>(key: string) => Observable<State | null>;
 
-  // cancels any pending url updates
+  /**
+   * Cancels any pending url updates
+   */
   cancel: () => void;
 
-  // synchronously runs any pending url updates
-  // returned boolean indicates if change occurred
-  flush: (opts?: { replace?: boolean }) => boolean;
+  /**
+   * Lower level wrapper around history library that handles batching multiple URL updates into one history change
+   */
+  kbnUrlControls: IKbnUrlControls;
 }
 
 /**
- * Implements syncing to/from url strategies.
- * Replicates what was implemented in state (AppState, GlobalState)
- * Both expanded and hashed use cases
+ * Creates {@link IKbnUrlStateStorage} state storage
+ * @returns - {@link IKbnUrlStateStorage}
+ * @public
  */
 export const createKbnUrlStateStorage = (
-  { useHash = false, history }: { useHash: boolean; history?: History } = { useHash: false }
+  {
+    useHash = false,
+    history,
+    onGetError,
+    onSetError,
+  }: {
+    useHash: boolean;
+    history?: History;
+    onGetError?: (error: Error) => void;
+    onSetError?: (error: Error) => void;
+  } = {
+    useHash: false,
+  }
 ): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
   return {
@@ -60,18 +78,26 @@ export const createKbnUrlStateStorage = (
       { replace = false }: { replace: boolean } = { replace: false }
     ) => {
       // syncState() utils doesn't wait for this promise
-      return url.updateAsync(
-        currentUrl => setStateToKbnUrl(key, state, { useHash }, currentUrl),
-        replace
-      );
+      return url.updateAsync((currentUrl) => {
+        try {
+          return setStateToKbnUrl(key, state, { useHash }, currentUrl);
+        } catch (error) {
+          if (onSetError) onSetError(error);
+        }
+      }, replace);
     },
-    get: key => {
+    get: (key) => {
       // if there is a pending url update, then state will be extracted from that pending url,
       // otherwise current url will be used to retrieve state from
-      return getStateFromKbnUrl(key, url.getPendingUrl());
+      try {
+        return getStateFromKbnUrl(key, url.getPendingUrl());
+      } catch (e) {
+        if (onGetError) onGetError(e);
+        return null;
+      }
     },
     change$: <State>(key: string) =>
-      new Observable(observer => {
+      new Observable((observer) => {
         const unlisten = url.listen(() => {
           observer.next();
         });
@@ -81,13 +107,15 @@ export const createKbnUrlStateStorage = (
         };
       }).pipe(
         map(() => getStateFromKbnUrl<State>(key)),
+        catchError((error) => {
+          if (onGetError) onGetError(error);
+          return of(null);
+        }),
         share()
       ),
-    flush: ({ replace = false }: { replace?: boolean } = {}) => {
-      return !!url.flush(replace);
-    },
     cancel() {
       url.cancel();
     },
+    kbnUrlControls: url,
   };
 };

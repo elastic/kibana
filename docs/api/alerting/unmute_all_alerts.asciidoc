@@ -1,0 +1,39 @@
+[[unmute-all-alerts-api]]
+=== Unmute all alerts API
+++++
+<titleabbrev>Unmute all alerts</titleabbrev>
+++++
+
+Unmute all alerts.
+
+[[unmute-all-alerts-api-all-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/alerting/rule/<id>/_unmute_all`
+
+`POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>/_unmute_all`
+
+[[unmute-all-alerts-api-path-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the rule whose alerts you want to unmute.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[unmute-all-alerts-api-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Unmute all alerts with ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35/_unmute_all
+--------------------------------------------------
+// KIBANA

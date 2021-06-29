@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { APP_CLUSTER_PRIVILEGES, APP_INDEX_PRIVILEGES } from '../../../common/constants';
-import { Privileges } from '../../../common';
+import { Privileges } from '../../../common/types/privileges';
 
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../index';
@@ -26,13 +28,10 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
         return res.ok({ body: privilegesResult });
       }
 
-      // Get cluster priviliges
+      // Get cluster privileges
       const {
-        has_all_requested: hasAllPrivileges,
-        cluster,
-      } = await ctx.transform!.dataClient.callAsCurrentUser('transport.request', {
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
+        body: { has_all_requested: hasAllPrivileges, cluster },
+      } = await ctx.core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
         body: {
           cluster: APP_CLUSTER_PRIVILEGES,
         },
@@ -43,10 +42,9 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
       privilegesResult.hasAllPrivileges = hasAllPrivileges;
 
       // Get all index privileges the user has
-      const { indices } = await ctx.transform!.dataClient.callAsCurrentUser('transport.request', {
-        path: '/_security/user/_privileges',
-        method: 'GET',
-      });
+      const {
+        body: { indices },
+      } = await ctx.core.elasticsearch.client.asCurrentUser.security.getUserPrivileges();
 
       // Check if they have all the required index privileges for at least one index
       const oneIndexWithAllPrivileges = indices.find(({ privileges }: { privileges: string[] }) => {
@@ -54,7 +52,7 @@ export function registerPrivilegesRoute({ router, license }: RouteDependencies) 
           return true;
         }
 
-        const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every(privilege =>
+        const indexHasAllPrivileges = APP_INDEX_PRIVILEGES.every((privilege) =>
           privileges.includes(privilege)
         );
 

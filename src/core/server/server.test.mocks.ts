@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { httpServiceMock } from './http/http_service.mock';
@@ -41,9 +30,12 @@ jest.mock('./legacy/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
 }));
 
-import { configServiceMock } from './config/config_service.mock';
+const realKbnConfig = jest.requireActual('@kbn/config');
+
+import { configServiceMock } from './config/mocks';
 export const mockConfigService = configServiceMock.create();
-jest.doMock('./config/config_service', () => ({
+jest.doMock('@kbn/config', () => ({
+  ...realKbnConfig,
   ConfigService: jest.fn(() => mockConfigService),
 }));
 
@@ -66,7 +58,7 @@ jest.doMock('./ui_settings/ui_settings_service', () => ({
 }));
 
 export const mockEnsureValidConfiguration = jest.fn();
-jest.doMock('./legacy/config/ensure_valid_configuration', () => ({
+jest.doMock('./config/ensure_valid_configuration', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 
@@ -74,14 +66,32 @@ import { RenderingService, mockRenderingService } from './rendering/__mocks__/re
 export { mockRenderingService };
 jest.doMock('./rendering/rendering_service', () => ({ RenderingService }));
 
-import { uuidServiceMock } from './uuid/uuid_service.mock';
-export const mockUuidService = uuidServiceMock.create();
-jest.doMock('./uuid/uuid_service', () => ({
-  UuidService: jest.fn(() => mockUuidService),
+import { environmentServiceMock } from './environment/environment_service.mock';
+export const mockEnvironmentService = environmentServiceMock.create();
+jest.doMock('./environment/environment_service', () => ({
+  EnvironmentService: jest.fn(() => mockEnvironmentService),
 }));
 
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 export const mockMetricsService = metricsServiceMock.create();
 jest.doMock('./metrics/metrics_service', () => ({
   MetricsService: jest.fn(() => mockMetricsService),
+}));
+
+import { statusServiceMock } from './status/status_service.mock';
+export const mockStatusService = statusServiceMock.create();
+jest.doMock('./status/status_service', () => ({
+  StatusService: jest.fn(() => mockStatusService),
+}));
+
+import { loggingServiceMock } from './logging/logging_service.mock';
+export const mockLoggingService = loggingServiceMock.create();
+jest.doMock('./logging/logging_service', () => ({
+  LoggingService: jest.fn(() => mockLoggingService),
+}));
+
+import { i18nServiceMock } from './i18n/i18n_service.mock';
+export const mockI18nService = i18nServiceMock.create();
+jest.doMock('./i18n/i18n_service', () => ({
+  I18nService: jest.fn(() => mockI18nService),
 }));

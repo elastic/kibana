@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./login_page');
 
-import { AppMount, ScopedHistory } from 'src/core/public';
-import { loginApp } from './login_app';
+import type { AppMount } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { loginApp } from './login_app';
 
 describe('loginApp', () => {
   it('properly registers application', () => {
@@ -38,8 +39,7 @@ describe('loginApp', () => {
   it('properly renders application', async () => {
     const coreSetupMock = coreMock.createSetup();
     const coreStartMock = coreMock.createStart();
-    coreStartMock.injectedMetadata.getInjectedVar.mockReturnValue(true);
-    coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}]);
+    coreSetupMock.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const containerMock = document.createElement('div');
 
     loginApp.create({
@@ -52,19 +52,17 @@ describe('loginApp', () => {
       element: containerMock,
       appBasePath: '',
       onAppLeave: jest.fn(),
-      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+      setHeaderActionMenu: jest.fn(),
+      history: scopedHistoryMock.create(),
     });
-
-    expect(coreStartMock.injectedMetadata.getInjectedVar).toHaveBeenCalledTimes(1);
-    expect(coreStartMock.injectedMetadata.getInjectedVar).toHaveBeenCalledWith('secureCookies');
 
     const mockRenderApp = jest.requireMock('./login_page').renderLoginPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(coreStartMock.i18n, containerMock, {
       http: coreStartMock.http,
+      notifications: coreStartMock.notifications,
       fatalErrors: coreStartMock.fatalErrors,
       loginAssistanceMessage: 'some-message',
-      requiresSecureConnection: true,
     });
   });
 });

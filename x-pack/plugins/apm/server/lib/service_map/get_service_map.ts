@@ -1,71 +1,111 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PromiseReturnType } from '../../../typings/common';
+import { Logger } from 'kibana/server';
+import { chunk } from 'lodash';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../helpers/setup_request';
+  AGENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../common/elasticsearch_fieldnames';
+import { getServicesProjection } from '../../projections/services';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { environmentQuery } from '../../../server/utils/queries';
+import { withApmSpan } from '../../utils/with_apm_span';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import {
+  DEFAULT_ANOMALIES,
+  getServiceAnomalies,
+} from './get_service_anomalies';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
-import { getServicesProjection } from '../../../common/projections/services';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import {
-  SERVICE_AGENT_NAME,
-  SERVICE_NAME,
-  SERVICE_FRAMEWORK_NAME
-} from '../../../common/elasticsearch_fieldnames';
+import { transformServiceMapResponses } from './transform_service_map_responses';
 
 export interface IEnvOptions {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
-  after?: string;
+  searchAggregatedTransactions: boolean;
+  logger: Logger;
 }
 
 async function getConnectionData({
   setup,
   serviceName,
   environment,
-  after
 }: IEnvOptions) {
-  const { traceIds, after: nextAfter } = await getTraceSampleIds({
-    setup,
-    serviceName,
-    environment,
-    after
+  return withApmSpan('get_service_map_connections', async () => {
+    const { traceIds } = await getTraceSampleIds({
+      setup,
+      serviceName,
+      environment,
+    });
+
+    const chunks = chunk(
+      traceIds,
+      setup.config['xpack.apm.serviceMapMaxTracesPerRequest']
+    );
+
+    const init = {
+      connections: [],
+      discoveredServices: [],
+    };
+
+    if (!traceIds.length) {
+      return init;
+    }
+
+    const chunkedResponses = await withApmSpan(
+      'get_service_paths_from_all_trace_ids',
+      () =>
+        Promise.all(
+          chunks.map((traceIdsChunk) =>
+            getServiceMapFromTraceIds({
+              setup,
+              serviceName,
+              environment,
+              traceIds: traceIdsChunk,
+            })
+          )
+        )
+    );
+
+    return chunkedResponses.reduce((prev, current) => {
+      return {
+        connections: prev.connections.concat(current.connections),
+        discoveredServices: prev.discoveredServices.concat(
+          current.discoveredServices
+        ),
+      };
+    });
   });
-
-  const serviceMapData = traceIds.length
-    ? await getServiceMapFromTraceIds({
-        setup,
-        serviceName,
-        environment,
-        traceIds
-      })
-    : { connections: [], discoveredServices: [] };
-
-  return {
-    after: nextAfter,
-    ...serviceMapData
-  };
 }
 
 async function getServicesData(options: IEnvOptions) {
-  // only return services on the first request for the global service map
-  if (options.after) {
-    return [];
+  const { environment, setup, searchAggregatedTransactions } = options;
+
+  const projection = getServicesProjection({
+    setup,
+    searchAggregatedTransactions,
+  });
+
+  let filter = [
+    ...projection.body.query.bool.filter,
+    ...environmentQuery(environment),
+  ];
+
+  if (options.serviceName) {
+    filter = filter.concat({
+      term: {
+        [SERVICE_NAME]: options.serviceName,
+      },
+    });
   }
-
-  const { setup } = options;
-
-  const projection = getServicesProjection({ setup });
-
-  const { filter } = projection.body.query.bool;
 
   const params = mergeProjection(projection, {
     body: {
@@ -73,67 +113,73 @@ async function getServicesData(options: IEnvOptions) {
       query: {
         bool: {
           ...projection.body.query.bool,
-          filter: options.serviceName
-            ? filter.concat({
-                term: {
-                  [SERVICE_NAME]: options.serviceName
-                }
-              })
-            : filter
-        }
+          filter,
+        },
       },
       aggs: {
         services: {
           terms: {
             field: projection.body.aggs.services.terms.field,
-            size: 500
+            size: 500,
           },
           aggs: {
             agent_name: {
               terms: {
-                field: SERVICE_AGENT_NAME
-              }
+                field: AGENT_NAME,
+              },
             },
-            service_framework_name: {
-              terms: {
-                field: SERVICE_FRAMEWORK_NAME
-              }
-            }
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(
+    'get_service_stats_for_service_map',
+    params
+  );
 
   return (
-    response.aggregations?.services.buckets.map(bucket => {
+    response.aggregations?.services.buckets.map((bucket) => {
       return {
-        'service.name': bucket.key as string,
-        'agent.name':
+        [SERVICE_NAME]: bucket.key as string,
+        [AGENT_NAME]:
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        'service.environment': options.environment || null,
-        'service.framework.name':
-          (bucket.service_framework_name.buckets[0]?.key as
-            | string
-            | undefined) || null
+        [SERVICE_ENVIRONMENT]: options.environment || null,
       };
     }) || []
   );
 }
 
+export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
+export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
-export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData] = await Promise.all([
-    getConnectionData(options),
-    getServicesData(options)
-  ]);
 
-  return {
-    ...connectionData,
-    services: servicesData
-  };
+export function getServiceMap(options: IEnvOptions) {
+  return withApmSpan('get_service_map', async () => {
+    const { logger } = options;
+    const anomaliesPromise = getServiceAnomalies(
+      options
+
+      // always catch error to avoid breaking service maps if there is a problem with ML
+    ).catch((error) => {
+      logger.warn(`Unable to retrieve anomalies for service maps.`);
+      logger.error(error);
+      return DEFAULT_ANOMALIES;
+    });
+
+    const [connectionData, servicesData, anomalies] = await Promise.all([
+      getConnectionData(options),
+      getServicesData(options),
+      anomaliesPromise,
+    ]);
+
+    return transformServiceMapResponses({
+      ...connectionData,
+      services: servicesData,
+      anomalies,
+    });
+  });
 }

@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['monitoring', 'header']);
+  const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -20,7 +21,7 @@ export default function({ getService, getPageObjects }) {
       const UNSUPPORTED_CLUSTER_UUID = '6d-9tDFTRe-qT5GoBytdlQ';
 
       before(async () => {
-        await setup('monitoring/multicluster', {
+        await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
           from: 'Aug 15, 2017 @ 21:00:00.000',
           to: 'Aug 16, 2017 @ 00:00:00.000',
         });
@@ -77,7 +78,7 @@ export default function({ getService, getPageObjects }) {
       const SUPPORTED_CLUSTER_UUID = 'NDKg6VXAT6-TaGzEK2Zy7g';
 
       before(async () => {
-        await setup('monitoring/multi-basic', {
+        await setup('x-pack/test/functional/es_archives/monitoring/multi_basic', {
           from: 'Sep 7, 2017 @ 20:12:04.011',
           to: 'Sep 7, 2017 @ 20:18:55.733',
         });
@@ -89,7 +90,7 @@ export default function({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      describe('cluster row content', function() {
+      describe('cluster row content', function () {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
@@ -107,8 +108,9 @@ export default function({ getService, getPageObjects }) {
         });
 
         it('primary basic cluster shows cluster metrics', async () => {
+          // PageObjects.common.sleep(10000)
           expect(await clusterList.getClusterName(SUPPORTED_CLUSTER_UUID)).to.be('production');
-          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('N/A');
+          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('Clear');
           expect(await clusterList.getClusterNodesCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
           expect(await clusterList.getClusterIndicesCount(SUPPORTED_CLUSTER_UUID)).to.be('4');
           expect(await clusterList.getClusterDataSize(SUPPORTED_CLUSTER_UUID)).to.be('1.6 MB');
@@ -120,7 +122,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      describe('cluster row actions', function() {
+      describe('cluster row actions', function () {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
@@ -132,7 +134,7 @@ export default function({ getService, getPageObjects }) {
           );
         });
 
-        it('clicking the primary basic cluster goes to overview', async function() {
+        it('clicking the primary basic cluster goes to overview', async function () {
           const primaryBasicClusterLink = await clusterList.getClusterLink(SUPPORTED_CLUSTER_UUID);
           await primaryBasicClusterLink.click();
 

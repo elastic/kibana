@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
@@ -12,10 +14,10 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerOpenRoute({ router, license, lib }: RouteDependencies) {
+export function registerOpenRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/open'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const body = req.body as typeof bodySchema.type;
       const { indices = [] } = body;
 
@@ -26,7 +28,7 @@ export function registerOpenRoute({ router, license, lib }: RouteDependencies) {
       };
 
       try {
-        await await ctx.core.elasticsearch.dataClient.callAsCurrentUser('indices.open', params);
+        await await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.open', params);
         return res.ok();
       } catch (e) {
         if (lib.isEsError(e)) {
@@ -36,8 +38,8 @@ export function registerOpenRoute({ router, license, lib }: RouteDependencies) {
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

@@ -1,0 +1,37 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects when a Google marketplace application is added to the Google Workspace domain. An adversary may add a malicious application to an organization\u2019s Google Workspace domain in order to maintain a presence in their target\u2019s organization and steal data.",
+  "false_positives": [
+    "Applications can be added to a Google Workspace domain by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "from": "now-130m",
+  "index": [
+    "filebeat-*",
+    "logs-google_workspace*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Application Added to Google Workspace Domain",
+  "note": "## Config\n\nThe Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n\n### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information.\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-gsuite.html",
+  "query": "event.dataset:(gsuite.admin or google_workspace.admin) and event.provider:admin and event.category:iam and event.action:ADD_APPLICATION\n",
+  "references": [
+    "https://support.google.com/a/answer/6328701?hl=en#"
+  ],
+  "risk_score": 47,
+  "rule_id": "785a404b-75aa-4ffd-8be5-3334a5a544dd",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Google Workspace",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

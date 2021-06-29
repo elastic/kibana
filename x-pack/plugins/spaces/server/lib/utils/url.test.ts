@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // TEMPORARY UNTIL FIXED!
@@ -23,7 +24,7 @@ describe('modifyUrl()', () => {
 
   test('supports modifying the passed object', () => {
     expect(
-      modifyUrl('http://localhost', parsed => {
+      modifyUrl('http://localhost', (parsed) => {
         parsed.port = '9999';
         parsed.auth = 'foo:bar';
         return parsed;
@@ -33,7 +34,7 @@ describe('modifyUrl()', () => {
 
   test('supports changing pathname', () => {
     expect(
-      modifyUrl('http://localhost/some/path', parsed => {
+      modifyUrl('http://localhost/some/path', (parsed) => {
         parsed.pathname += '/subpath';
         return parsed;
       })
@@ -42,7 +43,7 @@ describe('modifyUrl()', () => {
 
   test('supports changing port', () => {
     expect(
-      modifyUrl('http://localhost:5601', parsed => {
+      modifyUrl('http://localhost:5601', (parsed) => {
         parsed.port = (Number(parsed.port!) + 1).toString();
         return parsed;
       })
@@ -51,7 +52,7 @@ describe('modifyUrl()', () => {
 
   test('supports changing protocol', () => {
     expect(
-      modifyUrl('http://localhost', parsed => {
+      modifyUrl('http://localhost', (parsed) => {
         parsed.protocol = 'mail';
         parsed.slashes = false;
         parsed.pathname = null;

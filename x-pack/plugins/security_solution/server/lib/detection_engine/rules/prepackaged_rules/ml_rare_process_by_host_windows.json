@@ -1,0 +1,34 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies rare processes that do not usually run on individual hosts, which can indicate execution of unauthorized services, malware, or persistence mechanisms. Processes are considered rare when they only run occasionally as compared with other processes running on the host.",
+  "false_positives": [
+    "A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this alert."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": [
+    "rare_process_by_host_windows_ecs",
+    "v2_rare_process_by_host_windows_ecs"
+  ],
+  "name": "Unusual Process For a Windows Host",
+  "note": "## Triage and analysis\n\n### Investigating an Unusual Windows Process\nDetection alerts from this rule indicate the presence of a Windows process that is rare and unusual for the host it ran on. Here are some possible avenues of investigation:\n- Consider the user as identified by the username field. Is this program part of an expected workflow for the user who ran this program on this host?\n- Examine the history of execution. If this process manifested only very recently, it might be part of a new software package. If it has a consistent cadence - for example if it runs monthly or quarterly - it might be part of a monthly or quarterly business process.\n- Examine the process metadata like the values of the Company, Description and Product fields which may indicate whether the program is associated with an expected software vendor or package.\n- Examine arguments and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.\n- Consider the same for the parent process. If the parent process is a legitimate system utility or service, this could be related to software updates or system management. If the parent process is something user-facing like an Office application, this process could be more suspicious.\n- If you have file hash values in the event data, and you suspect malware, you can optionally run a search for the file hash to see if the file is identified as malware by anti-malware tools. ",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "6d448b96-c922-4adb-b51c-b767f1ea5b76",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 6
+}

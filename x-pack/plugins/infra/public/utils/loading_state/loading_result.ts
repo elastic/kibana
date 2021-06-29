@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 interface UninitializedLoadingResult {
@@ -81,7 +82,7 @@ export const createFailureResult = <Parameters = any, ErrorPayload = any>(
 });
 
 export const createFailureResultReducer = <Parameters = any, ErrorPayload = any>(
-  convertErrorToString: (error: ErrorPayload) => string = error => `${error}`
+  convertErrorToString: (error: ErrorPayload) => string = (error) => `${error}`
 ) => (
   state: LoadingResult<Parameters>,
   { params, error }: { params: Parameters; error: ErrorPayload }

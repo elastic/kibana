@@ -1,33 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
-import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { validateConfig, validateParams } from '../lib';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
-import { ActionParamsType, ActionTypeConfigType } from './es_index';
+import { actionsMock } from '../mocks';
+import {
+  ActionParamsType,
+  ActionTypeConfigType,
+  ESIndexActionType,
+  ESIndexActionTypeExecutorOptions,
+} from './es_index';
+import { AlertHistoryEsIndexConnectorId } from '../../common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 
 const ACTION_TYPE_ID = '.index';
-const NO_OP_FN = () => {};
 
-const services = {
-  log: NO_OP_FN,
-  callCluster: jest.fn(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: ESIndexActionType;
 
 beforeAll(() => {
   const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<ActionTypeConfigType, {}, ActionParamsType>(ACTION_TYPE_ID);
 });
 
 beforeEach(() => {
@@ -43,51 +46,77 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
-    const config: Record<string, any> = {};
+    const config: Record<string, unknown> = {
+      index: 'testing-123',
+      refresh: false,
+    };
 
-    expect(validateConfig(actionType, config)).toEqual({
-      ...config,
-      index: null,
-    });
-
-    config.index = 'testing-123';
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
       index: 'testing-123',
+      refresh: false,
+      executionTimeField: null,
     });
+
+    config.executionTimeField = 'field-123';
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+      index: 'testing-123',
+      refresh: false,
+      executionTimeField: 'field-123',
+    });
+
+    config.executionTimeField = null;
+    expect(validateConfig(actionType, config)).toEqual({
+      ...config,
+      index: 'testing-123',
+      refresh: false,
+      executionTimeField: null,
+    });
+
+    delete config.index;
+
+    expect(() => {
+      validateConfig(actionType, { index: 666 });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [index]: expected value of type [string] but got [number]"`
+    );
+    delete config.executionTimeField;
+
+    expect(() => {
+      validateConfig(actionType, { index: 'testing-123', executionTimeField: true });
+    }).toThrowErrorMatchingInlineSnapshot(`
+"error validating action type config: [executionTimeField]: types that failed validation:
+- [executionTimeField.0]: expected value of type [string] but got [boolean]
+- [executionTimeField.1]: expected value to equal [null]"
+`);
+
+    delete config.refresh;
+    expect(() => {
+      validateConfig(actionType, { index: 'testing-123', refresh: 'foo' });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [refresh]: expected value of type [boolean] but got [string]"`
+    );
   });
 
   test('config validation fails when config is not valid', () => {
-    const baseConfig: Record<string, any> = {
+    const baseConfig: Record<string, unknown> = {
       indeX: 'bob',
     };
 
     expect(() => {
       validateConfig(actionType, baseConfig);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [indeX]: definition for this key is missing"`
+      `"error validating action type config: [index]: expected value of type [string] but got [undefined]"`
     );
-
-    delete baseConfig.user;
-    baseConfig.index = 666;
-
-    expect(() => {
-      validateConfig(actionType, baseConfig);
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action type config: [index]: types that failed validation:
-- [index.0]: expected value of type [string] but got [number]
-- [index.1]: expected value to equal [null]"
-`);
   });
 });
 
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
-    const params: Record<string, any> = {
-      index: 'testing-123',
-      executionTimeField: 'field-used-for-time',
-      refresh: true,
+    const params: Record<string, unknown> = {
       documents: [{ rando: 'thing' }],
+      indexOverride: null,
     };
     expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
         Object {
@@ -96,22 +125,7 @@ describe('params validation', () => {
               "rando": "thing",
             },
           ],
-          "executionTimeField": "field-used-for-time",
-          "index": "testing-123",
-          "refresh": true,
-        }
-    `);
-
-    delete params.index;
-    delete params.refresh;
-    delete params.executionTimeField;
-    expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
-        Object {
-          "documents": Array [
-            Object {
-              "rando": "thing",
-            },
-          ],
+          "indexOverride": null,
         }
     `);
   });
@@ -130,24 +144,6 @@ describe('params validation', () => {
     );
 
     expect(() => {
-      validateParams(actionType, { index: 666 });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [index]: expected value of type [string] but got [number]"`
-    );
-
-    expect(() => {
-      validateParams(actionType, { executionTimeField: true });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [executionTimeField]: expected value of type [string] but got [boolean]"`
-    );
-
-    expect(() => {
-      validateParams(actionType, { refresh: 'foo' });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [refresh]: expected value of type [boolean] but got [string]"`
-    );
-
-    expect(() => {
       validateParams(actionType, { documents: ['should be an object'] });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [documents.0]: could not parse record value from json input"`
@@ -160,27 +156,34 @@ describe('execute()', () => {
     const secrets = {};
     let config: ActionTypeConfigType;
     let params: ActionParamsType;
-    let executorOptions: ActionTypeExecutorOptions;
+    let executorOptions: ESIndexActionTypeExecutorOptions;
 
-    // minimal params, index via param
-    config = { index: null };
+    // minimal params
+    config = { index: 'index-value', refresh: false, executionTimeField: null };
     params = {
-      index: 'index-via-param',
       documents: [{ jim: 'bob' }],
-      executionTimeField: undefined,
-      refresh: undefined,
+      indexOverride: null,
     };
 
     const actionId = 'some-id';
 
-    executorOptions = { actionId, config, secrets, params, services };
-    services.callCluster.mockClear();
-    await actionType.executor(executorOptions);
+    executorOptions = {
+      actionId,
+      config,
+      secrets,
+      params,
+      services,
+    };
+    const scopedClusterClient = elasticsearchClientMock.createClusterClient().asScoped()
+      .asCurrentUser;
+    await actionType.executor({
+      ...executorOptions,
+      services: { ...services, scopedClusterClient },
+    });
 
-    expect(services.callCluster.mock.calls).toMatchInlineSnapshot(`
+    expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
-              "bulk",
               Object {
                 "body": Array [
                   Object {
@@ -190,33 +193,35 @@ describe('execute()', () => {
                     "jim": "bob",
                   },
                 ],
-                "index": "index-via-param",
+                "index": "index-value",
+                "refresh": false,
               },
             ],
           ]
     `);
 
-    // full params (except index), index via config
-    config = { index: 'index-via-config' };
+    // full params
+    config = { index: 'index-value', executionTimeField: 'field_to_use_for_time', refresh: true };
     params = {
-      index: undefined,
       documents: [{ jimbob: 'jr' }],
-      executionTimeField: 'field_to_use_for_time',
-      refresh: true,
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
-    services.callCluster.mockClear();
-    await actionType.executor(executorOptions);
+    scopedClusterClient.bulk.mockClear();
+    await actionType.executor({
+      ...executorOptions,
+      services: { ...services, scopedClusterClient },
+    });
 
-    const calls = services.callCluster.mock.calls;
-    const timeValue = calls[0][1].body[1].field_to_use_for_time;
+    const calls = scopedClusterClient.bulk.mock.calls;
+    const timeValue = ((calls[0][0]?.body as unknown[])[1] as Record<string, unknown>)
+      .field_to_use_for_time;
     expect(timeValue).toBeInstanceOf(Date);
-    delete calls[0][1].body[1].field_to_use_for_time;
+    delete ((calls[0][0]?.body as unknown[])[1] as Record<string, unknown>).field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "bulk",
             Object {
               "body": Array [
                 Object {
@@ -226,30 +231,31 @@ describe('execute()', () => {
                   "jimbob": "jr",
                 },
               ],
-              "index": "index-via-config",
+              "index": "index-value",
               "refresh": true,
             },
           ],
         ]
     `);
 
-    // minimal params, index via config and param
-    config = { index: 'index-via-config' };
+    // minimal params
+    config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
-      index: 'index-via-param',
       documents: [{ jim: 'bob' }],
-      executionTimeField: undefined,
-      refresh: undefined,
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
-    services.callCluster.mockClear();
-    await actionType.executor(executorOptions);
 
-    expect(services.callCluster.mock.calls).toMatchInlineSnapshot(`
+    scopedClusterClient.bulk.mockClear();
+    await actionType.executor({
+      ...executorOptions,
+      services: { ...services, scopedClusterClient },
+    });
+
+    expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "bulk",
           Object {
             "body": Array [
               Object {
@@ -259,29 +265,30 @@ describe('execute()', () => {
                 "jim": "bob",
               },
             ],
-            "index": "index-via-config",
+            "index": "index-value",
+            "refresh": false,
           },
         ],
       ]
     `);
 
     // multiple documents
-    config = { index: null };
+    config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
-      index: 'index-via-param',
       documents: [{ a: 1 }, { b: 2 }],
-      executionTimeField: undefined,
-      refresh: undefined,
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
-    services.callCluster.mockClear();
-    await actionType.executor(executorOptions);
+    scopedClusterClient.bulk.mockClear();
+    await actionType.executor({
+      ...executorOptions,
+      services: { ...services, scopedClusterClient },
+    });
 
-    expect(services.callCluster.mock.calls).toMatchInlineSnapshot(`
+    expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
-              "bulk",
               Object {
                 "body": Array [
                   Object {
@@ -297,10 +304,289 @@ describe('execute()', () => {
                     "b": 2,
                   },
                 ],
-                "index": "index-via-param",
+                "index": "index-value",
+                "refresh": false,
               },
             ],
           ]
+    `);
+  });
+
+  test('renders parameter templates as expected', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
+    };
+    const variables = {
+      who: 'world',
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      'action-type-id'
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "hello": "world",
+          },
+        ],
+        "indexOverride": null,
+      }
+    `);
+  });
+
+  test('ignores indexOverride for generic es index connector', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: 'hello-world',
+    };
+    const variables = {
+      who: 'world',
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      'action-type-id'
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "hello": "world",
+          },
+        ],
+        "indexOverride": null,
+      }
+    `);
+  });
+
+  test('renders parameter templates as expected for preconfigured alert history connector', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
+    };
+    const variables = {
+      date: '2021-01-01T00:00:00.000Z',
+      rule: {
+        id: 'rule-id',
+        name: 'rule-name',
+        type: 'rule-type',
+      },
+      context: {
+        contextVar1: 'contextValue1',
+        contextVar2: 'contextValue2',
+      },
+      params: {
+        ruleParam: 1,
+        ruleParamString: 'another param',
+      },
+      tags: ['abc', 'xyz'],
+      alert: {
+        id: 'alert-id',
+        actionGroup: 'action-group-id',
+        actionGroupName: 'Action Group',
+      },
+      state: {
+        alertStateValue: true,
+        alertStateAnotherValue: 'yes',
+      },
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      AlertHistoryEsIndexConnectorId
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "@timestamp": "2021-01-01T00:00:00.000Z",
+            "event": Object {
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alert": Object {
+                "actionGroup": "action-group-id",
+                "actionGroupName": "Action Group",
+                "context": Object {
+                  "rule-type": Object {
+                    "contextVar1": "contextValue1",
+                    "contextVar2": "contextValue2",
+                  },
+                },
+                "id": "alert-id",
+              },
+            },
+            "rule": Object {
+              "id": "rule-id",
+              "name": "rule-name",
+              "params": Object {
+                "rule-type": Object {
+                  "ruleParam": 1,
+                  "ruleParamString": "another param",
+                },
+              },
+              "type": "rule-type",
+            },
+            "tags": Array [
+              "abc",
+              "xyz",
+            ],
+          },
+        ],
+        "indexOverride": null,
+      }
+    `);
+  });
+
+  test('passes through indexOverride for preconfigured alert history connector', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: 'hello-world',
+    };
+    const variables = {
+      date: '2021-01-01T00:00:00.000Z',
+      rule: {
+        id: 'rule-id',
+        name: 'rule-name',
+        type: 'rule-type',
+      },
+      context: {
+        contextVar1: 'contextValue1',
+        contextVar2: 'contextValue2',
+      },
+      params: {
+        ruleParam: 1,
+        ruleParamString: 'another param',
+      },
+      tags: ['abc', 'xyz'],
+      alert: {
+        id: 'alert-id',
+        actionGroup: 'action-group-id',
+        actionGroupName: 'Action Group',
+      },
+      state: {
+        alertStateValue: true,
+        alertStateAnotherValue: 'yes',
+      },
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      AlertHistoryEsIndexConnectorId
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "@timestamp": "2021-01-01T00:00:00.000Z",
+            "event": Object {
+              "kind": "alert",
+            },
+            "kibana": Object {
+              "alert": Object {
+                "actionGroup": "action-group-id",
+                "actionGroupName": "Action Group",
+                "context": Object {
+                  "rule-type": Object {
+                    "contextVar1": "contextValue1",
+                    "contextVar2": "contextValue2",
+                  },
+                },
+                "id": "alert-id",
+              },
+            },
+            "rule": Object {
+              "id": "rule-id",
+              "name": "rule-name",
+              "params": Object {
+                "rule-type": Object {
+                  "ruleParam": 1,
+                  "ruleParamString": "another param",
+                },
+              },
+              "type": "rule-type",
+            },
+            "tags": Array [
+              "abc",
+              "xyz",
+            ],
+          },
+        ],
+        "indexOverride": "hello-world",
+      }
+    `);
+  });
+
+  test('throws error for preconfigured alert history index when no variables are available', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
+    };
+    const variables = {};
+
+    expect(() =>
+      actionType.renderParameterTemplates!(
+        paramsWithTemplates,
+        variables,
+        AlertHistoryEsIndexConnectorId
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error creating alert history document for ${AlertHistoryEsIndexConnectorId} connector"`
+    );
+  });
+
+  test('resolves with an error when an error occurs in the indexing operation', async () => {
+    const secrets = {};
+    // minimal params
+    const config = { index: 'index-value', refresh: false, executionTimeField: null };
+    const params = {
+      documents: [{ '': 'bob' }],
+      indexOverride: null,
+    };
+
+    const actionId = 'some-id';
+    const scopedClusterClient = elasticsearchClientMock.createClusterClient().asScoped()
+      .asCurrentUser;
+    scopedClusterClient.bulk.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        took: 0,
+        errors: true,
+        items: [
+          {
+            index: {
+              _index: 'indexme',
+              _id: '7buTjHQB0SuNSiS9Hayt',
+              status: 400,
+              error: {
+                type: 'mapper_parsing_exception',
+                reason: 'failed to parse',
+                caused_by: {
+                  type: 'illegal_argument_exception',
+                  reason: 'field name cannot be an empty string',
+                },
+              },
+            },
+          },
+        ],
+      })
+    );
+
+    expect(await actionType.executor({ actionId, config, secrets, params, services }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "error indexing documents",
+        "serviceMessage": "Cannot destructure property 'body' of '(intermediate value)' as it is undefined.",
+        "status": "error",
+      }
     `);
   });
 });

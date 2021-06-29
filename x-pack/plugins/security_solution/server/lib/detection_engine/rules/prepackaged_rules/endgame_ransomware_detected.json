@@ -1,0 +1,24 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Elastic Endgame detected Ransomware. Click the Elastic Endgame icon in the event.module column or the link in the rule.reference column for additional information.",
+  "from": "now-15m",
+  "index": [
+    "endgame-*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Ransomware - Detected - Elastic Endgame",
+  "query": "event.kind:alert and event.module:endgame and endgame.metadata.type:detection and (event.action:ransomware_event or endgame.event_subtype_full:ransomware_event)\n",
+  "risk_score": 99,
+  "rule_id": "8cb4f625-7743-4dfb-ae1b-ad92be9df7bd",
+  "severity": "critical",
+  "tags": [
+    "Elastic",
+    "Elastic Endgame"
+  ],
+  "type": "query",
+  "version": 6
+}

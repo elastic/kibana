@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a terminal (tty) is spawned via Perl. Attackers may upgrade a simple reverse shell to a fully interactive tty after obtaining initial access to a host.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Interactive Terminal Spawned via Perl",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:perl and\n  process.args:(\"exec \\\"/bin/sh\\\";\" or \"exec \\\"/bin/dash\\\";\" or \"exec \\\"/bin/bash\\\";\")\n",
+  "risk_score": 73,
+  "rule_id": "05e5a668-7b51-4a67-93ab-e9af405c9ef3",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 6
+}

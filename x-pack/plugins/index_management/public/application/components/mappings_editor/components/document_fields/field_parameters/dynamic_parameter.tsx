@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -24,6 +25,7 @@ export const dynamicSerializer = (field: Field): Field => {
 
   const dynamic =
     field.dynamic_toggle === true ? true : field.dynamic_strict === true ? 'strict' : false;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { dynamic_toggle, dynamic_strict, ...rest } = field;
 
   return {
@@ -79,7 +81,7 @@ export const DynamicParameter = ({ defaultToggleValue }: Props) => {
       formFieldPath="dynamic_toggle"
       defaultToggleValue={defaultToggleValue}
     >
-      {isOn => {
+      {(isOn) => {
         return isOn === false ? (
           <UseField
             path="dynamic_strict"

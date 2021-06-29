@@ -1,0 +1,717 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DatatableComponent it renders actions column when there are row actions 1`] = `
+<VisualizationContainer
+  className="lnsDataTableContainer"
+  reportTitle="My fanci metric chart"
+>
+  <ContextProvider
+    value={
+      Object {
+        "alignments": Object {
+          "a": "left",
+          "b": "left",
+          "c": "right",
+        },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
+        },
+        "rowHasRowClickTriggerActions": Array [
+          true,
+          true,
+          true,
+        ],
+        "table": Object {
+          "columns": Array [
+            Object {
+              "id": "a",
+              "meta": Object {
+                "field": "a",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "a",
+            },
+            Object {
+              "id": "b",
+              "meta": Object {
+                "field": "b",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "date_histogram",
+                },
+                "type": "date",
+              },
+              "name": "b",
+            },
+            Object {
+              "id": "c",
+              "meta": Object {
+                "field": "c",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "count",
+                },
+                "type": "number",
+              },
+              "name": "c",
+            },
+          ],
+          "rows": Array [
+            Object {
+              "a": "shoes",
+              "b": 1588024800000,
+              "c": 3,
+            },
+          ],
+          "type": "datatable",
+        },
+      }
+    }
+  >
+    <EuiDataGrid
+      aria-label="My fanci metric chart"
+      columnVisibility={
+        Object {
+          "setVisibleColumns": [Function],
+          "visibleColumns": Array [
+            "a",
+            "b",
+            "c",
+          ],
+        }
+      }
+      columns={
+        Array [
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
+            "displayAsText": "a",
+            "id": "a",
+          },
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
+            "displayAsText": "b",
+            "id": "b",
+          },
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
+            "displayAsText": "c",
+            "id": "c",
+          },
+        ]
+      }
+      data-test-subj="lnsDataTable"
+      gridStyle={
+        Object {
+          "border": "horizontal",
+          "header": "underline",
+        }
+      }
+      onColumnResize={[Function]}
+      renderCellValue={[Function]}
+      rowCount={1}
+      sorting={
+        Object {
+          "columns": Array [],
+          "onSort": [Function],
+        }
+      }
+      toolbarVisibility={false}
+      trailingControlColumns={
+        Array [
+          Object {
+            "headerCellRender": [Function],
+            "id": "trailingControlColumn",
+            "rowCellRender": [Function],
+            "width": 40,
+          },
+        ]
+      }
+    />
+  </ContextProvider>
+</VisualizationContainer>
+`;
+
+exports[`DatatableComponent it renders the title and value 1`] = `
+<VisualizationContainer
+  className="lnsDataTableContainer"
+  reportTitle="My fanci metric chart"
+>
+  <ContextProvider
+    value={
+      Object {
+        "alignments": Object {
+          "a": "left",
+          "b": "left",
+          "c": "right",
+        },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
+        },
+        "rowHasRowClickTriggerActions": undefined,
+        "table": Object {
+          "columns": Array [
+            Object {
+              "id": "a",
+              "meta": Object {
+                "field": "a",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "a",
+            },
+            Object {
+              "id": "b",
+              "meta": Object {
+                "field": "b",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "date_histogram",
+                },
+                "type": "date",
+              },
+              "name": "b",
+            },
+            Object {
+              "id": "c",
+              "meta": Object {
+                "field": "c",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "count",
+                },
+                "type": "number",
+              },
+              "name": "c",
+            },
+          ],
+          "rows": Array [
+            Object {
+              "a": "shoes",
+              "b": 1588024800000,
+              "c": 3,
+            },
+          ],
+          "type": "datatable",
+        },
+      }
+    }
+  >
+    <EuiDataGrid
+      aria-label="My fanci metric chart"
+      columnVisibility={
+        Object {
+          "setVisibleColumns": [Function],
+          "visibleColumns": Array [
+            "a",
+            "b",
+            "c",
+          ],
+        }
+      }
+      columns={
+        Array [
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
+            "displayAsText": "a",
+            "id": "a",
+          },
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
+            "displayAsText": "b",
+            "id": "b",
+          },
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort ascending",
+              },
+              "showSortDesc": Object {
+                "label": "Sort descending",
+              },
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
+            "displayAsText": "c",
+            "id": "c",
+          },
+        ]
+      }
+      data-test-subj="lnsDataTable"
+      gridStyle={
+        Object {
+          "border": "horizontal",
+          "header": "underline",
+        }
+      }
+      onColumnResize={[Function]}
+      renderCellValue={[Function]}
+      rowCount={1}
+      sorting={
+        Object {
+          "columns": Array [],
+          "onSort": [Function],
+        }
+      }
+      toolbarVisibility={false}
+      trailingControlColumns={Array []}
+    />
+  </ContextProvider>
+</VisualizationContainer>
+`;
+
+exports[`DatatableComponent it should render hide and reset actions on header even when it is in read only mode 1`] = `
+<VisualizationContainer
+  className="lnsDataTableContainer"
+  reportTitle="My fanci metric chart"
+>
+  <ContextProvider
+    value={
+      Object {
+        "alignments": Object {
+          "a": "left",
+          "b": "left",
+          "c": "right",
+        },
+        "getColorForValue": [MockFunction],
+        "minMaxByColumnId": Object {
+          "c": Object {
+            "max": 3,
+            "min": 3,
+          },
+        },
+        "rowHasRowClickTriggerActions": Array [
+          false,
+          false,
+          false,
+        ],
+        "table": Object {
+          "columns": Array [
+            Object {
+              "id": "a",
+              "meta": Object {
+                "field": "a",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "a",
+            },
+            Object {
+              "id": "b",
+              "meta": Object {
+                "field": "b",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "date_histogram",
+                },
+                "type": "date",
+              },
+              "name": "b",
+            },
+            Object {
+              "id": "c",
+              "meta": Object {
+                "field": "c",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "count",
+                },
+                "type": "number",
+              },
+              "name": "c",
+            },
+          ],
+          "rows": Array [
+            Object {
+              "a": "shoes",
+              "b": 1588024800000,
+              "c": 3,
+            },
+          ],
+          "type": "datatable",
+        },
+      }
+    }
+  >
+    <EuiDataGrid
+      aria-label="My fanci metric chart"
+      columnVisibility={
+        Object {
+          "setVisibleColumns": [Function],
+          "visibleColumns": Array [
+            "a",
+            "b",
+            "c",
+          ],
+        }
+      }
+      columns={
+        Array [
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": false,
+              "showSortDesc": false,
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              a
+            </div>,
+            "displayAsText": "a",
+            "id": "a",
+          },
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": false,
+              "showSortDesc": false,
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--left"
+            >
+              b
+            </div>,
+            "displayAsText": "b",
+            "id": "b",
+          },
+          Object {
+            "actions": Object {
+              "additional": Array [
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableResetWidth",
+                  "iconType": "empty",
+                  "isDisabled": true,
+                  "label": "Reset width",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+                Object {
+                  "color": "text",
+                  "data-test-subj": "lensDatatableHide",
+                  "iconType": "eyeClosed",
+                  "isDisabled": false,
+                  "label": "Hide",
+                  "onClick": [Function],
+                  "size": "xs",
+                },
+              ],
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": false,
+              "showSortDesc": false,
+            },
+            "cellActions": undefined,
+            "display": <div
+              className="lnsTableCell--right"
+            >
+              c
+            </div>,
+            "displayAsText": "c",
+            "id": "c",
+          },
+        ]
+      }
+      data-test-subj="lnsDataTable"
+      gridStyle={
+        Object {
+          "border": "horizontal",
+          "header": "underline",
+        }
+      }
+      onColumnResize={[Function]}
+      renderCellValue={[Function]}
+      rowCount={1}
+      sorting={
+        Object {
+          "columns": Array [],
+          "onSort": [Function],
+        }
+      }
+      toolbarVisibility={false}
+      trailingControlColumns={Array []}
+    />
+  </ContextProvider>
+</VisualizationContainer>
+`;

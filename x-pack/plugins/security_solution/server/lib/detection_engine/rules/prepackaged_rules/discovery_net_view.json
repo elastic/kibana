@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies attempts to enumerate hosts in a network using the built-in Windows net.exe tool.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Windows Network Enumeration",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  ((process.name : \"net.exe\" or process.pe.original_file_name == \"net.exe\") or\n   ((process.name : \"net1.exe\" or process.pe.original_file_name == \"net1.exe\") and\n       not process.parent.name : \"net.exe\")) and\n  (process.args : \"view\" or (process.args : \"time\" and process.args : \"\\\\\\\\*\"))\n\n\n  /* expand when ancestory is available\n  and not descendant of [process where event.type == (\"start\", \"process_started\") and process.name : \"cmd.exe\" and\n                           ((process.parent.name : \"userinit.exe\") or\n                            (process.parent.name : \"gpscript.exe\") or\n                            (process.parent.name : \"explorer.exe\" and\n                               process.args : \"C:\\\\*\\\\Start Menu\\\\Programs\\\\Startup\\\\*.bat*\"))]\n  */\n",
+  "risk_score": 47,
+  "rule_id": "7b8bfc26-81d2-435e-965c-d722ee397ef1",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1018",
+          "name": "Remote System Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1018/"
+        },
+        {
+          "id": "T1135",
+          "name": "Network Share Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1135/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

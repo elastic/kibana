@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { resolve } from 'path';
@@ -46,6 +35,20 @@ const options = {
   updateBaselines: {
     desc: 'Replace baseline screenshots with whatever is generated from the test.',
   },
+  updateSnapshots: {
+    desc: 'Replace inline and file snapshots with whatever is generated from the test.',
+  },
+  u: {
+    desc: 'Replace both baseline screenshots and snapshots',
+  },
+  include: {
+    arg: '<file>',
+    desc: 'Files that must included to be run, can be included multiple times.',
+  },
+  exclude: {
+    arg: '<file>',
+    desc: 'Files that must NOT be included to be run, can be included multiple times.',
+  },
   'include-tag': {
     arg: '<tag>',
     desc: 'Tags that suites must include to be run, can be included multiple times.',
@@ -65,8 +68,8 @@ const options = {
 
 export function displayHelp() {
   const helpOptions = Object.keys(options)
-    .filter(name => name !== '_')
-    .map(name => {
+    .filter((name) => name !== '_')
+    .map((name) => {
       const option = options[name];
       return {
         ...option,
@@ -74,7 +77,7 @@ export function displayHelp() {
         default: option.defaultHelp || '',
       };
     })
-    .map(option => {
+    .map((option) => {
       return `--${option.usage.padEnd(28)} ${option.desc} ${option.default}`;
     })
     .join(`\n      `);
@@ -115,6 +118,13 @@ export function processOptions(userOptions, defaultConfigPaths) {
     delete userOptions['kibana-install-dir'];
   }
 
+  userOptions.suiteFiles = {
+    include: [].concat(userOptions.include || []),
+    exclude: [].concat(userOptions.exclude || []),
+  };
+  delete userOptions.include;
+  delete userOptions.exclude;
+
   userOptions.suiteTags = {
     include: [].concat(userOptions['include-tag'] || []),
     exclude: [].concat(userOptions['exclude-tag'] || []),
@@ -134,7 +144,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
 
   return {
     ...userOptions,
-    configs: configs.map(c => resolve(c)),
+    configs: configs.map((c) => resolve(c)),
     createLogger,
     extraKbnOpts: userOptions._,
   };

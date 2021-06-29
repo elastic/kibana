@@ -1,0 +1,11 @@
+{
+  "name": "Rule 1",
+  "description": "Sample rule with single exception list",
+  "rule_id": "query-with-single-exception-list",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "query": "host.name: *",
+  "interval": "30s",
+  "exceptions_list": [{ "id": "7b4e8f40-4f0c-11eb-865c-8bc292d0513c", "list_id": "detection_list_1", "namespace_type": "single", "type": "detection" }]
+}

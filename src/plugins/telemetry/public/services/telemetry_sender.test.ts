@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint-disable dot-notation */
@@ -26,18 +15,22 @@ class LocalStorageMock implements Partial<Storage> {
   getItem = jest.fn();
   setItem = jest.fn();
 }
+const mockLocalStorage = new LocalStorageMock();
+const originalLocalStorage = window.localStorage;
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+});
 
 describe('TelemetrySender', () => {
-  let originalLocalStorage: Storage;
-  let mockLocalStorage: LocalStorageMock;
-  beforeAll(() => {
-    originalLocalStorage = window.localStorage;
+  beforeEach(() => {
+    mockLocalStorage.getItem.mockClear();
+    mockLocalStorage.setItem.mockClear();
   });
-
-  // @ts-ignore
-  beforeEach(() => (window.localStorage = mockLocalStorage = new LocalStorageMock()));
-  // @ts-ignore
-  afterAll(() => (window.localStorage = originalLocalStorage));
+  afterAll(() =>
+    Object.defineProperty(window, 'localStorage', {
+      value: originalLocalStorage,
+    })
+  );
 
   describe('constructor', () => {
     it('defaults lastReport if unset', () => {
@@ -78,20 +71,20 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
       const telemetrySender = new TelemetrySender(telemetryService);
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
+      const shouldSendReport = telemetrySender['shouldSendReport']();
 
       expect(telemetryService.getIsOptedIn).toBeCalledTimes(1);
-      expect(shouldSendRerpot).toBe(false);
+      expect(shouldSendReport).toBe(false);
     });
 
     it('returns true if lastReported is undefined', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
+      const shouldSendReport = telemetrySender['shouldSendReport']();
 
       expect(telemetrySender['lastReported']).toBeUndefined();
-      expect(shouldSendRerpot).toBe(true);
+      expect(shouldSendReport).toBe(true);
     });
 
     it('returns true if lastReported passed REPORT_INTERVAL_MS', () => {
@@ -101,8 +94,8 @@ describe('TelemetrySender', () => {
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender['lastReported'] = `${lastReported}`;
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
-      expect(shouldSendRerpot).toBe(true);
+      const shouldSendReport = telemetrySender['shouldSendReport']();
+      expect(shouldSendReport).toBe(true);
     });
 
     it('returns false if lastReported is within REPORT_INTERVAL_MS', () => {
@@ -112,8 +105,8 @@ describe('TelemetrySender', () => {
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender['lastReported'] = `${lastReported}`;
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
-      expect(shouldSendRerpot).toBe(false);
+      const shouldSendReport = telemetrySender['shouldSendReport']();
+      expect(shouldSendReport).toBe(false);
     });
 
     it('returns true if lastReported is malformed', () => {
@@ -121,8 +114,18 @@ describe('TelemetrySender', () => {
       telemetryService.getIsOptedIn = jest.fn().mockReturnValue(true);
       const telemetrySender = new TelemetrySender(telemetryService);
       telemetrySender['lastReported'] = `random_malformed_string`;
-      const shouldSendRerpot = telemetrySender['shouldSendReport']();
-      expect(shouldSendRerpot).toBe(true);
+      const shouldSendReport = telemetrySender['shouldSendReport']();
+      expect(shouldSendReport).toBe(true);
+    });
+
+    it('returns false if we are in screenshot mode', () => {
+      const telemetryService = mockTelemetryService({ isScreenshotMode: true });
+      telemetryService.getIsOptedIn = jest.fn().mockReturnValue(false);
+      const telemetrySender = new TelemetrySender(telemetryService);
+      const shouldSendReport = telemetrySender['shouldSendReport']();
+
+      expect(telemetryService.getIsOptedIn).toBeCalledTimes(0);
+      expect(shouldSendReport).toBe(false);
     });
 
     describe('sendIfDue', () => {
@@ -133,9 +136,7 @@ describe('TelemetrySender', () => {
         originalFetch = window.fetch;
       });
 
-      // @ts-ignore
       beforeEach(() => (window.fetch = mockFetch = jest.fn()));
-      // @ts-ignore
       afterAll(() => (window.fetch = originalFetch));
 
       it('does not send if already sending', async () => {
@@ -160,6 +161,15 @@ describe('TelemetrySender', () => {
         expect(mockFetch).toBeCalledTimes(0);
       });
 
+      it('does not send if we are in screenshot mode', async () => {
+        const telemetryService = mockTelemetryService({ isScreenshotMode: true });
+        const telemetrySender = new TelemetrySender(telemetryService);
+        telemetrySender['isSending'] = false;
+        await telemetrySender['sendIfDue']();
+
+        expect(mockFetch).toBeCalledTimes(0);
+      });
+
       it('sends report if due', async () => {
         const mockTelemetryUrl = 'telemetry_cluster_url';
         const mockTelemetryPayload = ['hashed_cluster_usage_data1'];
@@ -178,6 +188,7 @@ describe('TelemetrySender', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Elastic-Stack-Version': telemetryService.currentKibanaVersion,
           },
           body: mockTelemetryPayload[0],
         });
@@ -256,9 +267,7 @@ describe('TelemetrySender', () => {
       originalSetInterval = window.setInterval;
     });
 
-    // @ts-ignore
     beforeEach(() => (window.setInterval = mockSetInterval = jest.fn()));
-    // @ts-ignore
     afterAll(() => (window.setInterval = originalSetInterval));
 
     it('calls sendIfDue every 60000 ms', () => {

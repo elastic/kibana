@@ -1,107 +1,162 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
+import { TelemetryPluginConfig } from '../plugin';
 
 interface TelemetryServiceConstructor {
+  config: TelemetryPluginConfig;
   http: CoreStart['http'];
-  injectedMetadata: CoreStart['injectedMetadata'];
   notifications: CoreStart['notifications'];
+  isScreenshotMode: boolean;
+  currentKibanaVersion: string;
   reportOptInStatusChange?: boolean;
 }
 
+/**
+ * Handles caching telemetry config in the user's session and requests the
+ * backend to fetch telemetry payload requests or notify about config changes.
+ */
 export class TelemetryService {
   private readonly http: CoreStart['http'];
-  private readonly injectedMetadata: CoreStart['injectedMetadata'];
   private readonly reportOptInStatusChange: boolean;
   private readonly notifications: CoreStart['notifications'];
-  private isOptedIn: boolean | null;
-  private userHasSeenOptedInNotice: boolean;
+  private readonly defaultConfig: TelemetryPluginConfig;
+  private readonly isScreenshotMode: boolean;
+  private updatedConfig?: TelemetryPluginConfig;
+
+  /** Current version of Kibana */
+  public readonly currentKibanaVersion: string;
 
   constructor({
+    config,
     http,
-    injectedMetadata,
+    isScreenshotMode,
     notifications,
+    currentKibanaVersion,
     reportOptInStatusChange = true,
   }: TelemetryServiceConstructor) {
-    const isOptedIn = injectedMetadata.getInjectedVar('telemetryOptedIn') as boolean | null;
-    const userHasSeenOptedInNotice = injectedMetadata.getInjectedVar(
-      'telemetryNotifyUserAboutOptInDefault'
-    ) as boolean;
+    this.defaultConfig = config;
+    this.isScreenshotMode = isScreenshotMode;
     this.reportOptInStatusChange = reportOptInStatusChange;
-    this.injectedMetadata = injectedMetadata;
     this.notifications = notifications;
+    this.currentKibanaVersion = currentKibanaVersion;
     this.http = http;
-
-    this.isOptedIn = isOptedIn;
-    this.userHasSeenOptedInNotice = userHasSeenOptedInNotice;
   }
 
+  /**
+   * Config setter to locally persist the updated configuration.
+   * Useful for caching the configuration throughout the users' session,
+   * so they don't need to refresh the page.
+   * @param updatedConfig
+   */
+  public set config(updatedConfig: TelemetryPluginConfig) {
+    this.updatedConfig = updatedConfig;
+  }
+
+  /** Returns the latest configuration **/
+  public get config() {
+    return { ...this.defaultConfig, ...this.updatedConfig };
+  }
+
+  /** Is the cluster opted-in to telemetry **/
+  public get isOptedIn() {
+    return Boolean(this.config.optIn);
+  }
+
+  /** Changes the opt-in status **/
+  public set isOptedIn(optIn) {
+    this.config = { ...this.config, optIn };
+  }
+
+  /** true if the user has already seen the opt-in/out notice **/
+  public get userHasSeenOptedInNotice() {
+    return this.config.telemetryNotifyUserAboutOptInDefault;
+  }
+
+  /** Changes the notice visibility options **/
+  public set userHasSeenOptedInNotice(telemetryNotifyUserAboutOptInDefault) {
+    this.config = { ...this.config, telemetryNotifyUserAboutOptInDefault };
+  }
+
+  /** Is the cluster allowed to change the opt-in/out status **/
   public getCanChangeOptInStatus = () => {
-    const allowChangingOptInStatus = this.injectedMetadata.getInjectedVar(
-      'allowChangingOptInStatus'
-    ) as boolean;
+    const allowChangingOptInStatus = this.config.allowChangingOptInStatus;
     return allowChangingOptInStatus;
   };
 
+  /** Retrieve the opt-in/out notification URL **/
   public getOptInStatusUrl = () => {
-    const telemetryOptInStatusUrl = this.injectedMetadata.getInjectedVar(
-      'telemetryOptInStatusUrl'
-    ) as string;
+    const telemetryOptInStatusUrl = this.config.optInStatusUrl;
     return telemetryOptInStatusUrl;
   };
 
+  /** Retrieve the URL to report telemetry **/
   public getTelemetryUrl = () => {
-    const telemetryUrl = this.injectedMetadata.getInjectedVar('telemetryUrl') as string;
+    const telemetryUrl = this.config.url;
     return telemetryUrl;
   };
 
-  public getUserHasSeenOptedInNotice = () => {
-    return this.userHasSeenOptedInNotice;
-  };
+  /**
+   * Returns if an user should be shown the notice about Opt-In/Out telemetry.
+   * The decision is made based on whether any user has already dismissed the message or
+   * the user can't actually change the settings (in which case, there's no point on bothering them)
+   */
+  public getUserShouldSeeOptInNotice(): boolean {
+    return (
+      (this.config.telemetryNotifyUserAboutOptInDefault && this.config.userCanChangeSettings) ??
+      false
+    );
+  }
 
-  public getIsOptedIn = () => {
+  /** Is the user allowed to change the opt-in/out status **/
+  public get userCanChangeSettings() {
+    return this.config.userCanChangeSettings ?? false;
+  }
+
+  /** Change the user's permissions to change the opt-in/out status **/
+  public set userCanChangeSettings(userCanChangeSettings: boolean) {
+    this.config = { ...this.config, userCanChangeSettings };
+  }
+
+  /** Is the cluster opted-in to telemetry **/
+  public getIsOptedIn = (): boolean => {
     return this.isOptedIn;
   };
 
+  /** Are there any blockers for sending telemetry */
+  public canSendTelemetry = (): boolean => {
+    return !this.isScreenshotMode && this.getIsOptedIn();
+  };
+
+  /** Fetches an unencrypted telemetry payload so we can show it to the user **/
   public fetchExample = async () => {
     return await this.fetchTelemetry({ unencrypted: true });
   };
 
+  /**
+   * Fetches telemetry payload
+   * @param unencrypted Default `false`. Whether the returned payload should be encrypted or not.
+   */
   public fetchTelemetry = async ({ unencrypted = false } = {}) => {
-    const now = moment();
     return this.http.post('/api/telemetry/v2/clusters/_stats', {
       body: JSON.stringify({
         unencrypted,
-        timeRange: {
-          min: now
-            .clone() // Need to clone it to avoid mutation (and max being the same value)
-            .subtract(20, 'minutes')
-            .toISOString(),
-          max: now.toISOString(),
-        },
       }),
     });
   };
 
+  /**
+   * Overwrite the opt-in status.
+   * It will send a final request to the remote telemetry cluster to report about the opt-in/out change.
+   * @param optedIn Whether the user is opting-in (`true`) or out (`false`).
+   */
   public setOptIn = async (optedIn: boolean): Promise<boolean> => {
     const canChangeOptInStatus = this.getCanChangeOptInStatus();
     if (!canChangeOptInStatus) {
@@ -109,11 +164,15 @@ export class TelemetryService {
     }
 
     try {
-      await this.http.post('/api/telemetry/v2/optIn', {
+      // Report the option to the Kibana server to store the settings.
+      // It returns the encrypted update to send to the telemetry cluster [{cluster_uuid, opt_in_status}]
+      const optInPayload = await this.http.post<string[]>('/api/telemetry/v2/optIn', {
         body: JSON.stringify({ enabled: optedIn }),
       });
       if (this.reportOptInStatusChange) {
-        await this.reportOptInStatus(optedIn);
+        // Use the response to report about the change to the remote telemetry cluster.
+        // If it's opt-out, this will be the last communication to the remote service.
+        await this.reportOptInStatus(optInPayload);
       }
       this.isOptedIn = optedIn;
     } catch (err) {
@@ -132,6 +191,9 @@ export class TelemetryService {
     return true;
   };
 
+  /**
+   * Discards the notice about usage collection and stores it so we don't bother any other users.
+   */
   public setUserHasSeenNotice = async (): Promise<void> => {
     try {
       await this.http.put('/api/telemetry/v2/userHasSeenNotice');
@@ -149,7 +211,11 @@ export class TelemetryService {
     }
   };
 
-  private reportOptInStatus = async (OptInStatus: boolean): Promise<void> => {
+  /**
+   * Pushes the encrypted payload [{cluster_uuid, opt_in_status}] to the remote telemetry service
+   * @param optInPayload [{cluster_uuid, opt_in_status}] encrypted by the server into an array of strings
+   */
+  private reportOptInStatus = async (optInPayload: string[]): Promise<void> => {
     const telemetryOptInStatusUrl = this.getOptInStatusUrl();
 
     try {
@@ -157,8 +223,9 @@ export class TelemetryService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Elastic-Stack-Version': this.currentKibanaVersion,
         },
-        body: JSON.stringify({ enabled: OptInStatus }),
+        body: JSON.stringify(optInPayload),
       });
     } catch (err) {
       // Sending the ping is best-effort. Telemetry tries to send the ping once and discards it immediately if sending fails.

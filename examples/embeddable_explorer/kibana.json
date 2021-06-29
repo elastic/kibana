@@ -2,9 +2,8 @@
   "id": "embeddableExplorer",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "configPath": ["embeddable_explorer"],
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "inspector", "embeddable", "embeddableExamples"],
+  "requiredPlugins": ["uiActions", "inspector", "embeddable", "embeddableExamples", "developerExamples"],
   "optionalPlugins": []
 }

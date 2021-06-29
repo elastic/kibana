@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
-import { LICENSE_TYPE_BASIC, LicenseType } from '../../../legacy/common/constants';
+import { LicenseType } from '../../licensing/common/types';
 
 export const DEFAULT_REFRESH_INTERVAL_MS = 30000;
 export const MINIMUM_REFRESH_INTERVAL_MS = 1000;
@@ -14,7 +15,7 @@ export const PROGRESS_REFRESH_INTERVAL_MS = 2000;
 
 export const PLUGIN = {
   ID: 'transform',
-  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC as LicenseType,
+  MINIMUM_LICENSE_REQUIRED: 'basic' as LicenseType,
   getI18nName: (): string => {
     return i18n.translate('xpack.transform.appName', {
       defaultMessage: 'Transforms',
@@ -75,3 +76,32 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 ];
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
+
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
+export const TRANSFORM_STATE = {
+  ABORTING: 'aborting',
+  FAILED: 'failed',
+  INDEXING: 'indexing',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STOPPING: 'stopping',
+  WAITING: 'waiting',
+} as const;
+
+const transformStates = Object.values(TRANSFORM_STATE);
+export type TransformState = typeof transformStates[number];
+
+export const TRANSFORM_MODE = {
+  BATCH: 'batch',
+  CONTINUOUS: 'continuous',
+} as const;
+
+const transformModes = Object.values(TRANSFORM_MODE);
+export type TransformMode = typeof transformModes[number];
+
+export const TRANSFORM_FUNCTION = {
+  PIVOT: 'pivot',
+  LATEST: 'latest',
+} as const;
+
+export type TransformFunction = typeof TRANSFORM_FUNCTION[keyof typeof TRANSFORM_FUNCTION];

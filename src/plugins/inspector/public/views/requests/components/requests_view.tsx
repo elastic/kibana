@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -31,7 +20,7 @@ import { RequestDetails } from './request_details';
 
 interface RequestSelectorState {
   requests: Request[];
-  request: Request;
+  request: Request | null;
 }
 
 export class RequestsViewComponent extends Component<InspectorViewProps, RequestSelectorState> {
@@ -43,9 +32,9 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
   constructor(props: InspectorViewProps) {
     super(props);
 
-    props.adapters.requests.on('change', this._onRequestsChange);
+    props.adapters.requests!.on('change', this._onRequestsChange);
 
-    const requests = props.adapters.requests.getRequests();
+    const requests = props.adapters.requests!.getRequests();
     this.state = {
       requests,
       request: requests.length ? requests[0] : null,
@@ -53,10 +42,10 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
   }
 
   _onRequestsChange = () => {
-    const requests = this.props.adapters.requests.getRequests();
+    const requests = this.props.adapters.requests!.getRequests();
     const newState = { requests } as RequestSelectorState;
 
-    if (!requests.includes(this.state.request)) {
+    if (!this.state.request || !requests.includes(this.state.request)) {
       newState.request = requests.length ? requests[0] : null;
     }
     this.setState(newState);
@@ -69,7 +58,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
   };
 
   componentWillUnmount() {
-    this.props.adapters.requests.removeListener('change', this._onRequestsChange);
+    this.props.adapters.requests!.removeListener('change', this._onRequestsChange);
   }
 
   static renderEmptyRequests() {
@@ -140,16 +129,35 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
           </p>
         </EuiText>
         <EuiSpacer size="xs" />
-        <RequestSelector
-          requests={this.state.requests}
-          selectedRequest={this.state.request}
-          onRequestChanged={this.selectRequest}
-        />
-        <EuiSpacer size="xs" />
+        {this.state.request && (
+          <>
+            <RequestSelector
+              requests={this.state.requests}
+              selectedRequest={this.state.request}
+              onRequestChanged={this.selectRequest}
+            />
+            <EuiSpacer size="xs" />
+          </>
+        )}
 
         {this.state.request && this.state.request.description && (
           <EuiText size="xs">
             <p>{this.state.request.description}</p>
+          </EuiText>
+        )}
+
+        {this.state.request && this.state.request.searchSessionId && (
+          <EuiText size="xs">
+            <p
+              data-test-subj={'inspectorRequestSearchSessionId'}
+              data-search-session-id={this.state.request.searchSessionId}
+            >
+              <FormattedMessage
+                id="inspector.requests.searchSessionId"
+                defaultMessage="Search session id: {searchSessionId}"
+                values={{ searchSessionId: this.state.request.searchSessionId }}
+              />
+            </p>
           </EuiText>
         )}
 
@@ -160,3 +168,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { RequestsViewComponent as default };

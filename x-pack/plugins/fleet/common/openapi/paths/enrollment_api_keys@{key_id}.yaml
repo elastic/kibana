@@ -1,0 +1,18 @@
+parameters:
+  - schema:
+      type: string
+    name: keyId
+    in: path
+    required: true
+get:
+  summary: Enrollment - Info
+  tags: []
+  responses: {}
+  operationId: get-fleet-enrollment-api-keys-keyId
+delete:
+  summary: Enrollment - Delete
+  tags: []
+  responses: {}
+  operationId: delete-fleet-enrollment-api-keys-keyId
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml

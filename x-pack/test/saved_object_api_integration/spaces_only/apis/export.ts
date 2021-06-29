@@ -1,65 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SPACES } from '../../common/lib/spaces';
+import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { exportTestSuiteFactory } from '../../common/suites/export';
+import { exportTestSuiteFactory, getTestCases } from '../../common/suites/export';
 
-export default function({ getService }: FtrProviderContext) {
+const createTestCases = (spaceId: string) => {
+  const cases = getTestCases(spaceId);
+  return Object.values(cases);
+};
+
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const {
-    expectTypeOrObjectsRequired,
-    createExpectVisualizationResults,
-    expectInvalidTypeSpecified,
-    exportTest,
-  } = exportTestSuiteFactory(esArchiver, supertest);
+  const { addTests, createTestDefinitions } = exportTestSuiteFactory(esArchiver, supertest);
+  const createTests = (spaceId: string) => {
+    const testCases = createTestCases(spaceId);
+    return createTestDefinitions(testCases, false);
+  };
 
-  describe('export', () => {
-    exportTest('objects only within the current space (space_1)', {
-      ...SPACES.SPACE_1,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(SPACES.SPACE_1.spaceId),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
-    });
-
-    exportTest('objects only within the current space (default)', {
-      ...SPACES.DEFAULT,
-      tests: {
-        spaceAwareType: {
-          description: 'only the visualization',
-          statusCode: 200,
-          response: createExpectVisualizationResults(SPACES.DEFAULT.spaceId),
-        },
-        hiddenType: {
-          description: 'exporting space not allowed',
-          statusCode: 400,
-          response: expectInvalidTypeSpecified,
-        },
-        noTypeOrObjects: {
-          description: 'bad request, type or object is required',
-          statusCode: 400,
-          response: expectTypeOrObjectsRequired,
-        },
-      },
+  describe('_export', () => {
+    getTestScenarios().spaces.forEach(({ spaceId }) => {
+      const tests = createTests(spaceId);
+      addTests(`within the ${spaceId} space`, { spaceId, tests });
     });
   });
 }

@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`isLocked 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="mapFeatureTooltip_layerIcon"
+      grow={false}
+      key="layerIcon"
+    >
+      <span>
+        mockIcon
+      </span>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="eui-textTruncate"
+      grow={true}
+      key="layerName"
+    >
+      <EuiTextColor>
+        <h4
+          className="eui-textTruncate"
+          title="myLayerName"
+        >
+          myLayerName
+        </h4>
+      </EuiTextColor>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+      key="closeButton"
+    >
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        data-test-subj="mapTooltipCloseButton"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+</Fragment>
+`;
+
+exports[`render 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      className="mapFeatureTooltip_layerIcon"
+      grow={false}
+      key="layerIcon"
+    >
+      <span>
+        mockIcon
+      </span>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="eui-textTruncate"
+      grow={true}
+      key="layerName"
+    >
+      <EuiTextColor>
+        <h4
+          className="eui-textTruncate"
+          title="myLayerName"
+        >
+          myLayerName
+        </h4>
+      </EuiTextColor>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+</Fragment>
+`;
+
+exports[`should only show close button when layer name is not yet loaded 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      key="spacer"
+    />
+    <EuiFlexItem
+      grow={false}
+      key="closeButton"
+    >
+      <EuiButtonIcon
+        aria-label="Close tooltip"
+        data-test-subj="mapTooltipCloseButton"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiHorizontalRule
+    margin="xs"
+  />
+</Fragment>
+`;

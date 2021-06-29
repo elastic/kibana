@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { KibanaPrivileges } from '../../../../../../../common/model';
-import { KibanaPrivilegeCalculatorFactory } from '../kibana_privilege_calculator';
+
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+
+import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
+import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { RoleValidator } from '../../../validate_role';
-import { PrivilegeMatrix } from './privilege_matrix';
+import { PrivilegeSummary } from '../privilege_summary';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
@@ -42,23 +45,12 @@ const buildProps = (customProps: any = {}) => {
         manage: true,
       },
     },
-    features: [],
+    features: kibanaFeatures,
     editable: true,
     onChange: jest.fn(),
     validator: new RoleValidator(),
-    privilegeCalculatorFactory: new KibanaPrivilegeCalculatorFactory(
-      new KibanaPrivileges({
-        features: {
-          feature1: {
-            all: ['*'],
-            read: ['read'],
-          },
-        },
-        global: {},
-        space: {},
-        reserved: {},
-      })
-    ),
+    kibanaPrivileges: createKibanaPrivileges(kibanaFeatures),
+    canCustomizeSubFeaturePrivileges: true,
     ...customProps,
   };
 };
@@ -80,7 +72,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
       },
     });
 
-    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} />);
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toHaveLength(1);
@@ -89,13 +81,13 @@ describe('<SpaceAwarePrivilegeSection>', () => {
   it('hides the space table if there are no existing space privileges', () => {
     const props = buildProps();
 
-    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} />);
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toHaveLength(0);
   });
 
-  it('Renders flyout after clicking "Add a privilege" button', () => {
+  it('Renders flyout after clicking "Add space privilege" button', () => {
     const props = buildProps({
       role: {
         elasticsearch: {
@@ -111,7 +103,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
       },
     });
 
-    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} />);
     expect(wrapper.find(PrivilegeSpaceForm)).toHaveLength(0);
 
     wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]').simulate('click');
@@ -119,7 +111,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
     expect(wrapper.find(PrivilegeSpaceForm)).toHaveLength(1);
   });
 
-  it('hides privilege matrix when the role is reserved', () => {
+  it('hides privilege summary when the role is reserved', () => {
     const props = buildProps({
       role: {
         name: '',
@@ -135,8 +127,8 @@ describe('<SpaceAwarePrivilegeSection>', () => {
       },
     });
 
-    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
-    expect(wrapper.find(PrivilegeMatrix)).toHaveLength(0);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} />);
+    expect(wrapper.find(PrivilegeSummary)).toHaveLength(0);
   });
 
   describe('with base privilege set to "read"', () => {
@@ -156,7 +148,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
         },
       });
 
-      const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} />);
 
       const table = wrapper.find(PrivilegeSpaceTable);
       expect(table).toHaveLength(1);
@@ -183,7 +175,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
         },
       });
 
-      const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} />);
 
       const table = wrapper.find(PrivilegeSpaceTable);
       expect(table).toHaveLength(1);
@@ -202,7 +194,7 @@ describe('<SpaceAwarePrivilegeSection>', () => {
         },
       });
 
-      const wrapper = shallowWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
+      const wrapper = shallowWithIntl(<SpaceAwarePrivilegeSection {...props} />);
       expect(wrapper).toMatchSnapshot();
     });
   });

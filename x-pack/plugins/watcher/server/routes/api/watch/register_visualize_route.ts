@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
-import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 // @ts-ignore
 import { Watch } from '../../../models/watch/index';
@@ -16,37 +15,43 @@ import { Watch } from '../../../models/watch/index';
 import { VisualizeOptions } from '../../../models/visualize_options/index';
 
 const bodySchema = schema.object({
-  watch: schema.object({}, { allowUnknowns: true }),
-  options: schema.object({}, { allowUnknowns: true }),
+  watch: schema.object({}, { unknowns: 'allow' }),
+  options: schema.object({}, { unknowns: 'allow' }),
 });
 
 function fetchVisualizeData(dataClient: IScopedClusterClient, index: any, body: any) {
-  const params = {
-    index,
-    body,
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: [404],
-  };
-
-  return dataClient.callAsCurrentUser('search', params);
+  return dataClient.asCurrentUser
+    .search(
+      {
+        index,
+        body,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      },
+      { ignore: [404] }
+    )
+    .then(({ body: result }) => result);
 }
 
-export function registerVisualizeRoute(deps: RouteDependencies) {
-  deps.router.post(
+export function registerVisualizeRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
+  router.post(
     {
       path: '/api/watcher/watch/visualize',
       validate: {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const watch = Watch.fromDownstreamJson(request.body.watch);
       const options = VisualizeOptions.fromDownstreamJson(request.body.options);
       const body = watch.getVisualizeQuery(options);
 
       try {
-        const hits = await fetchVisualizeData(ctx.watcher!.client, watch.index, body);
+        const hits = await fetchVisualizeData(ctx.core.elasticsearch.client, watch.index, body);
         const visualizeData = watch.formatVisualizeData(hits);
 
         return response.ok({
@@ -55,13 +60,7 @@ export function registerVisualizeRoute(deps: RouteDependencies) {
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        return response.internalError({ body: e });
+        return handleEsError({ error: e, response });
       }
     })
   );

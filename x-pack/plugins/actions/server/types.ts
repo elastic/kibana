@@ -1,32 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectAttributes } from '../../../../src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
-
+import { LicenseType } from '../../licensing/common/types';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+  ElasticsearchClient,
+  RequestHandlerContext,
+} from '../../../../src/core/server';
+import { ActionTypeExecutorResult } from '../common';
+export { ActionTypeExecutorResult } from '../common';
+export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
+export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
+export { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
+export { SwimlanePublicConfigurationType } from './builtin_action_types/swimlane/types';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (request: any) => Services;
+export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
-export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
+export type ActionTypeConfig = Record<string, unknown>;
+export type ActionTypeSecrets = Record<string, unknown>;
+export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
-  callCluster(path: string, opts: any): Promise<any>;
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    actions?: {
-      getActionsClient: () => ActionsClient;
-      listTypes: ActionTypeRegistry['list'];
-    };
-  }
+export interface ActionsApiRequestHandlerContext {
+  getActionsClient: () => ActionsClient;
+  listTypes: ActionTypeRegistry['list'];
+}
+
+export interface ActionsRequestHandlerContext extends RequestHandlerContext {
+  actions: ActionsApiRequestHandlerContext;
 }
 
 export interface ActionsPlugin {
@@ -34,73 +50,106 @@ export interface ActionsPlugin {
   start: PluginStartContract;
 }
 
-export interface ActionsConfigType {
-  enabled: boolean;
-  whitelistedHosts: string[];
-  enabledActionTypes: string[];
-}
-
 // the parameters passed to an action type executor function
-export interface ActionTypeExecutorOptions {
+export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   actionId: string;
   services: Services;
-  config: Record<string, any>;
-  secrets: Record<string, any>;
-  params: Record<string, any>;
+  config: Config;
+  secrets: Secrets;
+  params: Params;
 }
 
-export interface ActionResult {
+export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
   id: string;
   actionTypeId: string;
   name: string;
-  config: Record<string, any>;
+  isMissingSecrets?: boolean;
+  config?: Config;
+  isPreconfigured: boolean;
+}
+
+export interface PreConfiguredAction<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets
+> extends ActionResult<Config> {
+  secrets: Secrets;
 }
 
 export interface FindActionResult extends ActionResult {
   referencedByCount: number;
 }
 
-// the result returned from an action type executor function
-export interface ActionTypeExecutorResult {
-  actionId: string;
-  status: 'ok' | 'error';
-  message?: string;
-  serviceMessage?: string;
-  data?: any;
-  retry?: null | boolean | Date;
-}
-
 // signature of the action type executor function
-export type ExecutorType = (
-  options: ActionTypeExecutorOptions
-) => Promise<ActionTypeExecutorResult | null | undefined | void>;
+export type ExecutorType<Config, Secrets, Params, ResultData> = (
+  options: ActionTypeExecutorOptions<Config, Secrets, Params>
+) => Promise<ActionTypeExecutorResult<ResultData>>;
 
-interface ValidatorType {
-  validate<T>(value: any): any;
+interface ValidatorType<Type> {
+  validate(value: unknown): Type;
 }
 
-export type ActionTypeCreator = (config?: ActionsConfigType) => ActionType;
-export interface ActionType {
+export interface ActionValidationService {
+  isHostnameAllowed(hostname: string): boolean;
+  isUriAllowed(uri: string): boolean;
+}
+
+export interface ActionType<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
+> {
   id: string;
   name: string;
   maxAttempts?: number;
+  minimumLicenseRequired: LicenseType;
   validate?: {
-    params?: ValidatorType;
-    config?: ValidatorType;
-    secrets?: ValidatorType;
+    params?: ValidatorType<Params>;
+    config?: ValidatorType<Config>;
+    secrets?: ValidatorType<Secrets>;
   };
-  executor: ExecutorType;
+  renderParameterTemplates?(
+    params: Params,
+    variables: Record<string, unknown>,
+    actionId?: string
+  ): Params;
+  executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
 export interface RawAction extends SavedObjectAttributes {
   actionTypeId: string;
   name: string;
+  isMissingSecrets: boolean;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }
 
 export interface ActionTaskParams extends SavedObjectAttributes {
   actionId: string;
+  // Saved Objects won't allow us to enforce unknown rather than any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+}
+
+export interface ActionTaskExecutorParams {
+  spaceId: string;
+  actionTaskParamsId: string;
+}
+
+export interface ProxySettings {
+  proxyUrl: string;
+  proxyBypassHosts: Set<string> | undefined;
+  proxyOnlyHosts: Set<string> | undefined;
+  proxyHeaders?: Record<string, string>;
+  proxySSLSettings: SSLSettings;
+}
+
+export interface ResponseSettings {
+  maxContentLength: number;
+  timeout: number;
+}
+
+export interface SSLSettings {
+  verificationMode?: 'none' | 'certificate' | 'full';
 }

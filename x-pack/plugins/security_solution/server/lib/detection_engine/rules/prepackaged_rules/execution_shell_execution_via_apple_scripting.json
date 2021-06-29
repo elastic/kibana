@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the execution of the shell process (sh) via scripting (JXA or AppleScript). Adversaries may use the doShellScript functionality in JXA or do shell script in AppleScript to execute system commands.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Shell Execution via Apple Scripting",
+  "query": "sequence by host.id with maxspan=5s\n [process where event.type in (\"start\", \"process_started\", \"info\") and process.name == \"osascript\"] by process.pid\n [process where event.type in (\"start\", \"process_started\") and process.name == \"sh\" and process.args == \"-c\"] by process.ppid\n",
+  "references": [
+    "https://developer.apple.com/library/archive/technotes/tn2065/_index.html",
+    "https://objectivebythesea.com/v2/talks/OBTS_v2_Thomas.pdf"
+  ],
+  "risk_score": 47,
+  "rule_id": "d461fac0-43e8-49e2-85ea-3a58fe120b4f",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 2
+}

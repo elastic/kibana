@@ -1,0 +1,58 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "An instance of MSBuild, the Microsoft Build Engine, was started by Explorer or the WMI (Windows Management Instrumentation) subsystem. This behavior is unusual and is sometimes used by malicious payloads.",
+  "false_positives": [
+    "The Build Engine is commonly used by Windows developers but use by non-engineers is unusual."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Microsoft Build Engine Started by a System Process",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"MSBuild.exe\" and\n  process.parent.name : (\"explorer.exe\", \"wmiprvse.exe\")\n",
+  "risk_score": 47,
+  "rule_id": "9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae3",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1127",
+          "name": "Trusted Developer Utilities Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1127/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 8
+}

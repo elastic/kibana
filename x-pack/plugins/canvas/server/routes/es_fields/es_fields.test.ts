@@ -1,26 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { initializeESFieldsRoute } from './es_fields';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
-import {
-  httpServiceMock,
-  httpServerMock,
-  loggingServiceMock,
-  elasticsearchServiceMock,
-} from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = ({
   core: {
-    elasticsearch: { dataClient: elasticsearchServiceMock.createScopedClusterClient() },
+    elasticsearch: {
+      client: elasticsearchServiceMock.createScopedClusterClient(),
+    },
   },
 } as unknown) as RequestHandlerContext;
 
@@ -30,40 +24,38 @@ describe('Retrieve ES Fields', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-    initializeESFieldsRoute({
-      router,
-      logger: loggingServiceMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeESFieldsRoute(routerDeps);
 
-    routeHandler = router.get.mock.calls[0][1];
+    routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
   it(`returns 200 with fields from existing index/index pattern`, async () => {
     const index = 'test';
     const mockResults = {
-      indices: ['test'],
-      fields: {
-        '@timestamp': {
-          date: {
-            type: 'date',
-            searchable: true,
-            aggregatable: true,
+      body: {
+        indices: ['test'],
+        fields: {
+          '@timestamp': {
+            date: {
+              type: 'date',
+              searchable: true,
+              aggregatable: true,
+            },
           },
-        },
-        name: {
-          text: {
-            type: 'text',
-            searchable: true,
-            aggregatable: false,
+          name: {
+            text: {
+              type: 'text',
+              searchable: true,
+              aggregatable: false,
+            },
           },
-        },
-        products: {
-          object: {
-            type: 'object',
-            searchable: false,
-            aggregatable: false,
+          products: {
+            object: {
+              type: 'object',
+              searchable: false,
+              aggregatable: false,
+            },
           },
         },
       },
@@ -76,10 +68,10 @@ describe('Retrieve ES Fields', () => {
       },
     });
 
-    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
-      .callAsCurrentUser as jest.Mock;
+    const fieldCapsMock = mockRouteContext.core.elasticsearch.client.asCurrentUser
+      .fieldCaps as jest.Mock;
 
-    callAsCurrentUserMock.mockResolvedValueOnce(mockResults);
+    fieldCapsMock.mockResolvedValueOnce(mockResults);
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
@@ -95,7 +87,7 @@ describe('Retrieve ES Fields', () => {
 
   it(`returns 200 with empty object when index/index pattern has no fields`, async () => {
     const index = 'test';
-    const mockResults = { indices: [index], fields: {} };
+    const mockResults = { body: { indices: [index], fields: {} } };
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
       path,
@@ -104,10 +96,10 @@ describe('Retrieve ES Fields', () => {
       },
     });
 
-    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
-      .callAsCurrentUser as jest.Mock;
+    const fieldCapsMock = mockRouteContext.core.elasticsearch.client.asCurrentUser
+      .fieldCaps as jest.Mock;
 
-    callAsCurrentUserMock.mockResolvedValueOnce(mockResults);
+    fieldCapsMock.mockResolvedValueOnce(mockResults);
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
@@ -119,8 +111,10 @@ describe('Retrieve ES Fields', () => {
     const index = 'test';
 
     const mockResults = {
-      indices: [index],
-      fields: {},
+      body: {
+        indices: [index],
+        fields: {},
+      },
     };
 
     const request = httpServerMock.createKibanaRequest({
@@ -132,10 +126,10 @@ describe('Retrieve ES Fields', () => {
       },
     });
 
-    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
-      .callAsCurrentUser as jest.Mock;
+    const fieldCapsMock = mockRouteContext.core.elasticsearch.client.asCurrentUser
+      .fieldCaps as jest.Mock;
 
-    callAsCurrentUserMock.mockResolvedValueOnce(mockResults);
+    fieldCapsMock.mockResolvedValueOnce(mockResults);
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
@@ -152,13 +146,13 @@ describe('Retrieve ES Fields', () => {
       },
     });
 
-    const callAsCurrentUserMock = mockRouteContext.core.elasticsearch.dataClient
-      .callAsCurrentUser as jest.Mock;
+    const fieldCapsMock = mockRouteContext.core.elasticsearch.client.asCurrentUser
+      .fieldCaps as jest.Mock;
 
-    callAsCurrentUserMock.mockRejectedValueOnce(new Error('Index not found'));
+    fieldCapsMock.mockRejectedValueOnce(new Error('Index not found'));
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
-    expect(response.status).toBe(500);
+    await expect(
+      routeHandler(mockRouteContext, request, kibanaResponseFactory)
+    ).rejects.toThrowError('Index not found');
   });
 });

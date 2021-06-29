@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
 import { ResourceSerializer } from '../../../../authorization/resource_serializer';
-import { ElasticsearchRole } from './elasticsearch_role';
+import type { ElasticsearchRole } from './elasticsearch_role';
 
 /**
  * Elasticsearch specific portion of the role definition.
@@ -142,7 +146,7 @@ export function getPutPayloadSchema(
                   schema.string({
                     validate(value) {
                       const globalPrivileges = getBasePrivilegeNames().global;
-                      if (!globalPrivileges.some(privilege => privilege === value)) {
+                      if (!globalPrivileges.some((privilege) => privilege === value)) {
                         return `unknown global privilege "${value}", must be one of [${globalPrivileges}]`;
                       }
                     },
@@ -152,7 +156,7 @@ export function getPutPayloadSchema(
                   schema.string({
                     validate(value) {
                       const spacePrivileges = getBasePrivilegeNames().space;
-                      if (!spacePrivileges.some(privilege => privilege === value)) {
+                      if (!spacePrivileges.some((privilege) => privilege === value)) {
                         return `unknown space privilege "${value}", must be one of [${spacePrivileges}]`;
                       }
                     },
@@ -235,7 +239,7 @@ export const transformPutPayloadToElasticsearchRole = (
     kibana = [],
   } = rolePayload;
   const otherApplications = allExistingApplications.filter(
-    roleApplication => roleApplication.application !== application
+    (roleApplication) => roleApplication.application !== application
   );
 
   return {
@@ -259,12 +263,12 @@ const transformPrivilegesToElasticsearchPrivileges = (
       return {
         privileges: [
           ...(base
-            ? base.map(privilege => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege))
+            ? base.map((privilege) => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege))
             : []),
           ...(feature
             ? Object.entries(feature)
                 .map(([featureName, featurePrivileges]) =>
-                  featurePrivileges.map(privilege =>
+                  featurePrivileges.map((privilege) =>
                     PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
                   )
                 )
@@ -279,12 +283,12 @@ const transformPrivilegesToElasticsearchPrivileges = (
     return {
       privileges: [
         ...(base
-          ? base.map(privilege => PrivilegeSerializer.serializeSpaceBasePrivilege(privilege))
+          ? base.map((privilege) => PrivilegeSerializer.serializeSpaceBasePrivilege(privilege))
           : []),
         ...(feature
           ? Object.entries(feature)
               .map(([featureName, featurePrivileges]) =>
-                featurePrivileges.map(privilege =>
+                featurePrivileges.map((privilege) =>
                   PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
                 )
               )
@@ -292,7 +296,7 @@ const transformPrivilegesToElasticsearchPrivileges = (
           : []),
       ],
       application,
-      resources: (spaces as string[]).map(resource =>
+      resources: (spaces as string[]).map((resource) =>
         ResourceSerializer.serializeSpaceResource(resource)
       ),
     };

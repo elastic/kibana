@@ -4,14 +4,12 @@
 <titleabbrev>Create space</titleabbrev>
 ++++
 
-Create a {kib} space.
-
-experimental["The underlying Spaces concepts are stable, but the APIs for managing Spaces are experimental."]
+experimental[] Create a {kib} space.
 
 [[spaces-api-post-request]]
 ==== Request
 
-`POST /api/spaces/space`
+`POST <kibana host>:<port>/api/spaces/space`
 
 [[spaces-api-post-request-body]]
 ==== Request body
@@ -29,13 +27,13 @@ experimental["The underlying Spaces concepts are stable, but the APIs for managi
   (Optional, string array) The list of disabled features for the space. To get a list of available feature IDs, use the <<features-api-get, Features API>>.
 
 `initials`::
-  (Optional, string) Specifies the initials shown in the space avatar. By default, the initials are automatically generated from the space name. Initials must be 1 or 2 characters.
+  (Optional, string) The initials shown in the space avatar. By default, the initials are automatically generated from the space name. Initials must be 1 or 2 characters.
 
 `color`::
-  (Optional, string) Specifies the hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
+  (Optional, string) The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
 
 `imageUrl`::
-  (Optional, string) Specifies the data-url encoded image to display in the space avatar. If specified, `initials` will not be displayed, and the `color` will be visible as the background color for transparent images.
+  (Optional, string) The data-URL encoded image to display in the space avatar. If specified, `initials` will not be displayed, and the `color` will be visible as the background color for transparent images.
   For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
 
 [[spaces-api-post-response-codes]]
@@ -47,9 +45,9 @@ experimental["The underlying Spaces concepts are stable, but the APIs for managi
 [[spaces-api-post-example]]
 ==== Example
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-POST /api/spaces/space
+$ curl -X POST api/spaces/space
 {
   "id": "marketing",
   "name": "Marketing",

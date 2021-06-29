@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Attackers may maintain persistence by creating registry keys using AppInit DLLs. AppInit DLLs are loaded by every process using the common library, user32.dll.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Registry Persistence via AppInit DLL",
+  "query": "registry where\n   registry.path : (\"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Windows\\\\AppInit_Dlls\", \n                    \"HKLM\\\\SOFTWARE\\\\Wow6432Node\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Windows\\\\AppInit_Dlls\") and\n   not process.executable : (\"C:\\\\Windows\\\\System32\\\\msiexec.exe\", \n                             \"C:\\\\Windows\\\\SysWOW64\\\\msiexec.exe\", \n                             \"C:\\\\Program Files\\\\Commvault\\\\ContentStore*\\\\Base\\\\cvd.exe\",\n                             \"C:\\\\Program Files (x86)\\\\Commvault\\\\ContentStore*\\\\Base\\\\cvd.exe\")\n",
+  "risk_score": 47,
+  "rule_id": "d0e159cf-73e9-40d1-a9ed-077e3158a855",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.010",
+              "name": "AppInit DLLs",
+              "reference": "https://attack.mitre.org/techniques/T1546/010/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 3
+}

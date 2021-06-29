@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of an anti-phishing policy in Microsoft 365. By default, Microsoft 365 includes built-in features that help protect users from phishing attacks. Anti-phishing polices increase this protection by refining settings to better detect and prevent attacks.",
+  "false_positives": [
+    "An anti-phishing policy may be deleted by a system or network administrator. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "from": "now-30m",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Microsoft 365 Exchange Anti-Phish Policy Deletion",
+  "note": "## Config\n\nThe Microsoft 365 Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:\"Remove-AntiPhishPolicy\" and event.outcome:success\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/powershell/module/exchange/remove-antiphishpolicy?view=exchange-ps",
+    "https://docs.microsoft.com/en-us/microsoft-365/security/office-365-security/set-up-anti-phishing-policies?view=o365-worldwide"
+  ],
+  "risk_score": 47,
+  "rule_id": "d68eb1b5-5f1c-4b6d-9e63-5b6b145cd4aa",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1566",
+          "name": "Phishing",
+          "reference": "https://attack.mitre.org/techniques/T1566/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

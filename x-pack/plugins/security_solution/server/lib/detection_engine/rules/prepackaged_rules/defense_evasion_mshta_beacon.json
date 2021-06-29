@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Mshta.exe making outbound network connections. This may indicate adversarial activity as Mshta is often leveraged by adversaries to execute malicious scripts and evade detection.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Mshta Making Network Connections",
+  "query": "sequence by process.entity_id with maxspan=2h\n  [process where event.type in (\"start\", \"process_started\") and process.name : \"mshta.exe\" and\n     not process.parent.name : \"Microsoft.ConfigurationManagement.exe\" and\n     not (process.parent.executable : \"C:\\\\Amazon\\\\Amazon Assistant\\\\amazonAssistantService.exe\" or\n          process.parent.executable : \"C:\\\\TeamViewer\\\\TeamViewer.exe\") and\n     not process.args : \"ADSelfService_Enroll.hta\"]\n  [network where process.name : \"mshta.exe\"]\n",
+  "risk_score": 21,
+  "rule_id": "c2d90150-0133-451c-a783-533e736c12d7",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.005",
+              "name": "Mshta",
+              "reference": "https://attack.mitre.org/techniques/T1218/005/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 3
+}

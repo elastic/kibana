@@ -2,7 +2,7 @@
 
 set -e
 
-targetBranch="${PR_TARGET_BRANCH:-${GIT_BRANCH#*/}}"
+targetBranch="${PR_TARGET_BRANCH:-$GIT_BRANCH}"
 bootstrapCache="$HOME/.kibana/bootstrap_cache/$targetBranch.tar"
 
 ###

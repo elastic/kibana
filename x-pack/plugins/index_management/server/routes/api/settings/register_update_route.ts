@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
@@ -14,13 +16,13 @@ const paramsSchema = schema.object({
   indexName: schema.string(),
 });
 
-export function registerUpdateRoute({ router, license, lib }: RouteDependencies) {
+export function registerUpdateRoute({ router, lib }: RouteDependencies) {
   router.put(
     {
       path: addBasePath('/settings/{indexName}'),
       validate: { body: bodySchema, params: paramsSchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { indexName } = req.params as typeof paramsSchema.type;
       const params = {
         ignoreUnavailable: true,
@@ -31,7 +33,7 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
       };
 
       try {
-        const response = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+        const response = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.putSettings',
           params
         );
@@ -44,8 +46,8 @@ export function registerUpdateRoute({ router, license, lib }: RouteDependencies)
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

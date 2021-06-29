@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -22,7 +23,7 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
       navLinksBuilder = new NavLinksBuilder(features);
     });
 
-    UserAtSpaceScenarios.forEach(scenario => {
+    UserAtSpaceScenarios.forEach((scenario) => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
@@ -38,14 +39,26 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
             break;
           case 'global_all at everything_space':
           case 'dual_privileges_all at everything_space':
-          case 'dual_privileges_read at everything_space':
-          case 'global_read at everything_space':
-          case 'everything_space_all at everything_space':
-          case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
               navLinksBuilder.except('ml', 'monitoring')
+            );
+            break;
+          case 'everything_space_all at everything_space':
+          case 'global_read at everything_space':
+          case 'dual_privileges_read at everything_space':
+          case 'everything_space_read at everything_space':
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('navLinks');
+            expect(uiCapabilities.value!.navLinks).to.eql(
+              navLinksBuilder.except(
+                'ml',
+                'monitoring',
+                'enterpriseSearch',
+                'appSearch',
+                'workplaceSearch'
+              )
             );
             break;
           case 'superuser at nothing_space':

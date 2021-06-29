@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -82,12 +71,12 @@ export class SampleDataSetCards extends React.Component {
     });
   };
 
-  install = async id => {
-    const targetSampleDataSet = this.state.sampleDataSets.find(sampleDataSet => {
+  install = async (id) => {
+    const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
       return sampleDataSet.id === id;
     });
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       processingStatus: { ...prevState.processingStatus, [id]: true },
     }));
 
@@ -95,7 +84,7 @@ export class SampleDataSetCards extends React.Component {
       await installSampleDataSet(id, targetSampleDataSet.defaultIndex);
     } catch (fetchError) {
       if (this._isMounted) {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
           processingStatus: { ...prevState.processingStatus, [id]: false },
         }));
       }
@@ -110,9 +99,9 @@ export class SampleDataSetCards extends React.Component {
     }
 
     if (this._isMounted) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         processingStatus: { ...prevState.processingStatus, [id]: false },
-        sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
+        sampleDataSets: prevState.sampleDataSets.map((sampleDataSet) => {
           if (sampleDataSet.id === id) {
             sampleDataSet.status = INSTALLED_STATUS;
           }
@@ -130,12 +119,12 @@ export class SampleDataSetCards extends React.Component {
     });
   };
 
-  uninstall = async id => {
-    const targetSampleDataSet = this.state.sampleDataSets.find(sampleDataSet => {
+  uninstall = async (id) => {
+    const targetSampleDataSet = this.state.sampleDataSets.find((sampleDataSet) => {
       return sampleDataSet.id === id;
     });
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       processingStatus: { ...prevState.processingStatus, [id]: true },
     }));
 
@@ -143,7 +132,7 @@ export class SampleDataSetCards extends React.Component {
       await uninstallSampleDataSet(id, targetSampleDataSet.defaultIndex);
     } catch (fetchError) {
       if (this._isMounted) {
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
           processingStatus: { ...prevState.processingStatus, [id]: false },
         }));
       }
@@ -158,9 +147,9 @@ export class SampleDataSetCards extends React.Component {
     }
 
     if (this._isMounted) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         processingStatus: { ...prevState.processingStatus, [id]: false },
-        sampleDataSets: prevState.sampleDataSets.map(sampleDataSet => {
+        sampleDataSets: prevState.sampleDataSets.map((sampleDataSet) => {
           if (sampleDataSet.id === id) {
             sampleDataSet.status = UNINSTALLED_STATUS;
           }
@@ -178,7 +167,7 @@ export class SampleDataSetCards extends React.Component {
     });
   };
 
-  lightOrDarkImage = sampleDataSet => {
+  lightOrDarkImage = (sampleDataSet) => {
     return getServices().uiSettings.get('theme:darkMode') && sampleDataSet.darkPreviewImagePath
       ? sampleDataSet.darkPreviewImagePath
       : sampleDataSet.previewImagePath;
@@ -187,7 +176,7 @@ export class SampleDataSetCards extends React.Component {
   render() {
     return (
       <EuiFlexGrid columns={3} className="homSampleDataSetCards">
-        {this.state.sampleDataSets.map(sampleDataSet => {
+        {this.state.sampleDataSets.map((sampleDataSet) => {
           return (
             <EuiFlexItem key={sampleDataSet.id}>
               <SampleDataSetCard

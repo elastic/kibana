@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import * as esMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/elasticsearch/metrics';
-import * as kibanaMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/kibana/metrics';
-import * as logstashMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/logstash/metrics';
-import * as beatsMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/beats/metrics';
-import * as apmMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/apm/metrics';
+import * as esMetrics from '../../../../../plugins/monitoring/server/lib/metrics/elasticsearch/metrics';
+import * as kibanaMetrics from '../../../../../plugins/monitoring/server/lib/metrics/kibana/metrics';
+import * as logstashMetrics from '../../../../../plugins/monitoring/server/lib/metrics/logstash/metrics';
+import * as beatsMetrics from '../../../../../plugins/monitoring/server/lib/metrics/beats/metrics';
+import * as apmMetrics from '../../../../../plugins/monitoring/server/lib/metrics/apm/metrics';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const es = getService('legacyEs');
 
   const metricSets = [

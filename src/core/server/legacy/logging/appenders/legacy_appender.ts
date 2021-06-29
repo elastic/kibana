@@ -1,27 +1,19 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
-import { DisposableAppender } from '../../../logging/appenders/appenders';
-import { LogRecord } from '../../../logging/log_record';
-import { LegacyLoggingServer } from '../legacy_logging_server';
-import { LegacyVars } from '../../types';
+import { LegacyLoggingServer } from '@kbn/legacy-logging';
+import { DisposableAppender, LogRecord } from '@kbn/logging';
+
+export interface LegacyAppenderConfig {
+  type: 'legacy-appender';
+  legacyLoggingConfig?: Record<string, any>;
+}
 
 /**
  * Simple appender that just forwards `LogRecord` to the legacy KbnServer log.
@@ -29,8 +21,8 @@ import { LegacyVars } from '../../types';
  */
 export class LegacyAppender implements DisposableAppender {
   public static configSchema = schema.object({
-    kind: schema.literal('legacy-appender'),
-    legacyLoggingConfig: schema.any(),
+    type: schema.literal('legacy-appender'),
+    legacyLoggingConfig: schema.recordOf(schema.string(), schema.any()),
   });
 
   /**
@@ -41,7 +33,7 @@ export class LegacyAppender implements DisposableAppender {
 
   private readonly loggingServer: LegacyLoggingServer;
 
-  constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
+  constructor(legacyLoggingConfig: any) {
     this.loggingServer = new LegacyLoggingServer(legacyLoggingConfig);
   }
 

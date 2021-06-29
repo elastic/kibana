@@ -1,33 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageContent,
-  EuiSpacer,
-  EuiText,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiPageContent, EuiSpacer } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
-import { extractQueryParams, getRouter, getRouterLinkProps, redirect } from '../../services';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { extractQueryParams, SectionLoading } from '../../../shared_imports';
+import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
-import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
-
-const disabledFields = {
-  name: true,
-};
+import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
 export class RemoteClusterEdit extends Component {
   static propTypes = {
@@ -70,7 +58,7 @@ export class RemoteClusterEdit extends Component {
     this.props.stopEditingCluster();
   }
 
-  save = clusterConfig => {
+  save = (clusterConfig) => {
     this.props.editCluster(clusterConfig);
   };
 
@@ -89,61 +77,55 @@ export class RemoteClusterEdit extends Component {
       const decodedRedirect = decodeURIComponent(redirectUrl);
       redirect(decodedRedirect);
     } else {
-      history.push(CRUD_APP_BASE_PATH);
+      history.push('/list');
       openDetailPanel(clusterName);
     }
   };
 
-  renderContent() {
+  render() {
     const { clusterName } = this.state;
 
     const { isLoading, cluster, isEditingCluster, getEditClusterError } = this.props;
 
     if (isLoading) {
       return (
-        <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.remoteClusters.edit.loadingLabel"
-                  defaultMessage="Loading remote cluster..."
-                />
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.remoteClusters.edit.loadingLabel"
+              defaultMessage="Loading remote cluster…"
+            />
+          </SectionLoading>
+        </EuiPageContent>
       );
     }
 
     if (!cluster) {
       return (
-        <Fragment>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.remoteClusters.edit.loadingErrorTitle"
-                defaultMessage="Error loading remote cluster"
-              />
-            }
-            color="danger"
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+          <EuiEmptyPrompt
             iconType="alert"
-          >
-            <FormattedMessage
-              id="xpack.remoteClusters.edit.loadingErrorMessage"
-              defaultMessage="The remote cluster '{name}' does not exist."
-              values={{ name: clusterName }}
-            />
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                {...getRouterLinkProps(CRUD_APP_BASE_PATH)}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.loadingErrorTitle"
+                  defaultMessage="Error loading remote cluster"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.loadingErrorMessage"
+                  defaultMessage="The remote cluster '{name}' does not exist."
+                  values={{ name: clusterName }}
+                />
+              </p>
+            }
+            actions={
+              <EuiButton
+                {...reactRouterNavigate(this.props.history, '/list')}
+                color="danger"
                 iconType="arrowLeft"
                 flush="left"
               >
@@ -151,47 +133,52 @@ export class RemoteClusterEdit extends Component {
                   id="xpack.remoteClusters.edit.viewRemoteClustersButtonLabel"
                   defaultMessage="View remote clusters"
                 />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Fragment>
+              </EuiButton>
+            }
+          />
+        </EuiPageContent>
       );
     }
 
-    const { isConfiguredByNode } = cluster;
+    const { isConfiguredByNode, hasDeprecatedProxySetting } = cluster;
 
     if (isConfiguredByNode) {
       return (
-        <Fragment>
-          <ConfiguredByNodeWarning />
-
-          <EuiSpacer size="s" />
-
-          <EuiButtonEmpty color="primary" onClick={this.cancel}>
-            <FormattedMessage
-              id="xpack.remoteClusters.edit.backToRemoteClustersButtonLabel"
-              defaultMessage="Back to remote clusters"
-            />
-          </EuiButtonEmpty>
-        </Fragment>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="primary">
+          <EuiEmptyPrompt
+            iconType="iInCircle"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.configuredByNodeWarningTitle"
+                  defaultMessage="Defined in configuration"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.remoteClusters.configuredByNodeWarningBody"
+                  defaultMessage="You can't edit or delete this remote cluster because it's defined in a node's
+                  elasticsearch.yml configuration file."
+                />
+              </p>
+            }
+            actions={
+              <EuiButton color="primary" iconType="arrowLeft" flush="left" onClick={this.cancel}>
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.backToRemoteClustersButtonLabel"
+                  defaultMessage="Back to remote clusters"
+                />
+              </EuiButton>
+            }
+          />
+        </EuiPageContent>
       );
     }
 
     return (
-      <RemoteClusterForm
-        fields={cluster}
-        disabledFields={disabledFields}
-        isSaving={isEditingCluster}
-        saveError={getEditClusterError}
-        save={this.save}
-        cancel={this.cancel}
-      />
-    );
-  }
-
-  render() {
-    return (
-      <EuiPageContent horizontalPosition="center" className="remoteClusterAddPage">
+      <>
         <RemoteClusterPageTitle
           title={
             <FormattedMessage
@@ -201,8 +188,35 @@ export class RemoteClusterEdit extends Component {
           }
         />
 
-        {this.renderContent()}
-      </EuiPageContent>
+        {hasDeprecatedProxySetting ? (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.remoteClusters.edit.deprecatedSettingsTitle"
+                  defaultMessage="Proceed with caution"
+                />
+              }
+              color="warning"
+              iconType="help"
+            >
+              <FormattedMessage
+                id="xpack.remoteClusters.edit.deprecatedSettingsMessage"
+                defaultMessage="This remote cluster has deprecated settings that we tried to resolve. Verify all changes before saving."
+              />
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        ) : null}
+
+        <RemoteClusterForm
+          cluster={cluster}
+          isSaving={isEditingCluster}
+          saveError={getEditClusterError}
+          save={this.save}
+          cancel={this.cancel}
+        />
+      </>
     );
   }
 }

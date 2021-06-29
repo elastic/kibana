@@ -1,0 +1,59 @@
+// MapBox
+
+.mapContainer {
+  flex-grow: 1;
+
+  .mapboxgl-ctrl-top-left .mapboxgl-ctrl {
+    margin-left: $euiSizeM;
+    margin-top: $euiSizeM;
+  }
+
+  .mapboxgl-ctrl-group:not(:empty) {
+    @include euiBottomShadowLarge;
+    @include mapToolbarButtonGroupBorderRadius;
+    background-color: $euiColorEmptyShade;
+    transition: transform $euiAnimSpeedNormal ease-in-out;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    > button {
+      @include size($euiSizeXL);
+
+      + button {
+        border: none;
+      }
+    }
+  }
+
+  .mapboxgl-ctrl button:not(:disabled) {
+    transition: background $euiAnimSpeedNormal ease-in-out;
+
+    &:hover {
+      background-color: transparentize($euiColorDarkShade, .9);
+    }
+  }
+
+  .mapboxgl-ctrl-group button:focus:focus-visible {
+    box-shadow: none;
+  }
+}
+
+// Custom SVG as background for zoom controls based off of EUI glyphs plusInCircleFilled and minusInCircleFilled
+// Also fixes dark mode
+.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon {
+  // sass-lint:disable-block no-important
+  background-repeat: no-repeat !important;
+  // sass-lint:disable-block quotes
+  background-image: url("data:image/svg+xml,%0A%3Csvg width='15px' height='15px' viewBox='0 0 15 15' version='1.1' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='#{hexToRGB($euiTextColor)}' d='M8,7 L8,3.5 C8,3.22385763 7.77614237,3 7.5,3 C7.22385763,3 7,3.22385763 7,3.5 L7,7 L3.5,7 C3.22385763,7 3,7.22385763 3,7.5 C3,7.77614237 3.22385763,8 3.5,8 L7,8 L7,11.5 C7,11.7761424 7.22385763,12 7.5,12 C7.77614237,12 8,11.7761424 8,11.5 L8,8 L11.5,8 C11.7761424,8 12,7.77614237 12,7.5 C12,7.22385763 11.7761424,7 11.5,7 L8,7 Z M7.5,15 C3.35786438,15 0,11.6421356 0,7.5 C0,3.35786438 3.35786438,0 7.5,0 C11.6421356,0 15,3.35786438 15,7.5 C15,11.6421356 11.6421356,15 7.5,15 Z' /%3E%3C/svg%3E") !important;
+  background-position: center !important;
+}
+
+.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon {
+  // sass-lint:disable-block no-important
+  background-repeat: no-repeat !important;
+  // sass-lint:disable-block quotes
+  background-image: url("data:image/svg+xml,%0A%3Csvg width='15px' height='15px' viewBox='0 0 15 15' version='1.1' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='#{hexToRGB($euiTextColor)}' d='M7.5,0 C11.6355882,0 15,3.36441176 15,7.5 C15,11.6355882 11.6355882,15 7.5,15 C3.36441176,15 0,11.6355882 0,7.5 C0,3.36441176 3.36441176,0 7.5,0 Z M3.5,7 C3.22385763,7 3,7.22385763 3,7.5 C3,7.77614237 3.22385763,8 3.5,8 L11.5,8 C11.7761424,8 12,7.77614237 12,7.5 C12,7.22385763 11.7761424,7 11.5,7 L3.5,7 Z' /%3E%3C/svg%3E") !important;
+  background-position: center !important;
+}

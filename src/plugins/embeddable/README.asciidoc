@@ -1,0 +1,43 @@
+[[embeddable-plugin]]
+== Embeddables plugin
+
+Embeddables are re-usable widgets that can be rendered in any environment or plugin. Developers can embed them directly in their plugin. End users can dynamically add them to any embeddable _containers_.
+
+=== Embeddable containers
+
+Containers are a special type of embeddable that can contain nested embeddables. Embeddables can be dynamically added to embeddable _containers_. Currently only dashboard uses this interface.
+
+=== Examples
+
+Many example embeddables are implemented and registered https://github.com/elastic/kibana/tree/master/examples/embeddable_examples[here]. They can be played around with and explored https://github.com/elastic/kibana/tree/master/examples/embeddable_explorer[in the Embeddable Explorer example plugin]. Just run kibana with
+
+[source,sh]
+--
+yarn start --run-examples
+--
+
+and navigate to the Embeddable explorer app.
+
+There is also an example of rendering dashboard container outside of dashboard app https://github.com/elastic/kibana/tree/master/examples/dashboard_embeddable_examples[here].
+
+=== Docs
+
+link:https://github.com/elastic/kibana/blob/master/src/plugins/embeddable/docs/README.md[Embeddable docs, guides & caveats]
+
+=== API docs
+
+==== Browser API
+https://github.com/elastic/kibana/blob/master/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablesetup.md[Browser Setup contract]
+https://github.com/elastic/kibana/blob/master/docs/development/plugins/embeddable/public/kibana-plugin-plugins-embeddable-public.embeddablestart.md[Browser Start contract]
+
+==== Server API
+https://github.com/elastic/kibana/blob/master/docs/development/plugins/embeddable/server/kibana-plugin-plugins-embeddable-server.embeddablesetup.md[Server Setup contract]
+
+=== Testing
+
+Run unit tests
+
+[source,sh]
+--
+yarn test:jest src/plugins/embeddable
+--

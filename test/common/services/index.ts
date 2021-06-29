@@ -1,36 +1,31 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { DeploymentService } from './deployment';
 import { LegacyEsProvider } from './legacy_es';
 import { ElasticsearchProvider } from './elasticsearch';
 import { EsArchiverProvider } from './es_archiver';
 import { KibanaServerProvider } from './kibana_server';
-import { RetryProvider } from './retry';
-import { RandomnessProvider } from './randomness';
+import { RetryService } from './retry';
+import { RandomnessService } from './randomness';
 import { SecurityServiceProvider } from './security';
+import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
+import { SavedObjectInfoService } from './saved_object_info';
 
 export const services = {
+  deployment: DeploymentService,
   legacyEs: LegacyEsProvider,
   es: ElasticsearchProvider,
   esArchiver: EsArchiverProvider,
   kibanaServer: KibanaServerProvider,
-  retry: RetryProvider,
-  randomness: RandomnessProvider,
+  retry: RetryService,
+  randomness: RandomnessService,
   security: SecurityServiceProvider,
+  esDeleteAllIndices: EsDeleteAllIndicesProvider,
+  savedObjectInfo: SavedObjectInfoService,
 };

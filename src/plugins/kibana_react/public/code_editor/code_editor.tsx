@@ -1,29 +1,24 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
+import { monaco } from '@kbn/monaco';
 
-import { monaco } from '@kbn/ui-shared-deps/monaco';
+import {
+  DARK_THEME,
+  LIGHT_THEME,
+  DARK_THEME_TRANSPARENT,
+  LIGHT_THEME_TRANSPARENT,
+} from './editor_theme';
 
-import { LIGHT_THEME, DARK_THEME } from './editor_theme';
+import './editor.scss';
 
 export interface Props {
   /** Width of editor. Defaults to 100%. */
@@ -39,14 +34,14 @@ export interface Props {
   value: string;
 
   /** Function invoked when text in editor is changed */
-  onChange: (value: string) => void;
+  onChange: (value: string, event: monaco.editor.IModelContentChangedEvent) => void;
 
   /**
    * Options for the Monaco Code Editor
    * Documentation of options can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.ieditorconstructionoptions.html
+   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html
    */
-  options?: monaco.editor.IEditorConstructionOptions;
+  options?: monaco.editor.IStandaloneEditorConstructionOptions;
 
   /**
    * Suggestion provider for autocompletion
@@ -95,6 +90,16 @@ export interface Props {
    * Should the editor use the dark theme
    */
   useDarkTheme?: boolean;
+
+  /**
+   * Should the editor use a transparent background
+   */
+  transparentBackground?: boolean;
+
+  /**
+   * Should the editor be rendered using the fullWidth EUI attribute
+   */
+  fullWidth?: boolean;
 }
 
 export class CodeEditor extends React.Component<Props, {}> {
@@ -141,8 +146,12 @@ export class CodeEditor extends React.Component<Props, {}> {
       }
     });
 
-    // Register the theme
+    // Register themes
     monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
+    monaco.editor.defineTheme(
+      'euiColorsTransparent',
+      this.props.useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+    );
   };
 
   _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
@@ -161,20 +170,39 @@ export class CodeEditor extends React.Component<Props, {}> {
     const { languageId, value, onChange, width, height, options } = this.props;
 
     return (
-      <React.Fragment>
+      <>
         <MonacoEditor
-          theme="euiColors"
+          theme={this.props.transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
           language={languageId}
           value={value}
           onChange={onChange}
-          editorWillMount={this._editorWillMount}
-          editorDidMount={this._editorDidMount}
           width={width}
           height={height}
-          options={options}
+          editorWillMount={this._editorWillMount}
+          editorDidMount={this._editorDidMount}
+          options={{
+            renderLineHighlight: 'none',
+            scrollBeyondLastLine: false,
+            minimap: {
+              enabled: false,
+            },
+            scrollbar: {
+              useShadows: false,
+            },
+            wordBasedSuggestions: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            matchBrackets: 'never',
+            ...options,
+          }}
         />
-        <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
-      </React.Fragment>
+        <ReactResizeDetector
+          handleWidth
+          handleHeight
+          onResize={this._updateDimensions}
+          refreshMode="debounce"
+        />
+      </>
     );
   }
 
@@ -184,3 +212,7 @@ export class CodeEditor extends React.Component<Props, {}> {
     }
   };
 }
+
+// React.lazy requires default export
+// eslint-disable-next-line import/no-default-export
+export default CodeEditor;

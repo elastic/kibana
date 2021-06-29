@@ -1,46 +1,34 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { UiSettingsParams, UserProvidedValues } from 'src/core/server/types';
+import { UserProvidedValues, PublicUiSettingsParams } from 'src/core/server/types';
 import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
 
 interface UiSettingsClientParams {
   api: UiSettingsApi;
-  defaults: Record<string, UiSettingsParams>;
+  defaults: Record<string, PublicUiSettingsParams>;
   initialSettings?: UiSettingsState;
   done$: Observable<unknown>;
 }
 
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly update$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
-  private readonly saved$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
   private readonly updateErrors$ = new Subject<Error>();
 
   private readonly api: UiSettingsApi;
-  private readonly defaults: Record<string, UiSettingsParams>;
-  private cache: Record<string, UiSettingsParams & UserProvidedValues>;
+  private readonly defaults: Record<string, PublicUiSettingsParams>;
+  private cache: Record<string, PublicUiSettingsParams & UserProvidedValues>;
 
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
@@ -50,7 +38,6 @@ export class UiSettingsClient implements IUiSettingsClient {
     params.done$.subscribe({
       complete: () => {
         this.update$.complete();
-        this.saved$.complete();
         this.updateErrors$.complete();
       },
     });
@@ -97,7 +84,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return concat(
       defer(() => of(this.get(key, defaultOverride))),
       this.update$.pipe(
-        filter(update => update.key === key),
+        filter((update) => update.key === key),
         map(() => this.get(key, defaultOverride))
       )
     );
@@ -127,35 +114,8 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.isDeclared(key) && Boolean(this.cache[key].isOverridden);
   }
 
-  overrideLocalDefault(key: string, newDefault: any) {
-    // capture the previous value
-    const prevDefault = this.defaults[key] ? this.defaults[key].value : undefined;
-
-    // update defaults map
-    this.defaults[key] = {
-      ...(this.defaults[key] || {}),
-      value: newDefault,
-    };
-
-    // update cached default value
-    this.cache[key] = {
-      ...(this.cache[key] || {}),
-      value: newDefault,
-    };
-
-    // don't broadcast change if userValue was already overriding the default
-    if (this.cache[key].userValue == null) {
-      this.update$.next({ key, newValue: newDefault, oldValue: prevDefault });
-      this.saved$.next({ key, newValue: newDefault, oldValue: prevDefault });
-    }
-  }
-
   getUpdate$() {
     return this.update$.asObservable();
-  }
-
-  getSaved$() {
-    return this.saved$.asObservable();
   }
 
   getUpdateErrors$() {
@@ -189,7 +149,6 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     try {
       const { settings } = await this.api.batchSet(key, newVal);
       this.cache = defaultsDeep({}, defaults, settings);
-      this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
     } catch (error) {
       this.setLocally(key, initialVal);

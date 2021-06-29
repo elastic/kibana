@@ -1,0 +1,83 @@
+.gphSidebar {
+  position: absolute;
+  right: $euiSizeS;
+  top: $euiSizeS;
+  width: $euiSizeXL * 10;
+  z-index: $euiZLevel1;
+  background-color: $euiColorEmptyShade;
+  border: $euiBorderThin;
+  padding: $euiSizeXS;
+  border-radius: $euiBorderRadius;
+  opacity: .9;
+  @include euiBottomShadowMedium;
+
+  .help-block {
+    font-size: $euiFontSizeXS;
+    color: $euiTextColor;
+  }
+}
+
+.gphSidebar__header {
+  margin-top: $euiSizeS;
+  color: $euiColorEmptyShade;
+  background-color: $euiColorDarkShade;
+  padding: $euiSizeXS;
+  border-radius: $euiBorderRadius;
+  margin-bottom: $euiSizeXS;
+}
+
+.gphSidebar__panel {
+  max-height: $euiSizeL * 10;
+  overflow-y: hidden auto;
+}
+
+/**
+ * Vertex Select
+ */
+
+.gphVertexSelect__button {
+  margin: $euiSizeXS $euiSizeXS $euiSizeXS 0;
+}
+
+/**
+ * Selection List
+ */
+
+.gphSelectionList {
+  height: $euiSizeL * 10;
+  background-color: $euiColorLightestShade;
+  overflow: auto;
+  margin-bottom: 0;
+}
+
+.gphSelectionList__icon {
+  font-size: $euiFontSizeXS;
+}
+
+.gphSelectionList__field {
+  line-height: $euiLineHeight;
+  margin: $euiSizeXS 0;
+  cursor: pointer;
+
+  > * {
+    vertical-align: middle;
+  }
+}
+
+.gphSelectionList__field--selected {
+  background: $euiColorLightShade;
+}
+
+/**
+ * Link summary
+ */
+
+.gphLinkSummary__term--1 {
+  color:$euiColorDanger;
+}
+.gphLinkSummary__term--2 {
+  color:$euiColorPrimary;
+}
+.gphLinkSummary__term--1-2 {
+  color: mix($euiColorDanger, $euiColorPrimary);
+}

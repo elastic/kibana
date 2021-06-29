@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import pipelinesFixture from './fixtures/pipelines';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe.skip('pipelines', () => {
-    const archive = 'monitoring/logstash/changing_pipelines';
+  describe('pipelines', () => {
+    const archive = 'x-pack/test/functional/es_archives/monitoring/logstash/changing_pipelines';
     const timeRange = {
       min: '2019-11-04T15:40:44.855Z',
       max: '2019-11-04T15:50:38.667Z',
@@ -52,11 +53,33 @@ export default function({ getService }) {
           .send({ timeRange, pagination: { ...pagination, index: page }, sort })
           .expect(200);
 
-        return body.pipelines.map(pipeline => pipeline.id);
+        return body.pipelines.map((pipeline) => pipeline.id);
       }
 
       const ids = [...(await getIds(0)), ...(await getIds(1)), ...(await getIds(2))];
       expect(ids.length).to.be(26);
+    });
+
+    it('should not error out if there is missing data for part of the time series', async () => {
+      const customTimeRange = {
+        ...timeRange,
+        max: '2019-11-04T15:59:38.667Z',
+      };
+
+      const customSort = {
+        ...sort,
+        field: 'logstash_cluster_pipeline_throughput',
+      };
+
+      await supertest
+        .post('/api/monitoring/v1/clusters/TUjQLdHNTh2SB9Wy0gOtWg/logstash/pipelines')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          timeRange: customTimeRange,
+          pagination: { ...pagination, index: 1 },
+          sort: customSort,
+        })
+        .expect(200);
     });
   });
 }

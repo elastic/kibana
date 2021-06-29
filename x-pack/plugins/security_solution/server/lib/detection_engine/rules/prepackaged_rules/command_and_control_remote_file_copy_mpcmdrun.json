@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the Windows Defender configuration utility (MpCmdRun.exe) being used to download a remote file.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Remote File Download via MpCmdRun",
+  "note": "## Triage and analysis\n\n### Investigating Remote File Download via MpCmdRun\nVerify details such as the parent process, URL reputation, and downloaded file details. Additionally, `MpCmdRun` logs this information in the Appdata Temp folder in `MpCmdRun.log`.",
+  "query": "process where event.type == \"start\" and\n  (process.name : \"MpCmdRun.exe\" or process.pe.original_file_name == \"MpCmdRun.exe\") and\n   process.args : \"-DownloadFile\" and process.args : \"-url\" and process.args : \"-path\"\n",
+  "references": [
+    "https://twitter.com/mohammadaskar2/status/1301263551638761477",
+    "https://www.bleepingcomputer.com/news/microsoft/microsoft-defender-can-ironically-be-used-to-download-malware/"
+  ],
+  "risk_score": 47,
+  "rule_id": "c6453e73-90eb-4fe7-a98c-cde7bbfc504a",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Command and Control"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1105",
+          "name": "Ingress Tool Transfer",
+          "reference": "https://attack.mitre.org/techniques/T1105/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 5
+}

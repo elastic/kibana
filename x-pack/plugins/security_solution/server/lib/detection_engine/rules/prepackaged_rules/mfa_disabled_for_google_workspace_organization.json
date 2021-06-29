@@ -1,0 +1,34 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects when multi-factor authentication (MFA) is disabled for a Google Workspace organization. An adversary may attempt to modify a password policy in order to weaken an organization\u2019s security controls.",
+  "false_positives": [
+    "MFA settings may be modified by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "from": "now-130m",
+  "index": [
+    "filebeat-*",
+    "logs-google_workspace*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "MFA Disabled for Google Workspace Organization",
+  "note": "## Config\n\nThe Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n\n### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information.\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-gsuite.html",
+  "query": "event.dataset:(gsuite.admin or google_workspace.admin) and event.provider:admin and event.category:iam and event.action:(ENFORCE_STRONG_AUTHENTICATION or ALLOW_STRONG_AUTHENTICATION) and gsuite.admin.new_value:false\n",
+  "risk_score": 47,
+  "rule_id": "e555105c-ba6d-481f-82bb-9b633e7b4827",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Google Workspace",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

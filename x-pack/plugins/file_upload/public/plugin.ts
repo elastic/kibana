@@ -1,41 +1,56 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// @ts-ignore
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
-// @ts-ignore
-import { JsonUploadAndParse } from './components/json_upload_and_parse';
-// @ts-ignore
-import { setupInitServicesAndConstants, startInitServicesAndConstants } from './kibana_services';
-import { IDataPluginServices } from '../../../../src/plugins/data/public';
-
-/**
- * These are the interfaces with your public contracts. You should export these
- * for other plugins to use in _their_ `SetupDeps`/`StartDeps` interfaces.
- * @public
- */
+import { CoreStart, Plugin } from '../../../../src/core/public';
+import {
+  FileUploadStartApi,
+  FileUploadComponent,
+  importerFactory,
+  hasImportPermission,
+  IndexNameFormComponent,
+  checkIndexExists,
+  getTimeFieldRange,
+  analyzeFile,
+} from './api';
+import { setStartServices } from './kibana_services';
+import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FileUploadPluginSetupDependencies {}
-export interface FileUploadPluginStartDependencies {
-  data: IDataPluginServices;
+export interface FileUploadSetupDependencies {}
+export interface FileUploadStartDependencies {
+  data: DataPublicPluginStart;
 }
 
 export type FileUploadPluginSetup = ReturnType<FileUploadPlugin['setup']>;
 export type FileUploadPluginStart = ReturnType<FileUploadPlugin['start']>;
 
-export class FileUploadPlugin implements Plugin<FileUploadPluginSetup, FileUploadPluginStart> {
-  public setup(core: CoreSetup, plugins: FileUploadPluginSetupDependencies) {
-    setupInitServicesAndConstants(core);
-  }
+export class FileUploadPlugin
+  implements
+    Plugin<
+      FileUploadPluginSetup,
+      FileUploadPluginStart,
+      FileUploadSetupDependencies,
+      FileUploadStartDependencies
+    > {
+  public setup() {}
 
-  public start(core: CoreStart, plugins: FileUploadPluginStartDependencies) {
-    startInitServicesAndConstants(core, plugins);
+  public start(core: CoreStart, plugins: FileUploadStartDependencies): FileUploadStartApi {
+    setStartServices(core, plugins);
     return {
-      JsonUploadAndParse,
+      FileUploadComponent,
+      IndexNameFormComponent,
+      importerFactory,
+      getMaxBytes,
+      getMaxBytesFormatted,
+      hasImportPermission,
+      checkIndexExists,
+      getTimeFieldRange,
+      analyzeFile,
     };
   }
 }

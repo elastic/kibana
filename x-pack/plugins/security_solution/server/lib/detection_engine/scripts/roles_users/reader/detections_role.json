@@ -1,0 +1,32 @@
+{
+  "elasticsearch": {
+    "cluster": [],
+    "indices": [
+      {
+        "names" : [
+          ".siem-signals*",
+          ".lists*",
+          ".items*"
+        ],
+        "privileges" : ["read"]
+      },
+      {
+        "names": [
+          "*"
+        ],
+        "privileges": ["read", "maintenance", "view_index_metadata"]
+      }
+    ]
+  },
+  "kibana": [
+    {
+      "feature": {
+        "ml": ["read"],
+        "siem": ["read"],
+        "actions": ["read"],
+        "builtInAlerts": ["read"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}

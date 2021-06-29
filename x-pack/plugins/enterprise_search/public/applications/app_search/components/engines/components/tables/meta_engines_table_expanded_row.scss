@@ -1,0 +1,21 @@
+.metaEnginesSourceEnginesTable {
+  margin: (-$euiSizeS) (-$euiSizeS) $euiSizeS (-$euiSizeS);
+
+  thead {
+    display: none;
+  }
+
+  @include euiBreakpoint('l', 'xl') {
+    .euiTableRowCell {
+      border-top: none;
+    }
+
+    .euiTitle {
+      display: none;
+    }
+  }
+
+  .euiTableHeaderMobile {
+    display: none
+  }
+}

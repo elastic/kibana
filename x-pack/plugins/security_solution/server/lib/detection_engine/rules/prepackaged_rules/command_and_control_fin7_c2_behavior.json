@@ -1,0 +1,61 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects a known command and control pattern in network events. The FIN7 threat group is known to use this command and control technique, while maintaining persistence in their target's network.",
+  "false_positives": [
+    "This rule could identify benign domains that are formatted similarly to FIN7's command and control algorithm. Alerts should be investigated by an analyst to assess the validity of the individual observations."
+  ],
+  "index": [
+    "packetbeat-*"
+  ],
+  "language": "lucene",
+  "license": "Elastic License v2",
+  "name": "Possible FIN7 DGA Command and Control Behavior",
+  "note": "## Triage and analysis\n\nIn the event this rule identifies benign domains in your environment, the `destination.domain` field in the rule can be modified to include those domains. Example: `...AND NOT destination.domain:(zoom.us OR benign.domain1 OR benign.domain2)`.",
+  "query": "event.category:(network OR network_traffic) AND type:(tls OR http) AND network.transport:tcp\nAND destination.domain:/[a-zA-Z]{4,5}\\.(pw|us|club|info|site|top)/ AND NOT destination.domain:zoom.us\n",
+  "references": [
+    "https://www.fireeye.com/blog/threat-research/2018/08/fin7-pursuing-an-enigmatic-and-evasive-global-criminal-operation.html"
+  ],
+  "risk_score": 73,
+  "rule_id": "4a4e23cf-78a2-449c-bac3-701924c269d3",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "Command and Control"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1071",
+          "name": "Application Layer Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1071/"
+        },
+        {
+          "id": "T1568",
+          "name": "Dynamic Resolution",
+          "reference": "https://attack.mitre.org/techniques/T1568/",
+          "subtechnique": [
+            {
+              "id": "T1568.002",
+              "name": "Domain Generation Algorithms",
+              "reference": "https://attack.mitre.org/techniques/T1568/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

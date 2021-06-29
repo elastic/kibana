@@ -1,0 +1,33 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies unusual parent-child process relationships that can indicate malware execution or persistence mechanisms. Malicious scripts often call on other applications and processes as part of their exploit payload. For example, when a malicious Office document runs scripts as part of an exploit payload, Excel or Word may start a script interpreter process, which, in turn, runs a script that downloads and executes malware. Another common scenario is Outlook running an unusual process when malware is downloaded in an email. Monitoring and identifying anomalous process relationships is a method of detecting new and emerging malware that is not yet recognized by anti-virus scanners.",
+  "false_positives": [
+    "Users running scripts in the course of technical support operations of software upgrades could trigger this alert. A newly installed program or one that runs rarely as part of a monthly or quarterly workflow could trigger this alert."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": [
+    "windows_anomalous_process_creation",
+    "v2_windows_anomalous_process_creation"
+  ],
+  "name": "Anomalous Windows Process Creation",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "0b29cab4-dbbd-4a3f-9e8e-1287c7c11ae5",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 5
+}

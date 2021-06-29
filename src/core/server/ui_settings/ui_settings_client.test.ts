@@ -1,25 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Chance from 'chance';
+import { schema } from '@kbn/config-schema';
 
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { createOrUpgradeSavedConfigMock } from './create_or_upgrade_saved_config/create_or_upgrade_saved_config.test.mock';
 
 import { SavedObjectsClient } from '../saved_objects';
@@ -27,7 +17,7 @@ import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_c
 import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
 
-const logger = loggingServiceMock.create().get();
+const logger = loggingSystemMock.create().get();
 
 const TYPE = 'config';
 const ID = 'kibana-version';
@@ -145,6 +135,22 @@ describe('ui settings', () => {
         expect(error.message).toBe('Unable to update "foo" because it is overridden');
       }
     });
+
+    it('validates value if a schema presents', async () => {
+      const defaults = { foo: { schema: schema.string() } };
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      await expect(
+        uiSettings.setMany({
+          bar: 2,
+          foo: 1,
+        })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: [validation [foo]]: expected value of type [string] but got [number]]`
+      );
+
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('#set()', () => {
@@ -161,6 +167,17 @@ describe('ui settings', () => {
       expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, {
         one: 'value',
       });
+    });
+
+    it('validates value if a schema presents', async () => {
+      const defaults = { foo: { schema: schema.string() } };
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      await expect(uiSettings.set('foo', 1)).rejects.toMatchInlineSnapshot(
+        `[Error: [validation [foo]]: expected value of type [string] but got [number]]`
+      );
+
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(0);
     });
 
     it('throws CannotOverrideError if the key is overridden', async () => {
@@ -191,6 +208,20 @@ describe('ui settings', () => {
 
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, ID, { one: null });
+    });
+
+    it('does not fail validation', async () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          value: '1',
+        },
+      };
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      await uiSettings.remove('foo');
+
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     });
 
     it('throws CannotOverrideError if the key is overridden', async () => {
@@ -235,6 +266,20 @@ describe('ui settings', () => {
       });
     });
 
+    it('does not fail validation', async () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          value: '1',
+        },
+      };
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      await uiSettings.removeMany(['foo', 'bar']);
+
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    });
+
     it('throws CannotOverrideError if any key is overridden', async () => {
       const { uiSettings } = setup({
         overrides: {
@@ -256,7 +301,13 @@ describe('ui settings', () => {
       const value = chance.word();
       const defaults = { key: { value } };
       const { uiSettings } = setup({ defaults });
-      expect(uiSettings.getRegistered()).toBe(defaults);
+      expect(uiSettings.getRegistered()).toEqual(defaults);
+    });
+    it('does not leak validation schema outside', () => {
+      const value = chance.word();
+      const defaults = { key: { value, schema: schema.string() } };
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.getRegistered()).toStrictEqual({ key: { value } });
     });
   });
 
@@ -274,7 +325,7 @@ describe('ui settings', () => {
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getUserProvided();
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         user: {
           userValue: 'customized',
         },
@@ -286,7 +337,7 @@ describe('ui settings', () => {
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.getUserProvided();
 
-      expect(result).toEqual({
+      expect(result).toStrictEqual({
         user: {
           userValue: 'customized',
         },
@@ -296,6 +347,32 @@ describe('ui settings', () => {
       });
     });
 
+    it('ignores user-configured value if it fails validation', async () => {
+      const esDocSource = { user: 'foo', id: 'bar' };
+      const defaults = {
+        id: {
+          value: 42,
+          schema: schema.number(),
+        },
+      };
+      const { uiSettings } = setup({ esDocSource, defaults });
+      const result = await uiSettings.getUserProvided();
+
+      expect(result).toStrictEqual({
+        user: {
+          userValue: 'foo',
+        },
+      });
+
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",
+          ],
+        ]
+      `);
+    });
+
     it('automatically creates the savedConfig if it is missing and returns empty object', async () => {
       const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
       savedObjectsClient.get = jest
@@ -303,7 +380,7 @@ describe('ui settings', () => {
         .mockRejectedValueOnce(SavedObjectsClient.errors.createGenericNotFoundError())
         .mockResolvedValueOnce({ attributes: {} });
 
-      expect(await uiSettings.getUserProvided()).toEqual({});
+      expect(await uiSettings.getUserProvided()).toStrictEqual({});
 
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
 
@@ -320,7 +397,7 @@ describe('ui settings', () => {
         SavedObjectsClient.errors.createGenericNotFoundError()
       );
 
-      expect(await uiSettings.getUserProvided()).toEqual({ foo: { userValue: 'bar ' } });
+      expect(await uiSettings.getUserProvided()).toStrictEqual({ foo: { userValue: 'bar ' } });
     });
 
     it('returns an empty object on Forbidden responses', async () => {
@@ -329,7 +406,7 @@ describe('ui settings', () => {
       const error = SavedObjectsClient.errors.decorateForbiddenError(new Error());
       savedObjectsClient.get.mockRejectedValue(error);
 
-      expect(await uiSettings.getUserProvided()).toEqual({});
+      expect(await uiSettings.getUserProvided()).toStrictEqual({});
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(0);
     });
 
@@ -339,7 +416,7 @@ describe('ui settings', () => {
       const error = SavedObjectsClient.errors.decorateEsUnavailableError(new Error());
       savedObjectsClient.get.mockRejectedValue(error);
 
-      expect(await uiSettings.getUserProvided()).toEqual({});
+      expect(await uiSettings.getUserProvided()).toStrictEqual({});
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(0);
     });
 
@@ -382,7 +459,7 @@ describe('ui settings', () => {
       };
 
       const { uiSettings } = setup({ esDocSource, overrides });
-      expect(await uiSettings.getUserProvided()).toEqual({
+      expect(await uiSettings.getUserProvided()).toStrictEqual({
         user: {
           userValue: 'customized',
         },
@@ -404,13 +481,38 @@ describe('ui settings', () => {
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
     });
 
-    it(`returns defaults when es doc is empty`, async () => {
+    it('returns defaults when es doc is empty', async () => {
       const esDocSource = {};
       const defaults = { foo: { value: 'bar' } };
       const { uiSettings } = setup({ esDocSource, defaults });
-      expect(await uiSettings.getAll()).toEqual({
+      expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'bar',
       });
+    });
+
+    it('ignores user-configured value if it fails validation', async () => {
+      const esDocSource = { user: 'foo', id: 'bar' };
+      const defaults = {
+        id: {
+          value: 42,
+          schema: schema.number(),
+        },
+      };
+      const { uiSettings } = setup({ esDocSource, defaults });
+      const result = await uiSettings.getAll();
+
+      expect(result).toStrictEqual({
+        id: 42,
+        user: 'foo',
+      });
+
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",
+          ],
+        ]
+      `);
     });
 
     it(`merges user values, including ones without defaults, into key value pairs`, async () => {
@@ -427,7 +529,7 @@ describe('ui settings', () => {
 
       const { uiSettings } = setup({ esDocSource, defaults });
 
-      expect(await uiSettings.getAll()).toEqual({
+      expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'user-override',
         bar: 'user-provided',
       });
@@ -451,10 +553,19 @@ describe('ui settings', () => {
 
       const { uiSettings } = setup({ esDocSource, defaults, overrides });
 
-      expect(await uiSettings.getAll()).toEqual({
+      expect(await uiSettings.getAll()).toStrictEqual({
         foo: 'bax',
         bar: 'user-provided',
       });
+    });
+
+    it('throws if mutates the result of getAll()', async () => {
+      const { uiSettings } = setup({ esDocSource: {} });
+      const result = await uiSettings.getAll();
+
+      expect(() => {
+        result.foo = 'bar';
+      }).toThrow();
     });
   });
 
@@ -518,6 +629,60 @@ describe('ui settings', () => {
 
       expect(await uiSettings.get('dateFormat')).toBe('foo');
     });
+
+    it('returns the default value if user-configured value fails validation', async () => {
+      const esDocSource = { id: 'bar' };
+      const defaults = {
+        id: {
+          value: 42,
+          schema: schema.number(),
+        },
+      };
+
+      const { uiSettings } = setup({ esDocSource, defaults });
+
+      expect(await uiSettings.get('id')).toBe(42);
+
+      expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Ignore invalid UiSettings value. Error: [validation [id]]: expected value of type [number] but got [string].",
+          ],
+        ]
+      `);
+    });
+  });
+
+  describe('#isSensitive()', () => {
+    it('returns false if sensitive config is not set', () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          value: '1',
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.isSensitive('foo')).toBe(false);
+    });
+
+    it('returns false if key is not in the settings', () => {
+      const { uiSettings } = setup();
+      expect(uiSettings.isSensitive('baz')).toBe(false);
+    });
+
+    it('returns true if overrides defined and key is overridden', () => {
+      const defaults = {
+        foo: {
+          schema: schema.string(),
+          sensitive: true,
+          value: '1',
+        },
+      };
+
+      const { uiSettings } = setup({ defaults });
+      expect(uiSettings.isSensitive('foo')).toBe(true);
+    });
   });
 
   describe('#isOverridden()', () => {
@@ -539,6 +704,113 @@ describe('ui settings', () => {
     it('returns true if overrides defined and key is overridden', () => {
       const { uiSettings } = setup({ overrides: { foo: true, bar: true } });
       expect(uiSettings.isOverridden('bar')).toBe(true);
+    });
+  });
+
+  describe('caching', () => {
+    describe('read operations cache user config', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.clearAllTimers();
+      });
+
+      it('get', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('getAll', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.getAll();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('getUserProvided', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        jest.advanceTimersByTime(10000);
+        await uiSettings.getUserProvided();
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('write operations invalidate user config cache', () => {
+      it('set', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.set('foo', 'bar');
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('setMany', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.setMany({ foo: 'bar' });
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('remove', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.remove('foo');
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
+
+      it('removeMany', async () => {
+        const esDocSource = {};
+        const { uiSettings, savedObjectsClient } = setup({ esDocSource });
+
+        await uiSettings.get('any');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+
+        await uiSettings.removeMany(['foo', 'bar']);
+        await uiSettings.get('foo');
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+      });
     });
   });
 });

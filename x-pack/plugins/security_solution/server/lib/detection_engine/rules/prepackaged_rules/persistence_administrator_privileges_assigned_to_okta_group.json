@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects when an administrator role is assigned to an Okta group. An adversary may attempt to assign administrator privileges to an Okta group in order to assign additional permissions to compromised user accounts and maintain access to their target organization.",
+  "false_positives": [
+    "Administrator roles may be assigned to Okta users by a Super Admin user. Verify that the behavior was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-okta*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Administrator Privileges Assigned to an Okta Group",
+  "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:okta.system and event.action:group.privilege.grant\n",
+  "references": [
+    "https://help.okta.com/en/prod/Content/Topics/Security/administrators-admin-comparison.htm",
+    "https://developer.okta.com/docs/reference/api/system-log/",
+    "https://developer.okta.com/docs/reference/api/event-types/"
+  ],
+  "risk_score": 47,
+  "rule_id": "b8075894-0b62-46e5-977c-31275da34419",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Identity",
+    "Okta",
+    "Continuous Monitoring",
+    "SecOps",
+    "Monitoring"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 6
+}

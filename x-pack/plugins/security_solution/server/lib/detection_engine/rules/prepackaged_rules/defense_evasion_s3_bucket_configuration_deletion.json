@@ -1,0 +1,58 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the deletion of various Amazon Simple Storage Service (S3) bucket configuration components.",
+  "false_positives": [
+    "Bucket components may be deleted by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Bucket component deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-60m",
+  "index": [
+    "filebeat-*",
+    "logs-aws*"
+  ],
+  "interval": "10m",
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "AWS S3 Bucket Configuration Deletion",
+  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:aws.cloudtrail and event.provider:s3.amazonaws.com and\n  event.action:(DeleteBucketPolicy or DeleteBucketReplication or DeleteBucketCors or\n                DeleteBucketEncryption or DeleteBucketLifecycle)\n  and event.outcome:success\n",
+  "references": [
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketPolicy.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketReplication.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketCors.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketEncryption.html",
+    "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteBucketLifecycle.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "227dc608-e558-43d9-b521-150772250bae",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
+    "SecOps",
+    "Asset Visibility"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

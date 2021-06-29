@@ -1,44 +1,32 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { App, LegacyApp, Mounter, AppUnmount } from './types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { AppUnmount, Mounter } from './types';
 import { ApplicationService } from './application_service';
 
 /** @internal */
 export type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 /** @internal */
-export type EitherApp = App | LegacyApp;
-/** @internal */
 export type MockedUnmount = jest.Mocked<AppUnmount>;
 
 /** @internal */
-export interface Mountable<T extends EitherApp> {
-  mounter: MockedMounter<T>;
+export interface Mountable {
+  mounter: MockedMounter;
   unmount: MockedUnmount;
 }
 
 /** @internal */
-export type MockedMounter<T extends EitherApp> = jest.Mocked<Mounter<jest.Mocked<T>>>;
+export type MockedMounter = jest.Mocked<Mounter>;
 /** @internal */
-export type MockedMounterTuple<T extends EitherApp> = [string, Mountable<T>];
+export type MockedMounterTuple = [string, Mountable];
 /** @internal */
-export type MockedMounterMap<T extends EitherApp> = Map<string, Mountable<T>>;
+export type MockedMounterMap = Map<string, Mountable>;
 /** @internal */
 export type MockLifecycle<
   T extends keyof ApplicationService,

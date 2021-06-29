@@ -1,0 +1,25 @@
+// Remote clusters plugin hacks
+
+// Prefix all styles with "remoteClusters" to avoid conflicts.
+// Examples
+//   remoteClustersChart
+//   remoteClustersChart__legend
+//   remoteClustersChart__legend--small
+//   remoteClustersChart__legend-isLoading
+
+/**
+ * 1. Override EuiFormRow styles. Otherwise the switch will jump around when toggled on and off,
+ *    as the 'Reset to defaults' link is added to and removed from the DOM.
+ * 2. Fix the positioning.
+ */
+.remoteClusterSkipIfUnavailableSwitch {
+  justify-content: flex-start !important; /* 1 */
+  padding-top: $euiSizeS !important;
+}
+
+/**
+ * 1. Prevent inherited flexbox layout from compressing this element on IE.
+ */
+.remoteClustersConnectionStatus__message {
+  flex-basis: auto !important; /* 1 */
+}

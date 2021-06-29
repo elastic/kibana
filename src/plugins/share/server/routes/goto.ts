@@ -1,29 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreSetup, IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { modifyUrl } from '@kbn/std';
 
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
 import { getGotoPath } from '../../common/short_url_routes';
-import { modifyUrl } from '../../../../core/utils';
 
 export const createGotoRoute = ({
   router,
@@ -34,14 +23,14 @@ export const createGotoRoute = ({
   shortUrlLookup: ShortUrlLookupService;
   http: CoreSetup['http'];
 }) => {
-  router.get(
+  http.resources.register(
     {
       path: getGotoPath('{urlId}'),
       validate: {
         params: schema.object({ urlId: schema.string() }),
       },
     },
-    router.handleLegacyErrors(async function(context, request, response) {
+    router.handleLegacyErrors(async function (context, request, response) {
       const url = await shortUrlLookup.getUrl(request.params.urlId, {
         savedObjects: context.core.savedObjects.client,
       });
@@ -52,7 +41,7 @@ export const createGotoRoute = ({
       if (!stateStoreInSessionStorage) {
         const basePath = http.basePath.get(request);
 
-        const prependedUrl = modifyUrl(url, parts => {
+        const prependedUrl = modifyUrl(url, (parts) => {
           if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
             parts.pathname = `${basePath}${parts.pathname}`;
           }
@@ -63,14 +52,8 @@ export const createGotoRoute = ({
           },
         });
       }
-      const body = await context.core.rendering.render();
 
-      return response.ok({
-        headers: {
-          'content-security-policy': http.csp.header,
-        },
-        body,
-      });
+      return response.renderCoreApp();
     })
   );
 };

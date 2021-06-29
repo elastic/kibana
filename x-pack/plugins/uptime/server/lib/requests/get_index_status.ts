@@ -1,22 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { StatesIndexStatus } from '../../../../../legacy/plugins/uptime/common/graphql/types';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
+import { StatesIndexStatus } from '../../../common/runtime_types';
 
-export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({ callES }) => {
+export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
+  uptimeEsClient,
+}) => {
   const {
-    _shards: { total },
-    count,
-  } = await callES('count', { index: INDEX_NAMES.HEARTBEAT });
-  return {
-    indexExists: total > 0,
-    docCount: {
-      count,
+    indices,
+    result: {
+      body: {
+        _shards: { total },
+        count,
+      },
     },
+  } = await uptimeEsClient.count({ terminateAfter: 1 });
+  return {
+    indices,
+    indexExists: total > 0,
+    docCount: count,
   };
 };

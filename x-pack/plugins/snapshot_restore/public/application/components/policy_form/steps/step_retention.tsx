@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -14,13 +16,14 @@ import {
   EuiButtonEmpty,
   EuiFieldNumber,
   EuiSelect,
+  EuiCode,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../common/types';
 import { TIME_UNITS } from '../../../../../common/constants';
-import { documentationLinksService } from '../../../services/documentation';
 import { StepProps } from './';
 import { textService } from '../../../services/text';
+import { useCore } from '../../../app_context';
 
 const getExpirationTimeOptions = (unitSize = '0') =>
   Object.entries(TIME_UNITS).map(([_key, value]) => ({
@@ -34,12 +37,19 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
   errors,
 }) => {
   const { retention = {} } = policy;
+  const { docLinks } = useCore();
 
-  const updatePolicyRetention = (updatedFields: Partial<SlmPolicyPayload['retention']>): void => {
+  const updatePolicyRetention = (
+    updatedFields: Partial<SlmPolicyPayload['retention']>,
+    validationHelperData = {}
+  ): void => {
     const newRetention = { ...retention, ...updatedFields };
-    updatePolicy({
-      retention: newRetention,
-    });
+    updatePolicy(
+      {
+        retention: newRetention,
+      },
+      validationHelperData
+    );
   };
 
   // State for touched inputs
@@ -85,7 +95,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             <EuiFieldNumber
               value={retention.expireAfterValue || ''}
               onBlur={() => setTouched({ ...touched, expireAfterValue: true })}
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 updatePolicyRetention({
                   expireAfterValue: value !== '' ? Number(value) : value,
@@ -101,7 +111,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               options={getExpirationTimeOptions(
                 retention.expireAfterValue ? retention.expireAfterValue.toString() : undefined
               )}
-              onChange={e => {
+              onChange={(e) => {
                 updatePolicyRetention({
                   expireAfterUnit: e.target.value,
                 });
@@ -129,7 +139,10 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepRetention.countDescription"
-          defaultMessage="The minimum and maximum number of snapshots to store in your cluster."
+          defaultMessage="The minimum and maximum number of snapshots to store in your cluster. It should not exceed {maxNumber}."
+          values={{
+            maxNumber: <EuiCode>200</EuiCode>,
+          }}
         />
       }
       fullWidth
@@ -151,7 +164,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               fullWidth
               value={retention.minCount || ''}
               onBlur={() => setTouched({ ...touched, minCount: true })}
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 updatePolicyRetention({
                   minCount: value !== '' ? Number(value) : value,
@@ -178,7 +191,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               fullWidth
               value={retention.maxCount || ''}
               onBlur={() => setTouched({ ...touched, maxCount: true })}
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 updatePolicyRetention({
                   maxCount: value !== '' ? Number(value) : value,
@@ -212,7 +225,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getSlmUrl()}
+            href={docLinks.links.apis.putSnapshotLifecyclePolicy}
             target="_blank"
             iconType="help"
           >

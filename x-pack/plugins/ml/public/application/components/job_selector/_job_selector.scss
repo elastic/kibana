@@ -1,0 +1,39 @@
+.mlJobSelectorBar {
+  padding: $euiSizeS;
+}
+
+.mlJobSelectorFlyoutBody>.euiFlyoutBody__overflow {
+  padding-top: $euiSizeS;
+}
+
+.mlJobSelector__ganttBar {
+  background-color: #79ADDA;
+  height: $euiSizeM;
+  border-radius: 2px;
+}
+
+.mlJobSelector__ganttBarBackEdge {
+  height: $euiSize;
+  border-left: 1px solid #D6D6D6;
+  border-right: 1px solid #D6D6D6;
+  margin-bottom: -14px;
+  padding-top: $euiSizeS;
+}
+
+.mlJobSelector__ganttBarDashed {
+  height: 1px;
+  border-top: 1px dashed #D6D6D6;
+}
+
+.mlJobSelector__ganttBarRunning {
+  background-image: linear-gradient(45deg,
+  rgba(255, 255, 255, .15) 25%,
+  transparent 25%,
+  transparent 50%,
+  rgba(255, 255, 255, .15) 50%,
+  rgba(255, 255, 255, .15) 75%,
+  transparent 75%,
+  transparent);
+  background-size: $euiSizeXXL $euiSizeXXL;
+  animation: progress-bar-stripes 2s linear infinite;
+}

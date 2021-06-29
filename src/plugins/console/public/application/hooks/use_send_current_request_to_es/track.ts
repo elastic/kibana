@@ -1,27 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { SenseEditor } from '../../models/sense_editor';
 import { getEndpointFromPosition } from '../../../lib/autocomplete/get_endpoint_from_position';
 import { MetricsTracker } from '../../../types';
 
-export const track = (requests: any[], editor: SenseEditor, trackUiMetric: MetricsTracker) => {
+export const track = (
+  requests: Array<{ method: string }>,
+  editor: SenseEditor,
+  trackUiMetric: MetricsTracker
+) => {
   const coreEditor = editor.getCoreEditor();
   // `getEndpointFromPosition` gets values from the server-side generated JSON files which
   // are a combination of JS, automatically generated JSON and manual overrides. That means

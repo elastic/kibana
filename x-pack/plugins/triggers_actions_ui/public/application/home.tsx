@@ -1,35 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { lazy, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiTitle,
-  EuiBetaBadge,
+  EuiText,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constants';
-import { getCurrentBreadcrumb } from './lib/breadcrumb';
+import { Section, routeToConnectors, routeToRules } from './constants';
+import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
-import { useAppDependencies } from './app_context';
-import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
+import { hasShowActionsCapability } from './lib/capabilities';
 
-import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
-import { AlertsList } from './sections/alerts_list/components/alerts_list';
+import { HealthCheck } from './components/health_check';
+import { HealthContextProvider } from './context/health_context';
+import { useKibana } from '../common/lib/kibana';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
-interface MatchParams {
+const ActionsConnectorsList = lazy(
+  () => import('./sections/actions_connectors_list/components/actions_connectors_list')
+);
+const AlertsList = lazy(() => import('./sections/alerts_list/components/alerts_list'));
+
+export interface MatchParams {
   section: Section;
 }
 
@@ -39,26 +46,25 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, capabilities, setBreadcrumbs } = useAppDependencies();
+  const {
+    chrome,
+    application: { capabilities },
+    setBreadcrumbs,
+    docLinks,
+  } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
-  const canShowAlerts = hasShowAlertsCapability(capabilities);
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
   }> = [];
 
-  if (canShowAlerts) {
-    tabs.push({
-      id: 'alerts',
-      name: (
-        <FormattedMessage
-          id="xpack.triggersActionsUI.home.alertsTabTitle"
-          defaultMessage="Alerts"
-        />
-      ),
-    });
-  }
+  tabs.push({
+    id: 'rules',
+    name: (
+      <FormattedMessage id="xpack.triggersActionsUI.home.rulesTabTitle" defaultMessage="Rules" />
+    ),
+  });
 
   if (canShowActions) {
     tabs.push({
@@ -73,44 +79,55 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`${BASE_PATH}/${newSection}`);
+    history.push(`/${newSection}`);
   };
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([getCurrentBreadcrumb(section || 'home')]);
+    setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'home')]);
     chrome.docTitle.change(getCurrentDocTitle(section || 'home'));
   }, [section, chrome, setBreadcrumbs]);
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle size="m">
+      <EuiPageContent color="transparent">
+        <EuiTitle size="m">
+          <EuiFlexGroup>
+            <EuiFlexItem>
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Alerts and Actions"
-                />
-                &emsp;
-                <EuiBetaBadge
-                  label="Beta"
-                  tooltipContent={i18n.translate(
-                    'xpack.triggersActionsUI.home.betaBadgeTooltipContent',
-                    {
-                      defaultMessage:
-                        'This module is not GA. Please help us by reporting any bugs.',
-                    }
-                  )}
+                  defaultMessage="Rules and Connectors"
                 />
               </h1>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={docLinks.links.alerting.guide}
+                target="_blank"
+                iconType="help"
+                data-test-subj="documentationLink"
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.home.docsLinkText"
+                  defaultMessage="Documentation"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.home.sectionDescription"
+              defaultMessage="Detect conditions using rules, and take actions using connectors."
+            />
+          </p>
+        </EuiText>
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
               isSelected={tab.id === section}
@@ -124,13 +141,28 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
         <EuiSpacer size="s" />
 
-        <Switch>
-          {canShowActions && (
-            <Route exact path={routeToConnectors} component={ActionsConnectorsList} />
-          )}
-          {canShowAlerts && <Route exact path={routeToAlerts} component={AlertsList} />}
-        </Switch>
+        <HealthContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <Switch>
+              {canShowActions && (
+                <Route
+                  exact
+                  path={routeToConnectors}
+                  component={suspendedComponentWithProps(ActionsConnectorsList, 'xl')}
+                />
+              )}
+              <Route
+                exact
+                path={routeToRules}
+                component={suspendedComponentWithProps(AlertsList, 'xl')}
+              />
+            </Switch>
+          </HealthCheck>
+        </HealthContextProvider>
       </EuiPageContent>
     </EuiPageBody>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { TriggersActionsUIHome as default };

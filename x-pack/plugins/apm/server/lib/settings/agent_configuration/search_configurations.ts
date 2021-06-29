@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { ESSearchHit } from '../../../../typings/elasticsearch';
+
+import { SearchHit } from '../../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT
+  SERVICE_ENVIRONMENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../helpers/setup_request';
-import { AgentConfiguration } from './configuration_types';
+import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import { convertConfigSettingsToString } from './convert_settings_to_string';
 
 export async function searchConfigurations({
   service,
-  setup
+  setup,
 }: {
   service: AgentConfiguration['service'];
   setup: Setup;
@@ -28,9 +31,9 @@ export async function searchConfigurations({
         {
           constant_score: {
             filter: { term: { [SERVICE_NAME]: service.name } },
-            boost: 2
-          }
-        }
+            boost: 2,
+          },
+        },
       ]
     : [];
 
@@ -39,9 +42,9 @@ export async function searchConfigurations({
         {
           constant_score: {
             filter: { term: { [SERVICE_ENVIRONMENT]: service.environment } },
-            boost: 1
-          }
-        }
+            boost: 1,
+          },
+        },
       ]
     : [];
 
@@ -55,16 +58,27 @@ export async function searchConfigurations({
             ...serviceNameFilter,
             ...environmentFilter,
             { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } },
-            { bool: { must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }] } }
-          ]
-        }
-      }
-    }
+            {
+              bool: {
+                must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }],
+              },
+            },
+          ],
+        },
+      },
+    },
   };
 
   const resp = await internalClient.search<AgentConfiguration, typeof params>(
+    'search_agent_configurations',
     params
   );
 
-  return resp.hits.hits[0] as ESSearchHit<AgentConfiguration> | undefined;
+  const hit = resp.hits.hits[0] as SearchHit<AgentConfiguration> | undefined;
+
+  if (!hit) {
+    return;
+  }
+
+  return convertConfigSettingsToString(hit);
 }

@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies remote execution of Windows services over remote procedure call (RPC). This could be indicative of lateral movement, but will be noisy if commonly done by administrators.\"",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Remotely Started Services via RPC",
+  "query": "sequence with maxspan=1s\n   [network where process.name : \"services.exe\" and\n      network.direction == \"incoming\" and network.transport == \"tcp\" and \n      source.port >= 49152 and destination.port >= 49152 and source.address not in (\"127.0.0.1\", \"::1\")\n   ] by host.id, process.entity_id\n\n   [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"services.exe\" and \n       not (process.name : \"svchost.exe\" and process.args : \"tiledatamodelsvc\") and \n       not (process.name : \"msiexec.exe\" and process.args : \"/V\")\n   \n    /* uncomment if psexec is noisy in your environment */\n    /* and not process.name : \"PSEXESVC.exe\" */\n   ] by host.id, process.parent.entity_id\n",
+  "risk_score": 47,
+  "rule_id": "aa9a274d-6b53-424d-ac5e-cb8ca4251650",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Lateral Movement"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 2
+}

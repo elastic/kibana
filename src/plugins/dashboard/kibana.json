@@ -1,0 +1,30 @@
+{
+  "id": "dashboard",
+  "version": "kibana",
+  "requiredPlugins": [
+    "data",
+    "embeddable",
+    "inspector",
+    "kibanaLegacy",
+    "navigation",
+    "savedObjects",
+    "share",
+    "uiActions",
+    "urlForwarding",
+    "presentationUtil",
+    "visualizations"
+  ],
+  "optionalPlugins": [
+    "home",
+    "spacesOss",
+    "savedObjectsTaggingOss",
+    "usageCollection"],
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "home",
+    "kibanaReact",
+    "kibanaUtils",
+    "presentationUtil"
+  ]
+}

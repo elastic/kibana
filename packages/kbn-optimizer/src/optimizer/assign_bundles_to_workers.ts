@@ -1,38 +1,26 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { Bundle, descending, ascending } from '../common';
 
 // helper types used inside getWorkerConfigs so we don't have
-// to calculate moduleCounts over and over
-
+// to calculate workUnits over and over
 export interface Assignments {
-  moduleCount: number;
+  workUnits: number;
   newBundles: number;
   bundles: Bundle[];
 }
 
 /** assign a wrapped bundle to a worker */
 const assignBundle = (worker: Assignments, bundle: Bundle) => {
-  const moduleCount = bundle.cache.getModuleCount();
-  if (moduleCount !== undefined) {
-    worker.moduleCount += moduleCount;
+  const workUnits = bundle.cache.getWorkUnits();
+  if (workUnits !== undefined) {
+    worker.workUnits += workUnits;
   } else {
     worker.newBundles += 1;
   }
@@ -59,7 +47,7 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
   const workers: Assignments[] = [];
   for (let i = 0; i < workerCount; i++) {
     workers.push({
-      moduleCount: 0,
+      workUnits: 0,
       newBundles: 0,
       bundles: [],
     });
@@ -67,19 +55,19 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
 
   /**
    * separate the bundles which do and don't have module
-   * counts and sort them by [moduleCount, id]
+   * counts and sort them by [workUnits, id]
    */
   const bundlesWithCountsDesc = bundles
-    .filter(b => b.cache.getModuleCount() !== undefined)
+    .filter((b) => b.cache.getWorkUnits() !== undefined)
     .sort(
       descending(
-        b => b.cache.getModuleCount(),
-        b => b.id
+        (b) => b.cache.getWorkUnits(),
+        (b) => b.id
       )
     );
   const bundlesWithoutModuleCounts = bundles
-    .filter(b => b.cache.getModuleCount() === undefined)
-    .sort(descending(b => b.id));
+    .filter((b) => b.cache.getWorkUnits() === undefined)
+    .sort(descending((b) => b.id));
 
   /**
    * assign largest bundles to the smallest worker until it is
@@ -87,9 +75,9 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
    * with module counts are assigned
    */
   while (bundlesWithCountsDesc.length) {
-    const [smallestWorker, nextSmallestWorker] = workers.sort(ascending(w => w.moduleCount));
+    const [smallestWorker, nextSmallestWorker] = workers.sort(ascending((w) => w.workUnits));
 
-    while (!nextSmallestWorker || smallestWorker.moduleCount <= nextSmallestWorker.moduleCount) {
+    while (!nextSmallestWorker || smallestWorker.workUnits <= nextSmallestWorker.workUnits) {
       const bundle = bundlesWithCountsDesc.shift();
 
       if (!bundle) {
@@ -104,7 +92,7 @@ export function assignBundlesToWorkers(bundles: Bundle[], maxWorkerCount: number
    * assign bundles without module counts to workers round-robin
    * starting with the smallest workers
    */
-  workers.sort(ascending(w => w.moduleCount));
+  workers.sort(ascending((w) => w.workUnits));
   while (bundlesWithoutModuleCounts.length) {
     for (const worker of workers) {
       const bundle = bundlesWithoutModuleCounts.shift();

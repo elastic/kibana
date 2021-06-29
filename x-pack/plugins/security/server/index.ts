@@ -1,55 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
-  RecursiveReadonly,
-} from '../../../../src/core/server';
+} from 'src/core/server';
+
 import { ConfigSchema } from './config';
-import { Plugin, SecurityPluginSetup, PluginSetupDependencies } from './plugin';
+import { securityConfigDeprecationProvider } from './config_deprecations';
+import type { PluginSetupDependencies, SecurityPluginSetup, SecurityPluginStart } from './plugin';
+import { SecurityPlugin } from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
-export {
-  Authentication,
-  AuthenticationResult,
-  DeauthenticationResult,
+export type {
   CreateAPIKeyResult,
-  InvalidateAPIKeyParams,
+  InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
+  GrantAPIKeyResult,
+  AuthenticationServiceStart,
 } from './authentication';
-export { SecurityPluginSetup };
-export { AuthenticatedUser } from '../common/model';
+export type { CheckPrivilegesPayload } from './authorization';
+export type AuthorizationServiceSetup = SecurityPluginStart['authz'];
+export { LegacyAuditLogger, AuditLogger, AuditEvent } from './audit';
+export type { SecurityPluginSetup, SecurityPluginStart };
+export type { AuthenticatedUser } from '../common/model';
+export { ROUTE_TAG_CAN_REDIRECT } from './routes/tags';
+export { AuditServiceSetup } from './audit';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
-  deprecations: ({ rename, unused }) => [
-    rename('sessionTimeout', 'session.idleTimeout'),
-    unused('authorization.legacyFallback.enabled'),
-    (settings, fromPath, log) => {
-      const hasProvider = (provider: string) =>
-        settings?.xpack?.security?.authc?.providers?.includes(provider) ?? false;
-
-      if (hasProvider('basic') && hasProvider('token')) {
-        log(
-          'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.'
-        );
-      }
-      return settings;
-    },
-  ],
+  deprecations: securityConfigDeprecationProvider,
   exposeToBrowser: {
     loginAssistanceMessage: true,
   },
 };
 export const plugin: PluginInitializer<
   RecursiveReadonly<SecurityPluginSetup>,
-  void,
+  RecursiveReadonly<SecurityPluginStart>,
   PluginSetupDependencies
-> = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext);
+> = (initializerContext: PluginInitializerContext) => new SecurityPlugin(initializerContext);

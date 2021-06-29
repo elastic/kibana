@@ -1,21 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
-import {
-  IRouter,
-  RequestHandlerContext,
-  KibanaRequest,
-  IKibanaResponse,
-  KibanaResponseFactory,
-} from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
 
-import { ActionExecutorContract } from '../lib';
-import { ActionTypeExecutorResult } from '../types';
+import { schema } from '@kbn/config-schema';
+import { IRouter } from 'kibana/server';
+import { ILicenseState } from '../lib';
+
+import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
+import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
+import { asHttpRequestExecutionSource } from '../lib/action_execution_source';
+import { verifyAccessAndContext } from './verify_access_and_context';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -25,40 +22,45 @@ const bodySchema = schema.object({
   params: schema.recordOf(schema.string(), schema.any()),
 });
 
+const rewriteBodyRes: RewriteResponseCase<ActionTypeExecutorResult<unknown>> = ({
+  actionId,
+  serviceMessage,
+  ...res
+}) => ({
+  ...res,
+  connector_id: actionId,
+  ...(serviceMessage ? { service_message: serviceMessage } : {}),
+});
+
 export const executeActionRoute = (
-  router: IRouter,
-  licenseState: LicenseState,
-  actionExecutor: ActionExecutorContract
+  router: IRouter<ActionsRequestHandlerContext>,
+  licenseState: ILicenseState
 ) => {
   router.post(
     {
-      path: '/api/action/{id}/_execute',
+      path: `${BASE_ACTION_API_PATH}/connector/{id}/_execute`,
       validate: {
         body: bodySchema,
         params: paramSchema,
       },
-      options: {
-        tags: ['access:actions-read'],
-      },
     },
-    router.handleLegacyErrors(async function(
-      context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      verifyApiAccess(licenseState);
-      const { params } = req.body;
-      const { id } = req.params;
-      const body: ActionTypeExecutorResult = await actionExecutor.execute({
-        params,
-        request: req,
-        actionId: id,
-      });
-      return body
-        ? res.ok({
-            body,
-          })
-        : res.noContent();
-    })
+    router.handleLegacyErrors(
+      verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const actionsClient = context.actions.getActionsClient();
+        const { params } = req.body;
+        const { id } = req.params;
+        const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
+          params,
+          actionId: id,
+          source: asHttpRequestExecutionSource(req),
+          relatedSavedObjects: [],
+        });
+        return body
+          ? res.ok({
+              body: rewriteBodyRes(body),
+            })
+          : res.noContent();
+      })
+    )
   );
 };

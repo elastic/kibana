@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { getAllEnvironments } from './get_all_environments';
+import { withApmSpan } from '../../../../utils/with_apm_span';
+import { getAllEnvironments } from '../../../environments/get_all_environments';
 import { Setup } from '../../../helpers/setup_request';
-import { PromiseReturnType } from '../../../../../typings/common';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
+import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
 
 export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<
   typeof getEnvironments
@@ -15,20 +18,24 @@ export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<
 
 export async function getEnvironments({
   serviceName,
-  setup
+  setup,
+  searchAggregatedTransactions,
 }: {
   serviceName: string | undefined;
   setup: Setup;
+  searchAggregatedTransactions: boolean;
 }) {
-  const [allEnvironments, existingEnvironments] = await Promise.all([
-    getAllEnvironments({ serviceName, setup }),
-    getExistingEnvironmentsForService({ serviceName, setup })
-  ]);
+  return withApmSpan('get_environments_for_agent_configuration', async () => {
+    const [allEnvironments, existingEnvironments] = await Promise.all([
+      getAllEnvironments({ serviceName, setup, searchAggregatedTransactions }),
+      getExistingEnvironmentsForService({ serviceName, setup }),
+    ]);
 
-  return allEnvironments.map(environment => {
-    return {
-      name: environment,
-      alreadyConfigured: existingEnvironments.includes(environment)
-    };
+    return [ALL_OPTION_VALUE, ...allEnvironments].map((environment) => {
+      return {
+        name: environment,
+        alreadyConfigured: existingEnvironments.includes(environment),
+      };
+    });
   });
 }

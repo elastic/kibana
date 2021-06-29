@@ -1,54 +1,57 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useState } from 'react';
 
 import { useCancellableEffect } from '../../../utils/cancellable_effect';
-import { useLogSummaryBufferInterval } from './use_log_summary_buffer_interval';
 import { fetchLogSummary } from './api/fetch_log_summary';
 import { LogEntriesSummaryResponse } from '../../../../common/http_api';
+import { useBucketSize } from './bucket_size';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export type LogSummaryBuckets = LogEntriesSummaryResponse['data']['buckets'];
 
 export const useLogSummary = (
   sourceId: string,
-  midpointTime: number | null,
-  intervalSize: number,
+  startTimestamp: number | null,
+  endTimestamp: number | null,
   filterQuery: string | null
 ) => {
+  const { services } = useKibanaContextForPlugin();
   const [logSummaryBuckets, setLogSummaryBuckets] = useState<LogSummaryBuckets>([]);
-  const { start: bufferStart, end: bufferEnd, bucketSize } = useLogSummaryBufferInterval(
-    midpointTime,
-    intervalSize
-  );
+  const bucketSize = useBucketSize(startTimestamp, endTimestamp);
 
   useCancellableEffect(
-    getIsCancelled => {
-      if (bufferStart === null || bufferEnd === null) {
+    (getIsCancelled) => {
+      if (startTimestamp === null || endTimestamp === null || bucketSize === null) {
         return;
       }
 
-      fetchLogSummary({
-        sourceId,
-        startDate: bufferStart,
-        endDate: bufferEnd,
-        bucketSize,
-        query: filterQuery,
-      }).then(response => {
+      fetchLogSummary(
+        {
+          sourceId,
+          startTimestamp,
+          endTimestamp,
+          bucketSize,
+          query: filterQuery,
+        },
+        services.http.fetch
+      ).then((response) => {
         if (!getIsCancelled()) {
           setLogSummaryBuckets(response.data.buckets);
         }
       });
     },
-    [sourceId, filterQuery, bufferStart, bufferEnd, bucketSize]
+    [sourceId, filterQuery, startTimestamp, endTimestamp, bucketSize]
   );
 
   return {
     buckets: logSummaryBuckets,
-    start: bufferStart,
-    end: bufferEnd,
+    start: startTimestamp,
+    end: endTimestamp,
   };
 };

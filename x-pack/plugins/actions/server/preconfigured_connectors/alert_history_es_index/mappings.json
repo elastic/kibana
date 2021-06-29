@@ -1,0 +1,84 @@
+{
+    "dynamic": "false",
+    "properties": {
+        "@timestamp": {
+            "type": "date"
+        },
+        "kibana": {
+            "properties": {
+                "alert": {
+                    "properties": {
+                        "actionGroup": {
+                            "type": "keyword"
+                        },
+                        "actionGroupName": {
+                            "type": "keyword"
+                        },
+                        "actionSubgroup": {
+                            "type": "keyword"
+                        },
+                        "context": {
+                            "type": "object",
+                            "enabled": false
+                        },
+                        "id": {
+                            "type": "keyword"
+                        }
+                    }
+                }
+            }
+        },
+        "tags": {
+            "ignore_above": 1024,
+            "type": "keyword",
+            "meta": {
+                "isArray": "true"
+            }
+        },
+        "message": {
+            "norms": false,
+            "type": "text"
+        },
+        "event": {
+            "properties": {
+                "kind": {
+                    "type": "keyword"
+                }
+            }
+        },
+        "rule": {
+            "properties": {
+                "author": {
+                    "type": "keyword"
+                },
+                "category": {
+                    "type": "keyword"
+                },
+                "id": {
+                    "type": "keyword"
+                },
+                "license": {
+                    "type": "keyword"
+                },
+                "name": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword"
+                        }
+                    }
+                },
+                "params": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "space": {
+                    "type": "keyword"
+                },
+                "type": {
+                    "type": "keyword"
+                }
+            }
+        }
+    }
+}

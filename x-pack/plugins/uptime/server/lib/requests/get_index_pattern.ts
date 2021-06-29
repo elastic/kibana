@@ -1,40 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { APICaller } from 'src/core/server';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { IndexPatternsFetcher, IIndexPattern } from '../../../../../../src/plugins/data/server';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
+import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
+import { UptimeESClient } from '../lib';
+import { savedObjectsAdapter } from '../saved_objects';
 
-export const getUptimeIndexPattern: UMElasticsearchQueryFn<any, {}> = async callES => {
-  const indexPatternsFetcher = new IndexPatternsFetcher((...rest: Parameters<APICaller>) =>
-    callES(...rest)
+export interface IndexPatternTitleAndFields {
+  title: string;
+  fields: FieldDescriptor[];
+}
+
+export const getUptimeIndexPattern = async ({
+  uptimeEsClient,
+}: {
+  uptimeEsClient: UptimeESClient;
+}): Promise<IndexPatternTitleAndFields | undefined> => {
+  const indexPatternsFetcher = new IndexPatternsFetcher(uptimeEsClient.baseESClient);
+
+  const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
+    uptimeEsClient.getSavedObjectsClient()!
   );
-
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
   // and since `getFieldsForWildcard` will throw if the specified indices don't exist,
   // we have to catch errors here to avoid all endpoints returning 500 for users without APM data
   // (would be a bad first time experience)
   try {
     const fields = await indexPatternsFetcher.getFieldsForWildcard({
-      pattern: INDEX_NAMES.HEARTBEAT,
+      pattern: dynamicSettings.heartbeatIndices,
     });
 
-    const indexPattern: IIndexPattern = {
+    return {
       fields,
-      title: INDEX_NAMES.HEARTBEAT,
+      title: dynamicSettings.heartbeatIndices,
     };
-
-    return indexPattern;
   } catch (e) {
     const notExists = e.output?.statusCode === 404;
     if (notExists) {
       // eslint-disable-next-line no-console
       console.error(
-        `Could not get dynamic index pattern because indices "${INDEX_NAMES.HEARTBEAT}" don't exist`
+        `Could not get dynamic index pattern because indices "${dynamicSettings.heartbeatIndices}" don't exist`
       );
       return;
     }

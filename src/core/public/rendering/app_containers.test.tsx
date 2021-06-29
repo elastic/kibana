@@ -1,37 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { AppWrapper, AppContainer } from './app_containers';
+import { AppWrapper } from './app_containers';
 
 describe('AppWrapper', () => {
   it('toggles the `hidden-chrome` class depending on the chrome visibility state', () => {
     const chromeVisible$ = new BehaviorSubject<boolean>(true);
 
-    const component = mount(<AppWrapper chromeVisible$={chromeVisible$}>app-content</AppWrapper>);
+    const component = mount(
+      <AppWrapper chromeVisible$={chromeVisible$} classes$={of([])}>
+        app-content
+      </AppWrapper>
+    );
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="app-wrapper"
+        class="kbnAppWrapper"
       >
         app-content
       </div>
@@ -41,7 +34,7 @@ describe('AppWrapper', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="app-wrapper hidden-chrome"
+        class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
       >
         app-content
       </div>
@@ -51,22 +44,25 @@ describe('AppWrapper', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="app-wrapper"
+        class="kbnAppWrapper"
       >
         app-content
       </div>
     `);
   });
-});
 
-describe('AppContainer', () => {
   it('adds classes supplied by chrome', () => {
+    const chromeVisible$ = new BehaviorSubject<boolean>(true);
     const appClasses$ = new BehaviorSubject<string[]>([]);
 
-    const component = mount(<AppContainer classes$={appClasses$}>app-content</AppContainer>);
+    const component = mount(
+      <AppWrapper chromeVisible$={chromeVisible$} classes$={appClasses$}>
+        app-content
+      </AppWrapper>
+    );
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="application"
+        class="kbnAppWrapper"
       >
         app-content
       </div>
@@ -76,7 +72,7 @@ describe('AppContainer', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="application classA classB"
+        class="kbnAppWrapper classA classB"
       >
         app-content
       </div>
@@ -86,7 +82,7 @@ describe('AppContainer', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="application classC"
+        class="kbnAppWrapper classC"
       >
         app-content
       </div>
@@ -96,7 +92,7 @@ describe('AppContainer', () => {
     component.update();
     expect(component.getDOMNode()).toMatchInlineSnapshot(`
       <div
-        class="application"
+        class="kbnAppWrapper"
       >
         app-content
       </div>

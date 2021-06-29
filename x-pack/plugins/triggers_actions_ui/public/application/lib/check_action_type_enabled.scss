@@ -1,0 +1,22 @@
+.actCheckActionTypeEnabled__disabledActionWarningCard {
+  background-color: $euiColorLightestShade;
+}
+
+.actAccordionActionForm {
+  background-color: $euiColorLightestShade;
+}
+
+.actAccordionActionForm .euiCard {
+  box-shadow: none;
+}
+
+.actAccordionActionForm__button {
+  padding: $euiSizeM;
+}
+
+.actConnectorsListGrid {
+  .euiToolTipAnchor,
+  .euiCard {
+    height: 100%;
+  }
+}

@@ -59,7 +59,7 @@ chrome.navLinks.update('myPlugin', {
 "requiredPlugins": ["licensing"],
 
 // my_plugin/server/plugin.ts
-import { LicensingPluginSetup, LICENSE_CHECK_STATE } from '../licensing/server'
+import { LicensingPluginSetup } from '../licensing/server'
 
 interface SetupDeps {
   licensing: LicensingPluginSetup;
@@ -69,7 +69,7 @@ class MyPlugin {
   setup(core: CoreSetup, deps: SetupDeps) {
     deps.licensing.license$.subscribe(license => {
       const { state, message } = license.check('myPlugin', 'gold')
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense && license.getFeature('name').isAvailable) {
         // enable some server side logic 
       } else {
@@ -81,16 +81,22 @@ class MyPlugin {
 }
 
 // my_plugin/public/plugin.ts
-import { LicensingPluginSetup, LICENSE_CHECK_STATE } from '../licensing/public'
+import { LicensingPluginSetup } from '../licensing/public'
 class MyPlugin {
   setup(core: CoreSetup, deps: SetupDeps) {
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => {});
+    core.application.register({
+      id: 'myApp',
+      updater$: appUpdater$,
+    });
+
     deps.licensing.license$.subscribe(license => {
       const { state, message } = license.check('myPlugin', 'gold')
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
       const showLinks = hasRequiredLicense && license.getFeature('name').isAvailable;
 
-      chrome.navLinks.update('myPlugin', {
-        hidden: !showLinks
+      appUpdater$.next(() => {
+        navLinkStatus: showLinks ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden
       });
     })
   }

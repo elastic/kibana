@@ -1,47 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
-import React, { Component } from 'react';
+import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiSwitch,
   EuiText,
   EuiTitle,
-  EuiButtonIcon,
-  EuiBasicTableColumn,
-  EuiSwitchEvent,
-  EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
+import _ from 'lodash';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart } from 'src/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { NotificationsStart, ScopedHistory } from 'src/core/public';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { Role } from '../../../../common/model';
 import {
-  Role,
+  getExtendedRoleDeprecationNotice,
+  isRoleDeprecated,
   isRoleEnabled,
   isRoleReadOnly,
   isRoleReserved,
-  isRoleDeprecated,
-  getExtendedRoleDeprecationNotice,
 } from '../../../../common/model';
-import { RolesAPIClient } from '../roles_api_client';
+import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
+import type { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
-import { DisabledBadge, DeprecatedBadge, ReservedBadge } from '../../badges';
 
 interface Props {
   notifications: NotificationsStart;
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
+  history: ScopedHistory;
 }
 
 interface State {
@@ -55,7 +60,7 @@ interface State {
 }
 
 const getRoleManagementHref = (action: 'edit' | 'clone', roleName?: string) => {
-  return `#/management/security/roles/${action}${roleName ? `/${roleName}` : ''}`;
+  return `/${action}${roleName ? `/${encodeURIComponent(roleName)}` : ''}`;
 };
 
 export class RolesGridPage extends Component<Props, State> {
@@ -106,7 +111,10 @@ export class RolesGridPage extends Component<Props, State> {
             </EuiText>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButton data-test-subj="createRoleButton" href={getRoleManagementHref('edit')}>
+            <EuiButton
+              data-test-subj="createRoleButton"
+              {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit'))}
+            >
               <FormattedMessage
                 id="xpack.security.management.roles.createRoleButtonLabel"
                 defaultMessage="Create role"
@@ -118,7 +126,7 @@ export class RolesGridPage extends Component<Props, State> {
           {this.state.showDeleteConfirmation ? (
             <ConfirmDelete
               onCancel={this.onCancelDelete}
-              rolesToDelete={this.state.selection.map(role => role.name)}
+              rolesToDelete={this.state.selection.map((role) => role.name)}
               callback={this.handleDelete}
               notifications={this.props.notifications}
               rolesAPIClient={this.props.rolesAPIClient}
@@ -147,6 +155,7 @@ export class RolesGridPage extends Component<Props, State> {
                 toolsRight: this.renderToolsRight(),
                 box: {
                   incremental: true,
+                  'data-test-subj': 'searchRoles',
                 },
                 onChange: (query: Record<string, any>) => {
                   this.setState({
@@ -190,7 +199,10 @@ export class RolesGridPage extends Component<Props, State> {
         render: (name: string, record: Role) => {
           return (
             <EuiText color="subdued" size="s">
-              <EuiLink data-test-subj="roleRowName" href={getRoleManagementHref('edit', name)}>
+              <EuiLink
+                data-test-subj="roleRowName"
+                {...reactRouterNavigate(this.props.history, getRoleManagementHref('edit', name))}
+              >
                 {name}
               </EuiLink>
             </EuiText>
@@ -228,7 +240,10 @@ export class RolesGridPage extends Component<Props, State> {
                   title={title}
                   color={'primary'}
                   iconType={'pencil'}
-                  href={getRoleManagementHref('edit', role.name)}
+                  {...reactRouterNavigate(
+                    this.props.history,
+                    getRoleManagementHref('edit', role.name)
+                  )}
                 />
               );
             },
@@ -248,7 +263,10 @@ export class RolesGridPage extends Component<Props, State> {
                   title={title}
                   color={'primary'}
                   iconType={'copy'}
-                  href={getRoleManagementHref('clone', role.name)}
+                  {...reactRouterNavigate(
+                    this.props.history,
+                    getRoleManagementHref('clone', role.name)
+                  )}
                 />
               );
             },
@@ -259,7 +277,7 @@ export class RolesGridPage extends Component<Props, State> {
   };
 
   private getVisibleRoles = (roles: Role[], filter: string, includeReservedRoles: boolean) => {
-    return roles.filter(role => {
+    return roles.filter((role) => {
       const normalized = `${role.name}`.toLowerCase();
       const normalizedQuery = filter.toLowerCase();
       return (

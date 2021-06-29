@@ -15,7 +15,7 @@ exports[`it renders without blowing up 1`] = `
       >
         <h2>
           <EuiIcon
-            className="collapsiblePanel__logo"
+            className="spcSectionPanel__collapsiblePanelLogo"
             size="xl"
             type="logoElasticsearch"
           />
@@ -23,17 +23,6 @@ exports[`it renders without blowing up 1`] = `
           Elasticsearch
         </h2>
       </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiLink
-        aria-label="hide desc"
-        data-test-subj="show-hide-section-link"
-        onClick={[Function]}
-      >
-        hide
-      </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer />

@@ -1,6 +1,10 @@
 // SASSTODO: Probably not the right file for this selector, but temporary until the files get re-organized
 .globalQueryBar {
-  padding: 0px $euiSizeS $euiSizeS $euiSizeS;
+  padding: 0 $euiSizeS $euiSizeS $euiSizeS;
+}
+
+.globalQueryBar:first-child {
+  padding-top: $euiSizeS;
 }
 
 .globalQueryBar:not(:empty) {

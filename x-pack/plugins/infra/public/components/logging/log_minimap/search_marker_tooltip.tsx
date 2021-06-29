@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { calculatePopoverPosition, EuiPortal } from '@elastic/eui';
 import * as React from 'react';
 
 import { AutoSizer } from '../../auto_sizer';
+
+const POPOVER_ARROW_SIZE = 12; // px, to position it later
 
 interface SearchMarkerTooltipProps {
   markerPosition: ClientRect;
@@ -19,7 +22,7 @@ export class SearchMarkerTooltip extends React.PureComponent<SearchMarkerTooltip
 
     return (
       <EuiPortal>
-        <div style={{ position: 'relative' }}>
+        <div>
           <AutoSizer content={false} bounds>
             {({ measureRef, bounds: { width, height } }) => {
               const { top, left } =
@@ -41,7 +44,11 @@ export class SearchMarkerTooltip extends React.PureComponent<SearchMarkerTooltip
                   }}
                   ref={measureRef}
                 >
-                  {children}
+                  <div
+                    className="euiToolTip__arrow"
+                    style={{ left: width || 0, top: (height || 0) / 2 - POPOVER_ARROW_SIZE / 2 }}
+                  />
+                  <div>{children}</div>
                 </div>
               );
             }}

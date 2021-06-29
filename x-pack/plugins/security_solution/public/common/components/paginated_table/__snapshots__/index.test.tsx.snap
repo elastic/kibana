@@ -1,0 +1,161 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Paginated Table Component rendering it renders the default load more table 1`] = `
+<InspectButtonContainer
+  show={true}
+>
+  <Panel
+    data-test-subj="paginated-table-loading-false"
+    loading={false}
+  >
+    <HeaderSectionComponent
+      subtitle="Showing: 1 Test Unit"
+      title="Hosts"
+      tooltip="My test tooltip"
+    >
+      <p>
+        My test supplement.
+      </p>
+    </HeaderSectionComponent>
+    <BasicTable
+      columns={
+        Array [
+          Object {
+            "field": "node.host.name",
+            "hideForMobile": false,
+            "name": "Host",
+            "render": [Function],
+            "truncateText": false,
+          },
+          Object {
+            "field": "node.host.firstSeen",
+            "hideForMobile": false,
+            "name": "First seen",
+            "render": [Function],
+            "truncateText": false,
+          },
+          Object {
+            "field": "node.host.os",
+            "hideForMobile": false,
+            "name": "OS",
+            "render": [Function],
+            "truncateText": false,
+          },
+          Object {
+            "field": "node.host.version",
+            "hideForMobile": false,
+            "name": "Version",
+            "render": [Function],
+            "truncateText": false,
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "cursor": Object {
+              "value": "98966fa2013c396155c460d35c0902be",
+            },
+            "host": Object {
+              "_id": "cPsuhGcB0WOhS6qyTKC0",
+              "firstSeen": "2018-12-06T15:40:53.319Z",
+              "name": "elrond.elstc.co",
+              "os": "Ubuntu",
+              "version": "18.04.1 LTS (Bionic Beaver)",
+            },
+          },
+          Object {
+            "cursor": Object {
+              "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+            },
+            "host": Object {
+              "_id": "KwQDiWcB0WOhS6qyXmrW",
+              "firstSeen": "2018-12-07T14:12:38.560Z",
+              "name": "siem-kibana",
+              "os": "Debian GNU/Linux",
+              "version": "9 (stretch)",
+            },
+          },
+        ]
+      }
+      onChange={[Function]}
+    />
+    <FooterAction>
+      <EuiFlexItem>
+        <EuiPopover
+          anchorPosition="downCenter"
+          button={
+            <EuiButtonEmpty
+              color="text"
+              iconSide="right"
+              iconType="arrowDown"
+              onClick={[Function]}
+              size="xs"
+            >
+              Rows per page: 1
+            </EuiButtonEmpty>
+          }
+          closePopover={[Function]}
+          data-test-subj="loadingMoreSizeRowPopover"
+          display="inlineBlock"
+          hasArrow={true}
+          id="customizablePagination"
+          isOpen={false}
+          ownFocus={true}
+          panelPaddingSize="none"
+          repositionOnScroll={true}
+        >
+          <EuiContextMenuPanel
+            data-test-subj="loadingMorePickSizeRow"
+            hasFocus={true}
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  2 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  5 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  10 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  20 rows
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="empty"
+                  onClick={[Function]}
+                >
+                  50 rows
+                </EuiContextMenuItem>,
+              ]
+            }
+          />
+        </EuiPopover>
+      </EuiFlexItem>
+      <PaginationEuiFlexItem
+        grow={false}
+      >
+        <EuiPagination
+          activePage={0}
+          data-test-subj="numberedPagination"
+          onPageClick={[Function]}
+          pageCount={10}
+        />
+      </PaginationEuiFlexItem>
+    </FooterAction>
+  </Panel>
+</InspectButtonContainer>
+`;

@@ -1,0 +1,33 @@
+/**
+ * Forms
+ */
+
+.gphFormGroup--small {
+  margin-bottom: $euiSizeS;
+}
+
+.gphColorPicker__color {
+  margin: $euiSizeXS;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    transform: scale(1.4);
+  }
+}
+
+/**
+ * Utilities
+ */
+
+.gphNoUserSelect {
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.gphAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}

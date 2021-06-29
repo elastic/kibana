@@ -9,7 +9,9 @@ experimental[] Import dashboards and corresponding saved objects.
 [[dashboard-api-import-request]]
 ==== Request
 
-`POST /api/kibana/dashboards/import`
+`POST <kibana host>:<port>/api/kibana/dashboards/import`
+
+`POST <kibana host>:<port>/s/<space-id>/api/kibana/dashboards/import`
 
 [[dashboard-api-import-params]]
 ==== Query parameters
@@ -23,7 +25,7 @@ experimental[] Import dashboards and corresponding saved objects.
 [[dashboard-api-import-request-body]]
 ==== Request body
 
-Use the complete response body from the <<dashboard-api-export, Export dashboard API>> as the request body. Do not manually construct a payload to the endpoint.
+Use the complete response body from the <<dashboard-api-export, Export dashboard API>> as the request body. Do not manually construct a payload to the endpoint. The max payload size is determined by the `savedObjects.maxImportPayloadBytes` configuration key.
 
 [[dashboard-api-import-response-body]]
 ==== Response body
@@ -40,9 +42,9 @@ Use the complete response body from the <<dashboard-api-export, Export dashboard
 [[dashboard-api-import-example]]
 ==== Example
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-POST api/kibana/dashboards/import?exclude=index-pattern
+$ curl -X POST api/kibana/dashboards/import?exclude=index-pattern
 {
   "objects": [
     {

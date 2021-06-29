@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation of a topic in Google Cloud Platform (GCP). In GCP, the publisher-subscriber relationship (Pub/Sub) is an asynchronous messaging service that decouples event-producing and event-processing services. A topic is used to forward messages from publishers to subscribers.",
+  "false_positives": [
+    "Topic creations may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Topic creations from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-gcp*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "GCP Pub/Sub Topic Creation",
+  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.pubsub.v*.Publisher.CreateTopic and event.outcome:success\n",
+  "references": [
+    "https://cloud.google.com/pubsub/docs/admin"
+  ],
+  "risk_score": 21,
+  "rule_id": "a10d3d9d-0f65-48f1-8b25-af175e2594f5",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Log Auditing"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0009",
+        "name": "Collection",
+        "reference": "https://attack.mitre.org/tactics/TA0009/"
+      },
+      "technique": [
+        {
+          "id": "T1530",
+          "name": "Data from Cloud Storage Object",
+          "reference": "https://attack.mitre.org/techniques/T1530/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

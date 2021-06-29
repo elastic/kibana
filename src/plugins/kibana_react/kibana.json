@@ -1,0 +1,7 @@
+{
+  "id": "kibanaReact",
+  "version": "kibana",
+  "ui": true,
+  "server": false,
+  "extraPublicDirs": ["common"]
+}

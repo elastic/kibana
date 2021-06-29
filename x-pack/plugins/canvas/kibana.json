@@ -4,7 +4,32 @@
     "kibanaVersion": "kibana",
     "configPath": ["xpack", "canvas"],
     "server": true,
-    "ui": false,
-    "requiredPlugins": ["features", "home"],
-    "optionalPlugins": ["usageCollection"]
+    "ui": true,
+    "requiredPlugins": [
+      "bfetch",
+      "charts",
+      "data",
+      "embeddable",
+      "expressions",
+      "features",
+      "inspector",
+      "presentationUtil",
+      "uiActions"
+    ],
+    "optionalPlugins": [
+      "home",
+      "reporting",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "discover",
+      "home",
+      "kibanaLegacy",
+      "kibanaReact",
+      "kibanaUtils",
+      "lens",
+      "maps",
+      "savedObjects",
+      "visualizations"
+    ]
   }

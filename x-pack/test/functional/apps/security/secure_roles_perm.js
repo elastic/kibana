@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
-import { indexBy } from 'lodash';
-export default function({ getService, getPageObjects }) {
+import { keyBy } from 'lodash';
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
     'security',
     'settings',
     'monitoring',
     'discover',
     'common',
-    'reporting',
+    'share',
     'header',
   ]);
   const log = getService('log');
@@ -21,20 +22,19 @@ export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
-  describe('secure roles and permissions', function() {
+  describe('secure roles and permissions', function () {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
-      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('security/discover');
+      await esArchiver.load('x-pack/test/functional/es_archives/security/discover');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
 
-    it('should add new role logstash_reader', async function() {
+    it('should add new role logstash_reader', async function () {
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('logstash_reader', {
         elasticsearch: {
@@ -51,48 +51,41 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    it('should add new user', async function() {
-      await PageObjects.security.clickElasticsearchUsers();
+    it('should add new user', async function () {
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({
+      await PageObjects.security.createUser({
         username: 'Rashmi',
         password: 'changeme',
-        confirmPassword: 'changeme',
-        fullname: 'RashmiFirst RashmiLast',
+        confirm_password: 'changeme',
+        full_name: 'RashmiFirst RashmiLast',
         email: 'rashmi@myEmail.com',
-        save: true,
-        roles: ['logstash_reader', 'kibana_admin'],
+        roles: ['logstash_reader'],
       });
       log.debug('After Add user: , userObj.userName');
-      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
       log.debug('roles: ', users.Rashmi.roles);
-      expect(users.Rashmi.roles).to.eql(['logstash_reader', 'kibana_admin']);
+      expect(users.Rashmi.roles).to.eql(['logstash_reader']);
       expect(users.Rashmi.fullname).to.eql('RashmiFirst RashmiLast');
       expect(users.Rashmi.reserved).to.be(false);
       await PageObjects.security.forceLogout();
       await PageObjects.security.login('Rashmi', 'changeme');
     });
 
-    it('Kibana User navigating to Management gets permission denied', async function() {
+    it('Kibana User does not have link to user management', async function () {
       await PageObjects.settings.navigateTo();
-      await PageObjects.security.clickElasticsearchUsers();
-      await retry.tryForTime(2000, async () => {
-        await testSubjects.find('permissionDeniedMessage');
-      });
+      await testSubjects.missingOrFail('users');
     });
 
-    it('Kibana User navigating to Discover and trying to generate CSV gets - Authorization Error ', async function() {
+    it('Kibana User navigating to Discover sees the generate CSV button', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.loadSavedSearch('A Saved Search');
-      log.debug('click Reporting button');
-      await PageObjects.reporting.openCsvReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
-      const queueReportError = await PageObjects.reporting.getQueueReportError();
-      expect(queueReportError).to.be(true);
+      log.debug('click Top Nav Share button');
+      await PageObjects.share.clickShareTopNavButton();
+      await testSubjects.existOrFail('sharePanel-CSVReports');
     });
 
-    after(async function() {
+    after(async function () {
       await PageObjects.security.forceLogout();
     });
   });

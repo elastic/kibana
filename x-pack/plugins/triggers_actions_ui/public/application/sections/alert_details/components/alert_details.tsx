@@ -1,40 +1,48 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
-import { indexBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import React, { useState, useEffect, useReducer } from 'react';
+import { keyBy } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import {
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
+  EuiPageHeader,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiPage,
   EuiPageContentBody,
-  EuiButtonEmpty,
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
-  EuiBetaBadge,
+  EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
-import { useAppDependencies } from '../../../app_context';
-import { hasSaveAlertsCapability } from '../../../lib/capabilities';
+import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
+import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
+import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { Alert, AlertType, ActionType } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
+import { ViewInApp } from './view_in_app';
+import { AlertEdit } from '../../alert_form';
+import { routeToRuleDetails } from '../../../constants';
+import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
+import { useKibana } from '../../../../common/lib/kibana';
+import { alertReducer } from '../../alert_form/alert_reducer';
 
-type AlertDetailsProps = {
+export type AlertDetailsProps = {
   alert: Alert;
   alertType: AlertType;
   actionTypes: ActionType[];
@@ -51,164 +59,303 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   muteAlert,
   requestRefresh,
 }) => {
-  const { capabilities } = useAppDependencies();
+  const history = useHistory();
+  const {
+    application: { capabilities },
+    alertTypeRegistry,
+    actionTypeRegistry,
+    setBreadcrumbs,
+    chrome,
+    http,
+  } = useKibana().services;
+  const [{}, dispatch] = useReducer(alertReducer, { alert });
+  const setInitialAlert = (value: Alert) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
+  };
 
-  const canSave = hasSaveAlertsCapability(capabilities);
+  // Set breadcrumb and page title
+  useEffect(() => {
+    setBreadcrumbs([
+      getAlertingSectionBreadcrumb('alerts'),
+      getAlertDetailsBreadcrumb(alert.id, alert.name),
+    ]);
+    chrome.docTitle.change(getCurrentDocTitle('alerts'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const actionTypesByTypeId = indexBy(actionTypes, 'id');
-  const [firstAction, ...otherActions] = alert.actions;
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
+  const canSaveAlert =
+    hasAllPrivilege(alert, alertType) &&
+    // if the alert has actions, can the user save the alert's action params
+    (canExecuteActions || (!canExecuteActions && alert.actions.length === 0));
 
+  const actionTypesByTypeId = keyBy(actionTypes, 'id');
+  const hasEditButton =
+    // can the user save the alert
+    canSaveAlert &&
+    // is this alert type editable from within Alerts Management
+    (alertTypeRegistry.has(alert.alertTypeId)
+      ? !alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
+      : false);
+
+  const alertActions = alert.actions;
+  const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
+  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const [dissmissAlertErrors, setDissmissAlertErrors] = useState<boolean>(false);
+
+  const setAlert = async () => {
+    history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
+  };
+
+  const getAlertStatusErrorReasonText = () => {
+    if (alert.executionStatus.error && alert.executionStatus.error.reason) {
+      return alertsErrorReasonTranslationsMapping[alert.executionStatus.error.reason];
+    } else {
+      return alertsErrorReasonTranslationsMapping.unknown;
+    }
+  };
+
+  const rightPageHeaderButtons = hasEditButton
+    ? [
+        <>
+          <EuiButtonEmpty
+            data-test-subj="openEditAlertFlyoutButton"
+            iconType="pencil"
+            onClick={() => setEditFlyoutVisibility(true)}
+            name="edit"
+            disabled={!alertType.enabledInLicense}
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+              defaultMessage="Edit"
+            />
+          </EuiButtonEmpty>
+          {editFlyoutVisible && (
+            <AlertEdit
+              initialAlert={alert}
+              onClose={() => {
+                setInitialAlert(alert);
+                setEditFlyoutVisibility(false);
+              }}
+              actionTypeRegistry={actionTypeRegistry}
+              alertTypeRegistry={alertTypeRegistry}
+              onSave={setAlert}
+            />
+          )}
+        </>,
+      ]
+    : [];
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle size="m">
-                <h1 data-test-subj="alertDetailsTitle">
-                  {alert.name}
-                  &emsp;
-                  <EuiBetaBadge
-                    label="Beta"
-                    tooltipContent={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
-                      {
-                        defaultMessage:
-                          'This module is not GA. Please help us by reporting any bugs.',
-                      }
-                    )}
+    <EuiPageBody>
+      <EuiPageContent color="transparent">
+        <EuiPageHeader
+          data-test-subj="alertDetailsTitle"
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertDetails.alertDetailsTitle"
+              defaultMessage="{alertName}"
+              values={{ alertName: alert.name }}
+            />
+          }
+          rightSideItems={[
+            <ViewInApp alert={alert} />,
+            <EuiButtonEmpty
+              data-test-subj="refreshAlertsButton"
+              iconType="refresh"
+              onClick={requestRefresh}
+              name="refresh"
+              color="primary"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertsList.refreshAlertsButtonLabel"
+                defaultMessage="Refresh"
+              />
+            </EuiButtonEmpty>,
+            ...rightPageHeaderButtons,
+          ]}
+        />
+        <EuiSpacer size="l" />
+        <EuiPageContentBody>
+          <EuiFlexGroup wrap responsive={false} gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle"
+                    defaultMessage="Type"
                   />
-                </h1>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-            <EuiPageContentHeaderSection>
-              <EuiFlexGroup responsive={false} gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="pencil">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="popout">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-                      defaultMessage="View in app"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="menuLeft">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
-                      defaultMessage="Activity Log"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <EuiFlexGroup wrap responsive={false} gutterSize="m">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge data-test-subj="alertTypeLabel">{alertType.name}</EuiBadge>
-                  </EuiFlexItem>
-                  {firstAction && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                        {actionTypesByTypeId[firstAction.actionTypeId].name ??
-                          firstAction.actionTypeId}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  {otherActions.length ? (
-                    <EuiFlexItem grow={false} data-test-subj="actionCountLabel">
-                      <EuiBadge color="hollow">+{otherActions.length}</EuiBadge>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiFlexGroup wrap responsive={false} gutterSize="m">
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      name="enable"
-                      disabled={!canSave}
-                      checked={isEnabled}
-                      data-test-subj="enableSwitch"
-                      onChange={async () => {
-                        if (isEnabled) {
-                          setIsEnabled(false);
-                          await disableAlert(alert);
-                        } else {
-                          setIsEnabled(true);
-                          await enableAlert(alert);
-                        }
-                        requestRefresh();
-                      }}
-                      label={
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
-                          defaultMessage="Enable"
-                        />
-                      }
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSwitch
-                      name="mute"
-                      checked={isMuted}
-                      disabled={!canSave || !isEnabled}
-                      data-test-subj="muteSwitch"
-                      onChange={async () => {
-                        if (isMuted) {
-                          setIsMuted(false);
-                          await unmuteAlert(alert);
-                        } else {
-                          setIsMuted(true);
-                          await muteAlert(alert);
-                        }
-                        requestRefresh();
-                      }}
-                      label={
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
-                          defaultMessage="Mute"
-                        />
-                      }
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <EuiFlexItem>
-                {alert.enabled ? (
-                  <AlertInstancesRouteWithApi requestRefresh={requestRefresh} alert={alert} />
-                ) : (
-                  <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
+                </p>
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiBadge data-test-subj="alertTypeLabel">{alertType.name}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              {uniqueActions && uniqueActions.length ? (
+                <>
+                  <EuiText size="s">
                     <p>
                       <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                        defaultMessage="Disabled Alerts do not have an active state, hence Alert Instances cannot be displayed."
+                        id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex"
+                        defaultMessage="Actions"
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer size="xs" />
+                  <EuiFlexGroup wrap gutterSize="s">
+                    {uniqueActions.map((action, index) => (
+                      <EuiFlexItem key={index} grow={false}>
+                        <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
+                          {actionTypesByTypeId[action].name ?? action}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </>
+              ) : null}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSpacer />
+              <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    name="disable"
+                    disabled={!canSaveAlert || !alertType.enabledInLicense}
+                    checked={!isEnabled}
+                    data-test-subj="disableSwitch"
+                    onChange={async () => {
+                      if (isEnabled) {
+                        setIsEnabled(false);
+                        await disableAlert(alert);
+                        // Reset dismiss if previously clicked
+                        setDissmissAlertErrors(false);
+                      } else {
+                        setIsEnabled(true);
+                        await enableAlert(alert);
+                      }
+                      requestRefresh();
+                    }}
+                    label={
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.disableTitle"
+                        defaultMessage="Disable"
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    name="mute"
+                    checked={isMuted}
+                    disabled={!canSaveAlert || !isEnabled || !alertType.enabledInLicense}
+                    data-test-subj="muteSwitch"
+                    onChange={async () => {
+                      if (isMuted) {
+                        setIsMuted(false);
+                        await unmuteAlert(alert);
+                      } else {
+                        setIsMuted(true);
+                        await muteAlert(alert);
+                      }
+                      requestRefresh();
+                    }}
+                    label={
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.muteTitle"
+                        defaultMessage="Mute"
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {alert.enabled && !dissmissAlertErrors && alert.executionStatus.status === 'error' ? (
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiCallOut
+                  color="danger"
+                  data-test-subj="alertErrorBanner"
+                  size="s"
+                  title={getAlertStatusErrorReasonText()}
+                  iconType="alert"
+                >
+                  <EuiText size="s" color="danger" data-test-subj="alertErrorMessageText">
+                    {alert.executionStatus.error?.message}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup gutterSize="s" wrap={true}>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="dismiss-execution-error"
+                        color="danger"
+                        onClick={() => setDissmissAlertErrors(true)}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.dismissButtonTitle"
+                          defaultMessage="Dismiss"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                    {alert.executionStatus.error?.reason ===
+                      AlertExecutionStatusErrorReasons.License && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          href={`${http.basePath.get()}/app/management/stack/license_management`}
+                          color="danger"
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="xpack.triggersActionsUI.sections.alertDetails.manageLicensePlanBannerLinkTitle"
+                            defaultMessage="Manage license"
+                          />
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiCallOut>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : null}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {alert.enabled ? (
+                <AlertInstancesRouteWithApi
+                  requestRefresh={requestRefresh}
+                  alert={alert}
+                  alertType={alertType}
+                  readOnly={!canSaveAlert}
+                />
+              ) : (
+                <>
+                  <EuiSpacer />
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.triggersActionsUI.sections.alertDetails.alerts.disabledRuleTitle',
+                      {
+                        defaultMessage: 'Disabled Rule',
+                      }
+                    )}
+                    color="warning"
+                    iconType="help"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledRule"
+                        defaultMessage="This rule is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
                       />
                     </p>
                   </EuiCallOut>
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+                </>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
   );
 };
 

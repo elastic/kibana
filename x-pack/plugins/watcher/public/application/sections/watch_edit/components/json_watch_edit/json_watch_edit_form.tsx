@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useContext, useState } from 'react';
@@ -20,16 +21,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { XJsonMode } from '@kbn/ace';
 
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
 import { ErrableFormRow, SectionError, Error as ServerError } from '../../../../components';
+import { XJson } from '../../../../shared_imports';
 import { onWatchSave } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
 import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
 
-import { useXJsonMode } from './use_x_json_mode';
+const xJsonMode = new XJsonMode();
+const { useXJsonMode } = XJson;
 
 export const JsonWatchEditForm = () => {
   const {
@@ -38,10 +42,10 @@ export const JsonWatchEditForm = () => {
   } = useAppContext();
 
   const { watch, setWatchProperty } = useContext(WatchContext);
-  const { xJsonMode, convertToJson, setXJson, xJson } = useXJsonMode(watch.watchString);
+  const { convertToJson, setXJson, xJson } = useXJsonMode(watch.watchString);
 
   const { errors } = watch.validate();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);

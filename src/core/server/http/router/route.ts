@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { RouteValidatorFullConfig } from './validator';
@@ -81,7 +70,7 @@ export interface RouteConfigOptionsBody {
   /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
    *
-   * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayloadBytes`.
+   * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayload`.
    */
   maxBytes?: number;
 
@@ -119,8 +108,8 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Defines authentication mode for a route:
    * - true. A user has to have valid credentials to access a resource
    * - false. A user can access a resource without any credentials.
-   * - 'optional'. A user can access a resource if has valid credentials or no credentials at all.
-   * Can be useful when we grant access to a resource but want to identify a user if possible.
+   * - 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.
+   *               Can be useful when we grant access to a resource but want to identify a user if possible.
    *
    * Defaults to `true` if an auth mechanism is registered.
    */
@@ -144,6 +133,21 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Additional body options {@link RouteConfigOptionsBody}.
    */
   body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
+
+  /**
+   * Defines per-route timeouts.
+   */
+  timeout?: {
+    /**
+     * Milliseconds to receive the payload
+     */
+    payload?: Method extends 'get' | 'options' ? undefined : number;
+
+    /**
+     * Milliseconds the socket can be idle before it's closed
+     */
+    idleSocket?: number;
+  };
 }
 
 /**
@@ -179,7 +183,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * access to raw values.
    * In some cases you may want to use another validation library. To do this, you need to
    * instruct the `@kbn/config-schema` library to output **non-validated values** with
-   * setting schema as `schema.object({}, { allowUnknowns: true })`;
+   * setting schema as `schema.object({}, { unknowns: 'allow' })`;
    *
    * @example
    * ```ts
@@ -212,7 +216,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    *   path: 'path/{id}',
    *   validate: {
    *     // handler has access to raw non-validated params in runtime
-   *     params: schema.object({}, { allowUnknowns: true })
+   *     params: schema.object({}, { unknowns: 'allow' })
    *   },
    * },
    * (context, req, res,) {

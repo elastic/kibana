@@ -1,26 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { canRequire } from './can_require';
 import { dependenciesVisitorsGenerator } from './visitors';
 import { dirname, isAbsolute, resolve } from 'path';
-import { builtinModules } from 'module';
 
 export function _calculateTopLevelDependency(inputDep, outputDep = '') {
   // The path separator will be always the forward slash
@@ -56,10 +44,13 @@ export async function dependenciesParseStrategy(
   wasParsed,
   results
 ) {
+  // Retrieve native nodeJS modules
+  const natives = process.binding('natives');
+
   // Get dependencies from a single file and filter
   // out node native modules from the result
   const dependencies = (await parseSingleFile(mainEntry, dependenciesVisitorsGenerator)).filter(
-    dep => !builtinModules.includes(dep)
+    (dep) => !natives[dep]
   );
 
   // Return the list of all the new entries found into
@@ -67,12 +58,8 @@ export async function dependenciesParseStrategy(
   // new dependencies
   return dependencies.reduce((filteredEntries, entry) => {
     const absEntryPath = resolve(cwd, dirname(mainEntry), entry);
-
-    // NOTE: cwd for following canRequires is absEntryPath
-    // because we should start looking from there
-    const requiredPath = canRequire(absEntryPath, absEntryPath);
-    const requiredRelativePath = canRequire(entry, absEntryPath);
-
+    const requiredPath = canRequire(cwd, absEntryPath);
+    const requiredRelativePath = canRequire(cwd, entry);
     const isRelativeFile = !isAbsolute(entry);
     const isNodeModuleDep = isRelativeFile && !requiredPath && requiredRelativePath;
     const isNewEntry = isRelativeFile && requiredPath;

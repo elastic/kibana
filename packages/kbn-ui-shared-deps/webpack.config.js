@@ -1,53 +1,42 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { REPO_ROOT } = require('@kbn/dev-utils');
-const webpack = require('webpack');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
-const SharedDeps = require('./index');
+const CompressionPlugin = require('compression-webpack-plugin');
+const { REPO_ROOT } = require('@kbn/utils');
+const { RawSource } = require('webpack-sources');
+
+const UiSharedDeps = require('./src/index');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
-exports.getWebpackConfig = ({ dev = false } = {}) => ({
-  mode: dev ? 'development' : 'production',
+module.exports = {
+  mode: 'production',
   entry: {
-    [SharedDeps.distFilename.replace(/\.js$/, '')]: './entry.js',
-    [SharedDeps.darkCssDistFilename.replace(/\.css$/, '')]: [
-      '@elastic/eui/dist/eui_theme_dark.css',
-      '@elastic/charts/dist/theme_only_dark.css',
-    ],
-    [SharedDeps.lightCssDistFilename.replace(/\.css$/, '')]: [
-      '@elastic/eui/dist/eui_theme_light.css',
-      '@elastic/charts/dist/theme_only_light.css',
-    ],
+    'kbn-ui-shared-deps': './src/entry.js',
+    'kbn-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
+    'kbn-ui-shared-deps.v7.light': ['@elastic/eui/dist/eui_theme_light.css'],
+    'kbn-ui-shared-deps.v8.dark': ['@elastic/eui/dist/eui_theme_amsterdam_dark.css'],
+    'kbn-ui-shared-deps.v8.light': ['@elastic/eui/dist/eui_theme_amsterdam_light.css'],
   },
   context: __dirname,
-  devtool: dev ? '#cheap-source-map' : false,
+  // cheap-source-map should be used if needed
+  devtool: false,
   output: {
-    path: SharedDeps.distDir,
+    path: UiSharedDeps.distDir,
     filename: '[name].js',
     sourceMapFilename: '[file].map',
-    publicPath: '__REPLACE_WITH_PUBLIC_PATH__',
-    devtoolModuleFilenameTemplate: info =>
+    devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
   },
@@ -56,11 +45,22 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     noParse: [MOMENT_SRC],
     rules: [
       {
+        include: [require.resolve('./src/entry.js')],
+        use: [
+          {
+            loader: UiSharedDeps.publicPathLoader,
+            options: {
+              key: 'kbn-ui-shared-deps',
+            },
+          },
+        ],
+      },
+      {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        include: [require.resolve('./monaco.ts')],
+        include: [require.resolve('./src/theme.ts')],
         use: [
           {
             loader: 'babel-loader',
@@ -70,6 +70,32 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           },
         ],
       },
+      {
+        test: /[\\\/]@elastic[\\\/]eui[\\\/].*\.js$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              plugins: [
+                [
+                  require.resolve('babel-plugin-transform-react-remove-prop-types'),
+                  {
+                    mode: 'remove',
+                    removeImport: true,
+                  },
+                ],
+              ],
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(ttf)(\?|$)/,
+        loader: 'url-loader',
+        options: {
+          limit: 8192,
+        },
+      },
     ],
   },
 
@@ -77,10 +103,45 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     alias: {
       moment: MOMENT_SRC,
     },
+    extensions: ['.js', '.ts'],
+    symlinks: false,
   },
 
   optimization: {
+    minimizer: [
+      new CssMinimizerPlugin({
+        parallel: false,
+        minimizerOptions: {
+          preset: [
+            'default',
+            {
+              discardComments: false,
+            },
+          ],
+        },
+      }),
+      new TerserPlugin({
+        cache: false,
+        sourceMap: false,
+        extractComments: false,
+        parallel: false,
+        terserOptions: {
+          compress: true,
+          mangle: true,
+        },
+      }),
+    ],
     noEmitOnErrors: true,
+    splitChunks: {
+      cacheGroups: {
+        'kbn-ui-shared-deps.@elastic': {
+          name: 'kbn-ui-shared-deps.@elastic',
+          test: (m) => m.resource && m.resource.includes('@elastic'),
+          chunks: 'all',
+          enforce: true,
+        },
+      },
+    },
   },
 
   performance: {
@@ -94,8 +155,44 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': dev ? '"development"' : '"production"',
+    new CompressionPlugin({
+      algorithm: 'brotliCompress',
+      filename: '[path].br',
+      test: /\.(js|css)$/,
+      cache: false,
     }),
+    new CompressionPlugin({
+      algorithm: 'gzip',
+      filename: '[path].gz',
+      test: /\.(js|css)$/,
+      cache: false,
+    }),
+    new (class MetricsPlugin {
+      apply(compiler) {
+        compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
+          const metrics = [
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-js',
+              value: compilation.assets['kbn-ui-shared-deps.js'].size(),
+            },
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-css',
+              value:
+                compilation.assets['kbn-ui-shared-deps.css'].size() +
+                compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
+            },
+            {
+              group: 'page load bundle size',
+              id: 'kbnUiSharedDeps-elastic',
+              value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
+            },
+          ];
+
+          compilation.emitAsset('metrics.json', new RawSource(JSON.stringify(metrics, null, 2)));
+        });
+      }
+    })(),
   ],
-});
+};

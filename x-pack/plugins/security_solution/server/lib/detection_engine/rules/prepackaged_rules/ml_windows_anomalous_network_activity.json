@@ -1,0 +1,34 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Windows processes that do not usually use the network but have unexpected network activity, which can indicate command-and-control, lateral movement, persistence, or data exfiltration activity. A process with unusual network activity can denote process exploitation or injection, where the process is used to run persistence mechanisms that allow a malicious actor remote access or control of the host, data exfiltration, and execution of unauthorized network applications.",
+  "false_positives": [
+    "A newly installed program or one that rarely uses the network could trigger this alert."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": [
+    "windows_anomalous_network_activity_ecs",
+    "v2_windows_anomalous_network_activity_ecs"
+  ],
+  "name": "Unusual Windows Network Activity",
+  "note": "## Triage and analysis\n\n### Investigating Unusual Network Activity\nDetection alerts from this rule indicate the presence of network activity from a Windows process for which network activity is very unusual.  Here are some possible avenues of investigation:\n- Consider the IP addresses, protocol and ports. Are these used by normal but infrequent network workflows? Are they expected or unexpected?\n- If the destination IP address is remote or external, does it associate with an expected domain, organization or geography? Note: avoid interacting directly with suspected malicious IP addresses.\n- Consider the user as identified by the username field. Is this network activity part of an expected workflow for the user who ran the program?\n- Examine the history of execution. If this process manifested only very recently, it might be part of a new software package. If it has a consistent cadence - for example if it runs monthly or quarterly - it might be part of a monthly or quarterly business process.\n- Examine the process arguments, title and working directory. These may provide indications as to the source of the program or the nature of the tasks it is performing.\n- Consider the same for the parent process. If the parent process is a legitimate system utility or service, this could be related to software updates or system management. If the parent process is something user-facing like an Office application, this process could be more suspicious.\n- If you have file hash values in the event data, and you suspect malware, you can optionally run a search for the file hash to see if the file is identified as malware by anti-malware tools.",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "ba342eb2-583c-439f-b04d-1fdd7c1417cc",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 6
+}

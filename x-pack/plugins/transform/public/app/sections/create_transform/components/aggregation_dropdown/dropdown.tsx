@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,6 +14,7 @@ interface Props {
   placeholder?: string;
   changeHandler(d: EuiComboBoxOptionOption[]): void;
   testSubj?: string;
+  isDisabled?: boolean;
 }
 
 export const DropDown: React.FC<Props> = ({
@@ -20,9 +22,11 @@ export const DropDown: React.FC<Props> = ({
   options,
   placeholder = 'Search ...',
   testSubj,
+  isDisabled,
 }) => {
   return (
     <EuiComboBox
+      fullWidth
       placeholder={placeholder}
       singleSelection={{ asPlainText: true }}
       options={options}
@@ -30,6 +34,7 @@ export const DropDown: React.FC<Props> = ({
       onChange={changeHandler}
       isClearable={false}
       data-test-subj={testSubj}
+      isDisabled={isDisabled}
     />
   );
 };

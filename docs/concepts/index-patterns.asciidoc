@@ -1,0 +1,154 @@
+[[index-patterns]]
+=== Create an index pattern
+
+{kib} requires an index pattern to access the {es} data that you want to explore.
+An index pattern selects the data to use and allows you to define properties of the fields.
+
+An index pattern can point to a specific index, for example, your log data from yesterday,
+or all indices that contain your data.  It can also point to a
+{ref}/data-streams.html[data stream] or {ref}/indices-aliases.html[index alias].
+
+You’ll learn how to:
+
+* Create index patterns
+* Set the default index pattern
+* Delete index patterns
+
+[float]
+[[index-patterns-read-only-access]]
+=== Before you begin
+
+* To access the *Index Patterns* view, you must have the {kib} privilege
+`Index Pattern Management`.  To create an index pattern, you must have the {es} privilege
+`view_index_metadata`. To add the privileges, open the main menu, then click *Stack Management > Roles*.
+
+* If a read-only indicator appears in {kib}, you have insufficient privileges
+to create or save index patterns. The buttons to create new index patterns or
+save existing index patterns are not visible. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
+
+[float]
+[[settings-create-pattern]]
+=== Create an index pattern
+
+If you collected data using one of the {kib} <<connect-to-elasticsearch,ingest options>>, uploaded a file, or added sample data,
+you get an index pattern for free, and can start exploring your data.
+If you loaded your own data, follow these steps to create an index pattern.
+
+. Open the main menu, then click to *Stack Management > Index Patterns*.
+
+. Click *Create index pattern*.
++
+[role="screenshot"]
+image:management/index-patterns/images/create-index-pattern.png["Create index pattern"]
+
+. Start typing in the *Index pattern* field, and {kib} looks for the names of
+{es} indices that match your input.
+** Use a wildcard (*) to match multiple indices.
+For example, suppose your system creates indices for Apache data
+using the naming scheme `filebeat-apache-a`, `filebeat-apache-b`, and so on.
+An index pattern named `filebeat-a` matches a single source, and `filebeat-*` matches multiple data sources.
+Using a wildcard is the most popular approach.
+
+** Select multiple indices by entering multiple strings,
+separated with a comma. Make sure there is no space after the comma.
+For example, `filebeat-a,filebeat-b` matches two indices, but not other indices
+you might have afterwards (filebeat-c).
+
+** Use a minus sign (-) to exclude an index, for example, test*,-test3.
+
+. Click *Next step*.
+
+. If {kib} detects an index with a timestamp, expand the *Time field* menu,
+and then specify the default field for filtering your data by time.
++
+If your index doesn’t have time-based data, or if you don’t want to select
+the default timestamp field, choose *I don’t want to use the Time Filter*.
++
+NOTE: If you don’t set a default time field, you will not be able to use
+global time filters on your dashboards. This is useful if
+you have multiple time fields and want to create dashboards that combine visualizations
+based on different timestamps.
+
+. Click *Create index pattern*.
++
+{kib} is now configured to use your {es} data.
+
+. Select this index pattern when you search and visualize your data.
+
+[float]
+[[rollup-index-pattern]]
+==== Create an index pattern for rolled up data
+
+An index pattern can match one rollup index.  For a combination rollup
+index pattern with both raw and rolled up data, use the standard notation:
+
+```ts
+rollup_logstash,kibana_sample_data_logs
+```
+For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up data>>.
+
+[float]
+[[management-cross-cluster-search]]
+==== Create an index pattern that searches across clusters
+
+If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
+you can create an index pattern to search across the clusters of your choosing. Use the
+same syntax that you'd use in a raw {ccs} request in {es}:
+
+```ts
+<cluster-names>:<pattern>
+```
+
+For example, to query {ls} indices across two {es} clusters
+that you set up for {ccs}, named `cluster_one` and `cluster_two`,
+use this for your index pattern:
+
+```ts
+ cluster_one:logstash-*,cluster_two:logstash-*
+```
+
+You can use wildcards in your cluster names
+to match any number of clusters.  For example, to search {ls} indices across
+clusters named `cluster_foo`, `cluster_bar`, and so on, create this index pattern:
+
+```ts
+cluster_*:logstash-*
+```
+
+To query across all {es} clusters that have been configured for {ccs},
+use a standalone wildcard for your cluster name in your index
+pattern:
+
+```ts
+*:logstash-*
+```
+
+You can use exclusions to exclude indices that might contain mapping errors.
+To match indices starting with `logstash-`, and exclude those starting with `logstash-old` from
+all clusters having a name starting with `cluster_`, you can use `cluster_*:logstash-*,cluster*:logstash-old*`.
+To exclude a cluster, use `cluster_*:logstash-*,cluster_one:-*`.
+
+Once an index pattern is configured using the {ccs} syntax, all searches and
+aggregations using that index pattern in {kib} take advantage of {ccs}.
+
+[float]
+[[delete-index-pattern]]
+=== Delete index patterns
+
+When you delete an index pattern, you are unable to recover the associated field formatters, scripted fields, source filters,
+and field popularity data. Deleting an index pattern does not remove any indices or data documents from {es}.
+
+WARNING: Deleting an index pattern breaks all visualizations, saved searches, and other saved objects that reference the index pattern.
+
+. Open the main menu, then click *Stack Management > Index Patterns*.
+
+. Click the index pattern you want to delete.
+
+. Delete (image:management/index-patterns/images/delete.png[Delete icon]) the index pattern.
+
+[float]
+[[reload-fields]]
+=== What’s next
+
+Learn how to <<managing-index-patterns,manage the data fields>> in your index patterns.

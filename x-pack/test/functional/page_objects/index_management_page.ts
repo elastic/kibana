@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -29,35 +30,26 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       const $ = await table.parseDomContent();
       return $.findTestSubjects('indexTableRow')
         .toArray()
-        .map(row => {
+        .map((row) => {
           return {
-            indexName: $(row)
-              .findTestSubject('indexTableIndexNameLink')
-              .text(),
-            indexHealth: $(row)
-              .findTestSubject('indexTableCell-health')
-              .text(),
-            indexStatus: $(row)
-              .findTestSubject('indexTableCell-status')
-              .text(),
-            indexPrimary: $(row)
-              .findTestSubject('indexTableCell-primary')
-              .text(),
-            indexReplicas: $(row)
-              .findTestSubject('indexTableCell-replica')
-              .text(),
+            indexName: $(row).findTestSubject('indexTableIndexNameLink').text(),
+            indexHealth: $(row).findTestSubject('indexTableCell-health').text(),
+            indexStatus: $(row).findTestSubject('indexTableCell-status').text(),
+            indexPrimary: $(row).findTestSubject('indexTableCell-primary').text(),
+            indexReplicas: $(row).findTestSubject('indexTableCell-replica').text(),
             indexDocuments: $(row)
               .findTestSubject('indexTableCell-documents')
               .text()
               .replace('documents', ''),
-            indexSize: $(row)
-              .findTestSubject('indexTableCell-size')
-              .text(),
+            indexSize: $(row).findTestSubject('indexTableCell-size').text(),
           };
         });
     },
-    async changeTabs(tab: 'indicesTab' | 'templatesTab') {
-      return await testSubjects.click(tab);
+
+    async changeTabs(
+      tab: 'indicesTab' | 'data_streamsTab' | 'templatesTab' | 'component_templatesTab'
+    ) {
+      await testSubjects.click(tab);
     },
   };
 }

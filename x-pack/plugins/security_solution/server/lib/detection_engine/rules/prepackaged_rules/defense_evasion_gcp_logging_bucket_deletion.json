@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a Logging bucket deletion in Google Cloud Platform (GCP). Log buckets are containers that store and organize log data. A deleted bucket stays in a pending state for 7 days, and Logging continues to route logs to the bucket during that time. To stop routing logs to a deleted bucket, the log sinks can be deleted that have the bucket as a destination, or the filter for the sinks can be modified to stop routing logs to the deleted bucket. An adversary may delete a log bucket to evade detection.",
+  "false_positives": [
+    "Logging bucket deletions may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Logging bucket deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-gcp*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "GCP Logging Bucket Deletion",
+  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.logging.v*.ConfigServiceV*.DeleteBucket and event.outcome:success\n",
+  "references": [
+    "https://cloud.google.com/logging/docs/buckets",
+    "https://cloud.google.com/logging/docs/storage"
+  ],
+  "risk_score": 47,
+  "rule_id": "5663b693-0dea-4f2e-8275-f1ae5ff2de8e",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Log Auditing"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

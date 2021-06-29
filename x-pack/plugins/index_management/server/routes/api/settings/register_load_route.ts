@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
@@ -19,10 +21,10 @@ function formatHit(hit: { [key: string]: {} }) {
   return hit[key];
 }
 
-export function registerLoadRoute({ router, license, lib }: RouteDependencies) {
+export function registerLoadRoute({ router, lib }: RouteDependencies) {
   router.get(
     { path: addBasePath('/settings/{indexName}'), validate: { params: paramsSchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { indexName } = req.params as typeof paramsSchema.type;
       const params = {
         expandWildcards: 'none',
@@ -33,7 +35,7 @@ export function registerLoadRoute({ router, license, lib }: RouteDependencies) {
       };
 
       try {
-        const hit = await ctx.core.elasticsearch.dataClient.callAsCurrentUser(
+        const hit = await ctx.core.elasticsearch.legacy.client.callAsCurrentUser(
           'indices.getSettings',
           params
         );
@@ -46,8 +48,8 @@ export function registerLoadRoute({ router, license, lib }: RouteDependencies) {
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

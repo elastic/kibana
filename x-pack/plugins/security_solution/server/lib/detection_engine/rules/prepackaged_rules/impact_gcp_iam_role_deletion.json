@@ -1,0 +1,52 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an Identity and Access Management (IAM) role deletion in Google Cloud Platform (GCP). A role contains a set of permissions that allows you to perform specific actions on Google Cloud resources. An adversary may delete an IAM role to inhibit access to accounts utilized by legitimate users.",
+  "false_positives": [
+    "Role deletions may be done by a system or network administrator. Verify whether the user email, resource name, and/or hostname should be making changes in your environment. Role deletions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "index": [
+    "filebeat-*",
+    "logs-gcp*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "GCP IAM Role Deletion",
+  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.iam.admin.v*.DeleteRole and event.outcome:success\n",
+  "references": [
+    "https://cloud.google.com/iam/docs/understanding-roles"
+  ],
+  "risk_score": 21,
+  "rule_id": "e2fb5b18-e33c-4270-851e-c3d675c9afcd",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1531",
+          "name": "Account Access Removal",
+          "reference": "https://attack.mitre.org/techniques/T1531/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

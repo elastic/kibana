@@ -1,0 +1,48 @@
+/*
+  This file contains all the global scope garbage that should be removed
+  when the UI framework implements everything we need
+*/
+
+.canvasContainerWrapper {
+  // Give buttons some room to the right
+  .euiAccordion__childWrapper {
+    overflow-x: hidden;
+  }
+
+  .clickable {
+    cursor: pointer;
+  }
+
+  // Temp EUI issue.
+  .canvasPalettePicker__swatchesPopover {
+    display: block;
+
+    .canvasPalettePicker__swatchesPopoverAnchor {
+      display: block;
+    }
+  }
+
+  // TODO: remove if fix is provided for https://github.com/elastic/eui/issues/833
+  // temp fix for SVGs not appearing in the EuiImage fullscreen view
+  .euiImageFullScreen {
+    min-width: 100px;
+  }
+}
+
+// Canvas has a few modals that necessitate a fixed height due to robust content
+// These styles prevent height jumpiness when using search inside a modal
+// EUI issue for additional props https://github.com/elastic/eui/issues/1154
+// Per the issue, EUI will only be implementing a maxWidth prop while other
+// overrrides will need to be made via the style attribute or CSS classes.
+//
+// Size restrictions are limited to larger screen sizes so that the modal
+// fills the viewport on smaller screen sizes, as designed by EUI.
+// https://github.com/elastic/kibana/pull/37345
+
+.canvasModal--fixedSize {
+  @include euiBreakpoint('m', 'l', 'xl') {
+    width: 75vw;
+    height: 75vh;
+    max-height: 680px; // limit for large screen displays
+  }
+}

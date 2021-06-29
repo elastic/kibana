@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Cobalt Strike is a threat emulation platform commonly modified and used by adversaries to conduct network attack and exploitation campaigns. This rule detects a network activity algorithm leveraged by Cobalt Strike implant beacons for command and control.",
+  "false_positives": [
+    "This rule should be tailored to either exclude systems, as sources or destinations, in which this behavior is expected."
+  ],
+  "index": [
+    "packetbeat-*"
+  ],
+  "language": "lucene",
+  "license": "Elastic License v2",
+  "name": "Cobalt Strike Command and Control Beacon",
+  "note": "## Threat intel\n\nThis activity has been observed in FIN7 campaigns.",
+  "query": "event.category:(network OR network_traffic) AND type:(tls OR http) AND network.transport:tcp AND destination.domain:/[a-z]{3}.stage.[0-9]{8}\\..*/\n",
+  "references": [
+    "https://blog.morphisec.com/fin7-attacks-restaurant-industry",
+    "https://www.fireeye.com/blog/threat-research/2017/04/fin7-phishing-lnk.html"
+  ],
+  "risk_score": 73,
+  "rule_id": "cf53f532-9cc9-445a-9ae7-fced307ec53c",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Network",
+    "Threat Detection",
+    "Command and Control"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1071",
+          "name": "Application Layer Protocol",
+          "reference": "https://attack.mitre.org/techniques/T1071/"
+        },
+        {
+          "id": "T1568",
+          "name": "Dynamic Resolution",
+          "reference": "https://attack.mitre.org/techniques/T1568/",
+          "subtechnique": [
+            {
+              "id": "T1568.002",
+              "name": "Domain Generation Algorithms",
+              "reference": "https://attack.mitre.org/techniques/T1568/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 5
+}

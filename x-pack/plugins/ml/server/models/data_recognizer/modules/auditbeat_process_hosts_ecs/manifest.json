@@ -1,7 +1,7 @@
 {
   "id": "auditbeat_process_hosts_ecs",
   "title": "Auditbeat host processes",
-  "description": "Detect unusual processes on hosts from auditd data (ECS)",
+  "description": "Detect unusual processes on hosts from auditd data (ECS).",
   "type": "Auditbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*",

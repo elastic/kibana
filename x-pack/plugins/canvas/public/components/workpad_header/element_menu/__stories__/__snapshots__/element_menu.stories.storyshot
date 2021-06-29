@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownLeft"
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      aria-label="Add an element"
+      className="euiButton euiButton--primary euiButton--small euiButton--fill canvasElementMenu__popoverButton"
+      data-test-subj="add-element-button"
+      disabled={false}
+      onClick={[Function]}
+      style={
+        Object {
+          "minWidth": undefined,
+        }
+      }
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButton__content"
+      >
+        <span
+          className="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+          size="m"
+        />
+        <span
+          className="euiButton__text"
+        >
+          Add element
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

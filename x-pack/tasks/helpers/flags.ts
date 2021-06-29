@@ -1,17 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import { resolve } from 'path';
 
 import log from 'fancy-log';
 import getopts from 'getopts';
-import { toArray } from 'rxjs/operators';
-
-// @ts-ignore complicated module doesn't have types yet
-import { findPluginSpecs } from '../../../src/legacy/plugin_discovery';
 
 /*
   Usage:
@@ -50,21 +45,6 @@ export const FLAGS = {
   plugins: opts.plugins
     ? String(opts.plugins)
         .split(',')
-        .map(id => id.trim())
+        .map((id) => id.trim())
     : undefined,
 };
-
-export async function getEnabledPlugins() {
-  if (FLAGS.plugins) {
-    return FLAGS.plugins;
-  }
-
-  const { spec$ } = findPluginSpecs({
-    plugins: {
-      paths: [resolve(__dirname, '..', '..')],
-    },
-  });
-
-  const enabledPlugins: Array<{ getId: () => string }> = await spec$.pipe(toArray()).toPromise();
-  return enabledPlugins.map(spec => spec.getId());
-}

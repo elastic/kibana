@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export const UIM_APP_NAME = 'index_management';
@@ -41,6 +42,8 @@ export const UIM_TEMPLATE_DETAIL_PANEL_SUMMARY_TAB = 'template_details_summary_t
 export const UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB = 'template_details_settings_tab';
 export const UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB = 'template_details_mappings_tab';
 export const UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB = 'template_details_aliases_tab';
+export const UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB = 'template_details_preview_tab';
 export const UIM_TEMPLATE_CREATE = 'template_create';
 export const UIM_TEMPLATE_UPDATE = 'template_update';
 export const UIM_TEMPLATE_CLONE = 'template_clone';
+export const UIM_TEMPLATE_SIMULATE = 'template_simulate';

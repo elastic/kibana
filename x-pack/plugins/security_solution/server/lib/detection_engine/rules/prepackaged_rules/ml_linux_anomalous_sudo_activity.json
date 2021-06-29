@@ -1,0 +1,59 @@
+{
+  "anomaly_threshold": 75,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Looks for sudo activity from an unusual user context. An unusual sudo user could be due to troubleshooting activity or it could be a sign of credentialed access via compromised accounts.",
+  "false_positives": [
+    "Uncommon sudo activity can be due to an engineer logging onto a server instance in order to perform manual troubleshooting or reconfiguration."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "linux_rare_sudo_user",
+  "name": "Unusual Sudo Activity",
+  "risk_score": 21,
+  "rule_id": "1e9fc667-9ff1-4b33-9f40-fefca8537eb0",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "reference": "https://attack.mitre.org/techniques/T1548/"
+        }
+      ]
+    }
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

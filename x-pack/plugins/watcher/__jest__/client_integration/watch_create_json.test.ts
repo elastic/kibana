@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import '../../../es_ui_shared/console_lang/mocks';
 
 import { act } from 'react-dom/test-utils';
+
+import { getExecuteDetails } from '../../__fixtures__';
+import { defaultWatch } from '../../public/application/models/watch';
 import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
-import { WATCH } from './helpers/constants';
-import defaultWatchJson from '../../public/application/models/watch/default_watch.json';
-import { getExecuteDetails } from '../../test/fixtures';
+import { WATCH } from './helpers/jest_constants';
 
 const { setup } = pageHelpers.watchCreateJson;
 
@@ -43,7 +44,7 @@ describe('<JsonWatchEdit /> create route', () => {
         const { find } = testBed;
 
         expect(find('tab').length).toBe(2);
-        expect(find('tab').map(t => t.text())).toEqual(['Edit', 'Simulate']);
+        expect(find('tab').map((t) => t.text())).toEqual(['Edit', 'Simulate']);
       });
 
       test('should navigate to the "Simulate" tab', () => {
@@ -76,7 +77,7 @@ describe('<JsonWatchEdit /> create route', () => {
           actions.clickSubmitButton();
 
           expect(form.getErrorsMessages()).toContain(
-            'ID can only contain letters, underscores, dashes, and numbers.'
+            'ID can only contain letters, underscores, dashes, periods and numbers.'
           );
         });
       });
@@ -107,6 +108,7 @@ describe('<JsonWatchEdit /> create route', () => {
               name: watch.name,
               type: watch.type,
               isNew: true,
+              isActive: true,
               actions: [
                 {
                   id: DEFAULT_LOGGING_ACTION_ID,
@@ -117,7 +119,7 @@ describe('<JsonWatchEdit /> create route', () => {
                   },
                 },
               ],
-              watch: defaultWatchJson,
+              watch: defaultWatch,
             })
           );
         });
@@ -172,7 +174,7 @@ describe('<JsonWatchEdit /> create route', () => {
 
           const latestRequest = server.requests[server.requests.length - 1];
 
-          const actionModes = Object.keys(defaultWatchJson.actions).reduce(
+          const actionModes = Object.keys(defaultWatch.actions).reduce(
             (actionAccum: any, action) => {
               actionAccum[action] = 'simulate';
               return actionAccum;
@@ -184,8 +186,9 @@ describe('<JsonWatchEdit /> create route', () => {
             id,
             type,
             isNew: true,
+            isActive: true,
             actions: [],
-            watch: defaultWatchJson,
+            watch: defaultWatch,
           };
 
           expect(latestRequest.requestBody).toEqual(
@@ -233,7 +236,7 @@ describe('<JsonWatchEdit /> create route', () => {
 
           const latestRequest = server.requests[server.requests.length - 1];
 
-          const actionModes = Object.keys(defaultWatchJson.actions).reduce(
+          const actionModes = Object.keys(defaultWatch.actions).reduce(
             (actionAccum: any, action) => {
               actionAccum[action] = ACTION_MODE;
               return actionAccum;
@@ -245,8 +248,9 @@ describe('<JsonWatchEdit /> create route', () => {
             id,
             type,
             isNew: true,
+            isActive: true,
             actions: [],
-            watch: defaultWatchJson,
+            watch: defaultWatch,
           };
 
           const triggeredTime = `now+${TRIGGERED_TIME}s`;

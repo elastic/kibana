@@ -1,0 +1,27 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "Looks for compiler activity by a user context which does not normally run compilers. This can be the result of ad-hoc software changes or unauthorized software deployment. This can also be due to local privilege elevation via locally run exploits or malware activity.",
+  "false_positives": [
+    "Uncommon compiler activity can be due to an engineer running a local build on a prod or staging instance in the course of troubleshooting or fixing a software issue."
+  ],
+  "from": "now-45m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "linux_rare_user_compiler",
+  "name": "Anomalous Linux Compiler Activity",
+  "risk_score": 21,
+  "rule_id": "cd66a419-9b3f-4f57-8ff8-ac4cd2d5f530",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 2
+}

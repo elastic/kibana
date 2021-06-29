@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import * as Rx from 'rxjs';
-import { createLegacyAPI, mockRouteContextWithInvalidLicense } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory } from 'src/core/server';
-import { httpServiceMock, httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock, httpServiceMock } from 'src/core/server/mocks';
+
+import { spacesClientServiceMock } from '../../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesAuditLogger } from '../../../lib/audit_logger';
-import { spacesConfig } from '../../../lib/__fixtures__';
+import { mockRouteContextWithInvalidLicense } from '../__fixtures__';
 import { initGetActiveSpaceApi } from './get_active_space';
 
 describe('GET /internal/spaces/_active_space', () => {
@@ -17,20 +18,20 @@ describe('GET /internal/spaces/_active_space', () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpServiceMock.createRouter();
 
-    const legacyAPI = createLegacyAPI();
+    const coreStart = coreMock.createStart();
 
-    const service = new SpacesService(null as any, () => legacyAPI);
-    const spacesService = await service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
-      authorization: null,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
-      config$: Rx.of(spacesConfig),
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
     initGetActiveSpaceApi({
       internalRouter: router,
-      spacesService,
+      getSpacesService: () =>
+        service.start({
+          basePath: coreStart.http.basePath,
+          spacesClientService: spacesClientServiceMock.createStart(),
+        }),
     });
 
     return {

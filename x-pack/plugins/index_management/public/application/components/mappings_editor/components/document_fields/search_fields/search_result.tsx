@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import VirtualList from 'react-tiny-virtual-list';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SearchResult as SearchResultType } from '../../../types';
-import { useDispatch } from '../../../mappings_state';
-import { State } from '../../../reducer';
+import { SearchResult as SearchResultType, State } from '../../../types';
+import { useDispatch } from '../../../mappings_state_context';
 import { SearchResultItem } from './search_result_item';
 
 interface Props {

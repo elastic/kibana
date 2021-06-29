@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { alertReducer } from './alert_reducer';
 import { Alert } from '../../../types';
 
@@ -11,13 +13,14 @@ describe('alert reducer', () => {
   beforeAll(() => {
     initialAlert = ({
       params: {},
-      consumer: 'alerting',
+      consumer: 'alerts',
       alertTypeId: null,
       schedule: {
         interval: '1m',
       },
       actions: [],
       tags: [],
+      notifyWhen: 'onActionGroupChange',
     } as unknown) as Alert;
   });
 
@@ -138,6 +141,29 @@ describe('alert reducer', () => {
     expect(updatedAlertActionParamsProperty.alert.actions[0].params.testActionParam).toBe(
       'test action params property updated'
     );
+  });
+
+  test('if the existing alert action params property was set to undefined (when other connector was selected)', () => {
+    initialAlert.actions.push({
+      id: '',
+      actionTypeId: 'testId',
+      group: 'Alert',
+      params: {
+        testActionParam: 'some value',
+      },
+    });
+    const updatedAlert = alertReducer(
+      { alert: initialAlert },
+      {
+        command: { type: 'setAlertActionParams' },
+        payload: {
+          key: 'testActionParam',
+          value: undefined,
+          index: 0,
+        },
+      }
+    );
+    expect(updatedAlert.alert.actions[0].params.testActionParam).toBe(undefined);
   });
 
   test('if alert action property was updated', () => {

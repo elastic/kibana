@@ -1,24 +1,10 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
-import './core.css';
-
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -32,26 +18,23 @@ import {
   InjectedMetadataSetup,
   InjectedMetadataStart,
 } from './injected_metadata';
-import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { mapToObject, pick } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
-import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
-import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { DeprecationsService } from './deprecations';
+import { CoreApp } from './core_app';
+import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-  requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
-  useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
 
 /** @internal */
@@ -86,7 +69,6 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
-  private readonly legacy: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly savedObjects: SavedObjectsService;
@@ -98,21 +80,15 @@ export class CoreSystem {
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
-  private readonly context: ContextService;
   private readonly integrations: IntegrationsService;
-
+  private readonly coreApp: CoreApp;
+  private readonly deprecations: DeprecationsService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
-    const {
-      rootDomElement,
-      browserSupportsCsp,
-      injectedMetadata,
-      requireLegacyFiles,
-      useLegacyTestHarness,
-    } = params;
+    const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
 
     this.rootDomElement = rootDomElement;
 
@@ -121,6 +97,7 @@ export class CoreSystem {
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
+    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
@@ -132,21 +109,18 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-    this.chrome = new ChromeService({ browserSupportsCsp });
+    this.chrome = new ChromeService({
+      browserSupportsCsp,
+      kibanaVersion: injectedMetadata.version,
+    });
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
+    this.deprecations = new DeprecationsService();
 
-    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
-
-    this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
-
-    this.legacy = new LegacyPlatformService({
-      requireLegacyFiles,
-      useLegacyTestHarness,
-    });
+    this.coreApp = new CoreApp(this.coreContext);
   }
 
   public async setup() {
@@ -159,26 +133,16 @@ export class CoreSystem {
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
+      this.docLinks.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
 
-      const pluginDependencies = this.plugins.getOpaqueIds();
-      const context = this.context.setup({
-        // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-        // 1) Can access context from any NP plugin
-        // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
-        //    New Platform plugins.
-        pluginDependencies: new Map([
-          ...pluginDependencies,
-          [this.legacy.legacyId, [...pluginDependencies.keys()]],
-        ]),
-      });
-      const application = this.application.setup({ context, http, injectedMetadata });
+      const application = this.application.setup({ http });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
-        context,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
@@ -187,12 +151,7 @@ export class CoreSystem {
       };
 
       // Services that do not expose contracts at setup
-      const plugins = await this.plugins.setup(core);
-
-      await this.legacy.setup({
-        core,
-        plugins: mapToObject(plugins.contracts),
-      });
+      await this.plugins.setup(core);
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -210,7 +169,7 @@ export class CoreSystem {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
-      const docLinks = await this.docLinks.start({ injectedMetadata });
+      const docLinks = this.docLinks.start({ injectedMetadata });
       const http = await this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
@@ -219,6 +178,7 @@ export class CoreSystem {
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
+      coreUiTargetDomElement.dataset.testSubj = 'kibanaChrome';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
 
@@ -239,21 +199,10 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
-        uiSettings,
       });
+      const deprecations = this.deprecations.start({ http });
 
-      application.registerMountContext(this.coreContext.coreId, 'core', () => ({
-        application: pick(application, ['capabilities', 'navigateToApp']),
-        chrome,
-        docLinks,
-        http,
-        i18n,
-        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
-        notifications,
-        overlays,
-        savedObjects,
-        uiSettings,
-      }));
+      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       const core: InternalCoreStart = {
         application,
@@ -267,9 +216,10 @@ export class CoreSystem {
         overlays,
         uiSettings,
         fatalErrors,
+        deprecations,
       };
 
-      const plugins = await this.plugins.start(core);
+      await this.plugins.start(core);
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
@@ -278,19 +228,16 @@ export class CoreSystem {
       this.rootDomElement.appendChild(notificationsTargetDomElement);
       this.rootDomElement.appendChild(overlayTargetDomElement);
 
-      const rendering = this.rendering.start({
+      this.rendering.start({
         application,
         chrome,
-        injectedMetadata,
         overlays,
         targetDomElement: coreUiTargetDomElement,
       });
 
-      await this.legacy.start({
-        core,
-        plugins: mapToObject(plugins.contracts),
-        targetDomElement: rendering.legacyTargetDomElement,
-      });
+      return {
+        application,
+      };
     } catch (error) {
       if (this.fatalErrorsSetup) {
         this.fatalErrorsSetup.add(error);
@@ -303,8 +250,8 @@ export class CoreSystem {
   }
 
   public stop() {
-    this.legacy.stop();
     this.plugins.stop();
+    this.coreApp.stop();
     this.notifications.stop();
     this.http.stop();
     this.integrations.stop();
@@ -312,6 +259,7 @@ export class CoreSystem {
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();
+    this.deprecations.stop();
     this.rootDomElement.textContent = '';
   }
 }

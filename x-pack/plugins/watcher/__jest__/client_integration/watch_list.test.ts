@@ -1,21 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import '../../../es_ui_shared/console_lang/mocks';
 
 import { act } from 'react-dom/test-utils';
-import * as fixtures from '../../test/fixtures';
-import {
-  setupEnvironment,
-  pageHelpers,
-  nextTick,
-  getRandomString,
-  findTestSubject,
-} from './helpers';
-import { WatchListTestBed } from './helpers/watch_list.helpers';
+import * as fixtures from '../../__fixtures__';
 import { ROUTES } from '../../common/constants';
+import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
+import { WatchListTestBed } from './helpers/watch_list.helpers';
 
 const { API_ROOT } = ROUTES;
 
@@ -25,28 +19,29 @@ describe('<WatchList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchListTestBed;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   afterAll(() => {
+    jest.useRealTimers();
     server.restore();
   });
 
   describe('on component mount', () => {
-    beforeEach(async () => {
-      testBed = await setup();
-    });
-
     describe('watches', () => {
       describe('when there are no watches', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches: [] });
+
+          await act(async () => {
+            testBed = await setup();
+          });
+          testBed.component.update();
         });
 
         test('should display an empty prompt', async () => {
-          const { component, exists } = await setup();
-
-          await act(async () => {
-            await nextTick();
-            component.update();
-          });
+          const { exists } = testBed;
 
           expect(exists('emptyPrompt')).toBe(true);
           expect(exists('emptyPrompt.createWatchButton')).toBe(true);
@@ -77,12 +72,47 @@ describe('<WatchList />', () => {
         beforeEach(async () => {
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches });
 
-          testBed = await setup();
-
           await act(async () => {
-            await nextTick();
-            testBed.component.update();
+            testBed = await setup();
           });
+
+          testBed.component.update();
+        });
+
+        test('should retain the search query', async () => {
+          const { table, actions } = testBed;
+
+          actions.searchWatches(watch1.name);
+
+          const { tableCellsValues } = table.getMetaData('watchesTable');
+
+          // Expect "watch1" is only visible in the table
+          expect(tableCellsValues.length).toEqual(1);
+          const row = tableCellsValues[0];
+          const { name, id, watchStatus } = watch1;
+
+          const expectedRow = [
+            '', // checkbox
+            id,
+            name,
+            watchStatus.state,
+            '', // comment
+            '', // lastMetCondition
+            '', // lastChecked
+            '', // actions
+          ];
+
+          expect(row).toEqual(expectedRow);
+
+          await actions.advanceTimeToTableRefresh();
+
+          const { tableCellsValues: updatedTableCellsValues } = table.getMetaData('watchesTable');
+
+          // Verify "watch1" is still the only watch visible in the table
+          expect(updatedTableCellsValues.length).toEqual(1);
+          const updatedRow = updatedTableCellsValues[0];
+
+          expect(updatedRow).toEqual(expectedRow);
         });
 
         test('should set the correct app title', () => {
@@ -132,7 +162,7 @@ describe('<WatchList />', () => {
 
           expect(findTestSubject(idColumn, `watchIdColumn-${watch1.id}`).length).toBe(1);
           expect(findTestSubject(idColumn, `watchIdColumn-${watch1.id}`).props().href).toEqual(
-            `#/management/elasticsearch/watcher/watches/watch/${watch1.id}/status`
+            `/watches/watch/${watch1.id}/status`
           );
         });
 
@@ -159,14 +189,10 @@ describe('<WatchList />', () => {
                 .getAttribute('disabled')
             ).toEqual('');
             expect(
-              findTestSubject(lastColumn, 'editWatchButton')
-                .getDOMNode()
-                .getAttribute('disabled')
+              findTestSubject(lastColumn, 'editWatchButton').getDOMNode().getAttribute('disabled')
             ).toEqual('');
             expect(
-              findTestSubject(lastColumn, 'deleteWatchButton')
-                .getDOMNode()
-                .getAttribute('disabled')
+              findTestSubject(lastColumn, 'deleteWatchButton').getDOMNode().getAttribute('disabled')
             ).toEqual('');
           });
         });
@@ -190,7 +216,7 @@ describe('<WatchList />', () => {
           });
 
           test('should send the correct HTTP request to delete watch', async () => {
-            const { component, actions, table } = testBed;
+            const { actions, table } = testBed;
             const { rows } = table.getMetaData('watchesTable');
 
             const watchId = rows[0].columns[2].value;
@@ -213,8 +239,6 @@ describe('<WatchList />', () => {
 
             await act(async () => {
               confirmButton!.click();
-              await nextTick();
-              component.update();
             });
 
             const latestRequest = server.requests[server.requests.length - 1];

@@ -1,14 +1,18 @@
 [[saved-objects-api]]
 == Saved objects APIs
 
-Manage {kib} saved objects, including dashboards, visualizations, index patterns, and more.
+Manage {kib} saved objects, including dashboards, visualizations, and more.
 
 WARNING: Do not write documents directly to the `.kibana` index. When you write directly
 to the `.kibana` index, the data becomes corrupted and permanently breaks future {kib} versions.
 
+NOTE: For managing {kib} index patterns, use the <<index-patterns-api, index patterns API>>.
+
 The following saved objects APIs are available: 
 
 * <<saved-objects-api-get, Get object API>> to retrieve a single {kib} saved object by ID
+
+* <<saved-objects-api-resolve, Resolve object API>> to retrieve a single {kib} saved object by ID, using any legacy URL alias if it exists
 
 * <<saved-objects-api-bulk-get, Bulk get objects API>> to retrieve multiple {kib} saved objects by ID
 
@@ -28,6 +32,8 @@ The following saved objects APIs are available:
 
 * <<saved-objects-api-resolve-import-errors, Resolve import errors API>> to resolve errors from the import API
 
+* <<saved-objects-api-rotate-encryption-key, Rotate encryption key API>> to rotate the encryption key for encrypted saved objects
+
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]
 include::saved-objects/find.asciidoc[]
@@ -38,3 +44,5 @@ include::saved-objects/delete.asciidoc[]
 include::saved-objects/export.asciidoc[]
 include::saved-objects/import.asciidoc[]
 include::saved-objects/resolve_import_errors.asciidoc[]
+include::saved-objects/resolve.asciidoc[]
+include::saved-objects/rotate_encryption_key.asciidoc[]

@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { IScopedClusterClient, Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { LicensingPluginSetup } from '../../../../licensing/server';
 
-import { ReindexOperation, ReindexOptions, ReindexStatus } from '../../../common/types';
+import { ReindexOperation, ReindexStatus } from '../../../common/types';
 
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';
 import { reindexServiceFactory } from '../../lib/reindexing';
@@ -23,7 +25,9 @@ interface ReindexHandlerArgs {
   licensing: LicensingPluginSetup;
   headers: Record<string, any>;
   credentialStore: CredentialStore;
-  enqueue?: boolean;
+  reindexOptions?: {
+    enqueue?: boolean;
+  };
 }
 
 export const reindexHandler = async ({
@@ -34,9 +38,9 @@ export const reindexHandler = async ({
   licensing,
   log,
   savedObjects,
-  enqueue,
+  reindexOptions,
 }: ReindexHandlerArgs): Promise<ReindexOperation> => {
-  const callAsCurrentUser = dataClient.callAsCurrentUser.bind(dataClient);
+  const callAsCurrentUser = dataClient.asCurrentUser;
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
   const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);
 
@@ -51,15 +55,11 @@ export const reindexHandler = async ({
 
   const existingOp = await reindexService.findReindexOperation(indexName);
 
-  const opts: ReindexOptions | undefined = enqueue
-    ? { queueSettings: { queuedAt: Date.now() } }
-    : undefined;
-
   // If the reindexOp already exists and it's paused, resume it. Otherwise create a new one.
   const reindexOp =
     existingOp && existingOp.attributes.status === ReindexStatus.paused
-      ? await reindexService.resumeReindexOperation(indexName, opts)
-      : await reindexService.createReindexOperation(indexName, opts);
+      ? await reindexService.resumeReindexOperation(indexName, reindexOptions)
+      : await reindexService.createReindexOperation(indexName, reindexOptions);
 
   // Add users credentials for the worker to use
   credentialStore.set(reindexOp, headers);

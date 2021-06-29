@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import brace from 'brace';
 import 'brace/ext/language_tools';
 
-const splitTokens = line => {
+const splitTokens = (line) => {
   return line.split(/\s+/);
 };
-const wordCompleter = words => {
+const wordCompleter = (words) => {
   return {
     identifierRegexps: [
       /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
@@ -31,7 +32,7 @@ const wordCompleter = words => {
       const endQuote = secondFullToken === '""' ? '' : '"';
       callback(
         null,
-        words.map(word => {
+        words.map((word) => {
           return {
             caption: ` ${word}`,
             value: `${startQuote}${word}${endQuote}`,

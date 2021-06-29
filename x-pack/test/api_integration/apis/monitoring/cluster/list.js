@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import multiclusterFixture from './fixtures/multicluster';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('list', () => {
     describe('with trial license clusters', () => {
-      const archive = 'monitoring/multicluster';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster';
       const timeRange = {
         min: '2017-08-15T21:00:00Z',
         max: '2017-08-16T00:00:00Z',

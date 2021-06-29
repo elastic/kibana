@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { FieldRule } from '.';
+import { FieldRule } from './field_rule';
 
 describe('FieldRule', () => {
-  ['*', 1, null, true, false].forEach(value => {
+  ['*', 1, null, true, false].forEach((value) => {
     it(`can convert itself to raw form with a single value of ${value}`, () => {
       const rule = new FieldRule('username', value);
       expect(rule.toRaw()).toEqual({

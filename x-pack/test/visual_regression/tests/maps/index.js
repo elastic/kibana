@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-export default function({ loadTestFile, getService }) {
+export default function ({ loadTestFile, getService }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('maps app visual regression', function() {
+  describe('maps app visual regression', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('maps/data');
-      await esArchiver.load('maps/kibana');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.load('x-pack/test/functional/es_archives/maps/kibana');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -21,8 +22,8 @@ export default function({ loadTestFile, getService }) {
     });
 
     after(async () => {
-      await esArchiver.unload('maps/data');
-      await esArchiver.unload('maps/kibana');
+      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.unload('x-pack/test/functional/es_archives/maps/kibana');
     });
 
     this.tags('ciGroup10');

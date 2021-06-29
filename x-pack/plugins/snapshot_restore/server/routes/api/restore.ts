@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
 import { serializeRestoreSettings } from '../../../common/lib';
@@ -12,33 +15,34 @@ import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
 import { restoreSettingsSchema } from './validate_schemas';
 
-export function registerRestoreRoutes({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerRestoreRoutes({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   // GET all snapshot restores
   router.get(
     { path: addBasePath('restores'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
 
       try {
         const snapshotRestores: SnapshotRestore[] = [];
-        const recoveryByIndexName: {
-          [key: string]: {
-            shards: SnapshotRestoreShardEs[];
-          };
-        } = await callAsCurrentUser('indices.recovery', {
+        const { body: recoveryByIndexName } = await clusterClient.asCurrentUser.indices.recovery({
           human: true,
         });
 
         // Filter to snapshot-recovered shards only
-        Object.keys(recoveryByIndexName).forEach(index => {
+        Object.keys(recoveryByIndexName).forEach((index) => {
           const recovery = recoveryByIndexName[index];
           let latestActivityTimeInMillis: number = 0;
           let latestEndTimeInMillis: number | null = null;
           const snapshotShards = (recovery.shards || [])
-            .filter(shard => shard.type === 'SNAPSHOT')
+            .filter((shard) => shard.type === 'SNAPSHOT')
             .sort((a, b) => a.id - b.id)
-            .map(shard => {
-              const deserializedShard = deserializeRestoreShard(shard);
+            .map((shard) => {
+              // TODO: Bring {@link SnapshotRestoreShardEs} in line with {@link ShardRecovery}
+              const deserializedShard = deserializeRestoreShard(shard as SnapshotRestoreShardEs);
               const { startTimeInMillis, stopTimeInMillis } = deserializedShard;
 
               // Set overall latest activity time
@@ -78,14 +82,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
 
         return res.ok({ body: snapshotRestores });
       } catch (e) {
-        if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return res.internalError({ body: e });
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -102,27 +99,21 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
       validate: { body: restoreSettingsSchema, params: restoreParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
       const { repository, snapshot } = req.params as TypeOf<typeof restoreParamsSchema>;
       const restoreSettings = req.body as TypeOf<typeof restoreSettingsSchema>;
 
       try {
-        const response = await callAsCurrentUser('snapshot.restore', {
+        const response = await clusterClient.asCurrentUser.snapshot.restore({
           repository,
           snapshot,
-          body: serializeRestoreSettings(restoreSettings),
+          // TODO: Bring {@link RestoreSettingsEs} in line with {@link RestoreRequest['body']}
+          body: serializeRestoreSettings(restoreSettings) as estypes.SnapshotRestoreRequest['body'],
         });
 
-        return res.ok({ body: response });
+        return res.ok({ body: response.body });
       } catch (e) {
-        if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return res.internalError({ body: e });
+        return handleEsError({ error: e, response: res });
       }
     })
   );

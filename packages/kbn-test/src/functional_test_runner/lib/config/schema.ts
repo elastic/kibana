@@ -1,47 +1,34 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
+import type { CustomHelpers } from 'joi';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-const INSPECTING =
-  process.execArgv.includes('--inspect') || process.execArgv.includes('--inspect-brk');
+// it will search both --inspect and --inspect-brk
+const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
 const urlPartsSchema = () =>
   Joi.object()
     .keys({
-      protocol: Joi.string()
-        .valid('http', 'https')
-        .default('http'),
-      hostname: Joi.string()
-        .hostname()
-        .default('localhost'),
+      protocol: Joi.string().valid('http', 'https').default('http'),
+      hostname: Joi.string().hostname().default('localhost'),
       port: Joi.number(),
       auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
       username: Joi.string(),
       password: Joi.string(),
       pathname: Joi.string().regex(/^\//, 'start with a /'),
       hash: Joi.string().regex(/^\//, 'start with a /'),
+      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
     })
     .default();
 
@@ -53,9 +40,32 @@ const appUrlPartsSchema = () =>
     })
     .default();
 
+const requiredWhenEnabled = (schema: Joi.Schema) => {
+  return Joi.when('enabled', {
+    is: true,
+    then: schema.required(),
+    otherwise: schema.optional(),
+  });
+};
+
+const dockerServerSchema = () =>
+  Joi.object()
+    .keys({
+      enabled: Joi.boolean().required(),
+      image: requiredWhenEnabled(Joi.string()),
+      port: requiredWhenEnabled(Joi.number()),
+      portInContainer: requiredWhenEnabled(Joi.number()),
+      waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
+      waitFor: Joi.func().optional(),
+      args: Joi.array().items(Joi.string()).optional(),
+    })
+    .default();
+
 const defaultRelativeToConfigPath = (path: string) => {
-  const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
-  makeDefault.description = `<config.js directory>/${path}`;
+  const makeDefault = (parent: any, helpers: CustomHelpers) => {
+    helpers.schema.description(`<config.js directory>/${path}`);
+    return resolve(dirname(helpers.prefs.context!.path), path);
+  };
   return makeDefault;
 };
 
@@ -64,28 +74,23 @@ export const schema = Joi.object()
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
 
-    excludeTestFiles: Joi.array()
-      .items(Joi.string())
-      .default([]),
-
-    suiteTags: Joi.object()
+    suiteFiles: Joi.object()
       .keys({
-        include: Joi.array()
-          .items(Joi.string())
-          .default([]),
-        exclude: Joi.array()
-          .items(Joi.string())
-          .default([]),
+        include: Joi.array().items(Joi.string()).default([]),
+        exclude: Joi.array().items(Joi.string()).default([]),
       })
       .default(),
 
-    services: Joi.object()
-      .pattern(ID_PATTERN, Joi.func().required())
+    suiteTags: Joi.object()
+      .keys({
+        include: Joi.array().items(Joi.string()).default([]),
+        exclude: Joi.array().items(Joi.string()).default([]),
+      })
       .default(),
 
-    pageObjects: Joi.object()
-      .pattern(ID_PATTERN, Joi.func().required())
-      .default(),
+    services: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
+
+    pageObjects: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
 
     timeouts: Joi.object()
       .keys({
@@ -125,14 +130,13 @@ export const schema = Joi.object()
       .default(),
 
     updateBaselines: Joi.boolean().default(false),
-
+    updateSnapshots: Joi.boolean().default(false),
     browser: Joi.object()
       .keys({
-        type: Joi.string()
-          .valid('chrome', 'firefox', 'ie')
-          .default('chrome'),
+        type: Joi.string().valid('chrome', 'firefox', 'msedge').default('chrome'),
 
         logPollingMs: Joi.number().default(100),
+        acceptInsecureCerts: Joi.boolean().default(false),
       })
       .default(),
 
@@ -168,10 +172,10 @@ export const schema = Joi.object()
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('oss'),
+        license: Joi.string().default('basic'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
-        serverEnvVars: Joi.object(),
+        esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
       })
@@ -183,6 +187,19 @@ export const schema = Joi.object()
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
         installDir: Joi.string(),
+        /** Options for how FTR should execute and interact with Kibana */
+        runOptions: Joi.object()
+          .keys({
+            /**
+             * Log message to wait for before initiating tests, defaults to waiting for Kibana status to be `available`.
+             * Note that this log message must not be filtered out by the current logging config, for example by the
+             * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
+             */
+            wait: Joi.object()
+              .regex()
+              .default(/Kibana is now available/),
+          })
+          .default(),
       })
       .default(),
 
@@ -203,14 +220,12 @@ export const schema = Joi.object()
       .default(),
 
     // definition of apps that work with `common.navigateToApp()`
-    apps: Joi.object()
-      .pattern(ID_PATTERN, appUrlPartsSchema())
-      .default(),
+    apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
 
-    // settings for the esArchiver module
-    esArchiver: Joi.object()
+    // settings for the saved objects svc
+    kbnArchiver: Joi.object()
       .keys({
-        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
       })
       .default(),
 
@@ -245,8 +260,25 @@ export const schema = Joi.object()
     // settings for the find service
     layout: Joi.object()
       .keys({
-        fixedHeaderHeight: Joi.number().default(50),
+        fixedHeaderHeight: Joi.number().default(100),
       })
       .default(),
+
+    // settings for the security service if there is no defaultRole defined, then default to superuser role.
+    security: Joi.object()
+      .keys({
+        roles: Joi.object().default(),
+        defaultRoles: Joi.array()
+          .items(Joi.string())
+          .when('$primary', {
+            is: true,
+            then: Joi.array().min(1),
+          })
+          .default(['superuser']),
+        disableTestUser: Joi.boolean(),
+      })
+      .default(),
+
+    dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
   })
   .default();

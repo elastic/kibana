@@ -1,0 +1,56 @@
+.secLoginCard {
+  display: block;
+  box-shadow: none;
+  padding: $euiSize;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    .secLoginCard__title {
+      text-decoration: underline;
+    }
+  }
+
+  &:disabled {
+    pointer-events: none;
+  }
+
+  &:not(.secLoginCard-isLoading):disabled {
+    .secLoginCard__title,
+    .secLoginCard__hint {
+      color: $euiColorMediumShade;
+    }
+  }
+
+  &:focus {
+    @include euiFocusRing;
+
+    border-color: transparent;
+    border-radius: $euiBorderRadius;
+
+    .secLoginCard__title {
+      text-decoration: underline;
+    }
+
+    // Make the focus ring clean and without borders
+    + .secLoginCard {
+      border-color: transparent;
+    }
+  }
+
+  + .secLoginCard {
+    border-top: $euiBorderThin;
+  }
+}
+
+.secLoginCard__hint {
+  @include euiFontSizeXS;
+  color: $euiColorDarkShade;
+  margin-top: $euiSizeXS;
+}
+
+.secLoginAssistanceMessage {
+  // This tightens up the layout if message is present
+  margin-top: -($euiSizeXXL + $euiSizeS);
+  padding: 0 $euiSize;
+}

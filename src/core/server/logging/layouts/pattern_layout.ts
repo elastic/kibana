@@ -1,26 +1,14 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { LogRecord, Layout } from '@kbn/logging';
 
-import { LogRecord } from '../log_record';
-import { Layout } from './layouts';
 import {
   Conversion,
   LoggerConversion,
@@ -34,17 +22,17 @@ import {
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[%date][%level][%logger]%meta %message`;
+const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
 
 export const patternSchema = schema.string({
-  validate: string => {
+  validate: (string) => {
     DateConversion.validate!(string);
   },
 });
 
 const patternLayoutSchema = schema.object({
   highlight: schema.maybe(schema.boolean()),
-  kind: schema.literal('pattern'),
+  type: schema.literal('pattern'),
   pattern: schema.maybe(patternSchema),
 });
 
@@ -58,7 +46,11 @@ const conversions: Conversion[] = [
 ];
 
 /** @internal */
-export type PatternLayoutConfigType = TypeOf<typeof patternLayoutSchema>;
+export interface PatternLayoutConfigType {
+  type: 'pattern';
+  highlight?: boolean;
+  pattern?: string;
+}
 
 /**
  * Layout that formats `LogRecord` using the `pattern` string with optional

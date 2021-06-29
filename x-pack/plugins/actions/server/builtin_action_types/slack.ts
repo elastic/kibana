@@ -1,17 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { URL } from 'url';
 import { curry } from 'lodash';
+import HttpProxyAgent from 'http-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
+import { Logger } from '../../../../../src/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
+import { renderMustacheString } from '../lib/mustache_renderer';
 
 import {
   ActionType,
@@ -20,6 +25,14 @@ import {
   ExecutorType,
 } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { getCustomAgents } from './lib/get_custom_agents';
+
+export type SlackActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
+export type SlackActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  {},
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
 
 // secrets definition
 
@@ -35,41 +48,55 @@ const SecretsSchema = schema.object(secretsSchemaProps);
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
 const ParamsSchema = schema.object({
-  message: schema.string(),
+  message: schema.string({ minLength: 1 }),
 });
 
 // action type definition
 
+export const ActionTypeId = '.slack';
 // customizing executor is only used for tests
 export function getActionType({
+  logger,
   configurationUtilities,
-  executor = slackExecutor,
+  executor = curry(slackExecutor)({ logger, configurationUtilities }),
 }: {
+  logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-  executor?: ExecutorType;
-}): ActionType {
+  executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
+}): SlackActionType {
   return {
-    id: '.slack',
+    id: ActionTypeId,
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
     validate: {
       secrets: schema.object(secretsSchemaProps, {
-        validate: curry(valdiateActionTypeConfig)(configurationUtilities),
+        validate: curry(validateActionTypeConfig)(configurationUtilities),
       }),
       params: ParamsSchema,
     },
+    renderParameterTemplates,
     executor,
   };
 }
 
-function valdiateActionTypeConfig(
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  return {
+    message: renderMustacheString(params.message, variables, 'slack'),
+  };
+}
+
+function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ) {
-  let url: URL;
+  const configuredUrl = secretsObject.webhookUrl;
   try {
-    url = new URL(secretsObject.webhookUrl);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring slack action: unable to parse host name from webhookUrl',
@@ -77,12 +104,12 @@ function valdiateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureWhitelistedHostname(url.hostname);
-  } catch (whitelistError) {
+    configurationUtilities.ensureUriAllowed(configuredUrl);
+  } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.slack.slackConfigurationError', {
       defaultMessage: 'error configuring slack action: {message}',
       values: {
-        message: whitelistError.message,
+        message: allowListError.message,
       },
     });
   }
@@ -91,18 +118,38 @@ function valdiateActionTypeConfig(
 // action executor
 
 async function slackExecutor(
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
+  execOptions: SlackActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
+  const secrets = execOptions.secrets;
+  const params = execOptions.params;
 
   let result: IncomingWebhookResult;
   const { webhookUrl } = secrets;
   const { message } = params;
+  const proxySettings = configurationUtilities.getProxySettings();
+
+  const customAgents = getCustomAgents(configurationUtilities, logger, webhookUrl);
+  const agent = webhookUrl.toLowerCase().startsWith('https')
+    ? customAgents.httpsAgent
+    : customAgents.httpAgent;
+
+  if (proxySettings) {
+    if (agent instanceof HttpProxyAgent || agent instanceof HttpsProxyAgent) {
+      logger.debug(`IncomingWebhook was called with proxyUrl ${proxySettings.proxyUrl}`);
+    }
+  }
 
   try {
-    const webhook = new IncomingWebhook(webhookUrl);
+    // https://slack.dev/node-slack-sdk/webhook
+    // node-slack-sdk use Axios inside :)
+    const webhook = new IncomingWebhook(webhookUrl, {
+      agent,
+    });
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {
@@ -120,7 +167,7 @@ async function slackExecutor(
     if (status === 429) {
       return pipe(
         getRetryAfterIntervalFromHeaders(headers),
-        map(retry => retryResultSeconds(actionId, err.message, retry)),
+        map((retry) => retryResultSeconds(actionId, err.message, retry)),
         getOrElse(() => retryResult(actionId, err.message))
       );
     }
@@ -135,6 +182,8 @@ async function slackExecutor(
         },
       }
     );
+    logger.error(`error on ${actionId} slack action: ${errMessage}`);
+
     return errorResult(actionId, errMessage);
   }
 
@@ -155,18 +204,21 @@ async function slackExecutor(
   return successResult(actionId, result);
 }
 
-function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
 }
 
-function errorResult(actionId: string, message: string): ActionTypeExecutorResult {
+function errorResult(actionId: string, message: string): ActionTypeExecutorResult<void> {
   return {
     status: 'error',
     message,
     actionId,
   };
 }
-function serviceErrorResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
+function serviceErrorResult(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.slack.errorPostingErrorMessage', {
     defaultMessage: 'error posting slack message',
   });
@@ -178,7 +230,7 @@ function serviceErrorResult(actionId: string, serviceMessage: string): ActionTyp
   };
 }
 
-function retryResult(actionId: string, message: string): ActionTypeExecutorResult {
+function retryResult(actionId: string, message: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage',
     {
@@ -197,7 +249,7 @@ function retryResultSeconds(
   actionId: string,
   message: string,
   retryAfter: number
-): ActionTypeExecutorResult {
+): ActionTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();

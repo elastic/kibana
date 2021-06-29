@@ -1,0 +1,53 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies suspicious child processes of a Java Archive (JAR) file. JAR files may be used to deliver malware in order to evade detection.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Suspicious JAR Child Process",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"java\" and\n  process.name : (\"sh\", \"bash\", \"dash\", \"ksh\", \"tcsh\", \"zsh\", \"curl\", \"wget\") and\n  process.args : \"-jar\" and process.args : \"*.jar\" and\n  /* Add any FP's here */\n  not process.executable : (\"/Users/*/.sdkman/*\", \"/Library/Java/JavaVirtualMachines/*\") and\n  not process.args : (\"/usr/local/*\", \"/Users/*/github.com/*\", \"/Users/*/src/*\")\n",
+  "risk_score": 47,
+  "rule_id": "8acb7614-1d92-4359-bfcf-478b6d9de150",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "macOS",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.007",
+              "name": "JavaScript/JScript",
+              "reference": "https://attack.mitre.org/techniques/T1059/007/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

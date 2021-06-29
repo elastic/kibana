@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -37,7 +38,18 @@ export class LoggingAction extends BaseAction {
 
   get upstreamJson() {
     const result = super.upstreamJson;
-    const text = !!this.text.trim() ? this.text : undefined;
+    let text;
+
+    if (typeof this.text === 'string') {
+      // If this.text is a non-empty string, we can send it to the API.
+      if (!!this.text.trim()) {
+        text = this.text;
+      }
+    } else {
+      // If the user incorrectly defined this.text, e.g. as an object in a JSON watch, let the API
+      // deal with it.
+      text = this.text;
+    }
 
     Object.assign(result, {
       text,

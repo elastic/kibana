@@ -1,10 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AllRule, AnyRule, FieldRule, ExceptAllRule, ExceptAnyRule, RuleGroup } from '.';
+import { AllRule } from './all_rule';
+import { AnyRule } from './any_rule';
+import { ExceptAllRule } from './except_all_rule';
+import { ExceptAnyRule } from './except_any_rule';
+import { FieldRule } from './field_rule';
+import type { RuleGroup } from './rule_group';
 
 describe('Any rule', () => {
   it('can be constructed without sub rules', () => {
@@ -22,7 +28,7 @@ describe('Any rule', () => {
 
     const rule = new AnyRule() as RuleGroup;
     expect(rule.canContainRules(subRules)).toEqual(true);
-    subRules.forEach(sr => rule.addRule(sr));
+    subRules.forEach((sr) => rule.addRule(sr));
     expect(rule.getRules()).toEqual([...subRules]);
   });
 

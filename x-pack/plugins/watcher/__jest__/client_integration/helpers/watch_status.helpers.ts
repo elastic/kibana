@@ -1,22 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  findTestSubject,
-  TestBed,
-  TestBedConfig,
-  nextTick,
-} from '../../../../../test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { registerTestBed, findTestSubject, TestBed, TestBedConfig, delay } from '@kbn/test/jest';
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
-import { WATCH_ID } from './constants';
+import { WATCH_ID } from './jest_constants';
 import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
@@ -49,10 +43,7 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
   const selectTab = (tab: 'execution history' | 'action statuses') => {
     const tabs = ['execution history', 'action statuses'];
 
-    testBed
-      .find('tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   const clickToggleActivationButton = async () => {
@@ -98,7 +89,7 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
 
     await act(async () => {
       button.simulate('click');
-      await nextTick(100);
+      await delay(100);
       component.update();
     });
   };

@@ -1,0 +1,60 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "The hosts file on endpoints is used to control manual IP address to hostname resolutions. The hosts file is the first point of lookup for DNS hostname resolution so if adversaries can modify the endpoint hosts file, they can route traffic to malicious infrastructure. This rule detects modifications to the hosts file on Microsoft Windows, Linux (Ubuntu or RHEL) and macOS systems.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Hosts File Modified",
+  "note": "## Config\n\nFor Windows systems using Auditbeat, this rule requires adding 'C:/Windows/System32/drivers/etc' as an additional path in the 'file_integrity' module of auditbeat.yml.",
+  "query": "file where event.type in (\"change\", \"creation\") and\n  file.path : (\"/private/etc/hosts\", \"/etc/hosts\", \"?:\\\\Windows\\\\System32\\\\drivers\\\\etc\\\\hosts\") \n",
+  "references": [
+    "https://www.elastic.co/guide/en/beats/auditbeat/current/auditbeat-reference-yml.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "9c260313-c811-4ec8-ab89-8f6530e0246c",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Windows",
+    "macOS",
+    "Threat Detection",
+    "Impact"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "Impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1565",
+          "name": "Data Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1565/",
+          "subtechnique": [
+            {
+              "id": "T1565.001",
+              "name": "Stored Data Manipulation",
+              "reference": "https://attack.mitre.org/techniques/T1565/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 5
+}

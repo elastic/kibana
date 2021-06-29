@@ -1,0 +1,37 @@
+// SASSTODO: Too risky to change to BEM naming
+.visualize {
+  display: flex;
+  flex: 1 1 100%;
+  overflow: hidden;
+}
+
+// SASSTODO: Too risky to change to BEM naming
+.visualization {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  position: relative;
+  padding: $euiSizeS;
+  flex: 1 1 100%;
+}
+
+.visChart {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.visChart--vertical {
+  flex-direction: column;
+}
+
+.visChart__spinner, .visError {
+  display: flex;
+  flex: 1 1 auto;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}

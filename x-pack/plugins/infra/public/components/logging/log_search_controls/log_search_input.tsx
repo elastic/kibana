@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFieldSearch } from '@elastic/eui';
@@ -10,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import * as React from 'react';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 
 interface LogSearchInputProps {
   className?: string;
@@ -32,7 +33,7 @@ export const LogSearchInput = class extends React.PureComponent<
     query: '',
   };
 
-  public handleSubmit: React.FormEventHandler<HTMLFormElement> = evt => {
+  public handleSubmit: React.FormEventHandler<HTMLFormElement> = (evt) => {
     evt.preventDefault();
 
     const { query } = this.state;
@@ -44,7 +45,7 @@ export const LogSearchInput = class extends React.PureComponent<
     }
   };
 
-  public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = evt => {
+  public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = (evt) => {
     this.setState({
       query: evt.target.value,
     });
@@ -81,6 +82,6 @@ const PlainSearchField = euiStyled(EuiFieldSearch)`
   box-shadow: none;
 
   &:focus {
-    box-shadow: inset 0 -2px 0 0 ${props => props.theme.eui.euiColorPrimary};
+    box-shadow: inset 0 -2px 0 0 ${(props) => props.theme.eui.euiColorPrimary};
   }
 `;

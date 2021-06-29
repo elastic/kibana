@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ACTION_STATES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,9 @@ export class ActionStatus {
     this.id = props.id;
     this.actionStatusJson = props.actionStatusJson;
     this.errors = props.errors;
+    this.lastCheckedRawFormat = props.lastCheckedRawFormat;
 
+    this.lastExecutionRawFormat = get(this.actionStatusJson, 'last_execution.timestamp');
     this.lastAcknowledged = getMoment(get(this.actionStatusJson, 'ack.timestamp'));
     this.lastExecution = getMoment(get(this.actionStatusJson, 'last_execution.timestamp'));
     this.lastExecutionSuccessful = get(this.actionStatusJson, 'last_execution.successful');
@@ -30,7 +33,10 @@ export class ActionStatus {
     const actionStatusJson = this.actionStatusJson;
     const ackState = actionStatusJson.ack.state;
 
-    if (this.lastExecutionSuccessful === false) {
+    if (
+      this.lastExecutionSuccessful === false &&
+      this.lastCheckedRawFormat === this.lastExecutionRawFormat
+    ) {
       return ACTION_STATES.ERROR;
     }
 
@@ -96,7 +102,7 @@ export class ActionStatus {
 
   // generate object from elasticsearch response
   static fromUpstreamJson(json) {
-    const missingPropertyError = missingProperty =>
+    const missingPropertyError = (missingProperty) =>
       i18n.translate(
         'xpack.watcher.models.actionStatus.actionStatusJsonPropertyMissingBadRequestMessage',
         {

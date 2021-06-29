@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreStart } from 'kibana/public';
@@ -23,29 +12,42 @@ import { renderOptInBanner } from './render_opt_in_banner';
 import { TelemetryService } from '../telemetry_service';
 
 interface TelemetryNotificationsConstructor {
+  http: CoreStart['http'];
   overlays: CoreStart['overlays'];
   telemetryService: TelemetryService;
 }
 
+/**
+ * Helpers to the Telemetry banners spread through the code base in Welcome and Home landing pages.
+ */
 export class TelemetryNotifications {
+  private readonly http: CoreStart['http'];
   private readonly overlays: CoreStart['overlays'];
   private readonly telemetryService: TelemetryService;
   private optedInNoticeBannerId?: string;
   private optInBannerId?: string;
 
-  constructor({ overlays, telemetryService }: TelemetryNotificationsConstructor) {
+  constructor({ http, overlays, telemetryService }: TelemetryNotificationsConstructor) {
     this.telemetryService = telemetryService;
+    this.http = http;
     this.overlays = overlays;
   }
 
+  /**
+   * Should the opted-in banner be shown to the user?
+   */
   public shouldShowOptedInNoticeBanner = (): boolean => {
-    const userHasSeenOptedInNotice = this.telemetryService.getUserHasSeenOptedInNotice();
+    const userShouldSeeOptInNotice = this.telemetryService.getUserShouldSeeOptInNotice();
     const bannerOnScreen = typeof this.optedInNoticeBannerId !== 'undefined';
-    return !bannerOnScreen && userHasSeenOptedInNotice;
+    return !bannerOnScreen && userShouldSeeOptInNotice;
   };
 
+  /**
+   * Renders the banner that claims the cluster is opted-in, and gives the option to opt-out.
+   */
   public renderOptedInNoticeBanner = (): void => {
     const bannerId = renderOptedInNoticeBanner({
+      http: this.http,
       onSeen: this.setOptedInNoticeSeen,
       overlays: this.overlays,
     });
@@ -53,12 +55,18 @@ export class TelemetryNotifications {
     this.optedInNoticeBannerId = bannerId;
   };
 
+  /**
+   * Should the banner to opt-in be shown to the user?
+   */
   public shouldShowOptInBanner = (): boolean => {
     const isOptedIn = this.telemetryService.getIsOptedIn();
     const bannerOnScreen = typeof this.optInBannerId !== 'undefined';
     return !bannerOnScreen && isOptedIn === null;
   };
 
+  /**
+   * Renders the banner that claims the cluster is opted-out, and gives the option to opt-in.
+   */
   public renderOptInBanner = (): void => {
     const bannerId = renderOptInBanner({
       setOptIn: this.onSetOptInClick,
@@ -68,6 +76,10 @@ export class TelemetryNotifications {
     this.optInBannerId = bannerId;
   };
 
+  /**
+   * Opt-in/out button handler
+   * @param isOptIn true/false whether the user opts-in/out
+   */
   private onSetOptInClick = async (isOptIn: boolean) => {
     if (this.optInBannerId) {
       this.overlays.banners.remove(this.optInBannerId);
@@ -77,6 +89,9 @@ export class TelemetryNotifications {
     await this.telemetryService.setOptIn(isOptIn);
   };
 
+  /**
+   * Clears the banner and stores the user's dismissal of the banner.
+   */
   public setOptedInNoticeSeen = async (): Promise<void> => {
     if (this.optedInNoticeBannerId) {
       this.overlays.banners.remove(this.optedInNoticeBannerId);

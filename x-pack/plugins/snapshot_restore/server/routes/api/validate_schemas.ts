@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 export const nameParameterSchema = schema.object({
@@ -26,20 +28,12 @@ const snapshotRetentionSchema = schema.object({
 
 export const policySchema = schema.object({
   name: schema.string(),
-  version: schema.maybe(schema.number()),
-  modifiedDate: schema.maybe(schema.string()),
-  modifiedDateMillis: schema.maybe(schema.number()),
   snapshotName: schema.string(),
   schedule: schema.string(),
   repository: schema.string(),
-  nextExecution: schema.maybe(schema.string()),
-  nextExecutionMillis: schema.maybe(schema.number()),
   config: schema.maybe(snapshotConfigSchema),
   retention: schema.maybe(snapshotRetentionSchema),
   isManagedPolicy: schema.boolean(),
-  stats: schema.maybe(schema.object({}, { allowUnknowns: true })),
-  lastFailure: schema.maybe(schema.object({}, { allowUnknowns: true })),
-  lastSuccess: schema.maybe(schema.object({}, { allowUnknowns: true })),
 });
 
 const fsRepositorySettings = schema.object({
@@ -100,7 +94,7 @@ const hdsRepositorySettings = schema.object(
     readonly: schema.maybe(schema.boolean()),
     ['security.principal']: schema.maybe(schema.string()),
   },
-  { allowUnknowns: true }
+  { unknowns: 'allow' }
 );
 
 const hdsfRepository = schema.object({
@@ -158,7 +152,7 @@ const sourceRepository = schema.object({
       {
         delegateType: schema.string(),
       },
-      { allowUnknowns: true }
+      { unknowns: 'allow' }
     ),
   ]),
 });
@@ -182,4 +176,5 @@ export const restoreSettingsSchema = schema.object({
   indexSettings: schema.maybe(schema.string()),
   ignoreIndexSettings: schema.maybe(schema.arrayOf(schema.string())),
   ignoreUnavailable: schema.maybe(schema.boolean()),
+  includeAliases: schema.maybe(schema.boolean()),
 });

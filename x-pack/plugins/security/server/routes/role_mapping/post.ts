@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
+
+import type { RouteDefinitionParams } from '../';
 import { wrapError } from '../../errors';
-import { RouteDefinitionParams } from '..';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 
-export function defineRoleMappingPostRoutes(params: RouteDefinitionParams) {
-  const { clusterClient, router } = params;
-
+export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/security/role_mapping/{name}',
@@ -36,20 +37,17 @@ export function defineRoleMappingPostRoutes(params: RouteDefinitionParams) {
           // and keeping this in sync (and testable!) with ES could prove problematic.
           // We do not interpret any of these rules within this route handler;
           // they are simply passed to ES for processing.
-          rules: schema.object({}, { allowUnknowns: true }),
-          metadata: schema.object({}, { allowUnknowns: true }),
+          rules: schema.object({}, { unknowns: 'allow' }),
+          metadata: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const saveResponse = await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.saveRoleMapping', {
-            name: request.params.name,
-            body: request.body,
-          });
-        return response.ok({ body: saveResponse });
+        const saveResponse = await context.core.elasticsearch.client.asCurrentUser.security.putRoleMapping(
+          { name: request.params.name, body: request.body }
+        );
+        return response.ok({ body: saveResponse.body });
       } catch (error) {
         const wrappedError = wrapError(error);
         return response.customError({

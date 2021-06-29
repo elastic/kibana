@@ -1,46 +1,36 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import sinon from 'sinon';
-import Progress from './progress';
-import Logger from '../lib/logger';
 
-describe('kibana cli', function() {
-  describe('plugin installer', function() {
-    describe('progressReporter', function() {
+import { Progress } from './progress';
+import { Logger } from '../lib/logger';
+
+describe('kibana cli', function () {
+  describe('plugin installer', function () {
+    describe('progressReporter', function () {
       let logger;
       let progress;
 
-      beforeEach(function() {
+      beforeEach(function () {
         logger = new Logger({ silent: false, quiet: false });
         sinon.stub(logger, 'log');
         sinon.stub(logger, 'error');
         progress = new Progress(logger);
       });
 
-      afterEach(function() {
+      afterEach(function () {
         logger.log.restore();
         logger.error.restore();
       });
 
-      describe('handleData', function() {
-        it('should show a max of 20 dots for full progress', function() {
+      describe('handleData', function () {
+        it('should show a max of 20 dots for full progress', function () {
           progress.init(1000);
           progress.progress(1000);
           progress.complete();
@@ -70,7 +60,7 @@ describe('kibana cli', function() {
           expect(logger.log.getCall(21).args[0]).toMatch(/complete/i);
         });
 
-        it('should show dot for each 5% of completion', function() {
+        it('should show dot for each 5% of completion', function () {
           progress.init(1000);
           expect(logger.log.callCount).toBe(1);
 

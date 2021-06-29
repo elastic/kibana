@@ -1,61 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
-import { Module } from '../../../../../legacy/plugins/ml/common/types/modules';
+import { SavedObjectsClientContract, KibanaRequest, IScopedClusterClient } from 'kibana/server';
+import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
+import type { MlClient } from '../../lib/ml_client';
+import { JobSavedObjectService } from '../../saved_objects';
+
+const callAs = () => Promise.resolve({ body: {} });
+
+const mlClusterClient = ({
+  asCurrentUser: callAs,
+  asInternalUser: callAs,
+} as unknown) as IScopedClusterClient;
+
+const mlClient = (callAs as unknown) as MlClient;
 
 describe('ML - data recognizer', () => {
-  const dr = new DataRecognizer(({
-    ml: {
-      mlClient: {
-        callAsCurrentUser: jest.fn(),
-      },
-    },
-    core: {
-      savedObjects: {
-        client: {
-          find: jest.fn(),
-          bulkCreate: jest.fn(),
-        },
-      },
-    },
-  } as unknown) as RequestHandlerContext);
-
-  const moduleIds = [
-    'apache_ecs',
-    'apm_jsbase',
-    'apm_nodejs',
-    'apm_transaction',
-    'auditbeat_process_docker_ecs',
-    'auditbeat_process_hosts_ecs',
-    'logs_ui_analysis',
-    'logs_ui_categories',
-    'metricbeat_system_ecs',
-    'nginx_ecs',
-    'sample_data_ecommerce',
-    'sample_data_weblogs',
-    'siem_auditbeat',
-    'siem_auditbeat_auth',
-    'siem_packetbeat',
-    'siem_winlogbeat',
-    'siem_winlogbeat_auth',
-  ];
-
-  // check all module IDs are the same as the list above
-  it('listModules - check all module IDs', async () => {
-    const modules = await dr.listModules();
-    const ids = modules.map(m => m.id);
-    expect(ids.join()).toEqual(moduleIds.join());
-  });
-
-  it('getModule - load a single module', async () => {
-    const module = await dr.getModule(moduleIds[0]);
-    expect(module.id).toEqual(moduleIds[0]);
-  });
+  const dr = new DataRecognizer(
+    mlClusterClient,
+    mlClient,
+    ({
+      find: jest.fn(),
+      bulkCreate: jest.fn(),
+    } as unknown) as SavedObjectsClientContract,
+    {} as JobSavedObjectService,
+    { headers: { authorization: '' } } as KibanaRequest
+  );
 
   describe('jobOverrides', () => {
     it('should apply job overrides correctly', () => {

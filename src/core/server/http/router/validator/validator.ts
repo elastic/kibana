@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { ValidationError, Type, schema, ObjectType } from '@kbn/config-schema';
+import { ValidationError, ObjectType, Type, schema, isConfigSchema } from '@kbn/config-schema';
 import { Stream } from 'stream';
 import { RouteValidationError } from './validator_error';
 
@@ -85,7 +74,7 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
   T extends RouteValidationFunction<any>
     ? ReturnType<T>['value']
     : T extends Type<any>
-    ? ReturnType<T['validate']>
+    ? T['type']
     : undefined
 >;
 
@@ -143,8 +132,8 @@ export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> &
  * @internal
  */
 export class RouteValidator<P = {}, Q = {}, B = {}> {
-  public static from<P = {}, Q = {}, B = {}>(
-    opts: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>
+  public static from<_P = {}, _Q = {}, _B = {}>(
+    opts: RouteValidator<_P, _Q, _B> | RouteValidatorFullConfig<_P, _Q, _B>
   ) {
     if (opts instanceof RouteValidator) {
       return opts;
@@ -170,7 +159,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getParams(data: unknown, namespace?: string): Readonly<P> {
-    return this.validate(this.config.params, this.options.unsafe?.params, data, namespace);
+    return this.validate(this.config.params, this.options.unsafe?.params, data, namespace) as P;
   }
 
   /**
@@ -178,7 +167,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getQuery(data: unknown, namespace?: string): Readonly<Q> {
-    return this.validate(this.config.query, this.options.unsafe?.query, data, namespace);
+    return this.validate(this.config.query, this.options.unsafe?.query, data, namespace) as Q;
   }
 
   /**
@@ -186,7 +175,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
    * @internal
    */
   public getBody(data: unknown, namespace?: string): Readonly<B> {
-    return this.validate(this.config.body, this.options.unsafe?.body, data, namespace);
+    return this.validate(this.config.body, this.options.unsafe?.body, data, namespace) as B;
   }
 
   /**
@@ -236,7 +225,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     data?: unknown,
     namespace?: string
   ): RouteValidationResultType<typeof validationRule> {
-    if (validationRule instanceof Type) {
+    if (isConfigSchema(validationRule)) {
       return validationRule.validate(data, {}, namespace);
     } else if (typeof validationRule === 'function') {
       return this.validateFunction(validationRule, data, namespace);

@@ -1,0 +1,44 @@
+.mlChartTooltip {
+  @include euiToolTipStyle('s');
+  @include euiFontSizeXS;
+  padding: 0;
+  transition: opacity $euiAnimSpeedNormal;
+  pointer-events: none;
+  user-select: none;
+  max-width: 512px;
+
+  &__list {
+    margin: $euiSizeXS;
+  }
+
+  &__header {
+    @include euiToolTipTitle;
+    padding: $euiSizeXS ($euiSizeXS * 2);
+  }
+
+  &__item {
+    display: flex;
+    padding: 3px;
+    box-sizing: border-box;
+    border-left: $euiSizeXS solid transparent;
+  }
+
+  &__label {
+    min-width: 1px;
+  }
+
+  &__value {
+    font-weight: $euiFontWeightBold;
+    text-align: right;
+    font-feature-settings: 'tnum';
+    margin-left: 8px;
+  }
+
+  &__rowHighlighted {
+    background-color: transparentize($euiColorGhost, .9);
+  }
+
+  &--hidden {
+    opacity: 0;
+  }
+}

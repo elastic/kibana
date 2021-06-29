@@ -1,5 +1,46 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+/* @notice
+ *
+ * This product includes code that is based on Ace editor, which was available
+ * under a "BSD" license.
+ *
+ * Distributed under the BSD license:
+ *
+ * Copyright (c) 2010, Ajax.org B.V.
+ * All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of Ajax.org B.V. nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL AJAX.ORG B.V. BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 /* eslint-disable */
-/* 
+/*
   This file is loaded up as a blob by Brace to hand to Ace to load as Jsonp
   (hence the redefining of everything).  It is based on the javascript
   mode from the brace distro.
@@ -197,7 +238,6 @@ ace.define('ace/lib/oop', ['require', 'exports', 'module'], function (
   acequire,
   exports
 ) {
-  
   (exports.inherits = function (ctor, superCtor) {
     (ctor.super_ = superCtor),
     (ctor.prototype = Object.create(superCtor.prototype, {
@@ -221,7 +261,6 @@ ace.define('ace/range', ['require', 'exports', 'module'], function (
   acequire,
   exports
 ) {
-  
   let comparePoints = function (p1, p2) {
       return p1.row - p2.row || p1.column - p2.column;
     },
@@ -426,7 +465,6 @@ ace.define('ace/apply_delta', ['require', 'exports', 'module'], function (
   acequire,
   exports
 ) {
-  
   exports.applyDelta = function (docLines, delta) {
     let row = delta.start.row,
       startColumn = delta.start.column,
@@ -467,7 +505,6 @@ ace.define(
   'ace/lib/event_emitter',
   ['require', 'exports', 'module'],
   function (acequire, exports) {
-    
     let EventEmitter = {},
       stopPropagation = function () {
         this.propagationStopped = !0;
@@ -579,7 +616,6 @@ ace.define(
   'ace/anchor',
   ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/event_emitter'],
   function (acequire, exports) {
-    
     let oop = acequire('./lib/oop'),
       EventEmitter = acequire('./lib/event_emitter').EventEmitter,
       Anchor = (exports.Anchor = function (doc, row, column) {
@@ -696,7 +732,6 @@ ace.define(
     'ace/anchor',
   ],
   function (acequire, exports) {
-    
     let oop = acequire('./lib/oop'),
       applyDelta = acequire('./apply_delta').applyDelta,
       EventEmitter = acequire('./lib/event_emitter').EventEmitter,
@@ -1064,7 +1099,6 @@ ace.define('ace/lib/lang', ['require', 'exports', 'module'], function (
   acequire,
   exports
 ) {
-  
   (exports.last = function (a) {
     return a[a.length - 1];
   }),
@@ -1215,7 +1249,6 @@ ace.define(
     'ace/lib/lang',
   ],
   function (acequire, exports) {
-    
     acequire('../range').Range;
     let Document = acequire('../document').Document,
       lang = acequire('../lib/lang'),

@@ -1,0 +1,10 @@
+{
+  "id": "savedObjectsManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["management", "data"],
+  "optionalPlugins": ["dashboard", "visualizations", "discover", "home", "savedObjectsTaggingOss", "spacesOss"],
+  "extraPublicDirs": ["public/lib"],
+  "requiredBundles": ["kibanaReact", "home"]
+}

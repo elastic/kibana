@@ -1,0 +1,61 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a new service principal is added in Azure. An application, hosted service, or automated tool that accesses or modifies resources needs an identity created. This identity is known as a service principal. For security reasons, it's always recommended to use service principals with automated tools rather than allowing them to log in with a user identity.",
+  "false_positives": [
+    "A service principal may be created by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Service principal additions from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+  ],
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-azure*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Azure Service Principal Addition",
+  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Add service principal\" and event.outcome:(success or Success)\n",
+  "references": [
+    "https://msrc-blog.microsoft.com/2020/12/13/customer-guidance-on-recent-nation-state-cyber-attacks/",
+    "https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal"
+  ],
+  "risk_score": 47,
+  "rule_id": "60b6b72f-0fbc-47e7-9895-9ba7627a8b50",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Azure",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1550",
+          "name": "Use Alternate Authentication Material",
+          "reference": "https://attack.mitre.org/techniques/T1550/",
+          "subtechnique": [
+            {
+              "id": "T1550.001",
+              "name": "Application Access Token",
+              "reference": "https://attack.mitre.org/techniques/T1550/001/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 4
+}

@@ -1,0 +1,94 @@
+[role="xpack"]
+[[webhook-action-type]]
+=== Webhook connector and action
+++++
+<titleabbrev>Webhook</titleabbrev>
+++++
+
+The Webhook connector uses https://github.com/axios/axios[axios] to send a POST or PUT request to a web service.
+
+[float]
+[[webhook-connector-configuration]]
+==== Connector configuration
+
+Webhook connectors have the following configuration properties.
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+URL::       The request URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Method::    HTTP request method, either `POST`(default) or `PUT`.
+Headers::   A set of key-value pairs sent as headers with the request
+Require authentication:: If true, a username and password for login type authentication must be provided.
+Username::      Username for HTTP basic authentication.
+Password::  Password for HTTP basic authentication.
+
+[float]
+[[webhook-connector-networking-configuration]]
+==== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
+[[Preconfigured-webhook-configuration]]
+==== Preconfigured connector type
+
+[source,text]
+--
+ my-webhook:
+   name: preconfigured-webhook-connector-type
+   actionTypeId: .webhook
+   config:
+     url: https://test.host
+     method: POST
+     headers:
+       testheader: testvalue
+   secrets:
+     user: testuser
+     password: passwordkeystorevalue
+--
+
+Config defines information for the connector type.
+
+`url`:: A URL string that corresponds to *URL*.
+`method`:: A string that corresponds to *Method*.
+`headers`:: A record<string, string> that corresponds to *Headers*.
+`hasAuth`:: A boolean that corresponds to *Requires authentication*. If `true`, this connector will require values for `user` and `password` inside the secrets configuration. Defaults to `true`.
+
+Secrets defines sensitive information for the connector type.
+
+`user`:: A string that corresponds to *User*. Required if `hasAuth` is set to `true`.
+`password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
+
+[float]
+[[define-webhook-ui]]
+==== Define connector in Stack Management
+
+Define Webhook connector properties.
+
+[role="screenshot"]
+image::management/connectors/images/webhook-connector.png[Webhook connector]
+
+Test Webhook action parameters.
+
+[role="screenshot"]
+image::management/connectors/images/webhook-params-test.png[Webhook params test]
+
+[float]
+[[webhook-action-configuration]]
+==== Action configuration
+
+Webhook actions have the following properties.
+
+Body::      A JSON payload sent to the request URL. For example: 
++
+[source,text]
+--
+{
+  "short_description": "{{context.rule.name}}",
+  "description": "{{context.rule.description}}",
+  ...
+}
+--
+
+Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have
+their values escaped, so that the final JSON will be valid (escaping double quote characters).
+For more information on Mustache template variables, refer to <<defining-rules-actions-details>>.

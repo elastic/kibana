@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import type { RoleMapping } from '../../../../../common/model';
 import {
+  validateRoleMappingForSave,
   validateRoleMappingName,
   validateRoleMappingRoles,
   validateRoleMappingRoleTemplates,
   validateRoleMappingRules,
-  validateRoleMappingForSave,
 } from './role_mapping_validation';
-import { RoleMapping } from '../../../../../common/model';
 
 describe('validateRoleMappingName', () => {
   it('requires a value', () => {

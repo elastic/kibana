@@ -1,73 +1,82 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsClientContract } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
-import { GetBasePathFunction, RawAction } from './types';
+import { RawAction, ActionTypeRegistryContract, PreConfiguredAction } from './types';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
+import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
+import { isSavedObjectExecutionSource } from './lib';
+import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
-  getBasePath: GetBasePathFunction;
-  isESOUsingEphemeralEncryptionKey: boolean;
+  isESOCanEncrypt: boolean;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  preconfiguredActions: PreConfiguredAction[];
 }
 
-export interface ExecuteOptions {
+export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | 'source'> {
   id: string;
-  params: Record<string, any>;
   spaceId: string;
   apiKey: string | null;
+  relatedSavedObjects?: RelatedSavedObjects;
 }
 
-export function createExecuteFunction({
-  getBasePath,
+export type ExecutionEnqueuer = (
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
+  options: ExecuteOptions
+) => Promise<void>;
+
+export function createExecutionEnqueuerFunction({
   taskManager,
-  getScopedSavedObjectsClient,
-  isESOUsingEphemeralEncryptionKey,
+  actionTypeRegistry,
+  isESOCanEncrypt,
+  preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
-  return async function execute({ id, params, spaceId, apiKey }: ExecuteOptions) {
-    if (isESOUsingEphemeralEncryptionKey === true) {
+  return async function execute(
+    unsecuredSavedObjectsClient: SavedObjectsClientContract,
+    { id, params, spaceId, source, apiKey, relatedSavedObjects }: ExecuteOptions
+  ) {
+    if (!isESOCanEncrypt) {
       throw new Error(
-        `Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 
-    const requestHeaders: Record<string, string> = {};
+    const { actionTypeId, name, isMissingSecrets } = await getAction(
+      unsecuredSavedObjectsClient,
+      preconfiguredActions,
+      id
+    );
 
-    if (apiKey) {
-      requestHeaders.authorization = `ApiKey ${apiKey}`;
+    if (isMissingSecrets) {
+      throw new Error(
+        `Unable to execute action because no secrets are defined for the "${name}" connector.`
+      );
     }
 
-    // Since we're using API keys and accessing elasticsearch can only be done
-    // via a request, we're faking one with the proper authorization headers.
-    const fakeRequest: any = {
-      headers: requestHeaders,
-      getBasePath: () => getBasePath(spaceId),
-      path: '/',
-      route: { settings: {} },
-      url: {
-        href: '/',
-      },
-      raw: {
-        req: {
-          url: '/',
-        },
-      },
-    };
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId, { notifyUsage: true })) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
 
-    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
-    const actionSavedObject = await savedObjectsClient.get<RawAction>('action', id);
-    const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
-      actionId: id,
-      params,
-      apiKey,
-    });
+    const actionTaskParamsRecord = await unsecuredSavedObjectsClient.create(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      {
+        actionId: id,
+        params,
+        apiKey,
+        relatedSavedObjects,
+      },
+      executionSourceAsSavedObjectReferences(source)
+    );
 
     await taskManager.schedule({
-      taskType: `actions:${actionSavedObject.attributes.actionTypeId}`,
+      taskType: `actions:${actionTypeId}`,
       params: {
         spaceId,
         actionTaskParamsId: actionTaskParamsRecord.id,
@@ -76,4 +85,31 @@ export function createExecuteFunction({
       scope: ['actions'],
     });
   };
+}
+
+function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
+  return isSavedObjectExecutionSource(executionSource)
+    ? {
+        references: [
+          {
+            name: 'source',
+            ...executionSource.source,
+          },
+        ],
+      }
+    : {};
+}
+
+async function getAction(
+  unsecuredSavedObjectsClient: SavedObjectsClientContract,
+  preconfiguredActions: PreConfiguredAction[],
+  actionId: string
+): Promise<PreConfiguredAction | RawAction> {
+  const pcAction = preconfiguredActions.find((action) => action.id === actionId);
+  if (pcAction) {
+    return pcAction;
+  }
+
+  const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
+  return attributes;
 }

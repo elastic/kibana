@@ -1,0 +1,78 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Windows contains accessibility features that may be launched with a key combination before a user has logged in. An adversary can modify the way these programs are launched to get a command prompt or backdoor without logging in to the system.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Potential Modification of Accessibility Binaries",
+  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n process.parent.name : (\"Utilman.exe\", \"winlogon.exe\") and user.name == \"SYSTEM\" and\n process.args :\n    (\n    \"C:\\\\Windows\\\\System32\\\\osk.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Magnify.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Narrator.exe\",\n    \"C:\\\\Windows\\\\System32\\\\Sethc.exe\",\n    \"utilman.exe\",\n    \"ATBroker.exe\",\n    \"DisplaySwitch.exe\",\n    \"sethc.exe\"\n    )\n and not process.pe.original_file_name in\n    (\n    \"osk.exe\",\n    \"sethc.exe\",\n    \"utilman2.exe\",\n    \"DisplaySwitch.exe\",\n    \"ATBroker.exe\",\n    \"ScreenMagnifier.exe\",\n    \"SR.exe\",\n    \"Narrator.exe\",\n    \"magnify.exe\",\n    \"MAGNIFY.EXE\"\n    )\n\n/* uncomment once in winlogbeat to avoid bypass with rogue process with matching pe original file name */\n/* and process.code_signature.subject_name == \"Microsoft Windows\" and process.code_signature.status == \"trusted\" */\n",
+  "references": [
+    "https://www.elastic.co/blog/practical-security-engineering-stateful-detection"
+  ],
+  "risk_score": 73,
+  "rule_id": "7405ddf1-6c8e-41ce-818f-48bea6bcaed8",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.008",
+              "name": "Accessibility Features",
+              "reference": "https://attack.mitre.org/techniques/T1546/008/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.008",
+              "name": "Accessibility Features",
+              "reference": "https://attack.mitre.org/techniques/T1546/008/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 7
+}

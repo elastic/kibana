@@ -54,11 +54,22 @@
   .embPanel__titleInner {
     overflow: hidden;
     display: flex;
+    align-items: center;
     padding-right: $euiSizeS;
+  }
+
+  .embPanel__titleTooltipAnchor {
+    max-width: 100%;
   }
 
   .embPanel__titleText {
     @include euiTextTruncate;
+    font-weight: $euiFontWeightBold;
+  }
+
+  .embPanel__placeholderTitleText {
+    color: $euiColorMediumShade;
+    font-weight: $euiFontWeightRegular;
   }
 }
 
@@ -83,7 +94,7 @@
   */
 
 .embPanel__optionsMenuButton {
-  background-color: transparentize($euiColorDarkestShade, 0.9);
+  background-color: transparentize($euiColorDarkestShade, .9);
   border-bottom-right-radius: 0;
   border-top-left-radius: 0;
 
@@ -109,9 +120,10 @@
 // EDITING MODE
 
 .embPanel--editing {
-  border-style: dashed;
-  border-color: $euiColorMediumShade;
+  border-style: dashed !important;
+  border-color: $euiColorMediumShade !important;
   transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+  border-width: $euiBorderWidthThin;
 
   &:hover,
   &:focus {
@@ -132,11 +144,24 @@
   }
 }
 
+// LOADING and ERRORS
+
+.embPanel--loading {
+  .embPanel__title {
+    color: $euiTextSubduedColor;
+  }
+}
+
 .embPanel__error {
   text-align: center;
   justify-content: center;
   flex-direction: column;
   overflow: auto;
-  text-align: center;
   padding: $euiSizeS;
+}
+
+.embPanel__label {
+  position: absolute;
+  padding-left: $euiSizeS;
+  z-index: $euiZLevel1;
 }

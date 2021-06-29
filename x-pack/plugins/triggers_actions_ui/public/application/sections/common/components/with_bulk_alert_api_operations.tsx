@@ -1,20 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
-import { Alert, AlertType, AlertTaskState } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
+import {
+  Alert,
+  AlertType,
+  AlertTaskState,
+  AlertInstanceSummary,
+  AlertingFrameworkHealth,
+} from '../../../../types';
 import {
   deleteAlerts,
   disableAlerts,
   enableAlerts,
   muteAlerts,
   unmuteAlerts,
-  deleteAlert,
   disableAlert,
   enableAlert,
   muteAlert,
@@ -23,25 +28,40 @@ import {
   unmuteAlertInstance,
   loadAlert,
   loadAlertState,
+  loadAlertInstanceSummary,
   loadAlertTypes,
+  alertingFrameworkHealth,
 } from '../../../lib/alert_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   muteAlerts: (alerts: Alert[]) => Promise<void>;
   unmuteAlerts: (alerts: Alert[]) => Promise<void>;
   enableAlerts: (alerts: Alert[]) => Promise<void>;
   disableAlerts: (alerts: Alert[]) => Promise<void>;
-  deleteAlerts: (alerts: Alert[]) => Promise<void>;
+  deleteAlerts: (
+    alerts: Alert[]
+  ) => Promise<{
+    successes: string[];
+    errors: string[];
+  }>;
   muteAlert: (alert: Alert) => Promise<void>;
   unmuteAlert: (alert: Alert) => Promise<void>;
   muteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   unmuteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   enableAlert: (alert: Alert) => Promise<void>;
   disableAlert: (alert: Alert) => Promise<void>;
-  deleteAlert: (alert: Alert) => Promise<void>;
+  deleteAlert: (
+    alert: Alert
+  ) => Promise<{
+    successes: string[];
+    errors: string[];
+  }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
+  loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
+  getHealth: () => Promise<AlertingFrameworkHealth>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -50,36 +70,39 @@ export function withBulkAlertOperations<T>(
   WrappedComponent: React.ComponentType<T & ComponentOpts>
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
-    const { http } = useAppDependencies();
+    const { http } = useKibana().services;
     return (
       <WrappedComponent
         {...(props as T)}
         muteAlerts={async (items: Alert[]) =>
-          muteAlerts({ http, ids: items.filter(item => !isAlertMuted(item)).map(item => item.id) })
+          muteAlerts({
+            http,
+            ids: items.filter((item) => !isAlertMuted(item)).map((item) => item.id),
+          })
         }
         unmuteAlerts={async (items: Alert[]) =>
-          unmuteAlerts({ http, ids: items.filter(isAlertMuted).map(item => item.id) })
+          unmuteAlerts({ http, ids: items.filter(isAlertMuted).map((item) => item.id) })
         }
         enableAlerts={async (items: Alert[]) =>
-          enableAlerts({ http, ids: items.filter(isAlertDisabled).map(item => item.id) })
+          enableAlerts({ http, ids: items.filter(isAlertDisabled).map((item) => item.id) })
         }
         disableAlerts={async (items: Alert[]) =>
           disableAlerts({
             http,
-            ids: items.filter(item => !isAlertDisabled(item)).map(item => item.id),
+            ids: items.filter((item) => !isAlertDisabled(item)).map((item) => item.id),
           })
         }
         deleteAlerts={async (items: Alert[]) =>
-          deleteAlerts({ http, ids: items.map(item => item.id) })
+          deleteAlerts({ http, ids: items.map((item) => item.id) })
         }
         muteAlert={async (alert: Alert) => {
           if (!isAlertMuted(alert)) {
-            return muteAlert({ http, id: alert.id });
+            return await muteAlert({ http, id: alert.id });
           }
         }}
         unmuteAlert={async (alert: Alert) => {
           if (isAlertMuted(alert)) {
-            return unmuteAlert({ http, id: alert.id });
+            return await unmuteAlert({ http, id: alert.id });
           }
         }}
         muteAlertInstance={async (alert: Alert, instanceId: string) => {
@@ -94,18 +117,22 @@ export function withBulkAlertOperations<T>(
         }}
         enableAlert={async (alert: Alert) => {
           if (isAlertDisabled(alert)) {
-            return enableAlert({ http, id: alert.id });
+            return await enableAlert({ http, id: alert.id });
           }
         }}
         disableAlert={async (alert: Alert) => {
           if (!isAlertDisabled(alert)) {
-            return disableAlert({ http, id: alert.id });
+            return await disableAlert({ http, id: alert.id });
           }
         }}
-        deleteAlert={async (alert: Alert) => deleteAlert({ http, id: alert.id })}
+        deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
+        loadAlertInstanceSummary={async (alertId: Alert['id']) =>
+          loadAlertInstanceSummary({ http, alertId })
+        }
         loadAlertTypes={async () => loadAlertTypes({ http })}
+        getHealth={async () => alertingFrameworkHealth({ http })}
       />
     );
   };
@@ -120,5 +147,5 @@ function isAlertMuted(alert: Alert) {
 }
 
 function isAlertInstanceMuted(alert: Alert, instanceId: string) {
-  return alert.mutedInstanceIds.findIndex(muted => muted === instanceId) >= 0;
+  return alert.mutedInstanceIds.findIndex((muted) => muted === instanceId) >= 0;
 }

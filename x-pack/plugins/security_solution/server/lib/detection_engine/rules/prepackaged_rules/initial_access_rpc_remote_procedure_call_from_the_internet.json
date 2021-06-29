@@ -1,0 +1,49 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects network events that may indicate the use of RPC traffic from the Internet. RPC is commonly used by system administrators to remotely control a system for maintenance or to use shared resources. It should almost never be directly exposed to the Internet, as it is frequently targeted and exploited by threat actors as an initial access or back-door vector.",
+  "from": "now-9m",
+  "index": [
+    "filebeat-*",
+    "packetbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "RPC (Remote Procedure Call) from the Internet",
+  "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:135 or event.dataset:zeek.dce_rpc) and\n  not source.ip:(\n    10.0.0.0/8 or\n    127.0.0.0/8 or\n    169.254.0.0/16 or\n    172.16.0.0/12 or\n    192.0.0.0/24 or\n    192.0.0.0/29 or\n    192.0.0.8/32 or\n    192.0.0.9/32 or\n    192.0.0.10/32 or\n    192.0.0.170/32 or\n    192.0.0.171/32 or\n    192.0.2.0/24 or\n    192.31.196.0/24 or\n    192.52.193.0/24 or\n    192.168.0.0/16 or\n    192.88.99.0/24 or\n    224.0.0.0/4 or\n    100.64.0.0/10 or\n    192.175.48.0/24 or\n    198.18.0.0/15 or\n    198.51.100.0/24 or\n    203.0.113.0/24 or\n    240.0.0.0/4 or\n    \"::1\" or\n    \"FE80::/10\" or\n    \"FF00::/8\"\n  ) and\n  destination.ip:(\n    10.0.0.0/8 or\n    172.16.0.0/12 or\n    192.168.0.0/16\n  )\n",
+  "references": [
+    "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
+  ],
+  "risk_score": 73,
+  "rule_id": "143cb236-0956-4f42-a706-814bcaa0cf5a",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Network",
+    "Threat Detection",
+    "Initial Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
+      },
+      "technique": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "reference": "https://attack.mitre.org/techniques/T1190/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 9
+}

@@ -1,0 +1,75 @@
+[[get-rule-api]]
+=== Get rule API
+++++
+<titleabbrev>Get rule</titleabbrev>
+++++
+
+Retrieve a rule by ID.
+
+[[get-rule-api-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/alerting/rule/<id>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
+
+[[get-rule-api-params]]
+==== Path parameters
+
+`id`::
+  (Required, string) The ID of the rule to retrieve.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[get-rule-api-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+[[get-rule-api-example]]
+==== Example
+
+Retrieve the rule object with the ID `41893910-6bca-11eb-9e0d-85d233e3ee35`:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35
+--------------------------------------------------
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+--------------------------------------------------
+{
+  "id": "0a037d60-6b62-11eb-9e0d-85d233e3ee35",
+  "notify_when": "onActionGroupChange",
+  "params": {
+    "aggType": "avg",
+  },
+  "consumer": "alerts",
+  "rule_type_id": "test.rule.type",
+  "schedule": {
+    "interval": "1m"
+  },
+  "actions": [],
+  "tags": [],
+  "name": "test rule",
+  "enabled": true,
+  "throttle": null,
+  "api_key_owner": "elastic",
+  "created_by": "elastic",
+  "updated_by": "elastic",
+  "mute_all": false,
+  "muted_alert_ids": [],
+  "updated_at": "2021-02-10T05:37:19.086Z",
+  "created_at": "2021-02-10T05:37:19.086Z",
+  "scheduled_task_id": "0b092d90-6b62-11eb-9e0d-85d233e3ee35",
+  "execution_status": {
+    "last_execution_date": "2021-02-10T17:55:14.262Z",
+    "status": "ok"
+  }
+}
+--------------------------------------------------

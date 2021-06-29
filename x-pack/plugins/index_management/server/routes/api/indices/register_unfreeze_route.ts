@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -13,10 +14,10 @@ const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerUnfreezeRoute({ router, license, lib }: RouteDependencies) {
+export function registerUnfreezeRoute({ router, lib }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/unfreeze'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
+    async (ctx, req, res) => {
       const { indices = [] } = req.body as typeof bodySchema.type;
       const params = {
         path: `/${encodeURIComponent(indices.join(','))}/_unfreeze`,
@@ -24,7 +25,7 @@ export function registerUnfreezeRoute({ router, license, lib }: RouteDependencie
       };
 
       try {
-        await ctx.core.elasticsearch.dataClient.callAsCurrentUser('transport.request', params);
+        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', params);
         return res.ok();
       } catch (e) {
         if (lib.isEsError(e)) {
@@ -34,8 +35,8 @@ export function registerUnfreezeRoute({ router, license, lib }: RouteDependencie
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
-    })
+    }
   );
 }

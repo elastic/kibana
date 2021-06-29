@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { InfraSourceStatusAdapter } from '../../source_status';
+import type { InfraPluginRequestHandlerContext } from '../../../types';
+import { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
 import { InfraDatabaseGetIndicesResponse } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
   constructor(private readonly framework: KibanaFramework) {}
 
-  public async getIndexNames(requestContext: RequestHandlerContext, aliasName: string) {
+  public async getIndexNames(requestContext: InfraPluginRequestHandlerContext, aliasName: string) {
     const indexMaps = await Promise.all([
       this.framework
         .callWithRequest(requestContext, 'indices.getAlias', {
@@ -34,13 +35,16 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
     );
   }
 
-  public async hasAlias(requestContext: RequestHandlerContext, aliasName: string) {
+  public async hasAlias(requestContext: InfraPluginRequestHandlerContext, aliasName: string) {
     return await this.framework.callWithRequest(requestContext, 'indices.existsAlias', {
       name: aliasName,
     });
   }
 
-  public async hasIndices(requestContext: RequestHandlerContext, indexNames: string) {
+  public async getIndexStatus(
+    requestContext: InfraPluginRequestHandlerContext,
+    indexNames: string
+  ): Promise<SourceIndexStatus> {
     return await this.framework
       .callWithRequest(requestContext, 'search', {
         ignore_unavailable: true,
@@ -48,12 +52,23 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         index: indexNames,
         size: 0,
         terminate_after: 1,
+        track_total_hits: 1,
       })
       .then(
-        response => response._shards.total > 0,
-        err => {
+        (response) => {
+          if (response._shards.total <= 0) {
+            return 'missing';
+          }
+
+          if (response.hits.total.value > 0) {
+            return 'available';
+          }
+
+          return 'empty';
+        },
+        (err) => {
           if (err.status === 404) {
-            return false;
+            return 'missing';
           }
           throw err;
         }

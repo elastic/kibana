@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
-import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
+import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { InfraDatabaseSearchResponse } from '../lib/adapters/framework';
 
 export const getAllCompositeData = async <
@@ -13,18 +13,15 @@ export const getAllCompositeData = async <
   Bucket = {},
   Options extends object = {}
 >(
-  framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  esClientSearch: (
+    options: Options
+  ) => Promise<ApiResponse<InfraDatabaseSearchResponse<{}, Aggregation>>>,
   options: Options,
   bucketSelector: (response: InfraDatabaseSearchResponse<{}, Aggregation>) => Bucket[],
   onAfterKey: (options: Options, response: InfraDatabaseSearchResponse<{}, Aggregation>) => Options,
   previousBuckets: Bucket[] = []
 ): Promise<Bucket[]> => {
-  const response = await framework.callWithRequest<{}, Aggregation>(
-    requestContext,
-    'search',
-    options
-  );
+  const { body: response } = await esClientSearch(options);
 
   // Nothing available, return the previous buckets.
   if (response.hits.total.value === 0) {
@@ -46,8 +43,7 @@ export const getAllCompositeData = async <
   // There is possibly more data, concat previous and current buckets and call ourselves recursively.
   const newOptions = onAfterKey(options, response);
   return getAllCompositeData(
-    framework,
-    requestContext,
+    esClientSearch,
     newOptions,
     bucketSelector,
     onAfterKey,

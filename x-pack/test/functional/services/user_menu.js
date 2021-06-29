@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export function UserMenuProvider({ getService }) {
@@ -42,8 +43,10 @@ export function UserMenuProvider({ getService }) {
         return;
       }
 
-      await testSubjects.click('userMenuButton');
-      await retry.waitFor('user menu opened', async () => await testSubjects.exists('userMenu'));
+      await retry.try(async () => {
+        await testSubjects.click('userMenuButton');
+        await testSubjects.existOrFail('userMenu');
+      });
     }
   })();
 }

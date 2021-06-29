@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/lib/serialization';
-import { isEsError } from '../../../lib/is_es_error';
 import { RouteDependencies } from '../../../types';
-import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 const paramsSchema = schema.object({
   id: schema.string(),
@@ -21,25 +19,13 @@ const bodySchema = schema.object(
   {
     type: schema.string(),
     isNew: schema.boolean(),
+    isActive: schema.boolean(),
   },
-  { allowUnknowns: true }
+  { unknowns: 'allow' }
 );
 
-function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
-  return dataClient.callAsCurrentUser('watcher.getWatch', {
-    id: watchId,
-  });
-}
-
-function saveWatch(dataClient: IScopedClusterClient, id: string, body: any) {
-  return dataClient.callAsCurrentUser('watcher.putWatch', {
-    id,
-    body,
-  });
-}
-
-export function registerSaveRoute(deps: RouteDependencies) {
-  deps.router.put(
+export function registerSaveRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
+  router.put(
     {
       path: '/api/watcher/watch/{id}',
       validate: {
@@ -47,14 +33,18 @@ export function registerSaveRoute(deps: RouteDependencies) {
         body: bodySchema,
       },
     },
-    licensePreRoutingFactory(deps, async (ctx, request, response) => {
+    license.guardApiRoute(async (ctx, request, response) => {
       const { id } = request.params;
-      const { type, isNew, ...watchConfig } = request.body;
+      const { type, isNew, isActive, ...watchConfig } = request.body;
+
+      const dataClient = ctx.core.elasticsearch.client;
 
       // For new watches, verify watch with the same ID doesn't already exist
       if (isNew) {
         try {
-          const existingWatch = await fetchWatch(ctx.watcher!.client, id);
+          const { body: existingWatch } = await dataClient.asCurrentUser.watcher.getWatch({
+            id,
+          });
           if (existingWatch.found) {
             return response.conflict({
               body: {
@@ -68,9 +58,9 @@ export function registerSaveRoute(deps: RouteDependencies) {
             });
           }
         } catch (e) {
-          const es404 = isEsError(e) && e.statusCode === 404;
+          const es404 = e?.statusCode === 404;
           if (!es404) {
-            return response.internalError({ body: e });
+            throw e;
           }
           // Else continue...
         }
@@ -91,17 +81,16 @@ export function registerSaveRoute(deps: RouteDependencies) {
 
       try {
         // Create new watch
+        const { body: putResult } = await dataClient.asCurrentUser.watcher.putWatch({
+          id,
+          active: isActive,
+          body: serializedWatch,
+        });
         return response.ok({
-          body: await saveWatch(ctx.watcher!.client, id, serializedWatch),
+          body: putResult,
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        return response.internalError({ body: e });
+        return handleEsError({ error: e, response });
       }
     })
   );

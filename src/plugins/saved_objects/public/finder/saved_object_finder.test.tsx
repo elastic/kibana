@@ -1,27 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('lodash', () => ({
   debounce: (fn: any) => fn,
 }));
 
-const nextTick = () => new Promise(res => process.nextTick(res));
+const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import {
   EuiEmptyPrompt,
@@ -130,10 +119,7 @@ describe('SavedObjectsFinder', () => {
 
     wrapper.instance().componentDidMount!();
     await nextTick();
-    wrapper
-      .find(EuiListGroupItem)
-      .first()
-      .simulate('click');
+    wrapper.find(EuiListGroupItem).first().simulate('click');
     expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
       true
     );
@@ -469,12 +455,7 @@ describe('SavedObjectsFinder', () => {
     wrapper.instance().componentDidMount!();
     await nextTick();
 
-    expect(
-      wrapper
-        .find(EuiEmptyPrompt)
-        .first()
-        .prop('body')
-    ).toEqual(noItemsMessage);
+    expect(wrapper.find(EuiEmptyPrompt).first().prop('body')).toEqual(noItemsMessage);
   });
 
   describe('pagination', () => {
@@ -504,12 +485,7 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(
-        wrapper
-          .find(EuiTablePagination)
-          .first()
-          .prop('itemsPerPage')
-      ).toEqual(15);
+      expect(wrapper.find(EuiTablePagination).first().prop('itemsPerPage')).toEqual(15);
       expect(wrapper.find(EuiListGroup).children().length).toBe(15);
     });
 
@@ -531,10 +507,7 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find(EuiTablePagination)
-        .first()
-        .prop('onChangeItemsPerPage')!(5);
+      wrapper.find(EuiTablePagination).first().prop('onChangeItemsPerPage')!(5);
       expect(wrapper.find(EuiListGroup).children().length).toBe(5);
     });
 
@@ -556,17 +529,8 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find(EuiTablePagination)
-        .first()
-        .prop('onChangePage')!(1);
-      expect(
-        wrapper
-          .find(EuiListGroup)
-          .children()
-          .first()
-          .key()
-      ).toBe('15');
+      wrapper.find(EuiTablePagination).first().prop('onChangePage')!(1);
+      expect(wrapper.find(EuiListGroup).children().first().key()).toBe('15');
     });
 
     it('should show an ordinary pagination for fixed page sizes', async () => {
@@ -587,12 +551,7 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      expect(
-        wrapper
-          .find(EuiPagination)
-          .first()
-          .prop('pageCount')
-      ).toEqual(2);
+      expect(wrapper.find(EuiPagination).first().prop('pageCount')).toEqual(2);
       expect(wrapper.find(EuiListGroup).children().length).toBe(33);
     });
 
@@ -614,17 +573,8 @@ describe('SavedObjectsFinder', () => {
 
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find(EuiPagination)
-        .first()
-        .prop('onPageClick')!(1);
-      expect(
-        wrapper
-          .find(EuiListGroup)
-          .children()
-          .first()
-          .key()
-      ).toBe('33');
+      wrapper.find(EuiPagination).first().prop('onPageClick')!(1);
+      expect(wrapper.find(EuiListGroup).children().first().key()).toBe('33');
     });
   });
 

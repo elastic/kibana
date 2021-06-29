@@ -1,0 +1,30 @@
+{
+  "anomaly_threshold": 50,
+  "author": [
+    "Elastic"
+  ],
+  "description": "A machine learning job detected a significant spike in the rate of a particular error in the CloudTrail messages. Spikes in error messages may accompany attempts at privilege escalation, lateral movement, or discovery.",
+  "false_positives": [
+    "Spikes in error message activity can also be due to bugs in cloud automation scripts or workflows; changes to cloud automation scripts or workflows; adoption of new services; changes in the way services are used; or changes to IAM privileges."
+  ],
+  "from": "now-60m",
+  "interval": "15m",
+  "license": "Elastic License v2",
+  "machine_learning_job_id": "high_distinct_count_error_message",
+  "name": "Spike in AWS Error Messages",
+  "note": "## Triage and analysis\n\n### Investigating Spikes in CloudTrail Errors\nDetection alerts from this rule indicate a large spike in the number of CloudTrail log messages that contain a particular error message. The error message in question was associated with the response to an AWS API command or method call. Here are some possible avenues of investigation:\n- Examine the history of the error. Has it manifested before? If the error, which is visible in the `aws.cloudtrail.error_message` field, manifested only very recently, it might be related to recent changes in an automation module or script.\n- Examine the request parameters. These may provide indications as to the nature of the task being performed when the error occurred. Is the error related to unsuccessful attempts to enumerate or access objects, data or secrets? If so, this can sometimes be a byproduct of discovery, privilege escalation or lateral movement attempts.\n- Consider the user as identified by the user.name field. Is this activity part of an expected workflow for the user context? Examine the user identity in the `aws.cloudtrail.user_identity.arn` field and the access key id in the `aws.cloudtrail.user_identity.access_key_id` field which can help identify the precise user context. The user agent details in the `user_agent.original` field may also indicate what kind of a client made the request.\n- Consider the source IP address and geolocation for the calling user who issued the command. Do they look normal for the calling user? If the source is an EC2 IP address, is it associated with an EC2 instance in one of your accounts or could it be sourcing from an EC2 instance not under your control? If it is an authorized EC2 instance, is the activity associated with normal behavior for the instance role or roles? Are there any other alerts or signs of suspicious activity involving this instance?",
+  "references": [
+    "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "78d3d8d9-b476-451d-a9e0-7a5addd70670",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "AWS",
+    "ML"
+  ],
+  "type": "machine_learning",
+  "version": 4
+}

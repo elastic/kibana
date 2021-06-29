@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import mockRolledUpData from './hybrid_index_helper';
 
-export default function({ getService, getPageObjects }) {
-  const es = getService('legacyEs');
+export default function ({ getService, getPageObjects }) {
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const PageObjects = getPageObjects([
     'common',
     'settings',
@@ -19,7 +21,7 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('tsvb integration', function() {
+  describe('tsvb integration', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `tsvb-test-rollup-job-${Date.now()}`;
@@ -33,7 +35,7 @@ export default function({ getService, getPageObjects }) {
 
     before(async () => {
       // load visualize to have an index pattern ready, otherwise visualize will redirect
-      await esArchiver.load('visualize/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/visualize/default');
     });
 
     it('create rollup tsvb', async () => {
@@ -47,9 +49,8 @@ export default function({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         //Create a rollup for kibana to recognize
-        await es.transport.request({
-          path: `/_rollup/job/${rollupJobName}`,
-          method: 'PUT',
+        await es.rollup.putJob({
+          id: rollupJobName,
           body: {
             index_pattern: rollupSourceIndexName,
             rollup_index: rollupTargetIndexName,
@@ -67,7 +68,7 @@ export default function({ getService, getPageObjects }) {
         });
       });
 
-      await pastDates.map(async day => {
+      await pastDates.map(async (day) => {
         await es.index(mockRolledUpData(rollupJobName, rollupTargetIndexName, day));
       });
 
@@ -81,7 +82,9 @@ export default function({ getService, getPageObjects }) {
         'Oct 15, 2019 @ 19:31:44.000'
       );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
-      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
+      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName, false);
+      await PageObjects.visualBuilder.selectIndexPatternTimeField('@timestamp');
+      await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);
       await PageObjects.common.sleep(3000);
@@ -96,9 +99,8 @@ export default function({ getService, getPageObjects }) {
         method: 'DELETE',
       });
 
-      await es.indices.delete({ index: rollupTargetIndexName });
-      await es.indices.delete({ index: rollupSourceIndexName });
-      await esArchiver.load('empty_kibana');
+      await esDeleteAllIndices([rollupTargetIndexName, rollupSourceIndexName]);
+      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
     });
   });
 }

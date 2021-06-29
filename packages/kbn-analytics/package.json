@@ -3,20 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "description": "Kibana Analytics tool",
-  "main": "target/node/index.js",
-  "browser": "target/web/index.js",
-  "types": "target/types/index.d.ts",
+  "main": "target_node/index.js",
+  "types": "target_types/index.d.ts",
+  "browser": "target_web/index.js",
   "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
-  "license": "Apache-2.0",
-  "scripts": {
-    "build": "node scripts/build",
-    "kbn:bootstrap": "node scripts/build --source-maps",
-    "kbn:watch": "node scripts/build --source-maps --watch"
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@kbn/dev-utils": "1.0.0",
-    "@kbn/babel-preset": "1.0.0",
-    "typescript": "3.7.2"
-  }
+  "license": "SSPL-1.0 OR Elastic License 2.0"
 }

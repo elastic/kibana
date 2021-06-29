@@ -1,46 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { PROCESSOR_EVENT } from '../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../helpers/setup_request';
 
 // Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function hasHistoricalAgentData(setup: Setup) {
-  const { client, indices } = setup;
+  const { apmEventClient } = setup;
 
   const params = {
     terminateAfter: 1,
-    index: [
-      indices['apm_oss.errorIndices'],
-      indices['apm_oss.metricsIndices'],
-      indices['apm_oss.sourcemapIndices'],
-      indices['apm_oss.transactionIndices']
-    ],
+    apm: {
+      events: [
+        ProcessorEvent.error,
+        ProcessorEvent.metric,
+        ProcessorEvent.transaction,
+      ],
+    },
     body: {
       size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [PROCESSOR_EVENT]: [
-                  'error',
-                  'metric',
-                  'sourcemap',
-                  'transaction'
-                ]
-              }
-            }
-          ]
-        }
-      }
-    }
+    },
   };
 
-  const resp = await client.search(params);
-  const hasHistorialAgentData = resp.hits.total.value > 0;
-  return hasHistorialAgentData;
+  const resp = await apmEventClient.search('has_historical_agent_data', params);
+  return resp.hits.total.value > 0;
 }

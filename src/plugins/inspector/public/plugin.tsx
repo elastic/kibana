@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -22,10 +11,11 @@ import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { toMountPoint } from '../../kibana_react/public';
 import { InspectorViewRegistry } from './view_registry';
-import { Adapters, InspectorOptions, InspectorSession } from './types';
+import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
+import { Adapters } from '../common';
 
-import { getRequestsViewDescription, getDataViewDescription } from './views';
+import { getRequestsViewDescription } from './views';
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
@@ -66,10 +56,9 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
-    this.views.register(getDataViewDescription(core.uiSettings));
     this.views.register(getRequestsViewDescription());
 
     return {
@@ -82,7 +71,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   }
 
   public start(core: CoreStart) {
-    const isAvailable: Start['isAvailable'] = adapters =>
+    const isAvailable: Start['isAvailable'] = (adapters) =>
       this.views!.getVisible(adapters).length > 0;
 
     const closeButtonLabel = i18n.translate('inspector.closeButton', {
@@ -100,7 +89,15 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
       }
 
       return core.overlays.openFlyout(
-        toMountPoint(<InspectorPanel views={views} adapters={adapters} title={options.title} />),
+        toMountPoint(
+          <InspectorPanel
+            views={views}
+            adapters={adapters}
+            title={options.title}
+            options={options.options}
+            dependencies={{ uiSettings: core.uiSettings }}
+          />
+        ),
         {
           'data-test-subj': 'inspectorPanel',
           closeButtonAriaLabel: closeButtonLabel,

@@ -1,27 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { APICaller, Logger } from 'src/core/server';
+
+import { ElasticsearchClient, Logger } from 'src/core/server';
 import { first } from 'rxjs/operators';
+
+import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import {
   IndexGroup,
-  ReindexOptions,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
 } from '../../../common/types';
+
+import { esIndicesStateCheck } from '../es_indices_state_check';
+
 import {
   generateNewIndexName,
   getReindexWarnings,
   sourceNameForIndex,
   transformFlatSettings,
 } from './index_settings';
+
 import { ReindexActions } from './reindex_actions';
-import { LicensingPluginSetup } from '../../../../licensing/server';
 
 import { error } from './error';
 
@@ -52,9 +58,12 @@ export interface ReindexService {
   /**
    * Creates a new reindex operation for a given index.
    * @param indexName
-   * @param opts
+   * @param opts Additional options when creating a new reindex operation
    */
-  createReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
+  createReindexOperation(
+    indexName: string,
+    opts?: { enqueue?: boolean }
+  ): Promise<ReindexSavedObject>;
 
   /**
    * Retrieves all reindex operations that have the given status.
@@ -68,6 +77,12 @@ export interface ReindexService {
    * @param indexName
    */
   findReindexOperation(indexName: string): Promise<ReindexSavedObject | null>;
+
+  /**
+   * Delete reindex operations for completed indices with deprecations.
+   * @param indexNames
+   */
+  cleanupReindexOperations(indexNames: string[]): Promise<void> | null;
 
   /**
    * Process the reindex operation through one step of the state machine and resolves
@@ -87,7 +102,21 @@ export interface ReindexService {
    * @param indexName
    * @param opts As with {@link createReindexOperation} we support this setting.
    */
-  resumeReindexOperation(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
+  resumeReindexOperation(
+    indexName: string,
+    opts?: { enqueue?: boolean }
+  ): Promise<ReindexSavedObject>;
+
+  /**
+   * Update the update_at field on the reindex operation
+   *
+   * @remark
+   * Currently also sets a startedAt field on the SavedObject, not really used
+   * elsewhere, but is an indication that the object has started being processed.
+   *
+   * @param indexName
+   */
+  startQueuedReindexOperation(indexName: string): Promise<ReindexSavedObject>;
 
   /**
    * Cancel an in-progress reindex operation for a given index. Only allowed when the
@@ -100,7 +129,7 @@ export interface ReindexService {
 }
 
 export const reindexServiceFactory = (
-  callAsUser: APICaller,
+  esClient: ElasticsearchClient,
   actions: ReindexActions,
   log: Logger,
   licensing: LicensingPluginSetup
@@ -114,15 +143,14 @@ export const reindexServiceFactory = (
    */
   const stopMlJobs = async () => {
     await actions.incrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
       await validateNodesMinimumVersion(6, 7);
 
-      const res = await callAsUser('transport.request', {
-        path: '/_ml/set_upgrade_mode?enabled=true',
-        method: 'POST',
+      const { body } = await esClient.ml.setUpgradeMode({
+        enabled: true,
       });
 
-      if (!res.acknowledged) {
+      if (!body.acknowledged) {
         throw new Error(`Could not stop ML jobs`);
       }
 
@@ -135,14 +163,13 @@ export const reindexServiceFactory = (
    */
   const resumeMlJobs = async () => {
     await actions.decrementIndexGroupReindexes(IndexGroup.ml);
-    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async mlDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.ml, async (mlDoc) => {
       if (mlDoc.attributes.runningReindexCount === 0) {
-        const res = await callAsUser('transport.request', {
-          path: '/_ml/set_upgrade_mode?enabled=false',
-          method: 'POST',
+        const { body } = await esClient.ml.setUpgradeMode({
+          enabled: false,
         });
 
-        if (!res.acknowledged) {
+        if (!body.acknowledged) {
           throw new Error(`Could not resume ML jobs`);
         }
       }
@@ -156,13 +183,10 @@ export const reindexServiceFactory = (
    */
   const stopWatcher = async () => {
     await actions.incrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
-      const { acknowledged } = await callAsUser('transport.request', {
-        path: '/_watcher/_stop',
-        method: 'POST',
-      });
+    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
+      const { body } = await esClient.watcher.stop();
 
-      if (!acknowledged) {
+      if (!body.acknowledged) {
         throw new Error('Could not stop Watcher');
       }
 
@@ -175,14 +199,11 @@ export const reindexServiceFactory = (
    */
   const startWatcher = async () => {
     await actions.decrementIndexGroupReindexes(IndexGroup.watcher);
-    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async watcherDoc => {
+    await actions.runWhileIndexGroupLocked(IndexGroup.watcher, async (watcherDoc) => {
       if (watcherDoc.attributes.runningReindexCount === 0) {
-        const { acknowledged } = await callAsUser('transport.request', {
-          path: '/_watcher/_start',
-          method: 'POST',
-        });
+        const { body } = await esClient.watcher.start();
 
-        if (!acknowledged) {
+        if (!body.acknowledged) {
           throw new Error('Could not start Watcher');
         }
       }
@@ -194,16 +215,18 @@ export const reindexServiceFactory = (
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
     // Cancel reindex task if it was started but not completed
     if (reindexOp.attributes.lastCompletedStep === ReindexStep.reindexStarted) {
-      await callAsUser('tasks.cancel', {
-        taskId: reindexOp.attributes.reindexTaskId,
-      }).catch(e => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
+      await esClient.tasks
+        .cancel({
+          task_id: reindexOp.attributes.reindexTaskId ?? undefined,
+        })
+        .catch(() => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
     }
 
     // Set index back to writable if we ever got past this point.
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
-      await callAsUser('indices.putSettings', {
+      await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { 'index.blocks.write': false },
+        body: { settings: { blocks: { write: false } } },
       });
     }
 
@@ -211,7 +234,9 @@ export const reindexServiceFactory = (
       reindexOp.attributes.lastCompletedStep >= ReindexStep.newIndexCreated &&
       reindexOp.attributes.lastCompletedStep < ReindexStep.aliasCreated
     ) {
-      await callAsUser('indices.delete', { index: reindexOp.attributes.newIndexName });
+      await esClient.indices.delete({
+        index: reindexOp.attributes.newIndexName,
+      });
     }
 
     // Resume consumers if we ever got past this point.
@@ -225,10 +250,7 @@ export const reindexServiceFactory = (
   // ------ Functions used to process the state machine
 
   const validateNodesMinimumVersion = async (minMajor: number, minMinor: number) => {
-    const nodesResponse = await callAsUser('transport.request', {
-      path: '/_nodes',
-      method: 'GET',
-    });
+    const { body: nodesResponse } = await esClient.nodes.info();
 
     const outDatedNodes = Object.values(nodesResponse.nodes).filter((node: any) => {
       const matches = node.version.match(VERSION_REGEX);
@@ -266,9 +288,9 @@ export const reindexServiceFactory = (
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
     const { indexName } = reindexOp.attributes;
-    const putReadonly = await callAsUser('indices.putSettings', {
+    const { body: putReadonly } = await esClient.indices.putSettings({
       index: indexName,
-      body: { 'index.blocks.write': true },
+      body: { settings: { blocks: { write: true } } },
     });
 
     if (!putReadonly.acknowledged) {
@@ -292,7 +314,7 @@ export const reindexServiceFactory = (
 
     const { settings, mappings } = transformFlatSettings(flatSettings);
 
-    const createIndex = await callAsUser('indices.create', {
+    const { body: createIndex } = await esClient.indices.create({
       index: newIndexName,
       body: {
         settings,
@@ -314,21 +336,44 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const startReindexing = async (reindexOp: ReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, reindexOptions } = reindexOp.attributes;
 
-    const startReindex = (await callAsUser('reindex', {
+    // Where possible, derive reindex options at the last moment before reindexing
+    // to prevent them from becoming stale as they wait in the queue.
+    const indicesState = await esIndicesStateCheck(esClient, [indexName]);
+    const shouldOpenAndClose = indicesState[indexName] === 'closed';
+    if (shouldOpenAndClose) {
+      log.debug(`Detected closed index ${indexName}, opening...`);
+      await esClient.indices.open({ index: indexName });
+    }
+
+    const flatSettings = await actions.getFlatSettings(indexName);
+    if (!flatSettings) {
+      throw error.indexNotFound(`Index ${indexName} does not exist.`);
+    }
+
+    const { body: startReindexResponse } = await esClient.reindex({
       refresh: true,
-      waitForCompletion: false,
+      wait_for_completion: false,
       body: {
         source: { index: indexName },
         dest: { index: reindexOp.attributes.newIndexName },
       },
-    })) as any;
+    });
 
     return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.reindexStarted,
-      reindexTaskId: startReindex.task,
+      reindexTaskId:
+        startReindexResponse.task === undefined
+          ? startReindexResponse.task
+          : String(startReindexResponse.task),
       reindexTaskPercComplete: 0,
+      reindexOptions: {
+        ...(reindexOptions ?? {}),
+        // Indicate to downstream states whether we opened a closed index that should be
+        // closed again.
+        openAndClose: shouldOpenAndClose,
+      },
     });
   };
 
@@ -337,21 +382,21 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const updateReindexStatus = async (reindexOp: ReindexSavedObject) => {
-    const taskId = reindexOp.attributes.reindexTaskId;
+    const taskId = reindexOp.attributes.reindexTaskId!;
 
     // Check reindexing task progress
-    const taskResponse = await callAsUser('tasks.get', {
-      taskId,
-      waitForCompletion: false,
+    const { body: taskResponse } = await esClient.tasks.get({
+      task_id: taskId,
+      wait_for_completion: false,
     });
 
     if (!taskResponse.completed) {
       // Updated the percent complete
-      const perc = taskResponse.task.status.created / taskResponse.task.status.total;
+      const perc = taskResponse.task.status!.created / taskResponse.task.status!.total;
       return actions.updateReindexOp(reindexOp, {
         reindexTaskPercComplete: perc,
       });
-    } else if (taskResponse.task.status.canceled === 'by user request') {
+    } else if (taskResponse.task.status?.canceled === 'by user request') {
       // Set the status to cancelled
       reindexOp = await actions.updateReindexOp(reindexOp, {
         status: ReindexStatus.cancelled,
@@ -361,9 +406,11 @@ export const reindexServiceFactory = (
       reindexOp = await cleanupChanges(reindexOp);
     } else {
       // Check that it reindexed all documents
-      const { count } = await callAsUser('count', { index: reindexOp.attributes.indexName });
+      const {
+        body: { count },
+      } = await esClient.count({ index: reindexOp.attributes.indexName });
 
-      if (taskResponse.task.status.created < count) {
+      if (taskResponse.task.status!.created < count) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
         throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
@@ -377,7 +424,7 @@ export const reindexServiceFactory = (
     }
 
     // Delete the task from ES .tasks index
-    const deleteTaskResp = await callAsUser('delete', {
+    const { body: deleteTaskResp } = await esClient.delete({
       index: '.tasks',
       id: taskId,
     });
@@ -394,30 +441,34 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
-    const { indexName, newIndexName } = reindexOp.attributes;
+    const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
-    const existingAliases = (
-      await callAsUser('indices.getAlias', {
-        index: indexName,
-      })
-    )[indexName].aliases;
+    const { body: response } = await esClient.indices.getAlias({
+      index: indexName,
+    });
 
-    const extraAlises = Object.keys(existingAliases).map(aliasName => ({
+    const existingAliases = response[indexName].aliases;
+
+    const extraAliases = Object.keys(existingAliases).map((aliasName) => ({
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
     }));
 
-    const aliasResponse = await callAsUser('indices.updateAliases', {
+    const { body: aliasResponse } = await esClient.indices.updateAliases({
       body: {
         actions: [
           { add: { index: newIndexName, alias: indexName } },
           { remove_index: { index: indexName } },
-          ...extraAlises,
+          ...extraAliases,
         ],
       },
     });
 
     if (!aliasResponse.acknowledged) {
       throw error.cannotCreateIndex(`Index aliases could not be created.`);
+    }
+
+    if (reindexOptions?.openAndClose === true) {
+      await esClient.indices.close({ index: indexName });
     }
 
     return actions.updateReindexOp(reindexOp, {
@@ -494,9 +545,7 @@ export const reindexServiceFactory = (
         body.cluster = [...body.cluster, 'manage_watcher'];
       }
 
-      const resp = await callAsUser('transport.request', {
-        path: '/_security/user/_has_privileges',
-        method: 'POST',
+      const { body: resp } = await esClient.security.hasPrivileges({
         body,
       });
 
@@ -520,8 +569,8 @@ export const reindexServiceFactory = (
       }
     },
 
-    async createReindexOperation(indexName: string, opts?: ReindexOptions) {
-      const indexExists = await callAsUser('indices.exists', { index: indexName });
+    async createReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
+      const { body: indexExists } = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
         throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
       }
@@ -542,7 +591,10 @@ export const reindexServiceFactory = (
         }
       }
 
-      return actions.createReindexOp(indexName, opts);
+      return actions.createReindexOp(
+        indexName,
+        opts?.enqueue ? { queueSettings: { queuedAt: Date.now() } } : undefined
+      );
     },
 
     async findReindexOperation(indexName: string) {
@@ -560,10 +612,27 @@ export const reindexServiceFactory = (
       return findResponse.saved_objects[0];
     },
 
+    async cleanupReindexOperations(indexNames: string[]) {
+      const performCleanup = async (indexName: string) => {
+        const existingReindexOps = await actions.findReindexOperations(indexName);
+
+        if (existingReindexOps && existingReindexOps.total !== 0) {
+          const existingOp = existingReindexOps.saved_objects[0];
+          if (existingOp.attributes.status === ReindexStatus.completed) {
+            // Delete the existing one if its status is completed, but still contains deprecation warnings
+            // example scenario: index was upgraded, but then deleted and restored with an old snapshot
+            await actions.deleteReindexOp(existingOp);
+          }
+        }
+      };
+
+      await Promise.all(indexNames.map(performCleanup));
+    },
+
     findAllByStatus: actions.findAllByStatus,
 
     async processNextStep(reindexOp: ReindexSavedObject) {
-      return actions.runWhileLocked(reindexOp, async lockedReindexOp => {
+      return actions.runWhileLocked(reindexOp, async (lockedReindexOp) => {
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case ReindexStep.created:
@@ -604,7 +673,7 @@ export const reindexServiceFactory = (
           });
 
           // Cleanup any changes, ignoring any errors.
-          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch(err => lockedReindexOp);
+          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch((err) => lockedReindexOp);
         }
 
         return lockedReindexOp;
@@ -618,7 +687,7 @@ export const reindexServiceFactory = (
         throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return actions.runWhileLocked(reindexOp, async op => {
+      return actions.runWhileLocked(reindexOp, async (op) => {
         if (op.attributes.status === ReindexStatus.paused) {
           // Another node already paused the operation, don't do anything
           return reindexOp;
@@ -630,24 +699,45 @@ export const reindexServiceFactory = (
       });
     },
 
-    async resumeReindexOperation(indexName: string, opts?: ReindexOptions) {
+    async resumeReindexOperation(indexName: string, opts?: { enqueue: boolean }) {
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
         throw new Error(`No reindex operation found for index ${indexName}`);
       }
 
-      return actions.runWhileLocked(reindexOp, async op => {
+      return actions.runWhileLocked(reindexOp, async (op) => {
         if (op.attributes.status === ReindexStatus.inProgress) {
           // Another node already resumed the operation, don't do anything
           return reindexOp;
         } else if (op.attributes.status !== ReindexStatus.paused) {
           throw new Error(`Reindex operation must be paused in order to be resumed.`);
         }
+        const queueSettings = opts?.enqueue ? { queuedAt: Date.now() } : undefined;
 
         return actions.updateReindexOp(op, {
           status: ReindexStatus.inProgress,
-          reindexOptions: opts,
+          reindexOptions: queueSettings ? { queueSettings } : undefined,
+        });
+      });
+    },
+
+    async startQueuedReindexOperation(indexName: string) {
+      const reindexOp = await this.findReindexOperation(indexName);
+
+      if (!reindexOp) {
+        throw error.indexNotFound(`No reindex operation found for index ${indexName}`);
+      }
+
+      if (!reindexOp.attributes.reindexOptions?.queueSettings) {
+        throw error.reindexIsNotInQueue(`Reindex operation ${indexName} is not in the queue.`);
+      }
+
+      return actions.runWhileLocked(reindexOp, async (lockedReindexOp) => {
+        const { reindexOptions } = lockedReindexOp.attributes;
+        reindexOptions!.queueSettings!.startedAt = Date.now();
+        return actions.updateReindexOp(lockedReindexOp, {
+          reindexOptions,
         });
       });
     },
@@ -665,8 +755,8 @@ export const reindexServiceFactory = (
         );
       }
 
-      const resp = await callAsUser('tasks.cancel', {
-        taskId: reindexOp.attributes.reindexTaskId,
+      const { body: resp } = await esClient.tasks.cancel({
+        task_id: reindexOp.attributes.reindexTaskId!,
       });
 
       if (resp.node_failures && resp.node_failures.length > 0) {

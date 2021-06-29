@@ -1,32 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { handleNestedFilter } from './handle_nested_filter';
 import { fields } from '../../index_patterns/mocks';
 import { buildPhraseFilter, buildQueryFilter } from '../filters';
-import { IFieldType, IIndexPattern } from '../../index_patterns';
+import { IndexPatternBase } from './types';
+import { IFieldType } from '../../index_patterns';
 
-describe('handleNestedFilter', function() {
-  const indexPattern: IIndexPattern = ({
+describe('handleNestedFilter', function () {
+  const indexPattern: IndexPatternBase = {
     id: 'logstash-*',
     fields,
-  } as unknown) as IIndexPattern;
+  };
 
   it("should return the filter's query wrapped in nested query if the target field is nested", () => {
     const field = getField('nestedField.child');
@@ -86,6 +76,6 @@ describe('handleNestedFilter', function() {
   });
 
   function getField(name: string) {
-    return indexPattern.fields.find(field => field.name === name);
+    return indexPattern.fields.find((field) => field.name === name);
   }
 });

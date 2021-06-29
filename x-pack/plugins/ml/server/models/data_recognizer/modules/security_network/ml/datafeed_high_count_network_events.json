@@ -1,0 +1,20 @@
+{
+  "job_id": "high_count_network_events",
+  "indices": [
+    "logs-*",
+    "filebeat-*",
+    "packetbeat-*"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "network"
+          }
+        }
+      ]
+    }
+  }
+}

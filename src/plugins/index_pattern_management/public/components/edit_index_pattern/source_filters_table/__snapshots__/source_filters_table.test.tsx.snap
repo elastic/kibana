@@ -1,0 +1,280 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SourceFiltersTable should add a filter 1`] = `
+<Fragment>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "tim*",
+          },
+          Object {
+            "value": "na*",
+          },
+        ],
+      }
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 2,
+          "value": "tim*",
+        },
+        Object {
+          "clientId": 3,
+          "value": "na*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`SourceFiltersTable should filter based on the query bar 1`] = `
+<Fragment>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "time*",
+          },
+          Object {
+            "value": "nam*",
+          },
+          Object {
+            "value": "age*",
+          },
+        ],
+      }
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "time*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`SourceFiltersTable should remove a filter 1`] = `
+<Fragment>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "clientId": 2,
+            "value": "na*",
+          },
+        ],
+      }
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 3,
+          "value": "na*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`SourceFiltersTable should render normally 1`] = `
+<Fragment>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "time*",
+          },
+          Object {
+            "value": "nam*",
+          },
+          Object {
+            "value": "age*",
+          },
+        ],
+      }
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "time*",
+        },
+        Object {
+          "clientId": 2,
+          "value": "nam*",
+        },
+        Object {
+          "clientId": 3,
+          "value": "age*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`SourceFiltersTable should should a loading indicator when saving 1`] = `
+<Fragment>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "tim*",
+          },
+        ],
+      }
+    }
+    isSaving={true}
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "tim*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`SourceFiltersTable should show a delete modal 1`] = `
+<Fragment>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "value": "tim*",
+          },
+        ],
+      }
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 1,
+          "value": "tim*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+  <DeleteFilterConfirmationModal
+    filterToDeleteValue="tim*"
+    onCancelConfirmationModal={[Function]}
+    onDeleteFilter={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`SourceFiltersTable should update a filter 1`] = `
+<Fragment>
+  <header />
+  <AddFilter
+    onAddFilter={[Function]}
+  />
+  <eui-spacer
+    size="l"
+  />
+  <Table
+    deleteFilter={[Function]}
+    fieldWildcardMatcher={[Function]}
+    indexPattern={
+      Object {
+        "sourceFilters": Array [
+          Object {
+            "clientId": 1,
+            "value": "tim*",
+          },
+        ],
+      }
+    }
+    isSaving={false}
+    items={
+      Array [
+        Object {
+          "clientId": 2,
+          "value": "tim*",
+        },
+      ]
+    }
+    saveFilter={[Function]}
+  />
+</Fragment>
+`;

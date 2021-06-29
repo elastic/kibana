@@ -17,7 +17,7 @@ exports[`it renders without crashing 1`] = `
       >
         <EuiIcon
           size="xxl"
-          type="logoKibana"
+          type="logoElastic"
         />
       </span>
       <EuiTitle

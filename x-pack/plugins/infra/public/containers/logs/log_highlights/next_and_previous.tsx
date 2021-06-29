@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isNumber } from 'lodash';
@@ -13,7 +14,7 @@ import {
   getLogEntryIndexBeforeTime,
   getUniqueLogEntryKey,
 } from '../../../utils/log_entry';
-import { LogEntryHighlights } from './log_entry_highlights';
+import { LogEntriesHighlightsResponse } from '../../../../common/http_api';
 
 export const useNextAndPrevious = ({
   highlightTerms,
@@ -23,7 +24,7 @@ export const useNextAndPrevious = ({
 }: {
   highlightTerms: string[];
   jumpToTargetPosition: (target: TimeKey) => void;
-  logEntryHighlights: LogEntryHighlights | undefined;
+  logEntryHighlights: LogEntriesHighlightsResponse['data'] | undefined;
   visibleMidpoint: TimeKey | null;
 }) => {
   const [currentTimeKey, setCurrentTimeKey] = useState<UniqueTimeKey | null>(null);

@@ -1,60 +1,54 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
+class Task<C, A, R> {
+  public promise: Promise<R>;
+  private resolve!: (result: R) => void;
+  private reject!: (error: Error) => void;
+
+  constructor(
+    private readonly execQueue: Array<Task<C, A, R>>,
+    private readonly fn: (this: C, arg: A) => Promise<R>,
+    private readonly context: C,
+    private readonly arg: A
+  ) {
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
+
+  public async exec() {
+    try {
+      this.resolve(await this.fn.call(this.context, this.arg));
+    } catch (error) {
+      this.reject(error);
+    } finally {
+      this.execQueue.shift();
+      if (this.execQueue.length) {
+        this.execQueue[0].exec();
+      }
+    }
+  }
+}
 
 export function preventParallelCalls<C extends void, A, R>(
   fn: (this: C, arg: A) => Promise<R>,
   filter: (arg: A) => boolean
 ) {
-  const execQueue: Task[] = [];
+  const execQueue: Array<Task<C, A, R>> = [];
 
-  class Task {
-    public promise: Promise<R>;
-    private resolve!: (result: R) => void;
-    private reject!: (error: Error) => void;
-
-    constructor(private readonly context: C, private readonly arg: A) {
-      this.promise = new Promise((resolve, reject) => {
-        this.resolve = resolve;
-        this.reject = reject;
-      });
-    }
-
-    public async exec() {
-      try {
-        this.resolve(await fn.call(this.context, this.arg));
-      } catch (error) {
-        this.reject(error);
-      } finally {
-        execQueue.shift();
-        if (execQueue.length) {
-          execQueue[0].exec();
-        }
-      }
-    }
-  }
-
-  return async function(this: C, arg: A) {
+  return async function (this: C, arg: A) {
     if (filter(arg)) {
       return await fn.call(this, arg);
     }
 
-    const task = new Task(this, arg);
+    const task = new Task(execQueue, fn, this, arg);
     if (execQueue.push(task) === 1) {
       // only item in the queue, kick it off
       task.exec();

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState } from 'react';
@@ -46,7 +47,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
       case 'ftp':
         return (
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlWhitelistDescription"
+            id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlAllowedDescription"
             defaultMessage="This URL must be registered in the {settingKey} setting."
             values={{
               settingKey: <EuiCode>repositories.url.allowed_urls</EuiCode>,
@@ -128,7 +129,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                 <EuiSelect
                   options={schemeOptions}
                   value={selectedScheme}
-                  onChange={e => selectScheme(e.target.value)}
+                  onChange={(e) => selectScheme(e.target.value)}
                   aria-controls="readonlyRepositoryUrlHelp"
                   data-test-subj="schemeSelect"
                 />
@@ -151,7 +152,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                 <EuiFieldText
                   defaultValue={url ? url.split('://')[1] : ''}
                   fullWidth
-                  onChange={e => {
+                  onChange={(e) => {
                     updateRepositorySettings({
                       url: `${selectedScheme}://${e.target.value}`,
                     });

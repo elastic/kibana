@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as rt from 'io-ts';
-
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
-import { defaultRequestParameters, getMlResultIndex } from './common';
+import { createCategoryIdFilters, createJobIdFilters, defaultRequestParameters } from './common';
 
 export const createLogEntryCategoriesQuery = (
   logEntryCategoriesJobId: string,
@@ -18,17 +18,13 @@ export const createLogEntryCategoriesQuery = (
     query: {
       bool: {
         filter: [
-          {
-            terms: {
-              category_id: categoryIds,
-            },
-          },
+          ...createJobIdFilters(logEntryCategoriesJobId),
+          ...createCategoryIdFilters(categoryIds),
         ],
       },
     },
-    _source: ['category_id', 'regex'],
+    _source: ['category_id', 'regex', 'terms'],
   },
-  index: getMlResultIndex(logEntryCategoriesJobId),
   size: categoryIds.length,
 });
 
@@ -36,6 +32,7 @@ export const logEntryCategoryHitRT = rt.type({
   _source: rt.type({
     category_id: rt.number,
     regex: rt.string,
+    terms: rt.string,
   }),
 });
 
@@ -50,4 +47,5 @@ export const logEntryCategoriesResponseRT = rt.intersection([
   }),
 ]);
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type logEntryCategoriesResponse = rt.TypeOf<typeof logEntryCategoriesResponseRT>;
