@@ -503,6 +503,12 @@ export interface CoreServicesUsageData {
             storeSizeBytes: number;
             primaryStoreSizeBytes: number;
         }[];
+        legacyUrlAliases: {
+            activeCount: number;
+            inactiveCount: number;
+            disabledCount: number;
+            totalCount: number;
+        };
     };
 }
 
@@ -765,6 +771,16 @@ export interface CoreUsageStats {
     'apiCalls.savedObjectsUpdate.namespace.default.total'?: number;
     // (undocumented)
     'apiCalls.savedObjectsUpdate.total'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.aliasMatch'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.conflict'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.exactMatch'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.notFound'?: number;
+    // (undocumented)
+    'savedObjectsRepository.resolvedOutcome.total'?: number;
 }
 
 // @public (undocumented)
@@ -777,8 +793,12 @@ export interface CountResponse {
 
 // @public
 export class CspConfig implements ICspConfig {
+    // (undocumented)
+    #private;
+    // Warning: (ae-forgotten-export) The symbol "CspConfigType" needs to be exported by the entry point index.d.ts
+    //
     // @internal
-    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
+    constructor(rawCspConfig: CspConfigType);
     // (undocumented)
     static readonly DEFAULT: CspConfig;
     // (undocumented)
@@ -2921,7 +2941,6 @@ export interface SavedObjectsResolveImportErrorsOptions {
 export interface SavedObjectsResolveResponse<T = unknown> {
     aliasTargetId?: string;
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-    // (undocumented)
     saved_object: SavedObject<T>;
 }
 

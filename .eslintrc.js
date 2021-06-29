@@ -858,6 +858,18 @@ module.exports = {
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
       },
     },
+    {
+      files: ['x-pack/plugins/apm/**/*.stories.*', 'x-pack/plugins/observability/**/*.stories.*'],
+      rules: {
+        'react/function-component-definition': [
+          'off',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
+      },
+    },
 
     /**
      * Fleet overrides

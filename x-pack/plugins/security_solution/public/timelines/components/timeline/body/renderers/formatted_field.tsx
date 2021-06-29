@@ -126,7 +126,7 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
-        value={value as string}
+        value={typeof value === 'string' ? value : ''}
       />
     );
   } else if (
