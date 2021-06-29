@@ -27,7 +27,6 @@ import {
   CONTACT_CARD_EMBEDDABLE,
 } from '../../../../../embeddable/public/lib/test_samples';
 import { getStubPluginServices } from '../../../../../presentation_util/public';
-import { setupIntersectionObserverMock } from '../../test_helpers';
 
 let dashboardContainer: DashboardContainer | undefined;
 const presentationUtil = getStubPluginServices();
@@ -92,10 +91,6 @@ function getProps(
     options,
   };
 }
-
-beforeEach(() => {
-  setupIntersectionObserverMock();
-});
 
 test('renders DashboardViewport', () => {
   const { props, options } = getProps();

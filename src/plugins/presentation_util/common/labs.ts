@@ -22,15 +22,15 @@ export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 export const projects: { [ID in ProjectID]: ProjectConfig & { id: ID } } = {
   [DEFER_BELOW_FOLD]: {
     id: DEFER_BELOW_FOLD,
-    isActive: true,
+    isActive: false,
     isDisplayed: true,
     environments: ['kibana', 'browser', 'session'],
     name: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectName', {
-      defaultMessage: 'Defer loading Dashboard Panels below "the fold"',
+      defaultMessage: 'Defer loading panels below "the fold"',
     }),
     description: i18n.translate('presentationUtil.labs.enableDeferBelowFoldProjectDescription', {
       defaultMessage:
-        'Any Dashboard panels below the fold-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
+        'Any panels below "the fold"-- the area hidden beyond the bottom of the window, accessed by scrolling-- will not be loaded immediately, but only when they enter the viewport',
     }),
     solutions: ['dashboard'],
   },
