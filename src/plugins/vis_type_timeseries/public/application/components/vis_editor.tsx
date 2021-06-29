@@ -200,7 +200,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
                 title={
                   <FormattedMessage
                     id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationTitle"
-                    defaultMessage="New: Index pattern mode"
+                    defaultMessage="TSVB introduces a new index pattern mode"
                   />
                 }
                 iconType="cheer"
@@ -209,13 +209,13 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
                 <p>
                   <FormattedMessage
                     id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationMessage"
-                    defaultMessage="Introduced on 7.13.0, TSVB supports a new mode of creating charts, the index pattern mode. Check it out {indexPatternModeLink}."
+                    defaultMessage="Great news! A new index pattern mode with support for runtime fields and improved performance is now available in TSVB. {indexPatternModeLink}."
                     values={{
                       indexPatternModeLink: (
                         <EuiLink href={indexPatternModeLink} target="_blank" external>
                           <FormattedMessage
                             id="visTypeTimeseries.visEditorVisualization.indexPatternMode.link"
-                            defaultMessage="here."
+                            defaultMessage="Give it a try."
                           />
                         </EuiLink>
                       ),
@@ -231,7 +231,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
                   >
                     <FormattedMessage
                       id="visTypeTimeseries.visEditorVisualization.indexPatternMode.dismissNoticeButtonText"
-                      defaultMessage="Dismiss message"
+                      defaultMessage="Dismiss"
                     />
                   </EuiButton>
                 </EuiFlexGroup>
