@@ -11,7 +11,6 @@ import { action } from '@storybook/addon-actions';
 import { ElementCard } from '../element_card';
 import { waitFor } from '../../../../../../../src/plugins/presentation_util/public/__stories__';
 import { getElasticLogo } from '../../../../../../../src/plugins/presentation_util/public';
-import { elasticLogo } from '../../../../../../../src/plugins/presentation_util/public';
 
 storiesOf('components/Elements/ElementCard', module)
   .addDecorator((story) => (
