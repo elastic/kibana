@@ -132,7 +132,9 @@ const getColumns = (
       'data-test-subj': 'nodesCount',
       sortable: true,
       render: (total, cluster) => (
-        <IsClusterSupported {...cluster}>{numeral(total).format('0,0')}</IsClusterSupported>
+        <IsClusterSupported {...cluster}>
+          {typeof total === 'number' ? numeral(total).format('0,0') : 0}
+        </IsClusterSupported>
       ),
     },
     {
@@ -405,6 +407,7 @@ export class Listing extends Component {
     const hasStandaloneCluster = !!clusters.find(
       (cluster) => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
     );
+    console.log('clusters passed to table rows', clusters);
 
     return (
       <EuiPage>
