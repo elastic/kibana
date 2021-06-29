@@ -8,7 +8,12 @@
 
 import _, { each, reject } from 'lodash';
 import { FieldAttrs, FieldAttrSet, IndexPatternAttributes } from '../..';
-import type { RuntimeField } from '../types';
+import type {
+  KibanaRuntimeField,
+  EsRuntimeField,
+  RuntimeObject,
+  RuntimeObjectWithSubFields,
+} from '../types';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -77,7 +82,8 @@ export class IndexPattern implements IIndexPattern {
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
   private fieldAttrs: FieldAttrs;
-  private runtimeFieldMap: Record<string, RuntimeField>;
+  private runtimeFieldMap: Record<string, EsRuntimeField>;
+  private runtimeObjectMap: Record<string, RuntimeObject>;
 
   /**
    * prevents errors when index pattern exists before indices
@@ -121,6 +127,7 @@ export class IndexPattern implements IIndexPattern {
     this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
+    this.runtimeObjectMap = spec.runtimeObjectMap || {};
   }
 
   /**
@@ -219,6 +226,7 @@ export class IndexPattern implements IIndexPattern {
       type: this.type,
       fieldFormats: this.fieldFormatMap,
       runtimeFieldMap: this.runtimeFieldMap,
+      runtimeObjectMap: this.runtimeObjectMap,
       fieldAttrs: this.fieldAttrs,
       intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
@@ -329,6 +337,7 @@ export class IndexPattern implements IIndexPattern {
       : JSON.stringify(this.fieldFormatMap);
     const fieldAttrs = this.getFieldAttrs();
     const runtimeFieldMap = this.runtimeFieldMap;
+    const runtimeObjectMap = this.runtimeObjectMap;
 
     return {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
@@ -342,6 +351,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: JSON.stringify(this.typeMeta ?? {}),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: runtimeFieldMap ? JSON.stringify(runtimeFieldMap) : undefined,
+      runtimeObjectMap: runtimeObjectMap ? JSON.stringify(runtimeObjectMap) : undefined,
     };
   }
 
@@ -369,22 +379,34 @@ export class IndexPattern implements IIndexPattern {
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-  addRuntimeField(name: string, runtimeField: RuntimeField) {
+  addRuntimeField(name: string, runtimeField: KibanaRuntimeField) {
+    const { type, script, customLabel, format, popularity } = runtimeField;
+
+    const esRuntimeField = { type, script };
+
     const existingField = this.getFieldByName(name);
     if (existingField) {
-      existingField.runtimeField = runtimeField;
+      existingField.runtimeField = esRuntimeField;
     } else {
       this.fields.add({
         name,
-        runtimeField,
+        runtimeField: esRuntimeField,
         type: castEsToKbnFieldTypeName(runtimeField.type),
         aggregatable: true,
         searchable: true,
-        count: 0,
+        count: popularity ?? 0,
         readFromDocValues: false,
       });
     }
-    this.runtimeFieldMap[name] = runtimeField;
+    this.runtimeFieldMap[name] = esRuntimeField;
+
+    this.setFieldCustomLabel(name, customLabel);
+
+    if (format) {
+      this.setFieldFormat(name, format);
+    } else {
+      this.deleteFieldFormat(name);
+    }
   }
 
   /**
@@ -399,7 +421,7 @@ export class IndexPattern implements IIndexPattern {
    * Returns runtime field if exists
    * @param name
    */
-  getRuntimeField(name: string): RuntimeField | null {
+  getRuntimeField(name: string): EsRuntimeField | null {
     return this.runtimeFieldMap[name] ?? null;
   }
 
@@ -407,7 +429,7 @@ export class IndexPattern implements IIndexPattern {
    * Replaces all existing runtime fields with new fields
    * @param newFields
    */
-  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+  replaceAllRuntimeFields(newFields: Record<string, EsRuntimeField>) {
     const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
     oldRuntimeFieldNames.forEach((name) => {
       this.removeRuntimeField(name);
@@ -434,6 +456,87 @@ export class IndexPattern implements IIndexPattern {
       }
     }
     delete this.runtimeFieldMap[name];
+  }
+
+  /**
+   * Add a runtime object and its subFields to the fields list
+   * @param name - The runtime object name
+   * @param runtimeObject - The runtime object definition
+   */
+  addRuntimeObject(name: string, runtimeObject: RuntimeObjectWithSubFields) {
+    this.removeRuntimeObject(name);
+
+    const { script, subFields } = runtimeObject;
+
+    for (const [subFieldName, subField] of Object.entries(subFields)) {
+      this.addRuntimeField(subFieldName, { ...subField, parent: name });
+    }
+
+    this.runtimeObjectMap[name] = { name, script, subFields: Object.keys(subFields) };
+  }
+
+  /**
+   * Returns runtime object if exists
+   * @param name
+   */
+  getRuntimeObject(name: string): RuntimeObject | null {
+    return this.runtimeObjectMap[name] ?? null;
+  }
+
+  /**
+   * Returns runtime object (if exists) with its subFields
+   * @param name
+   */
+  getRuntimeObjectWithSubFields(name: string): RuntimeObjectWithSubFields | null {
+    const existingRuntimeObject = this.runtimeObjectMap[name];
+
+    if (!existingRuntimeObject) {
+      return null;
+    }
+
+    const subFields = existingRuntimeObject.subFields.reduce((acc, subFieldName) => {
+      const field = this.getFieldByName(subFieldName);
+
+      if (!field) {
+        // This condition should never happen
+        return acc;
+      }
+
+      const runtimeField: KibanaRuntimeField = {
+        type: 'object',
+        parent: name,
+        customLabel: field.customLabel,
+        popularity: field.count,
+        format: this.getFormatterForFieldNoDefault(field.name)?.toJSON(),
+      };
+
+      return {
+        ...acc,
+        [subFieldName]: runtimeField,
+      };
+    }, {} as Record<string, KibanaRuntimeField>);
+
+    return {
+      ...existingRuntimeObject,
+      subFields,
+    };
+  }
+
+  /**
+   * Remove a runtime object with its associated subFields
+   * @param name - Object runtime name to remove
+   */
+  removeRuntimeObject(name: string) {
+    const existingRuntimeObject = this.getRuntimeObject(name);
+
+    if (!!existingRuntimeObject) {
+      // Remove all previous subFields
+      for (const subFieldName of existingRuntimeObject.subFields) {
+        this.removeRuntimeField(subFieldName);
+      }
+
+      delete this.runtimeObjectMap[name];
+    }
   }
 
   /**
