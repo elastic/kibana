@@ -11,6 +11,7 @@
   "references": [
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../../../src/plugins/advanced_settings/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
