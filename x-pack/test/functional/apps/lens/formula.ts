@@ -247,8 +247,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'lnsDatatable_metrics > lns-dimensionTrigger',
         'lnsDatatable_metrics > lns-empty-dimension'
       );
-      expect(await PageObjects.lens.getDatatableCellText(1, 1)).to.eql('0');
-      expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('0');
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
+      expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('0');
     });
   });
 }
