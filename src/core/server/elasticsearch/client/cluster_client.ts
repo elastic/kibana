@@ -8,8 +8,9 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
-import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
+import { GetAuthHeaders, Headers, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
+import type { ExecutionContextContainer } from '../../execution_context';
 import { ScopeableRequest } from '../types';
 import { ElasticsearchClient } from './types';
 import { configureClient } from './configure_client';
@@ -54,6 +55,7 @@ export interface ICustomClusterClient extends IClusterClient {
 export class ClusterClient implements ICustomClusterClient {
   public readonly asInternalUser: Client;
   private readonly rootScopedClient: Client;
+  private readonly allowListHeaders: string[];
 
   private isClosed = false;
 
@@ -61,10 +63,17 @@ export class ClusterClient implements ICustomClusterClient {
     private readonly config: ElasticsearchClientConfig,
     logger: Logger,
     type: string,
-    private readonly getAuthHeaders: GetAuthHeaders = noop
+    private readonly getAuthHeaders: GetAuthHeaders = noop,
+    getExecutionContext: () => ExecutionContextContainer | undefined = noop
   ) {
-    this.asInternalUser = configureClient(config, { logger, type });
-    this.rootScopedClient = configureClient(config, { logger, type, scoped: true });
+    this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
+    this.rootScopedClient = configureClient(config, {
+      logger,
+      type,
+      getExecutionContext,
+      scoped: true,
+    });
+    this.allowListHeaders = this.config.requestHeadersWhitelist;
   }
 
   asScoped(request: ScopeableRequest) {
@@ -87,13 +96,9 @@ export class ClusterClient implements ICustomClusterClient {
     let scopedHeaders: Headers;
     if (isRealRequest(request)) {
       const requestHeaders = ensureRawRequest(request).headers;
-      const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
       const authHeaders = this.getAuthHeaders(request);
 
-      scopedHeaders = filterHeaders({ ...requestHeaders, ...requestIdHeaders, ...authHeaders }, [
-        'x-opaque-id',
-        ...this.config.requestHeadersWhitelist,
-      ]);
+      scopedHeaders = filterHeaders({ ...requestHeaders, ...authHeaders }, this.allowListHeaders);
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }
