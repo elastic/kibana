@@ -35,11 +35,7 @@ import {
   timelineDataToEnrichment,
 } from './cti_details/helpers';
 
-interface EventViewTab {
-  id: EventViewId;
-  name: string;
-  content: JSX.Element;
-}
+type EventViewTab = EuiTabbedContentTab;
 
 export type EventViewId =
   | EventsViewType.tableView
@@ -130,7 +126,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
   const enrichmentCount = allEnrichments.length;
 
-  const summaryTab = useMemo(
+  const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
         ? {
