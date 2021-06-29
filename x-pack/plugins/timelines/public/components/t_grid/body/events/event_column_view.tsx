@@ -58,7 +58,7 @@ export const EventColumnView = React.memo<Props>(
     hasRowRenderers,
     onRuleChange,
     renderCellValue,
-    selectedEventIds,
+    selectedEventIds = {},
     showCheckboxes,
     tabType,
     timelineId,
