@@ -29,7 +29,7 @@ import {
   scrollJsonViewToBottom,
 } from '../../tasks/alerts_details';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
 describe('CTI Enrichment', () => {
@@ -37,7 +37,7 @@ describe('CTI Enrichment', () => {
     cleanKibana();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('suspicious_source_event');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     goToManageAlertsDetectionRules();
     createCustomIndicatorRule(newThreatIndicatorRule);
     reload();
@@ -49,7 +49,7 @@ describe('CTI Enrichment', () => {
   });
 
   beforeEach(() => {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     goToManageAlertsDetectionRules();
     goToRuleDetails();
   });

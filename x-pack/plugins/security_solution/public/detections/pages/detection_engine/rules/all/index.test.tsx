@@ -326,33 +326,4 @@ describe('AllRules', () => {
       expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();
     });
   });
-
-  it('renders exceptions lists tab when tab clicked', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllRules
-          createPrePackagedRules={jest.fn()}
-          hasPermissions
-          loading={false}
-          loadingCreatePrePackagedRules={false}
-          refetchPrePackagedRulesStatus={jest.fn()}
-          rulesCustomInstalled={1}
-          rulesInstalled={0}
-          rulesNotInstalled={0}
-          rulesNotUpdated={0}
-          setRefreshRulesData={jest.fn()}
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      const exceptionsTab = wrapper.find('[data-test-subj="allRulesTableTab-exceptions"] button');
-      exceptionsTab.simulate('click');
-
-      wrapper.update();
-      expect(wrapper.exists('[data-test-subj="allExceptionListsPanel"]')).toBeTruthy();
-      expect(wrapper.exists('[data-test-subj="rules-table"]')).toBeFalsy();
-      expect(wrapper.exists('[data-test-subj="monitoring-table"]')).toBeFalsy();
-    });
-  });
 });

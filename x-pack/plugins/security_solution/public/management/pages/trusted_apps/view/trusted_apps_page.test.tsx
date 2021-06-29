@@ -144,7 +144,7 @@ describe('When on the Trusted Apps Page', () => {
     waitForAction = mockedContext.middlewareSpy.waitForAction;
     render = () => mockedContext.render(<TrustedAppsPage />);
     reactTestingLibrary.act(() => {
-      history.push('/trusted_apps');
+      history.push('/administration/trusted_apps');
     });
     window.scrollTo = jest.fn();
   });
@@ -305,7 +305,7 @@ describe('When on the Trusted Apps Page', () => {
           });
 
           reactTestingLibrary.act(() => {
-            history.push('/trusted_apps?show=edit&id=9999-edit-8888');
+            history.push('/administration/trusted_apps?show=edit&id=9999-edit-8888');
           });
         });
 
@@ -323,7 +323,7 @@ describe('When on the Trusted Apps Page', () => {
 
         it('should redirect to list and show toast message if `id` is missing from URL', async () => {
           reactTestingLibrary.act(() => {
-            history.push('/trusted_apps?show=edit&id=');
+            history.push('/administration/trusted_apps?show=edit&id=');
           });
 
           await renderAndWaitForGetApi();
@@ -367,7 +367,7 @@ describe('When on the Trusted Apps Page', () => {
 
       beforeEach(async () => {
         reactTestingLibrary.act(() => {
-          history.push('/trusted_apps?view_type=list');
+          history.push('/administration/trusted_apps?view_type=list');
         });
 
         renderResult = await renderWithListData();
@@ -477,7 +477,7 @@ describe('When on the Trusted Apps Page', () => {
 
     it('should preserve other URL search params', async () => {
       reactTestingLibrary.act(() => {
-        history.push('/trusted_apps?page_index=2&page_size=20');
+        history.push('/administration/trusted_apps?page_index=2&page_size=20');
       });
       await renderAndClickAddButton();
       expect(history.location.search).toBe('?page_index=2&page_size=20&show=create');
@@ -884,7 +884,7 @@ describe('When on the Trusted Apps Page', () => {
     beforeEach(async () => {
       mockListApis(coreStart.http);
       reactTestingLibrary.act(() => {
-        history.push('/trusted_apps?filter=test');
+        history.push('/administration/trusted_apps?filter=test');
       });
       renderResult = render();
       await act(async () => {
@@ -912,7 +912,7 @@ describe('When on the Trusted Apps Page', () => {
         await waitForAction('trustedAppsListResourceStateChanged');
       });
       reactTestingLibrary.act(() => {
-        history.push('/trusted_apps', {
+        history.push('/administration/trusted_apps', {
           onBackButtonNavigateTo: [{ appId: 'appId' }],
           backButtonLabel: 'back to fleet',
           backButtonUrl: '/fleet',
@@ -928,7 +928,7 @@ describe('When on the Trusted Apps Page', () => {
 
     it('back button is not present', () => {
       reactTestingLibrary.act(() => {
-        history.push('/trusted_apps');
+        history.push('/administration/trusted_apps');
       });
       expect(renderResult.queryByTestId('backToOrigin')).toBeNull();
     });
