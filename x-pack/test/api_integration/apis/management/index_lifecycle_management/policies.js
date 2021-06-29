@@ -32,38 +32,27 @@ export default function ({ getService }) {
 
   const { addPolicyToIndex } = registerIndexHelpers({ supertest });
 
-  // failing ES promotion https://github.com/elastic/kibana/issues/103364
-  describe.skip('policies', () => {
+  describe('policies', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
 
     describe('list', () => {
       it('should have a default policy to manage the Watcher history indices', async () => {
         const { body } = await loadPolicies().expect(200);
-        const policy = body.find((policy) => policy.name === DEFAULT_POLICY_NAME);
+        const { version, name, policy } = body.find(
+          (policy) => policy.name === DEFAULT_POLICY_NAME
+        );
 
-        // We manually set the date for deterministic test
-        const modifiedDate = '2019-04-30T14:30:00.000Z';
-        policy.modified_date = modifiedDate;
-
-        // We don't want to match `_meta` field since it can change between Elasticsearch versions
-        delete policy.policy._meta;
-
-        expect(policy).to.eql({
-          version: 1,
-          modified_date: modifiedDate,
-          policy: {
-            phases: {
+        expect(version).to.eql(1);
+        expect(name).to.eql(DEFAULT_POLICY_NAME);
+        expect(policy.phases).to.eql({
+          delete: {
+            min_age: '7d',
+            actions: {
               delete: {
-                min_age: '7d',
-                actions: {
-                  delete: {
-                    delete_searchable_snapshot: true,
-                  },
-                },
+                delete_searchable_snapshot: true,
               },
             },
           },
-          name: DEFAULT_POLICY_NAME,
         });
       });
 
