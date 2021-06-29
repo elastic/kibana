@@ -92,18 +92,20 @@ export class TiledVectorLayer extends VectorLayer {
 
     const shapeTypeCountMeta: VectorShapeTypeCounts = tileMetas.reduce(
       (accumulator: VectorShapeTypeCounts, tileMeta: Feature) => {
-        if (!tileMeta || !tileMeta.properties) {
+        if (
+          !tileMeta ||
+          !tileMeta.properties ||
+          !tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]
+        ) {
           return accumulator;
         }
 
-        if (typeof tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS] !== 'string') {
-          return accumulator;
-        }
-        const counts = JSON.parse(tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]);
-
-        accumulator[VECTOR_SHAPE_TYPE.POINT] += counts[VECTOR_SHAPE_TYPE.POINT];
-        accumulator[VECTOR_SHAPE_TYPE.LINE] += counts[VECTOR_SHAPE_TYPE.LINE];
-        accumulator[VECTOR_SHAPE_TYPE.POLYGON] += counts[VECTOR_SHAPE_TYPE.POLYGON];
+        accumulator[VECTOR_SHAPE_TYPE.POINT] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POINT];
+        accumulator[VECTOR_SHAPE_TYPE.LINE] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.LINE];
+        accumulator[VECTOR_SHAPE_TYPE.POLYGON] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POLYGON];
 
         return accumulator;
       },
