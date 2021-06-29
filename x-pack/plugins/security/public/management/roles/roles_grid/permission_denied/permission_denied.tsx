@@ -5,33 +5,31 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PermissionDenied = () => (
-  <EuiFlexGroup gutterSize="none">
-    <EuiPageContent horizontalPosition="center">
-      <EuiEmptyPrompt
-        iconType="securityApp"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.security.management.roles.deniedPermissionTitle"
-              defaultMessage="You need permission to manage roles"
-            />
-          </h2>
-        }
-        body={
-          <p data-test-subj="permissionDeniedMessage">
-            <FormattedMessage
-              id="xpack.security.management.roles.noPermissionToManageRolesDescription"
-              defaultMessage="Contact your system administrator."
-            />
-          </p>
-        }
-      />
-    </EuiPageContent>
-  </EuiFlexGroup>
+  <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+    <EuiEmptyPrompt
+      iconType="securityApp"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.management.roles.deniedPermissionTitle"
+            defaultMessage="You need permission to manage roles"
+          />
+        </h2>
+      }
+      body={
+        <p data-test-subj="permissionDeniedMessage">
+          <FormattedMessage
+            id="xpack.security.management.roles.noPermissionToManageRolesDescription"
+            defaultMessage="Contact your system administrator."
+          />
+        </p>
+      }
+    />
+  </EuiPageContent>
 );
