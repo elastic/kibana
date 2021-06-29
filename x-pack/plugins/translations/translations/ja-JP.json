@@ -17336,7 +17336,7 @@
     "xpack.osquery.breadcrumbs.newLiveQueryPageTitle": "新規",
     "xpack.osquery.breadcrumbs.overviewPageTitle": "概要",
     "xpack.osquery.breadcrumbs.scheduledQueryGroupsPageTitle": "スケジュールされたクエリグループ",
-    "xpack.osquery.codeEditorField.osquerySchemaLinkLabel": "Osqueryスキーマ",
+    "xpack.osquery.osquerySchemaLinkLabel": "Osqueryスキーマ",
     "xpack.osquery.common.tabBetaBadgeLabel": "ベータ",
     "xpack.osquery.common.tabBetaBadgeTooltipContent": "この機能は現在開発中です。他にも機能が追加され、機能によっては変更されるものもあります。",
     "xpack.osquery.editScheduledQuery.pageTitle": "{queryName}を編集",

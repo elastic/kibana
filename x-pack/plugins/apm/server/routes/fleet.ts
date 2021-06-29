@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { keyBy } from 'lodash';
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
@@ -12,6 +13,8 @@ import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
 } from '../../common/apm_saved_object_constants';
+import { getFleetAgents } from '../lib/fleet/get_agents';
+import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import { createApmServerRoute } from './create_apm_server_route';
 import { createApmServerRouteRepository } from './create_apm_server_route_repository';
 import {
@@ -20,7 +23,6 @@ import {
 } from '../lib/fleet/get_cloud_apm_package_policy';
 import { createCloudApmPackgePolicy } from '../lib/fleet/create_cloud_apm_package_policy';
 import { getUnsupportedApmServerSchema } from '../lib/fleet/get_unsupported_apm_server_schema';
-import { getApmPackgePolicies } from '../lib/fleet/get_apm_package_policies';
 import { isSuperuser } from '../lib/fleet/is_superuser';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
 
@@ -30,13 +32,61 @@ const hasFleetDataRoute = createApmServerRoute({
   handler: async ({ core, plugins }) => {
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
-      throw Boom.internal(fleetPluginRequireMessage);
+      throw Boom.internal(FLEET_REQUIRED_MESSAGE);
     }
     const packagePolicies = await getApmPackgePolicies({
       core,
       fleetPluginStart,
     });
     return { hasData: packagePolicies.total > 0 };
+  },
+});
+
+const fleetAgentsRoute = createApmServerRoute({
+  endpoint: 'GET /api/apm/fleet/agents',
+  options: { tags: [] },
+  handler: async ({ core, plugins }) => {
+    const cloudSetup = plugins.cloud?.setup;
+    const cloudStandaloneSetup = cloudSetup
+      ? {
+          apmServerUrl: cloudSetup?.apm.url,
+          secretToken: cloudSetup?.apm.secretToken,
+        }
+      : undefined;
+
+    const fleetPluginStart = await plugins.fleet?.start();
+    if (!fleetPluginStart) {
+      throw Boom.internal(FLEET_REQUIRED_MESSAGE);
+    }
+    // fetches package policies that contains APM integrations
+    const packagePolicies = await getApmPackgePolicies({
+      core,
+      fleetPluginStart,
+    });
+
+    const policiesGroupedById = keyBy(packagePolicies.items, 'policy_id');
+
+    // fetches all agents with the found package policies
+    const fleetAgents = await getFleetAgents({
+      policyIds: Object.keys(policiesGroupedById),
+      core,
+      fleetPluginStart,
+    });
+
+    return {
+      cloudStandaloneSetup,
+      fleetAgents: fleetAgents.map((agent) => {
+        const packagePolicy = policiesGroupedById[agent.id];
+        const apmServerCompiledInputs =
+          packagePolicy.inputs[0].compiled_input['apm-server'];
+        return {
+          id: agent.id,
+          name: agent.name,
+          apmServerUrl: apmServerCompiledInputs?.url,
+          secretToken: apmServerCompiledInputs?.secret_token,
+        };
+      }),
+    };
   },
 });
 
@@ -97,7 +147,7 @@ const getMigrationCheckRoute = createApmServerRoute({
     const cloudApmMigrationEnabled =
       config['xpack.apm.agent.migrations.enabled'];
     if (!plugins.fleet || !plugins.security) {
-      throw Boom.internal(fleetSecurityPluginsRequireMessage);
+      throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
     const savedObjectsClient = context.core.savedObjects.client;
     const fleetPluginStart = await plugins.fleet.start();
@@ -124,7 +174,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     const cloudApmMigrationEnabled =
       config['xpack.apm.agent.migrations.enabled'];
     if (!plugins.fleet || !plugins.security) {
-      throw Boom.internal(fleetSecurityPluginsRequireMessage);
+      throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
     const savedObjectsClient = context.core.savedObjects.client;
     const coreStart = await resources.core.start();
@@ -134,7 +184,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     const securityPluginStart = await plugins.security.start();
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
     if (!hasRequiredRole || !cloudApmMigrationEnabled) {
-      throw Boom.forbidden(requiredRoleOnCloudMessage);
+      throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
     return {
       cloud_apm_package_policy: await createCloudApmPackgePolicy({
@@ -149,25 +199,24 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
 
 export const apmFleetRouteRepository = createApmServerRouteRepository()
   .add(hasFleetDataRoute)
+  .add(fleetAgentsRoute)
   .add(saveApmServerSchemaRoute)
   .add(getApmServerSchemaRoute)
   .add(getUnsupportedApmServerSchemaRoute)
   .add(getMigrationCheckRoute)
   .add(createCloudApmPackagePolicyRoute);
 
-const fleetPluginRequireMessage = i18n.translate(
-  'xpack.apm.api.fleet.has_data.fleetRequired',
-  {
-    defaultMessage: `Fleet plugin is required`,
-  }
+const FLEET_REQUIRED_MESSAGE = i18n.translate(
+  'xpack.apm.fleet_has_data.fleetRequired',
+  { defaultMessage: `Fleet plugin is required` }
 );
 
-const fleetSecurityPluginsRequireMessage = i18n.translate(
+const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.fleetSecurityRequired',
   { defaultMessage: `Fleet and Security plugins are required` }
 );
 
-const requiredRoleOnCloudMessage = i18n.translate(
+const CLOUD_SUPERUSER_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.cloud_apm_package_policy.requiredRoleOnCloud',
   {
     defaultMessage:

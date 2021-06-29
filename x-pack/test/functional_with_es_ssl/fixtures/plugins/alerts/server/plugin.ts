@@ -24,6 +24,7 @@ export const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor() {},
   producer: 'alerts',
 };
@@ -47,6 +48,7 @@ export const alwaysFiringAlertType: AlertType<
   defaultActionGroupId: 'default',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor(alertExecutorOptions) {
     const { services, state, params } = alertExecutorOptions;
 
@@ -76,6 +78,7 @@ export const failingAlertType: AlertType<never, never, never, never, 'default' |
   producer: 'alerts',
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor() {
     throw new Error('Failed to execute alert type');
   },
