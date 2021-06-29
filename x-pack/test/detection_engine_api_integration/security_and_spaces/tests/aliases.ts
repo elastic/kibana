@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should keep the original alias value such as "host_alias" from a source index when the value is indexed', async () => {
-      const rule = getRuleForSignalTesting(['alias']);
+      const rule = getRuleForSignalTesting(['host_alias']);
       const { id } = await createRule(supertest, rule);
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);
@@ -51,9 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
       expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
     });
 
-    // TODO: Make aliases work to where we can have ECS fields such as host.name filled out
-    it.skip('should copy alias data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
-      const rule = getRuleForSignalTesting(['alias']);
+    it('should copy alias data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
+      const rule = getRuleForSignalTesting(['host_alias']);
       const { id } = await createRule(supertest, rule);
       await waitForRuleSuccessOrStatus(supertest, id);
       await waitForSignalsToBePresent(supertest, 4, [id]);

@@ -148,6 +148,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
+    const { navigateToApp } = useKibana().services.application;
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -279,6 +280,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           (loadingRulesAction === 'enable' || loadingRulesAction === 'disable')
             ? loadingRuleIds
             : [],
+        navigateToApp,
         reFetchRules,
         refetchPrePackagedRulesStatus,
         hasReadActionsPrivileges: hasActionsPrivileges,
@@ -294,6 +296,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       history,
       loadingRuleIds,
       loadingRulesAction,
+      navigateToApp,
       reFetchRules,
     ]);
 
