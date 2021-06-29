@@ -10,25 +10,43 @@ import React from 'react';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import { EditableTitle } from './editable_title';
+import { EditableTitle, EditableTitleProps } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EditableTitle', () => {
   const mount = useMountAppended();
   const submitTitle = jest.fn();
+  const defaultProps: EditableTitleProps = {
+    title: 'Test title',
+    onSubmit: submitTitle,
+    isLoading: false,
+    userCanCrud: true,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('it renders', () => {
-    const wrapper = shallow(
-      <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
-    );
+    const wrapper = shallow(<EditableTitle {...defaultProps} />);
 
     expect(wrapper).toMatchSnapshot();
+  });
+
+  test('it does not show the edit icon when the user does not have edit permissions', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...{ ...defaultProps, userCanCrud: false }} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').exists()).toBeFalsy();
   });
 
   test('it shows the edit title input field', () => {
     const wrapper = mount(
       <TestProviders>
-        <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
@@ -43,7 +61,7 @@ describe('EditableTitle', () => {
   test('it shows the submit button', () => {
     const wrapper = mount(
       <TestProviders>
-        <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
@@ -58,7 +76,7 @@ describe('EditableTitle', () => {
   test('it shows the cancel button', () => {
     const wrapper = mount(
       <TestProviders>
-        <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
@@ -73,7 +91,7 @@ describe('EditableTitle', () => {
   test('it DOES NOT shows the edit icon when in edit mode', () => {
     const wrapper = mount(
       <TestProviders>
-        <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
@@ -88,7 +106,7 @@ describe('EditableTitle', () => {
   test('it switch to non edit mode when canceled', () => {
     const wrapper = mount(
       <TestProviders>
-        <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
@@ -104,7 +122,7 @@ describe('EditableTitle', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
@@ -128,7 +146,7 @@ describe('EditableTitle', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <EditableTitle title={title} onSubmit={submitTitle} isLoading={false} />
+        <EditableTitle {...{ ...defaultProps, title }} />
       </TestProviders>
     );
 
@@ -151,7 +169,7 @@ describe('EditableTitle', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <EditableTitle title="Test title" onSubmit={submitTitle} isLoading={false} />
+        <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 

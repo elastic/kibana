@@ -117,6 +117,7 @@ export const DetailsPanel = React.memo(
         data-test-subj="timeline:details-panel:flyout"
         size={panelSize}
         onClose={closePanel}
+        ownFocus={false}
       >
         {visiblePanel}
       </StyledEuiFlyout>

@@ -27,7 +27,7 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useActionResults } from '../../../action_results/use_action_results';
 import { useActionDetails } from '../../../actions/use_action_details';
-import { ResultTabs } from '../../../queries/edit/tabs';
+import { ResultTabs } from '../../saved_queries/edit/tabs';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
