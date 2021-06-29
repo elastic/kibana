@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
             return result['x-opaque-id'];
           })
-        ).to.be('kibana:execution_context_app:42');
+        ).to.contain('kibana:execution_context_app:42');
       });
     });
   });
