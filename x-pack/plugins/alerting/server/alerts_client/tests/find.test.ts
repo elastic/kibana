@@ -210,6 +210,7 @@ describe('find()', () => {
           actionVariables: undefined,
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
+          isExportable: true,
           id: '123',
           name: 'myType',
           producer: 'myApp',
@@ -224,6 +225,7 @@ describe('find()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'myApp',
     }));
@@ -234,6 +236,7 @@ describe('find()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'alerts',
       useSavedObjectReferences: {
@@ -402,6 +405,7 @@ describe('find()', () => {
           actionVariables: undefined,
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
+          isExportable: true,
           id: '123',
           name: 'myType',
           producer: 'myApp',
@@ -416,6 +420,7 @@ describe('find()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'myApp',
     }));
@@ -426,6 +431,7 @@ describe('find()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'alerts',
       useSavedObjectReferences: {

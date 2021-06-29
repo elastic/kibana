@@ -131,6 +131,7 @@ describe('get()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'alerts',
       useSavedObjectReferences: {
@@ -250,6 +251,7 @@ describe('get()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'alerts',
       useSavedObjectReferences: {

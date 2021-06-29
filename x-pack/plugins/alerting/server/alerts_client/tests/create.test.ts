@@ -830,6 +830,7 @@ describe('create()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'alerts',
       useSavedObjectReferences: {
@@ -1006,6 +1007,7 @@ describe('create()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: true,
       async executor() {},
       producer: 'alerts',
       useSavedObjectReferences: {
