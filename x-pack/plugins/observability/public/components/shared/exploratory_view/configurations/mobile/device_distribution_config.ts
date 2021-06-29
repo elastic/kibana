@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../../types';
+import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, USE_BREAK_DOWN_COLUMN } from '../constants';
 import { buildPhraseFilter } from '../utils';
 import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps): DataSeries {
+export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
     reportType: 'device-data-distribution',
     defaultSeriesType: 'bar',
@@ -28,9 +28,9 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
       },
     ],
     hasOperationType: false,
-    defaultFilters: Object.keys(MobileFields),
-    breakdowns: Object.keys(MobileFields),
-    filters: [
+    filterFields: Object.keys(MobileFields),
+    breakdownFields: Object.keys(MobileFields),
+    baseFilters: [
       ...buildPhraseFilter('agent.name', 'iOS/swift', indexPattern),
       ...buildPhraseFilter('processor.event', 'transaction', indexPattern),
     ],
@@ -39,11 +39,6 @@ export function getMobileDeviceDistributionConfig({ indexPattern }: ConfigProps)
       ...MobileFields,
       [SERVICE_NAME]: MOBILE_APP,
     },
-    reportDefinitions: [
-      {
-        field: SERVICE_NAME,
-        required: true,
-      },
-    ],
+    definitionFields: [SERVICE_NAME],
   };
 }
