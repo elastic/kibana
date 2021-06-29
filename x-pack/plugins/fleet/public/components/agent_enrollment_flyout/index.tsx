@@ -120,11 +120,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
             viewDataStepContent={viewDataStepContent}
           />
         ) : (
-          <StandaloneInstructions
-            agentPolicy={agentPolicy}
-            agentPolicies={agentPolicies}
-            viewDataStepContent={viewDataStepContent}
-          />
+          <StandaloneInstructions agentPolicy={agentPolicy} agentPolicies={agentPolicies} />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

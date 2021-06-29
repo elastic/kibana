@@ -109,7 +109,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       // there being no saved objects found
       content = (
         <ExtensionWrapper>
-          <CustomAssets pkgkey={pkgkey} packageInfo={packageInfo} />
+          <CustomAssets />
         </ExtensionWrapper>
       );
     } else {
@@ -143,7 +143,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
       // Ensure we add any custom assets provided via UI extension to the end of the list of other assets
       CustomAssets ? (
         <ExtensionWrapper>
-          <CustomAssets pkgkey={pkgkey} packageInfo={packageInfo} />
+          <CustomAssets />
         </ExtensionWrapper>
       ) : null,
     ];
