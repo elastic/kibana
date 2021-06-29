@@ -151,6 +151,7 @@ type TestSubject =
   | 'ignoreFailureSwitch.input'
   | 'ifField.textarea'
   | 'targetField.input'
+  | 'targetFieldsField.input'
   | 'keepOriginalField.input'
   | 'removeIfSuccessfulField.input'
   | 'shapeSelectorField'
