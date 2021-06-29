@@ -44,6 +44,7 @@ const alertType: NormalizedAlertType<
   ],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',

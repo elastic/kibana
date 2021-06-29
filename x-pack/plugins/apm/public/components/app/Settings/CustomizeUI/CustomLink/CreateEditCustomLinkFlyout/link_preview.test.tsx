@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { LinkPreview } from '../CreateEditCustomLinkFlyout/link_preview';
+import { composeStories } from '@storybook/testing-react';
 import {
   render,
   getNodeText,
@@ -14,24 +13,15 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
-import {
-  getCallApmApiSpy,
-  CallApmApiSpy,
-} from '../../../../../../services/rest/callApmApiSpy';
+import React from 'react';
+import * as stories from './link_preview.stories';
+
+const { Example } = composeStories(stories);
 
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
 describe('LinkPreview', () => {
-  let callApmApiSpy: CallApmApiSpy;
-  beforeAll(() => {
-    callApmApiSpy = getCallApmApiSpy().mockResolvedValue({
-      transaction: { id: 'foo' },
-    });
-  });
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
   const getElementValue = (container: HTMLElement, id: string) =>
     getNodeText(
       ((getByTestId(container, id) as HTMLDivElement)
@@ -41,7 +31,7 @@ describe('LinkPreview', () => {
   it('shows label and url default values', () => {
     act(() => {
       const { container } = render(
-        <LinkPreview label="" url="" filters={[{ key: '', value: '' }]} />
+        <Example label="" url="" filters={[{ key: '', value: '' }]} />
       );
       expect(getElementValue(container, 'preview-label')).toEqual('Elastic.co');
       expect(getElementValue(container, 'preview-url')).toEqual(
@@ -53,7 +43,7 @@ describe('LinkPreview', () => {
   it('shows label and url values', () => {
     act(() => {
       const { container } = render(
-        <LinkPreview
+        <Example
           label="foo"
           url="https://baz.co"
           filters={[{ key: '', value: '' }]}
@@ -71,7 +61,7 @@ describe('LinkPreview', () => {
   it("shows warning when couldn't replace context variables", () => {
     act(() => {
       const { container } = render(
-        <LinkPreview
+        <Example
           label="foo"
           url="https://baz.co?service.name={{invalid}"
           filters={[{ key: '', value: '' }]}
@@ -86,20 +76,23 @@ describe('LinkPreview', () => {
       expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
     });
   });
+
   it('replaces url with transaction id', async () => {
     const { container } = render(
-      <LinkPreview
+      <Example
         label="foo"
         url="https://baz.co?transaction={{transaction.id}}"
         filters={[{ key: '', value: '' }]}
       />
     );
-    await waitFor(() => expect(callApmApiSpy).toHaveBeenCalled());
-    expect(getElementValue(container, 'preview-label')).toEqual('foo');
-    expect(
-      removeExternalLinkText(
-        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
-      )
-    ).toEqual('https://baz.co?transaction=foo');
+
+    await waitFor(() => {
+      expect(getElementValue(container, 'preview-label')).toEqual('foo');
+      expect(
+        removeExternalLinkText(
+          (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        )
+      ).toEqual('https://baz.co?transaction=0');
+    });
   });
 });
