@@ -7,10 +7,9 @@
 
 import React, { useState } from 'react';
 import { EuiSwitch, EuiPopover, EuiText, EuiFormRow } from '@elastic/eui';
-import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
-import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
+import { SETTINGS_ROUTE } from '../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
 
 interface Props {
