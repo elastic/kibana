@@ -160,8 +160,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  clearJobAuditMessages(jobId: string, start: string, end: string) {
-    const body = JSON.stringify({ jobId, start, end });
+  clearJobAuditMessages(jobId: string) {
+    const body = JSON.stringify({ jobId });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/job_audit_messages/clear_messages`,
       method: 'PUT',

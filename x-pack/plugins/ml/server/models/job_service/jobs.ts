@@ -232,6 +232,7 @@ export function jobsProvider(
         tempJob.auditMessage = {
           level: auditMessage.highestLevel,
           text: auditMessage.highestLevelText,
+          ...(auditMessage.cleared ? { cleared: auditMessage.cleared } : {}),
         };
       }
       return tempJob;

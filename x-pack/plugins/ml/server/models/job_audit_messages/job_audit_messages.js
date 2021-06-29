@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import {
+  ML_NOTIFICATION_INDEX_PATTERN,
+  ML_NOTIFICATION_INDEX_02,
+} from '../../../common/constants/index_patterns';
 import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import moment from 'moment';
 
@@ -36,7 +39,7 @@ const anomalyDetectorTypeFilter = {
   },
 };
 
-export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
+export function jobAuditMessagesProvider({ asInternalUser, asCurrentUser }, mlClient) {
   // search for audit messages,
   // jobId is optional. without it, all jobs will be listed.
   // from is optional and should be a string formatted in ES time units. e.g. 12h, 1d, 7d
@@ -124,7 +127,10 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
 
     let messages = [];
     if (body.hits.total.value > 0) {
-      messages = body.hits.hits.map((hit) => hit._source);
+      messages = body.hits.hits.map((hit) => ({
+        clearable: hit._index === ML_NOTIFICATION_INDEX_02,
+        ...hit._source,
+      }));
     }
     messages = await jobSavedObjectService.filterJobsForSpace(
       'anomaly-detector',
@@ -166,7 +172,8 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
       });
       levelsPerJobAggSize = jobIds.length;
     }
-
+    // TODO: needs to return whether latest message is cleared so we can have it as part of the audit message and
+    // not show the icon in the table if it is
     const { body } = await asInternalUser.search({
       index: ML_NOTIFICATION_INDEX_PATTERN,
       ignore_unavailable: true,
@@ -267,36 +274,59 @@ export function jobAuditMessagesProvider({ asInternalUser }, mlClient) {
     return jobMessages;
   }
 
-  // Sets 'cleared' to true for messages in the last 24hrs and adds message for clear action
-  // 'from' is 24hrs ago
-  async function clearJobAuditMessages(jobSavedObjectService, { jobId, start, end }) {
-    console.log('------- ABOUT TO FETCH MESSAGES -----', jobId, start, end);
-    const messages = await getJobAuditMessages(jobSavedObjectService, { jobId, start, end });
-    const latestMessage = messages[messages.length - 1];
-    console.log('------- LATEST MESSAGE -----', JSON.stringify(latestMessage, null, 2));
-    // eslint-disable-next-line
+  const clearedTime = new Date().getTime();
+
+  // Sets 'cleared' to true for messages in the last 24hrs and index new message for clear action
+  async function clearJobAuditMessages(jobId) {
     const newClearedMessage = {
       job_id: jobId,
       job_type: 'anomaly_detection',
       level: MESSAGE_LEVEL.INFO,
-      message: "Cleared all jobs for the last 24hrs'",
-      timestamp: new Date().getTime(),
+      message: 'Cleared set to true for messages in the last 24hrs.',
+      timestamp: clearedTime,
     };
 
-    const params = {
-      index: ML_NOTIFICATION_INDEX_PATTERN,
-      body: latestMessage,
-      refresh: 'wait_for',
+    const query = {
+      bool: {
+        filter: [
+          {
+            range: {
+              timestamp: {
+                gte: 'now-24h',
+              },
+            },
+          },
+          {
+            term: {
+              job_id: jobId,
+            },
+          },
+        ],
+      },
     };
 
-    if (typeof latestMessage._id !== 'undefined') {
-      params.id = latestMessage._id;
-      delete params.body._id;
-    }
+    await Promise.all([
+      asCurrentUser.updateByQuery({
+        index: ML_NOTIFICATION_INDEX_02,
+        ignore_unavailable: true,
+        refresh: true,
+        conflicts: 'proceed',
+        body: {
+          query,
+          script: {
+            source: 'ctx._source.cleared = true',
+            lang: 'painless',
+          },
+        },
+      }),
+      asCurrentUser.index({
+        index: ML_NOTIFICATION_INDEX_02,
+        body: newClearedMessage,
+        refresh: 'wait_for',
+      }),
+    ]);
 
-    const { body } = await asInternalUser.index(params);
-    console.log('---- BODY ------', JSON.stringify(body, null, 2));
-    return body;
+    return { success: true, last_cleared: clearedTime };
   }
 
   function levelToText(level) {

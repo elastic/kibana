@@ -185,7 +185,7 @@ export class JobDetailsUI extends Component {
           name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel', {
             defaultMessage: 'Job messages',
           }),
-          content: <JobMessagesPane jobId={job.job_id} />,
+          content: <JobMessagesPane jobId={job.job_id} refreshJobList={refreshJobList} />,
         },
       ];
 

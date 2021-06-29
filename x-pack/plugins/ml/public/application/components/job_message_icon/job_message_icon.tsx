@@ -18,7 +18,7 @@ interface Props {
 const [INFO, WARNING, ERROR] = ['info', 'warning', 'error'];
 
 export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
-  if (message === undefined) {
+  if (message === undefined || message.cleared === true) {
     return <span />;
   }
 
