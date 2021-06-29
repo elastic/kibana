@@ -30,11 +30,12 @@ import { durationToNumber } from '../../common/schema_utils';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
 import { useIlmPolicyStatus, UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
+import type { SharePluginSetup } from '../shared_imports';
 import { ClientConfigType } from '../plugin';
 import { ReportDeleteButton, ReportDownloadButton, ReportErrorButton, ReportInfoButton } from './';
 import { ReportDiagnostic } from './report_diagnostic';
-
 import { MigrateIlmPolicy } from './migrate_ilm_policy';
+import { IlmPolicyLink } from './ilm_policy_link';
 
 export interface Job {
   id: string;
@@ -60,7 +61,9 @@ export interface Props {
   license$: LicensingPluginSetup['license$'];
   pollConfig: ClientConfigType['poll'];
   redirect: ApplicationStart['navigateToApp'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   toasts: ToastsSetup;
+  urlService: SharePluginSetup['url'];
   ilmPolicyContextValue: UseIlmPolicyStatusReturn;
 }
 
@@ -138,7 +141,8 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { ilmPolicyContextValue } = this.props;
+    const { ilmPolicyContextValue, urlService, navigateToUrl } = this.props;
+    const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     return (
       <>
         <EuiPageHeader
@@ -164,9 +168,7 @@ class ReportListingUi extends Component<Props, State> {
             {ilmPolicyContextValue.isLoading ? (
               <EuiLoadingSpinner />
             ) : (
-              <EuiButtonEmpty size="xs" href="#">
-                View ILM policy
-              </EuiButtonEmpty>
+              ilmLocator && <IlmPolicyLink navigateToUrl={navigateToUrl} locator={ilmLocator} />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -550,7 +552,7 @@ class ReportListingUi extends Component<Props, State> {
 
 const PrivateReportListing = injectI18n(ReportListingUi);
 
-export const ReportListing = (props: Props) => {
+export const ReportListing = (props: Omit<Props, 'ilmPolicyContextValue' | 'intl'>) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
   return <PrivateReportListing {...props} ilmPolicyContextValue={ilmPolicyStatusValue} />;
 };

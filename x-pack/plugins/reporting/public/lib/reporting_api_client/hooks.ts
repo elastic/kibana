@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRequest, UseRequestResponse } from '../../../../../../src/plugins/es_ui_shared/public';
+import { useRequest, UseRequestResponse } from '../../shared_imports';
 import { IlmPolicyStatusResponse } from '../../../common/types';
 
 import { API_GET_ILM_POLICY_STATUS } from '../../../common/constants';

@@ -22,7 +22,6 @@ import {
   ReportApiJSON,
   ReportDocument,
   ReportSource,
-  IlmPolicyStatusResponse,
 } from '../../../common/types';
 import { add } from '../../notifier/job_completion_notifications';
 

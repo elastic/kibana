@@ -10,11 +10,11 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart } from 'src/core/public';
-import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 import { ILicense } from '../../../licensing/public';
 import { ReportingAPIClient, InternalApiClientClientProvider } from '../lib/reporting_api_client';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
+import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
 import { ReportListing } from './report_listing';
 
 export async function mountManagementSection(
@@ -23,6 +23,7 @@ export async function mountManagementSection(
   license$: Observable<ILicense>,
   pollConfig: ClientConfigType['poll'],
   apiClient: ReportingAPIClient,
+  urlService: SharePluginSetup['url'],
   params: ManagementAppMountParams
 ) {
   render(
@@ -34,7 +35,9 @@ export async function mountManagementSection(
             license$={license$}
             pollConfig={pollConfig}
             redirect={coreStart.application.navigateToApp}
+            navigateToUrl={coreStart.application.navigateToUrl}
             apiClient={apiClient}
+            urlService={urlService}
           />
         </IlmPolicyStatusContextProvider>
       </InternalApiClientClientProvider>
