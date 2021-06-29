@@ -6,8 +6,8 @@
  */
 
 import {
-  elasticLogo,
   functionWrapper,
+  getElasticLogo,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { containerStyle } from './containerStyle';
@@ -15,6 +15,11 @@ import { containerStyle } from './containerStyle';
 const errors = getFunctionErrors().containerStyle;
 
 describe('containerStyle', () => {
+  let elasticLogo;
+  beforeEach(async () => {
+    elasticLogo = (await getElasticLogo()).elasticLogo;
+  });
+
   const fn = functionWrapper(containerStyle);
 
   describe('default output', () => {
