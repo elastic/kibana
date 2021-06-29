@@ -13990,7 +13990,6 @@
     "xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError": "無効です。 {message}",
     "xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError": "フィールドの取得中にエラーが発生しました。ページを更新して再起動してください。",
     "xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields": "このインデックスパターンの数値型フィールドが見つかりませんでした。",
-    "xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder": "従属変数",
     "xpack.ml.dataframe.analytics.create.destinationIndexHelpText": "この名前のインデックスがすでに存在します。この分析ジョブを実行すると、デスティネーションインデックスが変更されます。",
     "xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel": "固有の宛先インデックス名を選択してください。",
     "xpack.ml.dataframe.analytics.create.destinationIndexInvalidError": "無効なデスティネーションインデックス名。",

@@ -14172,7 +14172,6 @@
     "xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError": "无效。{message}",
     "xpack.ml.dataframe.analytics.create.dependentVariableOptionsFetchError": "获取字段时出现问题。请刷新页面并重试。",
     "xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields": "没有为此索引模式找到任何数值类型字段。",
-    "xpack.ml.dataframe.analytics.create.dependentVariablePlaceholder": "因变量",
     "xpack.ml.dataframe.analytics.create.destinationIndexHelpText": "已存在具有此名称的索引。请注意，运行此分析作业将会修改此目标索引。",
     "xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel": "选择唯一目标索引名称。",
     "xpack.ml.dataframe.analytics.create.destinationIndexInvalidError": "目标索引名称无效。",
