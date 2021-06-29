@@ -138,17 +138,18 @@ export class TelemetryEndpointTask {
 
     const endpointPolicyCache = new Map<string, FullAgentPolicyInput>();
     for (const policyInfo of fleetAgents.values()) {
-      if (policyInfo.policy_id !== null && policyInfo.policy_id !== undefined) {
-        if (!endpointPolicyCache.has(policyInfo.policy_id)) {
-          const packagePolicies = await this.sender.fetchEndpointPolicyConfigs(
-            policyInfo.policy_id
-          );
-          packagePolicies?.inputs.forEach((input) => {
-            if (input.type === 'endpoint' && policyInfo.policy_id !== undefined) {
-              endpointPolicyCache.set(policyInfo.policy_id, input);
-            }
-          });
-        }
+      const shouldCachePolicy =
+        policyInfo.policy_id !== null &&
+        policyInfo.policy_id !== undefined &&
+        !endpointPolicyCache.has(policyInfo.policy_id);
+
+      if (shouldCachePolicy) {
+        const packagePolicies = await this.sender.fetchEndpointPolicyConfigs(policyInfo.policy_id);
+        packagePolicies?.inputs.forEach((input) => {
+          if (input.type === 'endpoint' && policyInfo.policy_id !== undefined) {
+            endpointPolicyCache.set(policyInfo.policy_id, input);
+          }
+        });
       }
     }
 
