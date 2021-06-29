@@ -54,7 +54,7 @@ export class FileDataVisualizerView extends Component {
       isExplanationFlyoutVisible: false,
       bottomBarVisible: false,
       hasPermissionToImport: false,
-      hasFindFileStructurePermission: true,
+      fileCouldNotBeReadPermissionError: false,
     };
 
     this.overrides = {};
@@ -92,7 +92,7 @@ export class FileDataVisualizerView extends Component {
         fileSize: 0,
         fileTooLarge: false,
         fileCouldNotBeRead: false,
-        hasFindFileStructurePermission: true,
+        fileCouldNotBeReadPermissionError: false,
         serverError: null,
         results: undefined,
         explanation: undefined,
@@ -188,19 +188,19 @@ export class FileDataVisualizerView extends Component {
         fileCouldNotBeRead: isRetry,
       });
     } catch (error) {
-      const hasFindFileStructurePermission = error.body.statusCode !== 403;
+      const fileCouldNotBeReadPermissionError = error.body.statusCode === 403;
       this.setState({
         results: undefined,
         explanation: undefined,
         loaded: false,
         loading: false,
         fileCouldNotBeRead: true,
-        hasFindFileStructurePermission,
+        fileCouldNotBeReadPermissionError,
         serverError: error,
       });
 
       // reload the results with the previous overrides
-      if (isRetry === false && hasFindFileStructurePermission === true) {
+      if (isRetry === false && fileCouldNotBeReadPermissionError === false) {
         this.setState({
           loading: true,
           loaded: false,
@@ -283,7 +283,7 @@ export class FileDataVisualizerView extends Component {
       isExplanationFlyoutVisible,
       bottomBarVisible,
       hasPermissionToImport,
-      hasFindFileStructurePermission,
+      fileCouldNotBeReadPermissionError,
     } = this.state;
 
     const fields =
@@ -298,7 +298,7 @@ export class FileDataVisualizerView extends Component {
             {!loading && !loaded && (
               <AboutPanel
                 onFilePickerChange={this.onFilePickerChange}
-                disabled={!hasFindFileStructurePermission}
+                disabled={!fileCouldNotBeReadPermissionError}
               />
             )}
 
@@ -310,14 +310,14 @@ export class FileDataVisualizerView extends Component {
 
             {fileCouldNotBeRead && loading === false && (
               <>
-                {hasFindFileStructurePermission ? (
+                {fileCouldNotBeReadPermissionError ? (
+                  <FindFileStructurePermissionDenied />
+                ) : (
                   <FileCouldNotBeRead
                     error={serverError}
                     loaded={loaded}
                     showEditFlyout={this.showEditFlyout}
                   />
-                ) : (
-                  <FindFileStructurePermissionDenied />
                 )}
                 <EuiSpacer size="l" />
               </>
