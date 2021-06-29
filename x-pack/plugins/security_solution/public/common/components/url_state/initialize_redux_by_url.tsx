@@ -26,6 +26,11 @@ import { queryTimelineById } from '../../../timelines/components/open_timeline/h
 import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
 import { SecurityPageName } from '../../../../common/constants';
 
+const isDetectionsPages = (pageName: string) =>
+  pageName === SecurityPageName.alerts ||
+  pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.exceptions;
+
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch
 ): DispatchSetInitialStateFromUrl => ({
@@ -45,7 +50,7 @@ export const dispatchSetInitialStateFromUrl = (
       const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
       if (sourcererState != null) {
         const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
-          (key) => !(key === SourcererScopeName.default && pageName === SecurityPageName.alerts)
+          (key) => !(key === SourcererScopeName.default && isDetectionsPages(pageName))
         ) as SourcererScopeName[];
         activeScopes.forEach((scope) =>
           dispatch(
