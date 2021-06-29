@@ -22,7 +22,7 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import type { ExecutionContextSetup } from '../execution_context';
+import type { InternalExecutionContextSetup } from '../execution_context';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
@@ -136,7 +136,7 @@ export class HttpServer {
 
   public async setup(
     config: HttpConfig,
-    executionContext?: ExecutionContextSetup
+    executionContext?: InternalExecutionContextSetup
   ): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
@@ -333,11 +333,13 @@ export class HttpServer {
 
   private setupRequestStateAssignment(
     config: HttpConfig,
-    executionContext?: ExecutionContextSetup
+    executionContext?: InternalExecutionContextSetup
   ) {
     this.server!.ext('onRequest', (request, responseToolkit) => {
       const requestId = getRequestId(request, config.requestId);
-      executionContext?.client.startWith({ requestId });
+
+      const parentContext = executionContext?.getParentContextFrom(request.headers);
+      executionContext?.set({ ...parentContext, requestId });
 
       request.app = {
         ...(request.app ?? {}),
@@ -348,10 +350,10 @@ export class HttpServer {
     });
   }
 
-  private setupContextExecutionCleanup(executionContext?: ExecutionContextSetup) {
+  private setupContextExecutionCleanup(executionContext?: InternalExecutionContextSetup) {
     if (!executionContext) return;
     this.server!.events.on('response', function () {
-      executionContext.client.stop();
+      executionContext.reset();
     });
   }
 
