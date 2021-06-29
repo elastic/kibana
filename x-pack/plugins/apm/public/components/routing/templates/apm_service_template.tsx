@@ -155,7 +155,7 @@ function AnalyzeDataButton({ serviceName }: { serviceName: string }) {
             'EXPERIMENTAL - Analyze Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
         })}
       >
-        <EuiButtonEmpty href={href} iconType="visBarVertical">
+        <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">
           {i18n.translate('xpack.apm.analyzeDataButton.label', {
             defaultMessage: 'Analyze data',
           })}
