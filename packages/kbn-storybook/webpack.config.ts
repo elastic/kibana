@@ -12,6 +12,7 @@ import { resolve } from 'path';
 import { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
+import { IgnoreNotFoundExportPlugin } from './ignoreNotFoundExportPlugin';
 
 const stats = {
   ...Stats.presetToOptions('minimal'),
@@ -70,6 +71,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
         },
       ],
     },
+    plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
