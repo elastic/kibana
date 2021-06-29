@@ -16,6 +16,7 @@ import { shallow } from 'enzyme';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { getPageHeaderActions } from '../../../test_helpers';
 
+import { PrecisionSlider } from './components/precision_slider';
 import { RelevanceTuning } from './relevance_tuning';
 
 import { RelevanceTuningCallouts } from './relevance_tuning_callouts';
@@ -51,6 +52,7 @@ describe('RelevanceTuning', () => {
   it('renders', () => {
     const wrapper = subject();
     expect(wrapper.find(RelevanceTuningCallouts).exists()).toBe(true);
+    expect(wrapper.find(PrecisionSlider).exists()).toBe(true);
     expect(wrapper.find(RelevanceTuningForm).exists()).toBe(true);
     expect(wrapper.find(RelevanceTuningPreview).exists()).toBe(true);
   });

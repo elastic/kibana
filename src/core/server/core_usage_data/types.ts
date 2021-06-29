@@ -110,6 +110,12 @@ export interface CoreUsageStats {
   'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
   'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
+  // Saved Objects Repository counters
+  'savedObjectsRepository.resolvedOutcome.exactMatch'?: number;
+  'savedObjectsRepository.resolvedOutcome.aliasMatch'?: number;
+  'savedObjectsRepository.resolvedOutcome.conflict'?: number;
+  'savedObjectsRepository.resolvedOutcome.notFound'?: number;
+  'savedObjectsRepository.resolvedOutcome.total'?: number;
 }
 
 /**
@@ -150,6 +156,12 @@ export interface CoreServicesUsageData {
       storeSizeBytes: number;
       primaryStoreSizeBytes: number;
     }[];
+    legacyUrlAliases: {
+      activeCount: number;
+      inactiveCount: number;
+      disabledCount: number;
+      totalCount: number;
+    };
   };
 }
 

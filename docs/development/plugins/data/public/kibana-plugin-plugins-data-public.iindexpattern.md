@@ -12,7 +12,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IIndexPattern extends MinimalIndexPattern 
+export interface IIndexPattern extends IndexPatternBase 
 ```
 
 ## Properties

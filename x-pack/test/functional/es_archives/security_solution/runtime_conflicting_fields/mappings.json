@@ -5,7 +5,7 @@
     "mappings": {
       "dynamic": "strict",
       "runtime": {
-        "host_alias": {
+        "host.hostname": {
           "type": "keyword",
           "script": {
             "source": "emit(doc['host.name'].value)"
@@ -97,6 +97,9 @@
         "host": {
           "properties": {
             "name": {
+              "type": "keyword"
+            },
+            "hostname": {
               "type": "keyword"
             }
           }
