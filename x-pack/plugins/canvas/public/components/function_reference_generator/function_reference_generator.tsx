@@ -19,8 +19,9 @@ interface Props {
 export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry }) => {
   const functionDefinitions = Object.values(functionRegistry);
 
-  const copyDocs = () => {
-    copy(generateFunctionReference(functionDefinitions));
+  const copyDocs = async () => {
+    const functionRefs = await generateFunctionReference(functionDefinitions);
+    copy(functionRefs);
     notifyService
       .getService()
       .success(

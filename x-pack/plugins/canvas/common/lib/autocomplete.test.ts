@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { functionSpecs } from '../../__fixtures__/function_specs';
+import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { getFunctionSpecs } from '../../__fixtures__/function_specs';
 
 import {
   FunctionSuggestion,
@@ -14,8 +15,13 @@ import {
 } from './autocomplete';
 
 describe('autocomplete', () => {
+  let functionSpecs: UnwrapPromiseOrReturn<ReturnType<typeof getFunctionSpecs>>;
+  beforeEach(async () => {
+    functionSpecs = await getFunctionSpecs();
+  });
+
   describe('getFnArgDefAtPosition', () => {
-    it('should return function definition for plot', () => {
+    it('should return function definition for plot', async () => {
       const expression = 'plot ';
       const def = getFnArgDefAtPosition(functionSpecs, expression, expression.length);
       const plotFn = functionSpecs.find((spec: any) => spec.name === 'plot');
