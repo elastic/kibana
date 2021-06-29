@@ -6,19 +6,26 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
+import { MANAGEMENT_PATH, SecurityPageName } from '../../common/constants';
 import { ManagementContainer } from './pages';
-import { NotFoundPage } from '../app/404';
+import { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
 
 /**
  * Returns the React Router Routes for the management area
  */
-export const ManagementRoutes = () => (
-  <CurrentLicense>
-    <Switch>
-      <Route path="/" component={ManagementContainer} />
-      <Route render={() => <NotFoundPage />} />
-    </Switch>
-  </CurrentLicense>
+const ManagementRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.administration}>
+    <CurrentLicense>
+      <ManagementContainer />
+    </CurrentLicense>
+  </TrackApplicationView>
 );
+
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: MANAGEMENT_PATH,
+    render: ManagementRoutes,
+  },
+];
