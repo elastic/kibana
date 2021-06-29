@@ -113,6 +113,17 @@ export const useCasesColumns = ({
     [dispatchUpdateCaseProperty, refreshCases]
   );
 
+  const updateStatus = useCallback(
+    (status) =>
+      handleDispatchUpdate({
+        updateKey: 'status',
+        updateValue: status,
+        caseId: theCase.id,
+        version: theCase.version,
+      }),
+    [handleDispatchUpdate]
+  );
+
   const actions = useMemo(
     () =>
       getActions({
@@ -281,14 +292,7 @@ export const useCasesColumns = ({
             <StatusContextMenu
               currentStatus={theCase.status}
               disabled={!userCanCrud || isLoadingCases.length > 0}
-              onStatusChanged={(status) =>
-                handleDispatchUpdate({
-                  updateKey: 'status',
-                  updateValue: status,
-                  caseId: theCase.id,
-                  version: theCase.version,
-                })
-              }
+              onStatusChanged={updateStatus}
             />
           );
         }
@@ -346,9 +350,7 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase }) => {
     theCase.externalService?.pushedAt != null ? new Date(theCase.externalService?.pushedAt) : null;
   const hasDataToPush =
     lastCasePush === null ||
-    (lastCasePush != null &&
-      lastCaseUpdate != null &&
-      lastCasePush.getTime() < lastCaseUpdate?.getTime());
+    (lastCaseUpdate != null && lastCasePush.getTime() < lastCaseUpdate?.getTime());
   return (
     <p>
       <IconWrapper>
@@ -363,7 +365,7 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase }) => {
         title={theCase.externalService?.connectorName}
         href={theCase.externalService?.externalUrl}
         target="_blank"
-        aria-label={i18n.SERVICENOW_LINK_ARIA}
+        aria-label={i18n.PUSH_LINK_ARIA(theCase.externalService?.connectorName)}
       >
         {theCase.externalService?.externalTitle}
       </EuiLink>
