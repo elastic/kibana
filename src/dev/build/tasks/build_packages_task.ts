@@ -63,6 +63,7 @@ export const BuildBazelPackages: Task = {
     await buildBazelProductionProjects({
       kibanaRoot: config.resolveFromRepo(),
       buildRoot: build.resolvePath(),
+      onlyOSS: build.isOss(),
     });
   },
 };
@@ -74,6 +75,7 @@ export const BuildPackages: Task = {
     await buildNonBazelProductionProjects({
       kibanaRoot: config.resolveFromRepo(),
       buildRoot: build.resolvePath(),
+      onlyOSS: build.isOss(),
     });
   },
 };
