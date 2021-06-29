@@ -7,13 +7,13 @@
 
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { DevToolsSetup } from 'src/plugins/dev_tools/public';
+import { LicensingPluginSetup } from '../../licensing/public/types';
 import { FileUploadPluginStart } from '../../file_upload/public';
 import { Plugin } from '../../../../src/core/public';
 
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { registerDevTool, registerHomeFeatureCatalogue } from './registration';
 import { setStartServices } from './kibana_services';
-import { LicensingPluginSetup } from 'x-pack/plugins/licensing/server/types';
 
 export interface EcsMapperSetupDependencies {
   home?: HomePublicPluginSetup;

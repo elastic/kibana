@@ -10,11 +10,11 @@ import React from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CoreSetup } from 'kibana/public';
 import { first } from 'rxjs/operators';
+import { ILicense } from '../../licensing/common/types';
 import { EcsMapperSetupDependencies } from './plugin';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common';
-import { ILicense } from 'x-pack/plugins/licensing/common/types';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
@@ -62,7 +62,7 @@ export async function registerDevTool(plugins: EcsMapperSetupDependencies, core:
     },
   });
 
-  plugins.licensing.license$.subscribe((license) => {
+  plugins.licensing.license$.subscribe((license: ILicense) => {
     if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
       devTool.disable();
     } else if (devTool.isDisabled()) {
