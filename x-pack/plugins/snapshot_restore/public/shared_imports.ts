@@ -13,6 +13,7 @@ export {
   NotAuthorizedSection,
   SectionError,
   PageError,
+  PageLoading,
   sendRequest,
   SendRequestConfig,
   SendRequestResponse,
@@ -22,3 +23,5 @@ export {
   UseRequestConfig,
   WithPrivileges,
 } from '../../../../src/plugins/es_ui_shared/public';
+
+export { APP_WRAPPER_CLASS } from '../../../../src/core/public';

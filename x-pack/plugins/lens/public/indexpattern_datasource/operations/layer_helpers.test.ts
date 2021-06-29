@@ -25,6 +25,7 @@ import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
+import { IndexPatternColumn, OperationDefinition } from './definitions';
 import { TinymathAST } from 'packages/kbn-tinymath';
 
 jest.mock('../operations');
@@ -2642,7 +2643,15 @@ describe('state_helpers', () => {
       });
     });
 
+    // no operation currently requires this check, faking a transfer function to check whether the generic logic works
     it('should rewrite column params if that is necessary due to restrictions', () => {
+      operationDefinitionMap.date_histogram.transfer = ((oldColumn) => ({
+        ...oldColumn,
+        params: {
+          ...oldColumn.params,
+          interval: 'w',
+        },
+      })) as OperationDefinition<IndexPatternColumn, 'field'>['transfer'];
       const layer: IndexPatternLayer = {
         columnOrder: ['col1', 'col2'],
         columns: {
@@ -2666,10 +2675,10 @@ describe('state_helpers', () => {
           ...layer.columns.col1,
           params: {
             interval: 'w',
-            timeZone: 'CET',
           },
         },
       });
+      delete operationDefinitionMap.date_histogram.transfer;
     });
 
     it('should remove operations referencing fields with wrong field types', () => {

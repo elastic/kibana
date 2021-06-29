@@ -328,6 +328,7 @@ export class FleetPlugin
         list: agentPolicyService.list,
         getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
+        getByIds: agentPolicyService.getByIDs,
       },
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
