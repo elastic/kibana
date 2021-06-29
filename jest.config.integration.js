@@ -21,10 +21,7 @@ module.exports = {
   ],
   reporters: [
     'default',
-    [
-      '<rootDir>/node_modules/@kbn/test/target_node/jest/junit_reporter',
-      { reportName: 'Jest Integration Tests' },
-    ],
+    ['@kbn/test/target_node/jest/junit_reporter', { reportName: 'Jest Integration Tests' }],
   ],
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]

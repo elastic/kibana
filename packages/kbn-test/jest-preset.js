@@ -9,8 +9,6 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
-const { resolve } = require('path');
-
 module.exports = {
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
@@ -48,7 +46,7 @@ module.exports = {
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
 
   // Use this configuration option to add custom reporters to Jest
-  reporters: ['default', resolve(__dirname, './target_node/jest/junit_reporter')],
+  reporters: ['default', '@kbn/test/target_node/jest/junit_reporter'],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
