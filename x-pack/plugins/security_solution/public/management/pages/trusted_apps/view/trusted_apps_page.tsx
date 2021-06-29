@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -33,6 +35,7 @@ import { TrustedAppsGrid } from './components/trusted_apps_grid';
 import { TrustedAppsList } from './components/trusted_apps_list';
 import { TrustedAppDeletionDialog } from './trusted_app_deletion_dialog';
 import { TrustedAppsNotifications } from './trusted_apps_notifications';
+import { AppAction } from '../../../../common/store/actions';
 import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translations';
 import { EmptyState } from './components/empty_state';
 import { SearchBar } from '../../../components/search_bar';
@@ -40,11 +43,13 @@ import { BackToExternalAppButton } from '../../../components/back_to_external_ap
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
 
 export const TrustedAppsPage = memo(() => {
+  const dispatch = useDispatch<Dispatch<AppAction>>();
   const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
   const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
+  const navigationCallback = useTrustedAppsNavigateCallback((query: string) => ({ filter: query }));
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
     show: 'create',
     id: undefined,
@@ -56,7 +61,13 @@ export const TrustedAppsPage = memo(() => {
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
     view_type: viewType,
   }));
-  const handleOnSearch = useTrustedAppsNavigateCallback((query: string) => ({ filter: query }));
+  const handleOnSearch = useCallback(
+    (query: string) => {
+      dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: true } });
+      navigationCallback(query);
+    },
+    [dispatch, navigationCallback]
+  );
 
   const showCreateFlyout = !!location.show;
 

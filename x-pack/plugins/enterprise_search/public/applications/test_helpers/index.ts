@@ -15,6 +15,7 @@ export {
   getPageTitle,
   getPageDescription,
   getPageHeaderActions,
+  getPageHeaderChildren,
 } from './get_page_header';
 
 // Misc

@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "Attempt to Modify an Okta Policy",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:policy.lifecycle.update",
+  "query": "event.dataset:okta.system and event.action:policy.lifecycle.update\n",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"

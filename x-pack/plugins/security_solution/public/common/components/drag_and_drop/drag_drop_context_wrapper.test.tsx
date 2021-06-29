@@ -13,6 +13,8 @@ import { TestProviders } from '../../mock';
 
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 
+jest.mock('../../lib/kibana');
+
 describe('DragDropContextWrapper', () => {
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
