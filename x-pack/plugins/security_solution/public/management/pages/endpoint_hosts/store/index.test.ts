@@ -64,7 +64,9 @@ describe('EndpointList store concerns', () => {
         policyItems: [],
         selectedPolicyId: undefined,
         policyItemsLoading: false,
-        endpointPackageInfo: undefined,
+        endpointPackageInfo: {
+          type: 'UninitialisedResourceState',
+        },
         nonExistingPolicies: {},
         agentPolicies: {},
         endpointsExist: true,
