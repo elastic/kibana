@@ -16,6 +16,20 @@ import {
 import { RuleActionsOverflow } from './index';
 import { mockRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    useKibana: jest.fn().mockReturnValue({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+        },
+      },
+    }),
+  };
+});
+
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
@@ -28,21 +42,14 @@ jest.mock('../../../pages/detection_engine/rules/all/actions', () => ({
   editRuleAction: jest.fn(),
 }));
 
-jest.mock('../../../../common/lib/kibana', () => {
-  return {
-    KibanaServices: {
-      get: () => ({
-        http: { fetch: jest.fn() },
-      }),
-    },
-  };
-});
-
 const duplicateRulesActionMock = duplicateRulesAction as jest.Mock;
 const flushPromises = () => new Promise(setImmediate);
 
 describe('RuleActionsOverflow', () => {
   afterEach(() => {
+    jest.clearAllMocks();
+  });
+  afterAll(() => {
     jest.resetAllMocks();
   });
 
@@ -229,7 +236,7 @@ describe('RuleActionsOverflow', () => {
     await flushPromises();
 
     expect(duplicateRulesAction).toHaveBeenCalled();
-    expect(editRuleAction).toHaveBeenCalledWith(ruleDuplicate, expect.anything());
+    expect(editRuleAction).toHaveBeenCalledWith(ruleDuplicate.id, expect.anything());
   });
 
   describe('rules details export rule', () => {

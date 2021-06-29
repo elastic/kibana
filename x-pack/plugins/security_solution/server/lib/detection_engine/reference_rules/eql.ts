@@ -45,6 +45,7 @@ export const createEqlAlertType = (ruleDataClient: RuleDataClient, logger: Logge
       context: [{ name: 'server', description: 'the server' }],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: false,
     producer: 'security-solution',
     async executor({
       startedAt,

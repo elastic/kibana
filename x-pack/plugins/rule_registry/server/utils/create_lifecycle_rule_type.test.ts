@@ -40,6 +40,7 @@ function createRule() {
     },
     id: 'test_type',
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     name: 'Test type',
     producer: 'test',
     actionVariables: {

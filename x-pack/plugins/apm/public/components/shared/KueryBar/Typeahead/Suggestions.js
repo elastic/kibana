@@ -18,7 +18,7 @@ const List = euiStyled.ul`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${px(units.quarter)};
   box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
-    ${({ theme }) => tint(0.1, theme.eui.euiColorFullShade)};
+    ${({ theme }) => tint(0.9, theme.eui.euiColorFullShade)};
   position: absolute;
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   z-index: 10;
