@@ -35,6 +35,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
   AgentEnrollmentFlyout,
   AgentPolicySummaryLine,
+  ExtensionWrapper,
   LinkedAgentCount,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
@@ -104,7 +105,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const renderViewDataStepContent = useCallback(
     () =>
       CustomEnrollmentFlyoutFinalStep ? (
-        <CustomEnrollmentFlyoutFinalStep />
+        <ExtensionWrapper>
+          <CustomEnrollmentFlyoutFinalStep />
+        </ExtensionWrapper>
       ) : (
         <>
           <EuiText>

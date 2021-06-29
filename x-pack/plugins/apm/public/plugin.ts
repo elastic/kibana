@@ -310,20 +310,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     return {};
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    if (plugins.fleet) {
-      const { registerExtension } = plugins.fleet;
+    const { registerExtension } = plugins.fleet;
 
-      registerExtension({
-        package: 'apm',
-        view: 'agent-enrollment-flyout',
-        component: LazyApmEnrollmentFlyoutExtension,
-      });
+    registerExtension({
+      package: 'apm',
+      view: 'agent-enrollment-flyout',
+      component: LazyApmEnrollmentFlyoutExtension,
+    });
 
-      registerExtension({
-        package: 'apm',
-        view: 'package-detail-assets',
-        component: LazyApmCustomAssetsExtension,
-      });
-    }
+    registerExtension({
+      package: 'apm',
+      view: 'package-detail-assets',
+      component: LazyApmCustomAssetsExtension,
+    });
   }
 }
