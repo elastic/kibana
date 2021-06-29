@@ -31,7 +31,11 @@ describe('WaterfallChartWrapper', () => {
 
   it('renders the correct sidebar items', () => {
     const { getAllByTestId } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
+      <WaterfallChartWrapper
+        data={extractItems(NETWORK_EVENTS.events)}
+        total={1000}
+        markerItems={[]}
+      />
     );
 
     const sideBarItems = getAllByTestId('middleTruncatedTextSROnly');
@@ -41,7 +45,11 @@ describe('WaterfallChartWrapper', () => {
 
   it('search by query works', () => {
     const { getAllByTestId, getByTestId, getByLabelText } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
+      <WaterfallChartWrapper
+        data={extractItems(NETWORK_EVENTS.events)}
+        total={1000}
+        markerItems={[]}
+      />
     );
 
     const filterInput = getByLabelText(FILTER_REQUESTS_LABEL);
@@ -70,7 +78,11 @@ describe('WaterfallChartWrapper', () => {
 
   it('search by mime type works', () => {
     const { getAllByTestId, getByLabelText, getAllByText } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
+      <WaterfallChartWrapper
+        data={extractItems(NETWORK_EVENTS.events)}
+        total={1000}
+        markerItems={[]}
+      />
     );
 
     const sideBarItems = getAllByTestId('middleTruncatedTextSROnly');
@@ -96,7 +108,11 @@ describe('WaterfallChartWrapper', () => {
 
   it('renders sidebar even when filter matches 0 resources', () => {
     const { getAllByTestId, getByLabelText, getAllByText, queryAllByTestId } = render(
-      <WaterfallChartWrapper data={extractItems(NETWORK_EVENTS.events)} total={1000} />
+      <WaterfallChartWrapper
+        data={extractItems(NETWORK_EVENTS.events)}
+        total={1000}
+        markerItems={[]}
+      />
     );
 
     const sideBarItems = getAllByTestId('middleTruncatedTextSROnly');
@@ -132,7 +148,11 @@ describe('WaterfallChartWrapper', () => {
 
   it('opens flyout on sidebar click and closes on flyout close button', async () => {
     const { getByText, getByTestId, queryByText, getByRole } = render(
-      <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
+      <WaterfallChartWrapper
+        total={mockNetworkItems.length}
+        data={mockNetworkItems}
+        markerItems={[]}
+      />
     );
 
     expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
@@ -165,7 +185,11 @@ describe('WaterfallChartWrapper', () => {
 
   it('opens flyout on sidebar click and closes on second sidebar click', async () => {
     const { getByText, getByTestId, queryByText } = render(
-      <WaterfallChartWrapper total={mockNetworkItems.length} data={mockNetworkItems} />
+      <WaterfallChartWrapper
+        total={mockNetworkItems.length}
+        data={mockNetworkItems}
+        markerItems={[]}
+      />
     );
 
     expect(getByText(`${mockNetworkItems[0].url}`)).toBeInTheDocument();
