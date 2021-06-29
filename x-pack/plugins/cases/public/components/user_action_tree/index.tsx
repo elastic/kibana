@@ -451,7 +451,6 @@ export const UserActionTree = React.memo(
                 isRight(ActionsCommentRequestRt.decode(comment)) &&
                 comment.type === CommentType.actions
               ) {
-                // console.log(comment);
                 return [
                   ...comments,
                   ...(comment.actions !== null
