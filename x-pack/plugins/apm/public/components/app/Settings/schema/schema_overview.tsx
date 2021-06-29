@@ -17,6 +17,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,16 +31,23 @@ interface Props {
   isMigrated: boolean;
   isLoading: boolean;
   isLoadingConfirmation: boolean;
-  isDisabled: boolean;
+  cloudApmMigrationEnabled: boolean;
+  hasCloudAgentPolicy: boolean;
+  hasRequiredRole: boolean;
 }
 export function SchemaOverview({
   onSwitch,
   isMigrated,
   isLoading,
   isLoadingConfirmation,
-  isDisabled,
+  cloudApmMigrationEnabled,
+  hasCloudAgentPolicy,
+  hasRequiredRole,
 }: Props) {
   const fleetCloudAgentPolicyHref = useFleetCloudAgentPolicyHref();
+  const isDisabled =
+    !cloudApmMigrationEnabled || !hasCloudAgentPolicy || !hasRequiredRole;
+
   if (isLoading) {
     return (
       <>
@@ -149,6 +157,21 @@ export function SchemaOverview({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCard
+            betaBadgeLabel={i18n.translate(
+              'xpack.apm.settings.schema.migrate.dataStreams.betaBadge.label',
+              { defaultMessage: 'Beta' }
+            )}
+            betaBadgeTitle={i18n.translate(
+              'xpack.apm.settings.schema.migrate.dataStreams.betaBadge.title',
+              { defaultMessage: 'Data streams' }
+            )}
+            betaBadgeTooltipContent={i18n.translate(
+              'xpack.apm.settings.schema.migrate.dataStreams.betaBadge.description',
+              {
+                defaultMessage:
+                  'The switch to data streams is not GA. Please help us by reporting any bugs.',
+              }
+            )}
             image={
               <div>
                 <img src={rocketLaunchGraphic} alt="rocket launch" />
@@ -167,16 +190,25 @@ export function SchemaOverview({
             )}
             footer={
               <div>
-                <EuiButton
-                  fill
-                  isLoading={isLoadingConfirmation}
-                  isDisabled={isDisabled}
+                <EuiToolTip
+                  position="bottom"
+                  content={getDisabledReason({
+                    cloudApmMigrationEnabled,
+                    hasCloudAgentPolicy,
+                    hasRequiredRole,
+                  })}
                 >
-                  {i18n.translate(
-                    'xpack.apm.settings.schema.migrate.dataStreams.buttonText',
-                    { defaultMessage: 'Switch to data streams' }
-                  )}
-                </EuiButton>
+                  <EuiButton
+                    fill
+                    isLoading={isLoadingConfirmation}
+                    isDisabled={isDisabled}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.settings.schema.migrate.dataStreams.buttonText',
+                      { defaultMessage: 'Switch to data streams' }
+                    )}
+                  </EuiButton>
+                </EuiToolTip>
               </div>
             }
             onClick={onSwitch}
@@ -267,4 +299,57 @@ export function SchemaOverviewHeading() {
       <EuiSpacer size="m" />
     </>
   );
+}
+
+function getDisabledReason({
+  cloudApmMigrationEnabled,
+  hasCloudAgentPolicy,
+  hasRequiredRole,
+}: {
+  cloudApmMigrationEnabled: boolean;
+  hasCloudAgentPolicy: boolean;
+  hasRequiredRole: boolean;
+}) {
+  const reasons: string[] = [];
+  if (!cloudApmMigrationEnabled) {
+    reasons.push(
+      i18n.translate(
+        'xpack.apm.settings.schema.disabledReason.cloudApmMigrationEnabled',
+        { defaultMessage: 'Cloud migration is not enabled' }
+      )
+    );
+  }
+  if (!hasCloudAgentPolicy) {
+    reasons.push(
+      i18n.translate(
+        'xpack.apm.settings.schema.disabledReason.hasCloudAgentPolicy',
+        { defaultMessage: 'Cloud agent policy does not exist' }
+      )
+    );
+  }
+  if (!hasRequiredRole) {
+    reasons.push(
+      i18n.translate(
+        'xpack.apm.settings.schema.disabledReason.hasRequiredRole',
+        { defaultMessage: 'User does not have superuser role' }
+      )
+    );
+  }
+  if (reasons.length) {
+    return (
+      <FormattedMessage
+        id="xpack.apm.settings.schema.disabledReason"
+        defaultMessage="Switch to data streams is unavailable: {reasons}"
+        values={{
+          reasons: (
+            <ul>
+              {reasons.map((reasonText, index) => (
+                <li key={index}>- {reasonText}</li>
+              ))}
+            </ul>
+          ),
+        }}
+      />
+    );
+  }
 }

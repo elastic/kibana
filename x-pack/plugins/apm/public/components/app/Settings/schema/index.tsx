@@ -42,8 +42,6 @@ export function Schema() {
   const hasCloudAgentPolicy = !!data.has_cloud_agent_policy;
   const hasCloudApmPackagePolicy = !!data.has_cloud_apm_package_policy;
   const hasRequiredRole = !!data.has_required_role;
-  const isEnabled =
-    cloudApmMigrationEnabled && hasCloudAgentPolicy && hasRequiredRole;
   return (
     <>
       <SchemaOverview
@@ -61,7 +59,9 @@ export function Schema() {
         isMigrated={hasCloudApmPackagePolicy}
         isLoading={isLoading}
         isLoadingConfirmation={isLoadingConfirmation}
-        isDisabled={!isEnabled}
+        cloudApmMigrationEnabled={cloudApmMigrationEnabled}
+        hasCloudAgentPolicy={hasCloudAgentPolicy}
+        hasRequiredRole={hasRequiredRole}
       />
       {isSwitchActive && (
         <ConfirmSwitchModal
