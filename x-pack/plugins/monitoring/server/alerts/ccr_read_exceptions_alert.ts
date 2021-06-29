@@ -240,7 +240,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
       'xpack.monitoring.alerts.ccrReadExceptions.shortAction',
       {
         defaultMessage:
-          'Verify follower and leader index relationships across the affected remote clusters.',
+          'Verify follower and leader index relationships on the affected remote cluster.',
       }
     );
     const fullActionText = i18n.translate('xpack.monitoring.alerts.ccrReadExceptions.fullAction', {
@@ -258,7 +258,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     const internalShortMessage = i18n.translate(
       'xpack.monitoring.alerts.ccrReadExceptions.firing.internalShortMessage',
       {
-        defaultMessage: `CCR read exceptions alert is firing for the following remote clusters: {remoteClustersList}. {shortActionText}`,
+        defaultMessage: `CCR read exceptions alert is firing for the following remote cluster: {remoteClustersList}. {shortActionText}`,
         values: {
           remoteClustersList,
           shortActionText,
@@ -268,7 +268,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     const internalFullMessage = i18n.translate(
       'xpack.monitoring.alerts.ccrReadExceptions.firing.internalFullMessage',
       {
-        defaultMessage: `CCR read exceptions alert is firing for the following remote clusters: {remoteClustersList}. Current 'follower_index' indices are affected: {followerIndicesList}. {action}`,
+        defaultMessage: `CCR read exceptions alert is firing for the following remote cluster: {remoteClustersList}. Current 'follower_index' index affected: {followerIndicesList}. {action}`,
         values: {
           action,
           remoteClustersList,
