@@ -43,6 +43,8 @@ describe('csv', () => {
 one,1
 two,2
 fourty two,42`,
+          delimiter: '',
+          newline: '',
         },
         {} as ExecutionContext<Adapters, SerializableState>
       )
@@ -59,6 +61,7 @@ one\t1
 two\t2
 fourty two\t42`,
           delimiter: '\t',
+          newline: '',
         },
         {} as ExecutionContext<Adapters, SerializableState>
       )
@@ -73,6 +76,7 @@ one%SPLIT%1
 two%SPLIT%2
 fourty two%SPLIT%42`,
           delimiter: '%SPLIT%',
+          newline: '',
         },
         {} as ExecutionContext<Adapters, SerializableState>
       )
@@ -86,6 +90,7 @@ fourty two%SPLIT%42`,
         {
           data: `name,number\rone,1\rtwo,2\rfourty two,42`,
           newline: '\r',
+          delimiter: '',
         },
         {} as ExecutionContext<Adapters, SerializableState>
       )
@@ -110,6 +115,8 @@ fourty two%SPLIT%42`,
         {
           data: `foo," bar  ", baz, " buz "
 1,2,3,4`,
+          delimiter: '',
+          newline: '',
         },
         {} as ExecutionContext<Adapters, SerializableState>
       )
@@ -138,6 +145,8 @@ fourty two%SPLIT%42`,
           data: `foo," bar  ", baz, " buz "
 1,"  best  ",3, "  ok"
 "  good", bad, better   , " worst    " `,
+          delimiter: '',
+          newline: '',
         },
         {} as ExecutionContext<Adapters, SerializableState>
       )
@@ -153,6 +162,8 @@ fourty two%SPLIT%42`,
 one|1
 two.2
 fourty two,42`,
+          delimiter: '',
+          newline: '',
         },
         {} as ExecutionContext<Adapters, SerializableState>
       );
