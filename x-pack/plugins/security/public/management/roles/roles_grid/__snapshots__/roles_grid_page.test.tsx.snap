@@ -58,33 +58,33 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                   />
                 </EuiIcon>
                 <EuiSpacer
-                  size="s"
+                  size="m"
                 >
                   <div
-                    className="euiSpacer euiSpacer--s"
+                    className="euiSpacer euiSpacer--m"
                   />
                 </EuiSpacer>
+                <EuiTitle
+                  size="m"
+                >
+                  <h2
+                    className="euiTitle euiTitle--medium"
+                  >
+                    <FormattedMessage
+                      defaultMessage="You need permission to manage roles"
+                      id="xpack.security.management.roles.deniedPermissionTitle"
+                      values={Object {}}
+                    >
+                      You need permission to manage roles
+                    </FormattedMessage>
+                  </h2>
+                </EuiTitle>
                 <EuiTextColor
                   color="subdued"
                 >
                   <span
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    <EuiTitle
-                      size="m"
-                    >
-                      <h2
-                        className="euiTitle euiTitle--medium"
-                      >
-                        <FormattedMessage
-                          defaultMessage="You need permission to manage roles"
-                          id="xpack.security.management.roles.deniedPermissionTitle"
-                          values={Object {}}
-                        >
-                          You need permission to manage roles
-                        </FormattedMessage>
-                      </h2>
-                    </EuiTitle>
                     <EuiSpacer
                       size="m"
                     >

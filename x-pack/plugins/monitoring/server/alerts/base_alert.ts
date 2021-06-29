@@ -96,6 +96,7 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
+      isExportable: false,
       executor: (
         options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
           state: ExecutedState;

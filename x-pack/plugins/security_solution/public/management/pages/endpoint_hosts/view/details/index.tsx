@@ -154,6 +154,7 @@ export const EndpointDetailsFlyout = memo(() => {
       data-test-subj="endpointDetailsFlyout"
       size="m"
       paddingSize="l"
+      ownFocus={false}
     >
       {(show === 'policy_response' || show === 'isolate' || show === 'unisolate') && (
         <EndpointDetailsFlyoutHeader hostname={hostDetails?.host?.hostname} />
