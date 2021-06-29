@@ -18,6 +18,6 @@ cd ..
 # Example: ./find_rules.sh
 curl -v -k \
  -u $USER:changeme \
- -X GET "${KIBANA_URL}${SPACE_URL}/api/rac/alerts/index" | jq .
+ -X GET "${KIBANA_URL}${SPACE_URL}/internal/rac/alerts/index" | jq .
 
 # -X GET "${KIBANA_URL}${SPACE_URL}/api/apm/settings/apm-alerts-as-data-indices" | jq .

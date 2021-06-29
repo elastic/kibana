@@ -90,6 +90,9 @@ describe('getAlertByIdRoute', () => {
     const response = await server.inject(getReadRequest(), context);
 
     expect(response.status).toEqual(500);
-    expect(response.body).toEqual({ message: 'Unable to get alert', status_code: 500 });
+    expect(response.body).toEqual({
+      attributes: { success: false },
+      message: 'Unable to get alert',
+    });
   });
 });

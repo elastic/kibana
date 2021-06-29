@@ -3,6 +3,9 @@
   "value": {
     "index": ".alerts-observability-apm",
     "id": "NoxgpHkBqbdrfX07MqXV",
+    "_version": 1,
+    "_seq_no": 1,
+    "_primary_term": 1,
     "source": {
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "apm.error_rate",
@@ -18,6 +21,9 @@
   "value": {
     "index": ".alerts-security-solution",
     "id": "020202",
+    "_version": 1,
+    "_seq_no": 1,
+    "_primary_term": 1,
     "source": {
       "@timestamp": "2020-12-16T15:16:18.570Z",
       "rule.id": "siem.signals",

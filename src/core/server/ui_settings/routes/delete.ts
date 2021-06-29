@@ -34,10 +34,10 @@ export function registerDeleteRoute(router: IRouter) {
         });
       } catch (error) {
         if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-          return response.customError({
+          return {
             body: error,
             statusCode: error.output.statusCode,
-          });
+          };
         }
 
         if (error instanceof CannotOverrideError) {

@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const TEST_URL = '/api/rac/alerts';
+  const TEST_URL = '/internal/rac/alerts';
   const ALERTS_INDEX_URL = `${TEST_URL}/index`;
   const SPACE1 = 'space1';
 
@@ -57,8 +57,40 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(superUser.username, superUser.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
           .expect(200);
+      });
+
+      it(`${superUser.username} should receive a 409 if trying to update an old alert document version`, async () => {
+        const apmIndex = await getAPMIndexName(superUser);
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([999, 999]), 'utf8').toString('base64'),
+          })
+          .expect(409);
       });
 
       it(`${obsMinReadAlertsAllSpacesAll.username} should be able to update the APM alert in ${SPACE1}`, async () => {
@@ -67,20 +99,48 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsMinReadAlertsAllSpacesAll.username, obsMinReadAlertsAllSpacesAll.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
           .expect(200);
         expect(res.body).to.eql({
           success: true,
-          alerts: {
-            _index: '.alerts-observability-apm',
-            _id: 'NoxgpHkBqbdrfX07MqXV',
-            _version: 2,
-            result: 'updated',
-            _shards: { total: 2, successful: 1, failed: 0 },
-            _seq_no: 1,
-            _primary_term: 1,
-          },
+          _index: '.alerts-observability-apm',
+          _id: 'NoxgpHkBqbdrfX07MqXV',
+          result: 'updated',
+          _shards: { total: 2, successful: 1, failed: 0 },
+          _version: 'WzEsMV0=',
+          _seq_no: 1,
+          _primary_term: 1,
         });
+      });
+      it(`${obsMinReadAlertsAllSpacesAll.username} should receive a 409 if trying to update an old alert document version`, async () => {
+        const apmIndex = await getAPMIndexName(superUser);
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
+          .auth(obsMinReadAlertsAllSpacesAll.username, obsMinReadAlertsAllSpacesAll.password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
+          .expect(200);
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
+          .auth(obsMinReadAlertsAllSpacesAll.username, obsMinReadAlertsAllSpacesAll.password)
+          .set('kbn-xsrf', 'true')
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([999, 999]), 'utf8').toString('base64'),
+          })
+          .expect(409);
       });
 
       it(`${obsMinReadAlertsAll.username} should be able to update the APM alert in ${SPACE1}`, async () => {
@@ -89,7 +149,12 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsMinReadAlertsAll.username, obsMinReadAlertsAll.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
           .expect(200);
       });
       it(`${obsMinAll.username} should NOT be able to update the APM alert in ${SPACE1}`, async () => {
@@ -98,7 +163,12 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsMinAll.username, obsMinAll.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
           .expect(403);
       });
 
@@ -108,7 +178,12 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsMinAllSpacesAll.username, obsMinAllSpacesAll.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
           .expect(403);
       });
 
@@ -118,7 +193,12 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsAlertsAll.username, obsAlertsAll.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
           .expect(403);
       });
 
@@ -128,7 +208,12 @@ export default ({ getService }: FtrProviderContext) => {
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
           .auth(obsAlertsAllSpacesAll.username, obsAlertsAllSpacesAll.password)
           .set('kbn-xsrf', 'true')
-          .send({ ids: ['NoxgpHkBqbdrfX07MqXV'], status: 'closed', index: apmIndex })
+          .send({
+            ids: ['NoxgpHkBqbdrfX07MqXV'],
+            status: 'closed',
+            index: apmIndex,
+            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
+          })
           .expect(403);
       });
     });

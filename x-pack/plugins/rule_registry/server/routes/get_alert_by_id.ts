@@ -55,15 +55,15 @@ export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => 
           ...contentType,
         };
 
-        return response.custom({
+        return response.customError({
           headers: defaultedHeaders,
           statusCode: err.statusCode,
-          body: Buffer.from(
-            JSON.stringify({
-              message: err.message,
-              status_code: err.statusCode,
-            })
-          ),
+          body: {
+            message: err.message,
+            attributes: {
+              success: false,
+            },
+          },
         });
       }
     }

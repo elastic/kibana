@@ -22,7 +22,7 @@ describe('updateAlertByIdRoute', () => {
     clients.rac.update.mockResolvedValue({
       _index: '.alerts-observability-apm',
       _id: 'NoxgpHkBqbdrfX07MqXV',
-      _version: 2,
+      _version: 'WzM2MiwyXQ==',
       result: 'updated',
       _shards: { total: 2, successful: 1, failed: 0 },
       _seq_no: 1,
@@ -37,15 +37,13 @@ describe('updateAlertByIdRoute', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      alerts: {
-        _index: '.alerts-observability-apm',
-        _id: 'NoxgpHkBqbdrfX07MqXV',
-        _version: 2,
-        result: 'updated',
-        _shards: { total: 2, successful: 1, failed: 0 },
-        _seq_no: 1,
-        _primary_term: 1,
-      },
+      _index: '.alerts-observability-apm',
+      _id: 'NoxgpHkBqbdrfX07MqXV',
+      _version: 'WzM2MiwyXQ==',
+      result: 'updated',
+      _shards: { total: 2, successful: 1, failed: 0 },
+      _seq_no: 1,
+      _primary_term: 1,
       success: true,
     });
   });
@@ -95,6 +93,9 @@ describe('updateAlertByIdRoute', () => {
     const response = await server.inject(getUpdateRequest(), context);
 
     expect(response.status).toEqual(500);
-    expect(response.body).toEqual({ message: 'Unable to update alert', status_code: 500 });
+    expect(response.body).toEqual({
+      attributes: { success: false },
+      message: 'Unable to update alert',
+    });
   });
 });

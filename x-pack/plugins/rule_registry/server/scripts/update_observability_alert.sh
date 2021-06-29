@@ -24,5 +24,5 @@ curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
  -u observer:changeme \
- -X POST ${KIBANA_URL}${SPACE_URL}/api/rac/alerts \
+ -X POST ${KIBANA_URL}${SPACE_URL}/internal/rac/alerts \
  -d "{\"ids\": $IDS, \"status\":\"$STATUS\", \"index\":\".alerts-observability-apm\"}" | jq .

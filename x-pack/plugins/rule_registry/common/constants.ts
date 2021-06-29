@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const BASE_RAC_ALERTS_API_PATH = '/api/rac/alerts';
+export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';

@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const TEST_URL = '/api/rac/alerts';
+  const TEST_URL = '/internal/rac/alerts';
   const ALERTS_INDEX_URL = `${TEST_URL}/index`;
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';

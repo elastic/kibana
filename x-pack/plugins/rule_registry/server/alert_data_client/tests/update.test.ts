@@ -79,7 +79,8 @@ describe('update()', () => {
     );
     const result = await alertsClient.update({
       id: '1',
-      data: { status: 'closed' },
+      status: 'closed',
+      _version: undefined,
       index: '.alerts-observability-apm',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -93,7 +94,7 @@ describe('update()', () => {
           "successful": 1,
           "total": 2,
         },
-        "_version": 2,
+        "_version": "WzEsMV0=",
         "result": "updated",
       }
     `);
@@ -108,6 +109,7 @@ describe('update()', () => {
           },
           "id": "1",
           "index": ".alerts-observability-apm",
+          "refresh": "wait_for",
         },
       ]
     `);
@@ -162,7 +164,8 @@ describe('update()', () => {
     );
     await alertsClient.update({
       id: '1',
-      data: { status: 'closed' },
+      status: 'closed',
+      _version: undefined,
       index: '.alerts-observability-apm',
     });
 
@@ -186,7 +189,8 @@ describe('update()', () => {
     await expect(
       alertsClient.update({
         id: '1',
-        data: { status: 'closed' },
+        status: 'closed',
+        _version: undefined,
         index: '.alerts-observability-apm',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong on get"`);
@@ -242,7 +246,8 @@ describe('update()', () => {
     await expect(
       alertsClient.update({
         id: '1',
-        data: { status: 'closed' },
+        status: 'closed',
+        _version: undefined,
         index: '.alerts-observability-apm',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong on update"`);
@@ -280,6 +285,9 @@ describe('update()', () => {
                   _type: 'alert',
                   _index: '.alerts-observability-apm',
                   _id: 'NoxgpHkBqbdrfX07MqXV',
+                  _version: 2,
+                  _seq_no: 362,
+                  _primary_term: 2,
                   _source: {
                     'rule.id': 'apm.error_rate',
                     message: 'hello world 1',
@@ -312,7 +320,8 @@ describe('update()', () => {
       const alertsClient = new AlertsClient(alertsClientParams);
       const result = await alertsClient.update({
         id: '1',
-        data: { status: 'closed' },
+        status: 'closed',
+        _version: undefined,
         index: '.alerts-observability-apm',
       });
 
@@ -333,7 +342,7 @@ describe('update()', () => {
             "successful": 1,
             "total": 2,
           },
-          "_version": 2,
+          "_version": "WzEsMV0=",
           "result": "updated",
         }
       `);
@@ -348,7 +357,8 @@ describe('update()', () => {
       await expect(
         alertsClient.update({
           id: '1',
-          data: { status: 'closed' },
+          status: 'closed',
+          _version: undefined,
           index: '.alerts-observability-apm',
         })
       ).rejects.toMatchInlineSnapshot(

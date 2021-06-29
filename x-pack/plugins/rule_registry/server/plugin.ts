@@ -148,10 +148,7 @@ export class RuleRegistryPlugin
 
   private createRouteHandlerContext = (): IContextProvider<RacRequestHandlerContext, 'rac'> => {
     const { alertsClientFactory } = this;
-    return async function alertsRouteHandlerContext(
-      context,
-      request
-    ): Promise<RacApiRequestHandlerContext> {
+    return function alertsRouteHandlerContext(context, request): RacApiRequestHandlerContext {
       return {
         getAlertsClient: async () => {
           const createdClient = alertsClientFactory.create(request);
