@@ -11,15 +11,18 @@ import {
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
 } from '../../../../fleet/public';
+import { useUptimeSettingsContext } from '../../contexts/uptime_settings_context';
 
 export const SyntheticsCustomAssetsExtension: PackageAssetsComponent = () => {
+  const { basePath } = useUptimeSettingsContext();
+
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: 'Monitors',
-      url: '/app/uptime',
+      url: `${basePath}/app/uptime`,
       description: 'View monitors in Uptime',
     },
   ];
 
-  return <CustomAssetsAccordion views={views} />;
+  return <CustomAssetsAccordion views={views} initialIsOpen />;
 };

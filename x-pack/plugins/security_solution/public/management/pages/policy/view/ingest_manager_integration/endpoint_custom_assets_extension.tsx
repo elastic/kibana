@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useKibana } from '../../../../../common/lib/kibana';
 import {
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
@@ -13,13 +14,14 @@ import {
 } from '../../../../../../../fleet/public';
 
 export const EndpointCustomAssetsExtension: PackageAssetsComponent = () => {
+  const { http } = useKibana().services;
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: 'Hosts',
-      url: '/app/security/hosts/allHosts',
+      url: http.basePath.prepend('/app/security/hosts/allHosts'),
       description: 'View hosts in Security app',
     },
   ];
 
-  return <CustomAssetsAccordion views={views} />;
+  return <CustomAssetsAccordion views={views} initialIsOpen />;
 };

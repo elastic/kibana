@@ -5,28 +5,16 @@
  * 2.0.
  */
 
-import url from 'url';
-import { stringify } from 'querystring';
-
 import React, { lazy } from 'react';
-import { encode } from 'rison-node';
 
 import type { PackageAssetsComponent } from './types';
 import { CustomAssetsAccordion } from './components/custom_assets_accordion';
 import type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
+import { useStartServices } from './hooks';
 
 export const LazyCustomLogsAssetsComponent = lazy<PackageAssetsComponent>(async () => {
-  // Filter to only custom logs, which by default appear in the "generic" dataset
-  const logStreamQuery = 'data_stream.dataset: "generic"';
-  const logStreamUrl = url.format({
-    pathname: '/app/logs/stream',
-    search: stringify({
-      logFilter: encode({
-        expression: logStreamQuery,
-        kind: 'kuery',
-      }),
-    }),
-  });
+  const { http } = useStartServices();
+  const logStreamUrl = http.basePath.prepend('/app/logs/stream');
 
   const views: CustomAssetsAccordionProps['views'] = [
     {
@@ -36,6 +24,6 @@ export const LazyCustomLogsAssetsComponent = lazy<PackageAssetsComponent>(async 
     },
   ];
   return {
-    default: () => <CustomAssetsAccordion views={views} />,
+    default: () => <CustomAssetsAccordion views={views} initialIsOpen />,
   };
 });

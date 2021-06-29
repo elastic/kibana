@@ -25,11 +25,16 @@ export interface CustomAssetsAccordionProps {
     url: string;
     description: string;
   }>;
+  initialIsOpen?: boolean;
 }
 
-export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps> = ({ views }) => {
+export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps> = ({
+  views,
+  initialIsOpen = false,
+}) => {
   return (
     <EuiAccordion
+      initialIsOpen={initialIsOpen}
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
