@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import {
   getElasticLogo,
-  elasticOutline,
+  getElasticOutline,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
 // import { image } from './image';
 
@@ -17,8 +17,10 @@ describe.skip('image', () => {
   const fn = jest.fn();
 
   let elasticLogo;
+  let elasticOutline;
   beforeEach(async () => {
-    elasticLogo = (await getElasticLogo()).elasticLogo;
+    elasticLogo = await (await getElasticLogo()).elasticLogo;
+    elasticOutline = await (await getElasticOutline()).elasticOutline;
   });
 
   it('returns an image object using a dataUrl', () => {

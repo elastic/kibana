@@ -23,7 +23,7 @@ export const revealImageRenderer = (): ExpressionRenderDefinition<RevealImageRen
   displayName: revealImageStrings.getDisplayName(),
   help: revealImageStrings.getHelpDescription(),
   reuseDomNode: true,
-  render: async (
+  render: (
     domNode: HTMLElement,
     config: RevealImageRendererConfig,
     handlers: IInterpreterRenderHandlers

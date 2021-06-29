@@ -52,6 +52,12 @@ export const args = [
 
 export const initializers = [dateFormatInitializer, numberFormatInitializer];
 
-export const initializeArgs: SetupInitializer<any> = (core, plugins) => {
-  return [...args, ...initializers.map((initializer) => initializer(core, plugins))];
+export const initializeArgs: SetupInitializer<any> = async (core, plugins) => {
+  const depromisifiedArgs = await Promise.all(
+    args.map(async (fn) => {
+      const fnResult = await fn();
+      return () => fnResult;
+    })
+  );
+  return [...depromisifiedArgs, ...initializers.map((initializer) => initializer(core, plugins))];
 };

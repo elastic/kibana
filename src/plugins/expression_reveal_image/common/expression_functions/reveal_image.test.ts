@@ -8,7 +8,7 @@
 
 import {
   functionWrapper,
-  elasticOutline,
+  getElasticOutline,
   getElasticLogo,
 } from '../../../presentation_util/common/lib';
 import { getFunctionErrors } from '../../common/i18n';
@@ -22,10 +22,12 @@ const errors = getFunctionErrors().revealImage;
 describe('revealImageFunction', () => {
   let fn: UnwrapPromiseOrReturn<ReturnType<typeof revealImageFunction>>['fn'];
   let elasticLogo = '';
+  let elasticOutline = '';
 
   beforeEach(async () => {
     fn = await functionWrapper(revealImageFunction);
     elasticLogo = await (await getElasticLogo()).elasticLogo;
+    elasticOutline = await (await getElasticOutline()).elasticOutline;
   });
 
   it('returns a render as revealImage', () => {

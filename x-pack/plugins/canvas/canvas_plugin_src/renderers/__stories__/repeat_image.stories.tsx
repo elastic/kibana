@@ -10,12 +10,18 @@ import { storiesOf } from '@storybook/react';
 import { repeatImage } from '../repeat_image';
 import {
   getElasticLogo,
-  elasticOutline,
+  getElasticOutline,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { waitFor } from '../../../../../../src/plugins/presentation_util/public/__stories__';
 import { Render } from './render';
 
-const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
+const Renderer = ({
+  elasticLogo,
+  elasticOutline,
+}: {
+  elasticLogo: string;
+  elasticOutline: string;
+}) => {
   const config = {
     count: 42,
     image: elasticLogo,
@@ -29,6 +35,8 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
 
 storiesOf('enderers/repeatImage', module).add(
   'default',
-  (_, props) => <Renderer elasticLogo={props?.elasticLogo} />,
-  { decorators: [waitFor(getElasticLogo())] }
+  (_, props) => (
+    <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
+  ),
+  { decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())] }
 );

@@ -9,11 +9,17 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { revealImageRenderer } from '../';
-import { elasticOutline, getElasticLogo } from '../../../../presentation_util/public';
+import { getElasticOutline, getElasticLogo } from '../../../../presentation_util/public';
 import { Render, waitFor } from '../../../../presentation_util/public/__stories__';
 import { Origin } from '../../../common/types/expression_functions';
 
-const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
+const Renderer = ({
+  elasticLogo,
+  elasticOutline,
+}: {
+  elasticLogo: string;
+  elasticOutline: string;
+}) => {
   const config = {
     image: elasticLogo,
     emptyImage: elasticOutline,
@@ -25,6 +31,8 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
 
 storiesOf('renderers/revealImage', module).add(
   'default',
-  (_, props) => <Renderer elasticLogo={props?.elasticLogo} />,
-  { decorators: [waitFor(getElasticLogo())] }
+  (_, props) => (
+    <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
+  ),
+  { decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())] }
 );

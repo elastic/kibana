@@ -7,7 +7,7 @@
 
 import {
   getElasticLogo,
-  elasticOutline,
+  getElasticOutline,
   functionWrapper,
 } from '../../../../../../src/plugins/presentation_util/common/lib';
 import { repeatImage } from './repeat_image';
@@ -16,8 +16,10 @@ describe('repeatImage', () => {
   const fn = functionWrapper(repeatImage);
 
   let elasticLogo;
+  let elasticOutline;
   beforeEach(async () => {
-    elasticLogo = (await getElasticLogo()).elasticLogo;
+    elasticLogo = await (await getElasticLogo()).elasticLogo;
+    elasticOutline = await (await getElasticOutline()).elasticOutline;
   });
 
   it('returns a render as repeatImage', () => {
