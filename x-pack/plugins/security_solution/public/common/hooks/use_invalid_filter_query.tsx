@@ -57,7 +57,7 @@ export const useInvalidFilterQuery = ({
     if (myError != null && myError.displayError && kqlError != null) {
       // Removes error stack from user view
       delete kqlError.stack; // Mutates the error object and can possibly lead to side effects, only going this route for type issues. Change when we add a stackless toast error
-
+      console.log('here');
       addError(kqlError, { title: kqlError.name });
     }
   }, [addError, errors, id, kqlError]);

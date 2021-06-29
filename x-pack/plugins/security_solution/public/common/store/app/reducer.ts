@@ -49,7 +49,17 @@ export const appReducer = reducerWithInitialState(initialAppState)
   .case(addErrorHash, (state, { id, hash, title, message }) => {
     const errorIdx = state.errors.findIndex((e) => e.id === id);
     const errorObj = state.errors.find((e) => e.id === id) || { id, title, message };
-
+    console.log(state, errorIdx, errorObj);
+    if (errorIdx === -1) {
+      return {
+        ...state,
+        errors: state.errors.concat({
+          ...errorObj,
+          hash,
+          displayError: !state.errors.some((e) => e.hash === hash),
+        }),
+      };
+    }
     return {
       ...state,
       errors: [
