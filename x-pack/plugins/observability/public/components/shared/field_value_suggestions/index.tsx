@@ -30,6 +30,7 @@ export function FieldValueSuggestions({
   singleSelection,
   compressed,
   asFilterButton,
+  allowAllValuesSelection,
   asCombobox = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
@@ -73,6 +74,7 @@ export function FieldValueSuggestions({
       width={width}
       compressed={compressed}
       asFilterButton={asFilterButton}
+      allowAllValuesSelection={allowAllValuesSelection}
     />
   );
 }
