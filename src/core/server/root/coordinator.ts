@@ -9,49 +9,53 @@
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { Env, RawConfigurationProvider, ConfigService } from '@kbn/config';
 import { LoggingSystem } from '../logging';
-import { ClusterManager, ClusteringInfo, clusteringConfig } from '../clustering';
+import { NodeManager, NodeInfo, nodeConfig } from '../node';
 import { KibanaRoot } from './types';
 
 /**
- * Root class for the Kibana coordinator in clustering mode
+ * Root class for the Kibana coordinator in node clustering mode
  */
 export class KibanaCoordinator implements KibanaRoot {
   public readonly logger: LoggerFactory;
   private readonly log: Logger;
   private readonly loggingSystem: LoggingSystem;
   private readonly configService: ConfigService;
-  private clusterManager: ClusterManager;
+  private nodeManager: NodeManager;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
     private readonly env: Env,
-    private readonly clusteringInfo: ClusteringInfo,
+    private readonly nodeInfo: NodeInfo,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingSystem = new LoggingSystem();
     this.logger = this.loggingSystem.asLoggerFactory();
     this.configService = new ConfigService(rawConfigProvider, this.env, this.logger);
 
-    this.log = this.logger.get('root');
-    this.clusterManager = new ClusterManager(this.configService, this.logger);
+    this.log = this.logger.get('root.node.coordinator');
+    this.nodeManager = new NodeManager(this.configService, this.logger);
   }
 
   async setup() {
-    this.configService.setSchema(clusteringConfig.path, clusteringConfig.schema);
+    this.log.debug(`Setting up KibanaCoordinator: JSON.stringify(${this.nodeInfo})`);
+    this.configService.setSchema(nodeConfig.path, nodeConfig.schema);
     await this.configService.validate();
-    await this.clusterManager.setup();
+    await this.nodeManager.setup();
   }
 
   async start() {
+    this.log.debug('Starting KibanaCoordinator');
     // nothing for now
   }
 
   async shutdown(reason?: Error) {
+    this.log.debug('Stopping KibanaCoordinator');
+
     if (reason) {
       this.log.fatal(reason);
     }
 
-    await this.clusterManager.stopWorkers();
+    await this.nodeManager.stopWorkers();
 
     if (this.onShutdown) {
       this.onShutdown(reason);
@@ -60,7 +64,7 @@ export class KibanaCoordinator implements KibanaRoot {
 
   reloadLoggingConfig() {
     // TODO: broadcast to all workers
-    this.clusterManager.broadcast({
+    this.nodeManager.broadcast({
       _kind: 'kibana-broadcast',
       type: 'reload-logging-config',
     });

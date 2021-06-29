@@ -31,7 +31,7 @@ import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
-import { ClusteringService, clusteringConfig } from './clustering';
+import { NodeService, nodeConfig } from './node';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -74,7 +74,7 @@ export class Server {
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
   private readonly deprecations: DeprecationsService;
-  private readonly clustering: ClusteringService;
+  private readonly node: NodeService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -94,7 +94,7 @@ export class Server {
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.context = new ContextService(core);
-    this.clustering = new ClusteringService(core);
+    this.node = new NodeService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
     this.plugins = new PluginsService(core);
@@ -133,7 +133,7 @@ export class Server {
     // This needs to be done after plugin discovery
     await ensureValidConfiguration(this.configService);
 
-    const clusteringSetup = await this.clustering.setup();
+    const nodeSetup = await this.node.setup();
 
     const contextServiceSetup = this.context.setup({
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
@@ -214,6 +214,7 @@ export class Server {
       httpResources: httpResourcesSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      node: nodeSetup,
       deprecations: deprecationsSetup,
     };
 
@@ -317,7 +318,7 @@ export class Server {
       statusConfig,
       pidConfig,
       i18nConfig,
-      clusteringConfig,
+      nodeConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);

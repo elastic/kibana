@@ -9,7 +9,7 @@
 import { Serializable } from '../../types';
 
 /** @public */
-export type ClusterMessagePayload = Serializable;
+export type NodeMessagePayload = Serializable;
 
 export interface BroadcastOptions {
   /**
@@ -22,12 +22,12 @@ export interface BroadcastOptions {
 export interface TransferBroadcastMessage {
   _kind: 'kibana-broadcast';
   type: string;
-  payload?: ClusterMessagePayload;
+  payload?: NodeMessagePayload;
   options?: BroadcastOptions;
 }
 
 /** @public */
-export type MessageHandler = (payload: ClusterMessagePayload | undefined) => void;
+export type MessageHandler = (payload: NodeMessagePayload | undefined) => void;
 
 /** @public */
 export type MessageHandlerUnsubscribeFn = () => void;

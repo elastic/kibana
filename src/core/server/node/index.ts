@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { getClusteringInfo, ClusteringInfo } from './get_clustering_info';
-export { ClusteringService } from './clustering_service';
-export { ClusterManager } from './cluster_manager';
-export { config as clusteringConfig } from './clustering_config';
+export { getNodeInfo } from './get_node_info';
+export type { NodeInfo } from './get_node_info';
+export { NodeService } from './node_service';
+export type { NodeServiceSetup } from './node_service';
+export { NodeManager } from './node_manager';
+export { config as nodeConfig } from './node_config';

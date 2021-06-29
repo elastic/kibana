@@ -9,7 +9,7 @@
 import chalk from 'chalk';
 import { CliArgs, Env, RawConfigService } from './config';
 import { CriticalError } from './errors';
-import { getClusteringInfo } from './clustering';
+import { getNodeInfo } from './node';
 import { KibanaCoordinator } from './root/coordinator';
 import { KibanaWorker } from './root/worker';
 import { KibanaRoot } from './root/types';
@@ -40,7 +40,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const { REPO_ROOT } = require('@kbn/utils');
 
   const env = Env.createDefault(REPO_ROOT, {
-    // TODO: do we want to add clusterInfo to Env ?
+    // TODO: do we want to add nodeInfo to Env ?
     configs,
     cliArgs,
   });
@@ -48,16 +48,16 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const rawConfigService = new RawConfigService(configs, applyConfigOverrides);
   rawConfigService.loadConfig();
 
-  const clusterInfo = await getClusteringInfo(rawConfigService);
+  const nodeInfo = await getNodeInfo(rawConfigService);
 
   let root: KibanaRoot;
-  if (clusterInfo.isCoordinator) {
-    root = new KibanaCoordinator(rawConfigService, env, clusterInfo, onRootShutdown);
+  if (nodeInfo.isCoordinator) {
+    root = new KibanaCoordinator(rawConfigService, env, nodeInfo, onRootShutdown);
   } else {
-    root = new KibanaWorker(rawConfigService, env, clusterInfo, onRootShutdown);
+    root = new KibanaWorker(rawConfigService, env, nodeInfo, onRootShutdown);
   }
 
-  if (clusterInfo.isMaster) {
+  if (nodeInfo.isMaster) {
     process.on('SIGHUP', () => reloadConfiguration());
 
     // this is only used by the logrotator service

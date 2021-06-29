@@ -27,6 +27,7 @@ import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
 import { InternalLoggingServiceSetup } from './logging';
+import { NodeServiceSetup } from './node';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup } from './deprecations';
@@ -46,6 +47,7 @@ export interface InternalCoreSetup {
   httpResources: InternalHttpResourcesSetup;
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
+  node: NodeServiceSetup;
   deprecations: InternalDeprecationsServiceSetup;
 }
 

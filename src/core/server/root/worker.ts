@@ -13,10 +13,10 @@ import { concatMap, first, publishReplay, switchMap, tap } from 'rxjs/operators'
 import { Server } from '../server';
 import { LoggingConfigType, LoggingSystem } from '../logging';
 import { KibanaRoot } from './types';
-import { ClusteringInfo } from '../clustering';
+import { NodeInfo } from '../node';
 
 /**
- * Root class for workers in clustering mode.
+ * Root class for workers in node clustering mode.
  *
  * A worker is basically just doing the same thing
  */
@@ -30,17 +30,17 @@ export class KibanaWorker implements KibanaRoot {
   constructor(
     private readonly rawConfigService: RawConfigService,
     private readonly env: Env,
-    private readonly clusteringInfo: ClusteringInfo,
+    private readonly nodeInfo: NodeInfo,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingSystem = new LoggingSystem();
     this.logger = this.loggingSystem.asLoggerFactory();
-    this.log = this.logger.get('root');
+    this.log = this.logger.get('root.node.worker');
     this.server = new Server(this.rawConfigService, this.env, this.loggingSystem);
   }
 
   public async setup() {
-    if (this.clusteringInfo.isEnabled && this.clusteringInfo.isWorker) {
+    if (this.nodeInfo.isEnabled && this.nodeInfo.isWorker) {
       process.on('message', (message) => {
         if (message?.type === 'shutdown-worker') {
           this.shutdown();
@@ -51,7 +51,7 @@ export class KibanaWorker implements KibanaRoot {
     try {
       this.server.setupCoreConfig();
       await this.setupLogging();
-      this.log.debug('setting up root');
+      this.log.debug(`Setting up KibanaWorker: [NodeInfo: ${JSON.stringify(this.nodeInfo)}]`);
       return await this.server.setup();
     } catch (e) {
       await this.shutdown(e);
@@ -60,7 +60,7 @@ export class KibanaWorker implements KibanaRoot {
   }
 
   public async start() {
-    this.log.debug('starting root');
+    this.log.debug('Starting KibanaWorker');
     try {
       return await this.server.start();
     } catch (e) {
@@ -70,7 +70,7 @@ export class KibanaWorker implements KibanaRoot {
   }
 
   public async shutdown(reason?: any) {
-    this.log.debug('shutting root down');
+    this.log.debug('Shutting down KibanaWorker');
 
     if (reason) {
       if (reason.code === 'EADDRINUSE' && Number.isInteger(reason.port)) {

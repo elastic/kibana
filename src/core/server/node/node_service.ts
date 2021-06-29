@@ -11,9 +11,9 @@ import { take } from 'rxjs/operators';
 import { Logger } from '@kbn/logging';
 import { IConfigService } from '@kbn/config';
 import { CoreContext } from '../core_context';
-import { config as clusteringConfig, ClusteringConfigType } from './clustering_config';
+import { config as nodeConfig, NodeConfigType } from './node_config';
 import {
-  ClusterMessagePayload,
+  NodeMessagePayload,
   BroadcastOptions,
   TransferBroadcastMessage,
   MessageHandler,
@@ -24,30 +24,30 @@ import { isBroadcastMessage } from './utils';
 /**
  * @public
  */
-export interface ClusteringServiceSetup {
+export interface NodeServiceSetup {
   isEnabled: () => boolean;
   getWorkerId: () => number;
-  broadcast: (type: string, payload?: ClusterMessagePayload, options?: BroadcastOptions) => void;
+  broadcast: (type: string, payload?: NodeMessagePayload, options?: BroadcastOptions) => void;
   addMessageHandler: (type: string, handler: MessageHandler) => MessageHandlerUnsubscribeFn;
   // TODO: isMainWorker
 }
 
 /**
- * Worker-side clustering service
+ * Worker-side node clustering service
  */
-export class ClusteringService {
+export class NodeService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
   private readonly messageHandlers = new Map<string, MessageHandler[]>();
 
   constructor(coreContext: CoreContext) {
-    this.log = coreContext.logger.get('clustering');
+    this.log = coreContext.logger.get('node');
     this.configService = coreContext.configService;
   }
 
-  public async setup(): Promise<ClusteringServiceSetup> {
+  public async setup(): Promise<NodeServiceSetup> {
     const config = await this.configService
-      .atPath<ClusteringConfigType>(clusteringConfig.path)
+      .atPath<NodeConfigType>(nodeConfig.path)
       .pipe(take(1))
       .toPromise();
     const enabled = config.enabled && cluster.isWorker;
@@ -82,7 +82,7 @@ export class ClusteringService {
     });
   }
 
-  private broadcast(type: string, payload?: ClusterMessagePayload, options?: BroadcastOptions) {
+  private broadcast(type: string, payload?: NodeMessagePayload, options?: BroadcastOptions) {
     process.send!({
       _kind: 'kibana-broadcast',
       type,

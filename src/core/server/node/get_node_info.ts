@@ -8,22 +8,22 @@
 
 import cluster from 'cluster';
 import { RawConfigService } from '../config';
-import { loadClusteringConfig } from './load_config';
+import { loadNodeConfig } from './load_config';
 
 /**
  * @internal
  */
-export interface ClusteringInfo {
-  /** is clustering enabled */
+export interface NodeInfo {
+  /** is node clustering enabled */
   isEnabled: boolean;
   /**
    * Is the current process the master process.
-   * Will be true either when clustering is disabled or when the process is the coordinator
+   * Will be true either when node clustering is disabled or when the process is the coordinator
    */
   isMaster: boolean;
   /**
    * Is the current process the coordinator process
-   * (master process when clustering is enabled)
+   * (master process when node clustering is enabled)
    */
   isCoordinator: boolean;
   /** */
@@ -32,10 +32,8 @@ export interface ClusteringInfo {
   workerId: number;
 }
 
-export const getClusteringInfo = async (
-  rawConfigService: RawConfigService
-): Promise<ClusteringInfo> => {
-  const config = await loadClusteringConfig(rawConfigService);
+export const getNodeInfo = async (rawConfigService: RawConfigService): Promise<NodeInfo> => {
+  const config = await loadNodeConfig(rawConfigService);
   return {
     isEnabled: config.enabled,
     isMaster: cluster.isMaster,

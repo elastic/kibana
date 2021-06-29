@@ -7,25 +7,31 @@
  */
 
 import cluster from 'cluster';
+import { omit } from 'lodash';
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigService } from '../config';
-import { ClusteringConfigType, config as clusteringConfig } from './clustering_config';
+import {
+  NodeConfigType,
+  WorkersConfigType,
+  WorkerConfig,
+  config as nodeConfig,
+} from './node_config';
 import { TransferBroadcastMessage } from './types';
 import { isBroadcastMessage } from './utils';
 
 /**
- * Coordinator-side clustering service
+ * Coordinator-side node clustering service
  */
-export class ClusterManager {
-  private config?: ClusteringConfigType;
+export class NodeManager {
+  private config?: NodeConfigType;
   private readonly logger: Logger;
 
   constructor(private readonly configService: ConfigService, logger: LoggerFactory) {
-    this.logger = logger.get('cluster-manager');
+    this.logger = logger.get('node-manager');
   }
 
   public async setup() {
-    this.config = this.configService.atPathSync<ClusteringConfigType>(clusteringConfig.path);
+    this.config = this.configService.atPathSync<NodeConfigType>(nodeConfig.path);
     if (this.config.enabled && cluster.isMaster) {
       this.forkWorkers();
     }
@@ -56,8 +62,30 @@ export class ClusterManager {
       }
     };
 
-    const createWorker = () => {
-      const worker = cluster.fork({});
+    const getWorkerConfigs = (): WorkerConfig[] => {
+      const results: WorkerConfig[] = [];
+      let configs: Map<string, WorkersConfigType>;
+
+      if (this.config!.workers instanceof Map) {
+        configs = this.config!.workers;
+      } else {
+        configs = new Map([['worker', this.config!.workers]]);
+      }
+
+      for (const [name, config] of configs.entries()) {
+        for (let i = 0; i < config.count; i++) {
+          results.push({ ...omit(config, 'count'), worker_type: name });
+        }
+      }
+
+      return results;
+    };
+
+    const createWorker = (config: WorkerConfig) => {
+      this.logger.info(`*** Creating worker ${config.worker_type}: ${config}`);
+      // Passes all config through to the worker's `env`.
+      // Will probably need to do some additional processing here eventually.
+      const worker = cluster.fork(config);
       worker.on('message', (message: any) => {
         handleWorkerMessage(worker.id, message);
       });
@@ -74,12 +102,12 @@ export class ClusterManager {
         // died while closing
       } else {
         // died needs restart:
-        createWorker();
+        // createWorker();
       }
     });
 
-    for (let i = 0; i < this.config!.workers; i++) {
-      createWorker();
+    for (const config of getWorkerConfigs()) {
+      createWorker(config);
     }
   }
 }

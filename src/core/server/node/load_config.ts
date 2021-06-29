@@ -8,11 +8,11 @@
 
 import { take } from 'rxjs/operators';
 import { RawConfigService } from '../config';
-import { ClusteringConfigType, config } from './clustering_config';
+import { NodeConfigType, config } from './node_config';
 
-export const loadClusteringConfig = async (
+export const loadNodeConfig = async (
   rawConfigService: RawConfigService
-): Promise<ClusteringConfigType> => {
+): Promise<NodeConfigType> => {
   const rawConfig = await rawConfigService.getConfig$().pipe(take(1)).toPromise();
   return config.schema.validate(rawConfig[config.path]);
 };
