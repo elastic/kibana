@@ -190,7 +190,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     initUsageCollectors({
       core,
-      endpointAppContext: endpointContext,
       kibanaIndex: globalConfig.kibana.index,
       signalsIndex: config.signalsIndex,
       ml: plugins.ml,
