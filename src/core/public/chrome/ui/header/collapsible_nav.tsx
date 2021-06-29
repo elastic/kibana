@@ -15,9 +15,11 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiShowFor,
-  EuiText,
+  EuiCollapsibleNavProps,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -78,6 +80,7 @@ interface Props {
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
+  button: EuiCollapsibleNavProps['button'];
 }
 
 export function CollapsibleNav({
@@ -91,6 +94,7 @@ export function CollapsibleNav({
   closeNav,
   navigateToApp,
   navigateToUrl,
+  button,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -121,8 +125,10 @@ export function CollapsibleNav({
         defaultMessage: 'Primary',
       })}
       isOpen={isNavOpen}
-      isDocked={isLocked}
       onClose={closeNav}
+      button={button}
+      ownFocus={false}
+      size={240}
     >
       {customNavLink && (
         <Fragment>
@@ -192,16 +198,18 @@ export function CollapsibleNav({
       </EuiFlexItem>
 
       {/* Recently viewed */}
-      <EuiCollapsibleNavGroup
-        key="recentlyViewed"
-        background="light"
-        title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-        isCollapsible={true}
-        initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-        onToggle={(isCategoryOpen) => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
-        data-test-subj="collapsibleNavGroup-recentlyViewed"
-      >
-        {recentlyAccessed.length > 0 ? (
+      {recentlyAccessed.length > 0 && (
+        <EuiCollapsibleNavGroup
+          key="recentlyViewed"
+          background="light"
+          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+          isCollapsible={true}
+          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
+          onToggle={(isCategoryOpen) =>
+            setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)
+          }
+          data-test-subj="collapsibleNavGroup-recentlyViewed"
+        >
           <EuiListGroup
             aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
               defaultMessage: 'Recently viewed links',
@@ -233,16 +241,8 @@ export function CollapsibleNav({
             size="s"
             className="kbnCollapsibleNav__recentsListGroup"
           />
-        ) : (
-          <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-            <p>
-              {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                defaultMessage: 'No recently viewed items',
-              })}
-            </p>
-          </EuiText>
-        )}
-      </EuiCollapsibleNavGroup>
+        </EuiCollapsibleNavGroup>
+      )}
 
       <EuiHorizontalRule margin="none" />
 
@@ -255,6 +255,7 @@ export function CollapsibleNav({
             <EuiCollapsibleNavGroup
               key={category.id}
               iconType={category.euiIconType}
+              iconSize="m"
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
@@ -286,7 +287,7 @@ export function CollapsibleNav({
         ))}
 
         {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={['l', 'xl']}>
+        <EuiShowFor sizes={'none'}>
           <EuiCollapsibleNavGroup>
             <EuiListGroup flush>
               <EuiListGroupItem
@@ -323,6 +324,16 @@ export function CollapsibleNav({
             </EuiListGroup>
           </EuiCollapsibleNavGroup>
         </EuiShowFor>
+      </EuiFlexItem>
+      {/* Quick addition of that "ADD DATA" button everyone wants :) Feel free to remove though. */}
+      <EuiFlexItem grow={false}>
+        {/* Span fakes the nav group into not being the first item and therefore adding a top border */}
+        <span />
+        <EuiCollapsibleNavGroup>
+          <EuiButton fill fullWidth iconType="plusInCircleFilled">
+            <FormattedMessage id="core.ui.primaryNavSection.addDataBtn" defaultMessage="Add Data" />
+          </EuiButton>
+        </EuiCollapsibleNavGroup>
       </EuiFlexItem>
     </EuiCollapsibleNav>
   );
