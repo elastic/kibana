@@ -9,7 +9,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DocViewTable } from './table';
+import { I18nProvider } from '@kbn/i18n/react';
+import { DocViewerTable, DocViewerTableProps } from './table';
 import { indexPatterns, IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
@@ -23,7 +24,7 @@ import { getServices } from '../../../kibana_services';
   uiSettings: {
     get: (key: string) => {
       if (key === 'discover:showMultiFields') {
-        return false;
+        return true;
       }
     },
   },
@@ -75,6 +76,14 @@ indexPattern.fields.getByName = (name: string) => {
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 
+const mountComponent = (props: DocViewerTableProps) => {
+  return mount(
+    <I18nProvider>
+      <DocViewerTable {...props} />
+    </I18nProvider>
+  );
+};
+
 describe('DocViewTable at Discover', () => {
   // At Discover's main view, all buttons are rendered
   // check for existence of action buttons and warnings
@@ -114,7 +123,7 @@ describe('DocViewTable at Discover', () => {
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
   };
-  const component = mount(<DocViewTable {...props} />);
+  const component = mountComponent(props);
   [
     {
       _property: '_index',
@@ -210,7 +219,7 @@ describe('DocViewTable at Discover Context', () => {
     filter: jest.fn(),
   };
 
-  const component = mount(<DocViewTable {...props} />);
+  const component = mountComponent(props);
 
   it(`renders no toggleColumnButton`, () => {
     const foundLength = findTestSubject(component, 'toggleColumnButtons').length;
@@ -253,7 +262,7 @@ describe('DocViewTable at Discover Doc', () => {
     hit,
     indexPattern,
   };
-  const component = mount(<DocViewTable {...props} />);
+  const component = mountComponent(props);
   const foundLength = findTestSubject(component, 'addInclusiveFilterButton').length;
 
   it(`renders no action buttons`, () => {
@@ -381,20 +390,10 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     onAddColumn: jest.fn(),
     onRemoveColumn: jest.fn(),
   };
+
   it('renders multifield rows if showMultiFields flag is set', () => {
-    (getServices as jest.Mock).mockImplementationOnce(() => ({
-      uiSettings: {
-        get: (key: string) => {
-          return key === 'discover:showMultiFields';
-        },
-      },
-    }));
-    const component = mount(<DocViewTable {...props} />);
-    const categoryMultifieldRow = findTestSubject(
-      component,
-      'tableDocViewRow-multifieldsTitle-category'
-    );
-    expect(categoryMultifieldRow.length).toBe(1);
+    const component = mountComponent(props);
+
     const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
     expect(categoryKeywordRow.length).toBe(1);
 
@@ -404,23 +403,51 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
       1
     );
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-category.keyword-multifieldBadge').length
+    ).toBe(1);
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword-multifieldBadge')
+        .length
+    ).toBe(1);
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
+        .length
+    ).toBe(1);
   });
 
   it('does not render multifield rows if showMultiFields flag is not set', () => {
-    const component = mount(<DocViewTable {...props} />);
-    const categoryMultifieldRow = findTestSubject(
-      component,
-      'tableDocViewRow-multifieldsTitle-category'
-    );
-    expect(categoryMultifieldRow.length).toBe(0);
+    (getServices as jest.Mock).mockImplementationOnce(() => ({
+      uiSettings: {
+        get: (key: string) => {
+          return key === 'discover:showMultiFields' && false;
+        },
+      },
+    }));
+    const component = mountComponent(props);
+
     const categoryKeywordRow = findTestSubject(component, 'tableDocViewRow-category.keyword');
     expect(categoryKeywordRow.length).toBe(0);
 
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword').length).toBe(
       0
     );
+
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
       0
     );
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword-multifieldBadge')
+        .length
+    ).toBe(0);
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
+        .length
+    ).toBe(0);
   });
 });
