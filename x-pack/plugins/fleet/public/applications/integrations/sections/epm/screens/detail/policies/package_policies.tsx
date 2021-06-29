@@ -29,6 +29,7 @@ import {
   useUrlPagination,
   useGetPackageInstallStatus,
   AgentPolicyRefreshContext,
+  useUIExtension,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
@@ -88,6 +89,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
 
+  const CustomEnrollmentFlyoutFinalStep = useUIExtension(name, 'agent-enrollment-flyout');
+
   const handleTableOnChange = useCallback(
     ({ page }: CriteriaWithPagination<PackagePolicyAndAgentPolicy>) => {
       setPagination({
@@ -99,33 +102,36 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   );
 
   const renderViewDataStepContent = useCallback(
-    () => (
-      <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.viewDataDescription"
-            defaultMessage="After your agent starts, you can view your data in Kibana by using the integration's installed assets. {pleaseNote}: it may take a few minutes for the initial data to arrive."
-            values={{
-              pleaseNote: (
-                <strong>
-                  {i18n.translate(
-                    'xpack.fleet.epm.agentEnrollment.viewDataDescription.pleaseNoteLabel',
-                    { defaultMessage: 'Please note' }
-                  )}
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiButton href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}>
-          {i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
-            defaultMessage: 'View assets',
-          })}
-        </EuiButton>
-      </>
-    ),
-    [name, version, getHref]
+    () =>
+      CustomEnrollmentFlyoutFinalStep ? (
+        <CustomEnrollmentFlyoutFinalStep />
+      ) : (
+        <>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.viewDataDescription"
+              defaultMessage="After your agent starts, you can view your data in Kibana by using the integration's installed assets. {pleaseNote}: it may take a few minutes for the initial data to arrive."
+              values={{
+                pleaseNote: (
+                  <strong>
+                    {i18n.translate(
+                      'xpack.fleet.epm.agentEnrollment.viewDataDescription.pleaseNoteLabel',
+                      { defaultMessage: 'Please note' }
+                    )}
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiButton href={getHref('integration_details_assets', { pkgkey: `${name}-${version}` })}>
+            {i18n.translate('xpack.fleet.epm.agentEnrollment.viewDataAssetsLabel', {
+              defaultMessage: 'View assets',
+            })}
+          </EuiButton>
+        </>
+      ),
+    [name, version, getHref, CustomEnrollmentFlyoutFinalStep]
   );
 
   const columns: Array<EuiTableFieldDataColumnType<PackagePolicyAndAgentPolicy>> = useMemo(

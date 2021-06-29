@@ -100,13 +100,7 @@ export interface PackageCustomExtension {
 /**
  * UI Component Extension for displaying custom views under the Assets tab for a given Integration
  */
-export type PackageAssetsComponent = ComponentType<PackageAssetsComponentProps>;
-
-export interface PackageAssetsComponentProps {
-  /** The package key value that should be used used for URLs */
-  pkgkey: string;
-  packageInfo: PackageInfo;
-}
+export type PackageAssetsComponent = ComponentType<{}>;
 
 /** Extension point registration contract for Integration details Assets view */
 export interface PackageAssetsExtension {
@@ -115,9 +109,18 @@ export interface PackageAssetsExtension {
   component: LazyExoticComponent<PackageAssetsComponent>;
 }
 
+export type AgentEnrollmentFlyoutFinalStepExtensionComponent = ComponentType<{}>;
+
+export interface AgentEnrollmentFlyoutFinalStepExtension {
+  package: string;
+  view: 'agent-enrollment-flyout';
+  component: LazyExoticComponent<AgentEnrollmentFlyoutFinalStepExtensionComponent>;
+}
+
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
   | PackageCustomExtension
   | PackagePolicyCreateExtension
-  | PackageAssetsExtension;
+  | PackageAssetsExtension
+  | AgentEnrollmentFlyoutFinalStepExtension;

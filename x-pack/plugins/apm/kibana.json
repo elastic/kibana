@@ -11,7 +11,8 @@
     "embeddable",
     "infra",
     "observability",
-    "ruleRegistry"
+    "ruleRegistry",
+    "fleet"
   ],
   "optionalPlugins": [
     "spaces",
@@ -23,19 +24,14 @@
     "security",
     "ml",
     "home",
-    "maps",
-    "fleet"
+    "maps"
   ],
   "server": true,
   "ui": true,
-  "configPath": [
-    "xpack",
-    "apm"
-  ],
-  "extraPublicDirs": [
-    "public/style/variables"
-  ],
+  "configPath": ["xpack", "apm"],
+  "extraPublicDirs": ["public/style/variables"],
   "requiredBundles": [
+    "fleet",
     "home",
     "kibanaReact",
     "kibanaUtils",
