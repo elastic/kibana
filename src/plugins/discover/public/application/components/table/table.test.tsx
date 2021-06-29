@@ -435,8 +435,19 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword').length).toBe(
       0
     );
+
     expect(findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname').length).toBe(
       0
     );
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.keyword-multifieldBadge')
+        .length
+    ).toBe(0);
+
+    expect(
+      findTestSubject(component, 'tableDocViewRow-customer_first_name.nickname-multifieldBadge')
+        .length
+    ).toBe(0);
   });
 });
