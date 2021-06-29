@@ -38,7 +38,7 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     test('should show a loading indicator on component', async () => {
-      expect(exists('autoFollowPatternLoading')).toBe(true);
+      expect(exists('sectionLoading')).toBe(true);
     });
   });
 

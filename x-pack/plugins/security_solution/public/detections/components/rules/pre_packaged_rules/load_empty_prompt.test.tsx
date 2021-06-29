@@ -27,6 +27,7 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../containers/detection_engine/rules/api', () => ({
   getPrePackagedRulesStatus: jest.fn().mockResolvedValue({
@@ -52,9 +53,12 @@ describe('PrePackagedRulesPrompt', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('renders correctly', () => {
@@ -125,6 +129,28 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
       expect(wrapper.find('[data-test-subj="load-prebuilt-rules"]').last().text()).toEqual(
         'Load Elastic prebuilt timeline templates'
       );
+    });
+  });
+
+  it('renders disabled button if loading is true', async () => {
+    (getPrePackagedRulesStatus as jest.Mock).mockResolvedValue({
+      rules_not_installed: 0,
+      rules_installed: 0,
+      rules_not_updated: 0,
+      timelines_not_installed: 3,
+      timelines_installed: 0,
+      timelines_not_updated: 0,
+    });
+
+    const wrapper: ReactWrapper = mount(
+      <PrePackagedRulesPrompt {...{ ...props, loading: true }} />
+    );
+    await waitFor(() => {
+      wrapper.update();
+
+      expect(
+        wrapper.find('[data-test-subj="load-prebuilt-rules"] button').props().disabled
+      ).toEqual(true);
     });
   });
 });

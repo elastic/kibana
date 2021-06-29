@@ -158,8 +158,10 @@ export const useFetchIndex = (
             next: (response) => {
               if (isCompleteResponse(response)) {
                 const stringifyIndices = response.indicesExist.sort().join();
+
                 previousIndexesName.current = response.indicesExist;
                 setLoading(false);
+
                 setState({
                   browserFields: getBrowserFields(stringifyIndices, response.indexFields),
                   docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
@@ -167,6 +169,7 @@ export const useFetchIndex = (
                   indexExists: response.indicesExist.length > 0,
                   indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
                 });
+
                 searchSubscription$.current.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading(false);
@@ -187,7 +190,7 @@ export const useFetchIndex = (
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, addError, addWarning, onlyCheckIfIndicesExist]
+    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
   );
 
   useEffect(() => {

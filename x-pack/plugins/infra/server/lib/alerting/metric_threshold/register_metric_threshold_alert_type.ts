@@ -100,6 +100,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs): Metric
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     executor: createMetricThresholdExecutor(libs),
     actionVariables: {
       context: [

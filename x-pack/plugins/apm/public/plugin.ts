@@ -175,6 +175,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       () => import('./tutorial/tutorial_fleet_instructions')
     );
 
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialConfigAgent',
+      () => import('./tutorial/config_agent')
+    );
+
+    pluginSetupDeps.home?.tutorials.registerCustomComponent(
+      'TutorialConfigAgentRumScript',
+      () => import('./tutorial/config_agent/rum_script')
+    );
+
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {

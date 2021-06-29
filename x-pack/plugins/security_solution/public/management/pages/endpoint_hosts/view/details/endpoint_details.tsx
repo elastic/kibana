@@ -27,11 +27,10 @@ import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointDetailsPath } from '../../../../common/routing';
-import { SecurityPageName } from '../../../../../app/types';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 import { EndpointPolicyLink } from '../components/endpoint_policy_link';
 import { OutOfDate } from '../components/out_of_date';
 import { EndpointAgentStatus } from '../components/endpoint_agent_status';
+import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -54,26 +53,18 @@ export const EndpointDetails = memo(
     const policyStatus = useEndpointSelector(
       policyResponseStatus
     ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
-    const { formatUrl } = useFormatUrl(SecurityPageName.administration);
+    const { getAppUrl } = useAppUrl();
 
     const [policyResponseUri, policyResponseRoutePath] = useMemo(() => {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { selected_endpoint, show, ...currentUrlParams } = queryParams;
-      return [
-        formatUrl(
-          getEndpointDetailsPath({
-            name: 'endpointPolicyResponse',
-            ...currentUrlParams,
-            selected_endpoint: details.agent.id,
-          })
-        ),
-        getEndpointDetailsPath({
-          name: 'endpointPolicyResponse',
-          ...currentUrlParams,
-          selected_endpoint: details.agent.id,
-        }),
-      ];
-    }, [details.agent.id, formatUrl, queryParams]);
+      const path = getEndpointDetailsPath({
+        name: 'endpointPolicyResponse',
+        ...currentUrlParams,
+        selected_endpoint: details.agent.id,
+      });
+      return [getAppUrl({ path }), path];
+    }, [details.agent.id, getAppUrl, queryParams]);
 
     const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
