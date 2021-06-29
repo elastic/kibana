@@ -7,5 +7,11 @@
  */
 
 export { ExecutionContextService } from './execution_context_service';
-export type { ExecutionContextSetup, ExecutionContextStart } from './execution_context_service';
-export type { IExecutionContext } from './execution_context_client';
+export type {
+  InternalExecutionContextSetup,
+  InternalExecutionContextStart,
+  ExecutionContextSetup,
+  ExecutionContextStart,
+  IExecutionContext,
+} from './execution_context_service';
+export type { ExecutionContextContainer } from './execution_context_container';
