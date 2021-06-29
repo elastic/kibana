@@ -185,7 +185,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
-              "lineNumber": 113
+              "lineNumber": 111
             },
             "deprecated": false,
             "children": [
@@ -207,7 +207,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/task_manager/server/plugin.ts",
-                  "lineNumber": 113
+                  "lineNumber": 111
                 },
                 "deprecated": false,
                 "isRequired": true

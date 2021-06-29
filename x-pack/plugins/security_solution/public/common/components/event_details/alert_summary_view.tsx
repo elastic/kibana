@@ -36,6 +36,7 @@ import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../networ
 import { SummaryView } from './summary_view';
 import { AlertSummaryRow, getSummaryColumns, SummaryRow } from './helpers';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
+import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import { endpointAlertCheck } from '../../utils/endpoint_alert_check';
 
@@ -183,7 +184,7 @@ const AlertSummaryViewComponent: React.FC<{
     return endpointAlertCheck({ data });
   }, [data]);
 
-  const agentId = useMemo(() => {
+  const endpointId = useMemo(() => {
     const findAgentId = find({ category: 'agent', field: 'agent.id' }, data)?.values;
     return findAgentId ? findAgentId[0] : '';
   }, [data]);
@@ -194,7 +195,7 @@ const AlertSummaryViewComponent: React.FC<{
       contextId: timelineId,
       eventId,
       fieldName: 'agent.status',
-      value: agentId,
+      value: endpointId,
       linkValue: undefined,
     },
   };
@@ -221,7 +222,9 @@ const AlertSummaryViewComponent: React.FC<{
         <StyledEuiDescriptionList data-test-subj={`summary-view-guide`} compressed>
           <EuiDescriptionListTitle>{i18n.INVESTIGATION_GUIDE}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <LineClamp content={maybeRule?.note} />
+            <LineClamp>
+              <MarkdownRenderer>{maybeRule.note}</MarkdownRenderer>
+            </LineClamp>
           </EuiDescriptionListDescription>
         </StyledEuiDescriptionList>
       )}

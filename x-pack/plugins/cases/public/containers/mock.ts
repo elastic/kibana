@@ -86,7 +86,7 @@ export const basicCase: Case = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
   connector: {
-    id: '123',
+    id: 'none',
     name: 'My Connector',
     type: ConnectorTypes.none,
     fields: null,
@@ -117,7 +117,7 @@ export const collectionCase: Case = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
   connector: {
-    id: '123',
+    id: 'none',
     name: 'My Connector',
     type: ConnectorTypes.none,
     fields: null,
@@ -176,6 +176,12 @@ export const basicPush = {
 
 export const pushedCase: Case = {
   ...basicCase,
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   externalService: basicPush,
 };
 
@@ -251,7 +257,7 @@ export const basicCaseSnake: CaseResponse = {
   closed_by: null,
   comments: [basicCommentSnake],
   connector: {
-    id: '123',
+    id: 'none',
     name: 'My Connector',
     type: ConnectorTypes.none,
     fields: null,
@@ -286,6 +292,12 @@ export const basicPushSnake = {
 
 export const pushedCaseSnake = {
   ...basicCaseSnake,
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   external_service: basicPushSnake,
 };
 
