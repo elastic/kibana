@@ -41,7 +41,6 @@ declare module '../../../../../src/plugins/share/public' {
 
 interface Params {
   appBasePath: string;
-  useHash: boolean;
 }
 
 export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL_GENERATOR> {
@@ -123,7 +122,6 @@ export function registerUrlGenerator(
   return share.urlGenerators.registerUrlGenerator(
     new MlUrlGenerator({
       appBasePath: baseUrl,
-      useHash: core.uiSettings.get('state:storeInSessionStorage'),
     })
   );
 }
