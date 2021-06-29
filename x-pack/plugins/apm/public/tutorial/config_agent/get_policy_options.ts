@@ -50,7 +50,7 @@ export function getPolicyOptions({
       label: DEFAULT_STANDALONE_CONFIG_LABEL,
       apmServerUrl: data.cloudStandaloneSetup?.apmServerUrl,
       secretToken: data.cloudStandaloneSetup?.secretToken,
-      isVisible: isCloudVisible,
+      isVisible: isCloudVisible && !hasFleetAgentsSelected,
       isSelected: !hasFleetAgentsSelected,
     },
     {
@@ -59,7 +59,7 @@ export function getPolicyOptions({
       label: DEFAULT_STANDALONE_CONFIG_LABEL,
       apmServerUrl: 'http://localhost:8200',
       secretToken: '',
-      isVisible: !isCloudVisible,
+      isVisible: !isCloudVisible && !hasFleetAgentsSelected,
       isSelected: !hasFleetAgentsSelected,
     },
     ...fleetAgentsOptions,

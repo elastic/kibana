@@ -35,9 +35,8 @@ export function PolicySelector({
 }: Props) {
   const { fleetAgents, standalone } = groupBy(options, 'type');
 
-  const standaloneComboboxOptions: EuiComboBoxOptionOption[] = standalone.map(
-    ({ key, label }) => ({ key, label })
-  );
+  const standaloneComboboxOptions: EuiComboBoxOptionOption[] =
+    standalone?.map(({ key, label }) => ({ key, label })) || [];
 
   const fleetAgentsComboboxOptions = fleetAgents?.length
     ? [

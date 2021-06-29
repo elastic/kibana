@@ -117,15 +117,6 @@ describe('getPolicyOptions', () => {
 
         expect(options).toEqual([
           {
-            key: 'cloud',
-            type: 'standalone',
-            label: 'Default Standalone configuration',
-            apmServerUrl: 'cloud_url',
-            secretToken: 'cloud_token',
-            isVisible: true,
-            isSelected: false,
-          },
-          {
             key: 'policy-elastic-agent-on-cloud',
             type: 'fleetAgents',
             label: 'Elastic Cloud agent policy',
@@ -229,15 +220,6 @@ describe('getPolicyOptions', () => {
         });
 
         expect(options).toEqual([
-          {
-            key: 'onPrem',
-            type: 'standalone',
-            label: 'Default Standalone configuration',
-            apmServerUrl: 'http://localhost:8200',
-            secretToken: '',
-            isVisible: true,
-            isSelected: false,
-          },
           {
             key: 'policy-elastic-agent-on-cloud',
             type: 'fleetAgents',
