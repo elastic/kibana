@@ -14,7 +14,7 @@ import { FieldsConfig, from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { SerializerFunc } from '../../../../../../shared_imports';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { FIELD_TYPES, UseField, UseMultiFields, useFormData, Field, FieldHook, FieldConfig, fieldValidators } from '../../../../../../shared_imports';
+import { FIELD_TYPES, UseField, UseMultiFields, useFormData, Field, FieldHook, FieldConfig } from '../../../../../../shared_imports';
 
 interface InternalNetworkTypes {
   internal_networks: string[];
@@ -24,6 +24,20 @@ interface InternalNetworkTypes {
 type InternalNetworkFields = {
   [K in keyof InternalNetworkTypes]: FieldHook<InternalNetworkTypes[K]>;
 };
+
+const internalNetworkValues: string[] = [
+  'loopback',
+  'unicast',
+  'global_unicast',
+  'multicast',
+  'interface_local_multicast',
+  'link_local_unicast',
+  'link_local_multicast',
+  'link_local_multicast',
+  'private',
+  'public',
+  'unspecified',
+];
 
 const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
@@ -67,20 +81,6 @@ const fieldsConfig: FieldsConfig = {
   },
 };
 
-const internalNetworkValues: string[] = [
-  'loopback',
-  'unicast',
-  'global_unicast',
-  'multicast',
-  'interface_local_multicast',
-  'link_local_unicast',
-  'link_local_multicast',
-  'link_local_multicast',
-  'private',
-  'public',
-  'unspecified',
-];
-
 const internalNetworkConfig: Record<
   keyof InternalNetworkFields,
   { path: string; config?: FieldConfig<any>, euiFieldProps?: Record<string, any> }
@@ -95,6 +95,20 @@ const internalNetworkConfig: Record<
       type: FIELD_TYPES.COMBO_BOX,
       deserializer: to.arrayOfStrings,
       serializer: from.optionalArrayOfStrings,
+      fieldsToValidateOnChange: ['fields.internal_networks', 'fields.internal_networks_field'],
+      validations: [
+        {
+          validator: ({ value, path, formData }) => {
+            if (value.length === 0 && formData['fields.internal_networks_field'].length === 0) {
+              return {
+                err: 'ERR_FIELD_MISSING',
+                path,
+                message: 'Cannot be empty'
+              };
+            }
+          }
+        }
+      ],
       label: i18n.translate(
         'xpack.ingestPipelines.pipelineEditor.networkDirection.internalNetworksLabel',
         {
@@ -114,6 +128,20 @@ const internalNetworkConfig: Record<
     config: {
       type: FIELD_TYPES.TEXT,
       serializer: from.emptyStringToUndefined,
+      fieldsToValidateOnChange: ['fields.internal_networks', 'fields.internal_networks_field'],
+      validations: [
+        {
+          validator: ({ value, path, formData }) => {
+            if (value.length === 0 && formData['fields.internal_networks'].length === 0) {
+              return {
+                err: 'ERR_FIELD_MISSING',
+                path,
+                message: 'Cannot be empty'
+              };
+            }
+          }
+        }
+      ],
       label: i18n.translate(
         'xpack.ingestPipelines.pipelineEditor.networkDirection.internalNetworksFieldLabel',
         {
@@ -133,8 +161,6 @@ const internalNetworkConfig: Record<
   },
 };
 
-// TODO: when loading the form, setup correct default in EuiButtonGroup
-// TODO: When switching the EuiButtonGroup, clear both values for required fields
 export const NetworkDirection: FunctionComponent = () => {
   return (
     <>
@@ -164,16 +190,13 @@ export const NetworkDirection: FunctionComponent = () => {
 
       <UseMultiFields fields={internalNetworkConfig}>
         {({ internal_networks, internal_networks_field }) => {
-          // The fields need to be optionally rendered for this custom solution to work
           const [{ fields }] = useFormData();
-          const [isCustom, setIsCustom] = useState<null | boolean>();
+          const [isCustom, setIsCustom] = useState<boolean | undefined>();
           const field = isCustom ? internal_networks_field : internal_networks;
           const configKey: keyof InternalNetworkTypes = isCustom ? 'internal_networks_field' : 'internal_networks';
 
-          console.log(fields);
-
           useEffect(() => {
-            if (fields !== undefined && isCustom === undefined) {
+            if (fields && isCustom === undefined) {
               setIsCustom(fields?.internal_networks_field?.length > 0);
             }
           }, [fields]);
