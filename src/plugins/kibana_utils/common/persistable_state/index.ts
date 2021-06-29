@@ -8,7 +8,14 @@
 
 import { SavedObjectReference } from '../../../../core/types';
 
-export type SerializableValue = string | number | boolean | null | undefined | SerializableState;
+export type SerializableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | unknown
+  | SerializableState;
 export type Serializable = SerializableValue | SerializableValue[];
 
 export type SerializableState = {

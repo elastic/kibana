@@ -7,6 +7,7 @@
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PersistableStateDefinition } from 'src/plugins/kibana_utils/common';
 import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -119,7 +120,7 @@ export interface AlertType<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
   RecoveryActionGroupId extends string = never
-> {
+> extends PersistableStateDefinition<Params> {
   id: string;
   name: string;
   validate?: {

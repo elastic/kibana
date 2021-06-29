@@ -219,7 +219,7 @@ export interface AlertTypeParamsExpressionProps<
   alertInterval: string;
   alertThrottle: string;
   alertNotifyWhen: AlertNotifyWhenType;
-  setAlertParams: <Key extends keyof Params>(property: Key, value: Params[Key] | undefined) => void;
+  setAlertParams: <Key extends string>(property: Key, value: Params[Key] | undefined) => void;
   setAlertProperty: <Prop extends keyof Alert>(
     key: Prop,
     value: SanitizedAlert<Params>[Prop] | null

@@ -6,10 +6,11 @@
  */
 
 import { SavedObjectAttribute, SavedObjectAttributes } from 'kibana/server';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
 import { AlertNotifyWhenType } from './alert_notify_when_type';
 
 export type AlertTypeState = Record<string, unknown>;
-export type AlertTypeParams = Record<string, unknown>;
+export type AlertTypeParams = SerializableState;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
