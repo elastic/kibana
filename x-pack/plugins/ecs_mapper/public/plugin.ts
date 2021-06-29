@@ -6,15 +6,14 @@
  */
 
 import { CoreSetup, CoreStart } from 'kibana/public';
+import { DevToolsSetup } from 'src/plugins/dev_tools/public';
+import { FileUploadPluginStart } from '../../../../node_modules/x-pack/plugins/file_upload/public';
 import { Plugin } from '../../../../src/core/public';
 
-//import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { FileUploadPluginStart } from 'x-pack/plugins/file_upload/public';
 import { registerDevTool, registerHomeFeatureCatalogue } from './registration';
 import { setStartServices } from './kibana_services';
-import { DevToolsSetup } from 'src/plugins/dev_tools/public';
-import { LicensingPluginSetup } from 'x-pack/plugins/licensing/public';
+import { LicensingPluginSetup } from '../../../../node_modules/x-pack/plugins/licensing/public';
 
 export interface EcsMapperSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -47,4 +46,3 @@ export class EcsMapperPlugin
     setStartServices(core, plugins);
   }
 }
-

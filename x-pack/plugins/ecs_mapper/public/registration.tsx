@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PLUGIN } from '../common';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import React from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ILicense } from 'x-pack/plugins/licensing/common/types';
 import { CoreSetup } from 'kibana/public';
-import { EcsMapperSetupDependencies } from './plugin';
 import { first } from 'rxjs/operators';
+import { ILicense } from '../../../../node_modules/x-pack/plugins/licensing/common/types';
+import { EcsMapperSetupDependencies } from './plugin';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { PLUGIN } from '../common';
 
 const checkLicenseStatus = (license: ILicense) => {
   const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
@@ -61,7 +61,7 @@ export async function registerDevTool(plugins: EcsMapperSetupDependencies, core:
       });
     },
   });
-  
+
   plugins.licensing.license$.subscribe((license) => {
     if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
       devTool.disable();
@@ -84,6 +84,6 @@ export function registerHomeFeatureCatalogue(home: HomePublicPluginSetup) {
     path: '/app/dev_tools#/ecs_mapper',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.DATA,
-    order: 500
+    order: 500,
   });
 }

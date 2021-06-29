@@ -18,10 +18,12 @@ interface AppDependencies {
 }
 
 export const renderApp = ({ el, I18nContext }: AppDependencies) => {
-  render(<I18nContext>
-      <EcsMapperMainUi/>
-    </I18nContext>, 
-    el);
+  render(
+    <I18nContext>
+      <EcsMapperMainUi />
+    </I18nContext>,
+    el
+  );
 
   return () => unmountComponentAtNode(el);
 };
