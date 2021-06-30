@@ -34,9 +34,9 @@ export async function getStats(req, apmIndexPattern, clusterUuid) {
 
   const params = {
     index: apmIndexPattern,
-    filterPath: apmAggFilterPath,
+    filter_path: apmAggFilterPath,
     size: 0,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createApmQuery({
         start,

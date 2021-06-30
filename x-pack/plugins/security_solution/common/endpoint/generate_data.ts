@@ -52,7 +52,7 @@ export const ANCESTRY_LIMIT: number = 2;
 
 const Windows: OSFields[] = [
   {
-    name: 'windows 10.0',
+    name: 'Windows',
     full: 'Windows 10',
     version: '10.0',
     platform: 'Windows',
@@ -62,7 +62,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 10.0',
+    name: 'Windows',
     full: 'Windows Server 2016',
     version: '10.0',
     platform: 'Windows',
@@ -72,7 +72,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 6.2',
+    name: 'Windows',
     full: 'Windows Server 2012',
     version: '6.2',
     platform: 'Windows',
@@ -82,7 +82,7 @@ const Windows: OSFields[] = [
     },
   },
   {
-    name: 'windows 6.3',
+    name: 'Windows',
     full: 'Windows Server 2012R2',
     version: '6.3',
     platform: 'Windows',

@@ -23,7 +23,7 @@ import {
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  interface HostAlias {
+  interface Runtime {
     name: string;
     hostname: string;
   }
@@ -47,19 +47,18 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((signal) => (signal._source.host as HostAlias).name);
+        const hits = signalsOpen.hits.hits.map((signal) => (signal._source.host as Runtime).name);
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
 
-      // TODO: Make runtime fields able to be copied to where we can have ECS fields such as host.name filled out by them within the mapping directly
-      it.skip('should copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
+      it('should copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime']);
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map(
-          (signal) => (signal._source.host_alias as HostAlias).hostname
+          (signal) => (signal._source.host as Runtime).hostname
         );
         expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
       });
@@ -81,33 +80,69 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      // TODO: Make the overrides of runtime fields override the host.name in this use case.
-      it.skip('should copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
+      /**
+       * Note, this test shows that we do not shadow or overwrite runtime fields on-top of regular fields as we reduced
+       * risk with overwriting fields in the strategy we are currently using in detection engine. If you swap, change the strategies
+       * because we decide to overwrite "_source" values with "fields", then expect to change this test.
+       */
+      it('should NOT copy normal non-runtime data set from the source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
-        const hits = signalsOpen.hits.hits.map((signal) => (signal._source.host as HostAlias).name);
+        const hits = signalsOpen.hits.hits.map((signal) => signal._source.host);
         expect(hits).to.eql([
-          'I am the [host.name] field value which shadows the original host.name value',
-          'I am the [host.name] field value which shadows the original host.name value',
-          'I am the [host.name] field value which shadows the original host.name value',
-          'I am the [host.name] field value which shadows the original host.name value',
+          [
+            {
+              name: 'host name 1_1',
+            },
+            {
+              name: 'host name 1_2',
+            },
+          ],
+          [
+            {
+              name: 'host name 2_1',
+            },
+            {
+              name: 'host name 2_2',
+            },
+          ],
+          [
+            {
+              name: 'host name 3_1',
+            },
+            {
+              name: 'host name 3_2',
+            },
+          ],
+          [
+            {
+              name: 'host name 4_1',
+            },
+            {
+              name: 'host name 4_2',
+            },
+          ],
         ]);
       });
 
-      // TODO: Make runtime fields able to be copied to where we can have ECS fields such as host.name filled out by them within the mapping directly
-      it.skip('should copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
+      /**
+       * Note, this test shows that we do NOT shadow or overwrite runtime fields on-top of regular fields when we detect those
+       * fields as arrays of objects since the objects are flattened in "fields" and we detect something already there so we skip
+       * this shadowed runtime data as it is ambiguous of where we would put it in the array.
+       */
+      it('should NOT copy "runtime mapping" data from a source index into the signals index in the same position when the target is ECS compatible', async () => {
         const rule = getRuleForSignalTesting(['runtime_conflicting_fields']);
         const { id } = await createRule(supertest, rule);
         await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsOpen = await getSignalsById(supertest, id);
         const hits = signalsOpen.hits.hits.map(
-          (signal) => (signal._source.host_alias as HostAlias).hostname
+          (signal) => (signal._source.host as Runtime).hostname
         );
-        expect(hits).to.eql(['host name 1', 'host name 2', 'host name 3', 'host name 4']);
+        expect(hits).to.eql([undefined, undefined, undefined, undefined]);
       });
     });
   });
