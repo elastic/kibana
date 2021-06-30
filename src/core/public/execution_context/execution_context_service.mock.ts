@@ -11,7 +11,6 @@ import type { ExecutionContextContainer } from './execution_context_container';
 
 const creteContainerMock = () => {
   const mock: jest.Mocked<PublicMethodsOf<ExecutionContextContainer>> = {
-    toString: jest.fn(),
     toHeader: jest.fn(),
   };
   return mock;

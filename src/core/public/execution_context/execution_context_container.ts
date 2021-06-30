@@ -9,11 +9,11 @@ import type { KibanaExecutionContext } from '../../types';
 
 // Switch to the standard Baggage header
 // https://github.com/elastic/apm-agent-rum-js/issues/1040
-export const BAGGAGE_HEADER = 'x-kbn-context';
+const BAGGAGE_HEADER = 'x-kbn-context';
 
 // Maximum number of bytes per a single name-value pair allowed by w3c spec
 // https://w3c.github.io/baggage/
-const BAGGAGE_MAX_PER_NAME_VALUE_PAIRS = 4096;
+export const BAGGAGE_MAX_PER_NAME_VALUE_PAIRS = 4096;
 
 // a single character can use up to 4 bytes
 const MAX_BAGGAGE_LENGTH = BAGGAGE_MAX_PER_NAME_VALUE_PAIRS / 4;
@@ -28,8 +28,10 @@ export class ExecutionContextContainer {
   constructor(context: Readonly<KibanaExecutionContext>) {
     this.#context = context;
   }
-  toString(): string {
-    return enforceMaxLength(JSON.stringify(this.#context));
+  private toString(): string {
+    const value = JSON.stringify(this.#context);
+    // escape content as the description property might contain non-ASCII symbols
+    return enforceMaxLength(encodeURIComponent(value));
   }
   toHeader() {
     return { [BAGGAGE_HEADER]: this.toString() };

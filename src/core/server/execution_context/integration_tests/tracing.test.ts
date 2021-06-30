@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  BAGGAGE_HEADER,
-  ExecutionContextContainer,
-} from '../../../public/execution_context/execution_context_container';
+import { ExecutionContextContainer } from '../../../public/execution_context/execution_context_container';
 import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -238,7 +235,7 @@ describe('trace', () => {
       await root.start();
       const response = await kbnTestServer.request
         .get(root, '/execution-context')
-        .set(BAGGAGE_HEADER, new ExecutionContextContainer(parentContext).toString())
+        .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
 
       expect(response.body).toEqual({ ...parentContext, requestId: expect.any(String) });
@@ -293,7 +290,7 @@ describe('trace', () => {
       await root.start();
       const response = await kbnTestServer.request
         .get(root, '/execution-context')
-        .set(BAGGAGE_HEADER, new ExecutionContextContainer(parentContext).toString())
+        .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
 
       expect(response.body).toEqual({ ...parentContext, requestId: expect.any(String) });
@@ -319,7 +316,7 @@ describe('trace', () => {
 
       const response = await kbnTestServer.request
         .get(root, '/execution-context')
-        .set(BAGGAGE_HEADER, new ExecutionContextContainer(parentContext).toString())
+        .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
 
       const header = response.body['x-opaque-id'];
@@ -340,7 +337,7 @@ describe('trace', () => {
 
       const response = await kbnTestServer.request
         .get(root, '/execution-context')
-        .set(BAGGAGE_HEADER, new ExecutionContextContainer(parentContext).toString())
+        .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
 
       const header = response.body['x-opaque-id'];
@@ -368,7 +365,7 @@ describe('trace', () => {
 
       const response = await kbnTestServer.request
         .get(root, '/execution-context')
-        .set(BAGGAGE_HEADER, new ExecutionContextContainer(parentContext).toString())
+        .set(new ExecutionContextContainer(parentContext).toHeader())
         .expect(200);
 
       const header = response.body['x-opaque-id'];
@@ -382,6 +379,35 @@ describe('trace', () => {
       const router = createRouter('');
       router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
         executionContext.set(parentContext);
+        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
+        return res.ok({ body: headers || {} });
+      });
+
+      await root.start();
+
+      const myOpaqueId = 'my-opaque-id';
+      const response = await kbnTestServer.request
+        .get(root, '/execution-context')
+        .set('x-opaque-id', myOpaqueId)
+        .expect(200);
+
+      const header = response.body['x-opaque-id'];
+      expect(header).toBe('my-opaque-id;kibana:test-type:42');
+    });
+
+    it('does not break on non-ASCII characters within execution context', async () => {
+      const { http, executionContext } = await root.setup();
+      const { createRouter } = http;
+
+      const router = createRouter('');
+      const ctx = {
+        type: 'test-type',
+        name: 'test-name',
+        id: '42',
+        description: 'какое-то описание',
+      };
+      router.get({ path: '/execution-context', validate: false }, async (context, req, res) => {
+        executionContext.set(ctx);
         const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping();
         return res.ok({ body: headers || {} });
       });

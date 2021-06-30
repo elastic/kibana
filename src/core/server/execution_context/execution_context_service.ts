@@ -64,7 +64,7 @@ export type ExecutionContextStart = ExecutionContextSetup;
 function parseHeader(header?: string): KibanaExecutionContext | undefined {
   if (!header) return undefined;
   try {
-    return JSON.parse(header);
+    return JSON.parse(decodeURIComponent(header));
   } catch (e) {
     return undefined;
   }

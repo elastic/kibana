@@ -29,7 +29,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
               type: 'execution_context_app',
               name: 'Execution context app',
               id: '42',
-              description: 'a request initiated by Execution context app',
+              // add a non-ASCII symbols to make it doesn't break the context propagation mechanism
+              description: 'какое-то странное описание',
             });
 
             const result = await coreStart.http.get('/execution_context/pass', {
