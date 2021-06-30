@@ -11,17 +11,20 @@ import { SerializableState, VersionedState, MigrateFunctionsObject } from './typ
 
 export function migrateToLatest<S extends SerializableState>(
   migrations: MigrateFunctionsObject,
-  [state, oldVersion]: VersionedState
+  { state, version: oldVersion }: VersionedState
 ): VersionedState<S> {
   const versions = Object.keys(migrations || {})
     .filter((v) => compare(v, oldVersion) > 0)
     .sort(compare);
 
-  if (!versions.length) return [state, oldVersion] as VersionedState<S>;
+  if (!versions.length) return { state, version: oldVersion } as VersionedState<S>;
 
   for (const version of versions) {
     state = migrations[version]!(state);
   }
 
-  return [state as S, versions[versions.length - 1]];
+  return {
+    state: state as S,
+    version: versions[versions.length - 1],
+  };
 }
