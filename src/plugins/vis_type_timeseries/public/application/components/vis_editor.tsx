@@ -74,7 +74,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       defaultIndex: null,
       hideCallout:
         this.props.vis.params.use_kibana_indexes ||
-        Boolean(this.localStorage.get('CALLOUT_HIDDEN')),
+        Boolean(this.localStorage.get('TSVB_INDEX_PATTERN_CALLOUT_HIDDEN')),
       model: {
         // we should set default value for 'time_range_mode' in model so that when user save visualization
         // we set right mode in savedObject
@@ -169,7 +169,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
   };
 
   dismissNotice = () => {
-    this.localStorage.set('CALLOUT_HIDDEN', true);
+    this.localStorage.set('TSVB_INDEX_PATTERN_CALLOUT_HIDDEN', true);
     this.setState({
       hideCallout: true,
     });
