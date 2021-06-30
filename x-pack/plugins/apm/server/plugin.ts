@@ -127,7 +127,7 @@ export class APMPlugin
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
-    const initializeRuleDataIndices = once(async () => {
+    const initializeRuleDataTemplates = once(async () => {
       const componentTemplateName = ruleDataService.getFullAssetName(
         'apm-mappings'
       );
@@ -176,7 +176,7 @@ export class APMPlugin
     });
 
     // initialize eagerly
-    const initializeRuleDataIndicesPromise = initializeRuleDataIndices().catch(
+    const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch(
       (err) => {
         this.logger!.error(err);
       }
@@ -184,7 +184,7 @@ export class APMPlugin
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
       ruleDataService.getFullAssetName('observability-apm'),
-      () => initializeRuleDataIndicesPromise
+      () => initializeRuleDataTemplatesPromise
     );
 
     const resourcePlugins = mapValues(plugins, (value, key) => {

@@ -197,7 +197,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
 
-      const initializeRuleDataIndices = once(async () => {
+      const initializeRuleDataTemplates = once(async () => {
         const componentTemplateName = ruleDataService.getFullAssetName(
           'security-solution-mappings'
         );
@@ -232,13 +232,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       // initialize eagerly
-      const initializeRuleDataIndicesPromise = initializeRuleDataIndices().catch((err) => {
+      const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch((err) => {
         this.logger!.error(err);
       });
 
       ruleDataClient = ruleDataService.getRuleDataClient(
         ruleDataService.getFullAssetName('security-solution'),
-        () => initializeRuleDataIndicesPromise
+        () => initializeRuleDataTemplatesPromise
       );
 
       // sec
