@@ -12,8 +12,6 @@ import uuid from 'uuid/v4';
 import { share } from 'rxjs/operators';
 import { isEqual, isEmpty, debounce } from 'lodash';
 import { EventEmitter } from 'events';
-import { EuiCallOut, EuiLink, EuiButton, EuiFlexGroup } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import type { IUiSettingsClient } from 'kibana/public';
 import {
   Vis,
@@ -36,6 +34,7 @@ import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
 import { TimeseriesVisParams } from '../../types';
+import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
@@ -56,7 +55,6 @@ interface TimeseriesEditorState {
   extractedIndexPatterns: IndexPatternValue[];
   model: TimeseriesVisParams;
   visFields?: VisFields;
-  hideCallout: boolean;
 }
 
 export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditorState> {
@@ -72,9 +70,6 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       autoApply: true,
       dirty: false,
       defaultIndex: null,
-      hideCallout:
-        this.props.vis.params.use_kibana_indexes ||
-        Boolean(this.localStorage.get('TSVB_INDEX_PATTERN_CALLOUT_HIDDEN')),
       model: {
         // we should set default value for 'time_range_mode' in model so that when user save visualization
         // we set right mode in savedObject
@@ -168,16 +163,8 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.visDataSubject.next(visData);
   };
 
-  dismissNotice = () => {
-    this.localStorage.set('TSVB_INDEX_PATTERN_CALLOUT_HIDDEN', true);
-    this.setState({
-      hideCallout: true,
-    });
-  };
-
   render() {
-    const { model, visFields, hideCallout } = this.state;
-    const indexPatternModeLink = getCoreStart().docLinks.links.visualize.tsvbIndexPatternMode;
+    const { model, visFields } = this.state;
 
     if (!visFields) {
       // wait for fields initialization
@@ -195,48 +182,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       >
         <DefaultIndexPatternContext.Provider value={this.state.defaultIndex}>
           <div className="tvbEditor" data-test-subj="tvbVisEditor">
-            {!hideCallout && (
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationTitle"
-                    defaultMessage="TSVB now supports index patterns"
-                  />
-                }
-                iconType="cheer"
-                size="s"
-              >
-                <p>
-                  <FormattedMessage
-                    id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationMessage"
-                    defaultMessage="Great news! You can now visualize the data from Elasticsearch indices or Kibana index patterns. {indexPatternModeLink}."
-                    values={{
-                      indexPatternModeLink: (
-                        <EuiLink href={indexPatternModeLink} target="_blank" external>
-                          <FormattedMessage
-                            id="visTypeTimeseries.visEditorVisualization.indexPatternMode.link"
-                            defaultMessage="Check it out."
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-                <EuiFlexGroup gutterSize="none">
-                  <EuiButton
-                    size="s"
-                    onClick={() => {
-                      this.dismissNotice();
-                    }}
-                  >
-                    <FormattedMessage
-                      id="visTypeTimeseries.visEditorVisualization.indexPatternMode.dismissNoticeButtonText"
-                      defaultMessage="Dismiss"
-                    />
-                  </EuiButton>
-                </EuiFlexGroup>
-              </EuiCallOut>
-            )}
+            {!this.props.vis.params.use_kibana_indexes && <UseIndexPatternModeCallout />}
             <div className="tvbEditor--hideForReporting">
               <VisPicker currentVisType={model.type} onChange={this.handleChange} />
             </div>
