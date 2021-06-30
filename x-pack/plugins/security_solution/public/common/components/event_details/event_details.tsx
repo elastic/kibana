@@ -51,7 +51,7 @@ export enum EventsViewType {
 
 interface Props {
   browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[] | null;
+  data: TimelineEventsDetailsItem[];
   id: string;
   isAlert: boolean;
   timelineTabType: TimelineTabs | 'flyout';
@@ -104,11 +104,11 @@ const EventDetailsComponent: React.FC<Props> = ({
     setSelectedTabId,
   ]);
 
-  const eventFields = useMemo(() => getEnrichmentFields(data ?? []), [data]);
+  const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
   const existingEnrichments = useMemo(
     () =>
       isAlert
-        ? parseExistingEnrichments(data ?? []).map((enrichmentData) =>
+        ? parseExistingEnrichments(data).map((enrichmentData) =>
             timelineDataToEnrichment(enrichmentData)
           )
         : [],
@@ -136,7 +136,7 @@ const EventDetailsComponent: React.FC<Props> = ({
               <>
                 <AlertSummaryView
                   {...{
-                    data: data ?? [],
+                    data,
                     eventId: id,
                     browserFields,
                     timelineId,
@@ -208,7 +208,7 @@ const EventDetailsComponent: React.FC<Props> = ({
           <EuiSpacer size="l" />
           <EventFieldsBrowser
             browserFields={browserFields}
-            data={data ?? []}
+            data={data}
             eventId={id}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
@@ -228,7 +228,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         <>
           <EuiSpacer size="m" />
           <TabContentWrapper>
-            <JsonView data={data ?? []} />
+            <JsonView data={data} />
           </TabContentWrapper>
         </>
       ),
