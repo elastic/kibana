@@ -23,9 +23,9 @@ describe('attach timeline to case', () => {
   context('without cases created', () => {
     beforeEach(() => {
       cleanKibana();
-      createTimeline(timeline).then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline')
-      );
+      createTimeline(timeline).then((response) => {
+        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
+      });
     });
 
     it('attach timeline to a new case', function () {

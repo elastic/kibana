@@ -221,7 +221,7 @@ export const useUrlStateHooks = ({
         }
       });
     } else if (pathName !== prevProps.pathName) {
-      handleInitialize(type, pageName === SecurityPageName.detections);
+      handleInitialize(type, pageName === SecurityPageName.alerts);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitializing, history, pathName, pageName, prevProps, urlState]);

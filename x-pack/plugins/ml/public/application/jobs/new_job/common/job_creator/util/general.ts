@@ -311,6 +311,10 @@ export function getJobCreatorTitle(jobCreator: JobCreatorType) {
       return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.categorization', {
         defaultMessage: 'Categorization',
       });
+    case JOB_TYPE.RARE:
+      return i18n.translate('xpack.ml.newJob.wizard.jobCreatorTitle.rare', {
+        defaultMessage: 'Rare',
+      });
     default:
       return '';
   }

@@ -170,6 +170,16 @@ describe('EnginesLogic', () => {
         });
         expect(EnginesLogic.actions.onEnginesLoad).toHaveBeenCalledWith(MOCK_ENGINES_API_RESPONSE);
       });
+
+      it('handles errors', async () => {
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        EnginesLogic.actions.loadEngines();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
     });
 
     describe('loadMetaEngines', () => {
@@ -191,6 +201,16 @@ describe('EnginesLogic', () => {
         expect(EnginesLogic.actions.onMetaEnginesLoad).toHaveBeenCalledWith(
           MOCK_ENGINES_API_RESPONSE
         );
+      });
+
+      it('handles errors', async () => {
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+        mount();
+
+        EnginesLogic.actions.loadMetaEngines();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
