@@ -36,7 +36,6 @@ export async function mountManagementSection(
             pollConfig={pollConfig}
             redirect={coreStart.application.navigateToApp}
             navigateToUrl={coreStart.application.navigateToUrl}
-            apiClient={apiClient}
             urlService={urlService}
           />
         </IlmPolicyStatusContextProvider>
