@@ -145,4 +145,4 @@ If you want to ingest your data, refer to {fleet-guide}/fleet-quick-start.html[Q
 If you want to secure access to your data, refer to our guide on <<tutorial-secure-access-to-kibana, securing {kib}>>
 
 If you want to try out {ml-features} with the sample data sets, refer to
-{ml-docs}/ml-getting-started.html][Getting started with {ml}].
+{ml-docs}/ml-getting-started.html[Getting started with {ml}].
