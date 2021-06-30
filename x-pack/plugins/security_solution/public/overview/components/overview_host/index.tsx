@@ -16,7 +16,7 @@ import { ESQuery } from '../../../../common/typed_json';
 import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
-import { getHostsUrl, useFormatUrl } from '../../../common/components/link_to';
+import { getHostDetailsUrl, useFormatUrl } from '../../../common/components/link_to';
 import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { InspectButtonContainer } from '../../../common/components/inspect';
@@ -56,8 +56,9 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const goToHost = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
-        path: getHostsUrl(urlSearch),
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
+        path: getHostDetailsUrl('allHosts', urlSearch),
       });
     },
     [navigateToApp, urlSearch]
@@ -75,7 +76,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
 
   const hostPageButton = useMemo(
     () => (
-      <LinkButton onClick={goToHost} href={formatUrl(getHostsUrl())}>
+      <LinkButton onClick={goToHost} href={formatUrl('/allHosts')}>
         <FormattedMessage
           id="xpack.securitySolution.overview.hostsAction"
           defaultMessage="View hosts"
@@ -115,7 +116,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
-        <EuiPanel>
+        <EuiPanel hasBorder>
           <HeaderSection id={OverviewHostQueryId} subtitle={subtitle} title={title}>
             <>{hostPageButton}</>
           </HeaderSection>

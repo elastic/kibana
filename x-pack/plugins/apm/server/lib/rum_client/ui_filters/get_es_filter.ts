@@ -9,7 +9,7 @@ import {
   uxLocalUIFilterNames,
   uxLocalUIFilters,
 } from '../../../../common/ux_ui_filter';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
 import { UxUIFilters } from '../../../../typings/ui_filters';
 import { environmentQuery } from '../../../utils/queries';
 

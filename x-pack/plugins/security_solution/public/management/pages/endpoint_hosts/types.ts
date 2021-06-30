@@ -37,9 +37,13 @@ export interface EndpointState {
   /** api error from retrieving host list */
   error?: ServerApiError;
   endpointDetails: {
+    flyoutView: EndpointIndexUIQueryParams['show'];
     activityLog: {
-      page: number;
-      pageSize: number;
+      paging: {
+        disabled: boolean;
+        page: number;
+        pageSize: number;
+      };
       logData: AsyncResourceState<ActivityLog>;
     };
     hostDetails: {

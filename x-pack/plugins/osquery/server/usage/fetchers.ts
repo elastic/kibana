@@ -9,6 +9,7 @@ import {
   AggregationsSingleBucketAggregate,
   AggregationsTopHitsAggregate,
   AggregationsValueAggregate,
+  SearchResponse,
 } from '@elastic/elasticsearch/api/types';
 import { PackagePolicyServiceInterface } from '../../../fleet/server';
 import { getRouteMetric } from '../routes/usage';
@@ -55,6 +56,7 @@ export async function getPolicyLevelUsage(
       },
     },
     index: '.fleet-agents',
+    ignore_unavailable: true,
   });
   const policied = agentResponse.body.aggregations?.policied as AggregationsSingleBucketAggregate;
   if (policied && typeof policied.doc_count === 'number') {
@@ -117,6 +119,7 @@ export async function getLiveQueryUsage(
       },
     },
     index: '.fleet-actions',
+    ignore_unavailable: true,
   });
   const result: LiveQueryUsage = {
     session: await getRouteMetric(soClient, 'live_query'),
@@ -130,6 +133,46 @@ export async function getLiveQueryUsage(
     };
   }
 
+  return result;
+}
+
+export function extractBeatUsageMetrics(
+  metricResponse: Pick<SearchResponse<unknown>, 'aggregations'>
+) {
+  const lastDayAggs = metricResponse.aggregations?.lastDay as AggregationsSingleBucketAggregate;
+  const result: BeatMetricsUsage = {
+    memory: {
+      rss: {},
+    },
+    cpu: {},
+  };
+
+  if (lastDayAggs) {
+    if ('max_rss' in lastDayAggs) {
+      result.memory.rss.max = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
+    }
+
+    if ('avg_rss' in lastDayAggs) {
+      result.memory.rss.avg = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
+    }
+
+    if ('max_cpu' in lastDayAggs) {
+      result.cpu.max = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
+    }
+
+    if ('avg_cpu' in lastDayAggs) {
+      result.cpu.avg = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
+    }
+
+    if ('latest' in lastDayAggs) {
+      const latest = (lastDayAggs.latest as AggregationsTopHitsAggregate).hits.hits[0]?._source
+        ?.monitoring.metrics.beat;
+      if (latest) {
+        result.cpu.latest = latest.cpu.total.time.ms;
+        result.memory.rss.latest = latest.memstats.rss;
+      }
+    }
+  }
   return result;
 }
 
@@ -185,39 +228,8 @@ export async function getBeatUsage(esClient: ElasticsearchClient) {
       },
     },
     index: METRICS_INDICES,
+    ignore_unavailable: true,
   });
-  const lastDayAggs = metricResponse.aggregations?.lastDay as AggregationsSingleBucketAggregate;
-  const result: BeatMetricsUsage = {
-    memory: {
-      rss: {},
-    },
-    cpu: {},
-  };
 
-  if ('max_rss' in lastDayAggs) {
-    result.memory.rss.max = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
-  }
-
-  if ('avg_rss' in lastDayAggs) {
-    result.memory.rss.avg = (lastDayAggs.max_rss as AggregationsValueAggregate).value;
-  }
-
-  if ('max_cpu' in lastDayAggs) {
-    result.cpu.max = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
-  }
-
-  if ('avg_cpu' in lastDayAggs) {
-    result.cpu.avg = (lastDayAggs.max_cpu as AggregationsValueAggregate).value;
-  }
-
-  if ('latest' in lastDayAggs) {
-    const latest = (lastDayAggs.latest as AggregationsTopHitsAggregate).hits.hits[0]?._source
-      ?.monitoring.metrics.beat;
-    if (latest) {
-      result.cpu.latest = latest.cpu.total.time.ms;
-      result.memory.rss.latest = latest.memstats.rss;
-    }
-  }
-
-  return result;
+  return extractBeatUsageMetrics(metricResponse);
 }

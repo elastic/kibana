@@ -67,6 +67,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
 
   const xFormatter = niceTimeFormatter([xMin, xMax]);
   const { observabilityRuleTypeRegistry } = useApmPluginContext();
+
   const { alerts } = useApmServiceContext();
   const { getFormatter } = observabilityRuleTypeRegistry;
   const [selectedAlertId, setSelectedAlertId] = useState<string | undefined>(
@@ -84,7 +85,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
   };
 
   return (
-    <div>
+    <>
       <EuiTitle size="xs">
         <span>{title}</span>
       </EuiTitle>
@@ -124,7 +125,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             alerts: alerts?.filter(
               (alert) => alert[RULE_ID]?.[0] === AlertType.ErrorCount
             ),
-            chartStartTime: buckets[0].x0,
+            chartStartTime: buckets[0]?.x0,
             getFormatter,
             selectedAlertId,
             setSelectedAlertId,
@@ -143,6 +144,6 @@ export function ErrorDistribution({ distribution, title }: Props) {
           </Suspense>
         </Chart>
       </div>
-    </div>
+    </>
   );
 }

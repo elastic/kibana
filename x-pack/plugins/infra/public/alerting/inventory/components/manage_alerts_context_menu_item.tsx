@@ -17,7 +17,7 @@ export const ManageAlertsContextMenuItem = () => {
   });
   return (
     <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
-      <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage alerts" />
+      <FormattedMessage id="xpack.infra.alerting.manageAlerts" defaultMessage="Manage rules" />
     </EuiContextMenuItem>
   );
 };

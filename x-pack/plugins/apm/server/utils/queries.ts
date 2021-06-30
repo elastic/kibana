@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../src/core/types/elasticsearch';
 import { SERVICE_ENVIRONMENT } from '../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,

@@ -128,7 +128,7 @@ export class StatsQuery {
       index: this.indexPatterns,
     });
 
-    // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+    // @ts-expect-error declare aggegations type explicitly
     return response.body.aggregations?.ids?.buckets.reduce(
       (cummulative: Record<string, number>, bucket: CategoriesAgg) => ({
         ...cummulative,

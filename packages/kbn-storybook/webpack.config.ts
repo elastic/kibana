@@ -94,7 +94,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     return plugin.options && typeof plugin.options.template === 'string';
   });
   if (htmlWebpackPlugin) {
-    htmlWebpackPlugin.options.template = require.resolve('../lib/templates/index.ejs');
+    htmlWebpackPlugin.options.template = require.resolve('../templates/index.ejs');
   }
 
   return webpackMerge(storybookConfig, config);

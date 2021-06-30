@@ -90,6 +90,10 @@ export const caseProps: CaseComponentProps = {
   },
   getCaseDetailHrefWithCommentId: jest.fn(),
   onComponentInitialized: jest.fn(),
+  actionsNavigation: {
+    href: jest.fn(),
+    onClick: jest.fn(),
+  },
   ruleDetailsNavigation: {
     href: jest.fn(),
     onClick: jest.fn(),
@@ -408,6 +412,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -448,6 +456,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -485,6 +497,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -522,6 +538,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -608,6 +628,7 @@ describe('CaseView ', () => {
       ).toBe(connectorName);
     });
   });
+
   it('should update connector', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -628,15 +649,19 @@ describe('CaseView ', () => {
 
     wrapper.find('[data-test-subj="connector-edit"] button').simulate('click');
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-
     wrapper.find('button[data-test-subj="dropdown-connector-resilient-2"]').simulate('click');
 
-    await waitFor(() => wrapper.update());
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(`[data-test-subj="connector-fields-resilient"]`).exists()).toBeTruthy();
+    });
+
     wrapper.find(`button[data-test-subj="edit-connectors-submit"]`).first().simulate('click');
 
     await waitFor(() => {
-      const updateObject = updateCaseProperty.mock.calls[0][0];
+      wrapper.update();
       expect(updateCaseProperty).toHaveBeenCalledTimes(1);
+      const updateObject = updateCaseProperty.mock.calls[0][0];
       expect(updateObject.updateKey).toEqual('connector');
       expect(updateObject.updateValue).toEqual({
         id: 'resilient-2',

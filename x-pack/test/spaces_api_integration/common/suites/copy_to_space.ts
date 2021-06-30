@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { EsArchiver } from '@kbn/es-archiver';
@@ -93,9 +93,12 @@ export function copyToSpaceTestSuiteFactory(
       },
     });
 
+    const aggs = response.aggregations as Record<
+      string,
+      estypes.AggregationsMultiBucketAggregate<SpaceBucket>
+    >;
     return {
-      // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
-      buckets: response.aggregations?.count.buckets as SpaceBucket[],
+      buckets: aggs.count.buckets,
     };
   };
 

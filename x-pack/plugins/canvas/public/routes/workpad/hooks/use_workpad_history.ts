@@ -31,11 +31,10 @@ export const useWorkpadHistory = () => {
     // This will happen when navigating directly to a url (there will be no state on that link click)
     if (locationState === undefined) {
       history.replace(fullPath, encode(historyState));
-    } else if (!doesStateMatchLocationState && !isInitialRun) {
+    } else if (!isInitialRun && !doesStateMatchLocationState) {
       // There was a state change here
-
       // If the state of the route that we are on does not match this new state, then we are going to push
       history.push(fullPath, encode(historyState));
     }
-  }, [history, historyState]);
+  }, [history, historyState, history.location.search]);
 };

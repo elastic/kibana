@@ -53,6 +53,11 @@ const canvasWebpack = {
       },
     ],
   },
+  resolve: {
+    alias: {
+      'src/plugins': resolve(KIBANA_ROOT, 'src/plugins'),
+    },
+  },
 };
 
 module.exports = {

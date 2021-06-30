@@ -11,8 +11,6 @@ import {
 } from '../../../../observability/public';
 import { callApmApi } from './createCallApmApi';
 
-export { createCallApmApi } from './createCallApmApi';
-
 export const fetchObservabilityOverviewPageData = async ({
   absoluteTime,
   relativeTime,

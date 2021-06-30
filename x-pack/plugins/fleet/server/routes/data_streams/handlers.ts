@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler, SavedObjectsBulkGetObject } from 'src/core/server';
 
@@ -140,10 +140,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
 
       // Query backing indices to extract data stream dataset, namespace, and type values
       const {
-        body: {
-          // @ts-expect-error @elastic/elasticsearch aggregations are not typed
-          aggregations: { dataset, namespace, type },
-        },
+        body: { aggregations: dataStreamAggs },
       } = await esClient.search({
         index: dataStream.indices.map((index) => index.index_name),
         body: {
@@ -186,6 +183,11 @@ export const getListHandler: RequestHandler = async (context, request, response)
           },
         },
       });
+
+      const { dataset, namespace, type } = dataStreamAggs as Record<
+        string,
+        estypes.AggregationsMultiBucketAggregate<{ key?: string }>
+      >;
 
       // Set values from backing indices query
       dataStreamResponse.dataset = dataset.buckets[0]?.key || '';

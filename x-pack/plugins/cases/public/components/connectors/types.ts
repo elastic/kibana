@@ -11,12 +11,11 @@ import React from 'react';
 import {
   ActionType as ThirdPartySupportedActions,
   CaseField,
-  ActionConnector,
   ConnectorTypeFields,
 } from '../../../common';
+import { CaseActionConnector } from '../types';
 
 export { ThirdPartyField as AllThirdPartyFields } from '../../../common';
-export type CaseActionConnector = ActionConnector;
 
 export interface ThirdPartyField {
   label: string;

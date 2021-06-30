@@ -15,7 +15,7 @@ import {
 import {
   ESSearchRequest,
   InferSearchResponseOf,
-} from '../../../../../../../../typings/elasticsearch';
+} from '../../../../../../../../src/core/types/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';

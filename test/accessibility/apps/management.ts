@@ -82,6 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Edit field type', async () => {
       await PageObjects.settings.clickEditFieldFormat();
       await a11y.testAppSnapshot();
+      await PageObjects.settings.clickCloseEditFieldFormatFlyout();
     });
 
     it('Advanced settings', async () => {

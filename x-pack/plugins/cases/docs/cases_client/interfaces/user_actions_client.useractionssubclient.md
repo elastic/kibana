@@ -28,4 +28,4 @@ Retrieves all user actions for a particular case.
 
 **Returns:** *Promise*<[*ICaseUserActionsResponse*](typedoc_interfaces.icaseuseractionsresponse.md)\>
 
-Defined in: [user_actions/client.ts:33](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/user_actions/client.ts#L33)
+Defined in: [user_actions/client.ts:33](https://github.com/jonathan-buttner/kibana/blob/b65ed845242/x-pack/plugins/cases/server/client/user_actions/client.ts#L33)

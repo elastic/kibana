@@ -35,7 +35,7 @@ import { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
 import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { esQuery } from '../../../../../../../../src/plugins/data/public';
@@ -206,11 +206,12 @@ const TimelineDescriptionComponent: React.FC<FlyoutHeaderProps> = ({ timelineId 
   const description = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
   );
-
   return (
     <EuiText size="s" data-test-subj="timeline-description">
       {description.length ? (
-        <LineClamp key={description.length} content={description} lineClampHeight={4.5} />
+        <LineClamp key={description.length} lineClampHeight={4.5}>
+          {description}
+        </LineClamp>
       ) : (
         commonI18n.DESCRIPTION
       )}
@@ -319,6 +320,8 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     filterQuery: combinedQueries?.filterQuery ?? '',
   });
 
+  const hasWritePermissions = useGetUserCasesPermissions()?.crud ?? false;
+
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">
       <EuiFlexItem>
@@ -350,9 +353,11 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
           <EuiFlexItem grow={false}>
             <AddToFavoritesButton timelineId={timelineId} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddToCaseButton timelineId={timelineId} />
-          </EuiFlexItem>
+          {hasWritePermissions && (
+            <EuiFlexItem grow={false}>
+              <AddToCaseButton timelineId={timelineId} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </StyledTimelineHeader>

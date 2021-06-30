@@ -23,7 +23,7 @@ export const ReportViewTypes = {
   dist: 'data-distribution',
   kpi: 'kpi-over-time',
   cwv: 'core-web-vitals',
-  mdd: 'mobile-device-distribution',
+  mdd: 'device-data-distribution',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -37,37 +37,33 @@ export interface ColumnFilter {
   query: string;
 }
 
-export interface ReportDefinition {
-  field: string;
-  required?: boolean;
-  custom?: boolean;
-  options?: Array<{
-    id: string;
-    field?: string;
-    label: string;
-    description?: string;
-    columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
-    columnFilters?: ColumnFilter[];
-    timeScale?: string;
-  }>;
+export interface MetricOption {
+  id: string;
+  field?: string;
+  label: string;
+  description?: string;
+  columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN';
+  columnFilters?: ColumnFilter[];
+  timeScale?: string;
 }
 
-export interface DataSeries {
+export interface SeriesConfig {
   reportType: ReportViewType;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
-
-  breakdowns: string[];
+  breakdownFields: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
+  filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[] | ExistsFilter[];
-  reportDefinitions: ReportDefinition[];
+  baseFilters?: PersistableFilter[] | ExistsFilter[];
+  definitionFields: string[];
+  metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
   yTitle?: string;
   yConfig?: YConfig[];
+  query?: { query: string; language: 'kuery' };
 }
 
 export type URLReportDefinition = Record<string, string[]>;
@@ -80,10 +76,12 @@ export interface SeriesUrl {
   breakdown?: string;
   filters?: UrlFilter[];
   seriesType?: SeriesType;
-  reportType: ReportViewTypeId;
+  reportType: ReportViewType;
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
+  selectedMetricField?: string;
+  isNew?: boolean;
 }
 
 export interface UrlFilter {
@@ -94,6 +92,7 @@ export interface UrlFilter {
 
 export interface ConfigProps {
   indexPattern: IIndexPattern;
+  series?: SeriesUrl;
 }
 
 export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';

@@ -10,7 +10,7 @@ import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
+} from '../../../../../src/core/types/elasticsearch';
 import { UxUIFilters } from '../../typings/ui_filters';
 
 interface Options {

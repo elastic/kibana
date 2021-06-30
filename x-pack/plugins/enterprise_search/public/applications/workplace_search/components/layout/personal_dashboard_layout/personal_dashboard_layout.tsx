@@ -6,44 +6,67 @@
  */
 
 import React from 'react';
+import { useRouteMatch } from 'react-router-dom';
 
-import { EuiPage, EuiPageSideBar, EuiPageBody, EuiCallOut } from '@elastic/eui';
+import { useValues } from 'kea';
 
-import { AccountHeader } from '..';
+import {
+  EuiPage,
+  EuiPageSideBar,
+  EuiPageBody,
+  EuiPageContentBody,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 
+import { FlashMessages } from '../../../../shared/flash_messages';
+import { HttpLogic } from '../../../../shared/http';
+import { SetWorkplaceSearchChrome } from '../../../../shared/kibana_chrome';
+import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
+import { Loading } from '../../../../shared/loading';
+
+import { PERSONAL_SOURCES_PATH, PERSONAL_SETTINGS_PATH } from '../../../routes';
 import { PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING } from '../../../views/content_sources/constants';
+import { AccountHeader, AccountSettingsSidebar, PrivateSourcesSidebar } from '../index';
 
 import './personal_dashboard_layout.scss';
 
 interface LayoutProps {
-  restrictWidth?: boolean;
-  readOnlyMode?: boolean;
-  sidebar: React.ReactNode;
+  isLoading?: boolean;
+  pageChrome?: BreadcrumbTrail;
 }
 
 export const PersonalDashboardLayout: React.FC<LayoutProps> = ({
   children,
-  restrictWidth,
-  readOnlyMode,
-  sidebar,
+  isLoading,
+  pageChrome,
 }) => {
+  const { readOnlyMode } = useValues(HttpLogic);
+
   return (
     <>
+      {pageChrome && <SetWorkplaceSearchChrome trail={pageChrome} />}
       <AccountHeader />
-      <EuiPage className="enterpriseSearchLayout personalDashboardLayout">
-        <EuiPageSideBar className="enterpriseSearchLayout__sideBar personalDashboardLayout__sideBar">
-          {sidebar}
+      <EuiPage className="personalDashboardLayout" paddingSize="none">
+        <EuiPageSideBar className="personalDashboardLayout__sideBar" sticky>
+          {useRouteMatch(PERSONAL_SOURCES_PATH) && <PrivateSourcesSidebar />}
+          {useRouteMatch(PERSONAL_SETTINGS_PATH) && <AccountSettingsSidebar />}
         </EuiPageSideBar>
-        <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
-          {readOnlyMode && (
-            <EuiCallOut
-              className="enterpriseSearchLayout__readOnlyMode"
-              color="warning"
-              iconType="lock"
-              title={PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING}
-            />
-          )}
-          {children}
+        <EuiPageBody component="main" panelled>
+          <EuiPageContentBody className="personalDashboardLayout__body" restrictWidth>
+            {readOnlyMode && (
+              <>
+                <EuiCallOut
+                  color="warning"
+                  iconType="lock"
+                  title={PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING}
+                />
+                <EuiSpacer />
+              </>
+            )}
+            <FlashMessages />
+            {isLoading ? <Loading /> : children}
+          </EuiPageContentBody>
         </EuiPageBody>
       </EuiPage>
     </>

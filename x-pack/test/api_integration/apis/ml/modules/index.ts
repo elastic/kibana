@@ -9,11 +9,14 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
+  const supertest = getService('supertest');
 
   const fleetPackages = ['apache', 'nginx'];
 
   describe('modules', function () {
     before(async () => {
+      // Fleet need to be setup to be able to setup packages
+      await supertest.post(`/api/fleet/setup`).set({ 'kbn-xsrf': 'some-xsrf-token' }).expect(200);
       for (const fleetPackage of fleetPackages) {
         await ml.testResources.installFleetPackage(fleetPackage);
       }

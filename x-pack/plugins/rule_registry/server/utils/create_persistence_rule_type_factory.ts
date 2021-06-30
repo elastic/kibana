@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ESSearchRequest } from 'typings/elasticsearch';
+import { ESSearchRequest } from 'src/core/types/elasticsearch';
 import v4 from 'uuid/v4';
 import { Logger } from '@kbn/logging';
 

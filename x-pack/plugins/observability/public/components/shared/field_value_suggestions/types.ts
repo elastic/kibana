@@ -7,7 +7,7 @@
 
 import { PopoverAnchorPosition } from '@elastic/eui';
 import { Dispatch, SetStateAction } from 'react';
-import { ESFilter } from 'typings/elasticsearch';
+import { ESFilter } from 'src/core/types/elasticsearch';
 
 interface CommonProps {
   selectedValue?: string[];
@@ -23,6 +23,7 @@ interface CommonProps {
   compressed?: boolean;
   asFilterButton?: boolean;
   showCount?: boolean;
+  allowAllValuesSelection?: boolean;
 }
 
 export type FieldValueSuggestionsProps = CommonProps & {

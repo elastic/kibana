@@ -295,6 +295,7 @@ export type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,

@@ -6,7 +6,7 @@
 
 ### Interfaces
 
-- [CaseIDsByAlertIDParams](../interfaces/cases_get.caseidsbyalertidparams.md)
+- [CasesByAlertIDParams](../interfaces/cases_get.casesbyalertidparams.md)
 - [GetParams](../interfaces/cases_get.getparams.md)
 
 ### Functions
@@ -31,7 +31,7 @@ Retrieves the reporters from all the cases.
 
 **Returns:** *Promise*<User[]\>
 
-Defined in: [cases/get.ts:255](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/get.ts#L255)
+Defined in: [cases/get.ts:290](https://github.com/jonathan-buttner/kibana/blob/b65ed845242/x-pack/plugins/cases/server/client/cases/get.ts#L290)
 
 ___
 
@@ -50,4 +50,4 @@ Retrieves the tags from all the cases.
 
 **Returns:** *Promise*<string[]\>
 
-Defined in: [cases/get.ts:205](https://github.com/jonathan-buttner/kibana/blob/0e98e105663/x-pack/plugins/cases/server/client/cases/get.ts#L205)
+Defined in: [cases/get.ts:240](https://github.com/jonathan-buttner/kibana/blob/b65ed845242/x-pack/plugins/cases/server/client/cases/get.ts#L240)

@@ -39,7 +39,7 @@ export async function fetchIndexShardSize(
 ): Promise<IndexShardSizeStats[]> {
   const params = {
     index,
-    filterPath: ['aggregations.clusters.buckets'],
+    filter_path: ['aggregations.clusters.buckets'],
     body: {
       size: 0,
       query: {
@@ -105,7 +105,7 @@ export async function fetchIndexShardSize(
   };
 
   const { body: response } = await esClient.search(params);
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+  // @ts-expect-error declare aggegations type explicitly
   const { buckets: clusterBuckets } = response.aggregations?.clusters;
   const stats: IndexShardSizeStats[] = [];
   if (!clusterBuckets?.length) {

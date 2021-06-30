@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreSetup, CoreStart } from 'src/core/public';
+import type { CoreSetup, CoreStart, ApplicationStart } from 'src/core/public';
 
 import type { Observable } from 'rxjs';
 import { from, of, combineLatest } from 'rxjs';
@@ -34,6 +34,26 @@ const createPackages$ = () =>
     shareReplay(1)
   );
 
+const toSearchResult = (
+  pkg: GetPackagesResponse['response'][number],
+  application: ApplicationStart
+) => {
+  const pkgkey = `${pkg.name}-${pkg.version}`;
+  return {
+    id: pkgkey,
+    type: packageType,
+    title: pkg.title,
+    score: 80,
+    url: {
+      // TODO: See https://github.com/elastic/kibana/issues/96134 for details about why we use '#' here. Below should be updated
+      // as part of migrating to non-hash based router.
+      // prettier-ignore
+      path: `${application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}#${pagePathGetters.integration_details_overview({ pkgkey })[1]}`,
+      prependBasePath: false,
+    },
+  };
+};
+
 export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResultProvider => {
   const coreStart$ = from(core.getStartServices()).pipe(
     map(([coreStart]) => coreStart),
@@ -52,12 +72,23 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
   return {
     id: 'packages',
     getSearchableTypes: () => [packageType],
-    find: ({ term }, { maxResults, aborted$ }) => {
-      if (!term) {
+    find: ({ term, types }, { maxResults, aborted$ }) => {
+      if (types?.includes(packageType) === false) {
         return of([]);
       }
 
-      term = term.toLowerCase();
+      const hasTypes = Boolean(types);
+      const typesIncludePackage = hasTypes && types!.includes(packageType);
+      const noSearchTerm = !term;
+      const includeAllPackages = typesIncludePackage && noSearchTerm;
+
+      if (!includeAllPackages && noSearchTerm) {
+        return of([]);
+      }
+
+      if (term) {
+        term = term.toLowerCase();
+      }
 
       const toSearchResults = (
         coreStart: CoreStart,
@@ -65,25 +96,17 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
       ): GlobalSearchProviderResult[] => {
         const packages = packagesResponse.slice(0, maxResults);
 
-        return packages.flatMap((pkg) => {
-          if (!term || !pkg.title.toLowerCase().includes(term)) {
-            return [];
-          }
-          const pkgkey = `${pkg.name}-${pkg.version}`;
-          return {
-            id: pkgkey,
-            type: packageType,
-            title: pkg.title,
-            score: 80,
-            url: {
-              // TODO: See https://github.com/elastic/kibana/issues/96134 for details about why we use '#' here. Below should be updated
-              // as part of migrating to non-hash based router.
-              // prettier-ignore
-              path: `${coreStart.application.getUrlForApp(INTEGRATIONS_PLUGIN_ID)}#${pagePathGetters.integration_details_overview({ pkgkey })[1]}`,
-              prependBasePath: false,
-            },
-          };
-        });
+        return packages.flatMap(
+          includeAllPackages
+            ? (pkg) => toSearchResult(pkg, coreStart.application)
+            : (pkg) => {
+                if (!term || !pkg.title.toLowerCase().includes(term)) {
+                  return [];
+                }
+
+                return toSearchResult(pkg, coreStart.application);
+              }
+        );
       };
 
       return combineLatest([coreStart$, getPackages$()]).pipe(
