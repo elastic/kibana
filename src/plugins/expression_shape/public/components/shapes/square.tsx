@@ -7,7 +7,7 @@
  */
 
 import { SvgElementTypes } from '../types';
-import { getShapeComponent } from './shape';
+import { getShapeComponent } from '../shape';
 
 export const Square = getShapeComponent({
   viewBox: {

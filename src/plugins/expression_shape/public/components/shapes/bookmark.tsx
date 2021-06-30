@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getShapeComponent } from './shape';
+import { getShapeComponent } from '../shape';
 
 export const Bookmark = getShapeComponent({
   viewBox: {

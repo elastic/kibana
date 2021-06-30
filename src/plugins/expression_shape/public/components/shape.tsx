@@ -7,8 +7,8 @@
  */
 
 import React, { JSXElementConstructor, useEffect } from 'react';
-import { viewBoxToString } from '../../../common/lib';
-import { ShapeHocProps, ShapeProps, SvgConfig, SvgElementTypes } from '../types';
+import { viewBoxToString } from '../../common/lib';
+import { ShapeHocProps, ShapeProps, SvgConfig, SvgElementTypes } from './types';
 
 export const ShapeHOC = (Component: JSXElementConstructor<any>, svgParams: SvgConfig) =>
   function HocComponent({
