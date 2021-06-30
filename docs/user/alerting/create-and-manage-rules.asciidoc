@@ -19,10 +19,10 @@ For more information on alerting concepts and the types of rules and connectors 
 A rule can have one of the following statuses:
 
 `active`:: The conditions for the rule have been met, and the associated actions should be invoked.
-`ok`:: The conditions for the rule had previously been met, but no longer are being met. Changed to `recovered` in a 7.14 release.
+`ok`:: The conditions for the rule were previously met, but no longer. Changed to `recovered` in the 7.14 release.
 `error`:: An error was encountered during rule execution.
-`pending`:: The rule has not yet executed; it was either just created, or just enabled after being disabled.
-`unknown`:: Fallback internally when calculating the status; if this is observed, there is likely some kind of problem with the alerting code.
+`pending`:: The rule has not yet executed.  The rule was either just created, or enabled after being disabled.
+`unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
 
 [float]
 === Required permissions
