@@ -13,6 +13,8 @@ import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import { AdministrationSubTab } from '../../../../management/types';
+// import { AdministrationSubTab } from '../types';
 
 const setBreadcrumbsMock = jest.fn();
 const chromeMock = {
@@ -26,6 +28,8 @@ const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
       return HostsTableType.authentications;
     case 'network':
       return NetworkRouteType.flows;
+    case 'administration':
+      return AdministrationSubTab.endpoints;
     default:
       return undefined;
   }
@@ -423,16 +427,16 @@ describe('Navigation Breadcrumbs', () => {
         },
       ]);
     });
-    test('should return Admin breadcrumbs when supplied admin pathname', () => {
+    test('should return Admin breadcrumbs when supplied endpoints pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
-        getMockObject('administration', '/', undefined),
+        getMockObject('administration', '/endpoints', undefined),
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
         { text: 'Security', href: 'securitySolution/overview' },
         {
-          text: 'Administration',
-          href: 'securitySolution/endpoints',
+          text: 'Endpoints',
+          href: '',
         },
       ]);
     });

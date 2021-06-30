@@ -377,12 +377,13 @@ export function updateGlobalNavigation({
   const deepLinks = getDeepLinks(undefined, capabilities);
   const updatedDeepLinks = deepLinks.map((link) => {
     switch (link.id) {
-      case 'case':
+      case SecurityPageName.case:
         return {
           ...link,
           navLinkStatus: capabilities.siem.read_cases
             ? AppNavLinkStatus.visible
             : AppNavLinkStatus.hidden,
+          searchable: capabilities.siem.read_cases === true,
         };
       default:
         return link;
@@ -390,6 +391,7 @@ export function updateGlobalNavigation({
   });
 
   updater$.next(() => ({
+    navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent showing main nav link
     deepLinks: updatedDeepLinks,
   }));
 }
