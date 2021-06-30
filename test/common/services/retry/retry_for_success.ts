@@ -79,6 +79,8 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
       lastError = attempt.error;
     }
 
-    await delay(retryDelay);
+    if (Date.now() - start + retryDelay < timeout) {
+      await delay(retryDelay);
+    }
   }
 }
