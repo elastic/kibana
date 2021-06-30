@@ -116,9 +116,13 @@ const CategoriesPageTemplate: React.FC<LazyObservabilityPageTemplateProps> = ({
   return (
     <LogsPageTemplate
       data-test-subj="logsLogEntryCategoriesPage"
-      pageHeader={{
-        pageTitle: logCategoriesTitle,
-      }}
+      pageHeader={
+        rest.isEmptyState
+          ? undefined
+          : {
+              pageTitle: logCategoriesTitle,
+            }
+      }
       {...rest}
     >
       {children}

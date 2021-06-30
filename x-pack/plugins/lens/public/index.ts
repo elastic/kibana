@@ -54,6 +54,9 @@ export type {
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './editor_frame_service/embeddable';
 

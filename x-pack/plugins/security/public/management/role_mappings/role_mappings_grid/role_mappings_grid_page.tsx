@@ -88,7 +88,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
 
     if (loadState === 'loadingApp') {
       return (
-        <EuiPageContent>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
           <SectionLoading>
             <FormattedMessage
               id="xpack.security.management.roleMappings.loadingRoleMappingsDescription"
@@ -105,7 +105,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       } = error;
 
       return (
-        <EuiPageContent>
+        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
           <EuiCallOut
             title={
               <FormattedMessage

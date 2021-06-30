@@ -81,8 +81,8 @@ export function getLatestStats(req, beatsIndexPattern, clusterUuid) {
   const params = {
     index: beatsIndexPattern,
     size: 0,
-    ignoreUnavailable: true,
-    filterPath: 'aggregations',
+    ignore_unavailable: true,
+    filter_path: 'aggregations',
     body: {
       query: createBeatsQuery({
         clusterUuid,

@@ -9,7 +9,9 @@ import {
   CASES,
   DETECTIONS,
   HOSTS,
-  ADMINISTRATION,
+  ENDPOINTS,
+  TRUSTED_APPS,
+  EVENT_FILTERS,
   NETWORK,
   OVERVIEW,
   TIMELINES,
@@ -19,11 +21,13 @@ import { loginAndWaitForPage } from '../../tasks/login';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 
 import {
-  DETECTIONS_URL,
+  ALERTS_URL,
   CASES_URL,
   HOSTS_URL,
   KIBANA_HOME,
-  ADMINISTRATION_URL,
+  ENDPOINTS_URL,
+  TRUSTED_APPS_URL,
+  EVENT_FILTERS_URL,
   NETWORK_URL,
   OVERVIEW_URL,
   TIMELINES_URL,
@@ -34,9 +38,9 @@ import {
 } from '../../tasks/kibana_navigation';
 import {
   CASES_PAGE,
-  DETECTIONS_PAGE,
+  ALERTS_PAGE,
   HOSTS_PAGE,
-  ADMINISTRATION_PAGE,
+  ENDPOINTS_PAGE,
   NETWORK_PAGE,
   OVERVIEW_PAGE,
   TIMELINES_PAGE,
@@ -54,9 +58,9 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
-  it('navigates to the Detections page', () => {
+  it('navigates to the Alerts page', () => {
     navigateFromHeaderTo(DETECTIONS);
-    cy.url().should('include', DETECTIONS_URL);
+    cy.url().should('include', ALERTS_URL);
   });
 
   it('navigates to the Hosts page', () => {
@@ -79,9 +83,17 @@ describe('top-level navigation common to all pages in the Security app', () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Administration page', () => {
-    navigateFromHeaderTo(ADMINISTRATION);
-    cy.url().should('include', ADMINISTRATION_URL);
+  it('navigates to the Endpoints page', () => {
+    navigateFromHeaderTo(ENDPOINTS);
+    cy.url().should('include', ENDPOINTS_URL);
+  });
+  it('navigates to the Trusted Apps page', () => {
+    navigateFromHeaderTo(TRUSTED_APPS);
+    cy.url().should('include', TRUSTED_APPS_URL);
+  });
+  it('navigates to the Event Filters page', () => {
+    navigateFromHeaderTo(EVENT_FILTERS);
+    cy.url().should('include', EVENT_FILTERS_URL);
   });
 });
 
@@ -97,9 +109,9 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', OVERVIEW_URL);
   });
 
-  it('navigates to the Detections page', () => {
-    navigateFromKibanaCollapsibleTo(DETECTIONS_PAGE);
-    cy.url().should('include', DETECTIONS_URL);
+  it('navigates to the Alerts page', () => {
+    navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
+    cy.url().should('include', ALERTS_URL);
   });
 
   it('navigates to the Hosts page', () => {
@@ -122,8 +134,8 @@ describe('Kibana navigation to all pages in the Security app ', () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Administration page', () => {
-    navigateFromKibanaCollapsibleTo(ADMINISTRATION_PAGE);
-    cy.url().should('include', ADMINISTRATION_URL);
+  it('navigates to the Endpoints page', () => {
+    navigateFromKibanaCollapsibleTo(ENDPOINTS_PAGE);
+    cy.url().should('include', ENDPOINTS_URL);
   });
 });

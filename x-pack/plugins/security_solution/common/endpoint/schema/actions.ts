@@ -9,10 +9,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const HostIsolationRequestSchema = {
   body: schema.object({
-    /** A list of Fleet Agent IDs whose hosts will be isolated */
-    agent_ids: schema.maybe(schema.arrayOf(schema.string())),
     /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
-    endpoint_ids: schema.maybe(schema.arrayOf(schema.string())),
+    endpoint_ids: schema.arrayOf(schema.string(), { minSize: 1 }),
     /** If defined, any case associated with the given IDs will be updated */
     alert_ids: schema.maybe(schema.arrayOf(schema.string())),
     /** Case IDs to be updated */
