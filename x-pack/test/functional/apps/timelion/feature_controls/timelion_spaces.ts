@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'timelion', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
+  const kibanaServer = getService('kibanaServer');
 
   describe('timelion', () => {
     before(async () => {
@@ -23,7 +24,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
+        // await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
+
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+        );
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
@@ -33,7 +38,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/timelion/feature_controls');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+        );
       });
 
       it('shows timelion navlink', async () => {
