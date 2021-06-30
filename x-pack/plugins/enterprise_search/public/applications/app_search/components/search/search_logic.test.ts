@@ -82,7 +82,7 @@ describe('SearchLogic', () => {
       afterAll(() => jest.useRealTimers());
 
       it('should make a GET API call with a search query', async () => {
-        http.get.mockReturnValueOnce(Promise.resolve(MOCK_SEARCH_RESPONSE));
+        http.post.mockReturnValueOnce(Promise.resolve(MOCK_SEARCH_RESPONSE));
         const logic = mountLogic();
         jest.spyOn(logic.actions, 'onSearch');
 
@@ -90,14 +90,14 @@ describe('SearchLogic', () => {
         jest.runAllTimers();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/search', {
+        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/some-engine/search', {
           query: { query: 'hello world' },
         });
         expect(logic.actions.onSearch).toHaveBeenCalledWith(MOCK_SEARCH_RESPONSE);
       });
 
       it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+        http.post.mockReturnValueOnce(Promise.reject('error'));
         const logic = mountLogic();
 
         logic.actions.search('test');

@@ -11,6 +11,7 @@ import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 import {
   jobAuditMessagesQuerySchema,
   jobAuditMessagesJobIdSchema,
+  clearJobAuditMessagesBodySchema,
 } from './schemas/job_audit_messages_schema';
 
 /**
@@ -43,8 +44,13 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
         try {
           const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
           const { jobId } = request.params;
-          const { from } = request.query;
-          const resp = await getJobAuditMessages(jobSavedObjectService, jobId, from);
+          const { from, start, end } = request.query;
+          const resp = await getJobAuditMessages(jobSavedObjectService, {
+            jobId,
+            from,
+            start,
+            end,
+          });
 
           return response.ok({
             body: resp,
@@ -80,7 +86,43 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
         try {
           const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
           const { from } = request.query;
-          const resp = await getJobAuditMessages(jobSavedObjectService, undefined, from);
+          const resp = await getJobAuditMessages(jobSavedObjectService, { from });
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    )
+  );
+
+  /**
+   * @apiGroup JobAuditMessages
+   *
+   * @api {put} /api/ml/job_audit_messages/clear_messages/{jobId} Index annotation
+   * @apiName ClearJobAuditMessages
+   * @apiDescription Clear the job audit messages.
+   *
+   * @apiSchema (body) clearJobAuditMessagesSchema
+   */
+  router.put(
+    {
+      path: '/api/ml/job_audit_messages/clear_messages',
+      validate: {
+        body: clearJobAuditMessagesBodySchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(
+      async ({ client, mlClient, request, response, jobSavedObjectService }) => {
+        try {
+          const { clearJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
+          const { jobId } = request.body;
+          const resp = await clearJobAuditMessages(jobId);
 
           return response.ok({
             body: resp,

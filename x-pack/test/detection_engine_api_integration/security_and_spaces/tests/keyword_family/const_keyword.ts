@@ -60,8 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).to.eql(4);
       });
 
-      // TODO: Fix this bug and make this work. We currently do not write out the dataset name when it is not in _source
-      it.skip('should copy the dataset_name_1 from the index into the signal', async () => {
+      it('should copy the dataset_name_1 from the index into the signal', async () => {
         const rule = {
           ...getRuleForSignalTesting(['const_keyword']),
           query: 'event.dataset: "dataset_name_1"',
@@ -99,8 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(signalsOpen.hits.hits.length).to.eql(4);
       });
 
-      // TODO: Fix this bug and make this work. We currently do not write out the dataset name when it is not in _source
-      it.skip('should copy the "dataset_name_1" from "event.dataset"', async () => {
+      it('should copy the "dataset_name_1" from "event.dataset"', async () => {
         const rule: EqlCreateSchema = {
           ...getRuleForSignalTesting(['const_keyword']),
           rule_id: 'eql-rule',
