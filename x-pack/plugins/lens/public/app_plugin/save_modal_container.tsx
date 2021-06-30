@@ -14,7 +14,7 @@ import { SaveModal } from './save_modal';
 import { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, injectFilterReferences } from '../persistence';
-import { LensByReferenceInput, LensEmbeddableInput } from '../editor_frame_service/embeddable';
+import { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
 import { LensAttributeService } from '../lens_attribute_service';
 import {
   DataPublicPluginStart,
