@@ -18,8 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('snapshotRestore');
     });
 
-    // Temporarily skipping test since ES changes are not available yet in latest snapshot
-    it.skip('Loads the app', async () => {
+    it('Loads the app', async () => {
       const appTitle = 'Snapshot and Restore';
       await log.debug(`Checking for app title to be ${appTitle}`);
       const appTitleText = await pageObjects.snapshotRestore.appTitleText();
