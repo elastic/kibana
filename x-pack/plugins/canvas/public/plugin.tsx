@@ -32,7 +32,7 @@ import { PresentationUtilPluginStart } from '../../../../src/plugins/presentatio
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
 import { pluginServices } from './services';
-import { registry } from './services/kibana';
+import { pluginServiceRegistry } from './services/kibana';
 
 export { CoreStart, CoreSetup };
 
@@ -146,7 +146,7 @@ export class CanvasPlugin
 
   public start(coreStart: CoreStart, startPlugins: CanvasStartDeps) {
     this.srcPlugin.start(coreStart, startPlugins);
-    pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
+    pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
     initLoadingIndicator(coreStart.http.addLoadingCountSource);
   }
 }

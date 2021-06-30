@@ -18,8 +18,10 @@ import { workpadServiceFactory } from './workpad';
 
 export { workpadServiceFactory } from './workpad';
 
-export const providers: PluginServiceProviders<CanvasPluginServices> = {
+export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
   workpad: new PluginServiceProvider(workpadServiceFactory),
 };
 
-export const registry = new PluginServiceRegistry<CanvasPluginServices>(providers);
+export const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices>(
+  pluginServiceProviders
+);

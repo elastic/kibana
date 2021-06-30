@@ -6,13 +6,12 @@
  */
 
 import {
-  PluginServices,
   PluginServiceProviders,
   PluginServiceProvider,
 } from '../../../../../../src/plugins/presentation_util/public';
 
 import { CanvasPluginServices } from '..';
-import { providers as stubProviders } from '../stubs';
+import { pluginServiceProviders as stubProviders } from '../stubs';
 import { workpadServiceFactory } from './workpad';
 
 export interface StorybookParams {
@@ -21,12 +20,13 @@ export interface StorybookParams {
   workpadCount?: number;
 }
 
-export const providers: PluginServiceProviders<CanvasPluginServices, StorybookParams> = {
+export const pluginServiceProviders: PluginServiceProviders<
+  CanvasPluginServices,
+  StorybookParams
+> = {
   ...stubProviders,
   workpad: new PluginServiceProvider(workpadServiceFactory),
 };
-
-export const pluginServices = new PluginServices<CanvasPluginServices>();
 
 export const argTypes = {
   hasTemplates: {

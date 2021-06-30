@@ -18,14 +18,14 @@ import { CanvasStartDeps } from '../../plugin';
 
 export { workpadServiceFactory } from './workpad';
 
-export const providers: PluginServiceProviders<
+export const pluginServiceProviders: PluginServiceProviders<
   CanvasPluginServices,
   KibanaPluginServiceParams<CanvasStartDeps>
 > = {
   workpad: new PluginServiceProvider(workpadServiceFactory),
 };
 
-export const registry = new PluginServiceRegistry<
+export const pluginServiceRegistry = new PluginServiceRegistry<
   CanvasPluginServices,
   KibanaPluginServiceParams<CanvasStartDeps>
->(providers);
+>(pluginServiceProviders);
