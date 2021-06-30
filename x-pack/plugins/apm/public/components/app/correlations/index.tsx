@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlyout,
@@ -23,8 +23,8 @@ import {
   EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
-import { LatencyCorrelations } from './latency_correlations';
+import { useHistory, useParams } from 'react-router-dom';
+import { MlLatencyCorrelations } from './ml_latency_correlations';
 import { ErrorCorrelations } from './error_correlations';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { createHref } from '../../shared/Links/url_helpers';
@@ -36,14 +36,20 @@ import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/license_prompt';
 import { IUrlParams } from '../../../context/url_params_context/types';
+import {
+  IStickyProperty,
+  StickyProperties,
+} from '../../shared/StickyProperties';
+import {
+  getEnvironmentLabel,
+  getNextEnvironmentUrlParam,
+} from '../../../../common/environment_filter_values';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 
-const latencyTab = {
-  key: 'latency',
-  label: i18n.translate('xpack.apm.correlations.tabs.latencyLabel', {
-    defaultMessage: 'Latency',
-  }),
-  component: LatencyCorrelations,
-};
 const errorRateTab = {
   key: 'errorRate',
   label: i18n.translate('xpack.apm.correlations.tabs.errorRateLabel', {
@@ -51,17 +57,26 @@ const errorRateTab = {
   }),
   component: ErrorCorrelations,
 };
-const tabs = [latencyTab, errorRateTab];
+const latencyCorrelationsTab = {
+  key: 'latencyCorrelations',
+  label: i18n.translate('xpack.apm.correlations.tabs.latencyLabel', {
+    defaultMessage: 'Latency',
+  }),
+  component: MlLatencyCorrelations,
+};
+const tabs = [latencyCorrelationsTab, errorRateTab];
 
 export function Correlations() {
   const license = useLicenseContext();
   const hasActivePlatinumLicense = isActivePlatinumLicense(license);
   const { urlParams } = useUrlParams();
+  const { serviceName } = useParams<{ serviceName: string }>();
+
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const [currentTab, setCurrentTab] = useState(latencyTab.key);
+  const [currentTab, setCurrentTab] = useState(latencyCorrelationsTab.key);
   const { component: TabContent } =
-    tabs.find((tab) => tab.key === currentTab) ?? latencyTab;
+    tabs.find((tab) => tab.key === currentTab) ?? latencyCorrelationsTab;
   const metric = {
     app: 'apm' as const,
     metric: hasActivePlatinumLicense
@@ -72,9 +87,51 @@ export function Correlations() {
   useTrackMetric(metric);
   useTrackMetric({ ...metric, delay: 15000 });
 
+  const stickyProperties: IStickyProperty[] = useMemo(() => {
+    const nextEnvironment = getNextEnvironmentUrlParam({
+      requestedEnvironment: serviceName,
+      currentEnvironmentUrlParam: urlParams.environment,
+    });
+
+    const properties: IStickyProperty[] = [];
+    if (serviceName !== undefined && nextEnvironment !== undefined) {
+      properties.push({
+        label: i18n.translate('xpack.apm.correlations.serviceLabel', {
+          defaultMessage: 'Service',
+        }),
+        fieldName: SERVICE_NAME,
+        val: serviceName,
+        width: '20%',
+      });
+    }
+    if (urlParams.transactionName) {
+      properties.push({
+        label: i18n.translate('xpack.apm.correlations.transactionLabel', {
+          defaultMessage: 'Transaction',
+        }),
+        fieldName: TRANSACTION_NAME,
+        val: urlParams.transactionName,
+        width: '20%',
+      });
+    }
+    if (urlParams.environment) {
+      properties.push({
+        label: i18n.translate('xpack.apm.correlations.environmentLabel', {
+          defaultMessage: 'Environment',
+        }),
+        fieldName: SERVICE_ENVIRONMENT,
+        val: getEnvironmentLabel(urlParams.environment),
+        width: '20%',
+      });
+    }
+
+    return properties;
+  }, [serviceName, urlParams.environment, urlParams.transactionName]);
+
   return (
     <>
       <EuiButton
+        fill
         onClick={() => {
           setIsFlyoutVisible(true);
         }}
@@ -87,7 +144,7 @@ export function Correlations() {
       {isFlyoutVisible && (
         <EuiPortal>
           <EuiFlyout
-            size="m"
+            size="l"
             ownFocus
             onClose={() => setIsFlyoutVisible(false)}
           >
@@ -112,25 +169,37 @@ export function Correlations() {
                 </h2>
               </EuiTitle>
               {hasActivePlatinumLicense && (
-                <EuiTabs style={{ marginBottom: '-25px' }}>
-                  {tabs.map(({ key, label }) => (
-                    <EuiTab
-                      key={key}
-                      isSelected={key === currentTab}
-                      onClick={() => {
-                        setCurrentTab(key);
-                      }}
-                    >
-                      {label}
-                    </EuiTab>
-                  ))}
-                </EuiTabs>
+                <>
+                  <EuiSpacer size="m" />
+                  <StickyProperties stickyProperties={stickyProperties} />
+
+                  {urlParams.kuery ? (
+                    <>
+                      <EuiSpacer size="m" />
+                      <Filters urlParams={urlParams} history={history} />
+                    </>
+                  ) : (
+                    <EuiSpacer size="s" />
+                  )}
+                  <EuiTabs style={{ marginBottom: '-25px' }}>
+                    {tabs.map(({ key, label }) => (
+                      <EuiTab
+                        key={key}
+                        isSelected={key === currentTab}
+                        onClick={() => {
+                          setCurrentTab(key);
+                        }}
+                      >
+                        {label}
+                      </EuiTab>
+                    ))}
+                  </EuiTabs>
+                </>
               )}
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
               {hasActivePlatinumLicense ? (
                 <>
-                  <Filters urlParams={urlParams} history={history} />
                   <TabContent onClose={() => setIsFlyoutVisible(false)} />
                 </>
               ) : (
@@ -163,24 +232,21 @@ function Filters({
   }
 
   return (
-    <>
-      <EuiCallOut size="s">
-        <span>
-          {i18n.translate('xpack.apm.correlations.filteringByLabel', {
-            defaultMessage: 'Filtering by',
+    <EuiCallOut size="s">
+      <span>
+        {i18n.translate('xpack.apm.correlations.filteringByLabel', {
+          defaultMessage: 'Filtering by',
+        })}
+      </span>
+      <EuiCode>{urlParams.kuery}</EuiCode>
+      <EuiLink href={createHref(history, { query: { kuery: '' } })}>
+        <EuiButtonEmpty size="xs" iconType="cross">
+          {i18n.translate('xpack.apm.correlations.clearFiltersLabel', {
+            defaultMessage: 'Clear',
           })}
-        </span>
-        <EuiCode>{urlParams.kuery}</EuiCode>
-        <EuiLink href={createHref(history, { query: { kuery: '' } })}>
-          <EuiButtonEmpty size="xs" iconType="cross">
-            {i18n.translate('xpack.apm.correlations.clearFiltersLabel', {
-              defaultMessage: 'Clear',
-            })}
-          </EuiButtonEmpty>
-        </EuiLink>
-      </EuiCallOut>
-      <EuiSpacer />
-    </>
+        </EuiButtonEmpty>
+      </EuiLink>
+    </EuiCallOut>
   );
 }
 
