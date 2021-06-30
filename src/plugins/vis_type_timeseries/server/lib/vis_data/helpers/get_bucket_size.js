@@ -45,8 +45,6 @@ const calculateBucketData = (timeInterval, capabilities) => {
       if (converted) {
         intervalString = converted.value + converted.unit;
       }
-
-      intervalString = undefined;
     } else {
       intervalString = '1ms';
     }

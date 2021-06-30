@@ -14,17 +14,17 @@ import {
 } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { Query, TimeRange, Filter, IndexPatternsContract } from 'src/plugins/data/public';
-import { Document } from '../../persistence';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
-import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
-import { IBasePath } from '../../../../../../src/core/public';
-import { AttributeService, ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { LensAttributeService } from '../../lens_attribute_service';
-import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
+import { Document } from '../persistence';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public/embeddable';
+import { coreMock, httpServiceMock } from '../../../../../src/core/public/mocks';
+import { IBasePath } from '../../../../../src/core/public';
+import { AttributeService, ViewMode } from '../../../../../src/plugins/embeddable/public';
+import { LensAttributeService } from '../lens_attribute_service';
+import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public/save_modal';
 import { act } from 'react-dom/test-utils';
 
-jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
+jest.mock('../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
   open: false,
 }));
