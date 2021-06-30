@@ -192,10 +192,39 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
+  const loadTimestampFieldOptions = useCallback(
+    async (query: string, exactMatched: MatchedItem[]) => {
+      const isValidResult = !existingIndexPatterns.includes(title) && exactMatched.length > 0;
+      if (isValidResult) {
+        setIsLoadingTimestampFields(true);
+        const getFieldsOptions: GetFieldsOptions = {
+          pattern: query,
+        };
+        if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+          getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
+          getFieldsOptions.rollupIndex = rollupIndex;
+        }
+
+        const fields = await ensureMinimumTime(
+          indexPatternService.getFieldsForWildcard(getFieldsOptions)
+        );
+        const timeFields = extractTimeFields(fields, requireTimestampField);
+        setIsLoadingTimestampFields(false);
+        setTimestampFieldOptions(timeFields);
+      } else {
+        setTimestampFieldOptions([]);
+      }
+    },
+    [existingIndexPatterns, indexPatternService, requireTimestampField, rollupIndex, title, type]
+  );
+
   const reloadMatchedIndices = useCallback(
     async (title2: string) => {
+      // todo move to utility lib
       const isRollupIndex = (indexName: string) =>
         getRollupIndices(rollupIndicesCapabilities).includes(indexName);
+
+      // move inside getIndices
       const getIndexTags = (indexName: string) =>
         isRollupIndex(indexName)
           ? [
@@ -227,8 +256,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           indexRequests
         )) as MatchedItem[][];
 
-        const isValidResult =
-          !!title?.length && !existingIndexPatterns.includes(title) && exactMatched.length > 0;
+        await loadTimestampFieldOptions(query, exactMatched);
 
         const matchedIndicesResult = getMatchedIndices(
           allSources,
@@ -247,25 +275,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
         setMatchedIndices(matchedIndicesResult);
         setIsLoadingMatchedIndices(false);
 
-        if (isValidResult) {
-          setIsLoadingTimestampFields(true);
-          const getFieldsOptions: GetFieldsOptions = {
-            pattern: query,
-          };
-          if (type === INDEX_PATTERN_TYPE.ROLLUP) {
-            getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
-            getFieldsOptions.rollupIndex = rollupIndex;
-          }
-
-          const fields = await ensureMinimumTime(
-            indexPatternService.getFieldsForWildcard(getFieldsOptions)
-          );
-          const timeFields = extractTimeFields(fields, requireTimestampField);
-          setIsLoadingTimestampFields(false);
-          setTimestampFieldOptions(timeFields);
-        } else {
-          setTimestampFieldOptions([]);
-        }
         return matchedIndicesResult;
       };
 
@@ -273,17 +282,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
       return fetchIndices(title2);
     },
     [
-      title,
-      existingIndexPatterns,
       http,
-      indexPatternService,
       allowHidden,
       allSources,
-      requireTimestampField,
-      rollupIndex,
       type,
       i18nTexts.rollupLabel,
       rollupIndicesCapabilities,
+      loadTimestampFieldOptions,
     ]
   );
 
@@ -313,7 +318,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const showIndexPatternTypeSelect = () =>
     uiSettings.isDeclared('rollups:enableIndexPatterns') &&
     uiSettings.get('rollups:enableIndexPatterns') &&
-    getRollupIndices(rollupIndicesCapabilities);
+    getRollupIndices(rollupIndicesCapabilities).length;
 
   const indexPatternTypeSelect = showIndexPatternTypeSelect() ? (
     <EuiFlexGroup>
@@ -374,10 +379,10 @@ TODO MOVE SOME OF THIS COMPLEXITY INTO A COMPONENT
     );
   };
 
-  // needed to trigger validation without touching advanced options
   if (title) {
+    // needed to trigger validation without touching advanced options
     form.validate().then((isValid) => {
-      const disable = !isValid || !matchedIndices.exactMatchedIndices.length;
+      const disable = !isValid;
       setDisableSubmit(disable);
     });
   }

@@ -10,10 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { fieldValidators } from '../shared_imports';
 import { INDEX_PATTERN_TYPE } from '../types';
 
-// import { RUNTIME_FIELD_OPTIONS } from './constants';
-
-// const { emptyField, numberGreaterThanField } = fieldValidators;
-
 export const schema = {
   title: {
     label: i18n.translate('indexPatternEditor.editor.form.titleLabel', {

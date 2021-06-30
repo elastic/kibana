@@ -44,7 +44,13 @@ const rollupIndexPatternTooManyMatchesError = {
   }),
 };
 
-const createTitlesNotAllowedValidator = (
+const mustMatchError = {
+  message: i18n.translate('indexPatternEditor.createIndex.noMatch', {
+    defaultMessage: 'Must match one or more indices, data streams, or index aliases',
+  }),
+};
+
+const createTitlesNoDupesValidator = (
   namesNotAllowed: string[]
 ): ValidationConfig<{}, string, string> => ({
   validator: ({ value }) => {
@@ -58,20 +64,24 @@ const createTitlesNotAllowedValidator = (
   },
 });
 
-interface RollupIndexPatternValidatorArgs {
+interface MatchesValidatorArgs {
   rollupIndicesCapabilities: Record<string, { error: string }>;
   refreshMatchedIndices: (title: string) => Promise<MatchedIndicesSet>;
   isRollup: boolean;
 }
 
-const rollupIndexPatternValidator = ({
+const matchesValidator = ({
   rollupIndicesCapabilities,
   refreshMatchedIndices,
   isRollup,
-}: RollupIndexPatternValidatorArgs): ValidationConfig<{}, string, string> => ({
+}: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value }) => {
     const results = await refreshMatchedIndices(value);
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
+
+    if (results.exactMatchedIndices.length === 0) {
+      return mustMatchError;
+    }
 
     if (!isRollup || !rollupIndices || !rollupIndices.length) {
       return;
@@ -121,15 +131,14 @@ const getTitleConfig = ({
   const validations = [
     ...titleFieldConfig.validations,
     // note this is responsible for triggering the state update for the selected source list.
-    rollupIndexPatternValidator({
+    matchesValidator({
       rollupIndicesCapabilities,
       refreshMatchedIndices,
       isRollup,
     }),
-    createTitlesNotAllowedValidator(namesNotAllowed),
+    createTitlesNoDupesValidator(namesNotAllowed),
   ];
 
-  // Add validation to not allow duplicates
   return {
     ...titleFieldConfig!,
     validations,
