@@ -507,9 +507,13 @@ export interface DocLinksStart {
             readonly elasticsearchModule: string;
             readonly startup: string;
             readonly exportedFields: string;
+            readonly suricataModule: string;
+            readonly zeekModule: string;
         };
         readonly auditbeat: {
             readonly base: string;
+            readonly auditdModule: string;
+            readonly systemModule: string;
         };
         readonly metricbeat: {
             readonly base: string;
@@ -525,6 +529,9 @@ export interface DocLinksStart {
         };
         readonly heartbeat: {
             readonly base: string;
+        };
+        readonly libbeat: {
+            readonly getStarted: string;
         };
         readonly logstash: {
             readonly base: string;
@@ -602,6 +609,10 @@ export interface DocLinksStart {
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
+            readonly ml: string;
+            readonly ruleChangeLog: string;
+            readonly detectionsReq: string;
+            readonly networkMap: string;
         };
         readonly query: {
             readonly eql: string;
