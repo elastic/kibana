@@ -6,6 +6,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "allowJs": true,
     "sourceRoot": "../../../../packages/kbn-es-query/src",
     "types": [
       "jest",
