@@ -90,6 +90,10 @@ export const caseProps: CaseComponentProps = {
   },
   getCaseDetailHrefWithCommentId: jest.fn(),
   onComponentInitialized: jest.fn(),
+  actionsNavigation: {
+    href: jest.fn(),
+    onClick: jest.fn(),
+  },
   ruleDetailsNavigation: {
     href: jest.fn(),
     onClick: jest.fn(),
@@ -408,6 +412,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -448,6 +456,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -485,6 +497,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -522,6 +538,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),

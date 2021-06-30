@@ -28,6 +28,7 @@ import { registerFleetPolicyCallbacks } from './lib/fleet/register_fleet_policy_
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
+import { apmCorrelationsSearchStrategyProvider } from './lib/search_strategies/correlations';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
@@ -236,6 +237,13 @@ export class APMPlugin
       logger: this.logger,
     });
 
+    // search strategies for async partial search results
+    if (plugins.data?.search?.registerSearchStrategy !== undefined) {
+      plugins.data.search.registerSearchStrategy(
+        'apmCorrelationsSearchStrategy',
+        apmCorrelationsSearchStrategyProvider()
+      );
+    }
     return {
       config$: mergedConfig$,
       getApmIndices: boundGetApmIndices,
