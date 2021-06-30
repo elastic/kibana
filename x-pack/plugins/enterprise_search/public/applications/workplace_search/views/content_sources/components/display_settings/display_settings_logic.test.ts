@@ -52,6 +52,10 @@ describe('DisplaySettingsLogic', () => {
     urlFieldHover: false,
     subtitleFieldHover: false,
     descriptionFieldHover: false,
+    typeFieldHover: false,
+    mediaTypeFieldHover: false,
+    createdByFieldHover: false,
+    updatedByFieldHover: false,
     fieldOptions: [],
     optionalFieldOptions: [
       {
@@ -182,6 +186,50 @@ describe('DisplaySettingsLogic', () => {
       });
     });
 
+    it('setTypeField', () => {
+      const TYPE = 'new type';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setTypeField(TYPE);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        typeField: TYPE,
+      });
+    });
+
+    it('setMediaTypeField', () => {
+      const MEDIA_TYPE = 'new media type';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setMediaTypeField(MEDIA_TYPE);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        mediaTypeField: MEDIA_TYPE,
+      });
+    });
+
+    it('setCreatedByField', () => {
+      const CREATED_BY = 'new created by';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setCreatedByField(CREATED_BY);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        createdByField: CREATED_BY,
+      });
+    });
+
+    it('setUpdatedByField', () => {
+      const UPDATED_BY = 'new updated by';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setUpdatedByField(UPDATED_BY);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        updatedByField: UPDATED_BY,
+      });
+    });
+
     it('setDetailFields', () => {
       const result = {
         destination: {
@@ -285,6 +333,36 @@ describe('DisplaySettingsLogic', () => {
       DisplaySettingsLogic.actions.toggleUrlFieldHover();
 
       expect(DisplaySettingsLogic.values.urlFieldHover).toEqual(!defaultValues.urlFieldHover);
+    });
+
+    it('toggleTypeFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleTypeFieldHover();
+
+      expect(DisplaySettingsLogic.values.typeFieldHover).toEqual(!defaultValues.typeFieldHover);
+    });
+
+    it('toggleMediaTypeFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleMediaTypeFieldHover();
+
+      expect(DisplaySettingsLogic.values.mediaTypeFieldHover).toEqual(
+        !defaultValues.mediaTypeFieldHover
+      );
+    });
+
+    it('toggleCreatedByFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleCreatedByFieldHover();
+
+      expect(DisplaySettingsLogic.values.createdByFieldHover).toEqual(
+        !defaultValues.createdByFieldHover
+      );
+    });
+
+    it('toggleUpdatedByFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleUpdatedByFieldHover();
+
+      expect(DisplaySettingsLogic.values.updatedByFieldHover).toEqual(
+        !defaultValues.updatedByFieldHover
+      );
     });
   });
 

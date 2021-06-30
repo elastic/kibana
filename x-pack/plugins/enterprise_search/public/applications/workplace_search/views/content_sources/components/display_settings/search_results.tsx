@@ -42,15 +42,33 @@ export const SearchResults: React.FC = () => {
     toggleTitleFieldHover,
     toggleSubtitleFieldHover,
     toggleDescriptionFieldHover,
+    toggleTypeFieldHover,
+    toggleMediaTypeFieldHover,
+    toggleCreatedByFieldHover,
+    toggleUpdatedByFieldHover,
     setTitleField,
     setSubtitleField,
     setDescriptionField,
+    setTypeField,
+    setMediaTypeField,
+    setCreatedByField,
+    setUpdatedByField,
     setUrlField,
     setColorField,
   } = useActions(DisplaySettingsLogic);
 
   const {
-    searchResultConfig: { titleField, descriptionField, subtitleField, urlField, color },
+    searchResultConfig: {
+      titleField,
+      descriptionField,
+      subtitleField,
+      typeField,
+      mediaTypeField,
+      createdByField,
+      updatedByField,
+      urlField,
+      color,
+    },
     fieldOptions,
     optionalFieldOptions,
   } = useValues(DisplaySettingsLogic);
@@ -133,6 +151,82 @@ export const SearchResults: React.FC = () => {
                 value={descriptionField || LEAVE_UNASSIGNED_FIELD}
                 onChange={({ target: { value } }) =>
                   setDescriptionField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Type"
+              helpText="This area is optional"
+              onMouseOver={toggleTypeFieldHover}
+              onFocus={toggleTypeFieldHover}
+              onMouseOut={toggleTypeFieldHover}
+              onBlur={toggleTypeFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="TypeFieldSelect"
+                value={typeField || LEAVE_UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setTypeField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Media Type"
+              helpText="This area is optional"
+              onMouseOver={toggleMediaTypeFieldHover}
+              onFocus={toggleMediaTypeFieldHover}
+              onMouseOut={toggleMediaTypeFieldHover}
+              onBlur={toggleMediaTypeFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="MediaTypeFieldSelect"
+                value={mediaTypeField || LEAVE_UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setMediaTypeField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Created By"
+              helpText="This area is optional"
+              onMouseOver={toggleCreatedByFieldHover}
+              onFocus={toggleCreatedByFieldHover}
+              onMouseOut={toggleCreatedByFieldHover}
+              onBlur={toggleCreatedByFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="CreatedByFieldSelect"
+                value={createdByField || LEAVE_UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setCreatedByField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label="Updated By"
+              helpText="This area is optional"
+              onMouseOver={toggleUpdatedByFieldHover}
+              onFocus={toggleUpdatedByFieldHover}
+              onMouseOut={toggleUpdatedByFieldHover}
+              onBlur={toggleUpdatedByFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="UpdatedByFieldSelect"
+                value={updatedByField || LEAVE_UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setUpdatedByField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
                 }
               />
             </EuiFormRow>

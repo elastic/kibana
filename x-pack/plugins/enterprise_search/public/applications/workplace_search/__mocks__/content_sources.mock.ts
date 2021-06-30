@@ -305,6 +305,10 @@ export const exampleResult = {
     urlField: 'myLink',
     color: '#e3e3e3',
     descriptionField: 'about',
+    typeField: 'otherType',
+    mediaTypeField: 'otherMediaType',
+    createdByField: 'otherCreatedBy',
+    updatedByField: 'otherUpdatedBy',
     detailFields: [
       { fieldName: 'cats', label: 'Felines' },
       { fieldName: 'dogs', label: 'Canines' },
