@@ -56,6 +56,7 @@ function mockProps() {
     navigateToApp: () => Promise.resolve(),
     navigateToUrl: () => Promise.resolve(),
     customNavLink$: new BehaviorSubject(undefined),
+    button: <button />,
   };
 }
 
@@ -76,19 +77,11 @@ function clickGroup(component: ReactWrapper, group: string) {
 describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
   it('renders the default nav', () => {
-    const onLock = sinon.spy();
-    const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
+    const component = mount(<CollapsibleNav {...mockProps()} />);
     expect(component).toMatchSnapshot();
 
     component.setProps({ isOpen: true });
     expect(component).toMatchSnapshot();
-
-    component.setProps({ isLocked: true });
-    expect(component).toMatchSnapshot();
-
-    // limit the find to buttons because jest also renders data-test-subj on a JSX wrapper element
-    component.find('button[data-test-subj="collapsible-nav-lock"]').simulate('click');
-    expect(onLock.callCount).toEqual(1);
   });
 
   it('renders links grouped by category', () => {

@@ -70,7 +70,7 @@ const ListItem = euiStyled.li`
 
 const Icon = euiStyled.div`
   flex: 0 0 ${px(units.double)};
-  background: ${({ type, theme }) => tint(0.1, getIconColor(type, theme))};
+  background: ${({ type, theme }) => tint(0.9, getIconColor(type, theme))};
   color: ${({ type, theme }) => getIconColor(type, theme)};
   width: 100%;
   height: 100%;

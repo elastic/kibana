@@ -328,6 +328,8 @@ export class SecurityPlugin
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
         checkPrivilegesDynamicallyWithRequest: this.authorizationSetup
           .checkPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivilegesWithRequest: this.authorizationSetup
+          .checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup.mode,
       },
 
@@ -386,6 +388,8 @@ export class SecurityPlugin
         checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
         checkPrivilegesDynamicallyWithRequest: this.authorizationSetup!
           .checkPrivilegesDynamicallyWithRequest,
+        checkSavedObjectsPrivilegesWithRequest: this.authorizationSetup!
+          .checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup!.mode,
       },
     });

@@ -37,6 +37,7 @@ export const buildOSSFeatures = ({
       privileges: {
         all: {
           app: ['discover', 'kibana'],
+          api: ['fileUpload:analyzeFile'],
           catalogue: ['discover'],
           savedObject: {
             all: ['search', 'query', 'index-pattern'],
