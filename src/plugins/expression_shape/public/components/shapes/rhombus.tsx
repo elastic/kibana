@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Shape, ShapeHOC } from './shape';
+import { getShapeComponent } from './shape';
 
-export const Rhombus = ShapeHOC(Shape, {
+export const Rhombus = getShapeComponent({
   viewBox: {
     minX: 0,
     minY: 0,

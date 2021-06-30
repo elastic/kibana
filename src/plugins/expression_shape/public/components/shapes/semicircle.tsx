@@ -7,9 +7,9 @@
  */
 
 import { SvgElementTypes } from '../types';
-import { Shape, ShapeHOC } from './shape';
+import { getShapeComponent } from './shape';
 
-export const Semicircle = ShapeHOC(Shape, {
+export const Semicircle = getShapeComponent({
   viewBox: {
     minX: 0,
     minY: 0,

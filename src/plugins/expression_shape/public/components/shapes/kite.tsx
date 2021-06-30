@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Shape, ShapeHOC } from './shape';
+import { getShapeComponent } from './shape';
 
-export const Kite = ShapeHOC(Shape, {
+export const Kite = getShapeComponent({
   viewBox: {
     minX: 0,
     minY: 0,

@@ -55,3 +55,5 @@ export function Shape({ shapeAttributes, shapeContentAttributes, shapeType }: Sh
     </svg>
   );
 }
+
+export const getShapeComponent = (props: SvgConfig) => ShapeHOC(Shape, props);
