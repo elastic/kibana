@@ -19,6 +19,13 @@ import { Overview } from './index';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
+import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
+import { useCtiEventCounts } from '../containers/overview_cti_links/use_cti_event_counts';
+import {
+  mockCtiEventCountsResponse,
+  mockCtiLinksResponse,
+} from '../components/overview_cti_links/mock';
+import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -43,6 +50,20 @@ jest.mock('../../common/components/query_bar', () => ({
 jest.mock('../../common/hooks/endpoint/ingest_enabled');
 jest.mock('../../common/containers/local_storage/use_messages_storage');
 
+jest.mock('../containers/overview_cti_links');
+jest.mock('../containers/overview_cti_links/use_cti_event_counts');
+jest.mock('../containers/overview_cti_links');
+const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
+useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
+
+jest.mock('../containers/overview_cti_links/use_cti_event_counts');
+const useCTIEventCountsMock = useCtiEventCounts as jest.Mock;
+useCTIEventCountsMock.mockReturnValue(mockCtiEventCountsResponse);
+
+jest.mock('../containers/overview_cti_links/use_is_threat_intel_module_enabled');
+const useIsThreatIntelModuleEnabledMock = useIsThreatIntelModuleEnabled as jest.Mock;
+useIsThreatIntelModuleEnabledMock.mockReturnValue(true);
+
 const endpointNoticeMessage = (hasMessageValue: boolean) => {
   return {
     hasMessage: () => hasMessageValue,
@@ -56,6 +77,7 @@ const mockUseSourcererScope = useSourcererScope as jest.Mock;
 const mockUseIngestEnabledCheck = useIngestEnabledCheck as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
+
 describe('Overview', () => {
   beforeEach(() => {
     mockUseFetchIndex.mockReturnValue([

@@ -23,16 +23,8 @@ Learn more about {kib} extension, additional *Vega* resources, and examples.
 ====== Automatic sizing
 
 Most users will want their Vega visualizations to take the full available space, so unlike
-Vega examples, `width` and `height` are not required parameters in {kib}. To set the width
-or height manually, set `autosize: none`. For example, to set the height to a specific pixel value:
-
-```
-autosize: none
-width: container
-height: 200
-```
-
-The default {kib} settings which are inherited by your visualizations are:
+Vega examples, `width` and `height` are not required parameters in {kib} because your
+spec will be merged with the default {kib} settings in most cases:
 
 ```
 autosize: {
@@ -43,17 +35,36 @@ width: container
 height: container
 ```
 
-{kib} is able to merge your custom `autosize` settings with the defaults. The options `fit-x`
-and `fit-y` are supported but not recommended over the default `fit` setting.
+These default settings are *not* applied if:
+
+* <<vega-with-a-map, Your spec uses `type=map`>>
+* Your spec is Vega-Lite and contains a facet, row, column, repeat, or concat operator. In these
+cases, providing `width` and `height` will affect the child size.
+
+To set the width or height manually, set `autosize: none` and provide the exact pixel sizes, including
+padding for the title, legend and axes.
+
+```
+autosize: none
+width: 600
+height: 200
+padding: {
+  top: 20
+  bottom: 20
+  left: 55
+  right: 150
+}
+```
 
 To learn more, read about
-https://vega.github.io/vega/docs/specification/#autosize[autosize]
-in the Vega documentation.
+https://vega.github.io/vega/docs/specification/#autosize[Vega autosize]
+and https://vega.github.io/vega-lite/docs/size.html[Vega-Lite autosize].
 
-WARNING: Autosize in Vega-Lite has https://vega.github.io/vega-lite/docs/size.html#limitations[several limitations]
-that can result in a warning like `Autosize "fit" only works for single views and layered views.`
-The recommended fix for this warning is to convert your spec to Vega using the <<vega-browser-debugging-console, browser console>>
+NOTE: Autosize in Vega-Lite has https://vega.github.io/vega-lite/docs/size.html#limitations[several limitations]
+which can affect the height and width of your visualization, but these limitations do not exist in Vega.
+If you need full control, convert your spec to Vega using the <<vega-browser-debugging-console, browser console>>
 `VEGA_DEBUG.vega_spec` output.
+To disable these warnings, you can <<vega-additional-configuration-options, add extra options to your spec>>.
 
 [float]
 [[vega-theme]]
