@@ -67,7 +67,7 @@ pageLoadAssetSize:
   searchprofiler: 67080
   security: 95864
   securityOss: 30806
-  securitySolution: 244785
+  securitySolution: 252760
   share: 99061
   snapshotRestore: 79032
   spaces: 57868
@@ -80,7 +80,7 @@ pageLoadAssetSize:
   uiActions: 97717
   uiActionsEnhanced: 313011
   upgradeAssistant: 81241
-  uptime: 232989
+  uptime: 40825
   urlDrilldown: 70674
   urlForwarding: 32579
   usageCollection: 39762
