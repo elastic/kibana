@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { Plugin } from 'src/core/public';
 import type { ExecutionContextServiceStart } from './execution_context_service';
 import type { ExecutionContextContainer } from './execution_context_container';
 
@@ -22,6 +23,13 @@ const createStartContractMock = () => {
   return mock;
 };
 
+const createMock = (): jest.Mocked<Plugin> => ({
+  setup: jest.fn(),
+  start: jest.fn(),
+  stop: jest.fn(),
+});
+
 export const executionContextServiceMock = {
+  create: createMock,
   createStartContract: createStartContractMock,
 };

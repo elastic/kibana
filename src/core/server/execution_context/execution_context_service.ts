@@ -11,7 +11,7 @@ import type { CoreService, KibanaExecutionContext } from '../../types';
 import type { CoreContext } from '../core_context';
 import type { Logger } from '../logging';
 
-import { BAGGAGE_HEADER, ExecutionContextContainer } from './execution_context_container';
+import { ExecutionContextContainer, getParentContextFrom } from './execution_context_container';
 
 /**
  * @public
@@ -61,15 +61,6 @@ export interface ExecutionContextSetup {
  */
 export type ExecutionContextStart = ExecutionContextSetup;
 
-function parseHeader(header?: string): KibanaExecutionContext | undefined {
-  if (!header) return undefined;
-  try {
-    return JSON.parse(decodeURIComponent(header));
-  } catch (e) {
-    return undefined;
-  }
-}
-
 export class ExecutionContextService
   implements CoreService<InternalExecutionContextSetup, InternalExecutionContextStart> {
   private readonly log: Logger;
@@ -82,7 +73,7 @@ export class ExecutionContextService
 
   setup(): InternalExecutionContextSetup {
     return {
-      getParentContextFrom: this.getParentContextFrom.bind(this),
+      getParentContextFrom,
       set: this.set.bind(this),
       reset: this.reset.bind(this),
       get: this.get.bind(this),
@@ -91,18 +82,13 @@ export class ExecutionContextService
 
   start(): InternalExecutionContextStart {
     return {
-      getParentContextFrom: this.getParentContextFrom.bind(this),
+      getParentContextFrom,
       set: this.set.bind(this),
       reset: this.reset.bind(this),
       get: this.get.bind(this),
     };
   }
   stop() {}
-
-  private getParentContextFrom(headers: Record<string, string>) {
-    const header = headers[BAGGAGE_HEADER];
-    return parseHeader(header);
-  }
 
   private set(context: KibanaServerExecutionContext) {
     const prevValue = this.asyncLocalStorage.getStore();
