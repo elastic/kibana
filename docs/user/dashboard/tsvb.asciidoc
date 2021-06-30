@@ -137,7 +137,6 @@ The index pattern mode unlocks many new features, such as:
 * URL drilldowns
 * Interactive filters for time series visualizations
 * Better performance
-* and more features to come
 
 The old mode, which the users can create a TSVB chart by applying an es index string, is considered as deprecated and is going to be removed in the future.
 
