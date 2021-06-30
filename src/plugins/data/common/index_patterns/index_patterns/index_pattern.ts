@@ -523,6 +523,10 @@ export class IndexPattern implements IIndexPattern {
    * @param runtimeObject - The runtime object definition
    */
   addRuntimeObject(name: string, runtimeObject: RuntimeObjectWithSubFields): IndexPatternField[] {
+    if (!runtimeObject.subFields || Object.keys(runtimeObject.subFields).length === 0) {
+      throw new Error(`Can't save runtime object [name = ${name}] without subfields.`);
+    }
+
     this.removeRuntimeObject(name);
 
     const { script, subFields } = runtimeObject;
