@@ -23,22 +23,8 @@ export function getBucketSize({
   const duration = moment.duration(end - start, 'ms');
   const bucketSize = Math.max(
     calculateAuto.near(numBuckets, duration).asSeconds(),
-    1
+    minBucketSize || 1
   );
-
-  if (minBucketSize && bucketSize < minBucketSize) {
-    return {
-      bucketSize: minBucketSize,
-      intervalString: `${minBucketSize}s`,
-    };
-  }
-
-  if (bucketSize < 0) {
-    return {
-      bucketSize: 0,
-      intervalString: 'auto',
-    };
-  }
 
   return { bucketSize, intervalString: `${bucketSize}s` };
 }
