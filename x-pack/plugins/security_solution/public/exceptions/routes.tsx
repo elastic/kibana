@@ -13,15 +13,19 @@ import { ExceptionListsTable } from '../detections/pages/detection_engine/rules/
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 
-export const ExceptionsRoutes = () => {
+const ExceptionsRoutes = () => {
+  return (
+    <TrackApplicationView viewId={SecurityPageName.exceptions}>
+      <ExceptionListsTable />
+      <SpyRoute pageName={SecurityPageName.exceptions} />
+    </TrackApplicationView>
+  );
+};
+
+const renderExceptionsRoutes = () => {
   return (
     <Switch>
-      <Route path={EXCEPTIONS_PATH} exact>
-        <TrackApplicationView viewId={SecurityPageName.exceptions}>
-          <ExceptionListsTable />
-          <SpyRoute pageName={SecurityPageName.exceptions} />
-        </TrackApplicationView>
-      </Route>
+      <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
       <Route component={NotFoundPage} />
     </Switch>
   );
@@ -30,6 +34,6 @@ export const ExceptionsRoutes = () => {
 export const routes = [
   {
     path: EXCEPTIONS_PATH,
-    render: ExceptionsRoutes,
+    render: renderExceptionsRoutes,
   },
 ];

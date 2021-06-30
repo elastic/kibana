@@ -15,14 +15,16 @@ import { SpyRoute } from '../common/utils/route/spy_routes';
 
 import { DetectionEnginePage } from './pages/detection_engine/detection_engine';
 
+const AlertsRoute = () => (
+  <TrackApplicationView viewId={SecurityPageName.alerts}>
+    <DetectionEnginePage />
+    <SpyRoute pageName={SecurityPageName.alerts} />
+  </TrackApplicationView>
+);
+
 const renderAlertsRoutes = () => (
   <Switch>
-    <Route path={ALERTS_PATH} exact>
-      <TrackApplicationView viewId={SecurityPageName.alerts}>
-        <DetectionEnginePage />
-        <SpyRoute pageName={SecurityPageName.alerts} />
-      </TrackApplicationView>
-    </Route>
+    <Route path={ALERTS_PATH} exact component={AlertsRoute} />
     <Route component={NotFoundPage} />
   </Switch>
 );

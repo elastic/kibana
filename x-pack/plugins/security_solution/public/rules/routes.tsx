@@ -38,25 +38,24 @@ const RulesSubRoutes = [
   },
 ];
 
-export const RulesRoutes = () => {
+const RulesRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.rules}>
+    <Switch>
+      {RulesSubRoutes.map((route, index) => (
+        <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
+          <route.main />
+        </Route>
+      ))}
+      <Route component={NotFoundPage} />
+    </Switch>
+  </TrackApplicationView>
+);
+
+const renderRulesRoutes = () => {
   return (
     <Switch>
-      <Route path={RULES_PATH}>
-        <TrackApplicationView viewId={SecurityPageName.rules}>
-          <Switch>
-            {RulesSubRoutes.map((route, index) => (
-              <Route
-                key={`rules-route-${route.path}`}
-                path={route.path}
-                exact={route?.exact ?? false}
-              >
-                <route.main />
-              </Route>
-            ))}
-            <Route component={NotFoundPage} />
-          </Switch>
-        </TrackApplicationView>
-      </Route>
+      <Route path={RULES_PATH} component={RulesRoutes} />
+      <Route component={NotFoundPage} />
     </Switch>
   );
 };
@@ -64,6 +63,6 @@ export const RulesRoutes = () => {
 export const routes = [
   {
     path: RULES_PATH,
-    render: RulesRoutes,
+    render: renderRulesRoutes,
   },
 ];
