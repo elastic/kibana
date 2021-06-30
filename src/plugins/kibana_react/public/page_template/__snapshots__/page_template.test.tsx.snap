@@ -2,7 +2,6 @@
 
 exports[`KibanaPageTemplate render basic template 1`] = `
 <EuiPageTemplate
-  paddingSize="l"
   pageHeader={
     Object {
       "description": "test",
@@ -16,6 +15,7 @@ exports[`KibanaPageTemplate render basic template 1`] = `
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "l",
     }
   }
   restrictWidth={true}
@@ -24,10 +24,10 @@ exports[`KibanaPageTemplate render basic template 1`] = `
 
 exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
 <EuiPageTemplate
-  paddingSize="none"
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "l",
     }
   }
   restrictWidth={true}
@@ -45,7 +45,6 @@ exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
 
 exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
 <EuiPageTemplate
-  paddingSize="l"
   pageHeader={
     Object {
       "description": "test",
@@ -59,6 +58,7 @@ exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "l",
     }
   }
   restrictWidth={true}
@@ -76,10 +76,10 @@ exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
 
 exports[`KibanaPageTemplate render default empty prompt 1`] = `
 <EuiPageTemplate
-  paddingSize="none"
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "l",
     }
   }
   restrictWidth={true}
@@ -104,7 +104,6 @@ exports[`KibanaPageTemplate render default empty prompt 1`] = `
 
 exports[`KibanaPageTemplate render solutionNav 1`] = `
 <EuiPageTemplate
-  paddingSize="l"
   pageHeader={
     Object {
       "description": "test",
@@ -118,6 +117,7 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
   pageSideBar={
     <KibanaPageTemplateSolutionNav
       icon="solution"
+      isOpenOnDesktop={true}
       items={
         Array [
           Object {
@@ -159,11 +159,13 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
         ]
       }
       name="Solution"
+      onCollapse={[Function]}
     />
   }
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "none",
     }
   }
   restrictWidth={true}

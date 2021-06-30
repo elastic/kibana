@@ -53,7 +53,7 @@ async function verifyHasPrivileges(req) {
           },
         ],
       },
-      ignoreUnavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
+      ignore_unavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
     });
   } catch (err) {
     if (

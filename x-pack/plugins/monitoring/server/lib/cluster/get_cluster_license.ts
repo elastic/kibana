@@ -20,8 +20,8 @@ export function getClusterLicense(req: LegacyRequest, esIndexPattern: string, cl
   const params = {
     index: esIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: 'hits.hits._source.license',
+    ignore_unavailable: true,
+    filter_path: ['hits.hits._source.license'],
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({

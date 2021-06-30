@@ -121,7 +121,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 entries: [
                   {
                     label: i18n.translate('xpack.apm.ux.overview.heading', {
-                      defaultMessage: 'Overview',
+                      defaultMessage: 'Dashboard',
                     }),
                     app: 'ux',
                     path: '/',
