@@ -19,8 +19,8 @@ export const EndpointCustomAssetsExtension: PackageAssetsComponent = () => {
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: 'Hosts',
-      url: http.basePath.prepend(`${APP_PATH}/hosts/allHosts`),
-      description: 'View hosts in Security app',
+      url: http.basePath.prepend(`${APP_PATH}/administration/endpoints`),
+      description: 'View endpoints in Security app',
     },
   ];
 
