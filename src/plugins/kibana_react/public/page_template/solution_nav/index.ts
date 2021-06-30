@@ -11,3 +11,7 @@ export {
   KibanaPageTemplateSolutionNavAvatar,
   KibanaPageTemplateSolutionNavAvatarProps,
 } from './solution_nav_avatar';
+export {
+  KibanaPageTemplateSolutionNavCollapseButton,
+  KibanaPageTemplateSolutionNavCollapseButtonProps,
+} from './solution_nav_collapse_button';

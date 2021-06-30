@@ -22,6 +22,23 @@
     0 0 20px $euiColorLightestShade;
 }
 
+@mixin searchResultTag {
+  height: 20px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 .25rem;
+  background: #E9EDF2;
+  color: #647487;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .075em;
+  white-space: nowrap;
+  z-index: 1;
+  margin-right: 5px;
+}
+
 // Wrapper
 .custom-source-display-settings {
   font-size: 16px;
@@ -72,6 +89,28 @@
     .example-result-detail-card & {
       color: $euiColorDarkShade;
     }
+  }
+
+  &__tag {
+    @include searchResultTag;
+  }
+
+  &__tag-content {
+    display: inline-flex;
+    height: 20px;
+    flex-shrink: 0;
+    align-items: center;
+  }
+
+  &__meta {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-top: .5rem;
+    font-size: .8em;
+    overflow: hidden;
   }
 }
 
