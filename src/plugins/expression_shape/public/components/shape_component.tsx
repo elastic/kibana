@@ -26,8 +26,8 @@ function ShapeComponent({
 }: ShapeComponentProps) {
   const parentNodeDimensions = useResizeObserver(parentNode);
   const [dimensions, setDimensions] = useState<NodeDimensions>({
-    width: 1,
-    height: 1,
+    width: parentNode.offsetWidth,
+    height: parentNode.offsetHeight,
   });
 
   const [shapeViewBox, setShapeViewBox] = useState<ViewBoxParams | null>(null);
