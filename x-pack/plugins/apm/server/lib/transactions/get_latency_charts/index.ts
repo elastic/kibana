@@ -185,6 +185,7 @@ export async function getLatencyPeriods({
   comparisonStart,
   comparisonEnd,
   kuery,
+  environment,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -195,6 +196,7 @@ export async function getLatencyPeriods({
   comparisonStart?: number;
   comparisonEnd?: number;
   kuery?: string;
+  environment?: string;
 }) {
   const { start, end } = setup;
   const options = {
@@ -204,6 +206,7 @@ export async function getLatencyPeriods({
     setup,
     searchAggregatedTransactions,
     kuery,
+    environment,
   };
 
   const currentPeriodPromise = getLatencyTimeseries({

@@ -13,7 +13,6 @@ import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
-  buildDefaultDist: boolean;
   downloadFreshNode: boolean;
   initialize: boolean;
   createGenericFolders: boolean;
@@ -36,7 +35,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   const run = createRunner({
     config,
     log,
-    buildDefaultDist: options.buildDefaultDist,
   });
 
   /**
