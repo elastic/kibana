@@ -8,10 +8,21 @@
 import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
+import styled, { css } from 'styled-components';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import * as i18n from './translations';
 import { CasesNavigation, LinkButton } from '../links';
 import { ErrorMessage } from '../use_push_to_service/callout/types';
+
+const ButtonFlexGroup = styled(EuiFlexGroup)`
+  ${({ theme }) => css`
+    & {
+      @media only screen and (max-width: ${theme.eui.euiBreakpoints.s}) {
+        flex-direction: column;
+      }
+    }
+  `}
+`;
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];
@@ -26,7 +37,7 @@ export const NavButtons: FunctionComponent<Props> = ({
   configureCasesNavigation,
   createCaseNavigation,
 }) => (
-  <EuiFlexGroup>
+  <ButtonFlexGroup responsive={false}>
     <EuiFlexItem grow={false}>
       <ConfigureCaseButton
         configureCasesNavigation={configureCasesNavigation}
@@ -37,7 +48,7 @@ export const NavButtons: FunctionComponent<Props> = ({
         titleTooltip={!isEmpty(actionsErrors) ? actionsErrors[0].title : ''}
       />
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem>
       <LinkButton
         fill
         onClick={createCaseNavigation.onClick}
@@ -48,5 +59,5 @@ export const NavButtons: FunctionComponent<Props> = ({
         {i18n.CREATE_TITLE}
       </LinkButton>
     </EuiFlexItem>
-  </EuiFlexGroup>
+  </ButtonFlexGroup>
 );
