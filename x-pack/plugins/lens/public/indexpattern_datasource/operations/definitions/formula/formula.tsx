@@ -55,7 +55,7 @@ export const formulaOperation: OperationDefinition<
 
     const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
     const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
-    if (error || typeof root === 'undefined' || root == null) {
+    if (error || root == null) {
       return error?.message ? [error.message] : [];
     }
 

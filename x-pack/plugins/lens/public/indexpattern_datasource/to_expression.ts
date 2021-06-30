@@ -230,12 +230,6 @@ function getExpressionForLayer(
       }
     );
 
-    const allDateHistogramFields = Object.values(columns)
-      .map((column) =>
-        column.operationType === dateHistogramOperation.type ? column.sourceField : null
-      )
-      .filter((field): field is string => Boolean(field));
-
     if (esAggEntries.length === 0) {
       return {
         type: 'expression',
@@ -255,6 +249,12 @@ function getExpressionForLayer(
         ],
       };
     }
+
+    const allDateHistogramFields = Object.values(columns)
+      .map((column) =>
+        column.operationType === dateHistogramOperation.type ? column.sourceField : null
+      )
+      .filter((field): field is string => Boolean(field));
 
     return {
       type: 'expression',
