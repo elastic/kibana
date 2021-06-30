@@ -15,7 +15,7 @@ import { IIndexPattern } from 'src/plugins/data/common';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
-import { useReadOnlyBadge } from '../../hooks/use_readOnly_badge';
+import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import {
   MetricsExplorerOptionsContainer,
   DEFAULT_METRICS_EXPLORER_VIEW_STATE,

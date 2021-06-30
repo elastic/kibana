@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useState } from 'react';
-import { METRICS_APP } from '../../../../common/constants';
 import { EuiTheme, withTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { DocumentTitle } from '../../../components/document_title';
 import { withMetricPageProviders } from './page_providers';
@@ -22,7 +21,6 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { useLinkProps } from '../../../hooks/use_link_props';
-import { useReadOnlyBadge } from '../../../hooks/use_readonly_badge';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
 
@@ -38,7 +36,6 @@ interface Props {
 
 export const MetricDetail = withMetricPageProviders(
   withTheme(({ match }: Props) => {
-    const uiCapabilities = useKibana().services.application?.capabilities;
     const nodeId = match.params.node;
     const nodeType = match.params.type as InventoryItemType;
     const inventoryModel = findInventoryModel(nodeType);
@@ -72,8 +69,6 @@ export const MetricDetail = withMetricPageProviders(
       },
       [sideNav]
     );
-
-    useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
 
     const inventoryLinkProps = useLinkProps({
       app: 'metrics',
