@@ -9,7 +9,7 @@
 :keywords: analyst, concept, task, reporting
 :description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website. 
 
-{kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website. 
+{kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads. 
 
 You access the options from the *Share* menu in the toolbar. The sharing options include the following:
 
