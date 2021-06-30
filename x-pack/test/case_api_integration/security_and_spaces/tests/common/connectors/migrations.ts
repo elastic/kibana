@@ -26,6 +26,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
 
       it('adds the owner field', async () => {
+        // We don't get the owner field back from the mappings when we retrieve the configuration so the only way to
+        // check that the migration worked is by checking the saved object stored in Elasticsearch directly
         const mappings = await getConnectorMappingsFromES({ es });
         expect(mappings.body.hits.hits.length).to.be(1);
         expect(mappings.body.hits.hits[0]._source?.['cases-connector-mappings'].owner).to.eql(
