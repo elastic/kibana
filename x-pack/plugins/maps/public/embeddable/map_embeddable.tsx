@@ -73,6 +73,7 @@ import { SavedMap } from '../routes/map_page';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
+import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
 
 import {
   MapByValueInput,
@@ -345,6 +346,7 @@ export class MapEmbeddable
             renderTooltipContent={this._renderTooltipContent}
             title={this.getTitle()}
             description={this.getDescription()}
+            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
           />
         </I18nContext>
       </Provider>,

@@ -8,11 +8,11 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> hot phase validation', () => {
-  let testBed: EditPolicyTestBed;
-  let actions: EditPolicyTestBed['actions'];
+  let testBed: ValidationTestBed;
+  let actions: ValidationTestBed['actions'];
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -27,7 +27,7 @@ describe('<EditPolicy /> hot phase validation', () => {
   beforeEach(async () => {
     httpRequestsMockHelpers.setLoadPolicies([]);
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupValidationTestBed();
     });
 
     const { component } = testBed;
@@ -159,13 +159,11 @@ describe('<EditPolicy /> hot phase validation', () => {
 
   describe('shrink', () => {
     test(`doesn't allow 0 for shrink`, async () => {
-      await actions.hot.toggleShrink();
       await actions.hot.setShrink('0');
       actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
     test(`doesn't allow -1 for shrink`, async () => {
-      await actions.hot.toggleShrink();
       await actions.hot.setShrink('-1');
       actions.errors.waitForValidation();
       actions.errors.expectMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);

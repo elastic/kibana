@@ -37,7 +37,7 @@ const defaultActionsConfig: ActionsConfig = {
     idleInterval: schema.duration().validate('1h'),
     pageSize: 100,
   },
-  tls: {
+  ssl: {
     proxyVerificationMode: 'full',
     verificationMode: 'full',
   },
@@ -316,38 +316,38 @@ describe('getProxySettings', () => {
       proxyRejectUnauthorizedCertificates: true,
     };
     let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('full');
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('full');
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
       proxyRejectUnauthorizedCertificates: false,
-      tls: {},
+      ssl: {},
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('none');
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('none');
   });
 
-  test('returns proper verificationMode value, based on the TLS proxy configuration', () => {
+  test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
-      tls: {
+      ssl: {
         proxyVerificationMode: 'full',
       },
     };
     let proxySettings = getActionsConfigurationUtilities(configTrue).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('full');
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('full');
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
       proxyUrl: 'https://proxy.elastic.co',
-      tls: {
+      ssl: {
         proxyVerificationMode: 'none',
       },
     };
     proxySettings = getActionsConfigurationUtilities(configFalse).getProxySettings();
-    expect(proxySettings?.proxyTLSSettings.verificationMode).toBe('none');
+    expect(proxySettings?.proxySSLSettings.verificationMode).toBe('none');
   });
 
   test('returns proxy headers', () => {
@@ -432,13 +432,13 @@ describe('getProxySettings', () => {
       customHostSettings: [
         {
           url: 'https://elastic.co',
-          tls: {
+          ssl: {
             verificationMode: 'full',
           },
         },
         {
           url: 'smtp://elastic.co:123',
-          tls: {
+          ssl: {
             verificationMode: 'none',
           },
           smtp: {
@@ -465,24 +465,24 @@ describe('getProxySettings', () => {
   });
 });
 
-describe('getTLSSettings', () => {
-  test('returns proper verificationMode value, based on the TLS proxy configuration', () => {
+describe('getSSLSettings', () => {
+  test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
-      tls: {
+      ssl: {
         verificationMode: 'full',
       },
     };
-    let tlsSettings = getActionsConfigurationUtilities(configTrue).getTLSSettings();
-    expect(tlsSettings.verificationMode).toBe('full');
+    let sslSettings = getActionsConfigurationUtilities(configTrue).getSSLSettings();
+    expect(sslSettings.verificationMode).toBe('full');
 
     const configFalse: ActionsConfig = {
       ...defaultActionsConfig,
-      tls: {
+      ssl: {
         verificationMode: 'none',
       },
     };
-    tlsSettings = getActionsConfigurationUtilities(configFalse).getTLSSettings();
-    expect(tlsSettings.verificationMode).toBe('none');
+    sslSettings = getActionsConfigurationUtilities(configFalse).getSSLSettings();
+    expect(sslSettings.verificationMode).toBe('none');
   });
 });

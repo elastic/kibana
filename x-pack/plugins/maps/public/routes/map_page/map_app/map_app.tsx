@@ -455,6 +455,7 @@ export class MapApp extends React.Component<Props, State> {
             addFilters={this._addFilter}
             title={this.props.savedMap.getAttributes().title}
             description={this.props.savedMap.getAttributes().description}
+            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this.props.savedMap.getStore())}
           />
         </div>
       </div>

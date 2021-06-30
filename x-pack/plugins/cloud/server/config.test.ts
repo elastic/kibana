@@ -9,13 +9,13 @@ import { config } from './config';
 
 describe('xpack.cloud config', () => {
   describe('full_story', () => {
-    it('allows orgId when enabled: false', () => {
+    it('allows org_id when enabled: false', () => {
       expect(() =>
         config.schema.validate({ full_story: { enabled: false, org_id: 'asdf' } })
       ).not.toThrow();
     });
 
-    it('rejects undefined or empty orgId when enabled: true', () => {
+    it('rejects undefined or empty org_id when enabled: true', () => {
       expect(() =>
         config.schema.validate({ full_story: { enabled: true } })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -28,7 +28,7 @@ describe('xpack.cloud config', () => {
       );
     });
 
-    it('accepts orgId when enabled: true', () => {
+    it('accepts org_id when enabled: true', () => {
       expect(() =>
         config.schema.validate({ full_story: { enabled: true, org_id: 'asdf' } })
       ).not.toThrow();

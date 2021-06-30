@@ -872,6 +872,59 @@ describe('xy_visualization', () => {
         },
       ]);
     });
+
+    it('should return an error if string and date histogram xAccessors (multiple layers) are used together', () => {
+      // current incompatibility is only for date and numeric histograms as xAccessors
+      const datasourceLayers = {
+        first: mockDatasource.publicAPIMock,
+        second: createMockDatasource('testDatasource').publicAPIMock,
+      };
+      datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
+        id === 'a'
+          ? (({
+              dataType: 'date',
+              scale: 'interval',
+            } as unknown) as Operation)
+          : null
+      );
+      datasourceLayers.second.getOperationForColumnId = jest.fn((id: string) =>
+        id === 'e'
+          ? (({
+              dataType: 'string',
+              scale: 'ordinal',
+            } as unknown) as Operation)
+          : null
+      );
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'a',
+                accessors: ['b'],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                splitAccessor: 'd',
+                xAccessor: 'e',
+                accessors: ['b'],
+              },
+            ],
+          },
+          datasourceLayers
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Wrong data type for Horizontal axis.',
+          longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
+        },
+      ]);
+    });
   });
 
   describe('#getWarningMessages', () => {
