@@ -45,10 +45,6 @@ export class IndexPatternField implements IFieldType {
     this.spec.runtimeField = runtimeField;
   }
 
-  public get parent() {
-    return this.spec.parent;
-  }
-
   /**
    * Script field code
    */

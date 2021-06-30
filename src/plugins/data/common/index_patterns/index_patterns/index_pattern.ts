@@ -202,12 +202,43 @@ export class IndexPattern implements IIndexPattern {
       };
     });
 
+    const runtimeFields = {
+      ...this.getComputedRuntimeFields(),
+      ...this.getComputedRuntimeObjects(),
+    };
+
     return {
       storedFields: ['*'],
       scriptFields,
       docvalueFields,
-      runtimeFields: this.runtimeFieldMap,
+      runtimeFields,
     };
+  }
+
+  private getComputedRuntimeFields() {
+    // Runtime fields which are **not** created from a parent object
+    return Object.entries(this.runtimeFieldMap).reduce((acc, [name, field]) => {
+      const { type, script, parent } = field;
+      if (parent !== undefined) {
+        return acc;
+      }
+      return {
+        ...acc,
+        [name]: { type, script },
+      };
+    }, {});
+  }
+
+  private getComputedRuntimeObjects() {
+    // Only return the script and set its type to 'object'
+    return Object.entries(this.runtimeObjectMap).reduce((acc, [name, runtimeObject]) => {
+      const { script } = runtimeObject;
+      return {
+        ...acc,
+        // [name]: { type: 'object', script }, // 'object' not supported yet ES side
+        [name]: { type: 'keyword', script }, // Temp to make demo work
+      };
+    }, {});
   }
 
   /**
@@ -379,16 +410,18 @@ export class IndexPattern implements IIndexPattern {
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-  addRuntimeField(name: string, runtimeField: KibanaRuntimeField) {
+  addRuntimeField(name: string, runtimeField: KibanaRuntimeField): IndexPatternField {
     const { type, script, parent, customLabel, format, popularity } = runtimeField;
 
-    const esRuntimeField = { type, script };
+    const esRuntimeField = { type, script, parent };
 
+    let fieldCreated: IndexPatternField;
     const existingField = this.getFieldByName(name);
     if (existingField) {
       existingField.runtimeField = esRuntimeField;
+      fieldCreated = existingField;
     } else {
-      this.fields.add({
+      fieldCreated = this.fields.add({
         name,
         runtimeField: esRuntimeField,
         type: castEsToKbnFieldTypeName(runtimeField.type),
@@ -396,7 +429,6 @@ export class IndexPattern implements IIndexPattern {
         searchable: true,
         count: popularity ?? 0,
         readFromDocValues: false,
-        parent,
       });
     }
     this.runtimeFieldMap[name] = esRuntimeField;
@@ -408,6 +440,8 @@ export class IndexPattern implements IIndexPattern {
     } else {
       this.deleteFieldFormat(name);
     }
+
+    return fieldCreated;
   }
 
   /**
@@ -464,16 +498,25 @@ export class IndexPattern implements IIndexPattern {
    * @param name - The runtime object name
    * @param runtimeObject - The runtime object definition
    */
-  addRuntimeObject(name: string, runtimeObject: RuntimeObjectWithSubFields) {
+  addRuntimeObject(name: string, runtimeObject: RuntimeObjectWithSubFields): IndexPatternField[] {
     this.removeRuntimeObject(name);
 
     const { script, subFields } = runtimeObject;
 
+    const fieldsCreated: IndexPatternField[] = [];
+
     for (const [subFieldName, subField] of Object.entries(subFields)) {
-      this.addRuntimeField(`${name}.${subFieldName}`, { ...subField, parent: name });
+      const field = this.addRuntimeField(`${name}.${subFieldName}`, { ...subField, parent: name });
+      fieldsCreated.push(field);
     }
 
-    this.runtimeObjectMap[name] = { name, script, subFields: Object.keys(subFields) };
+    this.runtimeObjectMap[name] = {
+      name,
+      script,
+      subFields: Object.keys(subFields),
+    };
+
+    return fieldsCreated;
   }
 
   /**

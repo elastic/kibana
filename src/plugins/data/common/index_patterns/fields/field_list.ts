@@ -15,7 +15,7 @@ import { IndexPattern } from '../index_patterns';
 type FieldMap = Map<IndexPatternField['name'], IndexPatternField>;
 
 export interface IIndexPatternFieldList extends Array<IndexPatternField> {
-  add(field: FieldSpec): void;
+  add(field: FieldSpec): IndexPatternField;
   getAll(): IndexPatternField[];
   getByName(name: IndexPatternField['name']): IndexPatternField | undefined;
   getByType(type: IndexPatternField['type']): IndexPatternField[];
@@ -57,11 +57,12 @@ export const fieldList = (
     public readonly getByType = (type: IndexPatternField['type']) => [
       ...(this.groups.get(type) || new Map()).values(),
     ];
-    public readonly add = (field: FieldSpec) => {
+    public readonly add = (field: FieldSpec): IndexPatternField => {
       const newField = new IndexPatternField({ ...field, shortDotsEnable });
       this.push(newField);
       this.setByName(newField);
       this.setByGroup(newField);
+      return newField;
     };
 
     public readonly remove = (field: IFieldType) => {

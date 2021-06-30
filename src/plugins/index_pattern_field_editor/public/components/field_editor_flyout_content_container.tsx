@@ -29,7 +29,7 @@ import { FieldPreviewProvider } from './preview';
 
 export interface Props {
   /** Handler for the "save" footer button */
-  onSave: (field: IndexPatternField) => void;
+  onSave: (field: IndexPatternField[]) => void;
   /** Handler for the "cancel" footer button */
   onCancel: () => void;
   onMounted?: FieldEditorFlyoutContentProps['onMounted'];
@@ -116,6 +116,49 @@ export const FieldEditorFlyoutContentContainer = ({
     [apiService, search, notifications]
   );
 
+  const saveRuntimeObject = useCallback(
+    (updatedField: Field): IndexPatternField[] => {
+      if (field?.type !== undefined && field?.type !== 'object') {
+        // A previous non object runtime field is now an object
+        indexPattern.removeRuntimeField(field.name);
+      } else if (field?.name && field.name !== updatedField.name) {
+        // rename an existing runtime object
+        indexPattern.removeRuntimeObject(field.name);
+      }
+
+      // --- Temporary hack to create a runtime object ---
+      const runtimeName = 'aaaObject';
+      const tempRuntimeObject = {
+        name: runtimeName,
+        script: updatedField.script!,
+        subFields: {
+          field_a: updatedField,
+          field_b: updatedField,
+          field_c: updatedField,
+        },
+      };
+      return indexPattern.addRuntimeObject(runtimeName, tempRuntimeObject);
+      // --- end temporary hack ---
+    },
+    [field?.name, field?.type, indexPattern]
+  );
+
+  const saveRuntimeField = useCallback(
+    (updatedField: Field): [IndexPatternField] => {
+      if (field?.type !== undefined && field?.type === 'object') {
+        // A previous object runtime field is now an object
+        indexPattern.removeRuntimeObject(field.name);
+      } else if (field?.name && field.name !== updatedField.name) {
+        // rename an existing runtime field
+        indexPattern.removeRuntimeField(field.name);
+      }
+
+      const fieldCreated = indexPattern.addRuntimeField(updatedField.name, updatedField);
+      return [fieldCreated];
+    },
+    [field?.name, field?.type, indexPattern]
+  );
+
   const saveField = useCallback(
     async (updatedField: Field) => {
       setIsSaving(true);
@@ -125,13 +168,6 @@ export const FieldEditorFlyoutContentContainer = ({
           usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
           // eslint-disable-next-line no-empty
         } catch {}
-
-        // rename an existing runtime field
-        if (field?.name && field.name !== updatedField.name) {
-          indexPattern.removeRuntimeField(field.name);
-        }
-
-        indexPattern.addRuntimeField(updatedField.name, updatedField);
       } else {
         try {
           usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
@@ -140,6 +176,11 @@ export const FieldEditorFlyoutContentContainer = ({
       }
 
       try {
+        const editedFields: IndexPatternField[] =
+          // updatedField.type === 'object'
+          // --> always "true" to demo the creation of runtime objects
+          true ? saveRuntimeObject(updatedField) : saveRuntimeField(updatedField);
+
         await indexPatternService.updateSavedObject(indexPattern);
 
         const message = i18n.translate('indexPatternFieldEditor.deleteField.savedHeader', {
@@ -147,10 +188,9 @@ export const FieldEditorFlyoutContentContainer = ({
           values: { fieldName: updatedField.name },
         });
         notifications.toasts.addSuccess(message);
-        setIsSaving(false);
 
-        const editedField = indexPattern.getFieldByName(updatedField.name);
-        onSave(editedField!);
+        setIsSaving(false);
+        onSave(editedFields);
       } catch (e) {
         const title = i18n.translate('indexPatternFieldEditor.save.errorTitle', {
           defaultMessage: 'Failed to save field changes',
@@ -165,8 +205,9 @@ export const FieldEditorFlyoutContentContainer = ({
       indexPatternService,
       notifications,
       fieldTypeToProcess,
-      field?.name,
       usageCollection,
+      saveRuntimeField,
+      saveRuntimeObject,
     ]
   );
 

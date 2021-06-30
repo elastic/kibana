@@ -44,7 +44,7 @@ export const getFieldDeleteModalOpener = ({
     const fieldToDelete = options.ctx.indexPattern.getFieldByName(options.fieldName);
     if (fieldToDelete?.runtimeField && fieldToDelete.parent !== undefined) {
       console.log( // eslint-disable-line
-        'Need to display a modal to indicate that this field needs to be deleted through its parent.'
+        'TODO: display a modal to indicate that this field needs to be deleted through its parent.'
       );
       return () => undefined;
     }

@@ -25,13 +25,13 @@ export interface EsRuntimeField {
   script?: {
     source: string;
   };
+  parent?: string;
 }
 
 export interface KibanaRuntimeField extends EsRuntimeField {
   format?: SerializedFieldFormat;
   customLabel?: string;
   popularity?: number;
-  parent?: string;
 }
 
 export interface RuntimeObject {
