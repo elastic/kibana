@@ -16,7 +16,7 @@ import * as t from 'io-ts';
 export const JourneyStepType = t.intersection([
   t.partial({
     monitor: t.partial({
-      duration: t.type({
+      duration: t.partial({
         us: t.number,
       }),
       name: t.string,
@@ -157,6 +157,10 @@ export const ScreenshotBlockDocType = t.type({
 });
 
 export type ScreenshotBlockDoc = t.TypeOf<typeof ScreenshotBlockDocType>;
+
+export function isScreenshotBlockDoc(data: unknown): data is ScreenshotBlockDoc {
+  return isRight(ScreenshotBlockDocType.decode(data));
+}
 
 /**
  * Contains the fields requried by the Synthetics UI when utilizing screenshot refs.
