@@ -46,18 +46,19 @@ export interface NavTab {
 }
 
 export type SiemNavTabKey =
-  | SecurityPageName.overview
+  | SecurityPageName.administration
+  | SecurityPageName.alerts
+  | SecurityPageName.case
+  | SecurityPageName.endpoints
+  | SecurityPageName.eventFilters
+  | SecurityPageName.exceptions
   | SecurityPageName.hosts
   | SecurityPageName.network
-  | SecurityPageName.alerts
+  | SecurityPageName.overview
   | SecurityPageName.rules
-  | SecurityPageName.exceptions
   | SecurityPageName.timelines
-  | SecurityPageName.case
-  | SecurityPageName.administration
-  | SecurityPageName.endpoints
   | SecurityPageName.trustedApps
-  | SecurityPageName.eventFilters;
+  | SecurityPageName.ueba;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 

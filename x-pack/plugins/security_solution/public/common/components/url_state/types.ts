@@ -66,6 +66,14 @@ export const URL_STATE_KEYS: Record<UrlStateType, KeyUrlState[]> = {
     CONSTANTS.timerange,
     CONSTANTS.timeline,
   ],
+  ueba: [
+    CONSTANTS.appQuery,
+    CONSTANTS.filters,
+    CONSTANTS.savedQuery,
+    CONSTANTS.sourcerer,
+    CONSTANTS.timerange,
+    CONSTANTS.timeline,
+  ],
   administration: [],
   network: [
     CONSTANTS.appQuery,

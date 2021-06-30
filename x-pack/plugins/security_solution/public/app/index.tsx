@@ -43,6 +43,7 @@ export const renderApp = ({
             ...subPlugins.exceptions.routes,
             ...subPlugins.hosts.routes,
             ...subPlugins.network.routes,
+            ...subPlugins.ueba.routes,
             ...subPlugins.timelines.routes,
             ...subPlugins.cases.routes,
             ...subPlugins.management.routes,

@@ -27,6 +27,7 @@ import {
   TIMELINES,
   CASE,
   ADMINISTRATION,
+  UEBA,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -40,6 +41,7 @@ import {
   ENDPOINTS_PATH,
   TRUSTED_APPS_PATH,
   EVENT_FILTERS_PATH,
+  UEBA_PATH,
 } from '../../../common/constants';
 
 export const topDeepLinks: AppDeepLink[] = [
@@ -91,6 +93,18 @@ export const topDeepLinks: AppDeepLink[] = [
     order: 9003,
   },
   {
+    id: SecurityPageName.ueba,
+    title: UEBA,
+    path: UEBA_PATH,
+    navLinkStatus: AppNavLinkStatus.visible,
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.ueba', {
+        defaultMessage: 'UEBA',
+      }),
+    ],
+    order: 9004,
+  },
+  {
     id: SecurityPageName.timelines,
     title: TIMELINES,
     path: TIMELINES_PATH,
@@ -100,7 +114,7 @@ export const topDeepLinks: AppDeepLink[] = [
         defaultMessage: 'Timelines',
       }),
     ],
-    order: 9004,
+    order: 9005,
   },
   {
     id: SecurityPageName.case,
@@ -112,7 +126,7 @@ export const topDeepLinks: AppDeepLink[] = [
         defaultMessage: 'Cases',
       }),
     ],
-    order: 9005,
+    order: 9006,
   },
   {
     id: SecurityPageName.administration,
@@ -253,6 +267,9 @@ const nestedDeepLinks: SecurityDeepLinks = {
         path: '/anomalies',
       },
     ],
+  },
+  [SecurityPageName.ueba]: {
+    base: [],
   },
   [SecurityPageName.timelines]: {
     base: [

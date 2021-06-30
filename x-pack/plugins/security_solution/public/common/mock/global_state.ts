@@ -25,6 +25,7 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
+import { uebaModel } from '../../ueba/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import { ManagementState } from '../../management/types';
@@ -160,6 +161,26 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
           sort: { direction: Direction.desc },
+        },
+      },
+    },
+  },
+  ueba: {
+    page: {
+      queries: {
+        [uebaModel.UebaTableType.riskScore]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
+        },
+      },
+    },
+    details: {
+      queries: {
+        [uebaModel.UebaTableType.riskScore]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: NetworkTopTablesFields.bytes_out, direction: Direction.desc },
         },
       },
     },

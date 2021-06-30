@@ -1,0 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createSelector } from 'reselect';
+
+import { State } from '../../common/store/types';
+
+import { UebaPageModel, UebaTableType } from './model';
+
+const selectUebaPage = (state: State): UebaPageModel => state.ueba.page;
+
+// const selectUebaDetails = (state: State): UebaDetailsModel => state.ueba.details;
+
+export const riskScoreSelector = () =>
+  createSelector(selectUebaPage, (ueba) => ueba.queries[UebaTableType.riskScore]);

@@ -32,6 +32,8 @@ export interface HostRouteSpyState extends RouteSpyState {
   tabName: HostsTableType | undefined;
 }
 
+export type UebaRouteSpyState = RouteSpyState;
+
 export interface NetworkRouteSpyState extends RouteSpyState {
   tabName: NetworkRouteType | undefined;
 }

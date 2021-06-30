@@ -288,6 +288,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
         network: new subPluginClasses.Network(),
+        ueba: new subPluginClasses.Ueba(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -313,6 +314,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       cases: subPlugins.cases.start(),
       hosts: subPlugins.hosts.start(storage),
       network: subPlugins.network.start(storage),
+      ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
     };
@@ -376,6 +378,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.exceptions.storageTimelines!.timelineById,
             ...subPlugins.hosts.storageTimelines!.timelineById,
             ...subPlugins.network.storageTimelines!.timelineById,
+            ...subPlugins.ueba.storageTimelines!.timelineById,
           },
         },
       };
@@ -392,6 +395,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           {
             ...subPlugins.hosts.store.initialState,
             ...subPlugins.network.store.initialState,
+            ...subPlugins.ueba.store.initialState,
             ...timelineInitialState,
             ...subPlugins.management.store.initialState,
           },
@@ -405,6 +409,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         {
           ...subPlugins.hosts.store.reducer,
           ...subPlugins.network.store.reducer,
+          ...subPlugins.ueba.store.reducer,
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,
