@@ -125,8 +125,8 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
           />
         </EuiFlexItem>
         {show && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               {(activeTab === TimelineTabs.query || activeTab === TimelineTabs.eql) && (
                 <EuiFlexItem grow={false}>
                   <InspectButton

@@ -48,6 +48,7 @@ const ColumnFlexGroup = styled(EuiFlexGroup)`
     & {
       @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
         flex-direction: row;
+        max-width: 100%;
       }
     }
   `}
