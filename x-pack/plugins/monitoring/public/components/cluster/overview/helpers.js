@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { formatBytesUsage, formatPercentageUsage, formatNumber } from '../../../lib/format_number';
-import {
-  EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiTitle,
-  EuiIcon,
-  EuiHealth,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import React from 'react';
+import { Legacy } from '../../../legacy_shims';
+import { formatBytesUsage, formatNumber, formatPercentageUsage } from '../../../lib/format_number';
 
 export function HealthLabel(props) {
   if (props.status === 'green') {
