@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { EuiPanel, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { createNewIndexAndPattern } from './create_new_index_pattern';
