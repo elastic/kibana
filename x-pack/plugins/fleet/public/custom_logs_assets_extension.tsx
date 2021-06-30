@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { CustomAssetsAccordion } from './components/custom_assets_accordion';
 import type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
@@ -18,9 +19,11 @@ export const CustomLogsAssetsExtension: PackageAssetsComponent = () => {
 
   const views: CustomAssetsAccordionProps['views'] = [
     {
-      name: 'Logs',
+      name: i18n.translate('xpack.fleet.assets.customLogs.name', { defaultMessage: 'Logs' }),
       url: logStreamUrl,
-      description: 'View Custom logs data in Logs app',
+      description: i18n.translate('xpack.fleet.assets.customLogs.description', {
+        defaultMessage: 'View Custom logs data in Logs app',
+      }),
     },
   ];
 

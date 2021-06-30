@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+
 import {
   PackageAssetsComponent,
   CustomAssetsAccordionProps,
@@ -19,9 +21,13 @@ export const SyntheticsCustomAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useKibana<ClientPluginsStart>().services;
   const views: CustomAssetsAccordionProps['views'] = [
     {
-      name: 'Monitors',
+      name: i18n.translate('xpack.uptime.fleetIntegration.assets.name', {
+        defaultMessage: 'Monitors',
+      }),
       url: http?.basePath.prepend(`/app/${PLUGIN.ID}`) ?? '',
-      description: 'View monitors in Uptime',
+      description: i18n.translate('xpack.uptime.fleetIntegration.assets.description', {
+        defaultMessage: 'View monitors in Uptime',
+      }),
     },
   ];
 

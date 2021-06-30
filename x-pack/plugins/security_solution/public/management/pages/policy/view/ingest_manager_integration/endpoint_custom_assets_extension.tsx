@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_PATH } from '../../../../../../common/constants';
 import {
@@ -18,9 +20,13 @@ export const EndpointCustomAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useKibana().services;
   const views: CustomAssetsAccordionProps['views'] = [
     {
-      name: 'Hosts',
+      name: i18n.translate('xpack.securitySolution.fleetIntegration.assets.name', {
+        defaultMessage: 'Hosts',
+      }),
       url: http.basePath.prepend(`${APP_PATH}/administration/endpoints`),
-      description: 'View endpoints in Security app',
+      description: i18n.translate('xpack.securitySolution.fleetIntegration.assets.description', {
+        defaultMessage: 'View endpoints in Security app',
+      }),
     },
   ];
 

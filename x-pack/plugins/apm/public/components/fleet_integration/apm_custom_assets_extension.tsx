@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   CustomAssetsAccordionProps,
@@ -20,9 +21,14 @@ export function ApmCustomAssetsExtension() {
 
   const views: CustomAssetsAccordionProps['views'] = [
     {
-      name: 'Services',
+      name: i18n.translate('xpack.apm.fleetIntegration.assets.name', {
+        defaultMessage: 'Services',
+      }),
       url: `${basePath}/app/apm`,
-      description: 'View application traces and service maps in APM',
+      description: i18n.translate(
+        'xpack.apm.fleetIntegration.assets.description',
+        { defaultMessage: 'View application traces and service maps in APM' }
+      ),
     },
   ];
 
