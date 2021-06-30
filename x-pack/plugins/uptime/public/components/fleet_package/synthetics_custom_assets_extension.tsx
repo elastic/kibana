@@ -11,15 +11,15 @@ import {
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
 } from '../../../../fleet/public';
-import { useUptimeSettingsContext } from '../../contexts/uptime_settings_context';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ClientPluginsStart } from '../../apps/plugin';
 
 export const SyntheticsCustomAssetsExtension: PackageAssetsComponent = () => {
-  const { basePath } = useUptimeSettingsContext();
-
+  const { http } = useKibana<ClientPluginsStart>().services;
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: 'Monitors',
-      url: `${basePath}/app/uptime`,
+      url: http?.basePath.prepend('/app/uptime') ?? '',
       description: 'View monitors in Uptime',
     },
   ];

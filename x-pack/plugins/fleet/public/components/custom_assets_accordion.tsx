@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { AssetTitleMap } from '../applications/integrations/sections/epm/constants';
+import { useStartServices } from '../hooks';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 
 export interface CustomAssetsAccordionProps {
   views: Array<{
@@ -34,6 +36,8 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
   views,
   initialIsOpen = false,
 }) => {
+  const { application } = useStartServices();
+
   return (
     <EuiAccordion
       initialIsOpen={initialIsOpen}
@@ -61,7 +65,9 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
               <EuiSplitPanel.Inner grow={false} key={index}>
                 <EuiText size="m">
                   <p>
-                    <EuiLink href={view.url}>{view.name}</EuiLink>
+                    <RedirectAppLinks application={application}>
+                      <EuiLink href={view.url}>{view.name}</EuiLink>
+                    </RedirectAppLinks>
                   </p>
                 </EuiText>
 
