@@ -1,4 +1,4 @@
 {
-  "main": "../target/jest",
-  "types": "../target/types/jest/index.d.ts"
+  "main": "../target_node/jest",
+  "types": "../target_types/jest/index.d.ts"
 }
