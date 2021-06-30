@@ -127,7 +127,7 @@ control the capturing process.
 |===
 a| `xpack.reporting.capture.timeouts`
 `.openUrl` {ess-icon}
-  | Specify the {ref}/common-options.html#time-units[time] to allow the Reporting browser to wait for the "Loading..." screen
+  | Specify the {time-units}[time] to allow the Reporting browser to wait for the "Loading..." screen
   to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current
   page, and the download link shows a warning message. Can be specified as number of milliseconds.
   Defaults to `1m`.
