@@ -10,7 +10,7 @@ import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 const DATE_INDEX_TYPE = 'date_index_name';
 
-describe('Processor: Date Index', () => {
+describe('Processor: Date Index Name', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
 
