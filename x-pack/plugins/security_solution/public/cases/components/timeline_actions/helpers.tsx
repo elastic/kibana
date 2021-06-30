@@ -13,10 +13,12 @@ import { ToasterContent } from './toaster_content';
 import * as i18n from './translations';
 import { Case } from '../../../../../cases/common';
 
+const LINE_CLAMP = 3;
+
 const Title = styled.span`
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: ${LINE_CLAMP};
   -webkit-box-orient: vertical;
   overflow: hidden;
 `;
