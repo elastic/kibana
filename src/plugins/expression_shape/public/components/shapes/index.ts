@@ -6,38 +6,22 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import arrow from '!!raw-loader!./arrow.svg';
-// @ts-ignore
-import arrowMulti from '!!raw-loader!./arrow_multi.svg';
-// @ts-ignore
-import bookmark from '!!raw-loader!./bookmark.svg';
-// @ts-ignore
-import cross from '!!raw-loader!./cross.svg';
-// @ts-ignore
-import circle from '!!raw-loader!./circle.svg';
-// @ts-ignore
-import hexagon from '!!raw-loader!./hexagon.svg';
-// @ts-ignore
-import kite from '!!raw-loader!./kite.svg';
-// @ts-ignore
-import pentagon from '!!raw-loader!./pentagon.svg';
-// @ts-ignore
-import rhombus from '!!raw-loader!./rhombus.svg';
-// @ts-ignore
-import semicircle from '!!raw-loader!./semicircle.svg';
-// @ts-ignore
-import speechBubble from '!!raw-loader!./speech_bubble.svg';
-// @ts-ignore
-import square from '!!raw-loader!./square.svg';
-// @ts-ignore
-import star from '!!raw-loader!./star.svg';
-// @ts-ignore
-import tag from '!!raw-loader!./tag.svg';
-// @ts-ignore
-import triangle from '!!raw-loader!./triangle.svg';
-// @ts-ignore
-import triangleRight from '!!raw-loader!./triangle_right.svg';
+import { Arrow as arrow } from './arrow';
+import { ArrowMulti as arrowMulti } from './arrow_multi';
+import { Bookmark as bookmark } from './bookmark';
+import { Cross as cross } from './cross';
+import { Circle as circle } from './circle';
+import { Hexagon as hexagon } from './hexagon';
+import { Kite as kite } from './kite';
+import { Pentagon as pentagon } from './pentagon';
+import { Rhombus as rhombus } from './rhombus';
+import { Semicircle as semicircle } from './semicircle';
+import { SpeechBubble as speechBubble } from './speech_bubble';
+import { Square as square } from './square';
+import { Star as star } from './star';
+import { Tag as tag } from './tag';
+import { Triangle as triangle } from './triangle';
+import { TriangleRight as triangleRight } from './triangle_right';
 
 export const shapes = {
   arrow,

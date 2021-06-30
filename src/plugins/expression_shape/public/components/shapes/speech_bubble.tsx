@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Shape, ShapeHOC } from './shape';
 
-export const Arrow = ShapeHOC(Shape, {
+export const SpeechBubble = ShapeHOC(Shape, {
   viewBox: {
     minX: 0,
     minY: 0,
@@ -15,6 +16,7 @@ export const Arrow = ShapeHOC(Shape, {
     height: 100,
   },
   shapeProps: {
-    points: '0,40 60,40 60,20 95,50 60,80 60,60 0,60',
+    points: '0,0 100,0 100,70 40,70 20,85 25,70 0,70',
+    strokeLinejoin: 'round',
   },
 });

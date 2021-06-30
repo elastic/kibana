@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { Shape, ShapeHOC } from './shape';
 
-export const Arrow = ShapeHOC(Shape, {
+export const Hexagon = ShapeHOC(Shape, {
   viewBox: {
     minX: 0,
     minY: 0,
@@ -15,6 +16,7 @@ export const Arrow = ShapeHOC(Shape, {
     height: 100,
   },
   shapeProps: {
-    points: '0,40 60,40 60,20 95,50 60,80 60,60 0,60',
+    points:
+      '70.000, 15.359 30.000, 15.359 10.000, 50.000 30.000, 84.641 70.000, 84.641 90.000, 50.000',
   },
 });

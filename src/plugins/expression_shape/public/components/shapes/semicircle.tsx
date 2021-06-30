@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { SvgElementTypes } from '../types';
 import { Shape, ShapeHOC } from './shape';
 
-export const Arrow = ShapeHOC(Shape, {
+export const Semicircle = ShapeHOC(Shape, {
   viewBox: {
     minX: 0,
     minY: 0,
@@ -15,6 +17,7 @@ export const Arrow = ShapeHOC(Shape, {
     height: 100,
   },
   shapeProps: {
-    points: '0,40 60,40 60,20 95,50 60,80 60,60 0,60',
+    d: 'M 5,50 h 90 A 45 45 180 1 0 5,50 Z',
   },
+  shapeType: SvgElementTypes.path,
 });

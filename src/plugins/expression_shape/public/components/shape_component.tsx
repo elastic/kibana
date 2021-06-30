@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import { NodeDimensions, ShapeComponentProps } from '../../common/types';
+import { Dimensions, ShapeComponentProps } from './types';
 import { shapes } from './shapes';
 import './shape.scss';
 import { ArrowMulti } from './shapes/arrow_multi';
@@ -25,7 +25,7 @@ function ShapeComponent({
   maintainAspect,
 }: ShapeComponentProps) {
   const parentNodeDimensions = useResizeObserver(parentNode);
-  const [dimensions, setDimensions] = useState<NodeDimensions>({
+  const [dimensions, setDimensions] = useState<Dimensions>({
     width: parentNode.offsetWidth,
     height: parentNode.offsetHeight,
   });
@@ -69,7 +69,7 @@ function ShapeComponent({
     parentNode.style.lineHeight = '0';
   }
 
-  const Shape = ArrowMulti;
+  const Shape = shapes[shapeType];
   return (
     <div className="shapeAligner">
       <Shape
