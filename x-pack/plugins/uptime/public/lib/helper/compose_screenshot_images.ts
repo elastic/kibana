@@ -36,11 +36,10 @@ export async function composeScreenshotRef(
    */
   const drawOperations: Array<Promise<void>> = [];
 
-  for (const block of screenshotRef.screenshot_ref.blocks) {
+  for (const { hash, top, left, width, height } of screenshotRef.screenshot_ref.blocks) {
     drawOperations.push(
       new Promise<void>((resolve, reject) => {
         const img = new Image();
-        const { top, left, width, height, hash } = block;
         const blob = blocks[hash];
         if (!blob) {
           reject(Error(`Error processing image. Expected image data with hash ${hash} is missing`));

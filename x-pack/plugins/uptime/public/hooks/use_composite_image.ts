@@ -8,13 +8,14 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React from 'react';
 import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
-import { ScreenshotRefImageData } from '../../common/runtime_types';
 import { ScreenshotRefImageData } from '../../common/runtime_types/ping/synthetics';
 import {
   fetchBlocksAction,
   isPendingBlock,
+  ScreenshotBlockCache,
   StoreScreenshotBlock,
 } from '../state/reducers/synthetics';
+import { journeyScreenshotBlockSelector } from '../state/selectors';
 
 function allBlocksLoaded(blocks: { [key: string]: StoreScreenshotBlock }, hashes: string[]) {
   for (const hash of hashes) {
@@ -48,6 +49,7 @@ export const useCompositeImage = (
 ): void => {
   const dispatch = useDispatch();
   const blocks = useSelector(journeyScreenshotBlockSelector);
+  // console.log('blocks size', Object.keys(blocks).length);
   React.useEffect(() => {
     dispatch(
       fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
@@ -66,14 +68,8 @@ export const useCompositeImage = (
 
     // if the URL is truthy it means it's already been composed, so there
     // is no need to call the function
-    if (
-      typeof imageData === 'undefined' ||
-      (isNewRef(imgRef, curRef) &&
-        allBlocksLoaded(
-          blocks,
-          imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash)
-        ))
-    ) {
+    // console.log('evaluating ', imgRef.ref.screenshotRef.monitor.check_group);
+    if (shouldCompose(imageData, imgRef, curRef, blocks)) {
       compose();
       setCurRef(imgRef);
     }
@@ -82,3 +78,18 @@ export const useCompositeImage = (
     };
   }, [blocks, curRef, imageData, imgRef, onComposeImageSuccess]);
 };
+
+function shouldCompose(
+  imageData: string | undefined,
+  imgRef: ScreenshotRefImageData,
+  curRef: ScreenshotRefImageData,
+  blocks: ScreenshotBlockCache
+): boolean {
+  return (
+    allBlocksLoaded(
+      blocks,
+      imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash)
+    ) &&
+    (typeof imageData === 'undefined' || isNewRef(imgRef, curRef))
+  );
+}
