@@ -9,7 +9,7 @@ import './agent_enrollment_flyout.test.mocks';
 
 import React from 'react';
 import { registerTestBed } from '@kbn/test/jest';
-import { act, prettyDOM } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import { coreMock } from 'src/core/public/mocks';
 
