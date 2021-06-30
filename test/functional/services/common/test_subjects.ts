@@ -312,9 +312,12 @@ export class TestSubjects extends FtrService {
     return testSubjSelector(selector);
   }
 
-  public async scrollIntoView(selector: string) {
+  public async scrollIntoView(
+    selector: string,
+    offset?: number | { topOffset?: number; bottomOffset?: number }
+  ) {
     const element = await this.find(selector);
-    await element.scrollIntoViewIfNecessary();
+    await element.scrollIntoViewIfNecessary(offset);
   }
 
   // isChecked always returns false when run on an euiSwitch, because they use the aria-checked attribute
