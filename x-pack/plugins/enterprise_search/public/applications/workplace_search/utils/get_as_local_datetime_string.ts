@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { toSentenceSerial } from './to_sentence_serial';
-export { getAsLocalDateTimeString } from './get_as_local_datetime_string';
+export const getAsLocalDateTimeString = (str: string) => {
+  const dateValue = Date.parse(str);
+  return dateValue ? new Date(dateValue).toLocaleString() : null;
+};
