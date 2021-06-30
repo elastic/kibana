@@ -200,7 +200,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
                 title={
                   <FormattedMessage
                     id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationTitle"
-                    defaultMessage="TSVB introduces a new index pattern mode"
+                    defaultMessage="TSVB now supports index patterns"
                   />
                 }
                 iconType="cheer"
@@ -209,13 +209,13 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
                 <p>
                   <FormattedMessage
                     id="visTypeTimeseries.visEditorVisualization.indexPatternMode.notificationMessage"
-                    defaultMessage="Great news! A new index pattern mode with support for runtime fields and improved performance is now available in TSVB. {indexPatternModeLink}."
+                    defaultMessage="Great news! You can now visualize the data from Elasticsearch indices or Kibana index patterns. {indexPatternModeLink}."
                     values={{
                       indexPatternModeLink: (
                         <EuiLink href={indexPatternModeLink} target="_blank" external>
                           <FormattedMessage
                             id="visTypeTimeseries.visEditorVisualization.indexPatternMode.link"
-                            defaultMessage="Give it a try."
+                            defaultMessage="Check it out."
                           />
                         </EuiLink>
                       ),
