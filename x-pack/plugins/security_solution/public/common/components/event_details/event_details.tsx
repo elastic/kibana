@@ -108,7 +108,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   const existingEnrichments = useMemo(
     () =>
       isAlert
-        ? parseExistingEnrichments(data).map((enrichmentData) =>
+        ? parseExistingEnrichments(data ?? []).map((enrichmentData) =>
             timelineDataToEnrichment(enrichmentData)
           )
         : [],
@@ -228,7 +228,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         <>
           <EuiSpacer size="m" />
           <TabContentWrapper>
-            <JsonView data={data} />
+            <JsonView data={data ?? []} />
           </TabContentWrapper>
         </>
       ),
