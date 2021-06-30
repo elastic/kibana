@@ -14,17 +14,6 @@ image:images/rules-and-connectors-ui.png[Example rule listing in the Rules and C
 For more information on alerting concepts and the types of rules and connectors available, see <<alerting-getting-started>>.
 
 [float]
-=== Rule status
-
-A rule can have one of the following statuses:
-
-`active`:: The conditions for the rule have been met, and the associated actions should be invoked.
-`ok`:: The conditions for the rule were previously met, but no longer. Changed to `recovered` in the 7.14 release.
-`error`:: An error was encountered during rule execution.
-`pending`:: The rule has not yet executed.  The rule was either just created, or enabled after being disabled.
-`unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
-
-[float]
 === Required permissions
 
 Access to rules is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
@@ -162,6 +151,17 @@ You can perform these operations in bulk by multi-selecting rules, and then clic
 
 [role="screenshot"]
 image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk,width=75%]
+
+[float]
+=== Rule status
+
+A rule can have one of the following statuses:
+
+`active`:: The conditions for the rule have been met, and the associated actions should be invoked.
+`ok`:: The conditions for the rule were previously met, but no longer. Changed to `recovered` in the 7.14 release.
+`error`:: An error was encountered during rule execution.
+`pending`:: The rule has not yet executed.  The rule was either just created, or enabled after being disabled.
+`unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
 
 [float]
 [[importing-and-exporting-rules]]
