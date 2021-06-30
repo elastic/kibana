@@ -215,7 +215,7 @@ export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.emptyMappingWarningDesc',
   {
     defaultMessage:
-      'This connector cannot be selected because it is missing the required case field mappings. You can edit this connector to add required field mappings or select a connector of type Alerts.',
+      'This connector cannot be selected because it is missing the required alert field mappings. You can edit this connector to add required field mappings or select a connector of type Alerts.',
   }
 );
 
@@ -265,13 +265,6 @@ export const SW_REQUIRED_ALERT_ID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAlertID',
   {
     defaultMessage: 'Alert ID is required.',
-  }
-);
-
-export const SW_REQUIRED_MAPPING_CONFIGURATION = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredMapping',
-  {
-    defaultMessage: 'Field configuration is required.',
   }
 );
 

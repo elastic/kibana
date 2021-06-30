@@ -66,13 +66,6 @@ export function getActionType(): ActionTypeModel<
         configErrors.appId = [...configErrors.appId, i18n.SW_REQUIRED_APP_ID_TEXT];
       }
 
-      if (!action.config.connectorType) {
-        configErrors.connectorType = [
-          ...configErrors.connectorType,
-          i18n.SW_REQUIRED_MAPPING_CONFIGURATION,
-        ];
-      }
-
       const mappingErrors = validateMappingForConnector(
         action.config.connectorType,
         action.config.mappings
