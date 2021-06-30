@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         throw new Error('Debug state is not available');
       }
 
-      // assert legend has changed
+      // assert legend has not changed
       expect(debugState.legend!.items).to.eql([
         { key: '5722.77', name: '> 5,722.77', color: '#209280' },
         { key: '8529.22', name: '> 8,529.22', color: '#54b399' },
