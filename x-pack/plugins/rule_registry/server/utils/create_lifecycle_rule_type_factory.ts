@@ -168,59 +168,57 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
         });
       }
 
-      const eventsToIndex = ruleDataClient.isWriteEnabled()
-        ? allAlertIds.map((alertId) => {
-            const alertData = alertsDataMap[alertId];
+      const eventsToIndex = allAlertIds.map((alertId) => {
+        const alertData = alertsDataMap[alertId];
 
-            if (!alertData) {
-              logger.warn(`Could not find alert data for ${alertId}`);
-            }
+        if (!alertData) {
+          logger.warn(`Could not find alert data for ${alertId}`);
+        }
 
-            const event: Mutable<ParsedTechnicalFields> = {
-              ...alertData,
-              ...ruleExecutorData,
-              [TIMESTAMP]: timestamp,
-              [EVENT_KIND]: 'event',
-              [ALERT_ID]: alertId,
-            };
+        const event: Mutable<ParsedTechnicalFields> = {
+          ...alertData,
+          ...ruleExecutorData,
+          [TIMESTAMP]: timestamp,
+          [EVENT_KIND]: 'event',
+          [ALERT_ID]: alertId,
+        };
 
-            const isNew = !state.trackedAlerts[alertId];
-            const isRecovered = !currentAlerts[alertId];
-            const isActiveButNotNew = !isNew && !isRecovered;
-            const isActive = !isRecovered;
+        const isNew = !state.trackedAlerts[alertId];
+        const isRecovered = !currentAlerts[alertId];
+        const isActiveButNotNew = !isNew && !isRecovered;
+        const isActive = !isRecovered;
 
-            const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
-              alertUuid: v4(),
-              started: timestamp,
-            };
+        const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
+          alertUuid: v4(),
+          started: timestamp,
+        };
 
-            event[ALERT_START] = started;
-            event[ALERT_UUID] = alertUuid;
+        event[ALERT_START] = started;
+        event[ALERT_UUID] = alertUuid;
 
-            if (isNew) {
-              event[EVENT_ACTION] = 'open';
-            }
+        if (isNew) {
+          event[EVENT_ACTION] = 'open';
+        }
 
-            if (isRecovered) {
-              event[ALERT_END] = timestamp;
-              event[EVENT_ACTION] = 'close';
-              event[ALERT_STATUS] = 'closed';
-            }
+        if (isRecovered) {
+          event[ALERT_END] = timestamp;
+          event[EVENT_ACTION] = 'close';
+          event[ALERT_STATUS] = 'closed';
+        }
 
-            if (isActiveButNotNew) {
-              event[EVENT_ACTION] = 'active';
-            }
+        if (isActiveButNotNew) {
+          event[EVENT_ACTION] = 'active';
+        }
 
-            if (isActive) {
-              event[ALERT_STATUS] = 'open';
-            }
+        if (isActive) {
+          event[ALERT_STATUS] = 'open';
+        }
 
-            event[ALERT_DURATION] =
-              (options.startedAt.getTime() - new Date(event[ALERT_START]!).getTime()) * 1000;
+        event[ALERT_DURATION] =
+          (options.startedAt.getTime() - new Date(event[ALERT_START]!).getTime()) * 1000;
 
-            return event;
-          })
-        : [];
+        return event;
+      });
 
       if (eventsToIndex.length) {
         const alertEvents: Map<string, ParsedTechnicalFields> = new Map();
@@ -237,16 +235,18 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
           });
         }
 
-        await ruleDataClient.getWriter().bulk({
-          body: eventsToIndex
-            .flatMap((event) => [{ index: {} }, event])
-            .concat(
-              Array.from(alertEvents.values()).flatMap((event) => [
-                { index: { _id: event[ALERT_UUID]! } },
-                event,
-              ])
-            ),
-        });
+        if (ruleDataClient.isWriteEnabled()) {
+          await ruleDataClient.getWriter().bulk({
+            body: eventsToIndex
+              .flatMap((event) => [{ index: {} }, event])
+              .concat(
+                Array.from(alertEvents.values()).flatMap((event) => [
+                  { index: { _id: event[ALERT_UUID]! } },
+                  event,
+                ])
+              ),
+          });
+        }
       }
 
       const nextTrackedAlerts = Object.fromEntries(
@@ -262,7 +262,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
 
       return {
         wrapped: nextWrappedState ?? {},
-        trackedAlerts: nextTrackedAlerts,
+        trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : [],
       };
     },
   };
