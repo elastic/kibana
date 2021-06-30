@@ -3,13 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "main": "./target",
-  "types": "./target/types",
-  "scripts": {
-    "build": "node scripts/build",
-    "kbn:bootstrap": "node scripts/build --source-maps",
-    "kbn:watch": "node scripts/build --watch --source-maps"
-  },
+  "main": "./target_node",
+  "types": "./target_types",
   "kibana": {
     "devOnly": true
   }

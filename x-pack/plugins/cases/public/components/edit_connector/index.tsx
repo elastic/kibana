@@ -330,11 +330,15 @@ export const EditConnector = React.memo(
               </EuiFlexGroup>
             </EuiFlexItem>
           )}
-          {pushCallouts == null && !isLoading && !editConnector && (
-            <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-              <span>{pushButton}</span>
-            </EuiFlexItem>
-          )}
+          {pushCallouts == null &&
+            !isLoading &&
+            !editConnector &&
+            userCanCrud &&
+            !permissionsError && (
+              <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
+                <span>{pushButton}</span>
+              </EuiFlexItem>
+            )}
         </MyFlexGroup>
       </EuiText>
     );
