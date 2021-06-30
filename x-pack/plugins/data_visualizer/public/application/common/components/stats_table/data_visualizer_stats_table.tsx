@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
+  EuiToolTip,
   HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
@@ -111,6 +112,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
       width: '40px',
       isExpander: true,
       render: (item: DataVisualizerTableItem) => {
+        const displayName = item.displayName ?? item.fieldName;
         if (item.fieldName === undefined) return null;
         const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
         return (
@@ -121,11 +123,11 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
               expandedRowItemIds.includes(item.fieldName)
                 ? i18n.translate('xpack.dataVisualizer.dataGrid.rowCollapse', {
                     defaultMessage: 'Hide details for {fieldName}',
-                    values: { fieldName: item.fieldName },
+                    values: { fieldName: displayName },
                   })
                 : i18n.translate('xpack.dataVisualizer.dataGrid.rowExpand', {
                     defaultMessage: 'Show details for {fieldName}',
-                    values: { fieldName: item.fieldName },
+                    values: { fieldName: displayName },
                   })
             }
             iconType={direction}
@@ -157,11 +159,15 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         }),
         sortable: true,
         truncateText: true,
-        render: (fieldName: string) => (
-          <EuiText size="s">
-            <b>{fieldName}</b>
-          </EuiText>
-        ),
+        render: (fieldName: string, item: DataVisualizerTableItem) => {
+          const displayName = item.displayName ?? item.fieldName;
+
+          return (
+            <EuiText size="s">
+              <b data-test-subj={`dataVisualizerDisplayName-${item.fieldName}`}>{displayName}</b>
+            </EuiText>
+          );
+        },
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'dataVisualizerTableColumnName',
       },
@@ -194,18 +200,33 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
-            <EuiButtonIcon
-              style={{ marginLeft: 4 }}
-              size={'s'}
-              iconType={showDistributions ? 'eye' : 'eyeClosed'}
-              onClick={() => toggleShowDistribution()}
-              aria-label={i18n.translate(
-                'xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel',
-                {
-                  defaultMessage: 'Show distributions',
+            <EuiToolTip
+              content={
+                !showDistributions
+                  ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsTooltip', {
+                      defaultMessage: 'Show distributions',
+                    })
+                  : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsTooltip', {
+                      defaultMessage: 'Hide distributions',
+                    })
+              }
+            >
+              <EuiButtonIcon
+                style={{ marginLeft: 4 }}
+                size={'s'}
+                iconType={showDistributions ? 'eye' : 'eyeClosed'}
+                onClick={() => toggleShowDistribution()}
+                aria-label={
+                  !showDistributions
+                    ? i18n.translate('xpack.dataVisualizer.dataGrid.showDistributionsAriaLabel', {
+                        defaultMessage: 'Show distributions',
+                      })
+                    : i18n.translate('xpack.dataVisualizer.dataGrid.hideDistributionsAriaLabel', {
+                        defaultMessage: 'Hide distributions',
+                      })
                 }
-              )}
-            />
+              />
+            </EuiToolTip>
           </div>
         ),
         render: (item: DataVisualizerTableItem) => {

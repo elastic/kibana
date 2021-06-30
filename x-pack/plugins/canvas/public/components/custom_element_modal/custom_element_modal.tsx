@@ -26,16 +26,57 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
 import { ElementCard } from '../element_card';
-import { ComponentStrings } from '../../../i18n/components';
 
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
 
-const { CustomElementModal: strings } = ComponentStrings;
-
+const strings = {
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getCharactersRemainingDescription: (numberOfRemainingCharacter: number) =>
+    i18n.translate('xpack.canvas.customElementModal.remainingCharactersDescription', {
+      defaultMessage: '{numberOfRemainingCharacter} characters remaining',
+      values: {
+        numberOfRemainingCharacter,
+      },
+    }),
+  getDescriptionInputLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.descriptionInputLabel', {
+      defaultMessage: 'Description',
+    }),
+  getElementPreviewTitle: () =>
+    i18n.translate('xpack.canvas.customElementModal.elementPreviewTitle', {
+      defaultMessage: 'Element preview',
+    }),
+  getImageFilePickerPlaceholder: () =>
+    i18n.translate('xpack.canvas.customElementModal.imageFilePickerPlaceholder', {
+      defaultMessage: 'Select or drag and drop an image',
+    }),
+  getImageInputDescription: () =>
+    i18n.translate('xpack.canvas.customElementModal.imageInputDescription', {
+      defaultMessage:
+        'Take a screenshot of your element and upload it here. This can also be done after saving.',
+    }),
+  getImageInputLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.imageInputLabel', {
+      defaultMessage: 'Thumbnail image',
+    }),
+  getNameInputLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.nameInputLabel', {
+      defaultMessage: 'Name',
+    }),
+  getSaveButtonLabel: () =>
+    i18n.translate('xpack.canvas.customElementModal.saveButtonLabel', {
+      defaultMessage: 'Save',
+    }),
+};
 interface Props {
   /**
    * initial value of the name of the custom element

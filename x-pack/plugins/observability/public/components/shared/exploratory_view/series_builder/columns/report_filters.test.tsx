@@ -15,13 +15,13 @@ describe('Series Builder ReportFilters', function () {
   const seriesId = 'test-series-id';
 
   const dataViewSeries = getDefaultConfigs({
-    reportType: 'dist',
+    reportType: 'data-distribution',
     indexPattern: mockIndexPattern,
     dataType: 'ux',
   });
 
   it('should render properly', function () {
-    render(<ReportFilters dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    render(<ReportFilters seriesConfig={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Add filter');
   });

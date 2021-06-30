@@ -18,6 +18,7 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiSpacer,
   EuiLink,
   EuiEmptyPrompt,
@@ -63,6 +64,7 @@ import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './alerts_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ManageLicenseModal } from './manage_license_modal';
+import { checkAlertTypeEnabled } from '../../../lib/check_alert_type_enabled';
 
 const ENTER_KEY = 13;
 
@@ -318,15 +320,32 @@ export const AlertsList: React.FunctionComponent = () => {
       width: '35%',
       'data-test-subj': 'alertsTableCell-name',
       render: (name: string, alert: AlertTableItem) => {
-        return (
-          <EuiLink
-            title={name}
-            onClick={() => {
-              history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
-            }}
-          >
-            {name}
-          </EuiLink>
+        const ruleType = alertTypesState.data.get(alert.alertTypeId);
+        const checkEnabledResult = checkAlertTypeEnabled(ruleType);
+        const link = (
+          <>
+            <EuiLink
+              title={name}
+              onClick={() => {
+                history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
+              }}
+            >
+              {name}
+            </EuiLink>
+          </>
+        );
+        return checkEnabledResult.isEnabled ? (
+          link
+        ) : (
+          <>
+            {link}
+            <EuiIconTip
+              data-test-subj="ruleDisabledByLicenseTooltip"
+              type="questionInCircle"
+              content={checkEnabledResult.message}
+              position="right"
+            />
+          </>
         );
       },
     },

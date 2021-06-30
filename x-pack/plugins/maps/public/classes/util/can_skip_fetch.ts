@@ -10,7 +10,7 @@ import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import { isRefreshOnlyQuery } from './is_refresh_only_query';
 import { ISource } from '../sources/source';
-import { DataMeta } from '../../../common/descriptor_types';
+import { DataMeta, Timeslice } from '../../../common/descriptor_types';
 import { DataRequest } from './data_request';
 
 const SOURCE_UPDATE_REQUIRED = true;
@@ -56,11 +56,13 @@ export async function canSkipSourceUpdate({
   prevDataRequest,
   nextMeta,
   extentAware,
+  getUpdateDueToTimeslice,
 }: {
   source: ISource;
   prevDataRequest: DataRequest | undefined;
   nextMeta: DataMeta;
   extentAware: boolean;
+  getUpdateDueToTimeslice: (timeslice?: Timeslice) => boolean;
 }): Promise<boolean> {
   const timeAware = await source.isTimeAware();
   const refreshTimerAware = await source.isRefreshTimerAware();
@@ -94,7 +96,9 @@ export async function canSkipSourceUpdate({
     updateDueToApplyGlobalTime = prevMeta.applyGlobalTime !== nextMeta.applyGlobalTime;
     if (nextMeta.applyGlobalTime) {
       updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
-      updateDueToTimeslice = !_.isEqual(prevMeta.timeslice, nextMeta.timeslice);
+      if (!_.isEqual(prevMeta.timeslice, nextMeta.timeslice)) {
+        updateDueToTimeslice = getUpdateDueToTimeslice(nextMeta.timeslice);
+      }
     }
   }
 

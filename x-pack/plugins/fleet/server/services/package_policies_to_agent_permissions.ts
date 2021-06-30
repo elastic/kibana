@@ -73,6 +73,13 @@ export async function storedPackagePoliciesToAgentPermissions(
           dataStreamsForPermissions = pkg.data_streams;
           break;
 
+        case 'osquery_manager':
+          // - Osquery manager doesn't store the `data_stream` metadata in
+          //   `packagePolicy.inputs`, so we will use _all_ data_streams from
+          //   the package.
+          dataStreamsForPermissions = pkg.data_streams;
+          break;
+
         default:
           // - Normal packages store some of the `data_stream` metadata in
           //   `packagePolicy.inputs[].streams[].data_stream`

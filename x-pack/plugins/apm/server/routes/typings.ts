@@ -39,6 +39,7 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
     >;
+    body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
   };
 }
 

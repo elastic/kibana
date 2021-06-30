@@ -13,18 +13,80 @@ import {
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
   CONTEXT_MENU_TOP_BORDER_CLASSNAME,
 } from '../../../../common/lib/constants';
-import { ComponentStrings } from '../../../../i18n/components';
+
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { Popover, ClosePopoverFn } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import { KioskControls } from './kiosk_controls';
 
-const { WorkpadHeaderViewMenu: strings } = ComponentStrings;
+const strings = {
+  getAutoplaySettingsMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplaySettingsMenuItemLabel', {
+      defaultMessage: 'Autoplay settings',
+    }),
+  getFullscreenMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.fullscreenMenuLabel', {
+      defaultMessage: 'Enter fullscreen mode',
+    }),
+  getHideEditModeLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.hideEditModeLabel', {
+      defaultMessage: 'Hide editing controls',
+    }),
+  getRefreshMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.refreshMenuItemLabel', {
+      defaultMessage: 'Refresh data',
+    }),
+  getRefreshSettingsMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.refreshSettingsMenuItemLabel', {
+      defaultMessage: 'Auto refresh settings',
+    }),
+  getShowEditModeLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {
+      defaultMessage: 'Show editing controls',
+    }),
+  getViewMenuButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuButtonLabel', {
+      defaultMessage: 'View',
+    }),
+  getViewMenuLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuLabel', {
+      defaultMessage: 'View options',
+    }),
+  getZoomFitToWindowText: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomFitToWindowText', {
+      defaultMessage: 'Fit to window',
+    }),
+  getZoomInText: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomInText', {
+      defaultMessage: 'Zoom in',
+    }),
+  getZoomMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomMenuItemLabel', {
+      defaultMessage: 'Zoom',
+    }),
+  getZoomOutText: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomOutText', {
+      defaultMessage: 'Zoom out',
+    }),
+  getZoomPercentage: (scale: number) =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomResetText', {
+      defaultMessage: '{scalePercentage}%',
+      values: {
+        scalePercentage: scale * 100,
+      },
+    }),
+  getZoomResetText: () =>
+    i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomPrecentageValue', {
+      defaultMessage: 'Reset',
+    }),
+};
 
 const QUICK_ZOOM_LEVELS = [0.5, 1, 2];
 

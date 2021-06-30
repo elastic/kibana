@@ -21,6 +21,7 @@ import { ConfigType } from '../';
 import {
   ENTERPRISE_SEARCH_KIBANA_COOKIE,
   JSON_HEADER,
+  ERROR_CONNECTING_HEADER,
   READ_ONLY_MODE_HEADER,
 } from '../../common/constants';
 
@@ -144,7 +145,7 @@ export class EnterpriseSearchRequestHandler {
           body: responseBody,
         });
       } catch (e) {
-        // Catch connection/auth errors
+        // Catch connection errors
         return this.handleConnectionError(response, e);
       }
     };
@@ -280,7 +281,9 @@ export class EnterpriseSearchRequestHandler {
     this.log.error(errorMessage);
     if (e instanceof Error) this.log.debug(e.stack as string);
 
-    return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
+    const headers = { ...this.headers, [ERROR_CONNECTING_HEADER]: 'true' };
+
+    return response.customError({ statusCode: 502, headers, body: errorMessage });
   }
 
   /**

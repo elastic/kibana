@@ -495,17 +495,13 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           onCancel={() => setFormState('VALID')}
         />
       )}
-      {from === 'package'
-        ? packageInfo && (
-            <IntegrationBreadcrumb
-              pkgTitle={integrationInfo?.title || packageInfo.title}
-              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-              integration={integrationInfo?.name}
-            />
-          )
-        : agentPolicy && (
-            <PolicyBreadcrumb policyName={agentPolicy.name} policyId={agentPolicy.id} />
-          )}
+      {packageInfo && (
+        <IntegrationBreadcrumb
+          pkgTitle={integrationInfo?.title || packageInfo.title}
+          pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+          integration={integrationInfo?.name}
+        />
+      )}
       <StepsWithLessPadding steps={steps} />
       <EuiSpacer size="xl" />
       <EuiSpacer size="xl" />
@@ -557,14 +553,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       </CustomEuiBottomBar>
     </CreatePackagePolicyPageLayout>
   );
-};
-
-const PolicyBreadcrumb: React.FunctionComponent<{
-  policyName: string;
-  policyId: string;
-}> = ({ policyName, policyId }) => {
-  useBreadcrumbs('add_integration_from_policy', { policyName, policyId });
-  return null;
 };
 
 const IntegrationBreadcrumb: React.FunctionComponent<{

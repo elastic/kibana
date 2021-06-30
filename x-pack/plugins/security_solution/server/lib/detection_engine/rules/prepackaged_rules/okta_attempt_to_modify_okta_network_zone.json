@@ -14,7 +14,7 @@
   "license": "Elastic License v2",
   "name": "Attempt to Modify an Okta Network Zone",
   "note": "## Config\n\nThe Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:okta.system and event.action:(zone.update or network_zone.rule.disabled or zone.remove_blacklist)",
+  "query": "event.dataset:okta.system and event.action:(zone.update or network_zone.rule.disabled or zone.remove_blacklist)\n",
   "references": [
     "https://help.okta.com/en/prod/Content/Topics/Security/network/network-zones.htm",
     "https://developer.okta.com/docs/reference/api/system-log/",

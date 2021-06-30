@@ -358,7 +358,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
     return (
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <HeaderSection title="" />
         <EuiLoadingContent data-test-subj="loading-alerts-panel" />
       </EuiPanel>

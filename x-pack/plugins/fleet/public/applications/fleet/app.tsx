@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { createHashHistory } from 'history';
-import { Router, Redirect, Route, Switch } from 'react-router-dom';
+import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -39,7 +40,7 @@ import { Error, Loading, SettingFlyout, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
-import { DefaultLayout, WithoutHeaderLayout } from './layouts';
+import { DefaultLayout, DefaultPageTitle, WithoutHeaderLayout, WithHeaderLayout } from './layouts';
 import { AgentPolicyApp } from './sections/agent_policy';
 import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
@@ -48,11 +49,18 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
-const ErrorLayout = ({ children }: { children: JSX.Element }) => (
+const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
+  isAddIntegrationsPath,
+  children,
+}) => (
   <EuiErrorBoundary>
-    <DefaultLayout>
-      <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
-    </DefaultLayout>
+    {isAddIntegrationsPath ? (
+      <WithHeaderLayout leftColumn={<DefaultPageTitle />}>{children}</WithHeaderLayout>
+    ) : (
+      <DefaultLayout>
+        <WithoutHeaderLayout>{children}</WithoutHeaderLayout>
+      </DefaultLayout>
+    )}
   </EuiErrorBoundary>
 );
 
@@ -70,6 +78,8 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   const [permissionsError, setPermissionsError] = useState<string>();
   const [isInitialized, setIsInitialized] = useState(false);
   const [initializationError, setInitializationError] = useState<Error | null>(null);
+
+  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
 
   useEffect(() => {
     (async () => {
@@ -109,7 +119,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
 
   if (isPermissionsLoading || permissionsError) {
     return (
-      <ErrorLayout>
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
         {isPermissionsLoading ? (
           <Loading />
         ) : permissionsError === 'REQUEST_ERROR' ? (
@@ -168,7 +178,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
 
   if (!isInitialized || initializationError) {
     return (
-      <ErrorLayout>
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
         {initializationError ? (
           <Error
             title={
@@ -314,9 +324,7 @@ export const AppRoutes = memo(
 
           {/* TODO: Move this route to the Integrations app */}
           <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
-            <DefaultLayout>
-              <CreatePackagePolicyPage />
-            </DefaultLayout>
+            <CreatePackagePolicyPage />
           </Route>
 
           <Redirect to={FLEET_ROUTING_PATHS.agents} />

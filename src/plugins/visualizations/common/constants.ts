@@ -7,4 +7,3 @@
  */
 
 export const VISUALIZE_ENABLE_LABS_SETTING = 'visualize:enableLabs';
-export const LEGACY_CHARTS_LIBRARY = 'visualization:visualize:legacyChartsLibrary';

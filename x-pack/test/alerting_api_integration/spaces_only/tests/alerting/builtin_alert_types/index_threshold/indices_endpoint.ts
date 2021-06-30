@@ -18,7 +18,7 @@ const API_URI = 'api/triggers_actions_ui/data/_indices';
 export default function indicesEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('indices endpoint', () => {

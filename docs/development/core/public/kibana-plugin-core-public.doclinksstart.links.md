@@ -8,6 +8,7 @@
 
 ```typescript
 readonly links: {
+        readonly settings: string;
         readonly canvas: {
             readonly guide: string;
         };
@@ -106,6 +107,7 @@ readonly links: {
         };
         readonly search: {
             readonly sessions: string;
+            readonly sessionLimits: string;
         };
         readonly indexPatterns: {
             readonly introduction: string;
@@ -199,5 +201,8 @@ readonly links: {
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
         }>;
+        readonly ecs: {
+            readonly guide: string;
+        };
     };
 ```
