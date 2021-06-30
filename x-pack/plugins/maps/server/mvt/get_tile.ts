@@ -40,6 +40,8 @@ import {
 import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
+import { pluckRangeFieldMeta } from '../../common/pluck_range_field_meta';
+import { RangeFieldMeta } from '../../common/descriptor_types';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
@@ -106,41 +108,22 @@ export async function getGridTile({
         minLon: tileBounds.top_left.lon,
       });
 
-      const rangeMeta: { [key: string]: { min: number; max: number } } = {};
-      for (let i = 0; i < features.length; i++) {
-        const feature = features[i];
-
-        if (feature.properties) {
-          for (const key in feature.properties) {
-            if (feature.properties.hasOwnProperty(key)) {
-              if (key !== 'key' && key !== 'gridCentroid') {
-                const rawValue = feature.properties[key];
-                let numberValue: number;
-                if (key === COUNT_PROP_NAME) {
-                  numberValue = parseFloat(rawValue);
-                } else if (typeof rawValue === 'number') {
-                  numberValue = rawValue;
-                } else if (rawValue) {
-                  numberValue = parseFloat(rawValue.value);
-                } else {
-                  continue;
-                }
-                if (!isNaN(numberValue)) {
-                  if (!rangeMeta[key]) {
-                    rangeMeta[key] = {
-                      min: Infinity,
-                      max: -Infinity,
-                    };
-                  }
-
-                  rangeMeta[key].min = Math.min(rangeMeta[key].min, numberValue);
-                  rangeMeta[key].max = Math.max(rangeMeta[key].max, numberValue);
-                }
-              }
-            }
+      const fieldNames = new Set<string>();
+      features.forEach((feature) => {
+        for (const key in feature.properties) {
+          if (feature.properties.hasOwnProperty(key) && key !== 'key' && key !== 'gridCentroid') {
+            fieldNames.add(key);
           }
         }
-      }
+      });
+
+      const rangeMeta: { [key: string]: RangeFieldMeta } = {};
+      fieldNames.forEach((fieldName: string) => {
+        const metaForField = pluckRangeFieldMeta(features, fieldName);
+        if (metaForField) {
+          rangeMeta[fieldName] = metaForField;
+        }
+      });
 
       const metaDataFeature: Feature = {
         type: 'Feature',
