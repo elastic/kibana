@@ -138,7 +138,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return {
       refresh,
       license$,
-      createLicensePoller: this.createLicensePoller.bind(this),
       featureUsage: featureUsageSetup,
     };
   }
