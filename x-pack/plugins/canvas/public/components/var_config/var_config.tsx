@@ -25,8 +25,6 @@ import { CanvasVariable } from '../../../types';
 import { EditVar } from './edit_var';
 import { DeleteVar } from './delete_var';
 
-import './var_config.scss';
-
 enum PanelMode {
   List,
   Edit,

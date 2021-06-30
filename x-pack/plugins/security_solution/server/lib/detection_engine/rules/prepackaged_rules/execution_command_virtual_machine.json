@@ -15,7 +15,7 @@
   "license": "Elastic License v2",
   "name": "Azure Command Execution on Virtual Machine",
   "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.COMPUTE/VIRTUALMACHINES/RUNCOMMAND/ACTION\" and event.outcome:(Success or success)",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:\"MICROSOFT.COMPUTE/VIRTUALMACHINES/RUNCOMMAND/ACTION\" and event.outcome:(Success or success)\n",
   "references": [
     "https://adsecurity.org/?p=4277",
     "https://posts.specterops.io/attacking-azure-azure-ad-and-introducing-powerzure-ca70b330511a",

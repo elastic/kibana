@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Potential Microsoft Office Sandbox Evasion",
-  "query": "event.category:file and not event.type:deletion and file.name:~$*.zip",
+  "query": "event.category:file and not event.type:deletion and file.name:~$*.zip\n",
   "references": [
     "https://i.blackhat.com/USA-20/Wednesday/us-20-Wardle-Office-Drama-On-macOS.pdf",
     "https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/",

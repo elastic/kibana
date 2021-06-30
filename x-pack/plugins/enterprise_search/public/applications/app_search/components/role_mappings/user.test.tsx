@@ -14,7 +14,12 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { UserFlyout, UserAddedInfo, UserInvitationCallout } from '../../../shared/role_mapping';
+import {
+  UserFlyout,
+  UserAddedInfo,
+  UserInvitationCallout,
+  DeactivatedUserCallout,
+} from '../../../shared/role_mapping';
 import { elasticsearchUsers } from '../../../shared/role_mapping/__mocks__/elasticsearch_users';
 import { wsSingleUserRoleMapping } from '../../../shared/role_mapping/__mocks__/roles';
 
@@ -89,6 +94,23 @@ describe('User', () => {
     const wrapper = shallow(<User />);
 
     expect(wrapper.find(UserAddedInfo)).toHaveLength(1);
+  });
+
+  it('renders DeactivatedUserCallout', () => {
+    setMockValues({
+      ...mockValues,
+      singleUserRoleMapping: {
+        ...wsSingleUserRoleMapping,
+        invitation: null,
+        elasticsearchUser: {
+          ...wsSingleUserRoleMapping.elasticsearchUser,
+          enabled: false,
+        },
+      },
+    });
+    const wrapper = shallow(<User />);
+
+    expect(wrapper.find(DeactivatedUserCallout)).toHaveLength(1);
   });
 
   it('disables form when username value not present', () => {

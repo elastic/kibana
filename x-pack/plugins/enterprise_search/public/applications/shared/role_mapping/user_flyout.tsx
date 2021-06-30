@@ -28,6 +28,7 @@ interface Props {
   isNew: boolean;
   isComplete: boolean;
   disabled: boolean;
+  formLoading: boolean;
   closeUserFlyout(): void;
   handleSaveUser(): void;
 }
@@ -49,6 +50,7 @@ export const UserFlyout: React.FC<Props> = ({
   isNew,
   isComplete,
   disabled,
+  formLoading,
   closeUserFlyout,
   handleSaveUser,
 }) => {
@@ -75,7 +77,7 @@ export const UserFlyout: React.FC<Props> = ({
         <EuiButtonEmpty onClick={closeUserFlyout}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton disabled={disabled} onClick={handleSaveUser} fill>
+        <EuiButton disabled={disabled} isLoading={formLoading} onClick={handleSaveUser} fill>
           {isNew ? ADD_USER_LABEL : UPDATE_USER_LABEL}
         </EuiButton>
       </EuiFlexItem>

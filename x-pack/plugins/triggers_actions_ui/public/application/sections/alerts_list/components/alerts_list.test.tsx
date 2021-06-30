@@ -69,6 +69,7 @@ const alertTypeFromApi = {
   defaultActionGroupId: 'default',
   producer: ALERTS_FEATURE_ID,
   minimumLicenseRequired: 'basic',
+  enabledInLicense: true,
   authorizedConsumers: {
     [ALERTS_FEATURE_ID]: { read: true, all: true },
   },
@@ -518,5 +519,124 @@ describe('alerts_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     // TODO: check delete button
+  });
+});
+
+describe('alerts_list with disabled itmes', () => {
+  let wrapper: ReactWrapper<any>;
+
+  async function setup() {
+    loadAlerts.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 2,
+      data: [
+        {
+          id: '1',
+          name: 'test alert',
+          tags: ['tag1'],
+          enabled: true,
+          alertTypeId: 'test_alert_type',
+          schedule: { interval: '5d' },
+          actions: [],
+          params: { name: 'test alert type name' },
+          scheduledTaskId: null,
+          createdBy: null,
+          updatedBy: null,
+          apiKeyOwner: null,
+          throttle: '1m',
+          muteAll: false,
+          mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+            error: null,
+          },
+        },
+        {
+          id: '2',
+          name: 'test alert 2',
+          tags: ['tag1'],
+          enabled: true,
+          alertTypeId: 'test_alert_type_disabled_by_license',
+          schedule: { interval: '5d' },
+          actions: [{ id: 'test', group: 'alert', params: { message: 'test' } }],
+          params: { name: 'test alert type name' },
+          scheduledTaskId: null,
+          createdBy: null,
+          updatedBy: null,
+          apiKeyOwner: null,
+          throttle: '1m',
+          muteAll: false,
+          mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+            error: null,
+          },
+        },
+      ],
+    });
+    loadActionTypes.mockResolvedValue([
+      {
+        id: 'test',
+        name: 'Test',
+      },
+      {
+        id: 'test2',
+        name: 'Test2',
+      },
+    ]);
+
+    loadAlertTypes.mockResolvedValue([
+      alertTypeFromApi,
+      {
+        id: 'test_alert_type_disabled_by_license',
+        name: 'some alert type that is not allowed',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        actionVariables: { context: [], state: [] },
+        defaultActionGroupId: 'default',
+        producer: ALERTS_FEATURE_ID,
+        minimumLicenseRequired: 'platinum',
+        enabledInLicense: false,
+        authorizedConsumers: {
+          [ALERTS_FEATURE_ID]: { read: true, all: true },
+        },
+      },
+    ]);
+    loadAllActions.mockResolvedValue([]);
+
+    alertTypeRegistry.has.mockReturnValue(false);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<AlertsList />);
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+  }
+
+  it('renders rules list with disabled indicator if disabled due to license', async () => {
+    await setup();
+    expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual('');
+    expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
+      'actAlertsList__tableRowDisabled'
+    );
+    expect(wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').length).toBe(
+      1
+    );
+    expect(
+      wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().type
+    ).toEqual('questionInCircle');
+    expect(
+      wrapper.find('EuiIconTip[data-test-subj="ruleDisabledByLicenseTooltip"]').props().content
+    ).toEqual('This rule type requires a Platinum license.');
   });
 });

@@ -430,7 +430,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                               </h6>
                             </EuiTitle>
                             <EuiCodeBlock
-                              language="painless"
+                              language="json"
                               fontSize="m"
                               paddingSize="m"
                               overflowHeight={300}

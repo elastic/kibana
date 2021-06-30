@@ -12,12 +12,17 @@ import type { SecurityPluginSetup } from '../../security/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginSetup } from '../../licensing/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+
 import type { MlLicense } from '../common/license';
 import type { ResolveMlCapabilities } from '../common/types/capabilities';
 import type { RouteGuard } from './lib/route_guard';
 import type { AlertingPlugin } from '../../alerting/server';
 import type { ActionsPlugin } from '../../actions/server';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import type {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
 
 export interface LicenseCheckResult {
   isAvailable: boolean;
@@ -41,6 +46,7 @@ export interface SavedObjectsRouteDeps {
 
 export interface PluginsSetup {
   cloud: CloudSetup;
+  data: DataPluginSetup;
   features: FeaturesPluginSetup;
   home: HomeServerPluginSetup;
   licensing: LicensingPluginSetup;
@@ -52,6 +58,7 @@ export interface PluginsSetup {
 }
 
 export interface PluginsStart {
+  data: DataPluginStart;
   spaces?: SpacesPluginStart;
 }
 
