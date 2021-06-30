@@ -151,6 +151,7 @@ class ReportListingUi extends Component<Props, State> {
     return (
       <>
         <EuiPageHeader
+          bottomBorder
           pageTitle={
             <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
           }

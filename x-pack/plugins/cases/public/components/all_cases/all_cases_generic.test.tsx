@@ -34,6 +34,24 @@ const alertDataMock = {
   alertId: 'alert-id',
   owner: SECURITY_SOLUTION_OWNER,
 };
+jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({
+      services: {
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: jest.fn().mockReturnValue({
+              actionTypeTitle: '.jira',
+              iconClass: 'logoSecurity',
+            }),
+          },
+        },
+      },
+    }),
+  };
+});
 
 describe('AllCasesGeneric ', () => {
   beforeEach(() => {
