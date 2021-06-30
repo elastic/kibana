@@ -999,7 +999,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 81
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -1031,7 +1031,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 83
+              "lineNumber": 82
             },
             "deprecated": false,
             "children": [
@@ -1054,7 +1054,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 84
+                  "lineNumber": 83
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -1105,7 +1105,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 92
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -1129,7 +1129,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 97
+              "lineNumber": 96
             },
             "deprecated": true,
             "references": []
@@ -1154,7 +1154,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 102
+              "lineNumber": 101
             },
             "deprecated": true,
             "references": []
@@ -1171,7 +1171,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 104
+              "lineNumber": 103
             },
             "deprecated": false,
             "children": [
@@ -1194,7 +1194,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 104
+                  "lineNumber": 103
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -1230,7 +1230,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 110
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [
@@ -1261,7 +1261,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 111
+                  "lineNumber": 110
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1289,7 +1289,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 119
+              "lineNumber": 118
             },
             "deprecated": false,
             "children": [
@@ -1305,7 +1305,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 119
+                  "lineNumber": 118
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1333,7 +1333,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 123
+              "lineNumber": 122
             },
             "deprecated": false,
             "children": [],
@@ -1367,7 +1367,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 127
+              "lineNumber": 126
             },
             "deprecated": false,
             "children": [
@@ -1398,7 +1398,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 128
+                  "lineNumber": 127
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1426,7 +1426,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 136
+              "lineNumber": 135
             },
             "deprecated": false,
             "children": [
@@ -1442,7 +1442,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 136
+                  "lineNumber": 135
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1470,7 +1470,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 140
+              "lineNumber": 139
             },
             "deprecated": false,
             "children": [],
@@ -1488,7 +1488,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 144
+              "lineNumber": 143
             },
             "deprecated": false,
             "children": [
@@ -1504,7 +1504,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 144
+                  "lineNumber": 143
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1524,7 +1524,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 148
+              "lineNumber": 147
             },
             "deprecated": false
           },
@@ -1584,7 +1584,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 160
+              "lineNumber": 159
             },
             "deprecated": false,
             "children": [
@@ -1609,7 +1609,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 161
+                  "lineNumber": 160
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1628,7 +1628,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 162
+                  "lineNumber": 161
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1651,7 +1651,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 163
+                  "lineNumber": 162
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1703,7 +1703,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 168
+              "lineNumber": 167
             },
             "deprecated": false,
             "children": [
@@ -1726,7 +1726,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 169
+                  "lineNumber": 168
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1749,7 +1749,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 170
+                  "lineNumber": 169
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1786,7 +1786,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 216
+              "lineNumber": 215
             },
             "deprecated": false,
             "children": [
@@ -1808,7 +1808,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 216
+                  "lineNumber": 215
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1826,7 +1826,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 216
+                  "lineNumber": 215
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1864,7 +1864,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 229
+              "lineNumber": 228
             },
             "deprecated": false,
             "children": [
@@ -1886,7 +1886,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 229
+                  "lineNumber": 228
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1914,7 +1914,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 240
+              "lineNumber": 239
             },
             "deprecated": false,
             "children": [
@@ -1936,7 +1936,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 240
+                  "lineNumber": 239
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1953,7 +1953,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 240
+                  "lineNumber": 239
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -1988,7 +1988,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 248
+              "lineNumber": 247
             },
             "deprecated": false,
             "children": [
@@ -2010,7 +2010,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 248
+                  "lineNumber": 247
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2027,7 +2027,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 248
+                  "lineNumber": 247
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -2055,7 +2055,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 257
+              "lineNumber": 256
             },
             "deprecated": false,
             "children": [],
@@ -3655,7 +3655,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/public/plugin.ts",
-          "lineNumber": 32
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -3671,7 +3671,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
-              "lineNumber": 35
+              "lineNumber": 41
             },
             "deprecated": false,
             "children": [
@@ -3694,7 +3694,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/public/plugin.ts",
-                  "lineNumber": 35
+                  "lineNumber": 41
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3730,7 +3730,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
-              "lineNumber": 45
+              "lineNumber": 51
             },
             "deprecated": false,
             "children": [
@@ -3753,7 +3753,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/public/plugin.ts",
-                  "lineNumber": 45
+                  "lineNumber": 51
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3788,7 +3788,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
-              "lineNumber": 59
+              "lineNumber": 65
             },
             "deprecated": false,
             "children": [
@@ -3810,7 +3810,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/public/plugin.ts",
-                  "lineNumber": 59
+                  "lineNumber": 65
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3830,7 +3830,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
-              "lineNumber": 75
+              "lineNumber": 81
             },
             "deprecated": false,
             "children": [],
@@ -3882,7 +3882,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/public/plugin.ts",
-          "lineNumber": 32
+          "lineNumber": 38
         },
         "deprecated": false,
         "children": [
@@ -3898,7 +3898,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
-              "lineNumber": 35
+              "lineNumber": 41
             },
             "deprecated": false,
             "children": [
@@ -3921,7 +3921,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/public/plugin.ts",
-                  "lineNumber": 35
+                  "lineNumber": 41
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -3957,7 +3957,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
-              "lineNumber": 45
+              "lineNumber": 51
             },
             "deprecated": false,
             "children": [
@@ -3980,7 +3980,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/public/plugin.ts",
-                  "lineNumber": 45
+                  "lineNumber": 51
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4015,7 +4015,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
-              "lineNumber": 59
+              "lineNumber": 65
             },
             "deprecated": false,
             "children": [
@@ -4037,7 +4037,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/public/plugin.ts",
-                  "lineNumber": 59
+                  "lineNumber": 65
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4057,7 +4057,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/public/plugin.ts",
-              "lineNumber": 75
+              "lineNumber": 81
             },
             "deprecated": false,
             "children": [],
@@ -4103,7 +4103,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
-          "lineNumber": 175
+          "lineNumber": 189
         },
         "deprecated": false,
         "children": [
@@ -4126,7 +4126,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 176
+              "lineNumber": 190
             },
             "deprecated": false
           },
@@ -4148,7 +4148,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 177
+              "lineNumber": 191
             },
             "deprecated": false
           },
@@ -4164,7 +4164,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 179
+              "lineNumber": 193
             },
             "deprecated": false,
             "children": [
@@ -4186,7 +4186,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 179
+                  "lineNumber": 193
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4224,7 +4224,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 219
+              "lineNumber": 233
             },
             "deprecated": false,
             "children": [
@@ -4255,7 +4255,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 220
+                  "lineNumber": 234
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4291,7 +4291,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 223
+              "lineNumber": 237
             },
             "deprecated": false,
             "children": [
@@ -4322,7 +4322,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 224
+                  "lineNumber": 238
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4358,7 +4358,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 227
+              "lineNumber": 241
             },
             "deprecated": false,
             "children": [
@@ -4389,7 +4389,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 228
+                  "lineNumber": 242
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4425,7 +4425,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 231
+              "lineNumber": 245
             },
             "deprecated": false,
             "children": [
@@ -4448,7 +4448,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 231
+                  "lineNumber": 245
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4465,7 +4465,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 231
+                  "lineNumber": 245
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4489,7 +4489,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 231
+                  "lineNumber": 245
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -4517,7 +4517,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 234
+              "lineNumber": 248
             },
             "deprecated": false,
             "children": [
@@ -4533,7 +4533,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 234
+                  "lineNumber": 248
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4563,7 +4563,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 241
+              "lineNumber": 255
             },
             "deprecated": false,
             "children": [],
@@ -4589,7 +4589,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 244
+              "lineNumber": 258
             },
             "deprecated": false,
             "children": [
@@ -4605,7 +4605,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 244
+                  "lineNumber": 258
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4635,7 +4635,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 251
+              "lineNumber": 265
             },
             "deprecated": false,
             "children": [],
@@ -4661,7 +4661,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 254
+              "lineNumber": 268
             },
             "deprecated": false,
             "children": [
@@ -4677,7 +4677,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 254
+                  "lineNumber": 268
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4707,7 +4707,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 261
+              "lineNumber": 275
             },
             "deprecated": false,
             "children": [],
@@ -4749,7 +4749,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 263
+              "lineNumber": 277
             },
             "deprecated": false,
             "returnComment": [],
@@ -4773,7 +4773,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 133
+                  "lineNumber": 147
                 },
                 "deprecated": false
               },
@@ -4789,7 +4789,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 135
+                  "lineNumber": 149
                 },
                 "deprecated": false
               },
@@ -4812,7 +4812,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 136
+                  "lineNumber": 150
                 },
                 "deprecated": false
               }
@@ -4837,7 +4837,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 269
+              "lineNumber": 283
             },
             "deprecated": false,
             "children": [],
@@ -4865,7 +4865,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 281
+              "lineNumber": 295
             },
             "deprecated": false,
             "children": [
@@ -4889,7 +4889,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 282
+                  "lineNumber": 296
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4906,7 +4906,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 283
+                  "lineNumber": 297
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -4946,7 +4946,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 293
+              "lineNumber": 307
             },
             "deprecated": false,
             "children": [
@@ -4970,7 +4970,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 293
+                  "lineNumber": 307
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5011,7 +5011,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 303
+              "lineNumber": 317
             },
             "deprecated": false,
             "children": [
@@ -5035,7 +5035,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 303
+                  "lineNumber": 317
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5055,7 +5055,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 303
+                  "lineNumber": 317
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5094,7 +5094,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 313
+              "lineNumber": 327
             },
             "deprecated": false,
             "children": [
@@ -5118,7 +5118,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 313
+                  "lineNumber": 327
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5137,7 +5137,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 313
+                  "lineNumber": 327
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5157,7 +5157,7 @@
               "\nReturns Kibana Platform *setup* life-cycle contract. Useful to return the\nsame contract on server-side and browser-side."
             ],
             "signature": [
-              "() => Pick<",
+              "(...args: unknown[]) => Pick<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -5169,10 +5169,28 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 321
+              "lineNumber": 335
             },
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.setup.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "unknown[]"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                  "lineNumber": 335
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -5185,7 +5203,7 @@
               "\nReturns Kibana Platform *start* life-cycle contract. Useful to return the\nsame contract on server-side and browser-side."
             ],
             "signature": [
-              "() => ",
+              "(...args: unknown[]) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -5196,10 +5214,28 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 329
+              "lineNumber": 360
             },
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExpressionsService.start.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "unknown[]"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                  "lineNumber": 360
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -5214,7 +5250,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 333
+              "lineNumber": 364
             },
             "deprecated": false,
             "children": [],
@@ -5746,7 +5782,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 59
+          "lineNumber": 58
         },
         "deprecated": false,
         "children": [
@@ -5762,7 +5798,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 60
+              "lineNumber": 59
             },
             "deprecated": false,
             "children": [
@@ -5785,7 +5821,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 60
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5821,7 +5857,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 62
+              "lineNumber": 61
             },
             "deprecated": false,
             "children": [
@@ -5852,7 +5888,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 63
+                  "lineNumber": 62
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5880,7 +5916,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 68
+              "lineNumber": 67
             },
             "deprecated": false,
             "children": [
@@ -5896,7 +5932,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 68
+                  "lineNumber": 67
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -5924,7 +5960,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 72
+              "lineNumber": 71
             },
             "deprecated": false,
             "children": [],
@@ -5950,7 +5986,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 76
+              "lineNumber": 75
             },
             "deprecated": false,
             "children": [],
@@ -6111,7 +6147,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 37
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -6127,7 +6163,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 38
+              "lineNumber": 37
             },
             "deprecated": false,
             "children": [
@@ -6150,7 +6186,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 38
+                  "lineNumber": 37
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6186,7 +6222,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 40
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [
@@ -6217,7 +6253,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 41
+                  "lineNumber": 40
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6245,7 +6281,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 46
+              "lineNumber": 45
             },
             "deprecated": false,
             "children": [
@@ -6261,7 +6297,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 46
+                  "lineNumber": 45
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -6289,7 +6325,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 50
+              "lineNumber": 49
             },
             "deprecated": false,
             "children": [],
@@ -6315,7 +6351,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 54
+              "lineNumber": 53
             },
             "deprecated": false,
             "children": [],
@@ -8241,7 +8277,11 @@
                 "section": "def-common.KnownTypeToString",
                 "text": "KnownTypeToString"
               },
-              "<",
+              "<Output extends ",
+              "ObservableLike",
+              "<any> ? ",
+              "UnwrapObservable",
+              "<Output> : ",
               "UnwrapPromiseOrReturn",
               "<Output>> | undefined"
             ],
@@ -8477,27 +8517,6 @@
                 "plugin": "canvas",
                 "link": {
                   "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts",
-                  "lineNumber": 32
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/escount.ts",
-                  "lineNumber": 33
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/esdocs.ts",
-                  "lineNumber": 36
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/essql.ts",
                   "lineNumber": 32
                 }
               }
@@ -8801,6 +8820,71 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionDefinitions.overall_metric",
+            "type": "Object",
+            "tags": [],
+            "label": "overall_metric",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"overall_metric\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.OverallMetricArgs",
+                "text": "OverallMetricArgs"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableState",
+              ">>"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/types.ts",
+              "lineNumber": 123
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExpressionFunctionDefinitions.derivative",
             "type": "Object",
             "tags": [],
@@ -8860,7 +8944,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/types.ts",
-              "lineNumber": 123
+              "lineNumber": 124
             },
             "deprecated": false
           },
@@ -8925,7 +9009,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/types.ts",
-              "lineNumber": 124
+              "lineNumber": 125
             },
             "deprecated": false
           }
@@ -9297,7 +9381,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
-          "lineNumber": 72
+          "lineNumber": 86
         },
         "deprecated": false,
         "children": [
@@ -9323,7 +9407,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 79
+              "lineNumber": 93
             },
             "deprecated": false,
             "returnComment": [],
@@ -9337,7 +9421,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 79
+                  "lineNumber": 93
                 },
                 "deprecated": false
               }
@@ -9365,7 +9449,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 87
+              "lineNumber": 101
             },
             "deprecated": false,
             "returnComment": [],
@@ -9379,7 +9463,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 87
+                  "lineNumber": 101
                 },
                 "deprecated": false
               }
@@ -9407,7 +9491,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 95
+              "lineNumber": 109
             },
             "deprecated": false,
             "returnComment": [],
@@ -9421,7 +9505,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 95
+                  "lineNumber": 109
                 },
                 "deprecated": false
               }
@@ -9457,7 +9541,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 121
+              "lineNumber": 135
             },
             "deprecated": false,
             "returnComment": [],
@@ -9481,7 +9565,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 122
+                  "lineNumber": 136
                 },
                 "deprecated": false
               },
@@ -9497,7 +9581,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 123
+                  "lineNumber": 137
                 },
                 "deprecated": false
               },
@@ -9520,7 +9604,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 124
+                  "lineNumber": 138
                 },
                 "deprecated": false
               }
@@ -9564,7 +9648,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 132
+              "lineNumber": 146
             },
             "deprecated": false,
             "returnComment": [],
@@ -9588,7 +9672,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 133
+                  "lineNumber": 147
                 },
                 "deprecated": false
               },
@@ -9604,7 +9688,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 135
+                  "lineNumber": 149
                 },
                 "deprecated": false
               },
@@ -9627,7 +9711,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 136
+                  "lineNumber": 150
                 },
                 "deprecated": false
               }
@@ -9654,7 +9738,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 148
+              "lineNumber": 162
             },
             "deprecated": false,
             "returnComment": [],
@@ -11370,16 +11454,16 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstFunction",
-            "text": "ExpressionAstFunction"
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
           },
           " | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
+            "section": "def-common.ExpressionAstFunction",
+            "text": "ExpressionAstFunction"
           }
         ],
         "source": {
@@ -12081,7 +12165,7 @@
       ],
       "source": {
         "path": "src/plugins/expressions/public/plugin.ts",
-        "lineNumber": 19
+        "lineNumber": 25
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -12115,7 +12199,7 @@
       ],
       "source": {
         "path": "src/plugins/expressions/public/plugin.ts",
-        "lineNumber": 24
+        "lineNumber": 30
       },
       "deprecated": false,
       "children": [
@@ -12132,7 +12216,7 @@
           ],
           "source": {
             "path": "src/plugins/expressions/public/plugin.ts",
-            "lineNumber": 25
+            "lineNumber": 31
           },
           "deprecated": false
         },
@@ -12155,7 +12239,7 @@
           ],
           "source": {
             "path": "src/plugins/expressions/public/plugin.ts",
-            "lineNumber": 26
+            "lineNumber": 32
           },
           "deprecated": false
         },
@@ -12188,7 +12272,7 @@
           ],
           "source": {
             "path": "src/plugins/expressions/public/plugin.ts",
-            "lineNumber": 27
+            "lineNumber": 33
           },
           "deprecated": false,
           "returnComment": [],
@@ -12276,7 +12360,7 @@
           ],
           "source": {
             "path": "src/plugins/expressions/public/plugin.ts",
-            "lineNumber": 28
+            "lineNumber": 34
           },
           "deprecated": false,
           "returnComment": [],
@@ -12326,7 +12410,7 @@
           ],
           "source": {
             "path": "src/plugins/expressions/public/plugin.ts",
-            "lineNumber": 29
+            "lineNumber": 35
           },
           "deprecated": false,
           "returnComment": [],
@@ -13171,7 +13255,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 81
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -13203,7 +13287,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 83
+              "lineNumber": 82
             },
             "deprecated": false,
             "children": [
@@ -13226,7 +13310,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 84
+                  "lineNumber": 83
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -13277,7 +13361,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 92
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -13301,7 +13385,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 97
+              "lineNumber": 96
             },
             "deprecated": true,
             "references": []
@@ -13326,7 +13410,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 102
+              "lineNumber": 101
             },
             "deprecated": true,
             "references": []
@@ -13343,7 +13427,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 104
+              "lineNumber": 103
             },
             "deprecated": false,
             "children": [
@@ -13366,7 +13450,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 104
+                  "lineNumber": 103
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -13402,7 +13486,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 110
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [
@@ -13433,7 +13517,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 111
+                  "lineNumber": 110
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13461,7 +13545,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 119
+              "lineNumber": 118
             },
             "deprecated": false,
             "children": [
@@ -13477,7 +13561,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 119
+                  "lineNumber": 118
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13505,7 +13589,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 123
+              "lineNumber": 122
             },
             "deprecated": false,
             "children": [],
@@ -13539,7 +13623,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 127
+              "lineNumber": 126
             },
             "deprecated": false,
             "children": [
@@ -13570,7 +13654,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 128
+                  "lineNumber": 127
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13598,7 +13682,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 136
+              "lineNumber": 135
             },
             "deprecated": false,
             "children": [
@@ -13614,7 +13698,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 136
+                  "lineNumber": 135
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13642,7 +13726,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 140
+              "lineNumber": 139
             },
             "deprecated": false,
             "children": [],
@@ -13660,7 +13744,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 144
+              "lineNumber": 143
             },
             "deprecated": false,
             "children": [
@@ -13676,7 +13760,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 144
+                  "lineNumber": 143
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13696,7 +13780,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 148
+              "lineNumber": 147
             },
             "deprecated": false
           },
@@ -13756,7 +13840,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 160
+              "lineNumber": 159
             },
             "deprecated": false,
             "children": [
@@ -13781,7 +13865,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 161
+                  "lineNumber": 160
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13800,7 +13884,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 162
+                  "lineNumber": 161
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13823,7 +13907,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 163
+                  "lineNumber": 162
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13875,7 +13959,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 168
+              "lineNumber": 167
             },
             "deprecated": false,
             "children": [
@@ -13898,7 +13982,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 169
+                  "lineNumber": 168
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13921,7 +14005,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 170
+                  "lineNumber": 169
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13958,7 +14042,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 216
+              "lineNumber": 215
             },
             "deprecated": false,
             "children": [
@@ -13980,7 +14064,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 216
+                  "lineNumber": 215
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -13998,7 +14082,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 216
+                  "lineNumber": 215
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -14036,7 +14120,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 229
+              "lineNumber": 228
             },
             "deprecated": false,
             "children": [
@@ -14058,7 +14142,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 229
+                  "lineNumber": 228
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -14086,7 +14170,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 240
+              "lineNumber": 239
             },
             "deprecated": false,
             "children": [
@@ -14108,7 +14192,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 240
+                  "lineNumber": 239
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -14125,7 +14209,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 240
+                  "lineNumber": 239
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -14160,7 +14244,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 248
+              "lineNumber": 247
             },
             "deprecated": false,
             "children": [
@@ -14182,7 +14266,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 248
+                  "lineNumber": 247
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -14199,7 +14283,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 248
+                  "lineNumber": 247
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -14227,7 +14311,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 257
+              "lineNumber": 256
             },
             "deprecated": false,
             "children": [],
@@ -15482,7 +15566,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/server/plugin.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "deprecated": false,
         "children": [
@@ -15504,7 +15588,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 18
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -15520,7 +15604,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 20
+              "lineNumber": 21
             },
             "deprecated": false,
             "children": [
@@ -15543,7 +15627,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/server/plugin.ts",
-                  "lineNumber": 20
+                  "lineNumber": 21
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -15579,7 +15663,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 22
+              "lineNumber": 23
             },
             "deprecated": false,
             "children": [
@@ -15602,7 +15686,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/server/plugin.ts",
-                  "lineNumber": 22
+                  "lineNumber": 23
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -15637,7 +15721,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             },
             "deprecated": false,
             "children": [
@@ -15659,7 +15743,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/server/plugin.ts",
-                  "lineNumber": 32
+                  "lineNumber": 33
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -15679,7 +15763,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [],
@@ -15731,7 +15815,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/server/plugin.ts",
-          "lineNumber": 16
+          "lineNumber": 17
         },
         "deprecated": false,
         "children": [
@@ -15753,7 +15837,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 18
+              "lineNumber": 19
             },
             "deprecated": false
           },
@@ -15769,7 +15853,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 20
+              "lineNumber": 21
             },
             "deprecated": false,
             "children": [
@@ -15792,7 +15876,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/server/plugin.ts",
-                  "lineNumber": 20
+                  "lineNumber": 21
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -15828,7 +15912,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 22
+              "lineNumber": 23
             },
             "deprecated": false,
             "children": [
@@ -15851,7 +15935,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/server/plugin.ts",
-                  "lineNumber": 22
+                  "lineNumber": 23
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -15886,7 +15970,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             },
             "deprecated": false,
             "children": [
@@ -15908,7 +15992,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/server/plugin.ts",
-                  "lineNumber": 32
+                  "lineNumber": 33
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -15928,7 +16012,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/server/plugin.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [],
@@ -16460,7 +16544,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 59
+          "lineNumber": 58
         },
         "deprecated": false,
         "children": [
@@ -16476,7 +16560,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 60
+              "lineNumber": 59
             },
             "deprecated": false,
             "children": [
@@ -16499,7 +16583,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 60
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -16535,7 +16619,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 62
+              "lineNumber": 61
             },
             "deprecated": false,
             "children": [
@@ -16566,7 +16650,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 63
+                  "lineNumber": 62
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -16594,7 +16678,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 68
+              "lineNumber": 67
             },
             "deprecated": false,
             "children": [
@@ -16610,7 +16694,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 68
+                  "lineNumber": 67
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -16638,7 +16722,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 72
+              "lineNumber": 71
             },
             "deprecated": false,
             "children": [],
@@ -16664,7 +16748,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 76
+              "lineNumber": 75
             },
             "deprecated": false,
             "children": [],
@@ -16708,7 +16792,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 37
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -16724,7 +16808,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 38
+              "lineNumber": 37
             },
             "deprecated": false,
             "children": [
@@ -16747,7 +16831,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 38
+                  "lineNumber": 37
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -16783,7 +16867,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 40
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [
@@ -16814,7 +16898,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 41
+                  "lineNumber": 40
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -16842,7 +16926,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 46
+              "lineNumber": 45
             },
             "deprecated": false,
             "children": [
@@ -16858,7 +16942,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 46
+                  "lineNumber": 45
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -16886,7 +16970,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 50
+              "lineNumber": 49
             },
             "deprecated": false,
             "children": [],
@@ -16912,7 +16996,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 54
+              "lineNumber": 53
             },
             "deprecated": false,
             "children": [],
@@ -18752,7 +18836,11 @@
                 "section": "def-common.KnownTypeToString",
                 "text": "KnownTypeToString"
               },
-              "<",
+              "<Output extends ",
+              "ObservableLike",
+              "<any> ? ",
+              "UnwrapObservable",
+              "<Output> : ",
               "UnwrapPromiseOrReturn",
               "<Output>> | undefined"
             ],
@@ -18988,27 +19076,6 @@
                 "plugin": "canvas",
                 "link": {
                   "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts",
-                  "lineNumber": 32
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/escount.ts",
-                  "lineNumber": 33
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/esdocs.ts",
-                  "lineNumber": 36
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/essql.ts",
                   "lineNumber": 32
                 }
               }
@@ -19312,6 +19379,71 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionDefinitions.overall_metric",
+            "type": "Object",
+            "tags": [],
+            "label": "overall_metric",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"overall_metric\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.OverallMetricArgs",
+                "text": "OverallMetricArgs"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableState",
+              ">>"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/types.ts",
+              "lineNumber": 123
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExpressionFunctionDefinitions.derivative",
             "type": "Object",
             "tags": [],
@@ -19371,7 +19503,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/types.ts",
-              "lineNumber": 123
+              "lineNumber": 124
             },
             "deprecated": false
           },
@@ -19436,7 +19568,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/types.ts",
-              "lineNumber": 124
+              "lineNumber": 125
             },
             "deprecated": false
           }
@@ -20941,16 +21073,16 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstFunction",
-            "text": "ExpressionAstFunction"
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
           },
           " | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
+            "section": "def-common.ExpressionAstFunction",
+            "text": "ExpressionAstFunction"
           }
         ],
         "source": {
@@ -21592,7 +21724,7 @@
       ],
       "source": {
         "path": "src/plugins/expressions/server/plugin.ts",
-        "lineNumber": 12
+        "lineNumber": 13
       },
       "deprecated": false,
       "lifecycle": "setup",
@@ -21616,7 +21748,7 @@
       ],
       "source": {
         "path": "src/plugins/expressions/server/plugin.ts",
-        "lineNumber": 14
+        "lineNumber": 15
       },
       "deprecated": false,
       "lifecycle": "start",
@@ -22622,7 +22754,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 81
+          "lineNumber": 80
         },
         "deprecated": false,
         "children": [
@@ -22654,7 +22786,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 83
+              "lineNumber": 82
             },
             "deprecated": false,
             "children": [
@@ -22677,7 +22809,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 84
+                  "lineNumber": 83
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -22728,7 +22860,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 92
+              "lineNumber": 91
             },
             "deprecated": false
           },
@@ -22752,7 +22884,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 97
+              "lineNumber": 96
             },
             "deprecated": true,
             "references": []
@@ -22777,7 +22909,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 102
+              "lineNumber": 101
             },
             "deprecated": true,
             "references": []
@@ -22794,7 +22926,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 104
+              "lineNumber": 103
             },
             "deprecated": false,
             "children": [
@@ -22817,7 +22949,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 104
+                  "lineNumber": 103
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -22853,7 +22985,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 110
+              "lineNumber": 109
             },
             "deprecated": false,
             "children": [
@@ -22884,7 +23016,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 111
+                  "lineNumber": 110
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -22912,7 +23044,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 119
+              "lineNumber": 118
             },
             "deprecated": false,
             "children": [
@@ -22928,7 +23060,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 119
+                  "lineNumber": 118
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -22956,7 +23088,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 123
+              "lineNumber": 122
             },
             "deprecated": false,
             "children": [],
@@ -22990,7 +23122,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 127
+              "lineNumber": 126
             },
             "deprecated": false,
             "children": [
@@ -23021,7 +23153,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 128
+                  "lineNumber": 127
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23049,7 +23181,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 136
+              "lineNumber": 135
             },
             "deprecated": false,
             "children": [
@@ -23065,7 +23197,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 136
+                  "lineNumber": 135
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23093,7 +23225,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 140
+              "lineNumber": 139
             },
             "deprecated": false,
             "children": [],
@@ -23111,7 +23243,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 144
+              "lineNumber": 143
             },
             "deprecated": false,
             "children": [
@@ -23127,7 +23259,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 144
+                  "lineNumber": 143
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23147,7 +23279,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 148
+              "lineNumber": 147
             },
             "deprecated": false
           },
@@ -23207,7 +23339,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 160
+              "lineNumber": 159
             },
             "deprecated": false,
             "children": [
@@ -23232,7 +23364,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 161
+                  "lineNumber": 160
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23251,7 +23383,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 162
+                  "lineNumber": 161
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23274,7 +23406,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 163
+                  "lineNumber": 162
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23326,7 +23458,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 168
+              "lineNumber": 167
             },
             "deprecated": false,
             "children": [
@@ -23349,7 +23481,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 169
+                  "lineNumber": 168
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23372,7 +23504,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 170
+                  "lineNumber": 169
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23409,7 +23541,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 216
+              "lineNumber": 215
             },
             "deprecated": false,
             "children": [
@@ -23431,7 +23563,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 216
+                  "lineNumber": 215
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23449,7 +23581,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 216
+                  "lineNumber": 215
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23487,7 +23619,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 229
+              "lineNumber": 228
             },
             "deprecated": false,
             "children": [
@@ -23509,7 +23641,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 229
+                  "lineNumber": 228
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23537,7 +23669,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 240
+              "lineNumber": 239
             },
             "deprecated": false,
             "children": [
@@ -23559,7 +23691,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 240
+                  "lineNumber": 239
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23576,7 +23708,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 240
+                  "lineNumber": 239
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23611,7 +23743,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 248
+              "lineNumber": 247
             },
             "deprecated": false,
             "children": [
@@ -23633,7 +23765,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 248
+                  "lineNumber": 247
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23650,7 +23782,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 248
+                  "lineNumber": 247
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -23678,7 +23810,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 257
+              "lineNumber": 256
             },
             "deprecated": false,
             "children": [],
@@ -25005,7 +25137,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
-          "lineNumber": 175
+          "lineNumber": 189
         },
         "deprecated": false,
         "children": [
@@ -25028,7 +25160,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 176
+              "lineNumber": 190
             },
             "deprecated": false
           },
@@ -25050,7 +25182,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 177
+              "lineNumber": 191
             },
             "deprecated": false
           },
@@ -25066,7 +25198,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 179
+              "lineNumber": 193
             },
             "deprecated": false,
             "children": [
@@ -25088,7 +25220,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 179
+                  "lineNumber": 193
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25126,7 +25258,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 219
+              "lineNumber": 233
             },
             "deprecated": false,
             "children": [
@@ -25157,7 +25289,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 220
+                  "lineNumber": 234
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25193,7 +25325,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 223
+              "lineNumber": 237
             },
             "deprecated": false,
             "children": [
@@ -25224,7 +25356,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 224
+                  "lineNumber": 238
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25260,7 +25392,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 227
+              "lineNumber": 241
             },
             "deprecated": false,
             "children": [
@@ -25291,7 +25423,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 228
+                  "lineNumber": 242
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25327,7 +25459,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 231
+              "lineNumber": 245
             },
             "deprecated": false,
             "children": [
@@ -25350,7 +25482,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 231
+                  "lineNumber": 245
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25367,7 +25499,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 231
+                  "lineNumber": 245
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25391,7 +25523,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 231
+                  "lineNumber": 245
                 },
                 "deprecated": false,
                 "isRequired": false
@@ -25419,7 +25551,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 234
+              "lineNumber": 248
             },
             "deprecated": false,
             "children": [
@@ -25435,7 +25567,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 234
+                  "lineNumber": 248
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25465,7 +25597,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 241
+              "lineNumber": 255
             },
             "deprecated": false,
             "children": [],
@@ -25491,7 +25623,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 244
+              "lineNumber": 258
             },
             "deprecated": false,
             "children": [
@@ -25507,7 +25639,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 244
+                  "lineNumber": 258
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25537,7 +25669,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 251
+              "lineNumber": 265
             },
             "deprecated": false,
             "children": [],
@@ -25563,7 +25695,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 254
+              "lineNumber": 268
             },
             "deprecated": false,
             "children": [
@@ -25579,7 +25711,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 254
+                  "lineNumber": 268
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25609,7 +25741,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 261
+              "lineNumber": 275
             },
             "deprecated": false,
             "children": [],
@@ -25651,7 +25783,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 263
+              "lineNumber": 277
             },
             "deprecated": false,
             "returnComment": [],
@@ -25675,7 +25807,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 133
+                  "lineNumber": 147
                 },
                 "deprecated": false
               },
@@ -25691,7 +25823,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 135
+                  "lineNumber": 149
                 },
                 "deprecated": false
               },
@@ -25714,7 +25846,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 136
+                  "lineNumber": 150
                 },
                 "deprecated": false
               }
@@ -25739,7 +25871,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 269
+              "lineNumber": 283
             },
             "deprecated": false,
             "children": [],
@@ -25767,7 +25899,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 281
+              "lineNumber": 295
             },
             "deprecated": false,
             "children": [
@@ -25791,7 +25923,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 282
+                  "lineNumber": 296
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25808,7 +25940,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 283
+                  "lineNumber": 297
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25848,7 +25980,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 293
+              "lineNumber": 307
             },
             "deprecated": false,
             "children": [
@@ -25872,7 +26004,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 293
+                  "lineNumber": 307
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25913,7 +26045,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 303
+              "lineNumber": 317
             },
             "deprecated": false,
             "children": [
@@ -25937,7 +26069,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 303
+                  "lineNumber": 317
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25957,7 +26089,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 303
+                  "lineNumber": 317
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -25996,7 +26128,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 313
+              "lineNumber": 327
             },
             "deprecated": false,
             "children": [
@@ -26020,7 +26152,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 313
+                  "lineNumber": 327
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -26039,7 +26171,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 313
+                  "lineNumber": 327
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -26059,7 +26191,7 @@
               "\nReturns Kibana Platform *setup* life-cycle contract. Useful to return the\nsame contract on server-side and browser-side."
             ],
             "signature": [
-              "() => Pick<",
+              "(...args: unknown[]) => Pick<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -26071,10 +26203,28 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 321
+              "lineNumber": 335
             },
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.setup.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "unknown[]"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                  "lineNumber": 335
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -26087,7 +26237,7 @@
               "\nReturns Kibana Platform *start* life-cycle contract. Useful to return the\nsame contract on server-side and browser-side."
             ],
             "signature": [
-              "() => ",
+              "(...args: unknown[]) => ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -26098,10 +26248,28 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 329
+              "lineNumber": 360
             },
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExpressionsService.start.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "unknown[]"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/service/expressions_services.ts",
+                  "lineNumber": 360
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -26116,7 +26284,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 333
+              "lineNumber": 364
             },
             "deprecated": false,
             "children": [],
@@ -26648,7 +26816,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 59
+          "lineNumber": 58
         },
         "deprecated": false,
         "children": [
@@ -26664,7 +26832,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 60
+              "lineNumber": 59
             },
             "deprecated": false,
             "children": [
@@ -26687,7 +26855,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 60
+                  "lineNumber": 59
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -26723,7 +26891,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 62
+              "lineNumber": 61
             },
             "deprecated": false,
             "children": [
@@ -26754,7 +26922,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 63
+                  "lineNumber": 62
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -26782,7 +26950,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 68
+              "lineNumber": 67
             },
             "deprecated": false,
             "children": [
@@ -26798,7 +26966,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 68
+                  "lineNumber": 67
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -26826,7 +26994,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 72
+              "lineNumber": 71
             },
             "deprecated": false,
             "children": [],
@@ -26852,7 +27020,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 76
+              "lineNumber": 75
             },
             "deprecated": false,
             "children": [],
@@ -27013,7 +27181,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 37
+          "lineNumber": 36
         },
         "deprecated": false,
         "children": [
@@ -27029,7 +27197,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 38
+              "lineNumber": 37
             },
             "deprecated": false,
             "children": [
@@ -27052,7 +27220,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 38
+                  "lineNumber": 37
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -27088,7 +27256,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 40
+              "lineNumber": 39
             },
             "deprecated": false,
             "children": [
@@ -27119,7 +27287,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 41
+                  "lineNumber": 40
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -27147,7 +27315,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 46
+              "lineNumber": 45
             },
             "deprecated": false,
             "children": [
@@ -27163,7 +27331,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/executor/executor.ts",
-                  "lineNumber": 46
+                  "lineNumber": 45
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -27191,7 +27359,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 50
+              "lineNumber": 49
             },
             "deprecated": false,
             "children": [],
@@ -27217,7 +27385,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 54
+              "lineNumber": 53
             },
             "deprecated": false,
             "children": [],
@@ -28094,6 +28262,50 @@
             "source": {
               "path": "src/plugins/expressions/common/expression_types/get_type.ts",
               "lineNumber": 9
+            },
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.getUiSettingFn",
+        "type": "Function",
+        "tags": [],
+        "label": "getUiSettingFn",
+        "description": [],
+        "signature": [
+          "({\n  getStartDependencies,\n}: UiSettingFnArguments) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionUiSetting",
+            "text": "ExpressionFunctionUiSetting"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+          "lineNumber": 39
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.getUiSettingFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  getStartDependencies,\n}",
+            "description": [],
+            "signature": [
+              "UiSettingFnArguments"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+              "lineNumber": 39
             },
             "deprecated": false,
             "isRequired": true
@@ -31030,7 +31242,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/expressions/common/executor/executor.ts",
-          "lineNumber": 28
+          "lineNumber": 27
         },
         "deprecated": false,
         "children": [
@@ -31048,7 +31260,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/executor/executor.ts",
-              "lineNumber": 34
+              "lineNumber": 33
             },
             "deprecated": false
           }
@@ -31064,7 +31276,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
-          "lineNumber": 42
+          "lineNumber": 56
         },
         "deprecated": false,
         "children": [
@@ -31087,7 +31299,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 43
+              "lineNumber": 57
             },
             "deprecated": false
           },
@@ -31103,7 +31315,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 45
+              "lineNumber": 59
             },
             "deprecated": false
           },
@@ -31121,7 +31333,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 52
+              "lineNumber": 66
             },
             "deprecated": false
           },
@@ -31146,7 +31358,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 59
+              "lineNumber": 73
             },
             "deprecated": false
           },
@@ -31162,7 +31374,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 61
+              "lineNumber": 75
             },
             "deprecated": false
           },
@@ -31178,7 +31390,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 63
+              "lineNumber": 77
             },
             "deprecated": false
           },
@@ -31201,7 +31413,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 65
+              "lineNumber": 79
             },
             "deprecated": false
           }
@@ -31303,7 +31515,11 @@
                 "section": "def-common.KnownTypeToString",
                 "text": "KnownTypeToString"
               },
-              "<",
+              "<Output extends ",
+              "ObservableLike",
+              "<any> ? ",
+              "UnwrapObservable",
+              "<Output> : ",
               "UnwrapPromiseOrReturn",
               "<Output>> | undefined"
             ],
@@ -31539,27 +31755,6 @@
                 "plugin": "canvas",
                 "link": {
                   "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/demodata/index.ts",
-                  "lineNumber": 32
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/escount.ts",
-                  "lineNumber": 33
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/esdocs.ts",
-                  "lineNumber": 36
-                }
-              },
-              {
-                "plugin": "canvas",
-                "link": {
-                  "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/server/essql.ts",
                   "lineNumber": 32
                 }
               }
@@ -31863,6 +32058,71 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionDefinitions.overall_metric",
+            "type": "Object",
+            "tags": [],
+            "label": "overall_metric",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"overall_metric\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.OverallMetricArgs",
+                "text": "OverallMetricArgs"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableState",
+              ">>"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/types.ts",
+              "lineNumber": 123
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExpressionFunctionDefinitions.derivative",
             "type": "Object",
             "tags": [],
@@ -31922,7 +32182,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/types.ts",
-              "lineNumber": 123
+              "lineNumber": 124
             },
             "deprecated": false
           },
@@ -31987,7 +32247,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/types.ts",
-              "lineNumber": 124
+              "lineNumber": 125
             },
             "deprecated": false
           }
@@ -32254,7 +32514,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
-          "lineNumber": 151
+          "lineNumber": 165
         },
         "deprecated": false,
         "children": [
@@ -32277,7 +32537,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 152
+              "lineNumber": 166
             },
             "deprecated": false
           },
@@ -32300,7 +32560,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 153
+              "lineNumber": 167
             },
             "deprecated": false
           }
@@ -32318,7 +32578,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
-          "lineNumber": 72
+          "lineNumber": 86
         },
         "deprecated": false,
         "children": [
@@ -32344,7 +32604,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 79
+              "lineNumber": 93
             },
             "deprecated": false,
             "returnComment": [],
@@ -32358,7 +32618,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 79
+                  "lineNumber": 93
                 },
                 "deprecated": false
               }
@@ -32386,7 +32646,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 87
+              "lineNumber": 101
             },
             "deprecated": false,
             "returnComment": [],
@@ -32400,7 +32660,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 87
+                  "lineNumber": 101
                 },
                 "deprecated": false
               }
@@ -32428,7 +32688,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 95
+              "lineNumber": 109
             },
             "deprecated": false,
             "returnComment": [],
@@ -32442,7 +32702,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 95
+                  "lineNumber": 109
                 },
                 "deprecated": false
               }
@@ -32478,7 +32738,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 121
+              "lineNumber": 135
             },
             "deprecated": false,
             "returnComment": [],
@@ -32502,7 +32762,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 122
+                  "lineNumber": 136
                 },
                 "deprecated": false
               },
@@ -32518,7 +32778,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 123
+                  "lineNumber": 137
                 },
                 "deprecated": false
               },
@@ -32541,7 +32801,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 124
+                  "lineNumber": 138
                 },
                 "deprecated": false
               }
@@ -32585,7 +32845,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 132
+              "lineNumber": 146
             },
             "deprecated": false,
             "returnComment": [],
@@ -32609,7 +32869,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 133
+                  "lineNumber": 147
                 },
                 "deprecated": false
               },
@@ -32625,7 +32885,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 135
+                  "lineNumber": 149
                 },
                 "deprecated": false
               },
@@ -32648,7 +32908,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/service/expressions_services.ts",
-                  "lineNumber": 136
+                  "lineNumber": 150
                 },
                 "deprecated": false
               }
@@ -32675,7 +32935,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/service/expressions_services.ts",
-              "lineNumber": 148
+              "lineNumber": 162
             },
             "deprecated": false,
             "returnComment": [],
@@ -33343,7 +33603,7 @@
             "label": "expression",
             "description": [],
             "signature": [
-              "((datatable: ",
+              "(datatable: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -33353,7 +33613,7 @@
               },
               ") => ",
               "Observable",
-              "<string | number | boolean | null>) | undefined"
+              "<string | number | boolean | null>"
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/specs/map_column.ts",
@@ -33486,6 +33746,96 @@
             "description": [],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/specs/moving_average.ts",
+              "lineNumber": 19
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.OverallMetricArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "OverallMetricArgs",
+        "description": [],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+          "lineNumber": 14
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.OverallMetricArgs.by",
+            "type": "Array",
+            "tags": [],
+            "label": "by",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 15
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.OverallMetricArgs.inputColumnId",
+            "type": "string",
+            "tags": [],
+            "label": "inputColumnId",
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 16
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.OverallMetricArgs.outputColumnId",
+            "type": "string",
+            "tags": [],
+            "label": "outputColumnId",
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 17
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.OverallMetricArgs.outputColumnName",
+            "type": "string",
+            "tags": [],
+            "label": "outputColumnName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 18
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.OverallMetricArgs.metric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "metric",
+            "description": [],
+            "signature": [
+              "\"max\" | \"min\" | \"sum\" | \"average\""
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
               "lineNumber": 19
             },
             "deprecated": false
@@ -33733,6 +34083,51 @@
             "source": {
               "path": "src/plugins/expressions/common/types/common.ts",
               "lineNumber": 57
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.UiSettingArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiSettingArguments",
+        "description": [],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+          "lineNumber": 27
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.UiSettingArguments.default",
+            "type": "Unknown",
+            "tags": [],
+            "label": "default",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.UiSettingArguments.parameter",
+            "type": "string",
+            "tags": [],
+            "label": "parameter",
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+              "lineNumber": 29
             },
             "deprecated": false
           }
@@ -34260,16 +34655,16 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstFunction",
-            "text": "ExpressionAstFunction"
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
           },
           " | ",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpression",
-            "text": "ExpressionAstExpression"
+            "section": "def-common.ExpressionAstFunction",
+            "text": "ExpressionAstFunction"
           }
         ],
         "source": {
@@ -34571,6 +34966,72 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-common.ExpressionFunctionOverallMetric",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionFunctionOverallMetric",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"overall_metric\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.OverallMetricArgs",
+            "text": "OverallMetricArgs"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState",
+          ">>"
+        ],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+          "lineNumber": 22
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-common.ExpressionFunctionTheme",
         "type": "Type",
         "tags": [],
@@ -34607,6 +35068,64 @@
         "source": {
           "path": "src/plugins/expressions/common/expression_functions/specs/theme.ts",
           "lineNumber": 20
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.ExpressionFunctionUiSetting",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionFunctionUiSetting",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"uiSetting\", unknown, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.UiSettingArguments",
+            "text": "UiSettingArguments"
+          },
+          ", Promise<",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<\"ui_setting\", { key: string; value: unknown; }>>, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState",
+          ">>"
+        ],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_functions/specs/ui_setting.ts",
+          "lineNumber": 32
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -34829,7 +35348,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/service/expressions_services.ts",
-          "lineNumber": 27
+          "lineNumber": 41
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -35057,30 +35576,6 @@
       },
       {
         "parentPluginId": "expressions",
-        "id": "def-common.functionSpecs",
-        "type": "Array",
-        "tags": [],
-        "label": "functionSpecs",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.AnyExpressionFunctionDefinition",
-            "text": "AnyExpressionFunctionDefinition"
-          },
-          "[]"
-        ],
-        "source": {
-          "path": "src/plugins/expressions/common/expression_functions/specs/index.ts",
-          "lineNumber": 21
-        },
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressions",
         "id": "def-common.InferFunctionDefinition",
         "type": "Type",
         "tags": [],
@@ -35172,6 +35667,30 @@
         "source": {
           "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
           "lineNumber": 15
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.MathColumnArguments",
+        "type": "Type",
+        "tags": [],
+        "label": "MathColumnArguments",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.MathArguments",
+            "text": "MathArguments"
+          },
+          " & { id: string; name?: string | undefined; copyMetaFrom?: string | null | undefined; }"
+        ],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+          "lineNumber": 14
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -35572,7 +36091,7 @@
         ],
         "source": {
           "path": "src/plugins/expressions/common/expression_types/specs/index.ts",
-          "lineNumber": 25
+          "lineNumber": 26
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -35655,6 +36174,23 @@
         "source": {
           "path": "src/plugins/expressions/common/types/common.ts",
           "lineNumber": 17
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.UiSetting",
+        "type": "Type",
+        "tags": [],
+        "label": "UiSetting",
+        "description": [],
+        "signature": [
+          "{ type: \"ui_setting\"; } & { key: string; value: unknown; }"
+        ],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+          "lineNumber": 31
         },
         "deprecated": false,
         "initialIsOpen": false
@@ -39324,7 +39860,9 @@
                 "section": "def-common.MapColumnArguments",
                 "text": "MapColumnArguments"
               },
-              ") => Promise<",
+              ") => ",
+              "Observable",
+              "<",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -39675,6 +40213,466 @@
                 "source": {
                   "path": "src/plugins/expressions/common/expression_functions/specs/math.ts",
                   "lineNumber": 125
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.mathColumn",
+        "type": "Object",
+        "tags": [],
+        "label": "mathColumn",
+        "description": [],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+          "lineNumber": 20
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.mathColumn.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"mathColumn\""
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.mathColumn.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"datatable\""
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+              "lineNumber": 27
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.mathColumn.inputTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "inputTypes",
+            "description": [],
+            "signature": [
+              "\"datatable\"[]"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+              "lineNumber": 28
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.mathColumn.help",
+            "type": "string",
+            "tags": [],
+            "label": "help",
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+              "lineNumber": 29
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.mathColumn.args",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+              "lineNumber": 39
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.mathColumn.args.Unnamed",
+                "type": "Any",
+                "tags": [],
+                "label": "Unnamed",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                  "lineNumber": 40
+                },
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.mathColumn.args.id",
+                "type": "Object",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                  "lineNumber": 41
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.id.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 42
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.id.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 43
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.id.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 46
+                    },
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.mathColumn.args.name",
+                "type": "Object",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                  "lineNumber": 48
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.name.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 49
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.name.aliases",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "aliases",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 50
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.name.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 51
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.name.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 54
+                    },
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.mathColumn.args.copyMetaFrom",
+                "type": "Object",
+                "tags": [],
+                "label": "copyMetaFrom",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                  "lineNumber": 56
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.copyMetaFrom.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "(\"string\" | \"null\")[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 57
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.copyMetaFrom.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 58
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.copyMetaFrom.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "false"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 62
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.mathColumn.args.copyMetaFrom.default",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "default",
+                    "description": [],
+                    "signature": [
+                      "null"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                      "lineNumber": 63
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.mathColumn.fn",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", args: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.MathColumnArguments",
+                "text": "MathColumnArguments"
+              },
+              ", context: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              "SerializableState",
+              ">) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+              "lineNumber": 66
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.mathColumn.fn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.Datatable",
+                    "text": "Datatable"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                  "lineNumber": 66
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.mathColumn.fn.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.MathColumnArguments",
+                    "text": "MathColumnArguments"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                  "lineNumber": 66
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.mathColumn.fn.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExecutionContext",
+                    "text": "ExecutionContext"
+                  },
+                  "<",
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.Adapters",
+                    "text": "Adapters"
+                  },
+                  ", ",
+                  "SerializableState",
+                  ">"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/math_column.ts",
+                  "lineNumber": 66
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -40838,6 +41836,504 @@
           "lineNumber": 110
         },
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
+        "id": "def-common.overallMetric",
+        "type": "Object",
+        "tags": [],
+        "label": "overallMetric",
+        "description": [
+          "\nCalculates the overall metric of a specified column in the data table.\n\nAlso supports multiple series in a single data table - use the `by` argument\nto specify the columns to split the calculation by.\nFor each unique combination of all `by` columns a separate overall metric will be calculated.\nThe order of rows won't be changed - this function is not modifying any existing columns, it's only\nadding the specified `outputColumnId` column to every row of the table without adding or removing rows.\n\nBehavior:\n* Will write the overall metric of `inputColumnId` into `outputColumnId`\n* If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`\n* Each cell will contain the calculated metric based on the values of all cells belonging to the current series.\n\nEdge cases:\n* Will return the input table if `inputColumnId` does not exist\n* Will throw an error if `outputColumnId` exists already in provided data table\n* If the row value contains `null` or `undefined`, it will be ignored and overwritten with the overall metric of\n  all cells of the same series.\n* For all values besides `null` and `undefined`, the value will be cast to a number before it's added to the\n  overall metric of the current series - if this results in `NaN` (like in case of objects), all cells of the\n  current series will be set to `NaN`.\n* To determine separate series defined by the `by` columns, the values of these columns will be cast to strings\n  before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.\n  Missing values (`null` and `undefined`) will be treated as empty strings."
+        ],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+          "lineNumber": 63
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.overallMetric.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"overall_metric\""
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 64
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.overallMetric.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"datatable\""
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 65
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.overallMetric.inputTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "inputTypes",
+            "description": [],
+            "signature": [
+              "\"datatable\"[]"
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 67
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.overallMetric.help",
+            "type": "string",
+            "tags": [],
+            "label": "help",
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 69
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.overallMetric.args",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 73
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.overallMetric.args.by",
+                "type": "Object",
+                "tags": [],
+                "label": "by",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                  "lineNumber": 74
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.by.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 75
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.by.multi",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "multi",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 78
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.by.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 79
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.by.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "false"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 80
+                    },
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.overallMetric.args.metric",
+                "type": "Object",
+                "tags": [],
+                "label": "metric",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                  "lineNumber": 82
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.metric.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 83
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.metric.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 86
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.metric.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      "(\"min\" | \"max\" | \"sum\" | \"average\")[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 87
+                    },
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.overallMetric.args.inputColumnId",
+                "type": "Object",
+                "tags": [],
+                "label": "inputColumnId",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                  "lineNumber": 89
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.inputColumnId.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 90
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.inputColumnId.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 93
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.inputColumnId.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 94
+                    },
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.overallMetric.args.outputColumnId",
+                "type": "Object",
+                "tags": [],
+                "label": "outputColumnId",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                  "lineNumber": 96
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.outputColumnId.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 97
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.outputColumnId.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 100
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.outputColumnId.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 101
+                    },
+                    "deprecated": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.overallMetric.args.outputColumnName",
+                "type": "Object",
+                "tags": [],
+                "label": "outputColumnName",
+                "description": [],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                  "lineNumber": 103
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.outputColumnName.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 104
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.outputColumnName.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"string\"[]"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 107
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.overallMetric.args.outputColumnName.required",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "required",
+                    "description": [],
+                    "signature": [
+                      "false"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                      "lineNumber": 108
+                    },
+                    "deprecated": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.overallMetric.fn",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", { by, inputColumnId, outputColumnId, outputColumnName, metric }: ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.OverallMetricArgs",
+                "text": "OverallMetricArgs"
+              },
+              ") => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              }
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+              "lineNumber": 112
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.overallMetric.fn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.Datatable",
+                    "text": "Datatable"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                  "lineNumber": 112
+                },
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.overallMetric.fn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ by, inputColumnId, outputColumnId, outputColumnName, metric }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.OverallMetricArgs",
+                    "text": "OverallMetricArgs"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
+                  "lineNumber": 112
+                },
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -42402,6 +43898,323 @@
       },
       {
         "parentPluginId": "expressions",
+        "id": "def-common.uiSetting",
+        "type": "Object",
+        "tags": [],
+        "label": "uiSetting",
+        "description": [],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+          "lineNumber": 33
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.uiSetting.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"ui_setting\""
+            ],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+              "lineNumber": 34
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.uiSetting.to",
+            "type": "Object",
+            "tags": [],
+            "label": "to",
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+              "lineNumber": 35
+            },
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.uiSetting.to.boolean",
+                "type": "Function",
+                "tags": [],
+                "label": "boolean",
+                "description": [],
+                "signature": [
+                  "({ value }: ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionValueBoxed",
+                    "text": "ExpressionValueBoxed"
+                  },
+                  "<\"ui_setting\", { key: string; value: unknown; }>) => boolean"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                  "lineNumber": 36
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.uiSetting.to.boolean.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "{ value }",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "expressions",
+                        "scope": "common",
+                        "docId": "kibExpressionsPluginApi",
+                        "section": "def-common.ExpressionValueBoxed",
+                        "text": "ExpressionValueBoxed"
+                      },
+                      "<\"ui_setting\", { key: string; value: unknown; }>"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                      "lineNumber": 36
+                    },
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.uiSetting.to.number",
+                "type": "Function",
+                "tags": [],
+                "label": "number",
+                "description": [],
+                "signature": [
+                  "({ value }: ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionValueBoxed",
+                    "text": "ExpressionValueBoxed"
+                  },
+                  "<\"ui_setting\", { key: string; value: unknown; }>) => number"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                  "lineNumber": 39
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.uiSetting.to.number.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "{ value }",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "expressions",
+                        "scope": "common",
+                        "docId": "kibExpressionsPluginApi",
+                        "section": "def-common.ExpressionValueBoxed",
+                        "text": "ExpressionValueBoxed"
+                      },
+                      "<\"ui_setting\", { key: string; value: unknown; }>"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                      "lineNumber": 39
+                    },
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.uiSetting.to.string",
+                "type": "Function",
+                "tags": [],
+                "label": "string",
+                "description": [],
+                "signature": [
+                  "({ value }: ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionValueBoxed",
+                    "text": "ExpressionValueBoxed"
+                  },
+                  "<\"ui_setting\", { key: string; value: unknown; }>) => string"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                  "lineNumber": 42
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.uiSetting.to.string.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "{ value }",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "expressions",
+                        "scope": "common",
+                        "docId": "kibExpressionsPluginApi",
+                        "section": "def-common.ExpressionValueBoxed",
+                        "text": "ExpressionValueBoxed"
+                      },
+                      "<\"ui_setting\", { key: string; value: unknown; }>"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                      "lineNumber": 42
+                    },
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.uiSetting.to.render",
+                "type": "Function",
+                "tags": [],
+                "label": "render",
+                "description": [],
+                "signature": [
+                  "({ value }: ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionValueBoxed",
+                    "text": "ExpressionValueBoxed"
+                  },
+                  "<\"ui_setting\", { key: string; value: unknown; }>) => ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionValueBoxed",
+                    "text": "ExpressionValueBoxed"
+                  },
+                  "<\"render\", { as: string; value: { text: string; }; }>"
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                  "lineNumber": 45
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.uiSetting.to.render.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "{ value }",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "expressions",
+                        "scope": "common",
+                        "docId": "kibExpressionsPluginApi",
+                        "section": "def-common.ExpressionValueBoxed",
+                        "text": "ExpressionValueBoxed"
+                      },
+                      "<\"ui_setting\", { key: string; value: unknown; }>"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                      "lineNumber": 45
+                    },
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.uiSetting.to.datatable",
+                "type": "Function",
+                "tags": [],
+                "label": "datatable",
+                "description": [],
+                "signature": [
+                  "({ key, value }: ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ExpressionValueBoxed",
+                    "text": "ExpressionValueBoxed"
+                  },
+                  "<\"ui_setting\", { key: string; value: unknown; }>) => ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.Datatable",
+                    "text": "Datatable"
+                  }
+                ],
+                "source": {
+                  "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                  "lineNumber": 57
+                },
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.uiSetting.to.datatable.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "{ key, value }",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "expressions",
+                        "scope": "common",
+                        "docId": "kibExpressionsPluginApi",
+                        "section": "def-common.ExpressionValueBoxed",
+                        "text": "ExpressionValueBoxed"
+                      },
+                      "<\"ui_setting\", { key: string; value: unknown; }>"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_types/specs/ui_setting.ts",
+                      "lineNumber": 57
+                    },
+                    "deprecated": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressions",
         "id": "def-common.variable",
         "type": "Object",
         "tags": [],
@@ -42759,6 +44572,22 @@
                   },
                   {
                     "parentPluginId": "expressions",
+                    "id": "def-common.variableSet.args.name.multi",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "multi",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
+                      "lineNumber": 34
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
                     "id": "def-common.variableSet.args.name.help",
                     "type": "string",
                     "tags": [],
@@ -42766,7 +44595,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
-                      "lineNumber": 34
+                      "lineNumber": 35
                     },
                     "deprecated": false
                   }
@@ -42781,7 +44610,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
-                  "lineNumber": 38
+                  "lineNumber": 39
                 },
                 "deprecated": false,
                 "children": [
@@ -42797,7 +44626,23 @@
                     ],
                     "source": {
                       "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
-                      "lineNumber": 39
+                      "lineNumber": 40
+                    },
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressions",
+                    "id": "def-common.variableSet.args.value.multi",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "multi",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
+                    "source": {
+                      "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
+                      "lineNumber": 41
                     },
                     "deprecated": false
                   },
@@ -42810,7 +44655,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
-                      "lineNumber": 40
+                      "lineNumber": 42
                     },
                     "deprecated": false
                   }
@@ -42848,7 +44693,7 @@
             ],
             "source": {
               "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
-              "lineNumber": 46
+              "lineNumber": 48
             },
             "deprecated": false,
             "children": [
@@ -42864,7 +44709,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
-                  "lineNumber": 46
+                  "lineNumber": 48
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -42881,7 +44726,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
-                  "lineNumber": 46
+                  "lineNumber": 48
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -42915,7 +44760,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/expressions/common/expression_functions/specs/var_set.ts",
-                  "lineNumber": 46
+                  "lineNumber": 48
                 },
                 "deprecated": false,
                 "isRequired": true

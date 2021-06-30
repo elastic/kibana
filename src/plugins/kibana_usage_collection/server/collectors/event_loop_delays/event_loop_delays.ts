@@ -8,16 +8,7 @@
 
 import type { EventLoopDelayMonitor } from 'perf_hooks';
 import { monitorEventLoopDelay } from 'perf_hooks';
-import { takeUntil, finalize, map } from 'rxjs/operators';
-import { Observable, timer } from 'rxjs';
-import type { ISavedObjectsRepository } from 'kibana/server';
-import {
-  MONITOR_EVENT_LOOP_DELAYS_START,
-  MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
-  MONITOR_EVENT_LOOP_DELAYS_RESET,
-  MONITOR_EVENT_LOOP_DELAYS_RESOLUTION,
-} from './constants';
-import { storeHistogram } from './saved_objects';
+import { MONITOR_EVENT_LOOP_DELAYS_RESOLUTION } from './constants';
 
 export interface IntervalHistogram {
   fromTimestamp: string;
@@ -76,34 +67,4 @@ export class EventLoopDelaysCollector {
   public stop() {
     this.loopMonitor.disable();
   }
-}
-
-/**
- * The monitoring of the event loop starts immediately.
- * The first collection of the histogram happens after 1 minute.
- * The daily histogram data is updated every 1 hour.
- */
-export function startTrackingEventLoopDelaysUsage(
-  internalRepository: ISavedObjectsRepository,
-  stopMonitoringEventLoop$: Observable<void>,
-  collectionStartDelay = MONITOR_EVENT_LOOP_DELAYS_START,
-  collectionInterval = MONITOR_EVENT_LOOP_DELAYS_INTERVAL,
-  histogramReset = MONITOR_EVENT_LOOP_DELAYS_RESET
-) {
-  const eventLoopDelaysCollector = new EventLoopDelaysCollector();
-
-  const resetOnCount = Math.ceil(histogramReset / collectionInterval);
-  timer(collectionStartDelay, collectionInterval)
-    .pipe(
-      map((i) => (i + 1) % resetOnCount === 0),
-      takeUntil(stopMonitoringEventLoop$),
-      finalize(() => eventLoopDelaysCollector.stop())
-    )
-    .subscribe(async (shouldReset) => {
-      const histogram = eventLoopDelaysCollector.collect();
-      if (shouldReset) {
-        eventLoopDelaysCollector.reset();
-      }
-      await storeHistogram(histogram, internalRepository);
-    });
 }

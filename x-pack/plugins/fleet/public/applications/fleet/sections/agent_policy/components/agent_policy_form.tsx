@@ -314,6 +314,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         <EuiFormRow fullWidth>
           <EuiFieldNumber
             fullWidth
+            disabled={agentPolicy.is_managed === true}
             value={agentPolicy.unenroll_timeout}
             min={1}
             onChange={(e) => updateAgentPolicy({ unenroll_timeout: Number(e.target.value) })}

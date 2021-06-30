@@ -45,7 +45,7 @@ export const dispatchSetInitialStateFromUrl = (
       const sourcererState = decodeRisonUrlState<SourcererScopePatterns>(newUrlStateString);
       if (sourcererState != null) {
         const activeScopes: SourcererScopeName[] = Object.keys(sourcererState).filter(
-          (key) => !(key === SourcererScopeName.default && pageName === SecurityPageName.detections)
+          (key) => !(key === SourcererScopeName.default && pageName === SecurityPageName.alerts)
         ) as SourcererScopeName[];
         activeScopes.forEach((scope) =>
           dispatch(

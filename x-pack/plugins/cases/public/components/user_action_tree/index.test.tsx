@@ -28,6 +28,7 @@ const defaultProps = {
   caseUserActions: [],
   connectors: [],
   getCaseDetailHrefWithCommentId: jest.fn(),
+  actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
   onRuleDetailsClick: jest.fn(),
   data: basicCase,
@@ -36,6 +37,7 @@ const defaultProps = {
   isLoadingUserActions: false,
   onUpdateField,
   selectedAlertPatterns: ['some-test-pattern'],
+  statusActionButton: null,
   updateCase,
   userCanCrud: true,
   useFetchAlertData: (): [boolean, Record<string, Ecs>] => [
