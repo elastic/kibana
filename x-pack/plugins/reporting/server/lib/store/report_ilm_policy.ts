@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PutLifecycleRequest } from '@elastic/elasticsearch/api/types';
+import { IlmPutLifecycleRequest } from '@elastic/elasticsearch/api/types';
 
-export const reportingIlmPolicy: PutLifecycleRequest['body'] = {
+export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
   policy: {
     phases: {
       hot: {
