@@ -8,7 +8,7 @@
 import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
-import { HostStatus } from '../../../../endpoint/types';
+import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -27,6 +27,7 @@ export interface EndpointFields {
   sensorVersion?: Maybe<string>;
   policyStatus?: Maybe<HostPolicyResponseActionStatus>;
   isolation?: Maybe<boolean>;
+  pendingActions?: Maybe<EndpointPendingActions['pending_actions']>;
   elasticAgentStatus?: Maybe<HostStatus>;
   id?: Maybe<string>;
 }

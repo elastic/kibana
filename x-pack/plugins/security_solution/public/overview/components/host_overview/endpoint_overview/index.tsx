@@ -82,7 +82,11 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
             data != null && data.elasticAgentStatus ? (
               <>
                 <AgentStatus hostStatus={data.elasticAgentStatus} />
-                <EndpointHostIsolationStatus isIsolated={Boolean(data.isolation)} />
+                <EndpointHostIsolationStatus
+                  isIsolated={Boolean(data.isolation)}
+                  pendingIsolate={data.pendingActions?.isolate ?? 0}
+                  pendingUnIsolate={data.pendingActions?.unisolate ?? 0}
+                />
               </>
             ) : (
               getEmptyTagValue()

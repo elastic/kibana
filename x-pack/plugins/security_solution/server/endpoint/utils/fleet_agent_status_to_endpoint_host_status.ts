@@ -21,7 +21,8 @@ const STATUS_MAPPING: ReadonlyMap<AgentStatus, HostStatus> = new Map([
 ]);
 
 /**
- * A Map of Fleet Agent Status to Endpoint Host Status
+ * A Map of Fleet Agent Status to Endpoint Host Status.
+ * Default status is `HostStatus.UNHEALTHY`
  */
 export const fleetAgentStatusToEndpointHostStatus = (status: AgentStatus): HostStatus => {
   return STATUS_MAPPING.get(status) || HostStatus.UNHEALTHY;
