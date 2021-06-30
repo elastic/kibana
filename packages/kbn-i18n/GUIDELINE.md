@@ -390,9 +390,9 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
 
 ### Large paragraphs
 
-Try to avoid having to use large paragraphs of text. These are difficult to maintain and often need slight changes when the information they portray becomes out of date. 
+Try to avoid using large paragraphs of text. These are difficult to maintain and often need slight changes when the information they portray becomes out of date. 
 
-If you have absolutely no choice, we can split paragraphs into a _few_ i18n chunks whenever it makes sense to do so. Similar principles of splitting sentences apply here. Each chunk on it's own should convey the context of the information.
+If you have absolutely no choice, you can split paragraphs into a _few_ i18n chunks whenever it makes sense to do so. Similar principles of splitting sentences apply here. Each chunk on its own should convey the context of the information.
 
 ### Unit tests
 
