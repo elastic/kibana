@@ -6,37 +6,111 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import classnames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
+
+import { ImagePreviewModal } from '../image_preview_modal';
+import type { DocumentField } from './field_list';
 
 interface Props {
-  field: {
-    key: string;
-    value: string;
-  };
+  field: DocumentField;
+  toggleIsPinned?: (name: string) => void;
   highlighted?: boolean;
 }
 
-export const PreviewListItem: React.FC<Props> = ({ field: { key, value }, highlighted }) => {
+export const PreviewListItem: React.FC<Props> = ({
+  field: { key, value, formattedValue, isPinned = false },
+  highlighted,
+  toggleIsPinned,
+}) => {
+  const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
+
   /* eslint-disable @typescript-eslint/naming-convention */
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
     'indexPatternFieldEditor__previewFieldList__item--highlighted': highlighted,
+    'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
   });
   /* eslint-enable @typescript-eslint/naming-convention */
 
+  const doesContainImage = formattedValue?.includes('<img');
+
+  const renderValue = () => {
+    if (doesContainImage) {
+      return (
+        <EuiButtonEmpty
+          color="text"
+          onClick={() => setIsPreviewImageModalVisible(true)}
+          iconType="image"
+        >
+          {i18n.translate('indexPatternFieldEditor.fieldPreview.viewImageButtonLabel', {
+            defaultMessage: 'View image',
+          })}
+        </EuiButtonEmpty>
+      );
+    }
+
+    if (formattedValue !== undefined) {
+      return (
+        <span
+          className="indexPatternFieldEditor__previewFieldList__item__value__wrapper"
+          // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
+          dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
+        />
+      );
+    }
+
+    return (
+      <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
+        {value}
+      </span>
+    );
+  };
+
   return (
-    <EuiFlexGroup className={classes} gutterSize="none">
-      <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
-        <div className="indexPatternFieldEditor__previewFieldList__item__key__wrapper">{key}</div>
-      </EuiFlexItem>
-      <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__value">
-        <EuiToolTip position="top" content={value}>
-          <span className="indexPatternFieldEditor__previewFieldList__item__value__wrapper">
-            {value}
-          </span>
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup className={classes} gutterSize="none">
+        <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
+          <div className="indexPatternFieldEditor__previewFieldList__item__key__wrapper">{key}</div>
+        </EuiFlexItem>
+        <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__value">
+          <EuiToolTip
+            position="top"
+            content={typeof value !== 'string' ? JSON.stringify(value) : value}
+          >
+            {renderValue()}
+          </EuiToolTip>
+        </EuiFlexItem>
+
+        <EuiFlexItem
+          className="indexPatternFieldEditor__previewFieldList__item__actions"
+          grow={false}
+        >
+          {toggleIsPinned && (
+            <EuiButtonIcon
+              onClick={() => {
+                toggleIsPinned(key);
+              }}
+              color="text"
+              iconType="pinFilled"
+              aria-label={i18n.translate(
+                'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
+                {
+                  defaultMessage: 'Pin field',
+                }
+              )}
+              className="indexPatternFieldEditor__previewFieldList__item__actionsBtn"
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isPreviewImageModalVisible && (
+        <ImagePreviewModal
+          imgHTML={formattedValue!}
+          closeModal={() => setIsPreviewImageModalVisible(false)}
+        />
+      )}
+    </>
   );
 };

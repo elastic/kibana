@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import React, { useState, useCallback, useEffect } from 'react';
-import { EuiSpacer, EuiResizeObserver } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiResizeObserver, EuiFieldSearch } from '@elastic/eui';
 
 import { useFieldPreviewContext } from './field_preview_context';
 import { FieldPreviewHeader } from './field_preview_header';
@@ -20,10 +21,11 @@ import './field_preview.scss';
 
 export const FieldPreview = () => {
   const [fieldListHeight, setFieldListHeight] = useState(-1);
+  const [searchValue, setSearchValue] = useState('');
 
   const {
     params: {
-      value: { name, script, format },
+      value: { name, script },
     },
     previewCount,
     fields,
@@ -34,7 +36,7 @@ export const FieldPreview = () => {
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API
   const isEmptyPromptVisible =
-    name === null && script === null && format === null
+    name === null && script === null
       ? true
       : // We have a response from the preview
       error !== null || fields.length > 0
@@ -46,18 +48,17 @@ export const FieldPreview = () => {
     setFieldListHeight(height);
   }, []);
 
-  const renderPinnedFields = () => {
+  const renderFieldsToPreview = () => {
     if (fields.length === 0) {
       return null;
     }
 
+    const [field] = fields;
+
     return (
       <ul>
         <li>
-          <PreviewListItem
-            field={{ key: fields[0].key, value: JSON.stringify(fields[0].value) }}
-            highlighted
-          />
+          <PreviewListItem field={field} highlighted />
         </li>
       </ul>
     );
@@ -79,12 +80,25 @@ export const FieldPreview = () => {
           <EuiSpacer />
 
           <DocumentsNavPreview />
-          <EuiSpacer />
+          <EuiSpacer size="s" />
+
+          <EuiFieldSearch
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder={i18n.translate(
+              'indexPatternFieldEditor.fieldPreview.filterFieldsPlaceholder',
+              {
+                defaultMessage: 'Filter fields',
+              }
+            )}
+            fullWidth
+          />
+          <EuiSpacer size="s" />
 
           {error === null ? (
             <>
-              {/* The current field(s) the user is creating and fields he has pinned to the top */}
-              {renderPinnedFields()}
+              {/* The current field(s) the user is creating */}
+              {renderFieldsToPreview()}
 
               {/* List of other fields in the document */}
               <EuiResizeObserver onResize={onFieldListResize}>
@@ -92,6 +106,8 @@ export const FieldPreview = () => {
                   <div ref={resizeRef} style={{ flex: 1 }}>
                     <PreviewFieldList
                       height={fieldListHeight}
+                      clearSearch={() => setSearchValue('')}
+                      searchValue={searchValue}
                       // We add a key to force rerender the virtual list whenever the window height changes
                       key={fieldListHeight}
                     />
