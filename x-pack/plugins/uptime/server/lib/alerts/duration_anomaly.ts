@@ -93,6 +93,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
     context: [],
     state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
   },
+  isExportable: true,
   minimumLicenseRequired: 'platinum',
   async executor({
     params,

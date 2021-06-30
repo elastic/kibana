@@ -114,7 +114,7 @@ export class UptimePlugin
                 entries: [
                   {
                     label: i18n.translate('xpack.uptime.overview.heading', {
-                      defaultMessage: 'Monitoring overview',
+                      defaultMessage: 'Monitors',
                     }),
                     app: 'uptime',
                     path: '/',

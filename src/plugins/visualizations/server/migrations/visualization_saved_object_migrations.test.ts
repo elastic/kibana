@@ -2163,6 +2163,36 @@ describe('migration visualization', () => {
     });
   });
 
+  describe('7.14.0 replaceIndexPatternReference', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    test('should replace index_pattern to index-pattern', () => {
+      expect(
+        migrate({
+          references: [
+            {
+              name: 'name',
+              type: 'index_pattern',
+            },
+          ],
+        } as Parameters<SavedObjectMigrationFn>[0])
+      ).toMatchInlineSnapshot(`
+        Object {
+          "references": Array [
+            Object {
+              "name": "name",
+              "type": "index-pattern",
+            },
+          ],
+        }
+      `);
+    });
+  });
+
   describe('7.14.0 update tagcloud defaults', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.14.0'](

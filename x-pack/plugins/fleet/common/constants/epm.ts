@@ -48,6 +48,9 @@ export const dataTypes = {
   Metrics: 'metrics',
 } as const;
 
+// currently identical but may be a subset or otherwise different some day
+export const monitoringTypes = Object.values(dataTypes);
+
 export const installationStatuses = {
   Installed: 'installed',
   NotInstalled: 'not_installed',

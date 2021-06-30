@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import { EuiSideNavItemType } from '@elastic/eui';
 
-import { EuiSideNavItemType, EuiSpacer } from '@elastic/eui';
-
-import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-import { generateNavLink, SideNav, SideNavLink } from '../../../shared/layout';
+import { generateNavLink } from '../../../shared/layout';
 import { NAV } from '../../constants';
 import {
   SOURCES_PATH,
   SECURITY_PATH,
-  ROLE_MAPPINGS_PATH,
+  USERS_AND_ROLES_PATH,
   GROUPS_PATH,
   ORG_SETTINGS_PATH,
 } from '../../routes';
@@ -33,8 +30,11 @@ export const useWorkplaceSearchNav = () => {
     {
       id: 'sources',
       name: NAV.SOURCES,
-      ...generateNavLink({ to: SOURCES_PATH }),
-      items: useSourceSubNav(),
+      ...generateNavLink({
+        to: SOURCES_PATH,
+        shouldShowActiveForSubroutes: true,
+        items: useSourceSubNav(),
+      }),
     },
     {
       id: 'groups',
@@ -45,7 +45,7 @@ export const useWorkplaceSearchNav = () => {
     {
       id: 'usersRoles',
       name: NAV.ROLE_MAPPINGS,
-      ...generateNavLink({ to: ROLE_MAPPINGS_PATH }),
+      ...generateNavLink({ to: USERS_AND_ROLES_PATH }),
     },
     {
       id: 'security',
@@ -65,37 +65,3 @@ export const useWorkplaceSearchNav = () => {
   // to cause all our navItems to properly render as nav links.
   return [{ id: '', name: '', items: navItems }];
 };
-
-// TODO: Delete below once fully migrated to KibanaPageTemplate
-
-interface Props {
-  sourcesSubNav?: React.ReactNode;
-  groupsSubNav?: React.ReactNode;
-  settingsSubNav?: React.ReactNode;
-}
-
-export const WorkplaceSearchNav: React.FC<Props> = ({
-  sourcesSubNav,
-  groupsSubNav,
-  settingsSubNav,
-}) => (
-  <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
-    <SideNavLink to="/" isRoot>
-      {NAV.OVERVIEW}
-    </SideNavLink>
-    <SideNavLink to={SOURCES_PATH} subNav={sourcesSubNav}>
-      {NAV.SOURCES}
-    </SideNavLink>
-    <SideNavLink to={GROUPS_PATH} subNav={groupsSubNav}>
-      {NAV.GROUPS}
-    </SideNavLink>
-    <SideNavLink shouldShowActiveForSubroutes to={ROLE_MAPPINGS_PATH}>
-      {NAV.ROLE_MAPPINGS}
-    </SideNavLink>
-    <SideNavLink to={SECURITY_PATH}>{NAV.SECURITY}</SideNavLink>
-    <SideNavLink subNav={settingsSubNav} to={ORG_SETTINGS_PATH}>
-      {NAV.SETTINGS}
-    </SideNavLink>
-    <EuiSpacer />
-  </SideNav>
-);

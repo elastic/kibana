@@ -5,18 +5,47 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
-import { IBasePath } from 'kibana/public';
-import PropTypes from 'prop-types';
 import React, { FunctionComponent, useState } from 'react';
+import PropTypes from 'prop-types';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { IBasePath } from 'kibana/public';
+
 import { ReportingStart } from '../../../../../reporting/public';
-import { ComponentStrings } from '../../../../i18n/components';
+import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
 import { CanvasWorkpadSharingData, getPdfJobParams } from './utils';
 
-const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
+const strings = {
+  getShareDownloadJSONTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareDownloadJSONTitle', {
+      defaultMessage: 'Download as {JSON}',
+      values: {
+        JSON,
+      },
+    }),
+  getShareDownloadPDFTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareDownloadPDFTitle', {
+      defaultMessage: '{PDF} reports',
+      values: {
+        PDF,
+      },
+    }),
+  getShareMenuButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareMenuButtonLabel', {
+      defaultMessage: 'Share',
+    }),
+  getShareWebsiteTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteTitle', {
+      defaultMessage: 'Share on a website',
+    }),
+  getShareWorkpadMessage: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWorkpadMessage', {
+      defaultMessage: 'Share this workpad',
+    }),
+};
 
 type CopyTypes = 'pdf' | 'reportingConfig';
 type ExportTypes = 'pdf' | 'json';

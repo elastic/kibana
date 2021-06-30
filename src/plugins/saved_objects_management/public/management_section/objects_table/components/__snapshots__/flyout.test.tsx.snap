@@ -2,6 +2,7 @@
 
 exports[`Flyout conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
+  data-test-subj="importSavedObjectsFlyout"
   onClose={[MockFunction]}
   size="s"
 >
@@ -277,6 +278,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
 
 exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
+  data-test-subj="importSavedObjectsFlyout"
   onClose={[MockFunction]}
   size="s"
 >
@@ -548,6 +550,7 @@ Array [
 
 exports[`Flyout should render import step 1`] = `
 <EuiFlyout
+  data-test-subj="importSavedObjectsFlyout"
   onClose={[MockFunction]}
   size="s"
 >

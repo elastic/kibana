@@ -105,6 +105,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
     context: [],
     state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
   },
+  isExportable: true,
   minimumLicenseRequired: 'basic',
   async executor({ services: { alertInstanceFactory, uptimeEsClient, dynamicSettings }, state }) {
     const { certs, total }: CertResult = await libs.requests.getCerts({

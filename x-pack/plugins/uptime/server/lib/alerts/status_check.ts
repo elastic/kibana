@@ -264,6 +264,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     ],
     state: [...commonMonitorStateI18, ...commonStateTranslations],
   },
+  isExportable: true,
   minimumLicenseRequired: 'basic',
   async executor({ params: rawParams, state, services: { uptimeEsClient, alertWithLifecycle } }) {
     const {

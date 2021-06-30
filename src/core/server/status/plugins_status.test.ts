@@ -8,7 +8,7 @@
 
 import { PluginName } from '../plugins';
 import { PluginsStatusService } from './plugins_status';
-import { of, Observable, BehaviorSubject } from 'rxjs';
+import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from './types';
 import { first } from 'rxjs/operators';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
@@ -33,6 +33,28 @@ describe('PluginStatusService', () => {
     ['b', ['a']],
     ['c', ['a', 'b']],
   ]);
+
+  describe('set', () => {
+    it('throws an exception if called after registrations are blocked', () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies,
+      });
+
+      service.blockNewRegistrations();
+      expect(() => {
+        service.set(
+          'a',
+          of({
+            level: ServiceStatusLevels.available,
+            summary: 'fail!',
+          })
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Custom statuses cannot be registered after setup, plugin [a] attempted"`
+      );
+    });
+  });
 
   describe('getDerivedStatus$', () => {
     it(`defaults to core's most severe status`, async () => {
@@ -230,6 +252,75 @@ describe('PluginStatusService', () => {
         { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
         { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
       ]);
+    });
+
+    it('updates when a plugin status observable emits', async () => {
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies: new Map([['a', []]]),
+      });
+      const statusUpdates: Array<Record<PluginName, ServiceStatus>> = [];
+      const subscription = service
+        .getAll$()
+        .subscribe((pluginStatuses) => statusUpdates.push(pluginStatuses));
+
+      const aStatus$ = new BehaviorSubject<ServiceStatus>({
+        level: ServiceStatusLevels.degraded,
+        summary: 'a degraded',
+      });
+      service.set('a', aStatus$);
+      aStatus$.next({ level: ServiceStatusLevels.unavailable, summary: 'a unavailable' });
+      aStatus$.next({ level: ServiceStatusLevels.available, summary: 'a available' });
+      subscription.unsubscribe();
+
+      expect(statusUpdates).toEqual([
+        { a: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' } },
+        { a: { level: ServiceStatusLevels.degraded, summary: 'a degraded' } },
+        { a: { level: ServiceStatusLevels.unavailable, summary: 'a unavailable' } },
+        { a: { level: ServiceStatusLevels.available, summary: 'a available' } },
+      ]);
+    });
+
+    it('emits an unavailable status if first emission times out, then continues future emissions', async () => {
+      jest.useFakeTimers();
+      const service = new PluginsStatusService({
+        core$: coreAllAvailable$,
+        pluginDependencies: new Map([
+          ['a', []],
+          ['b', ['a']],
+        ]),
+      });
+
+      const pluginA$ = new ReplaySubject<ServiceStatus>(1);
+      service.set('a', pluginA$);
+      const firstEmission = service.getAll$().pipe(first()).toPromise();
+      jest.runAllTimers();
+
+      expect(await firstEmission).toEqual({
+        a: { level: ServiceStatusLevels.unavailable, summary: 'Status check timed out after 30s' },
+        b: {
+          level: ServiceStatusLevels.unavailable,
+          summary: '[a]: Status check timed out after 30s',
+          detail: 'See the status page for more information',
+          meta: {
+            affectedServices: {
+              a: {
+                level: ServiceStatusLevels.unavailable,
+                summary: 'Status check timed out after 30s',
+              },
+            },
+          },
+        },
+      });
+
+      pluginA$.next({ level: ServiceStatusLevels.available, summary: 'a available' });
+      const secondEmission = service.getAll$().pipe(first()).toPromise();
+      jest.runAllTimers();
+      expect(await secondEmission).toEqual({
+        a: { level: ServiceStatusLevels.available, summary: 'a available' },
+        b: { level: ServiceStatusLevels.available, summary: 'All dependencies are available' },
+      });
+      jest.useRealTimers();
     });
   });
 

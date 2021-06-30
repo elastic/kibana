@@ -109,6 +109,96 @@ test('successfully executes', async () => {
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+          },
+          "kibana": Object {
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+          },
+          "message": "action started: test:1: 1",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+          },
+          "message": "action executed: test:1: 1",
+        },
+      ],
+    ]
+  `);
+});
+
+test('successfully executes as a task', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  const scheduleDelay = 10000; // milliseconds
+  const scheduled = new Date(Date.now() - scheduleDelay);
+  await actionExecutor.execute({
+    ...executeParams,
+    taskInfo: {
+      scheduled,
+    },
+  });
+
+  const eventTask = eventLogger.logEvent.mock.calls[0][0]?.kibana?.task;
+  expect(eventTask).toBeDefined();
+  expect(eventTask?.scheduled).toBe(scheduled.toISOString());
+  expect(eventTask?.schedule_delay).toBeGreaterThanOrEqual(scheduleDelay * 1000 * 1000);
+  expect(eventTask?.schedule_delay).toBeLessThanOrEqual(2 * scheduleDelay * 1000 * 1000);
 });
 
 test('provides empty config when config and / or secrets is empty', async () => {
