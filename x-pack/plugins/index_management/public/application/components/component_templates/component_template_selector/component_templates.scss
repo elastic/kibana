@@ -36,7 +36,7 @@ $heightHeader: $euiSizeL * 2;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     box-shadow: none;
-    height: 40px; /* [2] */
+    height: $euiSizeXXL; /* [2] */
   }
 
   &__listWrapper {
