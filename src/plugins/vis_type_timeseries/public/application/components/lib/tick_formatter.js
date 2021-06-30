@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import handlebars from 'handlebars/dist/handlebars';
 import { isNumber } from 'lodash';
+import handlebars from 'handlebars';
 import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
 import { inputFormats, outputFormats, isDuration } from '../lib/durations';
 import { getFieldFormats } from '../../../services';

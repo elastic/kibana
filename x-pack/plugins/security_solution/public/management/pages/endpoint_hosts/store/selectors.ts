@@ -69,6 +69,16 @@ export const policyItemsLoading = (state: Immutable<EndpointState>) => state.pol
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
+export const getIsEndpointPackageInfoPending: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(endpointPackageInfo, (packageInfo) =>
+  isLoadingResourceState(packageInfo)
+);
+export const getIsEndpointPackageInfoSuccessful: (
+  state: Immutable<EndpointState>
+) => boolean = createSelector(endpointPackageInfo, (packageInfo) =>
+  isLoadedResourceState(packageInfo)
+);
 
 export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
 
@@ -86,9 +96,8 @@ export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =
 export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
 const queryStrategyVersion = (state: Immutable<EndpointState>) => state.queryStrategyVersion;
 
-export const endpointPackageVersion = createSelector(
-  endpointPackageInfo,
-  (info) => info?.version ?? undefined
+export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
+  isLoadedResourceState(info) ? info.data.version : undefined
 );
 
 export const isTransformEnabled = createSelector(
@@ -364,13 +373,14 @@ export const getIsolationRequestError: (
   }
 });
 
+export const getEndpointDetailsFlyoutView = (
+  state: Immutable<EndpointState>
+): EndpointIndexUIQueryParams['show'] => state.endpointDetails.flyoutView;
+
 export const getActivityLogDataPaging = (
   state: Immutable<EndpointState>
-): Immutable<Omit<EndpointState['endpointDetails']['activityLog'], 'logData'>> => {
-  return {
-    page: state.endpointDetails.activityLog.page,
-    pageSize: state.endpointDetails.activityLog.pageSize,
-  };
+): Immutable<EndpointState['endpointDetails']['activityLog']['paging']> => {
+  return state.endpointDetails.activityLog.paging;
 };
 
 export const getActivityLogData = (

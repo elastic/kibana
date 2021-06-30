@@ -215,7 +215,7 @@ This action type has no `secrets` properties.
 | -------- | ------------------------------------------------------------------------------------------------- | ----------------- |
 | id       | ID of the connector used for pushing case updates to external systems.                            | string            |
 | name     | The connector name.                                                                               | string            |
-| type     | The type of the connector. Must be one of these: `.servicenow`, `jira`, `.resilient`, and `.none` | string            |
+| type     | The type of the connector. Must be one of these: `.servicenow`, `.servicenow-sir`, `.swimlane`, `jira`, `.resilient`, and `.none` | string            |
 | fields   | Object containing the connector’s fields.                                                         | [fields](#fields) |
 
 #### `fields`

@@ -12,6 +12,7 @@ describe('positiveRate(req, panel, series)', () => {
   let series;
   let req;
   let uiSettings;
+  let buildSeriesMetaParams;
 
   beforeEach(() => {
     panel = {
@@ -42,6 +43,9 @@ describe('positiveRate(req, panel, series)', () => {
     uiSettings = {
       get: async () => 50,
     };
+    buildSeriesMetaParams = jest.fn().mockResolvedValue({
+      interval: 'auto',
+    });
   });
 
   test('calls next when finished', async () => {
@@ -53,7 +57,8 @@ describe('positiveRate(req, panel, series)', () => {
       {},
       {},
       { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(next.mock.calls.length).toEqual(1);
@@ -68,7 +73,8 @@ describe('positiveRate(req, panel, series)', () => {
       {},
       {},
       { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
-      uiSettings
+      uiSettings,
+      buildSeriesMetaParams
     )(next)({});
 
     expect(doc).toEqual({

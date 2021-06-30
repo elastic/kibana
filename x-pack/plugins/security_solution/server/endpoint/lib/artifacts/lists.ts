@@ -140,8 +140,6 @@ export async function getEndpointEventFiltersList(
     policyId ? ` or exception-list-agnostic.attributes.tags:\"policy:${policyId}\"` : ''
   })`;
 
-  await eClient.createEndpointEventFiltersList();
-
   return getFilteredEndpointExceptionList(
     eClient,
     schemaVersion,

@@ -62,10 +62,6 @@ describe('test useDiscoverState', () => {
       });
     });
 
-    await act(async () => {
-      result.current.stateContainer.startSync();
-    });
-
     const initialColumns = result.current.state.columns;
     await act(async () => {
       result.current.setState({ columns: ['123'] });

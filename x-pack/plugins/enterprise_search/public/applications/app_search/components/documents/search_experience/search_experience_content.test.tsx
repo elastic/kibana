@@ -15,6 +15,7 @@ import { shallow } from 'enzyme';
 // @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
+import { Loading } from '../../../../shared/loading';
 import { SchemaType } from '../../../../shared/schema/types';
 
 import { Pagination } from './pagination';
@@ -82,13 +83,13 @@ describe('SearchExperienceContent', () => {
     expect(wrapper.find(Pagination).exists()).toBe(true);
   });
 
-  it('renders empty if a search was not performed yet', () => {
+  it('renders a loading state if a search was not performed yet', () => {
     setMockSearchContextState({
       ...searchState,
       wasSearched: false,
     });
     const wrapper = shallow(<SearchExperienceContent />);
-    expect(wrapper.isEmptyRender()).toBe(true);
+    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders results if a search was performed and there are more than 0 totalResults', () => {

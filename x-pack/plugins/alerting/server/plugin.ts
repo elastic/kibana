@@ -74,6 +74,7 @@ import { AlertingAuthorization } from './authorization';
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
+  executeStart: 'execute-start',
   executeAction: 'execute-action',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
@@ -191,8 +192,6 @@ export class AlertingPlugin {
       event: { provider: EVENT_LOG_PROVIDER },
     });
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.config);
-
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
@@ -219,6 +218,13 @@ export class AlertingPlugin {
         );
       });
     }
+
+    setupSavedObjects(
+      core.savedObjects,
+      plugins.encryptedSavedObjects,
+      this.alertTypeRegistry,
+      this.logger
+    );
 
     initializeApiKeyInvalidator(
       this.logger,

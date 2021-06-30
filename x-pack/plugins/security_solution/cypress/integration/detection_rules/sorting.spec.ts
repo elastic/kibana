@@ -36,7 +36,7 @@ import {
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../../common/constants';
 
-import { DETECTIONS_URL } from '../../urls/navigation';
+import { ALERTS_URL } from '../../urls/navigation';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { existingRule, newOverrideRule, newRule, newThresholdRule } from '../../objects/rule';
@@ -44,7 +44,7 @@ import { existingRule, newOverrideRule, newRule, newThresholdRule } from '../../
 describe('Alerts detection rules', () => {
   beforeEach(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     createCustomRule(newRule, '1');
@@ -129,7 +129,13 @@ describe('Alerts detection rules', () => {
   });
 
   it('Auto refreshes rules', () => {
-    cy.clock(Date.now());
+    /**
+     * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
+     * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
+     * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
+     */
+
+    cy.clock(Date.now(), ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']);
 
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();

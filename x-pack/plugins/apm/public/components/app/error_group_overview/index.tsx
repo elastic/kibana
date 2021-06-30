@@ -73,7 +73,7 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiPanel>
+        <EuiPanel hasBorder={true}>
           <ErrorDistribution
             distribution={errorDistributionData}
             title={i18n.translate(
@@ -85,7 +85,7 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <EuiPanel>
+        <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h3>
               {i18n.translate(

@@ -52,7 +52,7 @@ import {
   isCommentRequestTypeAlertOrGenAlert,
   transformCaseConnectorToEsConnector,
 } from '../../common';
-import { UpdateAlertRequest } from '../alerts/client';
+import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';

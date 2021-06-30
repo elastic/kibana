@@ -7,6 +7,7 @@
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { useToasts } from '../common/lib/kibana';
+import { useOwnerContext } from '../components/owner_context/use_owner_context';
 import { patchComment } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
@@ -72,6 +73,9 @@ export const useUpdateComment = (): UseUpdateComment => {
   const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
+  // this hook guarantees that there will be at least one value in the owner array, we'll
+  // just use the first entry just in case there are more than one entry
+  const owner = useOwnerContext()[0];
 
   const dispatchUpdateComment = useCallback(
     async ({
@@ -89,14 +93,15 @@ export const useUpdateComment = (): UseUpdateComment => {
         abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT', payload: commentId });
 
-        const response = await patchComment(
+        const response = await patchComment({
           caseId,
           commentId,
           commentUpdate,
           version,
-          abortCtrlRef.current.signal,
-          subCaseId
-        );
+          signal: abortCtrlRef.current.signal,
+          subCaseId,
+          owner,
+        });
 
         if (!isCancelledRef.current) {
           updateCase(response);

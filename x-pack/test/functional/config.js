@@ -85,7 +85,6 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
-        '--xpack.maps.enableDrawingFeature=true',
         '--xpack.reporting.roles.enabled=false', // use the non-deprecated access control model for Reporting
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
@@ -103,6 +102,7 @@ export default async function ({ readConfigFile }) {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
         'visualization:visualize:legacyChartsLibrary': true,
+        'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
@@ -514,6 +514,14 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         license_management_user: {

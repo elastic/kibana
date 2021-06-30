@@ -183,19 +183,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return jobStats;
     },
 
-    async waitForJobState(jobId: string, expectedJobState: JOB_STATE) {
-      await retry.waitForWithTimeout(
-        `job state to be ${expectedJobState}`,
-        2 * 60 * 1000,
-        async () => {
-          const state = await this.getJobState(jobId);
-          if (state === expectedJobState) {
-            return true;
-          } else {
-            throw new Error(`expected job state to be ${expectedJobState} but got ${state}`);
-          }
+    async waitForJobState(
+      jobId: string,
+      expectedJobState: JOB_STATE,
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(`job state to be ${expectedJobState}`, timeout, async () => {
+        const state = await this.getJobState(jobId);
+        if (state === expectedJobState) {
+          return true;
+        } else {
+          throw new Error(`expected job state to be ${expectedJobState} but got ${state}`);
         }
-      );
+      });
     },
 
     async getDatafeedState(datafeedId: string): Promise<DATAFEED_STATE> {
@@ -214,10 +214,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return state;
     },
 
-    async waitForDatafeedState(datafeedId: string, expectedDatafeedState: DATAFEED_STATE) {
+    async waitForDatafeedState(
+      datafeedId: string,
+      expectedDatafeedState: DATAFEED_STATE,
+      timeout: number = 2 * 60 * 1000
+    ) {
       await retry.waitForWithTimeout(
         `datafeed state to be ${expectedDatafeedState}`,
-        2 * 60 * 1000,
+        timeout,
         async () => {
           const state = await this.getDatafeedState(datafeedId);
           if (state === expectedDatafeedState) {

@@ -10,14 +10,10 @@ import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { contentSources } from '../../__mocks__/content_sources.mock';
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../shared/loading';
 import { SourcesTable } from '../../components/shared/sources_table';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import { OrganizationSources } from './organization_sources';
 
@@ -42,20 +38,12 @@ describe('OrganizationSources', () => {
     const wrapper = shallow(<OrganizationSources />);
 
     expect(wrapper.find(SourcesTable)).toHaveLength(1);
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
   });
 
-  it('returns loading when loading', () => {
+  it('does not render a page header when data is loading (to prevent a jump after redirect)', () => {
     setMockValues({ ...mockValues, dataLoading: true });
     const wrapper = shallow(<OrganizationSources />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
-  });
-
-  it('returns redirect when no sources', () => {
-    setMockValues({ ...mockValues, contentSources: [] });
-    const wrapper = shallow(<OrganizationSources />);
-
-    expect(wrapper.find(Redirect).prop('to')).toEqual(getSourcesPath(ADD_SOURCE_PATH, true));
+    expect(wrapper.prop('pageHeader')).toBeUndefined();
   });
 });

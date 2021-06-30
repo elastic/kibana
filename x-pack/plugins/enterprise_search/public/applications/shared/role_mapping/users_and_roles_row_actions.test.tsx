@@ -9,15 +9,23 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
+
+import {
+  REMOVE_ROLE_MAPPING_TITLE,
+  REMOVE_ROLE_MAPPING_BUTTON,
+  ROLE_MODAL_TEXT,
+} from './constants';
 
 import { UsersAndRolesRowActions } from './users_and_roles_row_actions';
 
 describe('UsersAndRolesRowActions', () => {
   const onManageClick = jest.fn();
   const onDeleteClick = jest.fn();
+  const username = 'foo';
 
   const props = {
+    username,
     onManageClick,
     onDeleteClick,
   };
@@ -40,7 +48,19 @@ describe('UsersAndRolesRowActions', () => {
     const wrapper = shallow(<UsersAndRolesRowActions {...props} />);
     const button = wrapper.find(EuiButtonIcon).last();
     button.simulate('click');
+    wrapper.find(EuiConfirmModal).prop('onConfirm')!({} as any);
 
     expect(onDeleteClick).toHaveBeenCalled();
+  });
+
+  it('renders role mapping confirm modal text', () => {
+    const wrapper = shallow(<UsersAndRolesRowActions {...props} username={undefined} />);
+    const button = wrapper.find(EuiButtonIcon).last();
+    button.simulate('click');
+    const modal = wrapper.find(EuiConfirmModal);
+
+    expect(modal.prop('title')).toEqual(REMOVE_ROLE_MAPPING_TITLE);
+    expect(modal.prop('children')).toEqual(<p>{ROLE_MODAL_TEXT}</p>);
+    expect(modal.prop('confirmButtonText')).toEqual(REMOVE_ROLE_MAPPING_BUTTON);
   });
 });

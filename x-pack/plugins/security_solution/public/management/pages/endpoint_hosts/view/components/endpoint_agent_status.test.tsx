@@ -41,7 +41,7 @@ describe('When using the EndpointAgentStatus component', () => {
     };
 
     act(() => {
-      mockedContext.history.push('/endpoints');
+      mockedContext.history.push('/administration/endpoints');
     });
   });
 
@@ -82,9 +82,7 @@ describe('When using the EndpointAgentStatus component', () => {
     });
 
     it('should show host pending action', () => {
-      expect(renderResult.getByTestId('rowIsolationStatus').textContent).toEqual(
-        'Isolating pending'
-      );
+      expect(renderResult.getByTestId('rowIsolationStatus').textContent).toEqual('Isolating');
     });
   });
 });

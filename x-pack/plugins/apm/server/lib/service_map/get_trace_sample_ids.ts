@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,

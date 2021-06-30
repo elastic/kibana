@@ -5,31 +5,32 @@
  * 2.0.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 
-import { Case } from '../../containers/types';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { CaseCallOut } from '../callout';
+import { CaseCallOut } from './callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
-import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
+import { Case, CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { CasesNavigation, LinkAnchor } from '../links';
-import { ErrorMessage } from '../callout/types';
+import { CasesNavigation } from '../links';
+import { CLOSED_CASE_PUSH_ERROR_ID, ErrorMessage } from './callout/types';
 
 export interface UsePushToService {
   caseId: string;
+  caseServices: CaseServices;
   caseStatus: string;
   configureCasesNavigation: CasesNavigation;
   connector: CaseConnector;
-  caseServices: CaseServices;
   connectors: ActionConnector[];
+  hasDataToPush: boolean;
+  isValidConnector: boolean;
+  onEditClick: () => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
-  isValidConnector: boolean;
 }
 
 export interface ReturnUsePushToService {
@@ -38,15 +39,17 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
-  configureCasesNavigation: { href },
-  connector,
   caseId,
   caseServices,
   caseStatus,
+  configureCasesNavigation,
+  connector,
   connectors,
+  hasDataToPush,
+  isValidConnector,
+  onEditClick,
   updateCase,
   userCanCrud,
-  isValidConnector,
 }: UsePushToService): ReturnUsePushToService => {
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
@@ -67,28 +70,24 @@ export const usePushToService = ({
 
   const errorsMsg = useMemo(() => {
     let errors: ErrorMessage[] = [];
+
+    // these message require that the user do some sort of write action as a result of the message, readonly users won't
+    // be able to perform such an action so let's not display the error to the user in that situation
+    if (!userCanCrud) {
+      return errors;
+    }
+
     if (actionLicense != null && !actionLicense.enabledInLicense) {
       errors = [...errors, getLicenseError()];
     }
+
     if (connectors.length === 0 && connector.id === 'none' && !loadingLicense) {
       errors = [
         ...errors,
         {
           id: 'connector-missing-error',
-          title: i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE,
-          description: (
-            <FormattedMessage
-              defaultMessage="To open and update cases in external systems, you must configure a {link}."
-              id="xpack.cases.caseView.pushToServiceDisableByNoConnectors"
-              values={{
-                link: (
-                  <LinkAnchor href={href} target="_blank">
-                    {i18n.LINK_CONNECTOR_CONFIGURE}
-                  </LinkAnchor>
-                ),
-              }}
-            />
-          ),
+          title: '',
+          description: i18n.CONFIGURE_CONNECTOR,
         },
       ];
     } else if (connector.id === 'none' && !loadingLicense) {
@@ -96,13 +95,8 @@ export const usePushToService = ({
         ...errors,
         {
           id: 'connector-not-selected-error',
-          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
-          description: (
-            <FormattedMessage
-              defaultMessage="To open and update cases in external systems, you must select an external incident management system for this case."
-              id="xpack.cases.caseView.pushToServiceDisableByNoCaseConfigDescription"
-            />
-          ),
+          title: '',
+          description: i18n.CONFIGURE_CONNECTOR,
         },
       ];
     } else if (!isValidConnector && !loadingLicense) {
@@ -110,7 +104,7 @@ export const usePushToService = ({
         ...errors,
         {
           id: 'connector-deleted-error',
-          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
+          title: '',
           description: (
             <FormattedMessage
               defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
@@ -125,8 +119,8 @@ export const usePushToService = ({
       errors = [
         ...errors,
         {
-          id: 'closed-case-push-error',
-          title: i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE,
+          id: CLOSED_CASE_PUSH_ERROR_ID,
+          title: '',
           description: (
             <FormattedMessage
               defaultMessage="Closed cases cannot be sent to external systems. Reopen the case if you want to open or update it in an external system."
@@ -136,29 +130,34 @@ export const usePushToService = ({
         },
       ];
     }
+
     if (actionLicense != null && !actionLicense.enabledInConfig) {
       errors = [...errors, getKibanaConfigError()];
     }
     return errors;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense]);
+  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, userCanCrud]);
 
   const pushToServiceButton = useMemo(
     () => (
-      <EuiButton
+      <EuiButtonEmpty
         data-test-subj="push-to-external-service"
-        fill
         iconType="importAction"
         onClick={handlePushToService}
         disabled={
-          isLoading || loadingLicense || errorsMsg.length > 0 || !userCanCrud || !isValidConnector
+          isLoading ||
+          loadingLicense ||
+          errorsMsg.length > 0 ||
+          !userCanCrud ||
+          !isValidConnector ||
+          !hasDataToPush
         }
         isLoading={isLoading}
       >
         {caseServices[connector.id]
           ? i18n.UPDATE_THIRD(connector.name)
           : i18n.PUSH_THIRD(connector.name)}
-      </EuiButton>
+      </EuiButtonEmpty>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -166,6 +165,7 @@ export const usePushToService = ({
       connectors,
       errorsMsg,
       handlePushToService,
+      hasDataToPush,
       isLoading,
       loadingLicense,
       userCanCrud,
@@ -176,11 +176,15 @@ export const usePushToService = ({
   const objToReturn = useMemo(
     () => ({
       pushButton:
-        errorsMsg.length > 0 ? (
+        errorsMsg.length > 0 || !hasDataToPush ? (
           <EuiToolTip
             position="top"
-            title={errorsMsg[0].title}
-            content={<p>{errorsMsg[0].description}</p>}
+            title={
+              errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connector.name)
+            }
+            content={
+              <p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>
+            }
           >
             {pushToServiceButton}
           </EuiToolTip>
@@ -189,10 +193,23 @@ export const usePushToService = ({
         ),
       pushCallouts:
         errorsMsg.length > 0 ? (
-          <CaseCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={errorsMsg} />
+          <CaseCallOut
+            configureCasesNavigation={configureCasesNavigation}
+            hasConnectors={connectors.length > 0}
+            messages={errorsMsg}
+            onEditClick={onEditClick}
+          />
         ) : null,
     }),
-    [errorsMsg, pushToServiceButton]
+    [
+      configureCasesNavigation,
+      connector.name,
+      connectors.length,
+      errorsMsg,
+      hasDataToPush,
+      onEditClick,
+      pushToServiceButton,
+    ]
   );
 
   return objToReturn;

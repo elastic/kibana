@@ -99,11 +99,30 @@ export const endpointPolicyResponseHttpMock = httpHandlerMockFactory<EndpointPol
   ]
 );
 
-type FleetApisHttpMockInterface = ResponseProvidersInterface<{
-  agentPolicy: () => GetAgentPoliciesResponse;
+export type FleetGetPackageListHttpMockInterface = ResponseProvidersInterface<{
   packageList: () => GetPackagesResponse;
 }>;
-export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterface>([
+export const fleetGetPackageListHttpMock = httpHandlerMockFactory<FleetGetPackageListHttpMockInterface>(
+  [
+    {
+      id: 'packageList',
+      method: 'get',
+      path: EPM_API_ROUTES.LIST_PATTERN,
+      handler() {
+        const generator = new EndpointDocGenerator('seed');
+
+        return {
+          response: [generator.generateEpmPackage()],
+        };
+      },
+    },
+  ]
+);
+
+export type FleetGetAgentPolicyListHttpMockInterface = ResponseProvidersInterface<{
+  agentPolicy: () => GetAgentPoliciesResponse;
+}>;
+export const fleetGetAgentPolicyListHttpMock = httpHandlerMockFactory([
   {
     id: 'agentPolicy',
     path: AGENT_POLICY_API_ROUTES.LIST_PATTERN,
@@ -127,18 +146,13 @@ export const fleetApisHttpMock = httpHandlerMockFactory<FleetApisHttpMockInterfa
       };
     },
   },
-  {
-    id: 'packageList',
-    method: 'get',
-    path: EPM_API_ROUTES.LIST_PATTERN,
-    handler() {
-      const generator = new EndpointDocGenerator('seed');
+]);
 
-      return {
-        response: [generator.generateEpmPackage()],
-      };
-    },
-  },
+type FleetApisHttpMockInterface = FleetGetPackageListHttpMockInterface &
+  FleetGetAgentPolicyListHttpMockInterface;
+export const fleetApisHttpMock = composeHttpHandlerMocks<FleetApisHttpMockInterface>([
+  fleetGetPackageListHttpMock,
+  fleetGetAgentPolicyListHttpMock,
 ]);
 
 type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &

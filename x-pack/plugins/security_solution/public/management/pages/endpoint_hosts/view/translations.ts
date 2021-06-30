@@ -16,6 +16,26 @@ export const ACTIVITY_LOG = {
     defaultMessage: 'Activity Log',
   }),
   LogEntry: {
+    endOfLog: i18n.translate(
+      'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.endOfLog',
+      {
+        defaultMessage: 'Nothing more to show',
+      }
+    ),
+    emptyState: {
+      title: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.title',
+        {
+          defaultMessage: 'No logged actions',
+        }
+      ),
+      body: i18n.translate(
+        'xpack.securitySolution.endpointDetails.activityLog.logEntry.emptyState.body',
+        {
+          defaultMessage: 'No actions have been logged for this endpoint.',
+        }
+      ),
+    },
     action: {
       isolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.isolated',
@@ -26,7 +46,7 @@ export const ACTIVITY_LOG = {
       unisolatedAction: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.action.unisolated',
         {
-          defaultMessage: 'unisolated host',
+          defaultMessage: 'released host',
         }
       ),
     },
@@ -46,13 +66,13 @@ export const ACTIVITY_LOG = {
       unisolationSuccessful: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationSuccessful',
         {
-          defaultMessage: 'host unisolation successful',
+          defaultMessage: 'host release successful',
         }
       ),
       unisolationFailed: i18n.translate(
         'xpack.securitySolution.endpointDetails.activityLog.logEntry.response.unisolationFailed',
         {
-          defaultMessage: 'host unisolation failed',
+          defaultMessage: 'host release failed',
         }
       ),
     },

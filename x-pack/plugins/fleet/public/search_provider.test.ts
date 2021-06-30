@@ -185,5 +185,105 @@ describe('Package search provider', () => {
 
       expect(sendGetPackages).toHaveBeenCalledTimes(1);
     });
+
+    describe('tags', () => {
+      test('without packages tag, without search term', () => {
+        getTestScheduler().run(({ hot, expectObservable }) => {
+          mockSendGetPackages.mockReturnValue(
+            hot('--(a|)', { a: { data: { response: testResponse } } })
+          );
+          setupMock.getStartServices.mockReturnValue(
+            hot('--(a|)', { a: [coreMock.createStart()] }) as any
+          );
+          const packageSearchProvider = createPackageSearchProvider(setupMock);
+          expectObservable(
+            packageSearchProvider.find(
+              { types: ['test'] },
+              { aborted$: NEVER, maxResults: 100, preference: '' }
+            )
+          ).toBe('(a|)', {
+            a: [],
+          });
+        });
+
+        expect(sendGetPackages).toHaveBeenCalledTimes(0);
+      });
+
+      test('with packages tag, with no search term', () => {
+        getTestScheduler().run(({ hot, expectObservable }) => {
+          mockSendGetPackages.mockReturnValue(
+            hot('--(a|)', { a: { data: { response: testResponse } } })
+          );
+          setupMock.getStartServices.mockReturnValue(
+            hot('--(a|)', { a: [coreMock.createStart()] }) as any
+          );
+          const packageSearchProvider = createPackageSearchProvider(setupMock);
+          expectObservable(
+            packageSearchProvider.find(
+              { types: ['package'] },
+              { aborted$: NEVER, maxResults: 100, preference: '' }
+            )
+          ).toBe('--(a|)', {
+            a: [
+              {
+                id: 'test-test',
+                score: 80,
+                title: 'test',
+                type: 'package',
+                url: {
+                  path: 'undefined#/detail/test-test/overview',
+                  prependBasePath: false,
+                },
+              },
+              {
+                id: 'test1-test1',
+                score: 80,
+                title: 'test1',
+                type: 'package',
+                url: {
+                  path: 'undefined#/detail/test1-test1/overview',
+                  prependBasePath: false,
+                },
+              },
+            ],
+          });
+        });
+
+        expect(sendGetPackages).toHaveBeenCalledTimes(1);
+      });
+
+      test('with packages tag, with search term', () => {
+        getTestScheduler().run(({ hot, expectObservable }) => {
+          mockSendGetPackages.mockReturnValue(
+            hot('--(a|)', { a: { data: { response: testResponse } } })
+          );
+          setupMock.getStartServices.mockReturnValue(
+            hot('--(a|)', { a: [coreMock.createStart()] }) as any
+          );
+          const packageSearchProvider = createPackageSearchProvider(setupMock);
+          expectObservable(
+            packageSearchProvider.find(
+              { term: 'test1', types: ['package'] },
+              { aborted$: NEVER, maxResults: 100, preference: '' }
+            )
+          ).toBe('--(a|)', {
+            a: [
+              {
+                id: 'test1-test1',
+                score: 80,
+                title: 'test1',
+                type: 'package',
+                url: {
+                  path: 'undefined#/detail/test1-test1/overview',
+                  prependBasePath: false,
+                },
+              },
+            ],
+          });
+        });
+
+        expect(sendGetPackages).toHaveBeenCalledTimes(1);
+      });
+    });
   });
 });

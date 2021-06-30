@@ -14,14 +14,13 @@ import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { IIndexPattern } from '../..';
+import { getDisplayValueFromFilter, getIndexPatternFromFilter } from '../../query';
 import {
   Filter,
   isFilterPinned,
-  getDisplayValueFromFilter,
   toggleFilterNegated,
   toggleFilterPinned,
   toggleFilterDisabled,
-  getIndexPatternFromFilter,
 } from '../../../common';
 import { getIndexPatterns } from '../../services';
 

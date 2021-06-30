@@ -15,17 +15,17 @@ describe('utils', () => {
     });
     it('should parse simple query with term', () => {
       expect(parseQueryFilterToKQL('simpleQuery', searchableFields)).toBe(
-        'exception-list-agnostic.attributes.name:(*simpleQuery*) OR exception-list-agnostic.attributes.description:(*simpleQuery*) OR exception-list-agnostic.attributes.entries.value:(*simpleQuery*) OR exception-list-agnostic.attributes.entries.entries.value:(*simpleQuery*)'
+        '(exception-list-agnostic.attributes.name:(*simpleQuery*) OR exception-list-agnostic.attributes.description:(*simpleQuery*) OR exception-list-agnostic.attributes.entries.value:(*simpleQuery*) OR exception-list-agnostic.attributes.entries.entries.value:(*simpleQuery*))'
       );
     });
     it('should parse complex query with term', () => {
       expect(parseQueryFilterToKQL('complex query', searchableFields)).toBe(
-        'exception-list-agnostic.attributes.name:(*complex*query*) OR exception-list-agnostic.attributes.description:(*complex*query*) OR exception-list-agnostic.attributes.entries.value:(*complex*query*) OR exception-list-agnostic.attributes.entries.entries.value:(*complex*query*)'
+        '(exception-list-agnostic.attributes.name:(*complex*query*) OR exception-list-agnostic.attributes.description:(*complex*query*) OR exception-list-agnostic.attributes.entries.value:(*complex*query*) OR exception-list-agnostic.attributes.entries.entries.value:(*complex*query*))'
       );
     });
     it('should parse complex query with colon and backslash chars term', () => {
       expect(parseQueryFilterToKQL('C:\\tmpes', searchableFields)).toBe(
-        'exception-list-agnostic.attributes.name:(*C\\:\\\\tmpes*) OR exception-list-agnostic.attributes.description:(*C\\:\\\\tmpes*) OR exception-list-agnostic.attributes.entries.value:(*C\\:\\\\tmpes*) OR exception-list-agnostic.attributes.entries.entries.value:(*C\\:\\\\tmpes*)'
+        '(exception-list-agnostic.attributes.name:(*C\\:\\\\tmpes*) OR exception-list-agnostic.attributes.description:(*C\\:\\\\tmpes*) OR exception-list-agnostic.attributes.entries.value:(*C\\:\\\\tmpes*) OR exception-list-agnostic.attributes.entries.entries.value:(*C\\:\\\\tmpes*))'
       );
     });
     it('should parse complex query with special chars term', () => {
@@ -35,7 +35,7 @@ describe('utils', () => {
           searchableFields
         )
       ).toBe(
-        "exception-list-agnostic.attributes.name:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.description:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*)"
+        "(exception-list-agnostic.attributes.name:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.description:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*))"
       );
     });
   });

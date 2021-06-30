@@ -132,19 +132,18 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async clearMarkdown() {
-    // Since we use ACE editor and that isn't really storing its value inside
-    // a textarea we must really select all text and remove it, and cannot use
-    // clearValue().
     await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
-      const editor = await this.testSubjects.find('codeEditorContainer');
-      const $ = await editor.parseDomContent();
-      const value = $('.ace_line').text();
-      if (value.length > 0) {
-        this.log.debug('Clearing text area input');
-        this.waitForMarkdownTextAreaCleaned();
-      }
+      const input = await this.find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+      await input.clickMouseButton();
+      await input.clearValueWithKeyboard();
 
-      return value.length === 0;
+      const linesContainer = await this.find.byCssSelector(
+        '.tvbMarkdownEditor__editor .view-lines'
+      );
+      // lines of code in monaco-editor
+      // text is not present in textarea
+      const lines = await linesContainer.findAllByClassName('mtk1');
+      return lines.length === 0;
     });
   }
 
@@ -564,7 +563,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async checkColorPickerPopUpIsPresent(): Promise<void> {
     this.log.debug(`Check color picker popup is present`);
-    await this.testSubjects.existOrFail('colorPickerPopover', { timeout: 5000 });
+    await this.testSubjects.existOrFail('euiColorPickerPopover', { timeout: 5000 });
   }
 
   public async changePanelPreview(nth: number = 0): Promise<void> {

@@ -27,7 +27,7 @@ export const DownloadStep = () => {
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.agentEnrollment.downloadDescription"
-            defaultMessage="You can download the agent binaries and their verification signatures from the Elastic Agent download page."
+            defaultMessage="Fleet Server runs on an Elastic Agent. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
           />
         </EuiText>
         <EuiSpacer size="l" />
@@ -49,14 +49,16 @@ export const DownloadStep = () => {
 
 export const AgentPolicySelectionStep = ({
   agentPolicies,
-  setSelectedAPIKeyId,
   setSelectedPolicyId,
-  setIsFleetServerPolicySelected,
+  selectedApiKeyId,
+  setSelectedAPIKeyId,
   excludeFleetServer,
+  setIsFleetServerPolicySelected,
 }: {
   agentPolicies?: AgentPolicy[];
-  setSelectedAPIKeyId?: (key?: string) => void;
   setSelectedPolicyId?: (policyId?: string) => void;
+  selectedApiKeyId?: string;
+  setSelectedAPIKeyId?: (key?: string) => void;
   setIsFleetServerPolicySelected?: (selected: boolean) => void;
   excludeFleetServer?: boolean;
 }) => {
@@ -99,6 +101,7 @@ export const AgentPolicySelectionStep = ({
       <EnrollmentStepAgentPolicy
         agentPolicies={regularAgentPolicies}
         withKeySelection={setSelectedAPIKeyId ? true : false}
+        selectedApiKeyId={selectedApiKeyId}
         onKeyChange={setSelectedAPIKeyId}
         onAgentPolicyChange={onAgentPolicyChange}
         excludeFleetServer={excludeFleetServer}
@@ -109,9 +112,11 @@ export const AgentPolicySelectionStep = ({
 
 export const AgentEnrollmentKeySelectionStep = ({
   agentPolicy,
+  selectedApiKeyId,
   setSelectedAPIKeyId,
 }: {
   agentPolicy: AgentPolicy;
+  selectedApiKeyId?: string;
   setSelectedAPIKeyId: (key?: string) => void;
 }) => {
   return {
@@ -132,9 +137,23 @@ export const AgentEnrollmentKeySelectionStep = ({
         <EuiSpacer size="l" />
         <AdvancedAgentAuthenticationSettings
           agentPolicyId={agentPolicy.id}
+          selectedApiKeyId={selectedApiKeyId}
           onKeyChange={setSelectedAPIKeyId}
         />
       </>
     ),
+  };
+};
+
+/**
+ * Send users to assets installed by the package in Kibana so they can
+ * view their data.
+ */
+export const ViewDataStep = (content: JSX.Element) => {
+  return {
+    title: i18n.translate('xpack.fleet.agentEnrollment.stepViewDataTitle', {
+      defaultMessage: 'View your data',
+    }),
+    children: content,
   };
 };

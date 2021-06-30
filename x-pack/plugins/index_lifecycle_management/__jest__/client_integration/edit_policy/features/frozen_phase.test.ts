@@ -6,13 +6,14 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { TestBed } from '@kbn/test/jest';
 
 import { licensingMock } from '../../../../../licensing/public/mocks';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { initTestBed } from '../init_test_bed';
 
 describe('<EditPolicy /> frozen phase', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: TestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -28,20 +29,11 @@ describe('<EditPolicy /> frozen phase', () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await initTestBed();
     });
 
     const { component } = testBed;
     component.update();
-  });
-
-  test('shows timing only when enabled', async () => {
-    const { actions, exists } = testBed;
-
-    expect(exists('frozen-phase')).toBe(true);
-    expect(actions.frozen.hasMinAgeInput()).toBeFalsy();
-    await actions.togglePhase('frozen');
-    expect(actions.frozen.hasMinAgeInput()).toBeTruthy();
   });
 
   describe('on non-enterprise license', () => {
@@ -49,7 +41,7 @@ describe('<EditPolicy /> frozen phase', () => {
       httpRequestsMockHelpers.setDefaultResponses();
 
       await act(async () => {
-        testBed = await setup({
+        testBed = await initTestBed({
           appServicesContext: {
             license: licensingMock.createLicense({ license: { type: 'basic' } }),
           },

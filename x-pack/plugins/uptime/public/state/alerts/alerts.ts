@@ -86,7 +86,7 @@ export const alertsReducer = handleActions<AlertState>(
 const showAlertDisabledSuccess = () => {
   kibanaService.core.notifications.toasts.addSuccess(
     i18n.translate('xpack.uptime.overview.alerts.disabled.success', {
-      defaultMessage: 'Alert successfully disabled!',
+      defaultMessage: 'Rule successfully disabled!',
     })
   );
 };
@@ -94,7 +94,7 @@ const showAlertDisabledSuccess = () => {
 const showAlertDisabledFailed = (err: Error) => {
   kibanaService.core.notifications.toasts.addError(err, {
     title: i18n.translate('xpack.uptime.overview.alerts.disabled.failed', {
-      defaultMessage: 'Alert cannot be disabled!',
+      defaultMessage: 'Rule cannot be disabled!',
     }),
   });
 };
@@ -157,7 +157,7 @@ export function* fetchAlertsEffect() {
     } catch (err) {
       kibanaService.core.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.uptime.overview.alerts.enabled.failed', {
-          defaultMessage: 'Alert cannot be enabled!',
+          defaultMessage: 'Rule cannot be enabled!',
         }),
       });
       yield put(createAlertAction.fail(err));

@@ -75,6 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show read-only badge`, async () => {
+        await PageObjects.common.navigateToActualUrl('observabilityCases');
         await PageObjects.observability.expectNoReadOnlyCallout();
       });
 
@@ -138,11 +139,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`landing page shows disabled "Create new case" button`, async () => {
         await PageObjects.common.navigateToActualUrl('observabilityCases');
-        await PageObjects.observability.expectCreateCaseButtonDisabled();
+        await PageObjects.observability.expectCreateCaseButtonMissing();
       });
 
-      it(`shows read-only callout`, async () => {
-        await PageObjects.observability.expectReadOnlyCallout();
+      it(`shows read-only glasses badge`, async () => {
+        await PageObjects.common.navigateToActualUrl('observabilityCases');
+        await PageObjects.observability.expectReadOnlyGlassesBadge();
       });
 
       it(`does not allow a case to be created`, async () => {
@@ -151,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // expect redirection to observability cases landing
-        await PageObjects.observability.expectCreateCaseButtonDisabled();
+        await PageObjects.observability.expectCreateCaseButtonMissing();
       });
 
       it(`does not allow a case to be edited`, async () => {
@@ -162,7 +164,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldUseHashForSubUrl: false,
           }
         );
-        await PageObjects.observability.expectAddCommentButtonDisabled();
+        await PageObjects.observability.expectAddCommentButtonMissing();
       });
     });
 

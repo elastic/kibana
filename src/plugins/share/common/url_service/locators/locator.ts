@@ -7,16 +7,27 @@
  */
 
 import type { SavedObjectReference } from 'kibana/server';
+import { DependencyList } from 'react';
 import type { PersistableState, SerializableState } from 'src/plugins/kibana_utils/common';
+import { useLocatorUrl } from './use_locator_url';
 import type {
   LocatorDefinition,
   LocatorPublic,
   KibanaLocation,
   LocatorNavigationParams,
+  LocatorGetUrlParams,
 } from './types';
 
 export interface LocatorDependencies {
+  /**
+   * Navigate without reloading the page to a KibanaLocation.
+   */
   navigate: (location: KibanaLocation, params?: LocatorNavigationParams) => Promise<void>;
+
+  /**
+   * Resolve a Kibana URL given KibanaLocation.
+   */
+  getUrl: (location: KibanaLocation, getUrlParams: LocatorGetUrlParams) => Promise<string>;
 }
 
 export class Locator<P extends SerializableState> implements PersistableState<P>, LocatorPublic<P> {
@@ -57,13 +68,29 @@ export class Locator<P extends SerializableState> implements PersistableState<P>
     return await this.definition.getLocation(params);
   }
 
+  public async getUrl(params: P, { absolute = false }: LocatorGetUrlParams = {}): Promise<string> {
+    const location = await this.getLocation(params);
+    const url = this.deps.getUrl(location, { absolute });
+
+    return url;
+  }
+
   public async navigate(
     params: P,
     { replace = false }: LocatorNavigationParams = {}
   ): Promise<void> {
     const location = await this.getLocation(params);
+
     await this.deps.navigate(location, {
       replace,
     });
   }
+
+  /* eslint-disable react-hooks/rules-of-hooks */
+  public readonly useUrl = (
+    params: P,
+    getUrlParams?: LocatorGetUrlParams,
+    deps: DependencyList = []
+  ): string => useLocatorUrl<P>(this, params, getUrlParams, deps);
+  /* eslint-enable react-hooks/rules-of-hooks */
 }

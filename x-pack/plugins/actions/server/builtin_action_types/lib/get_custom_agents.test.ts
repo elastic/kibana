@@ -30,7 +30,7 @@ describe('getCustomAgents', () => {
   test('get agents for valid proxy URL', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -44,7 +44,7 @@ describe('getCustomAgents', () => {
   test('return default agents for invalid proxy URL', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: ':nope: not a valid URL',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -64,7 +64,7 @@ describe('getCustomAgents', () => {
   test('returns non-proxy agents for matching proxyBypassHosts', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: new Set([targetHost]),
@@ -78,7 +78,7 @@ describe('getCustomAgents', () => {
   test('returns proxy agents for non-matching proxyBypassHosts', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: new Set([targetHost]),
@@ -96,7 +96,7 @@ describe('getCustomAgents', () => {
   test('returns proxy agents for matching proxyOnlyHosts', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -110,7 +110,7 @@ describe('getCustomAgents', () => {
   test('returns non-proxy agents for non-matching proxyOnlyHosts', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -128,7 +128,7 @@ describe('getCustomAgents', () => {
   test('handles custom host settings', () => {
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
-      tls: {
+      ssl: {
         verificationMode: 'none',
         certificateAuthoritiesData: 'ca data here',
       },
@@ -141,7 +141,7 @@ describe('getCustomAgents', () => {
   test('handles custom host settings with proxy', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: 'https://someproxyhost',
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -149,7 +149,7 @@ describe('getCustomAgents', () => {
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
-      tls: {
+      ssl: {
         verificationMode: 'none',
         certificateAuthoritiesData: 'ca data here',
       },
@@ -163,12 +163,12 @@ describe('getCustomAgents', () => {
   });
 
   test('handles overriding global verificationMode "none"', () => {
-    configurationUtilities.getTLSSettings.mockReturnValue({
+    configurationUtilities.getSSLSettings.mockReturnValue({
       verificationMode: 'none',
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
-      tls: {
+      ssl: {
         verificationMode: 'certificate',
       },
     });
@@ -181,12 +181,12 @@ describe('getCustomAgents', () => {
   });
 
   test('handles overriding global verificationMode "full"', () => {
-    configurationUtilities.getTLSSettings.mockReturnValue({
+    configurationUtilities.getSSLSettings.mockReturnValue({
       verificationMode: 'full',
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
-      tls: {
+      ssl: {
         verificationMode: 'none',
       },
     });
@@ -199,12 +199,12 @@ describe('getCustomAgents', () => {
   });
 
   test('handles overriding global verificationMode "none" with a proxy', () => {
-    configurationUtilities.getTLSSettings.mockReturnValue({
+    configurationUtilities.getSSLSettings.mockReturnValue({
       verificationMode: 'none',
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
-      tls: {
+      ssl: {
         verificationMode: 'full',
       },
     });
@@ -212,7 +212,7 @@ describe('getCustomAgents', () => {
       proxyUrl: 'https://someproxyhost',
       // note: this setting doesn't come into play, it's for the connection to
       // the proxy, not the target url
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,
@@ -226,12 +226,12 @@ describe('getCustomAgents', () => {
   });
 
   test('handles overriding global verificationMode "full" with a proxy', () => {
-    configurationUtilities.getTLSSettings.mockReturnValue({
+    configurationUtilities.getSSLSettings.mockReturnValue({
       verificationMode: 'full',
     });
     configurationUtilities.getCustomHostSettings.mockReturnValue({
       url: targetUrlCanonical,
-      tls: {
+      ssl: {
         verificationMode: 'none',
       },
     });
@@ -239,7 +239,7 @@ describe('getCustomAgents', () => {
       proxyUrl: 'https://someproxyhost',
       // note: this setting doesn't come into play, it's for the connection to
       // the proxy, not the target url
-      proxyTLSSettings: {
+      proxySSLSettings: {
         verificationMode: 'none',
       },
       proxyBypassHosts: undefined,

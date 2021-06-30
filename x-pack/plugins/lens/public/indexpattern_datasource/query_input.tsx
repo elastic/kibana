@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
 import { QueryStringInput, Query } from '../../../../../src/plugins/data/public';
 import { useDebouncedValue } from '../shared_components';
 
@@ -36,7 +37,11 @@ export const QueryInput = ({
       bubbleSubmitEvent={false}
       indexPatterns={[indexPatternTitle]}
       query={inputValue}
-      onChange={handleInputChange}
+      onChange={(newQuery) => {
+        if (!isEqual(newQuery, inputValue)) {
+          handleInputChange(newQuery);
+        }
+      }}
       onSubmit={() => {
         if (inputValue.query) {
           onSubmit();

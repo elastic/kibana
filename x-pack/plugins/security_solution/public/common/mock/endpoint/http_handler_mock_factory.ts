@@ -82,7 +82,8 @@ type HttpMethods = keyof Pick<
 const HTTP_METHODS: HttpMethods[] = ['delete', 'fetch', 'get', 'post', 'put', 'head', 'patch'];
 
 export type ApiHandlerMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> = (
-  http: jest.Mocked<HttpStart>
+  http: jest.Mocked<HttpStart>,
+  options?: { ignoreUnMockedApiRouteErrors?: boolean }
 ) => MockedApi<R>;
 
 interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> {
@@ -132,8 +133,9 @@ export type ApiHandlerMockFactoryProps<
 export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}>(
   mocks: ApiHandlerMockFactoryProps<R>
 ): ApiHandlerMock<R> => {
-  return (http) => {
+  return (http, options) => {
     let inflightApiCalls = 0;
+    const { ignoreUnMockedApiRouteErrors = false } = options ?? {};
     const apiDoneListeners: Array<() => void> = [];
     const markApiCallAsHandled = async (delay?: RouteMock['delay']) => {
       inflightApiCalls++;
@@ -219,6 +221,10 @@ export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}
           return responseProvider[routeMock.id](fetchOptions);
         } else if (priorMockedFunction) {
           return priorMockedFunction(...args);
+        }
+
+        if (ignoreUnMockedApiRouteErrors) {
+          return;
         }
 
         const err = new ApiRouteNotMocked(`API [${method.toUpperCase()} ${path}] is not MOCKED!`);

@@ -1,8 +1,8 @@
 [role="xpack"]
 [[alerting-setup]]
-== Alerting Setup
+== Alerting Set up
 ++++
-<titleabbrev>Setup</titleabbrev>
+<titleabbrev>Set up</titleabbrev>
 ++++
 
 The Alerting feature is automatically enabled in {kib}, but might require some additional configuration.

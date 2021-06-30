@@ -19,6 +19,8 @@ import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { getHostDetailsPageFilters } from './helpers';
 
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
 jest.mock('../../../common/containers/source', () => ({
@@ -78,7 +80,7 @@ describe('body', () => {
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <MemoryRouter initialEntries={[`/host-1/${path}`]}>
+          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
             <HostDetailsTabs
               isInitializing={false}
               detailName={'host-1'}

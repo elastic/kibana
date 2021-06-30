@@ -8,7 +8,7 @@
 import { capitalize, union } from 'lodash';
 import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../src/core/types/elasticsearch';
 import { createEsParams, useEsSearch } from './use_es_search';
 
 export interface Props {

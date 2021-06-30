@@ -187,12 +187,8 @@ async function migrateSourceToDest(context: Context) {
     await Index.write(
       client,
       dest.indexName,
-      await migrateRawDocs(
-        serializer,
-        documentMigrator.migrateAndConvert,
-        // @ts-expect-error @elastic/elasticsearch `Hit._id` may be a string | number in ES, but we always expect strings in the SO index.
-        docs
-      )
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      await migrateRawDocs(serializer, documentMigrator.migrateAndConvert, docs)
     );
   }
 }

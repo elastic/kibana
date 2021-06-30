@@ -6,9 +6,9 @@
  */
 
 import { get } from 'lodash/fp';
+import { ColumnHeaderOptions } from '../../../../../../common';
 
 import { BrowserFields } from '../../../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,

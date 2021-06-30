@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DropResult } from 'react-beautiful-dnd';
-
 import { kea, MakeLogicType } from 'kea';
 import { cloneDeep, isEqual, differenceBy } from 'lodash';
+
+import { DropResult } from '@elastic/eui';
 
 import {
   setSuccessMessage,
@@ -55,6 +55,10 @@ interface DisplaySettingsActions {
   setUrlField(urlField: string): string;
   setSubtitleField(subtitleField: string | null): string | null;
   setDescriptionField(descriptionField: string | null): string | null;
+  setTypeField(typeField: string | null): string | null;
+  setMediaTypeField(mediaTypeField: string | null): string | null;
+  setCreatedByField(createdByField: string | null): string | null;
+  setUpdatedByField(updatedByField: string | null): string | null;
   setColorField(hex: string): string;
   setDetailFields(result: DropResult): { result: DropResult };
   openEditDetailField(editFieldIndex: number | null): number | null;
@@ -70,6 +74,10 @@ interface DisplaySettingsActions {
   toggleTitleFieldHover(): void;
   toggleSubtitleFieldHover(): void;
   toggleDescriptionFieldHover(): void;
+  toggleTypeFieldHover(): void;
+  toggleMediaTypeFieldHover(): void;
+  toggleCreatedByFieldHover(): void;
+  toggleUpdatedByFieldHover(): void;
   toggleUrlFieldHover(): void;
 }
 
@@ -89,6 +97,10 @@ interface DisplaySettingsValues {
   urlFieldHover: boolean;
   subtitleFieldHover: boolean;
   descriptionFieldHover: boolean;
+  typeFieldHover: boolean;
+  mediaTypeFieldHover: boolean;
+  createdByFieldHover: boolean;
+  updatedByFieldHover: boolean;
   fieldOptions: OptionValue[];
   optionalFieldOptions: OptionValue[];
   availableFieldOptions: OptionValue[];
@@ -100,6 +112,10 @@ export const defaultSearchResultConfig = {
   subtitleField: '',
   descriptionField: '',
   urlField: '',
+  typeField: '',
+  mediaTypeField: '',
+  createdByField: '',
+  updatedByField: '',
   color: '#000000',
   detailFields: [],
 };
@@ -115,7 +131,11 @@ export const DisplaySettingsLogic = kea<
     setTitleField: (titleField: string) => titleField,
     setUrlField: (urlField: string) => urlField,
     setSubtitleField: (subtitleField: string | null) => subtitleField,
-    setDescriptionField: (descriptionField: string) => descriptionField,
+    setDescriptionField: (descriptionField: string | null) => descriptionField,
+    setTypeField: (typeField: string | null) => typeField,
+    setMediaTypeField: (mediaTypeField: string | null) => mediaTypeField,
+    setCreatedByField: (createdByField: string | null) => createdByField,
+    setUpdatedByField: (updatedByField: string | null) => updatedByField,
     setColorField: (hex: string) => hex,
     setDetailFields: (result: DropResult) => ({ result }),
     openEditDetailField: (editFieldIndex: number | null) => editFieldIndex,
@@ -128,6 +148,10 @@ export const DisplaySettingsLogic = kea<
     toggleTitleFieldHover: () => true,
     toggleSubtitleFieldHover: () => true,
     toggleDescriptionFieldHover: () => true,
+    toggleTypeFieldHover: () => true,
+    toggleMediaTypeFieldHover: () => true,
+    toggleCreatedByFieldHover: () => true,
+    toggleUpdatedByFieldHover: () => true,
     toggleUrlFieldHover: () => true,
     initializeDisplaySettings: () => true,
     setServerData: () => true,
@@ -180,6 +204,19 @@ export const DisplaySettingsLogic = kea<
         setDescriptionField: (searchResultConfig, descriptionField) => ({
           ...searchResultConfig,
           descriptionField,
+        }),
+        setTypeField: (searchResultConfig, typeField) => ({ ...searchResultConfig, typeField }),
+        setMediaTypeField: (searchResultConfig, mediaTypeField) => ({
+          ...searchResultConfig,
+          mediaTypeField,
+        }),
+        setCreatedByField: (searchResultConfig, createdByField) => ({
+          ...searchResultConfig,
+          createdByField,
+        }),
+        setUpdatedByField: (searchResultConfig, updatedByField) => ({
+          ...searchResultConfig,
+          updatedByField,
         }),
         setColorField: (searchResultConfig, color) => ({ ...searchResultConfig, color }),
         setDetailFields: (searchResultConfig, { result: { destination, source } }) => {
@@ -273,7 +310,31 @@ export const DisplaySettingsLogic = kea<
     descriptionFieldHover: [
       false,
       {
-        toggleDescriptionFieldHover: (addFieldModalVisible) => !addFieldModalVisible,
+        toggleDescriptionFieldHover: (descriptionFieldHover) => !descriptionFieldHover,
+      },
+    ],
+    typeFieldHover: [
+      false,
+      {
+        toggleTypeFieldHover: (typeFieldHover) => !typeFieldHover,
+      },
+    ],
+    mediaTypeFieldHover: [
+      false,
+      {
+        toggleMediaTypeFieldHover: (mediaTypeFieldHover) => !mediaTypeFieldHover,
+      },
+    ],
+    createdByFieldHover: [
+      false,
+      {
+        toggleCreatedByFieldHover: (createdByFieldHover) => !createdByFieldHover,
+      },
+    ],
+    updatedByFieldHover: [
+      false,
+      {
+        toggleUpdatedByFieldHover: (updatedByFieldHover) => !updatedByFieldHover,
       },
     ],
   },

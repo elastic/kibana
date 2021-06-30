@@ -233,7 +233,7 @@ describe('migrateRawDocsSafely', () => {
 
   test('instance of Either.left containing transform errors when the transform function throws a TransformSavedObjectDocument error', async () => {
     const transform = jest.fn<any, any>((doc: any) => {
-      throw new TransformSavedObjectDocumentError(new Error('error during transform'));
+      throw new TransformSavedObjectDocumentError(new Error('error during transform'), '8.0.0');
     });
     const task = migrateRawDocsSafely(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
@@ -247,7 +247,7 @@ describe('migrateRawDocsSafely', () => {
     expect(result.left.transformErrors.length).toEqual(1);
     expect(result.left.transformErrors[0]).toMatchInlineSnapshot(`
       Object {
-        "err": [Error: error during transform],
+        "err": [Error: Migration function for version 8.0.0 threw an error],
         "rawId": "a:b",
       }
     `);

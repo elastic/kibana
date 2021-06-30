@@ -7,7 +7,7 @@
  */
 
 import { mathColumn } from '../math_column';
-import { functionWrapper, testTable } from './utils';
+import { functionWrapper, testTable, tableWithNulls } from './utils';
 
 describe('mathColumn', () => {
   const fn = functionWrapper(mathColumn);
@@ -32,6 +32,30 @@ describe('mathColumn', () => {
       quantity: 100,
       time: 1517842800950,
     });
+  });
+
+  it('extracts a single array value, but not a multi-value array', () => {
+    const arrayTable = {
+      ...testTable,
+      rows: [
+        {
+          name: 'product1',
+          time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+          price: [605, 500],
+          quantity: [100],
+          in_stock: true,
+        },
+      ],
+    };
+    const args = {
+      id: 'output',
+      name: 'output',
+      expression: 'quantity',
+    };
+    expect(fn(arrayTable, args).rows[0].output).toEqual(100);
+    expect(() => fn(arrayTable, { ...args, expression: 'price' })).toThrowError(
+      `Cannot perform math on array values`
+    );
   });
 
   it('handles onError', () => {
@@ -70,5 +94,23 @@ describe('mathColumn', () => {
       name: 'name',
       meta: { type: 'date', params: { id: 'number', params: { digits: 2 } } },
     });
+  });
+
+  it('should correctly infer the type from the first non-null row', () => {
+    expect(
+      fn(tableWithNulls, { id: 'value', name: 'value', expression: 'price + 2', onError: 'null' })
+    ).toEqual(
+      expect.objectContaining({
+        type: 'datatable',
+        columns: [
+          ...tableWithNulls.columns,
+          expect.objectContaining({
+            id: 'value',
+            name: 'value',
+            meta: expect.objectContaining({ type: 'number' }),
+          }),
+        ],
+      })
+    );
   });
 });

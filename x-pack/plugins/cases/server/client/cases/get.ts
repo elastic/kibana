@@ -25,6 +25,8 @@ import {
   CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
   ENABLE_CASE_CONNECTOR,
+  CasesByAlertId,
+  CasesByAlertIdRt,
 } from '../../../common';
 import { countAlertsForID, createCaseError, flattenCaseSavedObject } from '../../common';
 import { CasesClientArgs } from '..';
@@ -35,7 +37,7 @@ import { CasesService } from '../../services';
 /**
  * Parameters for finding cases IDs using an alert ID
  */
-export interface CaseIDsByAlertIDParams {
+export interface CasesByAlertIDParams {
   /**
    * The alert ID to search for
    */
@@ -47,15 +49,15 @@ export interface CaseIDsByAlertIDParams {
 }
 
 /**
- * Case Client wrapper function for retrieving the case IDs that have a particular alert ID
+ * Case Client wrapper function for retrieving the case IDs and titles that have a particular alert ID
  * attached to them. This handles RBAC before calling the saved object API.
  *
  * @ignore
  */
-export const getCaseIDsByAlertID = async (
-  { alertID, options }: CaseIDsByAlertIDParams,
+export const getCasesByAlertID = async (
+  { alertID, options }: CasesByAlertIDParams,
   clientArgs: CasesClientArgs
-): Promise<string[]> => {
+): Promise<CasesByAlertId> => {
   const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
@@ -75,12 +77,15 @@ export const getCaseIDsByAlertID = async (
       Operations.getCaseIDsByAlertID.savedObjectType
     );
 
+    // This will likely only return one comment saved object, the response aggregation will contain
+    // the keys we need to retrieve the cases
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
       unsecuredSavedObjectsClient,
       alertId: alertID,
       filter,
     });
 
+    // make sure the comments returned have the right owner
     ensureSavedObjectsAreAuthorized(
       commentsWithAlert.saved_objects.map((comment) => ({
         owner: comment.attributes.owner,
@@ -88,7 +93,37 @@ export const getCaseIDsByAlertID = async (
       }))
     );
 
-    return CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
+    const caseIds = CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
+
+    // if we didn't find any case IDs then let's return early because there's nothing to request
+    if (caseIds.length <= 0) {
+      return [];
+    }
+
+    const casesInfo = await caseService.getCases({
+      unsecuredSavedObjectsClient,
+      caseIds,
+    });
+
+    // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
+    // just ignore it
+    const validCasesInfo = casesInfo.saved_objects.filter(
+      (caseInfo) => caseInfo.error === undefined
+    );
+
+    ensureSavedObjectsAreAuthorized(
+      validCasesInfo.map((caseInfo) => ({
+        owner: caseInfo.attributes.owner,
+        id: caseInfo.id,
+      }))
+    );
+
+    return CasesByAlertIdRt.encode(
+      validCasesInfo.map((caseInfo) => ({
+        id: caseInfo.id,
+        title: caseInfo.attributes.title,
+      }))
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed to get case IDs using alert ID: ${alertID} options: ${JSON.stringify(
@@ -138,7 +173,6 @@ export const get = async (
 
     let theCase: SavedObject<ESCaseAttributes>;
     let subCaseIds: string[] = [];
-
     if (ENABLE_CASE_CONNECTOR) {
       const [caseInfo, subCasesForCaseId] = await Promise.all([
         caseService.getCase({

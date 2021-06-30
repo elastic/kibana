@@ -15,6 +15,8 @@ import { TestProviders } from '../../../../common/mock';
 import { EndpointOverview } from './index';
 import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 
+jest.mock('../../../../common/lib/kibana');
+
 describe('EndpointOverview Component', () => {
   test('it renders with endpoint data', () => {
     const endpointData = {

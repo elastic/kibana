@@ -21,5 +21,6 @@ export default function spacesOnlyTestSuite({ loadTestFile }: FtrProviderContext
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./update_objects_spaces'));
+    loadTestFile(require.resolve('./disable_legacy_url_aliases'));
   });
 }

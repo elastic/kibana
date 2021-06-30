@@ -47,7 +47,7 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
 
   return (
     <WorkplaceSearchPageTemplate
-      pageChrome={[NAV.SETTINGS, NAV.SETTINGS_SOURCE_PRIORITIZATION, name]}
+      pageChrome={[NAV.SETTINGS, NAV.SETTINGS_SOURCE_PRIORITIZATION, name || '...']}
       isLoading={dataLoading}
     >
       <SaveConfig

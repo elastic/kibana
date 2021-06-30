@@ -23,6 +23,7 @@ import { ESTermQuery } from '../../common/typed_json';
 import { queryClient } from '../query_client';
 
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ResultsArgs {
   results: ResultEdges;
@@ -56,10 +57,8 @@ export const useActionResults = ({
   skip = false,
   isLive = false,
 }: UseActionResults) => {
-  const {
-    data,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { data } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
     ['actionResults', { actionId }],
@@ -103,9 +102,9 @@ export const useActionResults = ({
         aggregations: {
           totalResponded,
           // @ts-expect-error update types
-          successful: aggsBuckets.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
+          successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
           // @ts-expect-error update types
-          failed: aggsBuckets.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
+          failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
         },
         inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
@@ -124,8 +123,9 @@ export const useActionResults = ({
       refetchInterval: isLive ? 1000 : false,
       keepPreviousData: true,
       enabled: !skip && !!agentIds?.length,
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.action_results.fetchError', {
             defaultMessage: 'Error while fetching action results',
           }),

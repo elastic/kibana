@@ -226,13 +226,13 @@ describe('get()', () => {
       });
     });
 
-    test('logs audit event when getting an alert', async () => {
+    test('logs audit event when getting a rule', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       await alertsClient.get({ id: '1' });
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_get',
+            action: 'rule_get',
             outcome: 'success',
           }),
           kibana: { saved_object: { id: '1', type: 'alert' } },
@@ -240,7 +240,7 @@ describe('get()', () => {
       );
     });
 
-    test('logs audit event when not authorised to get an alert', async () => {
+    test('logs audit event when not authorised to get a rule', async () => {
       const alertsClient = new AlertsClient({ ...alertsClientParams, auditLogger });
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
@@ -248,7 +248,7 @@ describe('get()', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'alert_get',
+            action: 'rule_get',
             outcome: 'failure',
           }),
           kibana: {

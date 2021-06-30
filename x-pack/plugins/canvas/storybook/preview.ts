@@ -10,9 +10,6 @@ import { action } from '@storybook/addon-actions';
 import { startServices } from '../public/services/stubs';
 import { addDecorators } from './decorators';
 
-// Import the modules from the DLL.
-import './dll_contexts';
-
 // Import Canvas CSS
 import '../public/style/index.scss';
 

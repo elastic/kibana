@@ -5,7 +5,21 @@
  * 2.0.
  */
 
-import { convertToDate, addDocument, removeDocument } from './utils';
+import '../../__mocks__/engine_logic.mock';
+
+import { getCurationsBreadcrumbs, convertToDate, addDocument, removeDocument } from './utils';
+
+describe('getCurationsBreadcrumbs', () => {
+  it('generates curation-prefixed breadcrumbs', () => {
+    expect(getCurationsBreadcrumbs()).toEqual(['Engines', 'some-engine', 'Curations']);
+    expect(getCurationsBreadcrumbs(['Some page'])).toEqual([
+      'Engines',
+      'some-engine',
+      'Curations',
+      'Some page',
+    ]);
+  });
+});
 
 describe('convertToDate', () => {
   it('converts the English-only server timestamps to a parseable Date', () => {

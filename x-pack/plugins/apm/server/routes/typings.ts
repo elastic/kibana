@@ -29,6 +29,7 @@ export type InspectResponse = Array<{
   requestType: string;
   requestParams: Record<string, unknown>;
   esError: Error;
+  operationName: string;
 }>;
 
 export interface APMRouteCreateOptions {
@@ -39,6 +40,8 @@ export interface APMRouteCreateOptions {
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
     >;
+    body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
+    disableTelemetry?: boolean;
   };
 }
 

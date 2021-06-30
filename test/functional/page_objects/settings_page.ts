@@ -739,6 +739,10 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.click('editFieldFormat');
   }
 
+  async clickCloseEditFieldFormatFlyout() {
+    await this.testSubjects.click('euiFlyoutCloseButton');
+  }
+
   async associateIndexPattern(oldIndexPatternId: string, newIndexPatternTitle: string) {
     await this.find.clickByCssSelector(
       `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >
