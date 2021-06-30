@@ -23,7 +23,7 @@ import { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export const PackagePolicyActionsMenu: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
-  viewDataStep: EuiStepInterface;
+  viewDataStep?: EuiStepInterface;
 }> = ({ agentPolicy, packagePolicy, viewDataStep }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();

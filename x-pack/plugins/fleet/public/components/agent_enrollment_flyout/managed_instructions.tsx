@@ -114,7 +114,7 @@ export const ManagedInstructions = React.memo<Props>(
       }
 
       if (viewDataStep) {
-        baseSteps.push(viewDataStep);
+        baseSteps.push({ 'data-test-subj': 'view-data-step', ...viewDataStep });
       }
 
       return baseSteps;

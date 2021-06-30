@@ -9,7 +9,7 @@ import './agent_enrollment_flyout.test.mocks';
 
 import React from 'react';
 import { registerTestBed } from '@kbn/test/jest';
-import { act } from '@testing-library/react';
+import { act, prettyDOM } from '@testing-library/react';
 
 import { coreMock } from 'src/core/public/mocks';
 
@@ -21,7 +21,7 @@ import { FleetStatusProvider, ConfigContext } from '../../hooks';
 
 import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 
-import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep, ViewDataStep } from './steps';
+import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep } from './steps';
 
 import type { Props } from '.';
 import { AgentEnrollmentFlyout } from '.';
@@ -130,23 +130,24 @@ describe('<AgentEnrollmentFlyout />', () => {
     });
 
     describe('"View data" extension point', () => {
-      it('calls the "View data" step when UI extension is provided', async () => {
+      it('shows the "View data" step when UI extension is provided', async () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
             agentPolicies: [],
             onClose: jest.fn(),
-            viewDataStepContent: <div />,
+            viewDataStep: { title: 'View Data', children: <div /> },
           });
           testBed.component.update();
         });
         const { exists, actions } = testBed;
         expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(ViewDataStep).toHaveBeenCalled();
+        expect(exists('view-data-step')).toBe(true);
 
         jest.clearAllMocks();
         actions.goToStandaloneTab();
-        expect(ViewDataStep).not.toHaveBeenCalled();
+        expect(exists('agentEnrollmentFlyout')).toBe(true);
+        expect(exists('view-data-step')).toBe(false);
       });
 
       it('does not call the "View data" step when UI extension is not provided', async () => {
@@ -155,17 +156,17 @@ describe('<AgentEnrollmentFlyout />', () => {
           testBed = await setup({
             agentPolicies: [],
             onClose: jest.fn(),
-            viewDataStepContent: undefined,
+            viewDataStep: undefined,
           });
           testBed.component.update();
         });
         const { exists, actions } = testBed;
         expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(ViewDataStep).not.toHaveBeenCalled();
+        expect(exists('view-data-step')).toBe(false);
 
         jest.clearAllMocks();
         actions.goToStandaloneTab();
-        expect(ViewDataStep).not.toHaveBeenCalled();
+        expect(exists('view-data-step')).toBe(false);
       });
     });
   });
