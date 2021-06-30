@@ -36,6 +36,7 @@ export interface TagListProps {
 
 const MyFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
+    width: 100%;
     margin-top: ${theme.eui.euiSizeM};
     p {
       font-size: ${theme.eui.euiSizeM};
@@ -46,9 +47,9 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 const ColumnFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
     & {
+      max-width: 100%;
       @media only screen and (max-width: ${theme.eui.euiBreakpoints.m}) {
         flex-direction: row;
-        max-width: 100%;
       }
     }
   `}
