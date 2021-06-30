@@ -22,7 +22,7 @@ import { OnSaveProps } from '../../../../../src/plugins/saved_objects/public';
 import { syncQueryStateWithUrl } from '../../../../../src/plugins/data/public';
 import { LensAppProps, LensAppServices } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import { LensByReferenceInput } from '../editor_frame_service/embeddable';
+import { LensByReferenceInput } from '../embeddable';
 import { EditorFrameInstance } from '../types';
 import {
   setState as setAppState,
