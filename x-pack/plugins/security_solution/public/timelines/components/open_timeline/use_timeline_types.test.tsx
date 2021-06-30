@@ -31,6 +31,22 @@ jest.mock('../../../common/components/link_to', () => {
   };
 });
 
+jest.mock('../../../../../../../src/plugins/kibana_react/public', () => {
+  const originalModule = jest.requireActual('../../../../../../../src/plugins/kibana_react/public');
+  const useKibana = jest.fn().mockImplementation(() => ({
+    services: {
+      application: {
+        navigateToUrl: jest.fn(),
+      },
+    },
+  }));
+
+  return {
+    ...originalModule,
+    useKibana,
+  };
+});
+
 describe('useTimelineTypes', () => {
   it('init', async () => {
     await act(async () => {
