@@ -51,6 +51,7 @@ export const alertType: AlertType<
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   defaultActionGroupId: 'default',
   recoveryActionGroup: {
     id: 'hasLandedBackOnEarth',

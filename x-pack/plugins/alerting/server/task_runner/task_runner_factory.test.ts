@@ -26,6 +26,7 @@ const alertType: UntypedNormalizedAlertType = {
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   recoveryActionGroup: {
     id: 'recovered',
     name: 'Recovered',

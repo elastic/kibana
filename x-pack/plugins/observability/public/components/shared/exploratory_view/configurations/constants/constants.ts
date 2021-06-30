@@ -49,6 +49,7 @@ import {
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
 export const RECORDS_FIELD = 'Records';
+export const RECORDS_PERCENTAGE_FIELD = 'RecordsPercentage';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': BROWSER_FAMILY_LABEL,

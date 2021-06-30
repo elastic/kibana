@@ -19,7 +19,7 @@ import {
 } from '../../../../../core/public';
 import { ISavedObjectsManagementServiceRegistry } from '../../services';
 import { Header, NotFoundErrors, Intro, Form } from './components';
-import { canViewInApp, findObject } from '../../lib';
+import { canViewInApp, bulkGetObjects } from '../../lib';
 import { SubmittedFormData } from '../types';
 import { SavedObjectWithMetadata } from '../../types';
 
@@ -41,6 +41,11 @@ interface SavedObjectEditionState {
   object?: SavedObjectWithMetadata<any>;
 }
 
+const unableFindSavedObjectNotificationMessage = i18n.translate(
+  'savedObjectsManagement.objectView.unableFindSavedObjectNotificationMessage',
+  { defaultMessage: 'Unable to find saved object' }
+);
+
 export class SavedObjectEdition extends Component<
   SavedObjectEditionProps,
   SavedObjectEditionState
@@ -58,13 +63,26 @@ export class SavedObjectEdition extends Component<
   }
 
   componentDidMount() {
-    const { http, id } = this.props;
+    const { http, id, notifications } = this.props;
     const { type } = this.state;
-    findObject(http, type, id).then((object) => {
-      this.setState({
-        object,
+    bulkGetObjects(http, [{ type, id }])
+      .then(([object]) => {
+        if (object.error) {
+          const { message } = object.error;
+          notifications.toasts.addDanger({
+            title: unableFindSavedObjectNotificationMessage,
+            text: message,
+          });
+        } else {
+          this.setState({ object });
+        }
+      })
+      .catch((err) => {
+        notifications.toasts.addDanger({
+          title: unableFindSavedObjectNotificationMessage,
+          text: err.message ?? 'Unknown error',
+        });
       });
-    });
   }
 
   render() {

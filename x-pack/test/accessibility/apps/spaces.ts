@@ -114,7 +114,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // test starts with deleting space b so we can get the space selection page instead of logging out in the test
-    it('a11y test for space selection page', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/100968
+    it.skip('a11y test for space selection page', async () => {
       await PageObjects.spaceSelector.confirmDeletingSpace();
       await a11y.testAppSnapshot();
       await PageObjects.spaceSelector.clickSpaceCard('default');
