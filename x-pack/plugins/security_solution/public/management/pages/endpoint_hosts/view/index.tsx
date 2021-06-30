@@ -251,6 +251,7 @@ export const EndpointList = () => {
     return [
       {
         field: 'metadata',
+        width: '15%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
@@ -370,6 +371,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.host.ip',
+        width: '12%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.ip', {
           defaultMessage: 'IP Address',
         }),
@@ -388,7 +390,7 @@ export const EndpointList = () => {
       },
       {
         field: 'metadata.agent.version',
-        width: '5%',
+        width: '9%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.endpointVersion', {
           defaultMessage: 'Version',
         }),
@@ -396,6 +398,7 @@ export const EndpointList = () => {
       {
         field: 'metadata.@timestamp',
         name: lastActiveColumnName,
+        width: '9%',
         render(dateValue: HostInfo['metadata']['@timestamp']) {
           return (
             <FormattedDate
@@ -408,7 +411,7 @@ export const EndpointList = () => {
       },
       {
         field: '',
-        width: '5%',
+        width: '8%',
         name: i18n.translate('xpack.securitySolution.endpoint.list.actions', {
           defaultMessage: 'Actions',
         }),
