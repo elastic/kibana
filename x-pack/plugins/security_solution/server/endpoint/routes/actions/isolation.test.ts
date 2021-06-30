@@ -384,7 +384,7 @@ describe('Host Isolation', () => {
 
       it('logs a comment to the provided cases', async () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
-          body: { agent_ids: ['XYZ'], case_ids: ['one', 'two'] },
+          body: { endpoint_ids: ['XYZ'], case_ids: ['one', 'two'] },
         });
 
         expect(casesClient.attachments.add).toHaveBeenCalledTimes(2);
@@ -395,7 +395,7 @@ describe('Host Isolation', () => {
 
       it('logs a comment to any cases associated with the given alerts', async () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
-          body: { agent_ids: ['XYZ'], alert_ids: ['one', 'two'] },
+          body: { endpoint_ids: ['XYZ'], alert_ids: ['one', 'two'] },
         });
 
         expect(getCaseIdsFromAttachmentAddService()).toEqual(
@@ -407,7 +407,7 @@ describe('Host Isolation', () => {
         await callRoute(ISOLATE_HOST_ROUTE, {
           // 'case-1` provided on `case_ids` should be dedupped
           body: {
-            agent_ids: ['XYZ'],
+            endpoint_ids: ['XYZ'],
             case_ids: ['ONE', 'TWO', 'case-1'],
             alert_ids: ['one', 'two'],
           },
