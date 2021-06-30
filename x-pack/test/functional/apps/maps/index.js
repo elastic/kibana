@@ -20,7 +20,11 @@ export default function ({ loadTestFile, getService }) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
       );
-      //Find the missing references manually, use the below API to delete it after successful import.
+      // Functional tests verify behavior when referenced index pattern saved objects can not be found.
+      // However, saved object import fails when reference saved objects can not be found.
+      // To prevent import errors, index pattern saved object references exist during import
+      // but are then deleted afterwards to enable testing of missing reference index pattern saved objects.
+
       log.info('Delete index pattern');
       log.debug('id: ' + 'idThatDoesNotExitForESGeoGridSource');
       log.debug('id: ' + 'idThatDoesNotExitForESSearchSource');

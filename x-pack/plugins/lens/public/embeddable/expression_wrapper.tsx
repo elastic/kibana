@@ -17,8 +17,8 @@ import {
 import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import classNames from 'classnames';
-import { getOriginalRequestErrorMessages } from '../error_helper';
-import { ErrorMessage } from '../types';
+import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
+import { ErrorMessage } from '../editor_frame_service/types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
