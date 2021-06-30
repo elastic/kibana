@@ -14,13 +14,13 @@ image:images/rules-and-connectors-ui.png[Example rule listing in the Rules and C
 For more information on alerting concepts and the types of rules and connectors available, see <<alerting-getting-started>>.
 
 [float]
-=== Alerting statuses
+=== Rule status
 
-There are could be a multiple status values for the rule:
+A rule can have one of the following statuses:
 
 `active`:: The conditions for the rule have been met, and the associated actions should be invoked.
 `ok`:: The conditions for the rule had previously been met, but no longer are being met. Changed to `recovered` in a 7.14 release.
-`error`:: An error was encountered when the rule was executed.
+`error`:: An error was encountered during rule execution.
 `pending`:: The rule has not yet executed; it was either just created, or just enabled after being disabled.
 `unknown`:: Fallback internally when calculating the status; if this is observed, there is likely some kind of problem with the alerting code.
 
