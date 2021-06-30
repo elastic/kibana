@@ -57,8 +57,8 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
   const params = {
     index: Object.values(indexPatterns),
     size: 0,
-    ignoreUnavailable: true,
-    filterPath: ['aggregations.indices.buckets'],
+    ignore_unavailable: true,
+    filter_path: ['aggregations.indices.buckets'],
     body: {
       query: {
         bool: {
@@ -206,8 +206,8 @@ async function doesIndexExist(req, index) {
     index,
     size: 0,
     terminate_after: 1,
-    ignoreUnavailable: true,
-    filterPath: ['hits.total.value'],
+    ignore_unavailable: true,
+    filter_path: ['hits.total.value'],
   };
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);

@@ -34,10 +34,9 @@ export async function fetchCpuUsageNodeStats(
   // Using pure MS didn't seem to work well with the date_histogram interval
   // but minutes does
   const intervalInMinutes = moment.duration(endMs - startMs).asMinutes();
-  const filterPath = ['aggregations'];
   const params = {
     index,
-    filterPath,
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {

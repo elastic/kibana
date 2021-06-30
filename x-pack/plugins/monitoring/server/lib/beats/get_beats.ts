@@ -121,8 +121,8 @@ export async function getBeats(req: LegacyRequest, beatsIndexPattern: string, cl
   const params = {
     index: beatsIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       // only filter path can filter for inner_hits
       'hits.hits._source.beats_stats.beat.uuid',
       'hits.hits._source.beat.stats.beat.uuid',

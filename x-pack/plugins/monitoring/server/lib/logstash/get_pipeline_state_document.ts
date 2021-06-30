@@ -42,7 +42,7 @@ export async function getPipelineStateDocument(
   const params = {
     index: logstashIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       _source: { excludes: 'logstash_state.pipeline.representation.plugins' },
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },

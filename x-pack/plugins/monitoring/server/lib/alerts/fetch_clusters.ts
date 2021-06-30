@@ -23,7 +23,7 @@ export async function fetchClusters(
 ): Promise<AlertCluster[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.cluster_name',
@@ -70,7 +70,7 @@ export async function fetchClustersLegacy(
 ): Promise<AlertCluster[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_settings.cluster.metadata.display_name',
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.cluster_name',

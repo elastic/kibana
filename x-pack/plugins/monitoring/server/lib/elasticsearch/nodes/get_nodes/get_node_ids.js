@@ -17,8 +17,8 @@ export async function getNodeIds(req, indexPattern, { clusterUuid }, size) {
   const params = {
     index: indexPattern,
     size: 0,
-    ignoreUnavailable: true,
-    filterPath: ['aggregations.composite_data.buckets'],
+    ignore_unavailable: true,
+    filter_path: ['aggregations.composite_data.buckets'],
     body: {
       query: createQuery({
         type: 'node_stats',

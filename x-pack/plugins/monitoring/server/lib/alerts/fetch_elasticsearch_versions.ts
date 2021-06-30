@@ -16,7 +16,7 @@ export async function fetchElasticsearchVersions(
 ): Promise<AlertVersions[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.cluster_stats.nodes.versions',
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',

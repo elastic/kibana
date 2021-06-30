@@ -66,8 +66,8 @@ export function getClustersState(
   const params = {
     index: esIndexPattern,
     size: clusterUuids.length,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._source.cluster_state',
