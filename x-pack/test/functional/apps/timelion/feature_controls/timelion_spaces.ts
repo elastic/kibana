@@ -25,15 +25,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
         // await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
-
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
         );
+
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
           disabledFeatures: [],
         });
+
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion_custom_space.json',
+          { space: 'custom_space' }
+        );
       });
 
       after(async () => {
@@ -47,12 +52,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
+
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Timelion');
       });
 
       it(`allows a timelion sheet to be created`, async () => {
-        await PageObjects.common.navigateToApp('timelion');
+        await PageObjects.common.navigateToApp('timelion', {
+          basePath: '/s/custom_space',
+        });
+
         await PageObjects.timelion.saveTimelionSheet();
       });
     });
@@ -61,17 +70,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         // we need to load the following in every situation as deleting
         // a space deletes all of the associated saved objects
-        await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
+        // await esArchiver.load('x-pack/test/functional/es_archives/timelion/feature_controls');
+
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+        );
+
         await spacesService.create({
           id: 'custom_space',
           name: 'custom_space',
           disabledFeatures: ['timelion'],
         });
+
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion_custom_space.json',
+          { space: 'custom_space' }
+        );
       });
 
       after(async () => {
         await spacesService.delete('custom_space');
-        await esArchiver.unload('x-pack/test/functional/es_archives/timelion/feature_controls');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/timelion.json'
+        );
       });
 
       it(`doesn't show timelion navlink`, async () => {
