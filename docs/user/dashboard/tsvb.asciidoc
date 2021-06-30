@@ -32,7 +32,7 @@ By default, *TSVB* drops the last bucket because the time filter intersects the 
 
 [float]
 [[tsvb-index-pattern-mode]]
-==== TSVB Index pattern mode
+==== Index pattern mode
 Create *TSVB* visualizations with {kib} index patterns. 
 
 IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release.
