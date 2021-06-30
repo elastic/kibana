@@ -37,7 +37,7 @@ import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
-import { EditPanelAction } from '../actions';
+import { EditPanelAction, QuickEditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
@@ -94,6 +94,7 @@ interface BasePanelActions {
   inspectPanel: InspectPanelAction;
   removePanel: RemovePanelAction;
   editPanel: EditPanelAction;
+  quickEditPanel: QuickEditPanelAction;
 }
 
 const emptyObject = {};
@@ -370,6 +371,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       removePanel: new RemovePanelAction(),
       editPanel: new EditPanelAction(
         this.props.getEmbeddableFactory,
+        this.props.application,
+        this.props.stateTransfer
+      ),
+      quickEditPanel: new QuickEditPanelAction(
+        this.props.overlays,
         this.props.application,
         this.props.stateTransfer
       ),
