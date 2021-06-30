@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReportingStart } from '../../../reporting/public';
+import { ReportingStart } from '../../../../reporting/public';
 import { CanvasServiceFactory } from './';
 
 export interface ReportingService {
