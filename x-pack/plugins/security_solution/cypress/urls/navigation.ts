@@ -7,7 +7,12 @@
 
 export const ALERTS_URL = 'app/security/alerts';
 export const DETECTIONS_RULE_MANAGEMENT_URL = 'app/security/rules';
-export const detectionsRuleDetailsUrl = (ruleId: string) => `app/security/rules/id/${ruleId}`;
+export const ruleDetailsUrl = (ruleId: string) => `app/security/rules/id/${ruleId}`;
+export const detectionsRuleDetailsUrl = (ruleId: string) =>
+  `app/security/detections/rules/id/${ruleId}`;
+
+export const ruleEditUrl = (ruleId: string) => `${ruleDetailsUrl(ruleId)}/edit`;
+export const detectionRuleEditUrl = (ruleId: string) => `${detectionsRuleDetailsUrl(ruleId)}/edit`;
 
 export const CASES_URL = '/app/security/cases';
 export const DETECTIONS = '/app/siem#/detections';
