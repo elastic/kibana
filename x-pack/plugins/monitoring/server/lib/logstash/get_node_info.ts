@@ -45,8 +45,8 @@ export function getNodeInfo(
   const params = {
     index: lsIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.logstash_stats.events',
       'hits.hits._source.logstash.node.stats.events',
       'hits.hits._source.logstash_stats.jvm.uptime_in_millis',

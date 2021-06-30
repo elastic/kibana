@@ -116,8 +116,8 @@ export function buildGetIndicesQuery(
   return {
     index: esIndexPattern,
     size,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       // only filter path can filter for inner_hits
       'hits.hits._source.index_stats.index',
       'hits.hits._source.elasticsearch.index.name',

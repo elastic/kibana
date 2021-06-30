@@ -19,7 +19,7 @@ import { FieldsType } from '../types';
  *
  * @param fieldsValue The fields value that contains the nested field or not.
  * @param valueInMergedDocument The document to compare against fields value to see if it is also an array or not
- * @returns
+ * @returns The unboxed fields if any
  */
 export const recursiveUnboxingFields = (
   fieldsValue: FieldsType | FieldsType[0],
