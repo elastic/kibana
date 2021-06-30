@@ -769,9 +769,7 @@ export class IndexPattern implements IIndexPattern {
     // (undocumented)
     getAggregationRestrictions(): Record<string, Record<string, {
         agg?: string | undefined;
-        interval?: number | undefined; /**
-         * Get last saved saved object fields
-         */
+        interval?: number | undefined;
         fixed_interval?: string | undefined;
         calendar_interval?: string | undefined;
         delay?: string | undefined;
