@@ -46,6 +46,10 @@ describe('When using the Endpoint Details Actions Menu', () => {
     // Safe to mutate this mocked data
     // @ts-ignore
     endpointHost.metadata.Endpoint.state.isolation = isolation;
+    // @ts-ignore
+    endpointHost.metadata.host.os.name = 'Windows';
+    // @ts-ignore
+    endpointHost.metadata.agent.version = '7.14.0';
     httpMocks.responseProvider.metadataDetails.mockReturnValue(endpointHost);
   };
 

@@ -32,6 +32,7 @@ describe('RelevanceTuningLogic', () => {
       ],
     },
     search_fields: {},
+    precision: 10,
   };
   const schema = {};
   const schemaConflicts = {};
@@ -60,6 +61,7 @@ describe('RelevanceTuningLogic', () => {
     searchSettings: {
       boosts: {},
       search_fields: {},
+      precision: 2,
     },
     unsavedChanges: false,
     filterInputValue: '',
@@ -222,6 +224,21 @@ describe('RelevanceTuningLogic', () => {
           ...DEFAULT_VALUES,
           searchSettings,
           unsavedChanges: false,
+        });
+      });
+    });
+
+    describe('updatePrecision', () => {
+      it('should set precision inside search settings', () => {
+        mount();
+        RelevanceTuningLogic.actions.updatePrecision(9);
+
+        expect(RelevanceTuningLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          searchSettings: {
+            ...DEFAULT_VALUES.searchSettings,
+            precision: 9,
+          },
         });
       });
     });
