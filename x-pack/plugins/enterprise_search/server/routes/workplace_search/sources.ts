@@ -25,7 +25,7 @@ const pageSchema = schema.object({
   current: schema.nullable(schema.number()),
   size: schema.nullable(schema.number()),
   total_pages: schema.nullable(schema.number()),
-  total_results: schema.number(),
+  total_results: schema.nullable(schema.number()),
 });
 
 const oauthConfigSchema = schema.object({
@@ -45,9 +45,13 @@ const displayFieldSchema = schema.object({
 
 const displaySettingsSchema = schema.object({
   titleField: schema.maybe(schema.string()),
-  subtitleField: schema.maybe(schema.string()),
-  descriptionField: schema.maybe(schema.string()),
+  subtitleField: schema.nullable(schema.string()),
+  descriptionField: schema.nullable(schema.string()),
   urlField: schema.maybe(schema.string()),
+  typeField: schema.nullable(schema.string()),
+  mediaTypeField: schema.nullable(schema.string()),
+  createdByField: schema.nullable(schema.string()),
+  updatedByField: schema.nullable(schema.string()),
   color: schema.string(),
   urlFieldIsLinkable: schema.boolean(),
   detailFields: schema.oneOf([schema.arrayOf(displayFieldSchema), displayFieldSchema]),

@@ -36,7 +36,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-          "lineNumber": 21
+          "lineNumber": 23
         },
         "deprecated": false,
         "children": [
@@ -52,7 +52,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-              "lineNumber": 22
+              "lineNumber": 24
             },
             "deprecated": false,
             "children": [
@@ -68,7 +68,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-                  "lineNumber": 22
+                  "lineNumber": 24
                 },
                 "deprecated": false,
                 "isRequired": true
@@ -89,7 +89,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-              "lineNumber": 29
+              "lineNumber": 31
             },
             "deprecated": false,
             "children": [
@@ -102,7 +102,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-                  "lineNumber": 29
+                  "lineNumber": 31
                 },
                 "deprecated": false,
                 "children": [
@@ -118,7 +118,7 @@
                     ],
                     "source": {
                       "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-                      "lineNumber": 29
+                      "lineNumber": 31
                     },
                     "deprecated": false
                   }
@@ -140,7 +140,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-              "lineNumber": 60
+              "lineNumber": 73
             },
             "deprecated": false,
             "children": [
@@ -153,7 +153,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-                  "lineNumber": 60
+                  "lineNumber": 73
                 },
                 "deprecated": false,
                 "children": [
@@ -169,7 +169,7 @@
                     ],
                     "source": {
                       "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-                      "lineNumber": 60
+                      "lineNumber": 73
                     },
                     "deprecated": false
                   }
@@ -190,7 +190,7 @@
             ],
             "source": {
               "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-              "lineNumber": 92
+              "lineNumber": 105
             },
             "deprecated": false,
             "children": [
@@ -203,7 +203,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-                  "lineNumber": 92
+                  "lineNumber": 105
                 },
                 "deprecated": false,
                 "children": [
@@ -219,7 +219,7 @@
                     ],
                     "source": {
                       "path": "x-pack/plugins/rule_registry/server/rule_data_client/index.ts",
-                      "lineNumber": 92
+                      "lineNumber": 105
                     },
                     "deprecated": false
                   }
@@ -251,7 +251,9 @@
           },
           "; logger: ",
           "Logger",
-          "; }) => <TParams extends Record<string, unknown>, TAlertInstanceContext extends { [x: string]: unknown; }, TServices extends { alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext>; }>(type: ",
+          "; }) => <TParams extends Record<string, unknown>, TAlertInstanceContext extends { [x: string]: unknown; }, TServices extends { alertWithLifecycle: ",
+          "LifecycleAlertService",
+          "<TAlertInstanceContext>; }>(type: ",
           "AlertTypeWithExecutor",
           "<TParams, TAlertInstanceContext, TServices>) => { executor: (options: ",
           {
@@ -303,7 +305,7 @@
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
-          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; }"
+          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; isExportable: boolean; }"
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_rule_type_factory.ts",
@@ -412,7 +414,7 @@
             "section": "def-common.ActionVariable",
             "text": "ActionVariable"
           },
-          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; }"
+          "[] | undefined; } | undefined; minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\"; isExportable: boolean; }"
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_factory.ts",
@@ -893,7 +895,7 @@
         "signature": [
           "(input: unknown) => OutputOf<",
           "Optional",
-          "<{ readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"kibana.rac.alert.uuid\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\">>"
+          "<{ readonly \"kibana.rac.alert.producer\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.uuid\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.id\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.rac.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.severity.level\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.severity.value\": { readonly type: \"long\"; }; readonly \"kibana.rac.alert.status\": { readonly type: \"keyword\"; }; readonly \"kibana.rac.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly \"kibana.rac.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.uuid': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.id': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.name': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'rule.category': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }, \"tags\" | \"event.kind\" | \"event.action\" | \"rule.uuid\" | \"rule.id\" | \"rule.name\" | \"rule.category\" | \"kibana.rac.alert.producer\" | \"kibana.rac.alert.id\" | \"kibana.rac.alert.uuid\" | \"kibana.rac.alert.start\" | \"kibana.rac.alert.end\" | \"kibana.rac.alert.duration.us\" | \"kibana.rac.alert.severity.level\" | \"kibana.rac.alert.severity.value\" | \"kibana.rac.alert.status\" | \"kibana.rac.alert.evaluation.threshold\" | \"kibana.rac.alert.evaluation.value\">>"
         ],
         "source": {
           "path": "x-pack/plugins/rule_registry/common/parse_technical_fields.ts",
