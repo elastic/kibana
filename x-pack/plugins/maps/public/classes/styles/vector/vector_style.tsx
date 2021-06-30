@@ -595,21 +595,25 @@ export class VectorStyle implements IVectorStyle {
       return styleMeta;
     }
 
-    dynamicProperties.forEach((dynamicProperty) => {
-      const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
-      const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
-      const name = dynamicProperty.getFieldName();
-      if (!styleMeta.fieldMeta[name]) {
-        styleMeta.fieldMeta[name] = {};
-      }
-      if (categoricalStyleMeta) {
-        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
-      }
+    dynamicProperties.forEach(
+      (dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>) => {
+        const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(
+          features
+        );
+        const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
+        const name = dynamicProperty.getFieldName();
+        if (!styleMeta.fieldMeta[name]) {
+          styleMeta.fieldMeta[name] = {};
+        }
+        if (categoricalStyleMeta) {
+          styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
+        }
 
-      if (ordinalStyleMeta) {
-        styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+        if (ordinalStyleMeta) {
+          styleMeta.fieldMeta[name].range = ordinalStyleMeta;
+        }
       }
-    });
+    );
 
     return styleMeta;
   }

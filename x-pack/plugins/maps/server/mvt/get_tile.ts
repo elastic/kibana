@@ -119,7 +119,17 @@ export async function getGridTile({
 
       const rangeMeta: { [key: string]: RangeFieldMeta } = {};
       fieldNames.forEach((fieldName: string) => {
-        const metaForField = pluckRangeFieldMeta(features, fieldName);
+        const metaForField = pluckRangeFieldMeta(features, fieldName, (rawValue: unknown) => {
+          if (fieldName === COUNT_PROP_NAME) {
+            return parseFloat(rawValue as string);
+          } else if (typeof rawValue === 'number') {
+            return rawValue;
+          } else if (rawValue) {
+            return parseFloat((rawValue as { value: string }).value);
+          } else {
+            return NaN;
+          }
+        });
         if (metaForField) {
           rangeMeta[fieldName] = metaForField;
         }

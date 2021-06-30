@@ -105,7 +105,7 @@ export interface ILayer {
   getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
   getDescriptor(): LayerDescriptor;
   getGeoFieldNames(): string[];
-  getStyleMetaDescriptor(): Promise<StyleMetaDescriptor | null>;
+  getStyleMetaDescriptorFromLocal(): Promise<StyleMetaDescriptor | null>;
 }
 
 export type CustomIconAndTooltipContent = {
@@ -524,7 +524,7 @@ export class AbstractLayer implements ILayer {
     return source.isESSource() ? [(source as IESSource).getGeoFieldName()] : [];
   }
 
-  async getStyleMetaDescriptor(): Promise<StyleMetaDescriptor | null> {
+  async getStyleMetaDescriptorFromLocal(): Promise<StyleMetaDescriptor | null> {
     return null;
   }
 }

@@ -370,7 +370,7 @@ export class TiledVectorLayer extends VectorLayer {
     return null;
   }
 
-  async getStyleMetaDescriptor(): Promise<StyleMetaDescriptor | null> {
+  async getStyleMetaDescriptorFromLocal(): Promise<StyleMetaDescriptor | null> {
     const style = this.getCurrentStyle();
     if (!style) {
       return null;

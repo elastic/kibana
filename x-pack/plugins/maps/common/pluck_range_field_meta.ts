@@ -8,12 +8,16 @@
 import { Feature } from 'geojson';
 import { RangeFieldMeta } from './descriptor_types';
 
-export function pluckRangeFieldMeta(features: Feature[], name: string): RangeFieldMeta | null {
+export function pluckRangeFieldMeta(
+  features: Feature[],
+  name: string,
+  parseValue: (rawValue: unknown) => number
+): RangeFieldMeta | null {
   let min = Infinity;
   let max = -Infinity;
   for (let i = 0; i < features.length; i++) {
     const feature = features[i];
-    const newValue = parseFloat(feature.properties ? feature.properties[name] : null);
+    const newValue = feature.properties ? parseValue(feature.properties[name]) : NaN;
     if (!isNaN(newValue)) {
       min = Math.min(min, newValue);
       max = Math.max(max, newValue);

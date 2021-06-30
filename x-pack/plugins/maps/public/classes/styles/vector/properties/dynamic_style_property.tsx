@@ -173,8 +173,8 @@ export class DynamicStyleProperty<T>
     }
 
     const data = styleMetaDataRequest.getData() as StyleMetaData;
-    const rangeFieldMeta = this._pluckCategoricalStyleMetaFromFieldMetaData(data);
-    return rangeFieldMeta ? rangeFieldMeta : categoryFieldMetaFromLocalFeatures;
+    const categoricalFieldMeta = this._pluckCategoricalStyleMetaFromFieldMetaData(data);
+    return categoricalFieldMeta ? categoricalFieldMeta : categoryFieldMetaFromLocalFeatures;
   }
 
   getField() {
@@ -285,7 +285,9 @@ export class DynamicStyleProperty<T>
     }
 
     const name = this.getFieldName();
-    return pluckRangeFieldMeta(features, name);
+    return pluckRangeFieldMeta(features, name, (rawValue: unknown) => {
+      return parseFloat(rawValue as string);
+    });
   }
 
   pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null {
@@ -297,7 +299,7 @@ export class DynamicStyleProperty<T>
     return pluckCategoryFieldMeta(features, this.getFieldName(), size);
   }
 
-  _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData) {
+  _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): RangeFieldMeta | null {
     if (!this.isOrdinal() || !this._field) {
       return null;
     }
@@ -321,7 +323,9 @@ export class DynamicStyleProperty<T>
     };
   }
 
-  _pluckCategoricalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData) {
+  _pluckCategoricalStyleMetaFromFieldMetaData(
+    styleMetaData: StyleMetaData
+  ): CategoryFieldMeta | null {
     if (!this.isCategorical() || !this._field) {
       return null;
     }
