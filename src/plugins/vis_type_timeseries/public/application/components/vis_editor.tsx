@@ -159,8 +159,8 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     this.setState({ autoApply: event.target.checked });
   };
 
-  onDataChange = ({ visData }: { visData: TimeseriesVisData }) => {
-    this.visDataSubject.next(visData);
+  onDataChange = (data: { visData?: TimeseriesVisData }) => {
+    this.visDataSubject.next(data?.visData);
   };
 
   render() {
