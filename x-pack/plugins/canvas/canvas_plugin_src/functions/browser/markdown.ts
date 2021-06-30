@@ -11,7 +11,10 @@ import {
   Style,
   ExpressionFunctionDefinition,
 } from 'src/plugins/expressions/common';
+import { parse as parseHandlebars } from '@handlebars/parser';
 import { getFunctionHelp } from '../../../i18n';
+// @ts-ignore
+import { HandlebarsEvaluator } from './handlebars_evaluator';
 
 type Context = Datatable | null;
 
@@ -61,23 +64,19 @@ export function markdown(): ExpressionFunctionDefinition<
       },
     },
     fn: async (input, args) => {
-      // @ts-expect-error untyped local
-      const { Handlebars } = await import('../../../common/lib/handlebars');
-      const compileFunctions = args.content.map((str) =>
-        Handlebars.compile(String(str), { knownHelpersOnly: true })
-      );
-      const ctx = {
-        columns: [],
-        rows: [],
-        type: null,
-        ...input,
-      };
+      const ast = parseHandlebars(args.content.join(''));
+      const handlebars = new HandlebarsEvaluator(ast);
 
       return {
         type: 'render',
         as: 'markdown',
         value: {
-          content: compileFunctions.map((fn) => fn(ctx)).join(''),
+          content: handlebars.render({
+            columns: [],
+            rows: [],
+            type: null,
+            ...input,
+          }),
           font: args.font,
           openLinksInNewTab: args.openLinksInNewTab,
         },

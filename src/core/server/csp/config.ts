@@ -21,7 +21,7 @@ export const config = {
     rules: schema.arrayOf(schema.string(), {
       defaultValue: [
         `script-src 'self'`,
-        `worker-src blob: 'self'`,
+        `child-src 'self' blob:`, // better supported than `worker-src`
         `style-src 'unsafe-inline' 'self'`,
       ],
     }),

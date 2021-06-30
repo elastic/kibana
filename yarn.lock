@@ -1759,6 +1759,11 @@
     normalize-path "^2.0.1"
     through2 "^2.0.3"
 
+"@handlebars/parser@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@handlebars/parser/-/parser-2.1.0.tgz#100e625d53c339e2b571c91fa93a455e93670fe2"
+  integrity sha512-R14NuNaSKZ6eE9y4t0fg/1f8iKd5ZJtSOTIseGFzXINTV17XffhLG2Y0CvdKOgyVQ7+UnXi89YGzRo/xsgwHIA==
+
 "@hapi/accept@^5.0.1", "@hapi/accept@^5.0.2":
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@hapi/accept/-/accept-5.0.2.tgz#ab7043b037e68b722f93f376afb05e85c0699523"
