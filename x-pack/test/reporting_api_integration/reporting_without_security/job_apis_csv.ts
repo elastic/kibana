@@ -20,10 +20,10 @@ const apiResponseFields = [
   'jobtype',
   'max_attempts',
   'meta',
+  'payload.isDeprecated',
   'payload.title',
   'payload.type',
   'status',
-  'isDeprecated',
 ];
 
 // TODO: clean up the /list and /info endpoints to return ReportApiJSON interface data
@@ -33,10 +33,10 @@ const documentResponseFields = [
   '_source.jobtype',
   '_source.max_attempts',
   '_source.meta',
+  '_source.payload.isDeprecated',
   '_source.payload.title',
   '_source.payload.type',
   '_source.status',
-  '_source.isDeprecated',
 ];
 
 // eslint-disable-next-line import/no-default-export
@@ -60,6 +60,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(resStatus).to.be(200);
 
     const result: { job: ReportApiJSON; path: string } = JSON.parse(resText);
+    expect(result.job.payload.isDeprecated).to.not.be(true);
+
     return result;
   };
 

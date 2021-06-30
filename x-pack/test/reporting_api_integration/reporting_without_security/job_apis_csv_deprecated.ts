@@ -21,10 +21,10 @@ const apiResponseFields = [
   'jobtype',
   'max_attempts',
   'meta',
+  'payload.isDeprecated',
   'payload.title',
   'payload.type',
   'status',
-  'isDeprecated',
 ];
 
 // TODO: clean up the /list and /info endpoints to return ReportApiJSON interface data
@@ -34,10 +34,10 @@ const documentResponseFields = [
   '_source.jobtype',
   '_source.max_attempts',
   '_source.meta',
+  '_source.payload.isDeprecated',
   '_source.payload.title',
   '_source.payload.type',
   '_source.status',
-  '_source.isDeprecated',
 ];
 
 // eslint-disable-next-line import/no-default-export
@@ -77,6 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
           "max_attempts": 1,
           "meta": Object {},
           "payload": Object {
+            "isDeprecated": true,
             "title": "A Saved Search With a DATE FILTER",
             "type": "search",
           },
@@ -120,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
               "max_attempts": 1,
               "meta": Object {},
               "payload": Object {
+                "isDeprecated": true,
                 "title": "A Saved Search With a DATE FILTER",
                 "type": "search",
               },
@@ -157,6 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
               "max_attempts": 1,
               "meta": Object {},
               "payload": Object {
+                "isDeprecated": true,
                 "title": "A Saved Search With a DATE FILTER",
                 "type": "search",
               },
@@ -190,6 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
           "max_attempts": 1,
           "meta": Object {},
           "payload": Object {
+            "isDeprecated": true,
             "title": "A Saved Search With a DATE FILTER",
             "type": "search",
           },
