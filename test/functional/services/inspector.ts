@@ -47,7 +47,13 @@ export class InspectorService extends FtrService {
    */
   public async open(): Promise<void> {
     this.log.debug('Inspector.open');
-    const isOpen = await this.testSubjects.exists('inspectorPanel');
+    let isOpen = await this.testSubjects.exists('inspectorPanel', { timeout: 10 });
+    if (!isOpen) {
+      await this.testSubjects.click('openInspectorButton');
+    }
+
+    isOpen = await this.testSubjects.exists('inspectorPanel');
+
     if (!isOpen) {
       await this.retry.try(async () => {
         await this.testSubjects.click('openInspectorButton');
@@ -61,11 +67,11 @@ export class InspectorService extends FtrService {
    */
   public async close(): Promise<void> {
     this.log.debug('Close Inspector');
-    let isOpen = await this.testSubjects.exists('inspectorPanel');
+    let isOpen = await this.testSubjects.exists('inspectorPanel', { timeout: 10 });
     if (isOpen) {
       await this.retry.try(async () => {
         await this.flyout.close('inspectorPanel');
-        isOpen = await this.testSubjects.exists('inspectorPanel');
+        isOpen = await this.testSubjects.exists('inspectorPanel', { timeout: 10 });
         if (isOpen) {
           throw new Error('Failed to close inspector');
         }

@@ -85,9 +85,31 @@ export class GisPageObject extends FtrService {
   async waitForMapPanAndZoom(origView?: { lon: number; lat: number; zoom: number }) {
     await this.retry.try(async () => {
       this.log.debug('Waiting for map pan and zoom to complete');
-      const prevView = await this.getView();
-      await this.common.sleep(1000);
-      const currentView = await this.getView();
+
+      let prevView = await this.getView();
+      let currentView;
+
+      if (origView) {
+        for (let i = 0; i < 1000 / 20; i++) {
+          if (!_.isEqual(origView, prevView)) {
+            break;
+          }
+          await this.common.sleep(20);
+          prevView = await this.getView();
+        }
+      }
+
+      for (let i = 0; i < 1000 / 200; i++) {
+        await this.common.sleep(200);
+        currentView = await this.getView();
+
+        if (_.isEqual(prevView, currentView)) {
+          break;
+        }
+
+        prevView = currentView;
+      }
+
       if (origView && _.isEqual(origView, currentView)) {
         throw new Error('Map pan and zoom has not started yet');
       }
@@ -202,6 +224,11 @@ export class GisPageObject extends FtrService {
     });
   }
 
+  async offMapListingPage() {
+    this.log.debug(`offMapListingPage`);
+    return await this.listingTable.notOnListingPage('map');
+  }
+
   async searchForMapWithName(name: string) {
     this.log.debug(`searchForMapWithName: ${name}`);
 
@@ -223,8 +250,8 @@ export class GisPageObject extends FtrService {
 
   async gotoMapListingPage() {
     this.log.debug('gotoMapListingPage');
-    const onPage = await this.onMapListingPage();
-    if (!onPage) {
+    const offPage = await this.offMapListingPage();
+    if (offPage) {
       await this.retry.try(async () => {
         await this.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
         const onMapListingPage = await this.onMapListingPage();
