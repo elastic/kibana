@@ -43,7 +43,7 @@ export const errorRenderer = (): ExpressionRenderDefinition<ErrorRendererConfig>
 
     render(
       <I18nProvider>
-        <ErrorComponent handlers={handlers} {...config} parentNode={domNode} />
+        <ErrorComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
       </I18nProvider>,
       domNode
     );

@@ -7,7 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback, MouseEventHandler } from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { ErrorRendererConfig } from '../../common/types';
 import {
@@ -21,26 +21,24 @@ const Error = withSuspense(LazyErrorComponent);
 const Popover = withSuspense(LazyPopoverComponent);
 
 interface ErrorComponentProps extends ErrorRendererConfig {
-  handlers: IInterpreterRenderHandlers;
+  onLoaded: IInterpreterRenderHandlers['done'];
   parentNode: HTMLElement;
 }
 
-function ErrorComponent({ handlers, parentNode, error }: ErrorComponentProps) {
+function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
   const getButtonSize = (node: HTMLElement) => Math.min(node.clientHeight, node.clientWidth);
+  const parentNodeDimensions = useResizeObserver(parentNode);
 
   const [buttonSize, setButtonSize] = useState<number>(getButtonSize(parentNode));
 
   const updateErrorView = useCallback(() => {
     setButtonSize(getButtonSize(parentNode));
-  }, [parentNode]);
+    onLoaded();
+  }, [parentNode, onLoaded]);
 
   useEffect(() => {
-    handlers.event({ name: 'onResize', data: updateErrorView });
-    handlers.done();
-    return () => {
-      handlers.event({ name: 'destroy' });
-    };
-  }, [handlers, updateErrorView]);
+    updateErrorView();
+  }, [parentNodeDimensions, updateErrorView]);
 
   const button = (handleClick: MouseEventHandler<any>) => (
     <EuiIcon
