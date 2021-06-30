@@ -68,7 +68,10 @@ export class RedirectManager {
       throw error;
     }
 
-    const [migratedParams] = migrateToLatest(locator.migrations, [options.params, options.version]);
+    const { state: migratedParams } = migrateToLatest(locator.migrations, {
+      state: options.params,
+      version: options.version,
+    });
 
     locator
       .navigate(migratedParams)
