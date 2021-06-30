@@ -24,6 +24,7 @@ import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
+import { processImportResponse } from '../../../../src/plugins/saved_objects_management/public';
 
 export interface CloudConfigType {
   id?: string;
@@ -166,16 +167,21 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     }
 
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
-    const { initializeFullStory } = await import('./fullstory');
+    const fullStoryChunkPromise = import('./fullstory');
     const userIdPromise: Promise<string | undefined> = security
       ? loadFullStoryUserId({ getCurrentUser: security.authc.getCurrentUser })
       : Promise.resolve(undefined);
+
+    const [{ initializeFullStory }, userId] = await Promise.all([
+      fullStoryChunkPromise,
+      userIdPromise,
+    ]);
 
     initializeFullStory({
       basePath,
       orgId,
       packageInfo: this.initializerContext.env.packageInfo,
-      userIdPromise,
+      userId,
     });
   }
 }
