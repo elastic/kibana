@@ -9,7 +9,7 @@ import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 
 export const mockDetailItemDataId = 'Y-6TfmcB0WOhS6qyMv3s';
 
-export const generateMockDetailItemData = (): TimelineEventsDetailsItem[] => [
+export const mockDetailItemData: TimelineEventsDetailsItem[] = [
   {
     field: '_id',
     originalValue: 'pEMaMmkBUV60JmNWmWVi',
@@ -137,5 +137,3 @@ export const generateMockDetailItemData = (): TimelineEventsDetailsItem[] => [
     isObjectArray: false,
   },
 ];
-
-export const mockDetailItemData: TimelineEventsDetailsItem[] = generateMockDetailItemData();
