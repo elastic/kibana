@@ -292,7 +292,10 @@ describe('useEngineNav', () => {
     });
 
     it('returns a Search UI nav item', () => {
-      setMockValues({ ...values, myRole: { canManageEngineSearchUi: true } });
+      setMockValues({
+        ...values,
+        myRole: { canManageEngineSearchUi: true, canViewAccountCredentials: true },
+      });
       expect(useEngineNav()).toEqual([
         ...BASE_NAV,
         {

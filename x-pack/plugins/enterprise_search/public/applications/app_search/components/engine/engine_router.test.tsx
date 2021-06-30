@@ -168,7 +168,10 @@ describe('EngineRouter', () => {
   });
 
   it('renders a search ui view', () => {
-    setMockValues({ ...values, myRole: { canManageEngineSearchUi: true } });
+    setMockValues({
+      ...values,
+      myRole: { canManageEngineSearchUi: true, canViewAccountCredentials: true },
+    });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(SearchUI)).toHaveLength(1);

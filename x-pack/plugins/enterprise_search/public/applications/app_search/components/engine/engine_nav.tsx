@@ -50,6 +50,7 @@ export const useEngineNav = () => {
   const isEngineRoute = !!useRouteMatch(ENGINE_PATH);
   const {
     myRole: {
+      canViewAccountCredentials,
       canViewEngineAnalytics,
       canViewEngineDocuments,
       canViewEngineSchema,
@@ -275,7 +276,11 @@ export const useEngineNav = () => {
     });
   }
 
-  if (canManageEngineSearchUi) {
+  /* TODO: In 8.0, this should change to just canManageEngineSearchUi and access to Search UI should be removed from
+      the Editor role. As of 7.14, we are hiding this page from Editors this way to stay backward compatible with ent-search,
+      where Editors should still have access. Editors technically have access to this page but do not have access to
+      credentials, which are required for the page to work. */
+  if (canManageEngineSearchUi && canViewAccountCredentials) {
     navItems.push({
       id: 'searchUI',
       name: SEARCH_UI_TITLE,

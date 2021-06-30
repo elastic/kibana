@@ -51,6 +51,7 @@ import { EngineLogic, getEngineBreadcrumbs } from './';
 export const EngineRouter: React.FC = () => {
   const {
     myRole: {
+      canViewAccountCredentials,
       canViewEngineAnalytics,
       canViewEngineDocuments,
       canViewEngineSchema,
@@ -150,7 +151,11 @@ export const EngineRouter: React.FC = () => {
           <ResultSettings />
         </Route>
       )}
-      {canManageEngineSearchUi && (
+      {/* TODO: In 8.0, this should change to just canManageEngineSearchUi and access to Search UI should be removed from
+      the Editor role. As of 7.14, we are hiding this page from Editors this way to stay backward compatible with ent-search,
+      where Editors should still have access. Editors technically have access to this page but do not have access to
+      credentials, which are required for the page to work. */}
+      {canManageEngineSearchUi && canViewAccountCredentials && (
         <Route path={ENGINE_SEARCH_UI_PATH}>
           <SearchUI />
         </Route>
