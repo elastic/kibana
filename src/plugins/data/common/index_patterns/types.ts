@@ -20,7 +20,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
-export interface EsRuntimeField {
+export interface RuntimeField {
   type: RuntimeType;
   script?: {
     source: string;
@@ -28,7 +28,7 @@ export interface EsRuntimeField {
   parent?: string;
 }
 
-export interface KibanaRuntimeField extends EsRuntimeField {
+export interface EnhancedRuntimeField extends RuntimeField {
   format?: SerializedFieldFormat;
   customLabel?: string;
   popularity?: number;
@@ -43,7 +43,7 @@ export interface RuntimeObject {
 }
 
 export type RuntimeObjectWithSubFields = Omit<RuntimeObject, 'subFields'> & {
-  subFields: Record<string, KibanaRuntimeField>;
+  subFields: Record<string, EnhancedRuntimeField>;
 };
 
 /**
@@ -223,7 +223,7 @@ export interface FieldSpec extends IndexPatternFieldBase {
   readFromDocValues?: boolean;
   indexed?: boolean;
   customLabel?: string;
-  runtimeField?: EsRuntimeField;
+  runtimeField?: RuntimeField;
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
@@ -257,7 +257,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
-  runtimeFieldMap?: Record<string, EsRuntimeField>;
+  runtimeFieldMap?: Record<string, RuntimeField>;
   runtimeObjectMap?: Record<string, RuntimeObject>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
