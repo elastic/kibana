@@ -21,7 +21,7 @@ import {
   POPULATED_DOC_COUNT_SAMPLE_SIZE,
 } from './constants';
 
-const shouldBeExcluded = (fieldName: string) => {
+export const shouldBeExcluded = (fieldName: string) => {
   return (
     FIELDS_TO_EXCLUDE_AS_CANDIDATE.has(fieldName) ||
     FIELD_PREFIX_TO_EXCLUDE_AS_CANDIDATE.some((prefix) =>
@@ -30,7 +30,7 @@ const shouldBeExcluded = (fieldName: string) => {
   );
 };
 
-const hasPrefixToInclude = (fieldName: string) => {
+export const hasPrefixToInclude = (fieldName: string) => {
   return FIELD_PREFIX_TO_ADD_AS_CANDIDATE.some((prefix) =>
     fieldName.startsWith(prefix)
   );

@@ -26,7 +26,7 @@ interface ResponseHit {
   _source: ResponseHitSource;
 }
 
-interface BucketCorrelation {
+export interface BucketCorrelation {
   buckets_path: string;
   function: {
     count_correlation: {
