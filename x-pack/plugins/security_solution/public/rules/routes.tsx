@@ -38,7 +38,7 @@ const RulesSubRoutes = [
   },
 ];
 
-const RulesRoutes = () => (
+const renderRulesRoutes = () => (
   <TrackApplicationView viewId={SecurityPageName.rules}>
     <Switch>
       {RulesSubRoutes.map((route, index) => (
@@ -50,15 +50,6 @@ const RulesRoutes = () => (
     </Switch>
   </TrackApplicationView>
 );
-
-const renderRulesRoutes = () => {
-  return (
-    <Switch>
-      <Route path={RULES_PATH} component={RulesRoutes} />
-      <Route component={NotFoundPage} />
-    </Switch>
-  );
-};
 
 export const routes = [
   {
