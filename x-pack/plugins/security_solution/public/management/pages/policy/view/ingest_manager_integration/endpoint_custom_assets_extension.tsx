@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { APP_PATH } from '../../../../../../common/constants';
 import {
   CustomAssetsAccordionProps,
   CustomAssetsAccordion,
@@ -18,7 +19,7 @@ export const EndpointCustomAssetsExtension: PackageAssetsComponent = () => {
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: 'Hosts',
-      url: http.basePath.prepend('/app/security/hosts/allHosts'),
+      url: http.basePath.prepend(`${APP_PATH}/hosts/allHosts`),
       description: 'View hosts in Security app',
     },
   ];

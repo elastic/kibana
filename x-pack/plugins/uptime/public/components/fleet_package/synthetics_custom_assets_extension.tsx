@@ -13,13 +13,14 @@ import {
 } from '../../../../fleet/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsStart } from '../../apps/plugin';
+import { PLUGIN } from '../../../common/constants/plugin';
 
 export const SyntheticsCustomAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useKibana<ClientPluginsStart>().services;
   const views: CustomAssetsAccordionProps['views'] = [
     {
       name: 'Monitors',
-      url: http?.basePath.prepend('/app/uptime') ?? '',
+      url: http?.basePath.prepend(`/app/${PLUGIN.ID}`) ?? '',
       description: 'View monitors in Uptime',
     },
   ];
