@@ -12,7 +12,7 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
@@ -24,8 +24,6 @@ import { SecurityPageName } from '../../../app/types';
 import { Sourcerer } from '../sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useKibana } from '../../lib/kibana';
-import { SiemNavTabKey } from '../navigation/types';
-
 interface HeaderProps {
   border?: boolean;
   isLoading?: boolean;
@@ -66,9 +64,9 @@ HeaderSection.displayName = 'HeaderSection';
 
 interface BackOptions {
   text: LinkIconProps['children'];
-  href?: LinkIconProps['href'];
+  path?: string;
   dataTestSubj?: string;
-  pageId: SiemNavTabKey;
+  pageId: SecurityPageName;
 }
 
 export interface HeaderPageProps extends HeaderProps {
@@ -103,33 +101,34 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   const { navigateToUrl } = useKibana().services.application;
 
   const { formatUrl } = useFormatUrl(backOptions?.pageId ?? SecurityPageName.overview);
-  const backUrl = formatUrl(backOptions?.href ?? '');
-  const goTo = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      if (backOptions) {
-        navigateToUrl(backUrl);
-      }
-    },
-    [backOptions, navigateToUrl, backUrl]
-  );
+
+  const linkBack = useMemo(() => {
+    if (!backOptions) {
+      return null;
+    }
+    const backUrl = formatUrl(backOptions.path ?? '');
+    return (
+      <LinkBack>
+        <LinkIcon
+          dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
+          onClick={(ev: Event) => {
+            ev.preventDefault();
+            navigateToUrl(backUrl);
+          }}
+          href={backUrl}
+          iconType="arrowLeft"
+        >
+          {backOptions.text}
+        </LinkIcon>
+      </LinkBack>
+    );
+  }, [backOptions, navigateToUrl, formatUrl]);
+
   return (
     <>
       <EuiPageHeader alignItems="center" bottomBorder={border}>
         <HeaderSection>
-          {backOptions && (
-            <LinkBack>
-              <LinkIcon
-                dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
-                onClick={goTo}
-                href={backUrl}
-                iconType="arrowLeft"
-              >
-                {backOptions.text}
-              </LinkIcon>
-            </LinkBack>
-          )}
-
+          {linkBack}
           {!backOptions && backComponent && <>{backComponent}</>}
           {titleNode || (
             <Title
