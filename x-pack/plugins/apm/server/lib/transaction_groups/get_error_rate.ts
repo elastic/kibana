@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { Coordinate } from '../../../typings/timeseries';
-
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -15,16 +12,18 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import {
   environmentQuery,
-  rangeQuery,
   kqlQuery,
+  rangeQuery,
 } from '../../../server/utils/queries';
+import { Coordinate } from '../../../typings/timeseries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getBucketSize } from '../helpers/get_bucket_size';
+import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   calculateTransactionErrorPercentage,
@@ -101,7 +100,7 @@ export async function getErrorRate({
         timeseries: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: getBucketSize({
+            fixed_interval: getBucketSizeForAggregatedTransactions({
               start,
               end,
               searchAggregatedTransactions,

@@ -65,12 +65,8 @@ export const getMetrics = async ({
               timeseries: {
                 date_histogram: {
                   field: '@timestamp',
-                  fixed_interval: getBucketSize({
-                    start,
-                    end,
-                    numBuckets,
-                    searchAggregatedTransactions: true,
-                  }).intervalString,
+                  fixed_interval: getBucketSize({ start, end, numBuckets })
+                    .intervalString,
                   extended_bounds: {
                     min: start,
                     max: end,

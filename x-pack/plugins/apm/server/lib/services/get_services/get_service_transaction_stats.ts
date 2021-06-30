@@ -17,8 +17,8 @@ import {
 } from '../../../../common/transaction_types';
 import {
   environmentQuery,
-  rangeQuery,
   kqlQuery,
+  rangeQuery,
 } from '../../../../server/utils/queries';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -26,8 +26,8 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { getBucketSize } from '../../helpers/get_bucket_size';
 import { calculateThroughput } from '../../helpers/calculate_throughput';
+import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   calculateTransactionErrorPercentage,
   getOutcomeAggregation,
@@ -117,7 +117,7 @@ export async function getServiceTransactionStats({
                   timeseries: {
                     date_histogram: {
                       field: '@timestamp',
-                      fixed_interval: getBucketSize({
+                      fixed_interval: getBucketSizeForAggregatedTransactions({
                         start,
                         end,
                         numBuckets: 20,

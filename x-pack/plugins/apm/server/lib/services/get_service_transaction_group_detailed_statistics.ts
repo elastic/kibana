@@ -6,7 +6,6 @@
  */
 
 import { keyBy } from 'lodash';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -15,10 +14,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import {
   environmentQuery,
-  rangeQuery,
   kqlQuery,
+  rangeQuery,
 } from '../../../server/utils/queries';
 import { Coordinate } from '../../../typings/timeseries';
 import {
@@ -26,7 +26,7 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
-import { getBucketSize } from '../helpers/get_bucket_size';
+import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
@@ -68,7 +68,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
   }>
 > {
   const { apmEventClient } = setup;
-  const { intervalString } = getBucketSize({
+  const { intervalString } = getBucketSizeForAggregatedTransactions({
     start,
     end,
     numBuckets,

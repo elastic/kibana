@@ -13,12 +13,12 @@ export function getBucketSize({
   start,
   end,
   numBuckets = 100,
-  searchAggregatedTransactions,
+  minBucketSize,
 }: {
   start: number;
   end: number;
   numBuckets?: number;
-  searchAggregatedTransactions?: boolean;
+  minBucketSize?: number;
 }) {
   const duration = moment.duration(end - start, 'ms');
   const bucketSize = Math.max(
@@ -26,10 +26,11 @@ export function getBucketSize({
     1
   );
 
-  const intervalString = `${bucketSize}s`;
-
-  if (searchAggregatedTransactions && bucketSize < 60) {
-    return { bucketSize: 60, intervalString: '60s' };
+  if (minBucketSize && bucketSize < minBucketSize) {
+    return {
+      bucketSize: minBucketSize,
+      intervalString: `${minBucketSize}s`,
+    };
   }
 
   if (bucketSize < 0) {
@@ -39,5 +40,5 @@ export function getBucketSize({
     };
   }
 
-  return { bucketSize, intervalString };
+  return { bucketSize, intervalString: `${bucketSize}s` };
 }
