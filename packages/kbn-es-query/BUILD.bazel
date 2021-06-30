@@ -6,7 +6,7 @@ PKG_REQUIRE_NAME = "@kbn/es-query"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "src/**/*",
   ],
   exclude = ["**/*.test.*"],
 )
