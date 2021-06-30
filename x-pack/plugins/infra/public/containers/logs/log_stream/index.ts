@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import createContainer from 'constate';
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
