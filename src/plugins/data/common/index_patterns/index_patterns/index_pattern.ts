@@ -229,13 +229,37 @@ export class IndexPattern implements IIndexPattern {
     }, {});
   }
 
+  /**
+   * This method will need to be updated once ES support the "object" type
+   * We will need to add an aditional "fields" prop with the subFields.
+   *
+   * This is what ES will be expecting for runtime objects
+   * https://github.com/elastic/elasticsearch/issues/68203
+   *
+   * {
+   *   "objectName": {
+   *     "type": "object",
+   *     "script": "emit(...)" // script that emits multiple values
+   *     "fields": {  // map of the subFields
+   *       "field_1": {
+   *         "type": "ip"
+   *       },
+   *       "field_2": {
+   *         "type": "ip"
+   *       },
+   *     }
+   *   }
+   * }
+   *
+   * @returns A map of runtime objects
+   */
   private getComputedRuntimeObjects() {
     // Only return the script and set its type to 'object'
     return Object.entries(this.runtimeObjectMap).reduce((acc, [name, runtimeObject]) => {
       const { script } = runtimeObject;
       return {
         ...acc,
-        // [name]: { type: 'object', script }, // 'object' not supported yet ES side
+        // [name]: { type: 'object', script, fields: { ... } }, // 'object' not supported yet ES side
         [name]: { type: 'keyword', script }, // Temp to make demo work
       };
     }, {});
