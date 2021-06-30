@@ -18589,7 +18589,6 @@
     "xpack.securitySolution.alertDetails.alertSummary": "アラート概要",
     "xpack.securitySolution.alertDetails.checkDocs": "マニュアルをご確認ください。",
     "xpack.securitySolution.alertDetails.ifCtiNotEnabled": "脅威インテリジェンスソースを有効にしていない場合で、この機能について関心がある場合は、",
-    "xpack.securitySolution.alertDetails.noEnrichmentFound": "Threat Intel Enrichmentが見つかりません",
     "xpack.securitySolution.alertDetails.summary": "まとめ",
     "xpack.securitySolution.alertDetails.summary.investigationGuide": "調査ガイド",
     "xpack.securitySolution.alertDetails.summary.readLess": "表示を減らす",
