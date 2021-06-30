@@ -6,9 +6,9 @@
  */
 
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../../fleet/common';
-import { SecuritySolutionRequestHandlerContext } from '../../../types';
-import { ActivityLog, EndpointAction } from '../../../../common/endpoint/types';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
+import { SecuritySolutionRequestHandlerContext } from '../../types';
+import { ActivityLog, EndpointAction } from '../../../common/endpoint/types';
 
 export const getAuditLogResponse = async ({
   elasticAgentId,
