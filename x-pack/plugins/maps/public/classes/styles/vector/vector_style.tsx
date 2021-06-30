@@ -489,7 +489,7 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  async pluckStyleMetaFromTileMeta(features: Feature[]): Promise<StyleMetaDescriptor> {
+  async pluckStyleMetaFromTileMeta(metaFeatures: Feature[]): Promise<StyleMetaDescriptor> {
     const styleMeta = {
       geometryTypes: {
         isPointsOnly: false,
@@ -500,7 +500,7 @@ export class VectorStyle implements IVectorStyle {
     } as StyleMetaDescriptor;
 
     const dynamicProperties = this.getDynamicPropertiesArray();
-    if (dynamicProperties.length === 0 || !features) {
+    if (dynamicProperties.length === 0 || !metaFeatures) {
       // no additional meta data to pull from source data request.
       return styleMeta;
     }
@@ -513,8 +513,8 @@ export class VectorStyle implements IVectorStyle {
 
       let min = Infinity;
       let max = -Infinity;
-      for (let i = 0; i < features.length; i++) {
-        const properties = features[i].properties;
+      for (let i = 0; i < metaFeatures.length; i++) {
+        const properties = metaFeatures[i].properties;
         if (properties && properties[name]) {
           const metaFromTiles = properties[name];
           min = Math.min(metaFromTiles.min, min);
