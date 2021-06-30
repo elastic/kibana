@@ -8,7 +8,7 @@
 import { camelCase } from 'lodash';
 import { getClipboardData, setClipboardData } from './clipboard';
 import { cloneSubgraphs } from './clone_subgraphs';
-import { useNotifyService } from '../services';
+import { pluginServices } from '../services';
 import * as customElementService from './custom_element_service';
 import { getId } from './get_id';
 import { PositionedElement } from '../../types';
@@ -70,7 +70,7 @@ export const basicHandlerCreators = {
     description = '',
     image = ''
   ): void => {
-    const notifyService = useNotifyService();
+    const notifyService = pluginServices.getServices().notify;
 
     if (selectedNodes.length) {
       const content = JSON.stringify({ selectedNodes });
@@ -135,7 +135,7 @@ export const groupHandlerCreators = {
 // handlers for cut/copy/paste
 export const clipboardHandlerCreators = {
   cutNodes: ({ pageId, removeNodes, selectedNodes }: Props) => (): void => {
-    const notifyService = useNotifyService();
+    const notifyService = pluginServices.getServices().notify;
 
     if (selectedNodes.length) {
       setClipboardData({ selectedNodes });
@@ -144,7 +144,7 @@ export const clipboardHandlerCreators = {
     }
   },
   copyNodes: ({ selectedNodes }: Props) => (): void => {
-    const notifyService = useNotifyService();
+    const notifyService = pluginServices.getServices().notify;
 
     if (selectedNodes.length) {
       setClipboardData({ selectedNodes });
