@@ -33,9 +33,9 @@ describe('pie', () => {
   });
 
   describe('data', () => {
-    const result = fn(testPie).value.data;
-
     it('has one series per unique label', () => {
+      const result = fn(testPie).value.data;
+
       const uniqueLabels = testPie.rows.reduce(
         (unique, series) =>
           !unique.includes(series.color) ? unique.concat([series.color]) : unique,
@@ -47,6 +47,8 @@ describe('pie', () => {
     });
 
     it('populates the data of the plot with points from the pointseries', () => {
+      const result = fn(testPie).value.data;
+
       expect(result[0].data).toEqual([202]);
       expect(result[1].data).toEqual([67]);
       expect(result[2].data).toEqual([311]);
@@ -57,9 +59,9 @@ describe('pie', () => {
 
   describe('args', () => {
     describe('palette', () => {
-      it('sets the color palette', () => {
+      it('sets the color palette', async () => {
         const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
-        const mockedFn = functionWrapper(
+        const mockedFn = await functionWrapper(
           pieFunctionFactory({
             get: () => ({
               getCategoricalColors: mockedColors,
