@@ -14,12 +14,16 @@ import { FieldSpec, IFieldSubType, IndexPattern } from '../..';
  */
 export interface IFieldType {
   name: string;
+  /**
+   * Kibana/javascript type - string, number, etc
+   */
   type: string;
   script?: string;
   lang?: estypes.ScriptLanguage;
   count?: number;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
-  // this prop. It is also undefined on scripted fields.
+  /**
+   * Elasticsearch types. Multiple ES types may or may not conflict depending upon their kibana equivalents
+   */
   esTypes?: string[];
   aggregatable?: boolean;
   filterable?: boolean;
@@ -28,6 +32,9 @@ export interface IFieldType {
   visualizable?: boolean;
   readFromDocValues?: boolean;
   scripted?: boolean;
+  /**
+   * Expresses the structure of multi and nested fields
+   */
   subType?: IFieldSubType;
   displayName?: string;
   customLabel?: string;

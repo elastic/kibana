@@ -1254,7 +1254,6 @@ export interface IFieldType {
     customLabel?: string;
     // (undocumented)
     displayName?: string;
-    // (undocumented)
     esTypes?: string[];
     // (undocumented)
     filterable?: boolean;
@@ -1274,13 +1273,11 @@ export interface IFieldType {
     searchable?: boolean;
     // (undocumented)
     sortable?: boolean;
-    // (undocumented)
     subType?: IFieldSubType;
     // (undocumented)
     toSpec?: (options?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
     }) => FieldSpec;
-    // (undocumented)
     type: string;
     // (undocumented)
     visualizable?: boolean;
@@ -1535,7 +1532,6 @@ export class IndexPatternField implements IFieldType {
     deleteCount(): void;
     // (undocumented)
     get displayName(): string;
-    // (undocumented)
     get esTypes(): string[] | undefined;
     // (undocumented)
     get filterable(): boolean;
@@ -1559,7 +1555,6 @@ export class IndexPatternField implements IFieldType {
     get sortable(): boolean;
     // (undocumented)
     readonly spec: FieldSpec;
-    // (undocumented)
     get subType(): import("../types").IFieldSubType | undefined;
     // (undocumented)
     toJSON(): {
@@ -1581,7 +1576,6 @@ export class IndexPatternField implements IFieldType {
     toSpec({ getFormatterForField, }?: {
         getFormatterForField?: IndexPattern['getFormatterForField'];
     }): FieldSpec;
-    // (undocumented)
     get type(): string;
     // (undocumented)
     get visualizable(): boolean;
