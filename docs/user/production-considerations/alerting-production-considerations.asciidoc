@@ -36,7 +36,7 @@ For detailed guidance, see <<alerting-troubleshooting, Alerting Troubleshooting>
 
 [float]
 [[alerting-scaling-guidance]]
-=== Scaling Guidance
+=== Scaling guidance
 
 As rules and actions leverage background tasks to perform the majority of work, scaling Alerting is possible by following the <<task-manager-scaling-guidance,Task Manager Scaling Guidance>>.
 
