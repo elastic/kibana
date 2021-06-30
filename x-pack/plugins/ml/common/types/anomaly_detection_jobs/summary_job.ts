@@ -46,6 +46,7 @@ export interface AuditMessage {
   highestLevel: string;
   highestLevelText: string;
   text: string;
+  cleared?: boolean;
 }
 
 export type MlSummaryJobs = MlSummaryJob[];

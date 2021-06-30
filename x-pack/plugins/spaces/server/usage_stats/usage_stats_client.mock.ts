@@ -12,6 +12,7 @@ const createUsageStatsClientMock = () =>
     getUsageStats: jest.fn().mockResolvedValue({}),
     incrementCopySavedObjects: jest.fn().mockResolvedValue(null),
     incrementResolveCopySavedObjectsErrors: jest.fn().mockResolvedValue(null),
+    incrementDisableLegacyUrlAliases: jest.fn().mockResolvedValue(null),
   } as unknown) as jest.Mocked<UsageStatsClient>);
 
 export const usageStatsClientMock = {
