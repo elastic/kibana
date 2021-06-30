@@ -5,43 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import type { estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient, Logger } from 'kibana/server';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../../fleet/common';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
-
-export const getAuditLogESQuery = ({
-  elasticAgentId,
-  from,
-  size,
-}: {
-  elasticAgentId: string;
-  from: number;
-  size: number;
-}): estypes.SearchRequest => {
-  return {
-    index: [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX],
-    size,
-    from,
-    body: {
-      query: {
-        bool: {
-          should: [
-            { terms: { agents: [elasticAgentId] } },
-            { terms: { agent_id: [elasticAgentId] } },
-          ],
-        },
-      },
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-          },
-        },
-      ],
-    },
-  };
-};
+import { ActivityLog, EndpointAction } from '../../../../common/endpoint/types';
 
 export const getAuditLogResponse = async ({
   elasticAgentId,
@@ -58,48 +25,113 @@ export const getAuditLogResponse = async ({
 }): Promise<{
   page: number;
   pageSize: number;
-  data: Array<{
-    type: 'action' | 'response';
-    item: {
-      id: string;
-      data: unknown;
-    };
-  }>;
+  data: ActivityLog['data'];
 }> => {
-  const size = pageSize;
-  const from = page <= 1 ? 0 : page * pageSize - pageSize + 1;
+  const size = Math.floor(pageSize / 2);
+  const from = page <= 1 ? 0 : page * size - size + 1;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
 
+  const data = await getActivityLog({ esClient, from, size, elasticAgentId, logger });
+
+  return {
+    page,
+    pageSize,
+    data,
+  };
+};
+
+const getActivityLog = async ({
+  esClient,
+  size,
+  from,
+  elasticAgentId,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  elasticAgentId: string;
+  size: number;
+  from: number;
+  logger: Logger;
+}) => {
   const options = {
     headers: {
       'X-elastic-product-origin': 'fleet',
     },
     ignore: [404],
   };
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
-  let result;
-  const params = getAuditLogESQuery({
-    elasticAgentId,
-    from,
-    size,
-  });
+
+  let actionsResult;
+  let responsesResult;
 
   try {
-    result = await esClient.search(params, options);
+    actionsResult = await esClient.search(
+      {
+        index: AGENT_ACTIONS_INDEX,
+        size,
+        from,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { term: { agents: elasticAgentId } },
+                { term: { input_type: 'endpoint' } },
+                { term: { type: 'INPUT_ACTION' } },
+              ],
+            },
+          },
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
+        },
+      },
+      options
+    );
+    const actionIds = actionsResult?.body?.hits?.hits?.map(
+      (e) => (e._source as EndpointAction).action_id
+    );
+
+    responsesResult = await esClient.search(
+      {
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        size: 1000,
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { agent_id: elasticAgentId } }, { terms: { action_id: actionIds } }],
+            },
+          },
+        },
+      },
+      options
+    );
   } catch (error) {
     logger.error(error);
     throw error;
   }
-  if (result?.statusCode !== 200) {
+  if (actionsResult?.statusCode !== 200) {
     logger.error(`Error fetching actions log for agent_id ${elasticAgentId}`);
     throw new Error(`Error fetching actions log for agent_id ${elasticAgentId}`);
   }
 
-  return {
-    page,
-    pageSize,
-    data: result.body.hits.hits.map((e) => ({
-      type: e._index.startsWith('.fleet-actions') ? 'action' : 'response',
-      item: { id: e._id, data: e._source },
-    })),
-  };
+  const responses = responsesResult?.body?.hits?.hits?.length
+    ? responsesResult?.body?.hits?.hits?.map((e) => ({
+        type: 'response',
+        item: { id: e._id, data: e._source },
+      }))
+    : [];
+  const actions = actionsResult?.body?.hits?.hits?.length
+    ? actionsResult?.body?.hits?.hits?.map((e) => ({
+        type: 'action',
+        item: { id: e._id, data: e._source },
+      }))
+    : [];
+  const sortedData = ([...responses, ...actions] as ActivityLog['data']).sort((a, b) =>
+    new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
+  );
+
+  return sortedData;
 };

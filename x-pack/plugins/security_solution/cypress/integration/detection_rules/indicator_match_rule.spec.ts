@@ -17,16 +17,6 @@ import {
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
 import {
-  JSON_LINES,
-  TABLE_CELL,
-  TABLE_ROWS,
-  THREAT_CONTENT,
-  THREAT_DETAILS_VIEW,
-  THREAT_INTEL_TAB,
-  THREAT_SUMMARY_VIEW,
-  TITLE,
-} from '../../screens/alerts_details';
-import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
   RULE_NAME,
@@ -60,23 +50,15 @@ import {
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
   TAGS_DETAILS,
-  TIMELINE_FIELD,
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../screens/timeline';
-
 import {
-  expandFirstAlert,
   goToManageAlertsDetectionRules,
   investigateFirstAlertInTimeline,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import {
-  openJsonView,
-  openThreatIndicatorDetails,
-  scrollJsonViewToBottom,
-} from '../../tasks/alerts_details';
 import {
   changeRowsPerPageTo100,
   duplicateFirstRule,
@@ -121,9 +103,9 @@ import {
 import { goBackToRuleDetails, waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { addsFieldsToTimeline, goBackToAllRulesTable } from '../../tasks/rule_details';
+import { goBackToAllRulesTable } from '../../tasks/rule_details';
 
-import { DETECTIONS_URL, RULE_CREATION } from '../../urls/navigation';
+import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -407,7 +389,7 @@ describe('indicator match', () => {
     describe('Generating signals', () => {
       beforeEach(() => {
         cleanKibana();
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
       it('Creates and activates a new Indicator Match rule', () => {
@@ -520,166 +502,14 @@ describe('indicator match', () => {
         cy.get(PROVIDER_BADGE).should('have.length', 3);
         cy.get(PROVIDER_BADGE).should(
           'have.text',
-          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "${newThreatIndicatorRule.type}"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
+          `threat.indicator.matched.atomic: "${newThreatIndicatorRule.atomic}"threat.indicator.matched.type: "indicator_match_rule"threat.indicator.matched.field: "${newThreatIndicatorRule.indicatorMappingField}"`
         );
 
         cy.readFile(threatIndicatorPath).then((threatIndicator) => {
           cy.get(INDICATOR_MATCH_ROW_RENDER).should(
             'have.text',
-            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.type${newThreatIndicatorRule.type}${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
+            `threat.indicator.matched.field${newThreatIndicatorRule.indicatorMappingField}${accessibilityText}matched${newThreatIndicatorRule.indicatorMappingField}${newThreatIndicatorRule.atomic}${accessibilityText}threat.indicator.matched.typeindicator_match_rule${accessibilityText}fromthreat.indicator.event.dataset${threatIndicator.value.source.event.dataset}${accessibilityText}:threat.indicator.event.reference${threatIndicator.value.source.event.reference}(opens in a new tab or window)${accessibilityText}`
           );
-        });
-      });
-    });
-
-    describe('Enrichment', () => {
-      const fieldSearch = 'threat.indicator.matched';
-      const fields = [
-        'threat.indicator.matched.atomic',
-        'threat.indicator.matched.type',
-        'threat.indicator.matched.field',
-      ];
-      const expectedFieldsText = [
-        newThreatIndicatorRule.atomic,
-        newThreatIndicatorRule.type,
-        newThreatIndicatorRule.indicatorMappingField,
-      ];
-
-      const expectedEnrichment = [
-        { line: 4, text: '  "threat": {' },
-        {
-          line: 3,
-          text:
-            '    "indicator": "{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\",\\"event\\":{\\"reference\\":\\"https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/\\",\\"ingested\\":\\"2021-03-10T14:51:09.809069Z\\",\\"created\\":\\"2021-03-10T14:51:07.663Z\\",\\"kind\\":\\"enrichment\\",\\"module\\":\\"threatintel\\",\\"category\\":\\"threat\\",\\"type\\":\\"indicator\\",\\"dataset\\":\\"threatintel.abusemalware\\"},\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"file\\"}}"',
-        },
-        { line: 2, text: '  }' },
-      ];
-
-      before(() => {
-        cleanKibana();
-        esArchiverLoad('threat_indicator');
-        esArchiverLoad('suspicious_source_event');
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-        goToManageAlertsDetectionRules();
-        createCustomIndicatorRule(newThreatIndicatorRule);
-        reload();
-      });
-
-      after(() => {
-        esArchiverUnload('threat_indicator');
-        esArchiverUnload('suspicious_source_event');
-      });
-
-      beforeEach(() => {
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-        goToManageAlertsDetectionRules();
-        goToRuleDetails();
-      });
-
-      it('Displays matches on the timeline', () => {
-        addsFieldsToTimeline(fieldSearch, fields);
-
-        fields.forEach((field, index) => {
-          cy.get(TIMELINE_FIELD(field)).should('have.text', expectedFieldsText[index]);
-        });
-      });
-
-      it('Displays enrichment on the JSON view', () => {
-        expandFirstAlert();
-        openJsonView();
-        scrollJsonViewToBottom();
-
-        cy.get(JSON_LINES).then((elements) => {
-          const length = elements.length;
-          expectedEnrichment.forEach((enrichment) => {
-            cy.wrap(elements)
-              .eq(length - enrichment.line)
-              .should('have.text', enrichment.text);
-          });
-        });
-      });
-
-      it('Displays threat summary data on alerts details', () => {
-        const expectedThreatSummary = [
-          { field: 'matched.field', value: 'myhash.mysha256' },
-          { field: 'matched.type', value: 'file' },
-          { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
-        ];
-
-        expandFirstAlert();
-
-        cy.get(THREAT_SUMMARY_VIEW).within(() => {
-          cy.get(TABLE_ROWS).should('have.length', expectedThreatSummary.length);
-          expectedThreatSummary.forEach((row, index) => {
-            cy.get(TABLE_ROWS)
-              .eq(index)
-              .within(() => {
-                cy.get(TITLE).should('have.text', row.field);
-                cy.get(THREAT_CONTENT).should('have.text', row.value);
-              });
-          });
-        });
-      });
-
-      it('Displays threat indicator data on the threat intel tab', () => {
-        const expectedThreatIndicatorData = [
-          { field: 'first_seen', value: '2021-03-10T08:02:14.000Z' },
-          { field: 'file.size', value: '80280' },
-          { field: 'file.type', value: 'elf' },
-          {
-            field: 'file.hash.sha256',
-            value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-          },
-          {
-            field: 'file.hash.tlsh',
-            value: '6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE',
-          },
-          {
-            field: 'file.hash.ssdeep',
-            value:
-              '1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL',
-          },
-          { field: 'file.hash.md5', value: '9b6c3518a91d23ed77504b5416bfb5b3' },
-          { field: 'type', value: 'file' },
-          {
-            field: 'event.reference',
-            value:
-              'https://urlhaus-api.abuse.ch/v1/download/a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3/(opens in a new tab or window)',
-          },
-          { field: 'event.ingested', value: '2021-03-10T14:51:09.809069Z' },
-          { field: 'event.created', value: '2021-03-10T14:51:07.663Z' },
-          { field: 'event.kind', value: 'enrichment' },
-          { field: 'event.module', value: 'threatintel' },
-          { field: 'event.category', value: 'threat' },
-          { field: 'event.type', value: 'indicator' },
-          { field: 'event.dataset', value: 'threatintel.abusemalware' },
-          {
-            field: 'matched.atomic',
-            value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-          },
-          { field: 'matched.field', value: 'myhash.mysha256' },
-          {
-            field: 'matched.id',
-            value: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
-          },
-          { field: 'matched.index', value: 'filebeat-7.12.0-2021.03.10-000001' },
-          { field: 'matched.type', value: 'file' },
-        ];
-
-        expandFirstAlert();
-        openThreatIndicatorDetails();
-
-        cy.get(THREAT_INTEL_TAB).should('have.text', 'Threat Intel (1)');
-        cy.get(THREAT_DETAILS_VIEW).within(() => {
-          cy.get(TABLE_ROWS).should('have.length', expectedThreatIndicatorData.length);
-          expectedThreatIndicatorData.forEach((row, index) => {
-            cy.get(TABLE_ROWS)
-              .eq(index)
-              .within(() => {
-                cy.get(TABLE_CELL).eq(0).should('have.text', row.field);
-                cy.get(TABLE_CELL).eq(1).should('have.text', row.value);
-              });
-          });
         });
       });
     });
@@ -687,7 +517,7 @@ describe('indicator match', () => {
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
         cleanKibana();
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
         goToManageAlertsDetectionRules();
         createCustomIndicatorRule(newThreatIndicatorRule);
         reload();

@@ -355,6 +355,7 @@ export class DocLinksService {
           guide: `${KIBANA_DOCS}snapshot-repositories.html`,
           changeIndexSettings: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html#change-index-settings-during-restore`,
           createSnapshot: `${ELASTICSEARCH_DOCS}snapshots-take-snapshot.html`,
+          getSnapshot: `${ELASTICSEARCH_DOCS}get-snapshot-api.html`,
           registerSharedFileSystem: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-filesystem-repository`,
           registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-source-only-repository`,
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
@@ -416,6 +417,9 @@ export class DocLinksService {
           datastreamsNamingScheme: `${FLEET_DOCS}data-streams.html#data-streams-naming-scheme`,
           upgradeElasticAgent: `${FLEET_DOCS}upgrade-elastic-agent.html`,
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
+        },
+        ecs: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
         },
       },
     });
@@ -620,5 +624,8 @@ export interface DocLinksStart {
       upgradeElasticAgent: string;
       upgradeElasticAgent712lower: string;
     }>;
+    readonly ecs: {
+      readonly guide: string;
+    };
   };
 }
