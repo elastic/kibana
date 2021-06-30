@@ -9,7 +9,10 @@ import { get, isEmpty } from 'lodash/fp';
 
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { decodeIpv6 } from '../../../common/lib/helpers';
-import { getNetworkDetailsUrl } from '../../../common/components/link_to/redirect_to_network';
+import {
+  getTabsOnNetworkUrl,
+  getNetworkDetailsUrl,
+} from '../../../common/components/link_to/redirect_to_network';
 import { networkModel } from '../../store';
 import * as i18n from '../translations';
 import { NetworkRouteType } from '../navigation/types';
@@ -38,7 +41,7 @@ export const getBreadcrumbs = (
       text: i18n.PAGE_TITLE,
       href: getUrlForApp(APP_ID, {
         deepLinkId: SecurityPageName.network,
-        path: !isEmpty(search[0]) ? search[0] : '',
+        path: getTabsOnNetworkUrl(NetworkRouteType.flows, !isEmpty(search[0]) ? search[0] : ''),
       }),
     },
   ];

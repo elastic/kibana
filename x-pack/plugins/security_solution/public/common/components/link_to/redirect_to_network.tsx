@@ -9,10 +9,14 @@ import {
   FlowTarget,
   FlowTargetSourceDest,
 } from '../../../../common/search_strategy/security_solution/network';
+import { NetworkRouteType } from '../../../network/pages/navigation/types';
 
 import { appendSearch } from './helpers';
 
 export const getNetworkUrl = (search?: string) => `${appendSearch(search)}`;
+
+export const getTabsOnNetworkUrl = (flowTarget: NetworkRouteType, search?: string) =>
+  `/${flowTarget}${appendSearch(search)}`;
 
 export const getNetworkDetailsUrl = (
   detailName: string,

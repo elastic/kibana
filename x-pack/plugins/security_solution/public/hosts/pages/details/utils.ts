@@ -10,7 +10,10 @@ import { get, isEmpty } from 'lodash/fp';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
-import { getHostDetailsUrl } from '../../../common/components/link_to/redirect_to_hosts';
+import {
+  getTabsOnHostDetailsUrl,
+  getTabsOnHostsUrl,
+} from '../../../common/components/link_to/redirect_to_hosts';
 
 import * as i18n from '../translations';
 import { HostRouteSpyState } from '../../../common/utils/route/types';
@@ -38,7 +41,7 @@ export const getBreadcrumbs = (
     {
       text: i18n.PAGE_TITLE,
       href: getUrlForApp(APP_ID, {
-        path: !isEmpty(search[0]) ? search[0] : '',
+        path: getTabsOnHostsUrl(HostsTableType.hosts, !isEmpty(search[0]) ? search[0] : ''),
         deepLinkId: SecurityPageName.hosts,
       }),
     },
@@ -50,7 +53,11 @@ export const getBreadcrumbs = (
       {
         text: params.detailName,
         href: getUrlForApp(APP_ID, {
-          path: getHostDetailsUrl(params.detailName, !isEmpty(search[0]) ? search[0] : ''),
+          path: getTabsOnHostDetailsUrl(
+            params.detailName,
+            HostsTableType.authentications,
+            !isEmpty(search[0]) ? search[0] : ''
+          ),
           deepLinkId: SecurityPageName.hosts,
         }),
       },
