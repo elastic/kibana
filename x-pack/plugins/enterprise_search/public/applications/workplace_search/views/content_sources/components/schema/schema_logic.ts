@@ -349,7 +349,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
       } catch (e) {
         window.scrollTo(0, 0);
         if (isAdding) {
-          actions.onSchemaSetFormErrors(e?.message);
+          actions.onSchemaSetFormErrors(e?.body?.message);
         } else {
           flashAPIErrors(e);
         }
