@@ -274,12 +274,14 @@ Array [
 <Styled(EuiFlyout)
     data-test-subj="timeline:details-panel:flyout"
     onClose={[Function]}
+    ownFocus={false}
     size="m"
   >
     <EuiFlyout
       className="c0"
       data-test-subj="timeline:details-panel:flyout"
       onClose={[Function]}
+      ownFocus={false}
       size="m"
     >
       <div
@@ -507,6 +509,7 @@ Array [
     className="c0"
     data-test-subj="timeline:details-panel:flyout"
     onClose={[Function]}
+    ownFocus={false}
     size="m"
   >
     <div

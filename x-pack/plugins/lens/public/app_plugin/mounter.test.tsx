@@ -8,7 +8,7 @@ import { makeDefaultServices, makeLensStore, defaultDoc, createMockVisualization
 import { createMockDatasource, DatasourceMock } from '../mocks';
 import { act } from 'react-dom/test-utils';
 import { loadInitialStore } from './mounter';
-import { LensEmbeddableInput } from '../editor_frame_service/embeddable/embeddable';
+import { LensEmbeddableInput } from '../embeddable/embeddable';
 
 const defaultSavedObjectId = '1234';
 const preloadedState = {

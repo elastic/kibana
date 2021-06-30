@@ -31,7 +31,7 @@ import {
   LensEmbeddableInput,
   LensByReferenceInput,
   LensByValueInput,
-} from '../editor_frame_service/embeddable/embeddable';
+} from '../embeddable/embeddable';
 import {
   ACTION_VISUALIZE_LENS_FIELD,
   VisualizeFieldContext,
