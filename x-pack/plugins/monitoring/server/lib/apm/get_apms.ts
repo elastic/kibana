@@ -109,8 +109,8 @@ export async function getApms(req: LegacyRequest, apmIndexPattern: string, clust
   const params = {
     index: apmIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       // only filter path can filter for inner_hits
       'hits.hits._source.timestamp',
       'hits.hits._source.@timestamp',

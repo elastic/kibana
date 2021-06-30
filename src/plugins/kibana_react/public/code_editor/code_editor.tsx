@@ -95,6 +95,11 @@ export interface Props {
    * Should the editor use a transparent background
    */
   transparentBackground?: boolean;
+
+  /**
+   * Should the editor be rendered using the fullWidth EUI attribute
+   */
+  fullWidth?: boolean;
 }
 
 export class CodeEditor extends React.Component<Props, {}> {

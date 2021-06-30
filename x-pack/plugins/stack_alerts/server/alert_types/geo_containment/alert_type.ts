@@ -177,5 +177,6 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     },
     actionVariables,
     minimumLicenseRequired: 'gold',
+    isExportable: true,
   };
 }

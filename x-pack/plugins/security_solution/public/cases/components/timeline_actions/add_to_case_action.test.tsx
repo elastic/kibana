@@ -15,6 +15,7 @@ import { TestProviders } from '../../../common/mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { basicCase } from '../../../../../cases/public/containers/mock';
 import { Case, SECURITY_SOLUTION_OWNER } from '../../../../../cases/common';
+import { APP_ID, SecurityPageName } from '../../../../common/constants';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/link_to', () => {
@@ -177,8 +178,9 @@ describe('AddToCaseAction', () => {
       .first()
       .simulate('click');
 
-    expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolution:case', {
+    expect(mockNavigateToApp).toHaveBeenCalledWith(APP_ID, {
       path: '/basic-case-id',
+      deepLinkId: SecurityPageName.case,
     });
   });
 

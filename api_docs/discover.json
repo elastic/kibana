@@ -72,6 +72,300 @@
     "interfaces": [
       {
         "parentPluginId": "discover",
+        "id": "def-public.DiscoverAppLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverAppLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.DiscoverAppLocatorParams",
+            "text": "DiscoverAppLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.SerializableState",
+            "text": "SerializableState"
+          }
+        ],
+        "source": {
+          "path": "src/plugins/discover/public/locator.ts",
+          "lineNumber": 17
+        },
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.savedSearchId",
+            "type": "string",
+            "tags": [],
+            "label": "savedSearchId",
+            "description": [
+              "\nOptionally set saved search ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 21
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.indexPatternId",
+            "type": "string",
+            "tags": [],
+            "label": "indexPatternId",
+            "description": [
+              "\nOptionally set index pattern ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 26
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [
+              "\nOptionally set the time range in the time picker."
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 31
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.refreshInterval",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refreshInterval",
+            "description": [
+              "\nOptionally set the refresh interval."
+            ],
+            "signature": [
+              "(",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              " & ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ") | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 36
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [
+              "\nOptionally apply filters."
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 41
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "\nOptionally set a query."
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 46
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.useHash",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useHash",
+            "description": [
+              "\nIf not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines\nwhether to hash the data in the url to avoid url length issues."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 52
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
+            "description": [
+              "\nBackground search session id"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 57
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [
+              "\nColumns displayed in the table"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 62
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.interval",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nUsed interval of the histogram"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 67
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.sort",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sort",
+            "description": [
+              "\nArray of the used sorting [[field,direction],...]"
+            ],
+            "signature": [
+              "(string[][] & ",
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.SerializableState",
+                "text": "SerializableState"
+              },
+              ") | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 72
+            },
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.savedQuery",
+            "type": "string",
+            "tags": [],
+            "label": "savedQuery",
+            "description": [
+              "\nid of the used saved query"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "source": {
+              "path": "src/plugins/discover/public/locator.ts",
+              "lineNumber": 77
+            },
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.DiscoverUrlGeneratorState",
         "type": "Interface",
         "tags": [],
@@ -897,6 +1191,38 @@
       },
       {
         "parentPluginId": "discover",
+        "id": "def-public.DiscoverAppLocator",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverAppLocator",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.DiscoverAppLocatorParams",
+            "text": "DiscoverAppLocatorParams"
+          },
+          ">"
+        ],
+        "source": {
+          "path": "src/plugins/discover/public/locator.ts",
+          "lineNumber": 80
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.SEARCH_EMBEDDABLE_TYPE",
         "type": "string",
         "tags": [],
@@ -923,7 +1249,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 76
+        "lineNumber": 78
       },
       "deprecated": false,
       "children": [
@@ -943,7 +1269,32 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 77
+            "lineNumber": 79
+          },
+          "deprecated": false
+        },
+        {
+          "parentPluginId": "discover",
+          "id": "def-public.DiscoverSetup.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [
+            "\n`share` plugin URL locator for Discover app. Use it to generate links into\nDiscover application, for example, navigate:\n\n```ts\nawait plugins.discover.locator.navigate({\n  savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',\n  indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',\n  timeRange: {\n    to: 'now',\n    from: 'now-15m',\n    mode: 'relative',\n  },\n});\n```\n\nGenerate a location:\n\n```ts\nconst location = await plugins.discover.locator.getLocation({\n  savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',\n  indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',\n  timeRange: {\n    to: 'now',\n    from: 'now-15m',\n    mode: 'relative',\n  },\n});\n```"
+          ],
+          "signature": [
+            {
+              "pluginId": "discover",
+              "scope": "public",
+              "docId": "kibDiscoverPluginApi",
+              "section": "def-public.DiscoverAppLocator",
+              "text": "DiscoverAppLocator"
+            },
+            " | undefined"
+          ],
+          "source": {
+            "path": "src/plugins/discover/public/plugin.tsx",
+            "lineNumber": 118
           },
           "deprecated": false
         }
@@ -960,7 +1311,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/discover/public/plugin.tsx",
-        "lineNumber": 87
+        "lineNumber": 121
       },
       "deprecated": false,
       "children": [
@@ -982,7 +1333,7 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 88
+            "lineNumber": 122
           },
           "deprecated": false
         },
@@ -990,11 +1341,11 @@
           "parentPluginId": "discover",
           "id": "def-public.DiscoverStart.urlGenerator",
           "type": "Object",
-          "tags": [],
-          "label": "urlGenerator",
-          "description": [
-            "\n`share` plugin URL generator for Discover app. Use it to generate links into\nDiscover application, example:\n\n```ts\nconst url = await plugins.discover.urlGenerator.createUrl({\n  savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',\n  indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',\n  timeRange: {\n    to: 'now',\n    from: 'now-15m',\n    mode: 'relative',\n  },\n});\n```"
+          "tags": [
+            "deprecated"
           ],
+          "label": "urlGenerator",
+          "description": [],
           "signature": [
             {
               "pluginId": "share",
@@ -1007,7 +1358,48 @@
           ],
           "source": {
             "path": "src/plugins/discover/public/plugin.tsx",
-            "lineNumber": 106
+            "lineNumber": 127
+          },
+          "deprecated": true,
+          "references": [
+            {
+              "plugin": "osquery",
+              "link": {
+                "path": "x-pack/plugins/osquery/public/scheduled_query_groups/scheduled_query_group_queries_table.tsx",
+                "lineNumber": 224
+              }
+            },
+            {
+              "plugin": "osquery",
+              "link": {
+                "path": "x-pack/plugins/osquery/public/common/hooks/use_discover_link.tsx",
+                "lineNumber": 21
+              }
+            }
+          ]
+        },
+        {
+          "parentPluginId": "discover",
+          "id": "def-public.DiscoverStart.locator",
+          "type": "Object",
+          "tags": [],
+          "label": "locator",
+          "description": [
+            "\n`share` plugin URL locator for Discover app. Use it to generate links into\nDiscover application, for example, navigate:\n\n```ts\nawait plugins.discover.locator.navigate({\n  savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',\n  indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',\n  timeRange: {\n    to: 'now',\n    from: 'now-15m',\n    mode: 'relative',\n  },\n});\n```\n\nGenerate a location:\n\n```ts\nconst location = await plugins.discover.locator.getLocation({\n  savedSearchId: '571aaf70-4c88-11e8-b3d7-01146121b73d',\n  indexPatternId: 'c367b774-a4c2-11ea-bb37-0242ac130002',\n  timeRange: {\n    to: 'now',\n    from: 'now-15m',\n    mode: 'relative',\n  },\n});\n```"
+          ],
+          "signature": [
+            {
+              "pluginId": "discover",
+              "scope": "public",
+              "docId": "kibDiscoverPluginApi",
+              "section": "def-public.DiscoverAppLocator",
+              "text": "DiscoverAppLocator"
+            },
+            " | undefined"
+          ],
+          "source": {
+            "path": "src/plugins/discover/public/plugin.tsx",
+            "lineNumber": 159
           },
           "deprecated": false
         }
@@ -1230,6 +1622,23 @@
         "source": {
           "path": "src/plugins/discover/common/index.ts",
           "lineNumber": 12
+        },
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.SHOW_MULTIFIELDS",
+        "type": "string",
+        "tags": [],
+        "label": "SHOW_MULTIFIELDS",
+        "description": [],
+        "signature": [
+          "\"discover:showMultiFields\""
+        ],
+        "source": {
+          "path": "src/plugins/discover/common/index.ts",
+          "lineNumber": 22
         },
         "deprecated": false,
         "initialIsOpen": false

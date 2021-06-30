@@ -17,6 +17,7 @@ export const monitorEventLoopDelay = jest.fn().mockReturnValue({
   percentile: mockMonitorPercentile,
   disable: mockMonitorDisable,
   reset: mockMonitorReset,
+  ...createMockHistogram(),
 });
 
 jest.doMock('perf_hooks', () => ({

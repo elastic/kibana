@@ -27,7 +27,7 @@ export const DownloadStep = () => {
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.agentEnrollment.downloadDescription"
-            defaultMessage="You can download the agent binaries and their verification signatures from the Elastic Agent download page."
+            defaultMessage="Fleet Server runs on an Elastic Agent. You can download the Elastic Agent binaries and verification signatures from Elastic’s download page."
           />
         </EuiText>
         <EuiSpacer size="l" />
