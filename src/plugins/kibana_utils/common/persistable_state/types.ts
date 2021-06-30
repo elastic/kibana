@@ -27,13 +27,18 @@ export type Serializable = SerializableValue | SerializableValue[];
  * For example:
  *
  * ```ts
- * const obj: VersionedState<{ dashboardId: string }> = [{ dashboardId: '123' }, '7.14.0'];
+ * const obj: VersionedState<{ dashboardId: string }> = {
+ *   version: '7.14.0',
+ *   state: {
+ *     dashboardId: '123',
+ *   },
+ * };
  * ```
  */
-export type VersionedState<S extends SerializableState = SerializableState> = [
-  state: S,
-  version: string
-];
+export interface VersionedState<S extends SerializableState = SerializableState> {
+  version: string;
+  state: S;
+}
 
 /**
  * Persistable state interface can be implemented by something that persists
