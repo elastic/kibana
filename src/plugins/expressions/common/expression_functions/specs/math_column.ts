@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition } from '../types';
 import { math, MathArguments } from './math';
-import { Datatable, DatatableColumn, getType } from '../../expression_types';
+import { Datatable, DatatableColumn, DatatableColumnType, getType } from '../../expression_types';
 
 export type MathColumnArguments = MathArguments & {
   id: string;
@@ -104,7 +104,16 @@ export const mathColumn: ExpressionFunctionDefinition<
 
       return { ...row, [args.id]: result };
     });
-    const type = newRows.length ? getType(newRows[0][args.id]) : 'null';
+    let type: DatatableColumnType = 'null';
+    if (newRows.length) {
+      for (const row of newRows) {
+        const rowType = getType(row[args.id]);
+        if (rowType !== 'null') {
+          type = rowType;
+          break;
+        }
+      }
+    }
     const newColumn: DatatableColumn = {
       id: args.id,
       name: args.name ?? args.id,
