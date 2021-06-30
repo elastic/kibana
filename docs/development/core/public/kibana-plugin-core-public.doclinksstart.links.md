@@ -201,5 +201,8 @@ readonly links: {
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
         }>;
+        readonly ecs: {
+            readonly guide: string;
+        };
     };
 ```
