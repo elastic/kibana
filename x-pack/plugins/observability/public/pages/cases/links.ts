@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash/fp';
 import { useCallback } from 'react';
+import { observabilityAppId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 
 export const casesBreadcrumbs = {
@@ -39,18 +40,18 @@ interface FormatUrlOptions {
 }
 
 export type FormatUrl = (path: string, options?: Partial<FormatUrlOptions>) => string;
-export const useFormatUrl = (appId: string) => {
+export const useFormatUrl = () => {
   const { getUrlForApp } = useKibana().services.application;
   const formatUrl = useCallback<FormatUrl>(
     (path: string, { absolute = false } = {}) => {
       const pathArr = path.split('?');
-      const formattedPath = `${pathArr[0]}${isEmpty(pathArr[1]) ? '' : `?${pathArr[1]}`}`;
-      return getUrlForApp(`${appId}`, {
+      const formattedPath = `/cases/${pathArr[0]}${isEmpty(pathArr[1]) ? '' : `?${pathArr[1]}`}`;
+      return getUrlForApp(observabilityAppId, {
         path: formattedPath,
         absolute,
       });
     },
-    [appId, getUrlForApp]
+    [getUrlForApp]
   );
   return { formatUrl };
 };

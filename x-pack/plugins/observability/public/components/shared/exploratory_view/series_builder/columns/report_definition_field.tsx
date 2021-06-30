@@ -15,16 +15,17 @@ import { ESFilter } from '../../../../../../../../../src/core/types/elasticsearc
 import { PersistableFilter } from '../../../../../../../lens/common';
 import { ExistsFilter } from '../../../../../../../../../src/plugins/data/common/es_query/filters';
 import { buildPhrasesFilter } from '../../configurations/utils';
-import { DataSeries } from '../../types';
+import { SeriesConfig } from '../../types';
+import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';
 
 interface Props {
   seriesId: string;
   field: string;
-  dataSeries: DataSeries;
+  seriesConfig: SeriesConfig;
   onChange: (field: string, value?: string[]) => void;
 }
 
-export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }: Props) {
+export function ReportDefinitionField({ seriesId, field, seriesConfig, onChange }: Props) {
   const { getSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
@@ -33,11 +34,11 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
 
   const { reportDefinitions: selectedReportDefinitions = {} } = series;
 
-  const { labels, filters, reportDefinitions } = dataSeries;
+  const { labels, baseFilters, definitionFields } = seriesConfig;
 
   const queryFilters = useMemo(() => {
     const filtersN: ESFilter[] = [];
-    (filters ?? []).forEach((qFilter: PersistableFilter | ExistsFilter) => {
+    (baseFilters ?? []).forEach((qFilter: PersistableFilter | ExistsFilter) => {
       if (qFilter.query) {
         filtersN.push(qFilter.query);
       }
@@ -48,18 +49,20 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
     });
 
     if (!isEmpty(selectedReportDefinitions)) {
-      reportDefinitions.forEach(({ field: fieldT, custom }) => {
-        if (!custom && indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
+      definitionFields.forEach((fieldT) => {
+        if (indexPattern && selectedReportDefinitions?.[fieldT] && fieldT !== field) {
           const values = selectedReportDefinitions?.[fieldT];
-          const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
-          filtersN.push(valueFilter.query);
+          if (!values.includes(ALL_VALUES_SELECTED)) {
+            const valueFilter = buildPhrasesFilter(fieldT, values, indexPattern)[0];
+            filtersN.push(valueFilter.query);
+          }
         }
       });
     }
 
     return filtersN;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(selectedReportDefinitions), JSON.stringify(filters)]);
+  }, [JSON.stringify(selectedReportDefinitions), JSON.stringify(baseFilters)]);
 
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center" wrap>
@@ -74,6 +77,7 @@ export function ReportDefinitionField({ seriesId, field, dataSeries, onChange }:
             filters={queryFilters}
             time={series.time}
             fullWidth={true}
+            allowAllValuesSelection={true}
           />
         )}
       </EuiFlexItem>

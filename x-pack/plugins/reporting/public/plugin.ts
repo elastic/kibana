@@ -29,10 +29,11 @@ import { constants, getDefaultLayoutSelectors } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
-import { getGeneralErrorToast, getSharedComponents } from './components';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
+import { getGeneralErrorToast } from './notifier';
 import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
+import { getSharedComponents } from './shared';
 import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 
@@ -150,7 +151,7 @@ export class ReportingPublicPlugin
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start], { mountManagementSection }] = await Promise.all([
           getStartServices(),
-          import('./mount_management_section'),
+          import('./management/mount_management_section'),
         ]);
         return await mountManagementSection(
           core,

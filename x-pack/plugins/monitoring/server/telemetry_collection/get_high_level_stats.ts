@@ -7,7 +7,8 @@
 
 import { get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
@@ -248,7 +249,7 @@ function getIndexPatternForStackProduct(product: string) {
  * Returns an object keyed by the cluster UUIDs to make grouping easier.
  */
 export async function getHighLevelStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -269,7 +270,7 @@ export async function getHighLevelStats(
 export async function fetchHighLevelStats<
   T extends { cluster_uuid?: string } = { cluster_uuid?: string }
 >(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -300,14 +301,11 @@ export async function fetchHighLevelStats<
     filters.push(kibanaFilter);
   }
 
-  const params = {
-    index: getIndexPatternForStackProduct(product),
+  const params: estypes.SearchRequest = {
+    index: getIndexPatternForStackProduct(product) as string,
     size: maxBucketSize,
-    headers: {
-      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
-    },
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
       `hits.hits._source.${product}_stats.${product}.version`,
       `hits.hits._source.${product}_stats.os`,
@@ -325,7 +323,7 @@ export async function fetchHighLevelStats<
         end,
         type: `${product}_stats`,
         filters,
-      }),
+      }) as estypes.QueryDslQueryContainer,
       collapse: {
         // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
         field: `${product}_stats.${product}.uuid`,
@@ -334,7 +332,12 @@ export async function fetchHighLevelStats<
     },
   };
 
-  return callCluster('search', params);
+  const { body: response } = await callCluster.search(params, {
+    headers: {
+      'X-QUERY-SOURCE': TELEMETRY_QUERY_SOURCE,
+    },
+  });
+  return response as SearchResponse<T>;
 }
 
 /**

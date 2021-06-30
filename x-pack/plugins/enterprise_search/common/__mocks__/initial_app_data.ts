@@ -8,6 +8,10 @@
 export const DEFAULT_INITIAL_APP_DATA = {
   readOnlyMode: false,
   ilmEnabled: true,
+  searchOAuth: {
+    clientId: 'someUID',
+    redirectUrl: 'http://localhost:3002/ws/search_callback',
+  },
   configuredLimits: {
     appSearch: {
       engine: {
