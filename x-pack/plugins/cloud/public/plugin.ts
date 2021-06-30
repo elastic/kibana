@@ -24,7 +24,6 @@ import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
-import { processImportResponse } from '../../../../src/plugins/saved_objects_management/public';
 
 export interface CloudConfigType {
   id?: string;
