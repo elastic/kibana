@@ -14,8 +14,8 @@ export function migrateToLatest<S extends SerializableState>(
   [state, oldVersion]: VersionedState
 ): VersionedState<S> {
   const versions = Object.keys(migrations || {})
-    .sort(compare)
-    .filter((v) => compare(v, oldVersion) > 0);
+    .filter((v) => compare(v, oldVersion) > 0)
+    .sort(compare);
 
   if (!versions.length) return [state, oldVersion] as VersionedState<S>;
 
