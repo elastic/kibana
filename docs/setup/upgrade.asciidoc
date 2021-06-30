@@ -2,7 +2,7 @@
 == Upgrade {kib}
 
 Depending on the {kib} version you're upgrading from, the upgrade process to {version}
-varies. Upgrades are supported:
+varies. The following upgrades are supported:
 
 * Between minor versions
 * From 5.6 to 6.8
