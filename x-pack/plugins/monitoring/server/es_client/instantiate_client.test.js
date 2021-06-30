@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { instantiateLegacyClient, hasMonitoringCluster } from './instantiate_client';
+import { instantiateClient, hasMonitoringCluster } from './instantiate_client';
 
 const server = {
   monitoring: {
@@ -49,13 +49,13 @@ describe('Instantiate Client', () => {
 
   describe('Logging', () => {
     it('logs that the config was sourced from the production options', () => {
-      instantiateLegacyClient(server.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
 
       expect(log.info.mock.calls[0]).toEqual(['config sourced from: production cluster']);
     });
 
     it('logs that the config was sourced from the monitoring options', () => {
-      instantiateLegacyClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
 
       expect(log.info.mock.calls[0]).toEqual(['config sourced from: monitoring cluster']);
     });
@@ -63,7 +63,7 @@ describe('Instantiate Client', () => {
 
   describe('Custom Headers Configuration', () => {
     it('Does not add xpack.monitoring.elasticsearch.customHeaders if connected to production cluster', () => {
-      instantiateLegacyClient(server.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
 
       const createClusterCall = createClient.mock.calls[0];
       expect(createClient).toHaveBeenCalledTimes(1);
@@ -72,7 +72,7 @@ describe('Instantiate Client', () => {
     });
 
     it('Adds xpack.monitoring.elasticsearch.customHeaders if connected to monitoring cluster', () => {
-      instantiateLegacyClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
 
       const createClusterCall = createClient.mock.calls[0];
 
@@ -86,7 +86,7 @@ describe('Instantiate Client', () => {
 
   describe('Use a connection to production cluster', () => {
     it('exposes an authenticated client using production host settings', () => {
-      instantiateLegacyClient(server.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(server.monitoring.ui.elasticsearch, log, createClient);
 
       const createClusterCall = createClient.mock.calls[0];
       const createClientOptions = createClusterCall[1];
@@ -99,7 +99,7 @@ describe('Instantiate Client', () => {
 
   describe('Use a connection to monitoring cluster', () => {
     it('exposes an authenticated client using monitoring host settings', () => {
-      instantiateLegacyClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
+      instantiateClient(serverWithUrl.monitoring.ui.elasticsearch, log, createClient);
       const createClusterCall = createClient.mock.calls[0];
       const createClientOptions = createClusterCall[1];
 
