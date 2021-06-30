@@ -7,12 +7,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
 import React from 'react';
-
+import classNames from 'classnames';
 import {
   CaseFullExternalService,
   ActionConnector,
   CaseStatuses,
   CommentType,
+  Comment,
+  CommentRequestActionsType,
 } from '../../../common';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
@@ -20,19 +22,24 @@ import { parseString } from '../../containers/utils';
 import { Tags } from '../tag_list/tags';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
+import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { UserActionCopyLink } from './user_action_copy_link';
+import { UserActionMarkdown } from './user_action_markdown';
 import { UserActionMoveToReference } from './user_action_move_to_reference';
 import { Status, statuses } from '../status';
 import { UserActionShowAlert } from './user_action_show_alert';
 import * as i18n from './translations';
 import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { CasesNavigation } from '../links';
+import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
 
 interface LabelTitle {
   action: CaseUserActions;
   field: string;
 }
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
+
+export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
 
 const getStatusTitle = (id: string, status: CaseStatuses) => (
   <EuiFlexGroup
@@ -347,6 +354,75 @@ export const getGeneratedAlertsAttachment = ({
         <EuiFlexItem>{renderInvestigateInTimelineActionComponent(alertIds)}</EuiFlexItem>
       ) : null}
     </EuiFlexGroup>
+  ),
+});
+
+export const getActionAttachment = ({
+  comment,
+  userCanCrud,
+  isLoadingIds,
+  getCaseDetailHrefWithCommentId,
+  actionsNavigation,
+  manageMarkdownEditIds,
+  handleManageMarkdownEditId,
+  handleManageQuote,
+  handleSaveComment,
+  action,
+}: {
+  comment: Comment & CommentRequestActionsType;
+  userCanCrud: boolean;
+  isLoadingIds: string[];
+  getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  actionsNavigation?: ActionsNavigation;
+  manageMarkdownEditIds: string[];
+  handleManageMarkdownEditId: (id: string) => void;
+  handleManageQuote: (id: string) => void;
+  handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
+  action: CaseUserActions;
+}): EuiCommentProps => ({
+  username: (
+    <UserActionUsernameWithAvatar
+      username={comment.createdBy.username}
+      fullName={comment.createdBy.fullName}
+    />
+  ),
+  className: classNames({
+    isEdit: manageMarkdownEditIds.includes(comment.id),
+  }),
+  event: (
+    <HostIsolationCommentEvent
+      type={comment.actions.type}
+      endpoints={comment.actions.targets}
+      href={actionsNavigation?.href}
+      onClick={actionsNavigation?.onClick}
+    />
+  ),
+  'data-test-subj': 'endpoint-action',
+  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  timelineIcon: comment.actions.type === 'isolate' ? 'lock' : 'lockOpen',
+  actions: (
+    <UserActionContentToolbar
+      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+      id={comment.id}
+      editLabel={i18n.EDIT_COMMENT}
+      quoteLabel={i18n.QUOTE}
+      userCanCrud={userCanCrud}
+      isLoading={isLoadingIds.includes(comment.id)}
+      onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
+      onQuote={handleManageQuote.bind(null, comment.comment)}
+    />
+  ),
+  children: (
+    <UserActionMarkdown
+      id={comment.id}
+      content={comment.comment}
+      isEditable={manageMarkdownEditIds.includes(comment.id)}
+      onChangeEditable={handleManageMarkdownEditId}
+      onSaveContent={handleSaveComment.bind(null, {
+        id: comment.id,
+        version: comment.version,
+      })}
+    />
   ),
 });
 
