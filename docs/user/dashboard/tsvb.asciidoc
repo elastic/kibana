@@ -135,7 +135,7 @@ image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selecti
 The index pattern mode unlocks many new features, such as:
 * Runtime fields
 * URL drilldowns
-* Create filters by clicking on a timeseries chart
+* Interactive filters for time series visualizations
 * Better performance
 * and more features to come
 
