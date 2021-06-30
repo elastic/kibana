@@ -104,9 +104,9 @@ export interface TGridStandaloneProps {
   columns: ColumnHeaderOptions[];
   deletedEventIds: Readonly<string[]>;
   end: string;
-  loadingText?: React.ReactNode;
+  loadingText: React.ReactNode;
   filters: Filter[];
-  footerText?: React.ReactNode;
+  footerText: React.ReactNode;
   headerFilterGroup?: React.ReactNode;
   height?: number;
   indexNames: string[];
@@ -124,7 +124,7 @@ export interface TGridStandaloneProps {
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
   data?: DataPublicPluginStart;
-  unit?: (total: number) => React.ReactNode;
+  unit: (total: number) => React.ReactNode;
 }
 const basicUnit = (n: number) => i18n.UNIT(n);
 
