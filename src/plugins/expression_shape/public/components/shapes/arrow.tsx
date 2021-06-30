@@ -9,27 +9,20 @@ import React, { useEffect } from 'react';
 import { ShapeProps } from '../types';
 import { ShapeHOC } from './shape_hoc';
 
-function ArrowMultiShape({
-  shapeAttributes,
-  shapeContentAttributes,
-  setInitViewBoxParams,
-}: ShapeProps) {
+function ArrowShape({ shapeAttributes, shapeContentAttributes, setInitViewBoxParams }: ShapeProps) {
   useEffect(() => {
     setInitViewBoxParams({
       minX: 0,
       minY: 0,
       width: 100,
-      height: 60,
+      height: 100,
     });
   }, [setInitViewBoxParams]);
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...shapeAttributes}>
-      <polygon
-        points="5,30 25,10 25,20 75,20 75,10 95,30 75,50 75,40 25,40 25,50"
-        {...shapeContentAttributes}
-      />
+      <polygon points="0,40 60,40 60,20 95,50 60,80 60,60 0,60" {...shapeContentAttributes} />
     </svg>
   );
 }
 
-export const ArrowMulti = ShapeHOC(ArrowMultiShape);
+export const Arrow = ShapeHOC(ArrowShape);

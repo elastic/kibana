@@ -30,7 +30,7 @@ function ShapeComponent({
     height: parentNode.offsetHeight,
   });
 
-  const [shapeViewBox, setShapeViewBox] = useState<ViewBoxParams | null>(null);
+  const [shapeViewBox, setShapeViewBox] = useState<ViewBoxParams>();
 
   useEffect(() => {
     setDimensions({

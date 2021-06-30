@@ -29,10 +29,18 @@ export interface ViewBoxParams {
   height: number;
 }
 
-export interface ShapeProps {
+export interface ShapeHocProps {
   shapeAttributes: ShapeAttributes;
   shapeContentAttributes: ShapeContentAttributes;
-  setViewBoxParams: (viewBoxParams: ViewBoxParams) => void;
+  setViewBoxParams: (viewBoxParams?: ViewBoxParams) => void;
+}
+
+export interface ShapeProps {
+  shapeAttributes: ShapeAttributes & {
+    viewBox: string;
+  };
+  shapeContentAttributes: ShapeContentAttributes;
+  setInitViewBoxParams: (viewBoxParams: ViewBoxParams) => void;
 }
 
 export interface ParentNodeParams {
