@@ -16,7 +16,7 @@ import * as t from 'io-ts';
 export const JourneyStepType = t.intersection([
   t.partial({
     monitor: t.partial({
-      duration: t.partial({
+      duration: t.type({
         us: t.number,
       }),
       name: t.string,
@@ -170,7 +170,6 @@ export const ScreenshotRefImageDataType = t.type({
   maxSteps: t.number,
   ref: t.type({
     screenshotRef: RefResultType,
-    // blocks: t.array(ScreenshotBlockDocType),
   }),
 });
 
