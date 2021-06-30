@@ -7,3 +7,4 @@
  */
 
 export * from './edit_panel_action';
+export * from './quick_edit_panel_action';

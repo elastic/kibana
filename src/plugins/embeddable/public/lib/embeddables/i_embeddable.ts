@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
@@ -152,6 +151,13 @@ export interface IEmbeddable<
    * @return Inspector adapters that will be used to open an inspector for.
    */
   getInspectorAdapters(): Adapters | undefined;
+
+  getQuickEditControl?():
+    | Promise<{
+        control: JSX.Element;
+        onSave(): void;
+      }>
+    | undefined;
 
   /**
    * Cleans up subscriptions, destroy nodes mounted from calls to render.

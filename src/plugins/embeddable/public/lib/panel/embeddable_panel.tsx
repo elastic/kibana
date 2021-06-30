@@ -14,7 +14,6 @@ import deepEqual from 'fast-deep-equal';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
-import { UsageCollectionStart } from '../../../../usage_collection/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import {
@@ -37,7 +36,7 @@ import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
 import { PanelHeader } from './panel_header/panel_header';
 import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_action';
-import { EditPanelAction } from '../actions';
+import { EditPanelAction, QuickEditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
@@ -54,20 +53,15 @@ const removeById = (disabledActions: string[]) => ({ id }: { id: string }) =>
 interface Props {
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
   getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
-  getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
-  overlays?: CoreStart['overlays'];
-  notifications?: CoreStart['notifications'];
-  application?: CoreStart['application'];
-  inspector?: InspectorStartContract;
-  SavedObjectFinder?: React.ComponentType<any>;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+  overlays: CoreStart['overlays'];
+  notifications: CoreStart['notifications'];
+  application: CoreStart['application'];
+  inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
   stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
-  actionPredicate?: (actionId: string) => boolean;
-  reportUiCounter?: UsageCollectionStart['reportUiCounter'];
-  showShadow?: boolean;
-  showBadges?: boolean;
-  showNotifications?: boolean;
 }
 
 interface State {
@@ -84,26 +78,14 @@ interface State {
   errorEmbeddable?: ErrorEmbeddable;
 }
 
-interface InspectorPanelAction {
-  inspectPanel: InspectPanelAction;
-}
-
-interface BasePanelActions {
+interface PanelUniversalActions {
   customizePanelTitle: CustomizePanelTitleAction;
   addPanel: AddPanelAction;
   inspectPanel: InspectPanelAction;
   removePanel: RemovePanelAction;
   editPanel: EditPanelAction;
+  quickEditPanel: QuickEditPanelAction;
 }
-
-const emptyObject = {};
-type EmptyObject = typeof emptyObject;
-
-type PanelUniversalActions =
-  | BasePanelActions
-  | InspectorPanelAction
-  | (BasePanelActions & InspectorPanelAction)
-  | EmptyObject;
 
 export class EmbeddablePanel extends React.Component<Props, State> {
   private embeddableRoot: React.RefObject<HTMLDivElement>;
@@ -134,15 +116,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshBadges() {
-    if (!this.mounted) {
-      return;
-    }
-    if (this.props.showBadges === false) {
-      return;
-    }
     let badges = await this.props.getActions(PANEL_BADGE_TRIGGER, {
       embeddable: this.props.embeddable,
     });
+    if (!this.mounted) return;
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -157,15 +134,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshNotifications() {
-    if (!this.mounted) {
-      return;
-    }
-    if (this.props.showNotifications === false) {
-      return;
-    }
     let notifications = await this.props.getActions(PANEL_NOTIFICATION_TRIGGER, {
       embeddable: this.props.embeddable,
     });
+    if (!this.mounted) return;
 
     const { disabledActions } = this.props.embeddable.getInput();
     if (disabledActions) {
@@ -256,18 +228,13 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
-        hasShadow={this.props.showShadow}
       >
         {!this.props.hideHeader && (
           <PanelHeader
             getActionContextMenuPanel={this.getActionContextMenuPanel}
             hidePanelTitle={this.state.hidePanelTitle}
             isViewMode={viewOnlyMode}
-            customizeTitle={
-              'customizePanelTitle' in this.state.universalActions
-                ? this.state.universalActions.customizePanelTitle
-                : undefined
-            }
+            customizeTitle={this.state.universalActions.customizePanelTitle}
             closeContextMenu={this.state.closeContextMenu}
             title={title}
             badges={this.state.badges}
@@ -316,23 +283,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getUniversalActions = (): PanelUniversalActions => {
-    let actions = {};
-    if (this.props.inspector) {
-      actions = {
-        inspectPanel: new InspectPanelAction(this.props.inspector),
-      };
-    }
-    if (
-      !this.props.getEmbeddableFactory ||
-      !this.props.getAllEmbeddableFactories ||
-      !this.props.overlays ||
-      !this.props.notifications ||
-      !this.props.SavedObjectFinder ||
-      !this.props.application
-    ) {
-      return actions;
-    }
-
     const createGetUserData = (overlays: OverlayStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
         return new Promise<{ title: string | undefined; hideTitle?: boolean }>((resolve) => {
@@ -357,19 +307,23 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     // Universal actions are exposed on the context menu for every embeddable, they bypass the trigger
     // registry.
     return {
-      ...actions,
       customizePanelTitle: new CustomizePanelTitleAction(createGetUserData(this.props.overlays)),
       addPanel: new AddPanelAction(
         this.props.getEmbeddableFactory,
         this.props.getAllEmbeddableFactories,
         this.props.overlays,
         this.props.notifications,
-        this.props.SavedObjectFinder,
-        this.props.reportUiCounter
+        this.props.SavedObjectFinder
       ),
+      inspectPanel: new InspectPanelAction(this.props.inspector),
       removePanel: new RemovePanelAction(),
       editPanel: new EditPanelAction(
         this.props.getEmbeddableFactory,
+        this.props.application,
+        this.props.stateTransfer
+      ),
+      quickEditPanel: new QuickEditPanelAction(
+        this.props.overlays,
         this.props.application,
         this.props.stateTransfer
       ),
@@ -387,13 +341,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       regularActions = regularActions.filter(removeDisabledActions);
     }
 
-    let sortedActions = regularActions
-      .concat(Object.values(this.state.universalActions || {}) as Array<Action<object>>)
-      .sort(sortByOrderField);
-
-    if (this.props.actionPredicate) {
-      sortedActions = sortedActions.filter(({ id }) => this.props.actionPredicate!(id));
-    }
+    const sortedActions = [...regularActions, ...Object.values(this.state.universalActions)].sort(
+      sortByOrderField
+    );
 
     return await buildContextMenuForActions({
       actions: sortedActions.map((action) => ({
