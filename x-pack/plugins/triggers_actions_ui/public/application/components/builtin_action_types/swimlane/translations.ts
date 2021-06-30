@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.selectMessageText',
-  {
-    defaultMessage: 'Create record in Swimlane',
-  }
-);
-
-export const SW_ACTION_TYPE_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.actionTypeTitle',
-  {
-    defaultMessage: 'Create Swimlane Record',
-  }
-);
-
 export const SW_REQUIRED_RULE_NAME = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredRuleName',
   {
