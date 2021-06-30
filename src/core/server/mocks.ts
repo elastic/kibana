@@ -52,6 +52,7 @@ export { capabilitiesServiceMock } from './capabilities/capabilities_service.moc
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
