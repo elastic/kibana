@@ -28,7 +28,7 @@ export interface OpenFieldEditorOptions {
   ctx: {
     indexPattern: IndexPattern;
   };
-  onSave?: (field: IndexPatternField) => void;
+  onSave?: (field: IndexPatternField[]) => void;
   fieldName?: string;
 }
 
@@ -80,7 +80,7 @@ export const getFieldEditorOpener = ({
       }
     };
 
-    const onSaveField = (updatedField: IndexPatternField) => {
+    const onSaveField = (updatedField: IndexPatternField[]) => {
       closeEditor();
 
       if (onSave) {
@@ -104,9 +104,9 @@ export const getFieldEditorOpener = ({
     const fieldTypeToProcess: InternalFieldType =
       isNewRuntimeField || isExistingRuntimeField ? 'runtime' : 'concrete';
 
-    if (field?.runtimeField && field?.parent !== undefined) {
+    if (field?.runtimeField?.parent !== undefined) {
       console.log( // eslint-disable-line
-        'Need to display a modal to indicate that this field needs to be edited through its parent.'
+        'TODO: display a modal to indicate that this field needs to be edited through its parent.'
       );
       return closeEditor;
     }
