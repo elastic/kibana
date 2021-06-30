@@ -290,6 +290,7 @@ export const useSavedSearch = ({
         (error) => {
           if (error instanceof Error && error.name === 'AbortError') return;
           refs.current.fetchStatus = FetchStatus.ERROR;
+          data.search.showError(error);
           main$.next({
             fetchStatus: FetchStatus.ERROR,
             error,
