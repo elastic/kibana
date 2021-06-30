@@ -160,22 +160,18 @@ export class UploadLicense extends React.PureComponent {
           </EuiText>
           <EuiSpacer />
           <EuiForm isInvalid={!!this.errorMessage()} error={this.errorMessage()}>
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiText>
-                  <EuiFilePicker
-                    id="licenseFile"
-                    initialPromptText={
-                      <FormattedMessage
-                        id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                        defaultMessage="Select or drag your license file"
-                      />
-                    }
-                    onChange={this.handleFile}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiFilePicker
+              fullWidth
+              id="licenseFile"
+              initialPromptText={
+                <FormattedMessage
+                  id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                  defaultMessage="Select or drag your license file"
+                />
+              }
+              onChange={this.handleFile}
+            />
+
             <EuiSpacer size="m" />
             {shouldShowTelemetryOptIn(telemetry) && (
               <TelemetryOptIn
