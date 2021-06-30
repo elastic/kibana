@@ -8,9 +8,8 @@
 import { Observable } from 'rxjs';
 import type {
   IRouter,
-  ILegacyClusterClient,
   Logger,
-  ILegacyCustomClusterClient,
+  ICustomClusterClient,
   RequestHandlerContext,
   ElasticsearchClient,
 } from 'kibana/server';
@@ -71,7 +70,7 @@ export interface MonitoringCoreConfig {
 }
 
 export interface RouteDependencies {
-  cluster: ILegacyCustomClusterClient;
+  cluster: ICustomClusterClient;
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
@@ -87,7 +86,7 @@ export interface MonitoringCore {
 export interface LegacyShimDependencies {
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   instanceUuid: string;
-  esDataClient: ILegacyClusterClient;
+  esDataClient: ElasticsearchClient;
   kibanaStatsCollector: any;
 }
 
