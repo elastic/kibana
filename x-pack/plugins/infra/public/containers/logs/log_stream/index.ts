@@ -66,10 +66,9 @@ export function useLogStream({
   const prevStartTimestamp = usePrevious(startTimestamp);
   const prevEndTimestamp = usePrevious(endTimestamp);
 
-  const cachedQuery = useRef(query);
-
+  const [cachedQuery, setCachedQuery] = useState(query);
   if (!isEqual(query, cachedQuery)) {
-    cachedQuery.current = query;
+    setCachedQuery(query);
   }
 
   useEffect(() => {
@@ -89,7 +88,7 @@ export function useLogStream({
       sourceId,
       startTimestamp,
       endTimestamp,
-      query: cachedQuery.current,
+      query: cachedQuery,
       columnOverrides: columns,
     }),
     [columns, endTimestamp, cachedQuery, sourceId, startTimestamp]
