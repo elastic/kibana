@@ -20734,7 +20734,6 @@
     "xpack.securitySolution.pages.common.emptyActionEndpointDescription": "脅威防御、検出、深いセキュリティデータの可視化を実現し、ホストを保護します。",
     "xpack.securitySolution.pages.common.emptyActionSecondary": "入門ガイドを表示します。",
     "xpack.securitySolution.pages.common.emptyTitle": "Elastic Securityへようこそ。始めましょう。",
-    "xpack.securitySolution.pages.fourohfour.noContentFoundDescription": "コンテンツがありません",
     "xpack.securitySolution.paginatedTable.rowsButtonLabel": "ページごとの行数",
     "xpack.securitySolution.paginatedTable.showingSubtitle": "表示中",
     "xpack.securitySolution.paginatedTable.tooManyResultsToastText": "クエリ範囲を縮めて結果をさらにフィルタリングしてください",
