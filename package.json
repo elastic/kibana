@@ -470,7 +470,7 @@
     "@kbn/spec-to-console": "link:bazel-bin/packages/kbn-spec-to-console",
     "@kbn/storybook": "link:bazel-bin/packages/kbn-storybook",
     "@kbn/telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools",
-    "@kbn/test": "link:packages/kbn-test",
+    "@kbn/test": "link:bazel-bin/packages/kbn-test",
     "@kbn/test-subj-selector": "link:bazel-bin/packages/kbn-test-subj-selector",
     "@loaders.gl/polyfills": "^2.3.5",
     "@microsoft/api-documenter": "7.7.2",
