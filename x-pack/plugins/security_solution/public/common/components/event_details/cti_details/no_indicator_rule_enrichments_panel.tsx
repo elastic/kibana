@@ -25,7 +25,7 @@ const NoIndicatorRuleEnrichmentsPanelFC: React.FC = () => {
   return (
     <Container hasShadow={false} data-test-subj="no-indicator-rule-enrichments-panel">
       <EuiText textAlign="center">
-        <h2>{i18n.NO_INDICATOR_ENRICHMENTS_FOUND}</h2>
+        <h2>{i18n.NO_INDICATOR_ENRICHMENTS_TITLE}</h2>
       </EuiText>
       <EuiText size="s" color="subdued">
         {i18n.IF_CTI_NOT_ENABLED}

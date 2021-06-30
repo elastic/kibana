@@ -38,7 +38,7 @@ describe('NoInvestigationEnrichmentsPanel', () => {
 
     expect(
       wrapper.find('[data-test-subj="no-investigation-enrichments-panel"]').hostNodes().text()
-    ).toContain(i18n.NO_INVESTIGATION_ENRICHMENTS_EXPLANATION);
+    ).toContain(i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION);
   });
 
   it('invokes the onRangeChange handler when dates are changed', () => {

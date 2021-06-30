@@ -44,22 +44,22 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const NO_INDICATOR_ENRICHMENTS_FOUND = i18n.translate(
-  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsFound',
+export const NO_INDICATOR_ENRICHMENTS_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsTitle',
   {
     defaultMessage: 'No indicator match rule enrichments found',
   }
 );
 
-export const NO_INVESTIGATION_ENRICHMENTS_FOUND = i18n.translate(
-  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsFound',
+export const NO_INVESTIGATION_ENRICHMENTS_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsTitle',
   {
     defaultMessage: 'No investigation time enrichments found',
   }
 );
 
-export const NO_INVESTIGATION_ENRICHMENTS_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsFound',
+export const NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsDescription',
   {
     defaultMessage:
       "We haven't found any indicator matches from the last 30 days. If you would like to include older indicators, you can ",

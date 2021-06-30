@@ -26,10 +26,10 @@ const NoInvestigationEnrichmentsPanelFC: React.FC<{ onRangeChange: RangeCallback
   return (
     <Container hasShadow={false} data-test-subj="no-investigation-enrichments-panel">
       <EuiText textAlign="center">
-        <h2>{i18n.NO_INVESTIGATION_ENRICHMENTS_FOUND}</h2>
+        <h2>{i18n.NO_INVESTIGATION_ENRICHMENTS_TITLE}</h2>
       </EuiText>
       <EuiText size="s" color="subdued">
-        {i18n.NO_INVESTIGATION_ENRICHMENTS_EXPLANATION}
+        {i18n.NO_INVESTIGATION_ENRICHMENTS_DESCRIPTION}
         <EuiLink
           data-test-subj="change-enrichment-lookback-query-button"
           onClick={handleSearchClick}
