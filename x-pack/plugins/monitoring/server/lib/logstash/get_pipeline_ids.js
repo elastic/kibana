@@ -27,8 +27,8 @@ export async function getLogstashPipelineIds(
   const params = {
     index: logstashIndexPattern,
     size: 0,
-    ignoreUnavailable: true,
-    filterPath: ['aggregations.nest.id.buckets', 'aggregations.nest_mb.id.buckets'],
+    ignore_unavailable: true,
+    filter_path: ['aggregations.nest.id.buckets', 'aggregations.nest_mb.id.buckets'],
     body: {
       query: createQuery({
         start,

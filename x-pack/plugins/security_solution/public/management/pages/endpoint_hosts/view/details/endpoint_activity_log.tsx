@@ -31,6 +31,9 @@ import {
   getActivityLogRequestLoading,
 } from '../../store/selectors';
 
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  height: 85vh;
+`;
 const LoadMoreTrigger = styled.div`
   height: 6px;
   width: 100%;
@@ -79,7 +82,7 @@ export const EndpointActivityLog = memo(
 
     return (
       <>
-        <EuiFlexGroup direction="column" style={{ height: '85vh' }}>
+        <StyledEuiFlexGroup direction="column" responsive={false}>
           {(activityLogLoaded && !activityLogSize) || activityLogError ? (
             <EuiFlexItem>
               <EuiEmptyPrompt
@@ -115,7 +118,7 @@ export const EndpointActivityLog = memo(
               </EuiFlexItem>
             </>
           )}
-        </EuiFlexGroup>
+        </StyledEuiFlexGroup>
       </>
     );
   }
