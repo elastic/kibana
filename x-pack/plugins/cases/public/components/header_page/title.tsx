@@ -32,7 +32,7 @@ interface Props {
 const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
   <EuiTitle size="l">
     <h1 data-test-subj="header-page-title">
-      {isString(title) ? <TruncatedText text={title} /> : { title }}
+      {isString(title) ? <TruncatedText text={title} /> : title}
       {badgeOptions && (
         <>
           {' '}
