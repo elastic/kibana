@@ -196,6 +196,8 @@ export const usePivotConfig = (
 
         if (suggestedSortField) {
           config.aggConfig.sortField = suggestedSortField;
+          config.aggConfig.sortSettings = {};
+          config.aggConfig.sortSettings.order = 'desc';
         }
       }
 

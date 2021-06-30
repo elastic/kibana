@@ -33,11 +33,7 @@ export function getTopMetricsAggConfig(
     AggFormComponent: TopMetricsAggForm,
     /** Default name */
     aggName: PIVOT_SUPPORTED_AGGS.TOP_METRICS,
-    aggConfig: {
-      sortSettings: {
-        order: 'desc',
-      },
-    },
+    aggConfig: {},
     getEsAggConfig() {
       // ensure the configuration has been completed
       if (!this.isValid()) {
