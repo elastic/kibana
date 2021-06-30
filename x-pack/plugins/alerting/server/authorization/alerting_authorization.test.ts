@@ -1956,6 +1956,7 @@ describe('AlertingAuthorization', () => {
       name: 'myOtherAppAlertType',
       producer: 'alerts',
       enabledInLicense: true,
+      isExportable: true,
     };
     const myAppAlertType: RegistryAlertType = {
       actionGroups: [],
@@ -1967,6 +1968,7 @@ describe('AlertingAuthorization', () => {
       name: 'myAppAlertType',
       producer: 'myApp',
       enabledInLicense: true,
+      isExportable: true,
     };
     const mySecondAppAlertType: RegistryAlertType = {
       actionGroups: [],
@@ -1978,6 +1980,7 @@ describe('AlertingAuthorization', () => {
       name: 'mySecondAppAlertType',
       producer: 'myApp',
       enabledInLicense: true,
+      isExportable: true,
     };
     const setOfAlertTypes = new Set([myAppAlertType, myOtherAppAlertType, mySecondAppAlertType]);
 

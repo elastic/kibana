@@ -77,9 +77,6 @@
               }
             }
           },
-          "owner": {
-            "type": "keyword"
-          },
           "rule": {
             "properties": {
               "id": {

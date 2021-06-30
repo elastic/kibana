@@ -31,7 +31,7 @@ describe('buildSignal', () => {
     delete doc._source.event;
     const rule = getRulesSchemaMock();
     const signal = {
-      ...buildSignal([doc], rule, 'siem'),
+      ...buildSignal([doc], rule),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -61,7 +61,6 @@ describe('buildSignal', () => {
         },
       ],
       original_time: '2020-04-20T21:27:45.000Z',
-      owner: 'siem',
       status: 'open',
       rule: {
         author: [],
@@ -113,7 +112,7 @@ describe('buildSignal', () => {
     };
     const rule = getRulesSchemaMock();
     const signal = {
-      ...buildSignal([doc], rule, 'siem'),
+      ...buildSignal([doc], rule),
       ...additionalSignalFields(doc),
     };
     const expected: Signal = {
@@ -143,7 +142,6 @@ describe('buildSignal', () => {
         },
       ],
       original_time: '2020-04-20T21:27:45.000Z',
-      owner: 'siem',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',
