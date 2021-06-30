@@ -18,6 +18,7 @@ const defaultNetworkDirectionParameters = {
   ignore_missing: undefined,
   ignore_failure: undefined,
   destination_ip: undefined,
+  internal_networks: undefined,
   internal_networks_field: undefined,
 };
 
@@ -56,7 +57,7 @@ describe('Processor: Network Direction', () => {
     await testBed.actions.addProcessorType(NETWORK_DIRECTION_TYPE);
   });
 
-  test('prevents form submission if required fields are not provided', async () => {
+  test('prevents form submission if internal_network field is not provided', async () => {
     const {
       actions: { saveNewProcessor },
       form,

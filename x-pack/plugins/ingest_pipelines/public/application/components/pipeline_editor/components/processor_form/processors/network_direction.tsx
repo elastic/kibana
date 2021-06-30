@@ -7,6 +7,7 @@
 
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import { EuiButtonEmpty, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -104,12 +105,8 @@ const internalNetworkConfig: Record<
       validations: [
         {
           validator: ({ value, path, formData }) => {
-            if (value.length === 0 && formData['fields.internal_networks_field'].length === 0) {
-              return {
-                err: 'ERR_FIELD_MISSING',
-                path,
-                message: 'A field value is required.',
-              };
+            if (isEmpty(value) && isEmpty(formData['fields.internal_networks_field'])) {
+              return { path, message: 'A field value is required.' };
             }
           },
         },
@@ -137,12 +134,8 @@ const internalNetworkConfig: Record<
       validations: [
         {
           validator: ({ value, path, formData }) => {
-            if (value.length === 0 && formData['fields.internal_networks'].length === 0) {
-              return {
-                err: 'ERR_FIELD_MISSING',
-                path,
-                message: 'A field value is required.',
-              };
+            if (isEmpty(value) && isEmpty(formData['fields.internal_networks'])) {
+              return { path, message: 'A field value is required.' };
             }
           },
         },
