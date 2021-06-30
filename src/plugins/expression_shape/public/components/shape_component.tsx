@@ -11,7 +11,6 @@ import { useResizeObserver } from '@elastic/eui';
 import { Dimensions, ShapeComponentProps } from './types';
 import { shapes } from './shapes';
 import './shape.scss';
-import { ArrowMulti } from './shapes/arrow_multi';
 import { ShapeAttributes, ShapeContentAttributes, ViewBoxParams } from './types';
 import { getViewBox } from '../../common/lib';
 
