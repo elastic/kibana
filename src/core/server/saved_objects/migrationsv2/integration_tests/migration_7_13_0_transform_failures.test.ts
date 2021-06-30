@@ -93,10 +93,28 @@ describe('migration v2', () => {
         '7.14.0': (doc) => doc,
       },
     });
+
+    // registering the `space` type with a throwing migration fn to avoid the migration failing for unknown types
+    coreSetup.savedObjects.registerType({
+      name: 'space',
+      hidden: false,
+      mappings: {
+        properties: {},
+      },
+      namespaceType: 'single',
+      migrations: {
+        '7.14.0': (doc) => {
+          doc.attributes.foo.bar = 12;
+          return doc;
+        },
+      },
+    });
+
     try {
       await root.start();
     } catch (err) {
       const errorMessage = err.message;
+
       expect(
         errorMessage.startsWith(
           'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 7 corrupt saved object documents were found: '
@@ -122,11 +140,11 @@ describe('migration v2', () => {
       }
 
       expect(errorMessage.includes('7 transformation errors were encountered:')).toBeTruthy();
-      expect(
-        errorMessage.includes(
-          'space:default: Error: Document "default" has property "space" which belongs to a more recent version of Kibana [6.6.0]. The last known version is [undefined]'
+      expect(errorMessage).toEqual(
+        expect.stringContaining(
+          'space:sixth: Error: Migration function for version 7.14.0 threw an error'
         )
-      ).toBeTruthy();
+      );
     }
   });
 });

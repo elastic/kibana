@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { FatalErrorsSetup, StartServicesAccessor } from 'src/core/public';
 import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../../common/licensing';
 import type { PluginStartDependencies } from '../../plugin';
 import { tryDecodeURIComponent } from '../url_utils';
@@ -39,10 +40,7 @@ export const rolesManagementApp = Object.freeze({
         ];
 
         const [
-          [
-            { application, docLinks, http, i18n: i18nStart, notifications },
-            { data, features, spaces },
-          ],
+          [startServices, { data, features, spaces }],
           { RolesGridPage },
           { EditRolePage },
           { RolesAPIClient },
@@ -58,6 +56,8 @@ export const rolesManagementApp = Object.freeze({
           import('./privileges_api_client'),
           import('../users'),
         ]);
+
+        const { application, docLinks, http, i18n: i18nStart, notifications } = startServices;
 
         const rolesAPIClient = new RolesAPIClient(http);
         const RolesGridPageWithBreadcrumbs = () => {
@@ -114,21 +114,24 @@ export const rolesManagementApp = Object.freeze({
         };
 
         render(
-          <i18nStart.Context>
-            <Router history={history}>
-              <Switch>
-                <Route path={['/', '']} exact={true}>
-                  <RolesGridPageWithBreadcrumbs />
-                </Route>
-                <Route path="/edit/:roleName?">
-                  <EditRolePageWithBreadcrumbs action="edit" />
-                </Route>
-                <Route path="/clone/:roleName">
-                  <EditRolePageWithBreadcrumbs action="clone" />
-                </Route>
-              </Switch>
-            </Router>
-          </i18nStart.Context>,
+          <KibanaContextProvider services={startServices}>
+            <i18nStart.Context>
+              <Router history={history}>
+                <Switch>
+                  <Route path={['/', '']} exact={true}>
+                    <RolesGridPageWithBreadcrumbs />
+                  </Route>
+                  <Route path="/edit/:roleName?">
+                    <EditRolePageWithBreadcrumbs action="edit" />
+                  </Route>
+                  <Route path="/clone/:roleName">
+                    <EditRolePageWithBreadcrumbs action="clone" />
+                  </Route>
+                </Switch>
+              </Router>
+            </i18nStart.Context>
+          </KibanaContextProvider>,
+
           element
         );
 

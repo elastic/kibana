@@ -11,6 +11,7 @@ export enum JOB_TYPE {
   POPULATION = 'population',
   ADVANCED = 'advanced',
   CATEGORIZATION = 'categorization',
+  RARE = 'rare',
 }
 
 export enum CREATED_BY_LABEL {
@@ -18,6 +19,7 @@ export enum CREATED_BY_LABEL {
   MULTI_METRIC = 'multi-metric-wizard',
   POPULATION = 'population-wizard',
   CATEGORIZATION = 'categorization-wizard',
+  RARE = 'rare-wizard',
   APM_TRANSACTION = 'ml-module-apm-transaction',
 }
 

@@ -16,9 +16,10 @@ jest.mock('./browsers/install', () => ({
 }));
 
 import { coreMock } from 'src/core/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
+import { TaskManagerSetupContract } from '../../task_manager/server';
 import { ReportingPlugin } from './plugin';
 import { createMockConfigSchema } from './test_helpers';
-import { featuresPluginMock } from '../../features/server/mocks';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -42,6 +43,9 @@ describe('Reporting Plugin', () => {
         makeUsageCollector: jest.fn(),
         registerCollector: jest.fn(),
       },
+      taskManager: ({
+        registerTaskDefinitions: jest.fn(),
+      } as unknown) as TaskManagerSetupContract,
       security: {
         authc: {
           getCurrentUser: () => ({

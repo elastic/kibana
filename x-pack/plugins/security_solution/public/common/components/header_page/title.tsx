@@ -24,6 +24,19 @@ const Badge = (styled(EuiBadge)`
 ` as unknown) as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
+const Header = styled.h1`
+  display: flex;
+  align-items: center;
+`;
+Header.displayName = 'Header';
+
+const TitleWrapper = styled.span`
+  // Without  min-width: 0, as a flex child, it wouldn't shrink properly
+  // and could overflow its parent.
+  min-width: 0;
+`;
+TitleWrapper.displayName = 'TitleWrapper';
+
 interface Props {
   badgeOptions?: BadgeOptions;
   title: TitleProp;
@@ -32,9 +45,11 @@ interface Props {
 
 const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptions }) => (
   <EuiTitle size="l">
-    <h1 data-test-subj="header-page-title">
+    <Header data-test-subj="header-page-title">
       {!draggableArguments ? (
-        <TruncatableText tooltipContent={title}>{title}</TruncatableText>
+        <TitleWrapper>
+          <TruncatableText tooltipContent={title}>{title}</TruncatableText>
+        </TitleWrapper>
       ) : (
         <DefaultDraggable
           data-test-subj="header-page-draggable"
@@ -53,13 +68,13 @@ const TitleComponent: React.FC<Props> = ({ draggableArguments, title, badgeOptio
               tooltipPosition="bottom"
             />
           ) : (
-            <Badge color="hollow" title="">
+            <Badge color={badgeOptions.color || 'hollow'} title="">
               {badgeOptions.text}
             </Badge>
           )}
         </>
       )}
-    </h1>
+    </Header>
   </EuiTitle>
 );
 

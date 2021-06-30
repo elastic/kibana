@@ -27,6 +27,7 @@ import {
   getSearchSessionMapBuffer,
   getLayerById,
   getEditState,
+  getSelectedLayerId,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -342,6 +343,19 @@ export function updateEditShape(shapeToDraw: DRAW_SHAPE | null) {
   };
 }
 
+export function setEditLayerToSelectedLayer() {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const layerId = getSelectedLayerId(getState());
+    if (!layerId) {
+      return;
+    }
+    dispatch(updateEditLayer(layerId));
+  };
+}
+
 export function updateEditLayer(layerId: string | null) {
   return (dispatch: Dispatch) => {
     if (layerId !== null) {
@@ -373,6 +387,25 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
       return;
     }
     await layer.addFeature(geometry);
+    await dispatch(syncDataForLayer(layer, true));
+  };
+}
+
+export function deleteFeatureFromIndex(featureId: string) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const editState = getEditState(getState());
+    const layerId = editState ? editState.layerId : undefined;
+    if (!layerId) {
+      return;
+    }
+    const layer = getLayerById(layerId, getState());
+    if (!layer || !(layer instanceof VectorLayer)) {
+      return;
+    }
+    await layer.deleteFeature(featureId);
     await dispatch(syncDataForLayer(layer, true));
   };
 }

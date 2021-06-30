@@ -33,6 +33,7 @@ export interface Props {
   hasPreviewLayers: boolean;
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
+  enableEditMode: () => void;
 }
 
 interface State {
@@ -91,6 +92,9 @@ export class AddLayerPanel extends Component<Props, State> {
     if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
       // last step
       this.props.promotePreviewLayers();
+      if (this.state.layerWizard?.showFeatureEditTools) {
+        this.props.enableEditMode();
+      }
     } else {
       this.setState((prevState) => {
         const nextIndex = prevState.currentStepIndex + 1;

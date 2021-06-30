@@ -49,7 +49,9 @@ export async function fetchStatus(
       if (!states) {
         return result;
       }
-
+      // puts all alert states associated with this rule into a flat array.  this works with both the legacy alert
+      // of having multiple alert states per alert, each representing a firing node, and the current alert where each firing
+      // node is an alert with a single alert state, the node itself. https://github.com/elastic/kibana/pull/102544
       result.states = Object.values(states).reduce((accum: CommonAlertState[], instance: any) => {
         const alertInstanceState = instance.state as AlertInstanceState;
         if (!alertInstanceState.alertStates) {
