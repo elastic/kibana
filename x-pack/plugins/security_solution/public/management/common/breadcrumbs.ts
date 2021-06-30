@@ -29,7 +29,8 @@ export function getBreadcrumbs(
   return [
     {
       text: ADMINISTRATION,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.administration}`, {
+      href: getUrlForApp(APP_ID, {
+        deepLinkId: SecurityPageName.endpoints,
         path: !isEmpty(search[0]) ? search[0] : '',
       }),
     },

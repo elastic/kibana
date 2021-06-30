@@ -6,9 +6,24 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
-import { buildExistsFilter } from '../utils';
-import { MONITORS_DURATION_LABEL, PINGS_LABEL } from '../constants/labels';
+import { FieldLabels, REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD } from '../constants';
+import {
+  CLS_LABEL,
+  DCL_LABEL,
+  DOCUMENT_ONLOAD_LABEL,
+  FCP_LABEL,
+  LCP_LABEL,
+  MONITORS_DURATION_LABEL,
+  PINGS_LABEL,
+} from '../constants/labels';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_CLS,
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+} from '../constants/field_names/synthetics';
 
 export function getSyntheticsDistributionConfig({
   series,
@@ -23,7 +38,7 @@ export function getSyntheticsDistributionConfig({
     },
     yAxisColumns: [
       {
-        sourceField: RECORDS_FIELD,
+        sourceField: RECORDS_PERCENTAGE_FIELD,
         label: PINGS_LABEL,
       },
     ],
@@ -37,10 +52,39 @@ export function getSyntheticsDistributionConfig({
       'tags',
       'url.port',
     ],
-    baseFilters: [...buildExistsFilter('summary.up', indexPattern)],
+    baseFilters: [],
     definitionFields: ['monitor.name', 'url.full'],
     metricOptions: [
-      { label: 'Monitor duration', id: 'monitor.duration.us', field: 'monitor.duration.us' },
+      {
+        label: MONITORS_DURATION_LABEL,
+        id: MONITOR_DURATION_US,
+        field: MONITOR_DURATION_US,
+      },
+      {
+        label: LCP_LABEL,
+        field: SYNTHETICS_LCP,
+        id: SYNTHETICS_LCP,
+      },
+      {
+        label: FCP_LABEL,
+        field: SYNTHETICS_FCP,
+        id: SYNTHETICS_FCP,
+      },
+      {
+        label: DCL_LABEL,
+        field: SYNTHETICS_DCL,
+        id: SYNTHETICS_DCL,
+      },
+      {
+        label: DOCUMENT_ONLOAD_LABEL,
+        field: SYNTHETICS_DOCUMENT_ONLOAD,
+        id: SYNTHETICS_DOCUMENT_ONLOAD,
+      },
+      {
+        label: CLS_LABEL,
+        field: SYNTHETICS_CLS,
+        id: SYNTHETICS_CLS,
+      },
     ],
     labels: { ...FieldLabels, 'monitor.duration.us': MONITORS_DURATION_LABEL },
   };
