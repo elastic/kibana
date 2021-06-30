@@ -6,7 +6,10 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import type { SnapshotRepositorySettings } from '@elastic/elasticsearch/api/types';
+import type {
+  SnapshotGetRepositoryResponse,
+  SnapshotRepositorySettings,
+} from '@elastic/elasticsearch/api/types';
 
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { Repository, RepositoryType } from '../../../common/types';
@@ -101,7 +104,7 @@ export function registerRepositoriesRoutes({
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
-      let repositoryByName: any;
+      let repositoryByName: SnapshotGetRepositoryResponse;
 
       try {
         ({ body: repositoryByName } = await clusterClient.asCurrentUser.snapshot.getRepository({
@@ -111,12 +114,18 @@ export function registerRepositoriesRoutes({
         return handleEsError({ error: e, response: res });
       }
 
-      const response = await clusterClient.asCurrentUser.snapshot.get({
-        repository: name,
-        snapshot: '_all',
-      });
-
-      const { snapshots: snapshotList } = response.body;
+      const {
+        body: { snapshots: snapshotList },
+      } = await clusterClient.asCurrentUser.snapshot
+        .get({
+          repository: name,
+          snapshot: '_all',
+        })
+        .catch((e) => ({
+          body: {
+            snapshots: null,
+          },
+        }));
 
       if (repositoryByName[name]) {
         const { type = '', settings = {} } = repositoryByName[name];
