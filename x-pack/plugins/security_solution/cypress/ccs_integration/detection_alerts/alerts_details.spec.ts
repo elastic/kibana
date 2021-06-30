@@ -15,8 +15,8 @@ import {
 import { openJsonView, openTable, scrollJsonViewToBottom } from '../../tasks/alerts_details';
 import { createCustomRuleActivated } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
-import { esArchiverLoad } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { esArchiverCCSLoad, esArchiverCCSUnload } from '../../tasks/es_archiver';
 
 import { unmappedRule } from '../../objects/rule';
 
@@ -25,7 +25,7 @@ import { ALERTS_URL } from '../../urls/navigation';
 describe('Alert details with unmapped fields', () => {
   beforeEach(() => {
     cleanKibana();
-    esArchiverLoad('unmapped_fields');
+    esArchiverCCSLoad('unmapped_fields');
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -33,6 +33,10 @@ describe('Alert details with unmapped fields', () => {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     expandFirstAlert();
+  });
+
+  afterEach(() => {
+    esArchiverCCSUnload('unmapped_fields');
   });
 
   it('Displays the unmapped field on the JSON view', () => {
