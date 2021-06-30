@@ -17,9 +17,9 @@ import type { LayoutParams, Locator } from '../../common/types';
 import { isJobV2Params } from '../../common/job_utils';
 import type { JobParamsPNG, JobParamsPNGV2 } from '../../server/export_types/png/types';
 import type { JobParamsPDF, JobParamsPDFV2 } from '../../server/export_types/printable_pdf/types';
-import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
 interface JobParamsProviderOptions {
   shareableUrl: string;

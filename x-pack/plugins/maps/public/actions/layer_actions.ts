@@ -256,9 +256,10 @@ export function setSelectedLayer(layerId: string | null) {
     }
     if (layerId) {
       dispatch(trackCurrentLayerState(layerId));
-    }
-    if (getDrawMode(getState()) !== DRAW_MODE.NONE) {
-      dispatch(setDrawMode(DRAW_MODE.NONE));
+      // Reset draw mode only if setting a new selected layer
+      if (getDrawMode(getState()) !== DRAW_MODE.NONE) {
+        dispatch(setDrawMode(DRAW_MODE.NONE));
+      }
     }
     dispatch({
       type: SET_SELECTED_LAYER,
