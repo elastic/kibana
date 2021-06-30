@@ -86,7 +86,7 @@ export const basicCase: Case = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
   connector: {
-    id: '123',
+    id: 'none',
     name: 'My Connector',
     type: ConnectorTypes.none,
     fields: null,
@@ -117,7 +117,7 @@ export const collectionCase: Case = {
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
   connector: {
-    id: '123',
+    id: 'none',
     name: 'My Connector',
     type: ConnectorTypes.none,
     fields: null,
@@ -251,7 +251,7 @@ export const basicCaseSnake: CaseResponse = {
   closed_by: null,
   comments: [basicCommentSnake],
   connector: {
-    id: '123',
+    id: 'none',
     name: 'My Connector',
     type: ConnectorTypes.none,
     fields: null,

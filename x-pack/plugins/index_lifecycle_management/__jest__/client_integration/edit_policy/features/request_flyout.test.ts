@@ -6,11 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { TestBed } from '@kbn/test/jest';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { initTestBed } from '../init_test_bed';
 
 describe('<EditPolicy /> request flyout', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: TestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -26,7 +27,7 @@ describe('<EditPolicy /> request flyout', () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await initTestBed();
     });
 
     const { component } = testBed;

@@ -306,7 +306,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={FLEET_ROUTING_PATHS.agent_details_logs}
         render={() => {
-          return <AgentLogs agent={agent} />;
+          return <AgentLogs agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route

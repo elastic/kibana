@@ -62,10 +62,10 @@ export const ManagedInstructions = React.memo<Props>(
   ({ agentPolicy, agentPolicies, viewDataStepContent }) => {
     const fleetStatus = useFleetStatus();
 
-    const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
+    const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
     const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
 
-    const apiKey = useGetOneEnrollmentAPIKey(selectedAPIKeyId);
+    const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
     const settings = useGetSettings();
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
@@ -84,10 +84,11 @@ export const ManagedInstructions = React.memo<Props>(
         !agentPolicy
           ? AgentPolicySelectionStep({
               agentPolicies,
+              selectedApiKeyId,
               setSelectedAPIKeyId,
               setIsFleetServerPolicySelected,
             })
-          : AgentEnrollmentKeySelectionStep({ agentPolicy, setSelectedAPIKeyId }),
+          : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
       ];
       if (isFleetServerPolicySelected) {
         baseSteps.push(
@@ -101,7 +102,7 @@ export const ManagedInstructions = React.memo<Props>(
           title: i18n.translate('xpack.fleet.agentEnrollment.stepEnrollAndRunAgentTitle', {
             defaultMessage: 'Enroll and start the Elastic Agent',
           }),
-          children: selectedAPIKeyId && apiKey.data && (
+          children: selectedApiKeyId && apiKey.data && (
             <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
           ),
         });
@@ -115,7 +116,7 @@ export const ManagedInstructions = React.memo<Props>(
     }, [
       agentPolicy,
       agentPolicies,
-      selectedAPIKeyId,
+      selectedApiKeyId,
       apiKey.data,
       isFleetServerPolicySelected,
       settings.data?.item?.fleet_server_hosts,

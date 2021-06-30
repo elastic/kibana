@@ -61,6 +61,7 @@ export const isolationRequestHandler = function (
   TypeOf<typeof HostIsolationRequestSchema.body>,
   SecuritySolutionRequestHandlerContext
 > {
+  // eslint-disable-next-line complexity
   return async (context, req, res) => {
     if (
       (!req.body.agent_ids || req.body.agent_ids.length === 0) &&
@@ -100,14 +101,14 @@ export const isolationRequestHandler = function (
     }
     agentIDs = [...new Set(agentIDs)]; // dedupe
 
+    const casesClient = await endpointContext.service.getCasesClient(req);
+
     // convert any alert IDs into cases
     let caseIDs: string[] = req.body.case_ids?.slice() || [];
     if (req.body.alert_ids && req.body.alert_ids.length > 0) {
       const newIDs: string[][] = await Promise.all(
         req.body.alert_ids.map(async (a: string) => {
-          const cases: CasesByAlertId = await (
-            await endpointContext.service.getCasesClient(req)
-          ).cases.getCasesByAlertID({
+          const cases: CasesByAlertId = await casesClient.cases.getCasesByAlertID({
             alertID: a,
             options: { owner: APP_ID },
           });
@@ -167,16 +168,21 @@ export const isolationRequestHandler = function (
       commentLines.push(`\n\nWith Comment:\n> ${req.body.comment}`);
     }
 
-    caseIDs.forEach(async (caseId) => {
-      (await endpointContext.service.getCasesClient(req)).attachments.add({
-        caseId,
-        comment: {
-          comment: commentLines.join('\n'),
-          type: CommentType.user,
-          owner: APP_ID,
-        },
-      });
-    });
+    // Update all cases with a comment
+    if (caseIDs.length > 0) {
+      await Promise.all(
+        caseIDs.map((caseId) =>
+          casesClient.attachments.add({
+            caseId,
+            comment: {
+              comment: commentLines.join('\n'),
+              type: CommentType.user,
+              owner: APP_ID,
+            },
+          })
+        )
+      );
+    }
 
     return res.ok({
       body: {

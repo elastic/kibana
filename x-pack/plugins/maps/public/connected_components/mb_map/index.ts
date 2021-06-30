@@ -27,6 +27,7 @@ import {
   getMapSettings,
   getScrollZoom,
   getSpatialFiltersLayer,
+  getTimeslice,
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
@@ -43,6 +44,7 @@ function mapStateToProps(state: MapStoreState) {
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
+    timeslice: getTimeslice(state),
     featureModeActive:
       getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
     filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,

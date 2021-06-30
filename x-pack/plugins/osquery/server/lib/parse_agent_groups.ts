@@ -63,7 +63,7 @@ export const parseAgentSelection = async (
           perPage,
           page,
           kuery,
-          showInactive: true,
+          showInactive: false,
         });
         return { results: res.agents.map((agent) => agent.id), total: res.total };
       });
@@ -84,7 +84,7 @@ export const parseAgentSelection = async (
             perPage,
             page,
             kuery,
-            showInactive: true,
+            showInactive: false,
           });
           return { results: res.agents.map((agent) => agent.id), total: res.total };
         });

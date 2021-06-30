@@ -794,7 +794,7 @@ describe('AllCasesGeneric', () => {
         closedAt: null,
         closedBy: null,
         comments: [],
-        connector: { fields: null, id: '123', name: 'My Connector', type: '.none' },
+        connector: { fields: null, id: 'none', name: 'My Connector', type: '.none' },
         createdAt: '2020-02-19T23:06:33.798Z',
         createdBy: {
           email: 'leslie.knope@elastic.co',

@@ -109,6 +109,7 @@ export interface ContentSourceDetails extends ContentSource {
   errorReason: string | null;
   allowsReauth: boolean;
   boost: number;
+  activities: SourceActivity[];
 }
 
 interface DescriptionList {

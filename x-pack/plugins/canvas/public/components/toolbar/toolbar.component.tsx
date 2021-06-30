@@ -8,18 +8,39 @@
 import React, { FC, useState, useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
 import { CanvasElement } from '../../../types';
-import { ComponentStrings } from '../../../i18n';
 import { RoutingButtonIcon } from '../routing';
 
 import { WorkpadRoutingContext } from '../../routes/workpad';
 
-const { Toolbar: strings } = ComponentStrings;
+const strings = {
+  getEditorButtonLabel: () =>
+    i18n.translate('xpack.canvas.toolbar.editorButtonLabel', {
+      defaultMessage: 'Expression editor',
+    }),
+  getNextPageAriaLabel: () =>
+    i18n.translate('xpack.canvas.toolbar.nextPageAriaLabel', {
+      defaultMessage: 'Next Page',
+    }),
+  getPageButtonLabel: (pageNum: number, totalPages: number) =>
+    i18n.translate('xpack.canvas.toolbar.pageButtonLabel', {
+      defaultMessage: 'Page {pageNum}{rest}',
+      values: {
+        pageNum,
+        rest: totalPages > 1 ? ` of ${totalPages}` : '',
+      },
+    }),
+  getPreviousPageAriaLabel: () =>
+    i18n.translate('xpack.canvas.toolbar.previousPageAriaLabel', {
+      defaultMessage: 'Previous Page',
+    }),
+};
 
 type TrayType = 'pageManager' | 'expression';
 

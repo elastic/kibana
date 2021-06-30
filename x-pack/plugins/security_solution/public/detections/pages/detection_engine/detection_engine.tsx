@@ -22,7 +22,7 @@ import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../common/components/search_bar';
-import { WrapperPage } from '../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
@@ -197,22 +197,22 @@ const DetectionEnginePageComponent = () => {
 
   if (isUserAuthenticated != null && !isUserAuthenticated && !loading) {
     return (
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineUserUnauthenticated />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 
   if (!loading && (isSignalIndexExists === false || needsListsConfiguration)) {
     return (
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
         <DetectionEngineNoIndex
           needsSignalsIndex={isSignalIndexExists === false}
           needsListsIndex={needsListsConfiguration}
         />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 
@@ -228,7 +228,7 @@ const DetectionEnginePageComponent = () => {
             <SiemSearchBar id="global" indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <DetectionEngineHeaderPage
                 subtitle={
@@ -280,13 +280,13 @@ const DetectionEnginePageComponent = () => {
               onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               to={to}
             />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <WrapperPage>
+        <SecuritySolutionPageWrapper>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
           <OverviewEmpty />
-        </WrapperPage>
+        </SecuritySolutionPageWrapper>
       )}
       <SpyRoute pageName={SecurityPageName.detections} />
     </>

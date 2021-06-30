@@ -16,7 +16,7 @@ import {
   getCreateRuleUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { DetectionEngineHeaderPage } from '../../../components/detection_engine_header_page';
-import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 
 import { useUserData } from '../../../components/user_info';
@@ -182,7 +182,7 @@ const RulesPageComponent: React.FC = () => {
         subtitle={i18n.INITIAL_PROMPT_TEXT}
         title={i18n.IMPORT_RULE}
       />
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage
           backOptions={{
             href: getDetectionEngineUrl(),
@@ -258,7 +258,7 @@ const RulesPageComponent: React.FC = () => {
           rulesNotUpdated={rulesNotUpdated}
           setRefreshRulesData={handleSetRefreshRulesData}
         />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.detections} />
     </>

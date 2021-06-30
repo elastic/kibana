@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Suspense, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
 
@@ -17,11 +17,23 @@ import {
   EuiSpacer,
   EuiCopy,
   EuiButton,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
+import { getServices } from '../../kibana_services';
+
+export function Instruction({
+  commands,
+  paramValues,
+  textPost,
+  textPre,
+  replaceTemplateStrings,
+  customComponentName,
+}) {
+  const { tutorialService, http, uiSettings, getBasePath } = getServices();
+
   let pre;
   if (textPre) {
     pre = <Content text={replaceTemplateStrings(textPre)} />;
@@ -36,6 +48,13 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
       </div>
     );
   }
+  const customComponent = tutorialService.getCustomComponent(customComponentName);
+  //Memoize the custom component so it wont rerender everytime
+  const LazyCustomComponent = useMemo(() => {
+    if (customComponent) {
+      return React.lazy(() => customComponent());
+    }
+  }, [customComponent]);
 
   let copyButton;
   let commandBlock;
@@ -79,6 +98,16 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
 
       {post}
 
+      {LazyCustomComponent && (
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyCustomComponent
+            basePath={getBasePath()}
+            isDarkTheme={uiSettings.get('theme:darkMode')}
+            http={http}
+          />
+        </Suspense>
+      )}
+
       <EuiSpacer />
     </div>
   );
@@ -90,4 +119,5 @@ Instruction.propTypes = {
   textPost: PropTypes.string,
   textPre: PropTypes.string,
   replaceTemplateStrings: PropTypes.func.isRequired,
+  customComponentName: PropTypes.string,
 };

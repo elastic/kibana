@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, ReactNode } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
-import styled from 'styled-components';
+import styled, { StyledComponent } from 'styled-components';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
@@ -18,7 +18,11 @@ import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 
-const StyledEuiFlyout = styled(EuiFlyout)`
+// TODO: EUI team follow up on complex types and styled-components `styled`
+// https://github.com/elastic/eui/issues/4855
+const StyledEuiFlyout: StyledComponent<typeof EuiFlyout, {}, { children?: ReactNode }> = styled(
+  EuiFlyout
+)`
   z-index: ${({ theme }) => theme.eui.euiZLevel7};
 `;
 

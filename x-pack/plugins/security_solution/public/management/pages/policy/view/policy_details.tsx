@@ -42,7 +42,7 @@ import { useFormatUrl } from '../../../../common/components/link_to';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { PolicyDetailsForm } from './policy_details_form';
 
@@ -51,7 +51,7 @@ const PolicyDetailsHeader = styled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.xl} 0;
   background-color: #fafbfd;
   border-bottom: 1px solid #d3dae6;
-  .siemHeaderPage {
+  .securitySolutionHeaderPage {
     max-width: ${maxFormWidth};
     margin: 0 auto;
   }
@@ -159,7 +159,7 @@ export const PolicyDetails = React.memo(() => {
   // Else, if we have an error, then show error on the page.
   if (!policyItem) {
     return (
-      <WrapperPage noTimeline>
+      <SecuritySolutionPageWrapper noTimeline>
         {isPolicyLoading ? (
           <EuiLoadingSpinner size="xl" />
         ) : policyApiError ? (
@@ -168,7 +168,7 @@ export const PolicyDetails = React.memo(() => {
           </EuiCallOut>
         ) : null}
         <SpyRoute pageName={SecurityPageName.administration} />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
     );
   }
 
@@ -190,7 +190,7 @@ export const PolicyDetails = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
-      <WrapperPage
+      <SecuritySolutionPageWrapper
         noTimeline
         data-test-subj="policyDetailsPage"
         noPadding
@@ -221,7 +221,7 @@ export const PolicyDetails = React.memo(() => {
           <PolicyDetailsForm />
         </PolicyDetailsFormDiv>
         <EuiSpacer size="xxl" />
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
       <EuiBottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>

@@ -123,9 +123,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('tls customization', () => {
+    describe('ssl customization', () => {
       it('should handle the xpack.actions.rejectUnauthorized: false', async () => {
-        const connectorId = 'custom.tls.noCustom';
+        const connectorId = 'custom.ssl.noCustom';
         const port = await getPortOfConnector(connectorId);
         const server = await createTlsWebhookServer(port);
         const { status, body } = await supertest
@@ -143,11 +143,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       it('should handle the customized rejectUnauthorized: false', async () => {
-        const connectorId = 'custom.tls.rejectUnauthorizedFalse';
+        const connectorId = 'custom.ssl.rejectUnauthorizedFalse';
         const port = await getPortOfConnector(connectorId);
         const server = await createTlsWebhookServer(port);
         const { status, body } = await supertest
-          .post(`/api/actions/connector/custom.tls.rejectUnauthorizedFalse/_execute`)
+          .post(`/api/actions/connector/custom.ssl.rejectUnauthorizedFalse/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
             params: {
@@ -161,11 +161,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       it('should handle the customized rejectUnauthorized: true', async () => {
-        const connectorId = 'custom.tls.rejectUnauthorizedTrue';
+        const connectorId = 'custom.ssl.rejectUnauthorizedTrue';
         const port = await getPortOfConnector(connectorId);
         const server = await createTlsWebhookServer(port);
         const { status, body } = await supertest
-          .post(`/api/actions/connector/custom.tls.rejectUnauthorizedTrue/_execute`)
+          .post(`/api/actions/connector/custom.ssl.rejectUnauthorizedTrue/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
             params: {
@@ -180,11 +180,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       it('should handle the customized ca file', async () => {
-        const connectorId = 'custom.tls.caFile';
+        const connectorId = 'custom.ssl.caFile';
         const port = await getPortOfConnector(connectorId);
         const server = await createTlsWebhookServer(port);
         const { status, body } = await supertest
-          .post(`/api/actions/connector/custom.tls.caFile/_execute`)
+          .post(`/api/actions/connector/custom.ssl.caFile/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
             params: {

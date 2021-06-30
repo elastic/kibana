@@ -173,7 +173,6 @@ export const get = async (
 
     let theCase: SavedObject<ESCaseAttributes>;
     let subCaseIds: string[] = [];
-
     if (ENABLE_CASE_CONNECTOR) {
       const [caseInfo, subCasesForCaseId] = await Promise.all([
         caseService.getCase({

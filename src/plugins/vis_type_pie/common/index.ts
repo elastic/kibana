@@ -7,3 +7,4 @@
  */
 
 export const DEFAULT_PERCENT_DECIMALS = 2;
+export const LEGACY_PIE_CHARTS_LIBRARY = 'visualization:visualize:legacyPieChartsLibrary';

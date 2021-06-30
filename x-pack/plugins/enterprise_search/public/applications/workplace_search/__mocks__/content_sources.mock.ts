@@ -24,6 +24,7 @@ export const contentSources = [
     errorReason: null,
     allowsReauth: true,
     boost: 1,
+    activities: [],
   },
   {
     id: '124',
@@ -38,6 +39,7 @@ export const contentSources = [
     errorReason: null,
     allowsReauth: true,
     boost: 0.5,
+    activities: [],
   },
 ];
 

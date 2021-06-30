@@ -376,3 +376,22 @@ export function addNewFeatureToIndex(geometry: Geometry | Position[]) {
     await dispatch(syncDataForLayer(layer, true));
   };
 }
+
+export function deleteFeatureFromIndex(featureId: string) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const editState = getEditState(getState());
+    const layerId = editState ? editState.layerId : undefined;
+    if (!layerId) {
+      return;
+    }
+    const layer = getLayerById(layerId, getState());
+    if (!layer || !(layer instanceof VectorLayer)) {
+      return;
+    }
+    await layer.deleteFeature(featureId);
+    await dispatch(syncDataForLayer(layer, true));
+  };
+}

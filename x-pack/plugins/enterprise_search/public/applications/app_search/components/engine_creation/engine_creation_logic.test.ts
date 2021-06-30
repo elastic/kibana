@@ -20,7 +20,7 @@ describe('EngineCreationLogic', () => {
   const { mount } = new LogicMounter(EngineCreationLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { setQueuedSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     isLoading: false,
@@ -99,8 +99,8 @@ describe('EngineCreationLogic', () => {
         jest.clearAllMocks();
       });
 
-      it('should set a success message', () => {
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created engine.');
+      it('should show a success message', () => {
+        expect(flashSuccessToast).toHaveBeenCalledWith("Engine 'test' was created");
       });
 
       it('should navigate the user to the engine page', () => {

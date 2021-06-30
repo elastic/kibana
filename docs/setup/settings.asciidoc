@@ -36,10 +36,56 @@ Set to `false` to disable Console. *Default: `true`*
  <<ops-cGroupOverrides-cpuAcctPath, `ops.cGroupOverrides.cpuAcctPath`>>.
 
 | `csp.rules:`
- | A https://w3c.github.io/webappsec-csp/[content-security-policy] template
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."] 
+A https://w3c.github.io/webappsec-csp/[Content Security Policy] template
 that disables certain unnecessary and potentially insecure capabilities in
 the browser. It is strongly recommended that you keep the default CSP rules
 that ship with {kib}.
+
+| `csp.script_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
+
+| `csp.worker_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src[Content Security Policy `worker-src` directive].
+
+| `csp.style_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src[Content Security Policy `style-src` directive].
+
+| `csp.connect_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src[Content Security Policy `connect-src` directive].
+
+| `csp.default_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src[Content Security Policy `default-src` directive].
+
+| `csp.font_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/font-src[Content Security Policy `font-src` directive].
+
+| `csp.frame_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-src[Content Security Policy `frame-src` directive].
+
+| `csp.img_src:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/img-src[Content Security Policy `img-src` directive].
+
+| `csp.frame_ancestors:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors[Content Security Policy `frame-ancestors` directive].
+
+|===
+
+[NOTE]
+============
+The `frame-ancestors` directive can also be configured by using 
+<<server-securityResponseHeaders-disableEmbedding, `server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors` 
+are ignored.
+============
+
+[cols="2*<"]
+|===
+
+| `csp.report_uri:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
+
+| `csp.report_to:`
+| Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-to[Content Security Policy `report-to` directive].
 
 |[[csp-strict]] `csp.strict:`
  | Blocks {kib} access to any browser that
@@ -322,8 +368,7 @@ The time interval policy will rotate the log file every given interval of time. 
 
 | [[regionmap-ES-map]] `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
-When `includeElasticMapsService` is turned off, only the vector layers configured by <<regionmap-settings, `map.regionmap`>>
-and the tile layer configured by <<tilemap-url, `map.tilemap.url`>> are available in <<maps, Maps>>. *Default: `true`*
+When `includeElasticMapsService` is turned off, only tile layer configured by <<tilemap-url, `map.tilemap.url`>> is available in <<maps, Maps>>. *Default: `true`*
 
 | `map.emsUrl:`
  | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
@@ -333,7 +378,8 @@ and the tile layer configured by <<tilemap-url, `map.tilemap.url`>> are availabl
 requests through the {kib} server. *Default: `false`*
 
 | [[regionmap-settings]] `map.regionmap:` {ess-icon}
- | Specifies additional vector layers for
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Specifies additional vector layers for
 use in <<maps, Maps>> visualizations. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
@@ -347,7 +393,6 @@ The following example shows a valid region map configuration.
 [source,text]
 --
 map.regionmap:
-  includeElasticMapsService: false
   layers:
     - name: "Departments of France"
       url: "http://my.cors.enabled.server.org/france_departements.geojson"
@@ -363,10 +408,12 @@ map.regionmap:
 |===
 
 | [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon}
- | Optional. References the originating source of the geojson file.
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Optional. References the originating source of the geojson file.
 
 | [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon}
- | Mandatory. Each layer
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory. Each layer
 can contain multiple fields to indicate what properties from the geojson
 features you wish to expose. The following shows how to define multiple
 properties:
@@ -376,7 +423,6 @@ properties:
 [source,text]
 --
 map.regionmap:
-  includeElasticMapsService: false
   layers:
     - name: "Departments of France"
       url: "http://my.cors.enabled.server.org/france_departements.geojson"
@@ -392,11 +438,13 @@ map.regionmap:
 |===
 
 | [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon}
- | Mandatory. The human readable text that is shown under the Options tab when
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory. The human readable text that is shown under the Options tab when
 building the Region Map visualization.
 
 | [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon}
- | Mandatory.
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory.
 This value is used to do an inner-join between the document stored in
 {es} and the geojson file. For example, if the field in the geojson is
 called `Location` and has city names, there must be a field in {es}
@@ -404,12 +452,12 @@ that holds the same values that {kib} can then use to lookup for the geoshape
 data.
 
 | [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon}
- | Mandatory. A description of
-the map being provided.
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory. A description of the map being provided.
 
 | [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon}
- | Mandatory. The location of the
-geojson file as provided by a webserver.
+ | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+ Mandatory. The location of the geojson file as provided by a webserver.
 
 | [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
  | The map attribution string.
@@ -538,8 +586,7 @@ a|`server.securityResponseHeaders:`
 is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
 To disable, set to `null`. *Default:* `null`
 
-[[server-securityResponseHeaders-disableEmbedding]]
-a|`server.securityResponseHeaders:`
+|[[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders:`
 `disableEmbedding:`
 | Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options[`X-Frame-Options`] headers are configured to disable embedding

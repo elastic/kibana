@@ -1417,19 +1417,29 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                               </span>
                             </div>
                             <EuiText
+                              color="default"
                               size="s"
                             >
                               <div
                                 className="euiText euiText--small"
                               >
-                                <ul>
-                                  <li
-                                    className="euiForm__error"
-                                    key="0"
+                                <EuiTextColor
+                                  color="default"
+                                  component="div"
+                                >
+                                  <div
+                                    className="euiTextColor euiTextColor--default"
                                   >
-                                    The supplied license has expired.
-                                  </li>
-                                </ul>
+                                    <ul>
+                                      <li
+                                        className="euiForm__error"
+                                        key="0"
+                                      >
+                                        The supplied license has expired.
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </EuiTextColor>
                               </div>
                             </EuiText>
                           </div>
@@ -2149,19 +2159,29 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                               </span>
                             </div>
                             <EuiText
+                              color="default"
                               size="s"
                             >
                               <div
                                 className="euiText euiText--small"
                               >
-                                <ul>
-                                  <li
-                                    className="euiForm__error"
-                                    key="0"
+                                <EuiTextColor
+                                  color="default"
+                                  component="div"
+                                >
+                                  <div
+                                    className="euiTextColor euiTextColor--default"
                                   >
-                                    The supplied license is not valid for this product.
-                                  </li>
-                                </ul>
+                                    <ul>
+                                      <li
+                                        className="euiForm__error"
+                                        key="0"
+                                      >
+                                        The supplied license is not valid for this product.
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </EuiTextColor>
                               </div>
                             </EuiText>
                           </div>
@@ -2881,19 +2901,29 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                               </span>
                             </div>
                             <EuiText
+                              color="default"
                               size="s"
                             >
                               <div
                                 className="euiText euiText--small"
                               >
-                                <ul>
-                                  <li
-                                    className="euiForm__error"
-                                    key="0"
+                                <EuiTextColor
+                                  color="default"
+                                  component="div"
+                                >
+                                  <div
+                                    className="euiTextColor euiTextColor--default"
                                   >
-                                    Error encountered uploading license: Check your license file.
-                                  </li>
-                                </ul>
+                                    <ul>
+                                      <li
+                                        className="euiForm__error"
+                                        key="0"
+                                      >
+                                        Error encountered uploading license: Check your license file.
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </EuiTextColor>
                               </div>
                             </EuiText>
                           </div>
@@ -3613,19 +3643,29 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                               </span>
                             </div>
                             <EuiText
+                              color="default"
                               size="s"
                             >
                               <div
                                 className="euiText euiText--small"
                               >
-                                <ul>
-                                  <li
-                                    className="euiForm__error"
-                                    key="0"
+                                <EuiTextColor
+                                  color="default"
+                                  component="div"
+                                >
+                                  <div
+                                    className="euiTextColor euiTextColor--default"
                                   >
-                                    Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
-                                  </li>
-                                </ul>
+                                    <ul>
+                                      <li
+                                        className="euiForm__error"
+                                        key="0"
+                                      >
+                                        Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </EuiTextColor>
                               </div>
                             </EuiText>
                           </div>

@@ -129,7 +129,13 @@ describe('Alerts detection rules', () => {
   });
 
   it('Auto refreshes rules', () => {
-    cy.clock(Date.now());
+    /**
+     * Ran into the error: timer created with setInterval() but cleared with cancelAnimationFrame()
+     * There are no cancelAnimationFrames in the codebase that are used to clear a setInterval so
+     * explicitly set the below overrides. see https://docs.cypress.io/api/commands/clock#Function-names
+     */
+
+    cy.clock(Date.now(), ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date']);
 
     goToManageAlertsDetectionRules();
     waitForRulesTableToBeLoaded();

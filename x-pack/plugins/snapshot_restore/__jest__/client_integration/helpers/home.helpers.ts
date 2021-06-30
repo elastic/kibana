@@ -255,6 +255,7 @@ export type TestSubjects =
   | 'snapshotDetail.version'
   | 'snapshotLink'
   | 'snapshotList'
+  | 'snapshotListEmpty'
   | 'snapshotList.cell'
   | 'snapshotList.closeButton'
   | 'snapshotList.content'

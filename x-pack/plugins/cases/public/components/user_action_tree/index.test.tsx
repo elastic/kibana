@@ -36,6 +36,7 @@ const defaultProps = {
   isLoadingUserActions: false,
   onUpdateField,
   selectedAlertPatterns: ['some-test-pattern'],
+  statusActionButton: null,
   updateCase,
   userCanCrud: true,
   useFetchAlertData: (): [boolean, Record<string, Ecs>] => [

@@ -8,6 +8,7 @@
 
 import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
+import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
@@ -33,6 +34,14 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
+function sanitizeUrl(url) {
+  // eslint-disable-next-line no-script-url
+  if (parseUrl(url).protocol === 'javascript:') {
+    return '';
+  }
+  return url;
+}
+
 class TableVis extends Component {
   constructor(props) {
     super(props);
@@ -52,7 +61,7 @@ class TableVis extends Component {
     let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
-      rowDisplay = <a href={url}>{rowDisplay}</a>;
+      rowDisplay = <a href={sanitizeUrl(url)}>{rowDisplay}</a>;
     }
     const columns = row.series
       .filter((item) => item)

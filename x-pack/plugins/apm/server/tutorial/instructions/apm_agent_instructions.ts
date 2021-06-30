@@ -913,7 +913,10 @@ export const createPhpAgentInstructions = (
           'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
       }
     ),
-    commands: `elastic_apm.server_url=http://localhost:8200
+    commands: `elastic_apm.server_url="${
+      apmServerUrl || 'http://localhost:8200'
+    }"
+elastic.apm.secret_token="${secretToken}"
 elastic_apm.service_name="My service"
 `.split('\n'),
     textPost: i18n.translate(

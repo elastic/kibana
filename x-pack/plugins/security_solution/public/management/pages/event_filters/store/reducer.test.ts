@@ -168,4 +168,35 @@ describe('event filters reducer', () => {
       });
     });
   });
+
+  describe('ForceRefresh', () => {
+    it('sets the force refresh state to true', () => {
+      const result = eventFiltersPageReducer(
+        {
+          ...initialState,
+          listPage: { ...initialState.listPage, forceRefresh: false },
+        },
+        { type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } }
+      );
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        listPage: { ...initialState.listPage, forceRefresh: true },
+      });
+    });
+    it('sets the force refresh state to false', () => {
+      const result = eventFiltersPageReducer(
+        {
+          ...initialState,
+          listPage: { ...initialState.listPage, forceRefresh: true },
+        },
+        { type: 'eventFiltersForceRefresh', payload: { forceRefresh: false } }
+      );
+
+      expect(result).toStrictEqual({
+        ...initialState,
+        listPage: { ...initialState.listPage, forceRefresh: false },
+      });
+    });
+  });
 });

@@ -181,8 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/89550
-    describe.skip('query #2, which has an empty time range', () => {
+    describe('query #2, which has an empty time range', () => {
       const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
       const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
@@ -193,8 +192,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show "no results"', async () => {
-        const isVisible = await PageObjects.discover.hasNoResults();
-        expect(isVisible).to.be(true);
+        await retry.waitFor('no results screen is displayed', async function () {
+          const isVisible = await PageObjects.discover.hasNoResults();
+          return isVisible === true;
+        });
       });
 
       it('should suggest a new time range is picked', async () => {

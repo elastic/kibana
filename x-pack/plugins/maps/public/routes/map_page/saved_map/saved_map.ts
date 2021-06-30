@@ -241,6 +241,10 @@ export class SavedMap {
     return this._originatingApp;
   }
 
+  public getOriginatingAppName(): string | undefined {
+    return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
+  }
+
   public getAppNameFromId = (appId: string): string | undefined => {
     return this._getStateTransfer().getAppNameFromId(appId);
   };

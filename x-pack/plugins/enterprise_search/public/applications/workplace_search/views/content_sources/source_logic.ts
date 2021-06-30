@@ -20,7 +20,7 @@ import {
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
-import { NOT_FOUND_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
+import { PERSONAL_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';
 
 export interface SourceActions {
@@ -155,8 +155,14 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
           clearFlashMessages();
         }
       } catch (e) {
-        if (e.response.status === 404) {
-          KibanaLogic.values.navigateToUrl(NOT_FOUND_PATH);
+        if (e?.response?.status === 404) {
+          const redirect = isOrganization ? SOURCES_PATH : PERSONAL_SOURCES_PATH;
+          KibanaLogic.values.navigateToUrl(redirect);
+          setErrorMessage(
+            i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.notFoundErrorMessage', {
+              defaultMessage: 'Source not found.',
+            })
+          );
         } else {
           flashAPIErrors(e);
         }

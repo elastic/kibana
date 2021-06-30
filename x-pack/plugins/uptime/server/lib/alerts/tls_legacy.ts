@@ -103,6 +103,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
       state: [...tlsTranslations.actionVariables, ...commonStateTranslations],
     },
     minimumLicenseRequired: 'basic',
+    isExportable: true,
     async executor({ options, dynamicSettings, uptimeEsClient }) {
       const {
         services: { alertInstanceFactory },

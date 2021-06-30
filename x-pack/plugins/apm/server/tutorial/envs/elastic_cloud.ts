@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
+import {
+  INSTRUCTION_VARIANT,
+  TutorialSchema,
+  InstructionSetSchema,
+} from '../../../../../../src/plugins/home/server';
 
 import {
   createNodeAgentInstructions,
@@ -22,7 +26,9 @@ import {
 } from '../instructions/apm_agent_instructions';
 import { CloudSetup } from '../../../../cloud/server';
 
-export function createElasticCloudInstructions(cloudSetup?: CloudSetup) {
+export function createElasticCloudInstructions(
+  cloudSetup?: CloudSetup
+): TutorialSchema['elasticCloud'] {
   const apmServerUrl = cloudSetup?.apm.url;
   const instructionSets = [];
 
@@ -37,7 +43,9 @@ export function createElasticCloudInstructions(cloudSetup?: CloudSetup) {
   };
 }
 
-function getApmServerInstructionSet(cloudSetup?: CloudSetup) {
+function getApmServerInstructionSet(
+  cloudSetup?: CloudSetup
+): InstructionSetSchema {
   const cloudId = cloudSetup?.cloudId;
   return {
     title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
@@ -61,7 +69,9 @@ function getApmServerInstructionSet(cloudSetup?: CloudSetup) {
   };
 }
 
-function getApmAgentInstructionSet(cloudSetup?: CloudSetup) {
+function getApmAgentInstructionSet(
+  cloudSetup?: CloudSetup
+): InstructionSetSchema {
   const apmServerUrl = cloudSetup?.apm.url;
   const secretToken = cloudSetup?.apm.secretToken;
 

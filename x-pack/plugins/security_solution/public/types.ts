@@ -36,6 +36,7 @@ import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
 import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -50,6 +51,7 @@ export interface SetupPlugins {
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
+  dashboard?: DashboardStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;

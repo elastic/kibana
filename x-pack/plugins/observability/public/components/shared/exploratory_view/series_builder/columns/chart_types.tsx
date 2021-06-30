@@ -27,18 +27,14 @@ export function SeriesChartTypesSelect({
   seriesTypes?: SeriesType[];
   defaultChartType: SeriesType;
 }) {
-  const { getSeries, setSeries, allSeries } = useSeriesStorage();
+  const { getSeries, setSeries } = useSeriesStorage();
 
   const series = getSeries(seriesId);
 
   const seriesType = series?.seriesType ?? defaultChartType;
 
   const onChange = (value: SeriesType) => {
-    Object.keys(allSeries).forEach((seriesKey) => {
-      const seriesN = allSeries[seriesKey];
-
-      setSeries(seriesKey, { ...seriesN, seriesType: value });
-    });
+    setSeries(seriesId, { ...series, seriesType: value });
   };
 
   return (

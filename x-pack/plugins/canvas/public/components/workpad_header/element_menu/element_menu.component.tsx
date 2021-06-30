@@ -14,8 +14,9 @@ import {
   EuiIcon,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
-import { ComponentStrings } from '../../../../i18n/components';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { getId } from '../../../lib/get_id';
@@ -31,7 +32,56 @@ interface ElementTypeMeta {
   [key: string]: { name: string; icon: string };
 }
 
-export const { WorkpadHeaderElementMenu: strings } = ComponentStrings;
+const strings = {
+  getAssetsMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.manageAssetsMenuItemLabel', {
+      defaultMessage: 'Manage assets',
+    }),
+  getChartMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.chartMenuItemLabel', {
+      defaultMessage: 'Chart',
+    }),
+  getElementMenuButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuButtonLabel', {
+      defaultMessage: 'Add element',
+    }),
+  getElementMenuLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.elementMenuLabel', {
+      defaultMessage: 'Add an element',
+    }),
+  getEmbedObjectMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel', {
+      defaultMessage: 'Add from Kibana',
+    }),
+  getFilterMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel', {
+      defaultMessage: 'Filter',
+    }),
+  getImageMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.imageMenuItemLabel', {
+      defaultMessage: 'Image',
+    }),
+  getMyElementsMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.myElementsMenuItemLabel', {
+      defaultMessage: 'My elements',
+    }),
+  getOtherMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.otherMenuItemLabel', {
+      defaultMessage: 'Other',
+    }),
+  getProgressMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.progressMenuItemLabel', {
+      defaultMessage: 'Progress',
+    }),
+  getShapeMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.shapeMenuItemLabel', {
+      defaultMessage: 'Shape',
+    }),
+  getTextMenuItemLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderElementMenu.textMenuItemLabel', {
+      defaultMessage: 'Text',
+    }),
+};
 
 // label and icon for the context menu item for each element type
 const elementTypeMeta: ElementTypeMeta = {

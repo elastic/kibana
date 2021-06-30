@@ -9,11 +9,18 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer, EuiIcon } from '@elastic/eui';
+import {
+  EuiPageContent,
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiEmptyPrompt,
+  EuiSpacer,
+  EuiIcon,
+} from '@elastic/eui';
 
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
-import { WithPrivileges, SectionError, Error } from '../../../../shared_imports';
-import { SectionLoading } from '../../../components';
+import { WithPrivileges, PageLoading, PageError, Error } from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
 import { useLoadSnapshots } from '../../../services/http';
 import {
@@ -105,16 +112,18 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   if (isLoading) {
     content = (
-      <SectionLoading>
-        <FormattedMessage
-          id="xpack.snapshotRestore.snapshotList.loadingSnapshotsDescription"
-          defaultMessage="Loading snapshots…"
-        />
-      </SectionLoading>
+      <PageLoading>
+        <span data-test-subj="snapshotListEmpty">
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotList.loadingSnapshotsDescription"
+            defaultMessage="Loading snapshots…"
+          />
+        </span>
+      </PageLoading>
     );
   } else if (error) {
     content = (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.snapshotList.loadingSnapshotsErrorMessage"
@@ -126,168 +135,187 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     );
   } else if (Object.keys(errors).length && repositories.length === 0) {
     content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1 data-test-subj="title">
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPrompt.errorRepositoriesTitle"
-              defaultMessage="Some repositories contain errors"
-            />
-          </h1>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
-              defaultMessage="Go to {repositoryLink} to fix the errors."
-              values={{
-                repositoryLink: (
-                  <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.repositoryWarningLinkText"
-                      defaultMessage="Repositories"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        }
-      />
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1 data-test-subj="title">
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.emptyPrompt.errorRepositoriesTitle"
+                defaultMessage="Some repositories contain errors"
+              />
+            </h1>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.emptyPrompt.repositoryWarningDescription"
+                defaultMessage="Go to {repositoryLink} to fix the errors."
+                values={{
+                  repositoryLink: (
+                    <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.repositoryWarningLinkText"
+                        defaultMessage="Repositories"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          }
+        />
+      </EuiPageContent>
     );
   } else if (repositories.length === 0) {
     content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1 data-test-subj="title">
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesTitle"
-              defaultMessage="Start by registering a repository"
-            />
-          </h1>
-        }
-        body={
-          <>
-            <p>
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+        data-test-subj="snapshotListEmpty"
+      >
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1 data-test-subj="title">
               <FormattedMessage
-                id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesDescription"
-                defaultMessage="You need a place where your snapshots will live."
+                id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesTitle"
+                defaultMessage="Start by registering a repository"
               />
-            </p>
-            <p>
-              <EuiButton
-                {...reactRouterNavigate(history, linkToAddRepository())}
-                fill
-                iconType="plusInCircle"
-                data-test-subj="registerRepositoryButton"
-              >
+            </h1>
+          }
+          body={
+            <>
+              <p>
                 <FormattedMessage
-                  id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesAddButtonLabel"
-                  defaultMessage="Register a repository"
+                  id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesDescription"
+                  defaultMessage="You need a place where your snapshots will live."
                 />
-              </EuiButton>
-            </p>
-          </>
-        }
-        data-test-subj="emptyPrompt"
-      />
+              </p>
+              <p>
+                <EuiButton
+                  {...reactRouterNavigate(history, linkToAddRepository())}
+                  fill
+                  iconType="plusInCircle"
+                  data-test-subj="registerRepositoryButton"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesAddButtonLabel"
+                    defaultMessage="Register a repository"
+                  />
+                </EuiButton>
+              </p>
+            </>
+          }
+          data-test-subj="emptyPrompt"
+        />
+      </EuiPageContent>
     );
   } else if (snapshots.length === 0) {
     content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1 data-test-subj="title">
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsTitle"
-              defaultMessage="You don't have any snapshots yet"
-            />
-          </h1>
-        }
-        body={
-          <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
-            {({ hasPrivileges }) =>
-              hasPrivileges ? (
-                <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.snapshotList.emptyPrompt.usePolicyDescription"
-                      defaultMessage="Run a Snapshot Lifecycle Policy to create a snapshot.
-                        Snapshots can also be created by using {docLink}."
-                      values={{
-                        docLink: (
-                          <EuiLink
-                            href={docLinks.links.snapshotRestore.createSnapshot}
-                            target="_blank"
-                            data-test-subj="documentationLink"
-                          >
-                            <FormattedMessage
-                              id="xpack.snapshotRestore.emptyPrompt.usePolicyDocLinkText"
-                              defaultMessage="the Elasticsearch API"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                  <p>
-                    {policies.length === 0 ? (
-                      <EuiButton
-                        {...reactRouterNavigate(history, linkToAddPolicy())}
-                        fill
-                        iconType="plusInCircle"
-                        data-test-subj="addPolicyButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.snapshotList.emptyPrompt.addPolicyText"
-                          defaultMessage="Create a policy"
-                        />
-                      </EuiButton>
-                    ) : (
-                      <EuiButton
-                        {...reactRouterNavigate(history, linkToPolicies())}
-                        fill
-                        iconType="list"
-                        data-test-subj="goToPoliciesButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.snapshotList.emptyPrompt.goToPoliciesText"
-                          defaultMessage="View policies"
-                        />
-                      </EuiButton>
-                    )}
-                  </p>
-                </Fragment>
-              ) : (
-                <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsDescription"
-                      defaultMessage="Create a snapshot using the Elasticsearch API."
-                    />
-                  </p>
-                  <p>
-                    <EuiLink
-                      href={docLinks.links.snapshotRestore.createSnapshot}
-                      target="_blank"
-                      data-test-subj="documentationLink"
-                    >
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1 data-test-subj="title">
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsTitle"
+                defaultMessage="You don't have any snapshots yet"
+              />
+            </h1>
+          }
+          body={
+            <WithPrivileges
+              privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}
+            >
+              {({ hasPrivileges }) =>
+                hasPrivileges ? (
+                  <Fragment>
+                    <p>
                       <FormattedMessage
-                        id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
-                        defaultMessage="Learn how to create a snapshot"
-                      />{' '}
-                      <EuiIcon type="link" />
-                    </EuiLink>
-                  </p>
-                </Fragment>
-              )
-            }
-          </WithPrivileges>
-        }
-        data-test-subj="emptyPrompt"
-      />
+                        id="xpack.snapshotRestore.snapshotList.emptyPrompt.usePolicyDescription"
+                        defaultMessage="Run a Snapshot Lifecycle Policy to create a snapshot.
+                          Snapshots can also be created by using {docLink}."
+                        values={{
+                          docLink: (
+                            <EuiLink
+                              href={docLinks.links.snapshotRestore.createSnapshot}
+                              target="_blank"
+                              data-test-subj="documentationLink"
+                            >
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.emptyPrompt.usePolicyDocLinkText"
+                                defaultMessage="the Elasticsearch API"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
+                    <p>
+                      {policies.length === 0 ? (
+                        <EuiButton
+                          {...reactRouterNavigate(history, linkToAddPolicy())}
+                          fill
+                          iconType="plusInCircle"
+                          data-test-subj="addPolicyButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.snapshotList.emptyPrompt.addPolicyText"
+                            defaultMessage="Create a policy"
+                          />
+                        </EuiButton>
+                      ) : (
+                        <EuiButton
+                          {...reactRouterNavigate(history, linkToPolicies())}
+                          fill
+                          iconType="list"
+                          data-test-subj="goToPoliciesButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.snapshotList.emptyPrompt.goToPoliciesText"
+                            defaultMessage="View policies"
+                          />
+                        </EuiButton>
+                      )}
+                    </p>
+                  </Fragment>
+                ) : (
+                  <Fragment>
+                    <p>
+                      <FormattedMessage
+                        id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsDescription"
+                        defaultMessage="Create a snapshot using the Elasticsearch API."
+                      />
+                    </p>
+                    <p>
+                      <EuiLink
+                        href={docLinks.links.snapshotRestore.createSnapshot}
+                        target="_blank"
+                        data-test-subj="documentationLink"
+                      >
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
+                          defaultMessage="Learn how to create a snapshot"
+                        />{' '}
+                        <EuiIcon type="link" />
+                      </EuiLink>
+                    </p>
+                  </Fragment>
+                )
+              }
+            </WithPrivileges>
+          }
+          data-test-subj="emptyPrompt"
+        />
+      </EuiPageContent>
     );
   } else {
     const repositoryErrorsWarning = Object.keys(errors).length ? (
@@ -322,7 +350,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     ) : null;
 
     content = (
-      <Fragment>
+      <section data-test-subj="snapshotList">
         {repositoryErrorsWarning}
 
         <SnapshotTable
@@ -334,12 +362,12 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           repositoryFilter={filteredRepository}
           policyFilter={filteredPolicy}
         />
-      </Fragment>
+      </section>
     );
   }
 
   return (
-    <section data-test-subj="snapshotList">
+    <>
       {repositoryName && snapshotId ? (
         <SnapshotDetails
           repositoryName={repositoryName}
@@ -349,6 +377,6 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         />
       ) : null}
       {content}
-    </section>
+    </>
   );
 };
