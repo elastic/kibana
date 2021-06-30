@@ -6,8 +6,11 @@
  */
 
 import { lazy } from 'react';
-import { SyntheticsCustomAssetsExtension } from './synthetics_custom_assets_extension';
 
-export const LazySyntheticsCustomAssetsExtension = lazy(async () => ({
-  default: SyntheticsCustomAssetsExtension,
-}));
+export const LazySyntheticsCustomAssetsExtension = lazy(async () => {
+  const { SyntheticsCustomAssetsExtension } = await import('./synthetics_custom_assets_extension');
+
+  return {
+    default: SyntheticsCustomAssetsExtension,
+  };
+});

@@ -6,8 +6,13 @@
  */
 
 import { lazy } from 'react';
-import { ApmCustomAssetsExtension } from './apm_custom_assets_extension';
 
-export const LazyApmCustomAssetsExtension = lazy(async () => ({
-  default: ApmCustomAssetsExtension,
-}));
+export const LazyApmCustomAssetsExtension = lazy(async () => {
+  const { ApmCustomAssetsExtension } = await import(
+    './apm_custom_assets_extension'
+  );
+
+  return {
+    default: ApmCustomAssetsExtension,
+  };
+});
