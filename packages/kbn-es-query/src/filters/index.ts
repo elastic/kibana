@@ -24,7 +24,7 @@ export * from './phrases_filter';
 export * from './query_string_filter';
 export * from './range_filter';
 
-export { Query, Filter, FILTERS, LatLon, FilterStateStore } from './types';
+export { Query, Filter, FILTERS, LatLon, FilterStateStore, FieldFilter, FilterMeta } from './types';
 
 /**
  * Clean out any invalid attributes from the filters

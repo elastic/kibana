@@ -9,7 +9,8 @@
 import dateMath from '@elastic/datemath';
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS, buildQueryFromFilters } from '../../../common';
+import { buildQueryFromFilters } from '@kbn/es-query';
+import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../common';
 import { TimefilterSetup } from '../../query';
 import { AutocompleteUsageCollector } from '../collectors';
 

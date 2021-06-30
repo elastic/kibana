@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
-import { ConfigSchema, configSchema } from '../config';
-import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
-
 import {
   buildQueryFilter,
   buildCustomFilter,
@@ -20,7 +16,15 @@ import {
   buildPhrasesFilter,
   buildRangeFilter,
   isFilterDisabled,
-} from '../common';
+  nodeTypes,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  buildEsQuery,
+  buildQueryFromFilters,
+} from '@kbn/es-query';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { ConfigSchema, configSchema } from '../config';
+import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 /*
  * Filter helper namespace:
@@ -52,14 +56,7 @@ export const exporters = {
  * esQuery and esKuery:
  */
 
-import {
-  nodeTypes,
-  fromKueryExpression,
-  toElasticsearchQuery,
-  buildEsQuery,
-  buildQueryFromFilters,
-  getEsQueryConfig,
-} from '../common';
+import { getEsQueryConfig } from '../common';
 
 export const esKuery = {
   nodeTypes,
@@ -73,7 +70,7 @@ export const esQuery = {
   buildEsQuery,
 };
 
-export { EsQueryConfig, KueryNode } from '../common';
+export type { EsQueryConfig, KueryNode, IFieldSubType } from '@kbn/es-query';
 
 /*
  * Field Formats:
@@ -146,7 +143,6 @@ export {
 
 export {
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,

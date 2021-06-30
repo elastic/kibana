@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  FilterValueFormatter,
-  GeoBoundingBoxFilter,
-  FILTERS,
-  isGeoBoundingBoxFilter,
-  Filter,
-} from '../../../../../common';
+import { GeoBoundingBoxFilter, FILTERS, isGeoBoundingBoxFilter, Filter } from '@kbn/es-query';
+
+import { FilterValueFormatter } from '../../../../../common';
 
 const getFormattedValueFn = (params: any) => {
   return (formatter?: FilterValueFormatter) => {

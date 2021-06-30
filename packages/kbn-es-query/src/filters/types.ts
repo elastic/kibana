@@ -51,12 +51,6 @@ export type FilterState = {
   store: FilterStateStore;
 };
 
-type FilterFormatterFunction = (value: any) => string;
-export interface FilterValueFormatter {
-  convert: FilterFormatterFunction;
-  getConverterFor: (type: string) => FilterFormatterFunction;
-}
-
 // eslint-disable-next-line
 export type FilterMeta = {
   alias: string | null;

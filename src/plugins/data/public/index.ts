@@ -6,23 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
-import { ConfigSchema } from '../config';
-
-/*
- * Filters:
- */
-
 import {
-  buildEmptyFilter,
-  buildExistsFilter,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFilter,
-  buildRangeFilter,
-  disableFilter,
-  FILTERS,
-  FilterStateStore,
   getPhraseFilterField,
   getPhraseFilterValue,
   isExistsFilter,
@@ -34,9 +18,33 @@ import {
   isQueryStringFilter,
   isRangeFilter,
   toggleFilterNegated,
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
-} from '../common';
+  buildEmptyFilter,
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  buildQueryFilter,
+  buildRangeFilter,
+  disableFilter,
+  fromKueryExpression,
+  toElasticsearchQuery,
+  nodeTypes,
+  buildEsQuery,
+  buildQueryFromFilters,
+  luceneStringToDsl,
+  decorateQuery,
+} from '@kbn/es-query';
+/*
+ * esQuery and esKuery:
+ */
+
+import { PluginInitializerContext } from '../../../core/public';
+import { ConfigSchema } from '../config';
+
+/*
+ * Filters:
+ */
+
+import { FILTERS, FilterStateStore, compareFilters, COMPARE_ALL_OPTIONS } from '../common';
 
 import { FilterLabel } from './ui';
 import { FilterItem } from './ui/filter_bar';
@@ -103,22 +111,10 @@ export type {
   PhraseFilter,
   CustomFilter,
   MatchAllFilter,
-} from '../common';
+  IFieldSubType,
+} from '@kbn/es-query';
 
-/*
- * esQuery and esKuery:
- */
-
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-  buildEsQuery,
-  getEsQueryConfig,
-  buildQueryFromFilters,
-  luceneStringToDsl,
-  decorateQuery,
-} from '../common';
+import { getEsQueryConfig } from '../common';
 
 export const esKuery = {
   nodeTypes,
@@ -133,8 +129,6 @@ export const esQuery = {
   luceneStringToDsl,
   decorateQuery,
 };
-
-export { EsQueryConfig, KueryNode } from '../common';
 
 /*
  * Field Formatters:
@@ -258,7 +252,6 @@ export {
 export {
   IIndexPattern,
   IFieldType,
-  IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
@@ -486,7 +479,7 @@ export {
   getKbnTypeNames,
 } from '../common';
 
-export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
+export { isTimeRange, isQuery } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
 export { APPLY_FILTER_TRIGGER } from './triggers';

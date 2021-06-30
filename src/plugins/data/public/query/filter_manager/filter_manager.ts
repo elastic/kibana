@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from 'src/core/public';
 
+import { isFilterPinned, Filter } from '@kbn/es-query';
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
@@ -18,9 +19,7 @@ import { PartitionedFilters } from './types';
 
 import {
   FilterStateStore,
-  Filter,
   uniqFilters,
-  isFilterPinned,
   compareFilters,
   COMPARE_ALL_OPTIONS,
   UI_SETTINGS,

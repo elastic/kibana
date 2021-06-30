@@ -13,7 +13,7 @@ interface KibanaConfig {
   get: GetConfigFn;
 }
 
-export function getEsQueryConfig(config: KibanaConfig) {
+export function getEsQueryConfig(config: KibanaConfig): EsQueryConfig {
   const allowLeadingWildcards = config.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS);
   const queryStringOptions = config.get(UI_SETTINGS.QUERY_STRING_OPTIONS);
   const ignoreFilterIfFieldNotInIndex = config.get(
@@ -26,5 +26,5 @@ export function getEsQueryConfig(config: KibanaConfig) {
     queryStringOptions,
     ignoreFilterIfFieldNotInIndex,
     dateFormatTZ,
-  } as EsQueryConfig;
+  };
 }

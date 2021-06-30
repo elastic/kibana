@@ -8,13 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { size, transform, cloneDeep } from 'lodash';
+import { buildEsQuery, Query } from '@kbn/es-query';
 
 import { createFilterFilters } from './create_filter/filters';
 import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggFiltersFnName } from './filters_fn';
-import { getEsQueryConfig, buildEsQuery, Query, UI_SETTINGS } from '../../../../common';
+import { getEsQueryConfig, UI_SETTINGS } from '../../../../common';
 import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
