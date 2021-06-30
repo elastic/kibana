@@ -88,7 +88,8 @@ import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
 import { ALERTS_URL } from '../../urls/navigation';
 
-describe('Detection rules, override', () => {
+// https://github.com/elastic/kibana/issues/84020
+describe.skip('Detection rules, override', () => {
   const expectedUrls = newOverrideRule.referenceUrls.join('');
   const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
   const expectedTags = newOverrideRule.tags.join('');
