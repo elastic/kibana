@@ -39,7 +39,7 @@ const DetectionsRedirects = ({ location }: RouteComponentProps) =>
 export const routes: RouteProps[] = [
   {
     path: DETECTIONS_PATH,
-    component: DetectionsRedirects,
+    render: DetectionsRedirects,
   },
   {
     path: ALERTS_PATH,
