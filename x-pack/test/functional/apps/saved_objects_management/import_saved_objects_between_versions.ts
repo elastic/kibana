@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('Export import saved objects between versions', function () {
-    beforeEach(async function () {
+    before(async function () {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare');
       await kibanaServer.uiSettings.replace({});
