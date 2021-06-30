@@ -20,7 +20,6 @@ import React, { Fragment } from 'react';
 
 import { StyledEuiInMemoryTable } from '../summary_view';
 import { getSummaryColumns, SummaryRow, ThreatDetailsRow } from '../helpers';
-import { EmptyThreatDetailsView } from './empty_threat_details_view';
 import { FIRSTSEEN, EVENT_URL, EVENT_REFERENCE } from '../../../../../common/cti/constants';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { getFirstElement } from '../../../../../common/utils/data_retrieval';
@@ -131,10 +130,6 @@ const buildThreatDetailsItems = (enrichment: CtiEnrichment) =>
 const ThreatDetailsViewComponent: React.FC<{
   enrichments: CtiEnrichment[];
 }> = ({ enrichments }) => {
-  if (enrichments.length < 1) {
-    return <EmptyThreatDetailsView />;
-  }
-
   const sortedEnrichments = enrichments.sort((a, b) => getFirstSeen(b) - getFirstSeen(a));
 
   return (

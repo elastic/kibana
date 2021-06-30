@@ -44,10 +44,46 @@ export const INVESTIGATION_TOOLTIP_CONTENT = i18n.translate(
   }
 );
 
-export const NO_ENRICHMENT_FOUND = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentFound',
+export const NO_INDICATOR_ENRICHMENTS_FOUND = i18n.translate(
+  'xpack.securitySolution.alertDetails.noIndicatorEnrichmentsFound',
   {
-    defaultMessage: 'No Threat Intel Enrichment Found',
+    defaultMessage: 'No indicator match rule enrichments found',
+  }
+);
+
+export const NO_INVESTIGATION_ENRICHMENTS_FOUND = i18n.translate(
+  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsFound',
+  {
+    defaultMessage: 'No investigation time enrichments found',
+  }
+);
+
+export const NO_INVESTIGATION_ENRICHMENTS_EXPLANATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.noInvestigationEnrichmentsFound',
+  {
+    defaultMessage:
+      "We haven't found any indicator matches from the last 30 days. If you would like to include older indicators, you can ",
+  }
+);
+
+export const CHANGE_ENRICHMENT_LOOKBACK = i18n.translate(
+  'xpack.securitySolution.alertDetails.changeEnrichmentQueryLookback',
+  {
+    defaultMessage: 'search a different time range',
+  }
+);
+
+export const ENRICHMENT_LOOKBACK_START_DATE = i18n.translate(
+  'xpack.securitySolution.alertDetails.enrichmentQueryStartDate',
+  {
+    defaultMessage: 'Start date',
+  }
+);
+
+export const ENRICHMENT_LOOKBACK_END_DATE = i18n.translate(
+  'xpack.securitySolution.alertDetails.enrichmentQueryEndDate',
+  {
+    defaultMessage: 'End date',
   }
 );
 

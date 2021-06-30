@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -34,6 +35,8 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from './cti_details/helpers';
+import { NoInvestigationEnrichmentsPanel } from './cti_details/no_investigation_enrichments_panel';
+import { NoIndicatorRuleEnrichmentsPanel } from './cti_details/no_indicator_rule_enrichments_panel';
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -117,13 +120,13 @@ const EventDetailsComponent: React.FC<Props> = ({
   const {
     loading: enrichmentsLoading,
     result: enrichmentsResponse,
+    setRange,
   } = useInvestigationTimeEnrichment(eventFields);
-  const allEnrichments = useMemo(() => {
-    if (enrichmentsLoading || !enrichmentsResponse?.enrichments) {
-      return existingEnrichments;
-    }
-    return filterDuplicateEnrichments([...existingEnrichments, ...enrichmentsResponse.enrichments]);
-  }, [enrichmentsLoading, enrichmentsResponse, existingEnrichments]);
+  const investigationEnrichments = enrichmentsResponse?.enrichments;
+  const allEnrichments = useMemo(
+    () => filterDuplicateEnrichments([...existingEnrichments, ...(investigationEnrichments ?? [])]),
+    [existingEnrichments, investigationEnrichments]
+  );
   const enrichmentCount = allEnrichments.length;
 
   const summaryTab: EventViewTab | undefined = useMemo(
@@ -131,6 +134,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       isAlert
         ? {
             id: EventsViewType.summaryView,
+            'data-test-subj': 'alert-summary-tab',
             name: i18n.SUMMARY,
             content: (
               <>
@@ -145,7 +149,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 {enrichmentsLoading && (
                   <>
-                    <EuiLoadingContent lines={2} />
+                    <EuiLoadingContent lines={3} />
                   </>
                 )}
                 {enrichmentCount > 0 && (
@@ -192,10 +196,35 @@ const EventDetailsComponent: React.FC<Props> = ({
                 {enrichmentsLoading ? <EuiLoadingSpinner /> : `(${enrichmentCount})`}
               </span>
             ),
-            content: <ThreatDetailsView enrichments={allEnrichments} />,
+            content: (
+              <>
+                <EuiSpacer size="l" />
+                {existingEnrichments.length < 1 && <NoIndicatorRuleEnrichmentsPanel />}
+                {!isEmpty(eventFields) && !investigationEnrichments?.length && (
+                  <NoInvestigationEnrichmentsPanel onRangeChange={setRange} />
+                )}
+                {enrichmentsLoading ? (
+                  <>
+                    <EuiLoadingContent lines={10} />
+                    <EuiLoadingContent lines={10} />
+                  </>
+                ) : (
+                  <ThreatDetailsView enrichments={allEnrichments} />
+                )}
+              </>
+            ),
           }
         : undefined,
-    [allEnrichments, enrichmentCount, enrichmentsLoading, isAlert]
+    [
+      allEnrichments,
+      enrichmentCount,
+      enrichmentsLoading,
+      eventFields,
+      existingEnrichments.length,
+      investigationEnrichments?.length,
+      isAlert,
+      setRange,
+    ]
   );
 
   const tableTab = useMemo(
