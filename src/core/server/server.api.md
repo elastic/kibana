@@ -522,6 +522,11 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     deprecations: DeprecationsServiceSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionContextSetup" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ExecutionContextSetup"
+    //
+    // (undocumented)
+    executionContext: ExecutionContextSetup;
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
@@ -550,6 +555,11 @@ export interface CoreStart {
     coreUsageData: CoreUsageDataStart;
     // (undocumented)
     elasticsearch: ElasticsearchServiceStart;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionContextStart" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ExecutionContextStart"
+    //
+    // (undocumented)
+    executionContext: ExecutionContextStart;
     // (undocumented)
     http: HttpServiceStart;
     // (undocumented)

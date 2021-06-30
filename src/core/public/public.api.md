@@ -432,6 +432,11 @@ export interface CoreStart {
     deprecations: DeprecationsServiceStart;
     // (undocumented)
     docLinks: DocLinksStart;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionContextServiceStart" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ExecutionContextServiceStart"
+    //
+    // (undocumented)
+    executionContext: ExecutionContextServiceStart;
     // (undocumented)
     fatalErrors: FatalErrorsStart;
     // (undocumented)
@@ -752,6 +757,10 @@ export class HttpFetchError extends Error implements IHttpFetchError {
 export interface HttpFetchOptions extends HttpRequestInit {
     asResponse?: boolean;
     asSystemRequest?: boolean;
+    // Warning: (ae-forgotten-export) The symbol "ExecutionContextContainer" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    context?: ExecutionContextContainer;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -1663,6 +1672,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:172:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```
