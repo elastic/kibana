@@ -16,8 +16,15 @@ import { AnomalyResultsViewSelector } from './index';
 
 jest.mock('../../contexts/kibana', () => {
   return {
-    useMlUrlGenerator: () => ({
-      createUrl: jest.fn(),
+    useMlLocator: () => ({
+      getLocation: jest.fn(),
+      getUrl: jest.fn(),
+      useUrl: jest.fn(),
+      navigate: jest.fn(),
+      extract: jest.fn(),
+      inject: jest.fn(),
+      telemetry: jest.fn(),
+      migrations: {},
     }),
     useNavigateToPath: () => jest.fn(),
   };
