@@ -16,10 +16,13 @@ import {
   EXCEPTIONS_URL,
   DETECTIONS_RULE_MANAGEMENT_URL,
   RULE_CREATION,
+  detectionsRuleDetailsUrl,
 } from '../../urls/navigation';
 
 import { cleanKibana } from '../../tasks/common';
 import { NOT_FOUND } from '../../screens/common/page';
+
+const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
 describe('Display not found page', () => {
   before(() => {
@@ -44,6 +47,16 @@ describe('Display not found page', () => {
 
   it('navigates to the rules creation page with incorrect link', () => {
     loginAndWaitForPage(`${RULE_CREATION}/randomUrl`);
+    cy.get(NOT_FOUND).should('exist');
+  });
+
+  it('navigates to the rules details page with incorrect link', () => {
+    loginAndWaitForPage(`${detectionsRuleDetailsUrl(mockRuleId)}/randomUrl`);
+    cy.get(NOT_FOUND).should('exist');
+  });
+
+  it('navigates to the edit rules page with incorrect link', () => {
+    loginAndWaitForPage(`${detectionsRuleDetailsUrl(mockRuleId)}/edit/randomUrl`);
     cy.get(NOT_FOUND).should('exist');
   });
 
