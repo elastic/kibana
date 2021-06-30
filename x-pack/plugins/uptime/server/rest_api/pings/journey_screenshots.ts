@@ -41,8 +41,9 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex,
     });
 
+    if (result === null) return response.notFound();
     if (isFullScreenshot(result)) {
-      if (!result.synthetics.blob) {
+      if (!result.synthetics?.blob) {
         return response.notFound();
       }
 
