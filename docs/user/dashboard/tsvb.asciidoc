@@ -31,6 +31,29 @@ By default, *TSVB* drops the last bucket because the time filter intersects the 
 .. In the *Panel filter* field, enter <<kuery-query, KQL filters>> to view specific documents.
 
 [float]
+[[tsvb-index-pattern-mode]]
+==== TSVB Index pattern mode
+Create *TSVB* visualizations with {kib} index patterns. 
+
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release.
+It is the default one for new visualizations but it can also be switched for the old implementations:
+
+. Click *Panel options*, then click the gear icon to open the *Index pattern selection mode* options.
+. Select *Use only Kibana index patterns*.
+. Reselect the index pattern from the dropdown, then select the *Time field*.
+
+image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
+
+The index pattern mode unlocks many new features, such as:
+* Runtime fields
+
+* URL drilldowns
+
+* Interactive filters for time series visualizations
+
+* Better performance
+
+[float]
 [[configure-the-data-series]]
 ==== Configure the series
 
@@ -117,28 +140,6 @@ The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax 
 *Math*::
   The math context is able to do simple and advanced calculations per series.
   This function must always be the last metric in the series.
-
-[float]
-[[tsvb-index-pattern-mode]]
-==== TSVB Index pattern mode
-Create *TSVB* visualizations with {kib} index patterns. 
-
-IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release.
-It is the default one for new visualizations but it can also be switched for the old implementations:
-
-. Click *Panel options*, then click the gear icon to open the *Index pattern selection mode* options.
-. Select *Use only Kibana index patterns*.
-. Reselect the index pattern from the dropdown, then select the *Time field*.
-
-image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
-
-The index pattern mode unlocks many new features, such as:
-* Runtime fields
-* URL drilldowns
-* Interactive filters for time series visualizations
-* Better performance
-
-The old mode, which the users can create a TSVB chart by applying an es index string, is considered as deprecated and is going to be removed in the future.
 
 [float]
 [[tsvb-faq]]
