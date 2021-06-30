@@ -10,7 +10,9 @@ import { FIELD_TYPES, fieldValidators, FormSchema } from '../../common/shared_im
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
-const { emptyField } = fieldValidators;
+const { emptyField, maxLengthField } = fieldValidators;
+
+const MAX_TITLE_LENGTH = 64;
 
 export const schemaTags = {
   type: FIELD_TYPES.COMBO_BOX,
@@ -32,6 +34,12 @@ export const schema: FormSchema<FormProps> = {
     validations: [
       {
         validator: emptyField(i18n.TITLE_REQUIRED),
+      },
+      {
+        validator: maxLengthField({
+          length: MAX_TITLE_LENGTH,
+          message: i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH),
+        }),
       },
     ],
   },
