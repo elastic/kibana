@@ -7,8 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { DataPublicPluginStart } from '../shared_imports';
-import type { EsRuntimeField } from '../types';
+import { DataPublicPluginStart, RuntimeField } from '../shared_imports';
 
 export interface RuntimeFieldPainlessError {
   message: string;
@@ -95,7 +94,7 @@ export const parseEsError = (
 export const getRuntimeFieldValidator = (
   index: string,
   searchService: DataPublicPluginStart['search']
-) => async (runtimeField: EsRuntimeField) => {
+) => async (runtimeField: RuntimeField) => {
   return await searchService
     .search({
       params: {

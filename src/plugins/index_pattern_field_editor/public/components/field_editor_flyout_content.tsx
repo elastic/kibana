@@ -20,9 +20,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type { Field, EsRuntimeField } from '../types';
+import type { Field } from '../types';
 import { RuntimeFieldPainlessError } from '../lib';
 import { euiFlyoutClassname } from '../constants';
+import type { RuntimeField } from '../shared_imports';
 import { FlyoutPanels } from './flyout_panels';
 import { useFieldEditorContext } from './field_editor_context';
 import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
@@ -56,7 +57,7 @@ export interface Props {
    */
   onCancel: () => void;
   /** Handler to validate the script  */
-  runtimeFieldValidator: (field: EsRuntimeField) => Promise<RuntimeFieldPainlessError | null>;
+  runtimeFieldValidator: (field: RuntimeField) => Promise<RuntimeFieldPainlessError | null>;
   /** Optional field to process */
   field?: Field;
   isSavingField: boolean;

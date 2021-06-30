@@ -10,7 +10,7 @@ export { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../da
 
 export { UsageCollectionStart } from '../../usage_collection/public';
 
-export { RuntimeType, EsRuntimeField, KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
+export { RuntimeType, RuntimeField, KBN_FIELD_TYPES, ES_FIELD_TYPES } from '../../data/common';
 
 export { createKibanaReactContext, toMountPoint, CodeEditor } from '../../kibana_react/public';
 
