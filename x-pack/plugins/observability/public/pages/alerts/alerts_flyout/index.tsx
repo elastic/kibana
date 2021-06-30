@@ -61,12 +61,12 @@ export function AlertsFlyout({
   const decoratedAlerts = useMemo(() => {
     return decorateResponse(alerts ?? [], observabilityRuleTypeRegistry);
   }, [alerts, observabilityRuleTypeRegistry]);
-  const alertFromItems = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId);
-  let myAlert = alert;
-  if (!myAlert && alertFromItems) {
-    myAlert = alertFromItems;
+
+  let alertData = alert;
+  if (!alertData) {
+    alertData = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId);
   }
-  if (!myAlert) {
+  if (!alertData) {
     return null;
   }
 
@@ -75,45 +75,45 @@ export function AlertsFlyout({
       title: i18n.translate('xpack.observability.alertsFlyout.statusLabel', {
         defaultMessage: 'Status',
       }),
-      description: myAlert.active ? 'Active' : 'Recovered',
+      description: alertData.active ? 'Active' : 'Recovered',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.severityLabel', {
         defaultMessage: 'Severity',
       }),
-      description: <SeverityBadge severityLevel={myAlert.fields[ALERT_SEVERITY_LEVEL]} />,
+      description: <SeverityBadge severityLevel={alertData.fields[ALERT_SEVERITY_LEVEL]} />,
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.triggeredLabel', {
         defaultMessage: 'Triggered',
       }),
       description: (
-        <span title={myAlert.start.toString()}>{moment(myAlert.start).format(dateFormat)}</span>
+        <span title={alertData.start.toString()}>{moment(alertData.start).format(dateFormat)}</span>
       ),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.durationLabel', {
         defaultMessage: 'Duration',
       }),
-      description: asDuration(myAlert.fields[ALERT_DURATION], { extended: true }),
+      description: asDuration(alertData.fields[ALERT_DURATION], { extended: true }),
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.expectedValueLabel', {
         defaultMessage: 'Expected value',
       }),
-      description: myAlert.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
+      description: alertData.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.actualValueLabel', {
         defaultMessage: 'Actual value',
       }),
-      description: myAlert.fields[ALERT_EVALUATION_VALUE] ?? '-',
+      description: alertData.fields[ALERT_EVALUATION_VALUE] ?? '-',
     },
     {
       title: i18n.translate('xpack.observability.alertsFlyout.ruleTypeLabel', {
         defaultMessage: 'Rule type',
       }),
-      description: myAlert.fields[RULE_CATEGORY] ?? '-',
+      description: alertData.fields[RULE_CATEGORY] ?? '-',
     },
   ];
 
@@ -121,10 +121,10 @@ export function AlertsFlyout({
     <EuiFlyout onClose={onClose} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{myAlert.fields[RULE_NAME]}</h2>
+          <h2>{alertData.fields[RULE_NAME]}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="s">{myAlert.reason}</EuiText>
+        <EuiText size="s">{alertData.reason}</EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiSpacer size="s" />
@@ -134,11 +134,11 @@ export function AlertsFlyout({
           listItems={overviewListItems}
         />
       </EuiFlyoutBody>
-      {myAlert.link && !isInApp && (
+      {alertData.link && !isInApp && (
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton href={prepend && prepend(myAlert.link)} fill>
+              <EuiButton href={prepend && prepend(alertData.link)} fill>
                 View in app
               </EuiButton>
             </EuiFlexItem>
