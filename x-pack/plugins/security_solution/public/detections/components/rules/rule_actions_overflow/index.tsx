@@ -30,6 +30,7 @@ import {
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { getToolTipContent } from '../../../../common/utils/privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -58,6 +59,7 @@ const RuleActionsOverflowComponent = ({
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const history = useHistory();
+  const { navigateToApp } = useKibana().services.application;
   const [, dispatchToaster] = useStateToaster();
 
   const onRuleDeletedCallback = useCallback(() => {
@@ -82,7 +84,7 @@ const RuleActionsOverflowComponent = ({
                   dispatchToaster
                 );
                 if (createdRules?.length) {
-                  editRuleAction(createdRules[0], history);
+                  editRuleAction(createdRules[0].id, navigateToApp);
                 }
               }}
             >
@@ -123,7 +125,7 @@ const RuleActionsOverflowComponent = ({
       canDuplicateRuleWithActions,
       closePopover,
       dispatchToaster,
-      history,
+      navigateToApp,
       onRuleDeletedCallback,
       rule,
       userHasPermissions,

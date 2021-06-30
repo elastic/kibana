@@ -7,7 +7,15 @@
 
 import { loginAndWaitForPage, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS } from '../../urls/navigation';
+import {
+  ALERTS_URL,
+  DETECTIONS,
+  DETECTIONS_RULE_MANAGEMENT_URL,
+  RULE_CREATION,
+  SECURITY_DETECTIONS_RULES_CREATION_URL,
+  SECURITY_DETECTIONS_RULES_URL,
+  SECURITY_DETECTIONS_URL,
+} from '../../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
@@ -25,10 +33,24 @@ describe('URL compatibility', () => {
     cleanKibana();
   });
 
-  it('Redirects to Detection alerts from old Detections URL', () => {
+  it('Redirects to alerts from old siem Detections URL', () => {
     loginAndWaitForPage(DETECTIONS);
+    cy.url().should('include', ALERTS_URL);
+  });
 
-    cy.url().should('include', '/security/detections');
+  it('Redirects to alerts from old Detections URL', () => {
+    loginAndWaitForPage(SECURITY_DETECTIONS_URL);
+    cy.url().should('include', ALERTS_URL);
+  });
+
+  it('Redirects to rules from old Detections rules URL', () => {
+    loginAndWaitForPage(SECURITY_DETECTIONS_RULES_URL);
+    cy.url().should('include', DETECTIONS_RULE_MANAGEMENT_URL);
+  });
+
+  it('Redirects to rules creation from old Detections rules creation URL', () => {
+    loginAndWaitForPage(SECURITY_DETECTIONS_RULES_CREATION_URL);
+    cy.url().should('include', RULE_CREATION);
   });
 
   it('sets the global start and end dates from the url with timestamps', () => {

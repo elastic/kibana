@@ -110,7 +110,7 @@ export function useSeriesStorage() {
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { dt, op, st, rt, bd, ft, time, rdf, ...restSeries } = newValue;
+  const { dt, op, st, rt, bd, ft, time, rdf, mt, ...restSeries } = newValue;
   return {
     operationType: op,
     reportType: rt!,
@@ -120,6 +120,7 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
     time: time!,
     reportDefinitions: rdf,
     dataType: dt!,
+    selectedMetricField: mt,
     ...restSeries,
   };
 }
@@ -132,6 +133,7 @@ interface ShortUrlSeries {
   [URL_KEYS.BREAK_DOWN]?: string;
   [URL_KEYS.FILTERS]?: UrlFilter[];
   [URL_KEYS.REPORT_DEFINITIONS]?: URLReportDefinition;
+  [URL_KEYS.SELECTED_METRIC]?: string;
   time?: {
     to: string;
     from: string;

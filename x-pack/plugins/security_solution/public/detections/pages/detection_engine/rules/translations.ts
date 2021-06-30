@@ -44,7 +44,7 @@ export const ADD_NEW_RULE = i18n.translate(
 );
 
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.detectionEngine.rules.pageTitle', {
-  defaultMessage: 'Detection rules',
+  defaultMessage: 'Rules',
 });
 
 export const ADD_PAGE_TITLE = i18n.translate(

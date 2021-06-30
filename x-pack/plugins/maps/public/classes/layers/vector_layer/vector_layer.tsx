@@ -236,11 +236,17 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    const { tooltipContent, areResultsTrimmed } = this.getSource().getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const {
+      tooltipContent,
+      areResultsTrimmed,
+      isDeprecated,
+    } = this.getSource().getSourceTooltipContent(sourceDataRequest);
     return {
-      icon: this.getCurrentStyle().getIcon(),
+      icon: isDeprecated ? (
+        <EuiIcon type="alert" color="danger" />
+      ) : (
+        this.getCurrentStyle().getIcon()
+      ),
       tooltipContent,
       areResultsTrimmed,
     };

@@ -7,9 +7,9 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { getDefaultLayoutSelectors } from '../common';
-import { getSharedComponents } from './components';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingPublicPlugin } from './plugin';
+import { getSharedComponents } from './shared';
 
 export interface ReportingSetup {
   getDefaultLayoutSelectors: typeof getDefaultLayoutSelectors;
