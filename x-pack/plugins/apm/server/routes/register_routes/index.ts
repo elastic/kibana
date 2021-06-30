@@ -123,7 +123,7 @@ export function registerRoutes({
 
           if (!options.disableTelemetry && telemetryUsageCounter) {
             telemetryUsageCounter.incrementCounter({
-              counterName: `${method}_${pathname}`,
+              counterName: `${method.toUpperCase()} ${pathname}`,
               counterType: 'success',
             });
           }
@@ -133,7 +133,7 @@ export function registerRoutes({
           logger.error(error);
           if (!options.disableTelemetry && telemetryUsageCounter) {
             telemetryUsageCounter.incrementCounter({
-              counterName: `${method}_${pathname}`,
+              counterName: `${method.toUpperCase()} ${pathname}`,
               counterType: 'error',
             });
           }
