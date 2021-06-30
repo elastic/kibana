@@ -51,7 +51,7 @@ describe('query_correlation', () => {
 
       expect(
         (query?.body?.aggs?.ks_test as any)?.bucket_count_ks_test?.fractions
-      ).toEqual([0, ...fractions]);
+      ).toEqual(fractions);
     });
   });
 });
