@@ -24,13 +24,28 @@ import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { expandFirstAlert, goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import {
+  changeEnrichmentQueryRange,
   openJsonView,
+  openSummaryTab,
   openThreatIndicatorDetails,
   scrollJsonViewToBottom,
 } from '../../tasks/alerts_details';
 
 import { ALERTS_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
+
+const expectThreatSummaryRows = (expectedMatches: Array<{ field: string; value: string }>) =>
+  cy.get(THREAT_SUMMARY_VIEW).within(() => {
+    cy.get(TABLE_ROWS).should('have.length', expectedMatches.length);
+    expectedMatches.forEach((row, index) => {
+      cy.get(TABLE_ROWS)
+        .eq(index)
+        .within(() => {
+          cy.get(TITLE).should('have.text', row.field);
+          cy.get(THREAT_CONTENT).should('have.text', row.value);
+        });
+    });
+  });
 
 describe('CTI Enrichment', () => {
   before(() => {
@@ -173,21 +188,16 @@ describe('CTI Enrichment', () => {
         field: 'source.ip',
         value: '192.168.1.1',
       };
-      const expectedMatches = [indicatorMatchRuleEnrichment, investigationTimeEnrichment];
+      const dateOfInvestigationIndicator = '2021-05-27';
 
       expandFirstAlert();
+      expectThreatSummaryRows([indicatorMatchRuleEnrichment]);
 
-      cy.get(THREAT_SUMMARY_VIEW).within(() => {
-        cy.get(TABLE_ROWS).should('have.length', expectedMatches.length);
-        expectedMatches.forEach((row, index) => {
-          cy.get(TABLE_ROWS)
-            .eq(index)
-            .within(() => {
-              cy.get(TITLE).should('have.text', row.field);
-              cy.get(THREAT_CONTENT).should('have.text', row.value);
-            });
-        });
-      });
+      openThreatIndicatorDetails();
+      changeEnrichmentQueryRange({ from: dateOfInvestigationIndicator, to: undefined });
+
+      openSummaryTab();
+      expectThreatSummaryRows([investigationTimeEnrichment, indicatorMatchRuleEnrichment]);
     });
   });
 });

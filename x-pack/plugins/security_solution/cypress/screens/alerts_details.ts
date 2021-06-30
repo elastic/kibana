@@ -7,11 +7,22 @@
 
 export const CELL_TEXT = '.euiText';
 
+export const CHANGE_ENRICHMENT_RANGE_BUTTON =
+  '[data-test-subj="change-enrichment-lookback-query-button"]';
+
+export const ENRICHMENT_QUERY_RANGE_PICKER = '[data-test-subj="enrichment-query-range-picker"]';
+
+export const ENRICHMENT_QUERY_START_INPUT = '.start-picker';
+
+export const ENRICHMENT_QUERY_END_INPUT = '.end-picker';
+
 export const JSON_CONTENT = '[data-test-subj="jsonView"]';
 
 export const JSON_LINES = '.ace_line';
 
 export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
+
+export const SUMMARY_TAB = '[data-test-subj="alert-summary-tab"]';
 
 export const TABLE_CELL = '.euiTableRowCell';
 
