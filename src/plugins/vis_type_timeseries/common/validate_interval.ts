@@ -7,20 +7,29 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GTE_INTERVAL_RE } from '../../../common/interval_regexp';
-import { search } from '../../../../../plugins/data/public';
+import { GTE_INTERVAL_RE } from './interval_regexp';
+import { parseInterval, TimeRangeBounds } from '../../data/common';
 
-import type { TimeRangeBounds } from '../../../../data/common';
-import type { TimeseriesVisParams } from '../../types';
+export class ValidateIntervalError extends Error {
+  constructor() {
+    super(
+      i18n.translate('visTypeTimeseries.validateInterval.notifier.maxBucketsExceededErrorMessage', {
+        defaultMessage:
+          'Your query attempted to fetch too much data. Reducing the time range or changing the interval used usually fixes the issue.',
+      })
+    );
+  }
 
-const { parseInterval } = search.aggs;
+  public get name() {
+    return this.constructor.name;
+  }
 
-export function validateInterval(
-  bounds: TimeRangeBounds,
-  panel: TimeseriesVisParams,
-  maxBuckets: number
-) {
-  const { interval } = panel;
+  public get errBody() {
+    return this.message;
+  }
+}
+
+export function validateInterval(bounds: TimeRangeBounds, interval: string, maxBuckets: number) {
   const { min, max } = bounds;
   // No need to check auto it will return around 100
   if (!interval) return;
@@ -33,15 +42,7 @@ export function validateInterval(
     const span = max!.valueOf() - min!.valueOf();
     const buckets = Math.floor(span / duration.asMilliseconds());
     if (buckets > maxBuckets) {
-      throw new Error(
-        i18n.translate(
-          'visTypeTimeseries.validateInterval.notifier.maxBucketsExceededErrorMessage',
-          {
-            defaultMessage:
-              'Your query attempted to fetch too much data. Reducing the time range or changing the interval used usually fixes the issue.',
-          }
-        )
-      );
+      throw new ValidateIntervalError();
     }
   }
 }
