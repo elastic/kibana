@@ -15,6 +15,21 @@ export const configSchema = schema.object({
     }),
     valueSuggestions: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      method: schema.oneOf([schema.literal('terms_enum'), schema.literal('terms_agg')], {
+        defaultValue: 'terms_enum',
+      }),
+      tiers: schema.arrayOf(
+        schema.oneOf([
+          schema.literal('data_content'),
+          schema.literal('data_hot'),
+          schema.literal('data_warm'),
+          schema.literal('data_cold'),
+          schema.literal('data_frozen'),
+        ]),
+        {
+          defaultValue: ['data_hot', 'data_warm', 'data_content', 'data_cold'],
+        }
+      ),
       terminateAfter: schema.duration({ defaultValue: 100000 }),
       timeout: schema.duration({ defaultValue: 1000 }),
     }),
