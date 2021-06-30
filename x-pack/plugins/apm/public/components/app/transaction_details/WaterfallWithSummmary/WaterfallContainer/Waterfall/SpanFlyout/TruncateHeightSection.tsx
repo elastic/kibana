@@ -9,10 +9,10 @@ import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, ReactNode, useEffect, useRef, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
-import { px, units } from '../../../../../../../style/variables';
+import { px } from '../../../../../../../style/variables';
 
 const ToggleButtonContainer = euiStyled.div`
-  margin-top: ${px(units.half)};
+  margin-top: ${({ theme }) => theme.eui.euiSizeS}
   user-select: none;
 `;
 

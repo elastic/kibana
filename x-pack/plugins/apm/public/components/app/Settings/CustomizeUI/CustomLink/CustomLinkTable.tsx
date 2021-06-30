@@ -17,7 +17,7 @@ import {
 import { isEmpty } from 'lodash';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
-import { units, px } from '../../../../../style/variables';
+import { px } from '../../../../../style/variables';
 import { ManagedTable } from '../../../../shared/ManagedTable';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
@@ -63,7 +63,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       ),
     },
     {
-      width: px(units.triple),
+      width: '48px',
       name: '',
       actions: [
         ...(canSave

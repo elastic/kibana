@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiToolTip, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { units, px, truncate, unit } from '../../../../style/variables';
+import { px, truncate, unit } from '../../../../style/variables';
 import { HttpStatusBadge } from '../HttpStatusBadge';
 
 const HttpInfoBadge = euiStyled(EuiBadge)`
-  margin-right: ${px(units.quarter)};
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const Url = euiStyled('span')`

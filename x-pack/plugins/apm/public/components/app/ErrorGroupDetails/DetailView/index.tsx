@@ -23,7 +23,6 @@ import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/comm
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
-import { px, unit, units } from '../../../../style/variables';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
@@ -45,11 +44,11 @@ const HeaderContainer = euiStyled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: ${px(unit)};
+  margin-bottom: ${({ theme }) => theme.eui.euiSize};
 `;
 
 const TransactionLinkName = euiStyled.div`
-  margin-left: ${px(units.half)};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
   display: inline-block;
   vertical-align: middle;
 `;

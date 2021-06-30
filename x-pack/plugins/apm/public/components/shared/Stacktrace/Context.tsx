@@ -15,7 +15,7 @@ import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { borderRadius, px, unit, units } from '../../../style/variables';
+import { px } from '../../../style/variables';
 
 SyntaxHighlighter.registerLanguage('javascript', javascript);
 SyntaxHighlighter.registerLanguage('python', python);
@@ -23,14 +23,14 @@ SyntaxHighlighter.registerLanguage('ruby', ruby);
 
 const ContextContainer = euiStyled.div`
   position: relative;
-  border-radius: ${borderRadius};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
 `;
 
-const LINE_HEIGHT = units.eighth * 9;
+const LINE_HEIGHT = 18;
 const LineHighlight = euiStyled.div<{ lineNumber: number }>`
   position: absolute;
   width: 100%;
-  height: ${px(units.eighth * 9)};
+  height: ${px(LINE_HEIGHT)};
   top: ${(props) => px(props.lineNumber * LINE_HEIGHT)};
   pointer-events: none;
   background-color: ${({ theme }) => tint(0.9, theme.eui.euiColorWarning)};
@@ -40,7 +40,7 @@ const LineNumberContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: ${borderRadius};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   background: ${({ isLibraryFrame, theme }) =>
     isLibraryFrame
       ? theme.eui.euiColorEmptyShade
@@ -49,29 +49,29 @@ const LineNumberContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
 
 const LineNumber = euiStyled.div<{ highlight: boolean }>`
   position: relative;
-  min-width: ${px(units.eighth * 21)};
-  padding-left: ${px(units.half)};
-  padding-right: ${px(units.quarter)};
+  min-width: ${px(42)};
+  padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-right: ${({ theme }) => theme.eui.paddingSizes.xs};
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
-  line-height: ${px(unit + units.eighth)};
+  line-height: ${px(LINE_HEIGHT)};
   text-align: right;
   border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   background-color: ${({ highlight, theme }) =>
     highlight ? tint(0.9, theme.eui.euiColorWarning) : null};
 
   &:last-of-type {
-    border-radius: 0 0 0 ${borderRadius};
+    border-radius: 0 0 0 ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   }
 `;
 
 const LineContainer = euiStyled.div`
   overflow: auto;
-  margin: 0 0 0 ${px(units.eighth * 21)};
+  margin: 0 0 0 ${px(42)};
   padding: 0;
   background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
 
   &:last-of-type {
-    border-radius: 0 0 ${borderRadius} 0;
+    border-radius: 0 0 ${({ theme }) => theme.eui.euiBorderRadiusSmall} 0;
   }
 `;
 

@@ -13,13 +13,7 @@ import { EuiIconTip } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import {
-  fontFamilyCode,
-  fontSizes,
-  px,
-  truncate,
-  unit,
-} from '../../../../style/variables';
+import { px, truncate, unit } from '../../../../style/variables';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -28,7 +22,7 @@ import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
 import { APMQueryParams } from '../../../shared/Links/url_helpers';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
-  font-family: ${fontFamilyCode};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
 
 const MessageAndCulpritCell = euiStyled.div`
@@ -40,13 +34,13 @@ const ErrorLink = euiStyled(ErrorOverviewLink)`
 `;
 
 const MessageLink = euiStyled(ErrorDetailLink)`
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.large};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeM};
   ${truncate('100%')};
 `;
 
 const Culprit = euiStyled.div`
-  font-family: ${fontFamilyCode};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
 
 type ErrorGroupItem = APIReturnType<'GET /api/apm/services/{serviceName}/errors'>['errorGroups'][0];

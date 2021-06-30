@@ -15,7 +15,7 @@ import {
   asMillisecondDuration,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-import { fontFamilyCode, truncate } from '../../../../style/variables';
+import { truncate } from '../../../../style/variables';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
@@ -27,7 +27,7 @@ type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/trans
 // Truncate both the link and the child span (the tooltip anchor.) The link so
 // it doesn't overflow, and the anchor so we get the ellipsis.
 const TransactionNameLink = euiStyled(TransactionDetailLink)`
-  font-family: ${fontFamilyCode};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
   white-space: nowrap;
   ${truncate('100%')};
 

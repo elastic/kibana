@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { px, units } from '../../../style/variables';
 import { Stackframe as StackframeComponent } from './Stackframe';
 
 const LibraryStacktraceAccordion = euiStyled(EuiAccordion)`
-  margin: ${px(units.quarter)} 0;
+  margin: ${({ theme }) => theme.eui.euiSizeXS} 0;
 `;
 
 interface Props {

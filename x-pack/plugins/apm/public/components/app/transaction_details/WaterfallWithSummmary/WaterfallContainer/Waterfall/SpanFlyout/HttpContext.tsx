@@ -8,23 +8,16 @@
 import React, { Fragment } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
-import {
-  borderRadius,
-  fontFamilyCode,
-  fontSize,
-  px,
-  unit,
-  units,
-} from '../../../../../../../style/variables';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 
 const ContextUrl = euiStyled.div`
-  padding: ${px(units.half)} ${px(unit)};
+padding: ${({ theme }) =>
+  `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
   background: ${({ theme }) => theme.eui.euiColorLightestShade};
-  border-radius: ${borderRadius};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSize};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
 interface Props {

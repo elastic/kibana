@@ -25,7 +25,7 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { fontSizes, px, truncate, unit } from '../../../../style/variables';
+import { px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';
@@ -47,7 +47,7 @@ function formatString(value?: string | null) {
 }
 
 const AppLink = euiStyled(ServiceOrTransactionsOverviewLink)`
-  font-size: ${fontSizes.large};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeM}
   ${truncate('100%')};
 `;
 

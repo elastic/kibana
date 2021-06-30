@@ -13,7 +13,7 @@ import {
   asMillisecondDuration,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import { fontSizes, truncate } from '../../../style/variables';
+import { truncate } from '../../../style/variables';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
@@ -24,7 +24,7 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 type TraceGroup = APIReturnType<'GET /api/apm/traces'>['items'][0];
 
 const StyledTransactionLink = euiStyled(TransactionDetailLink)`
-  font-size: ${fontSizes.large};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeM};
   ${truncate('100%')};
 `;
 

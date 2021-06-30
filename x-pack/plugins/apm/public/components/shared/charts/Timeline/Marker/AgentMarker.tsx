@@ -10,18 +10,17 @@ import { EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/use_theme';
-import { px, units } from '../../../../../style/variables';
 import { Legend } from '../../Legend';
 import { AgentMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 const NameContainer = euiStyled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
-  padding-bottom: ${px(units.half)};
+  padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
 const TimeContainer = euiStyled.div`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
-  padding-top: ${px(units.half)};
+  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
 interface Props {

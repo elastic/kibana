@@ -9,13 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiTitle } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { px, unit, units } from '../../../style/variables';
 import { Stacktrace } from '.';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
 const Accordion = euiStyled(EuiAccordion)`
   border-top: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-top: ${px(units.half)};
+  margin-top: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const CausedByContainer = euiStyled('h5')`
@@ -31,7 +30,7 @@ const CausedByHeading = euiStyled('span')`
 `;
 
 const FramesContainer = euiStyled('div')`
-  padding-left: ${px(unit)};
+  padding-left: ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
 function CausedBy({ message }: { message: string }) {

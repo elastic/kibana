@@ -15,7 +15,7 @@ import {
   TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { px, unit, units } from '../../../../../style/variables';
+import { px } from '../../../../../style/variables';
 import { ErrorMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../../Legend';
@@ -29,12 +29,12 @@ const Popover = euiStyled.div`
 `;
 
 const TimeLegend = euiStyled(Legend)`
-  margin-bottom: ${px(unit)};
+  margin-bottom: ${({ theme }) => theme.eui.euiSize};
 `;
 
 const ErrorLink = euiStyled(ErrorDetailLink)`
   display: block;
-  margin: ${px(units.half)} 0 ${px(units.half)} 0;
+  margin: ${({ theme }) => `${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS} 0`};
   overflow-wrap: break-word;
 `;
 
@@ -101,9 +101,7 @@ export function ErrorMarker({ mark }: Props) {
       <Popover>
         <TimeLegend
           text={asDuration(mark.offset)}
-          indicator={() => (
-            <div style={{ marginRight: px(units.quarter) }}>@</div>
-          )}
+          indicator={<div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>}
         />
         <Legend
           key={mark.serviceColor}

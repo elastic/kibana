@@ -9,13 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  fontFamilyCode,
-  fontSizes,
-  px,
-  truncate,
-  units,
-} from '../../../style/variables';
+import { truncate } from '../../../style/variables';
 
 export interface IStickyProperty {
   val: JSX.Element | string | Date;
@@ -26,12 +20,12 @@ export interface IStickyProperty {
 }
 
 const TooltipFieldName = euiStyled.span`
-  font-family: ${fontFamilyCode};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
 
 const PropertyLabel = euiStyled.div`
-  margin-bottom: ${px(units.half)};
-  font-size: ${fontSizes.small};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 
   span {

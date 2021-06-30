@@ -9,11 +9,10 @@ import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
-import { px, units } from '../../../../../../style/variables';
 
 const SpanBadge = euiStyled(EuiBadge)`
   display: inline-block;
-  margin-right: ${px(units.quarter)};
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 export interface SyncBadgeProps {

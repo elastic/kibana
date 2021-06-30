@@ -73,7 +73,7 @@ export function SparkPlot({
   const colorValue = theme.eui[color];
 
   const chartSize = {
-    height: px(24),
+    height: theme.eui.euiSizeL,
     width: compact ? px(unit * 3) : px(unit * 4),
   };
 

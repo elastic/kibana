@@ -10,15 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { useTheme } from '../../../hooks/use_theme';
-import { px } from '../../../../public/style/variables';
-import { units } from '../../../style/variables';
 
 interface Props {
   count: number;
 }
 
 const Badge = euiStyled(EuiBadge)`
-  margin-top: ${px(units.eighth)};
+  margin-top: 2px;
 `;
 
 export function ErrorCountSummaryItemBadge({ count }: Props) {

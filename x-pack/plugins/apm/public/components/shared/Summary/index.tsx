@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { px, units } from '../../../../public/style/variables';
 import { Maybe } from '../../../../typings/common';
 
 interface Props {
@@ -18,7 +17,7 @@ interface Props {
 const Item = euiStyled(EuiFlexItem)`
   flex-wrap: nowrap;
   border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  padding-right: ${px(units.half)};
+  padding-right: ${({ theme }) => theme.eui.paddingSizes.s};
   flex-flow: row nowrap;
   line-height: 1.5;
   align-items: center !important;

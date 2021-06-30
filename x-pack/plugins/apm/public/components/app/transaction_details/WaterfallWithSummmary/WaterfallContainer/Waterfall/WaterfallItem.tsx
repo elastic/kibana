@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
-import { px, unit, units } from '../../../../../../style/variables';
+import { px } from '../../../../../../style/variables';
 import { ErrorCount } from '../../ErrorCount';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
@@ -37,8 +37,8 @@ const Container = euiStyled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
-  padding-top: ${px(units.half)};
-  padding-bottom: ${px(units.plus)};
+  padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
   margin-right: ${(props) => px(props.timelineMargins.right)};
   margin-left: ${(props) => px(props.timelineMargins.left)};
   background-color: ${({ isSelected, theme }) =>
@@ -53,7 +53,7 @@ const Container = euiStyled.div<IContainerStyleProps>`
 const ItemBar = euiStyled.div<IBarStyleProps>`
   box-sizing: border-box;
   position: relative;
-  height: ${px(unit)};
+  height: ${({ theme }) => theme.eui.euiSize};
   min-width: 2px;
   background-color: ${(props) => props.color};
 `;
@@ -63,11 +63,11 @@ const ItemText = euiStyled.span`
   right: 0;
   display: flex;
   align-items: center;
-  height: ${px(units.plus)};
+  height: ${({ theme }) => theme.eui.euiSizeL};
 
   /* add margin to all direct descendants */
   & > * {
-    margin-right: ${px(units.half)};
+    margin-right: ${({ theme }) => theme.eui.euiSizeS};
     white-space: nowrap;
   }
 `;

@@ -9,13 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { EuiIcon } from '@elastic/eui';
-import {
-  fontFamilyCode,
-  px,
-  units,
-  fontSizes,
-  unit,
-} from '../../../../style/variables';
+import { px, unit } from '../../../../style/variables';
 import { tint } from 'polished';
 
 function getIconColor(type, theme) {
@@ -40,23 +34,23 @@ const Description = euiStyled.div`
     display: inline;
 
     span {
-      font-family: ${fontFamilyCode};
+      font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
       color: ${({ theme }) => theme.eui.euiColorFullShade};
-      padding: 0 ${px(units.quarter)};
+      padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs};
       display: inline-block;
     }
   }
 `;
 
 const ListItem = euiStyled.li`
-  font-size: ${fontSizes.small};
-  height: ${px(units.double)};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  height: ${({ theme }) => theme.eui.euiSizeXL};
   align-items: center;
   display: flex;
   background: ${({ selected, theme }) =>
     selected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;
-  border-radius: ${px(units.quarter)};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
 
   ${Description} {
     p span {
@@ -69,19 +63,19 @@ const ListItem = euiStyled.li`
 `;
 
 const Icon = euiStyled.div`
-  flex: 0 0 ${px(units.double)};
+  flex: 0 0 ${({ theme }) => theme.eui.euiSizeXL};
   background: ${({ type, theme }) => tint(0.9, getIconColor(type, theme))};
   color: ${({ type, theme }) => getIconColor(type, theme)};
   width: 100%;
   height: 100%;
   text-align: center;
-  line-height: ${px(units.double)};
+  line-height: ${({ theme }) => theme.eui.euiSizeXL};
 `;
 
 const TextValue = euiStyled.div`
   flex: 0 0 ${px(unit * 16)};
   color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-  padding: 0 ${px(units.half)};
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
 `;
 
 function getEuiIconType(type) {

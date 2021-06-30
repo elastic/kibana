@@ -10,15 +10,18 @@ import PropTypes from 'prop-types';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { isEmpty } from 'lodash';
 import Suggestion from './Suggestion';
-import { units, px, unit } from '../../../../style/variables';
+import { px, unit } from '../../../../style/variables';
 import { tint } from 'polished';
 
 const List = euiStyled.ul`
   width: 100%;
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  border-radius: ${px(units.quarter)};
-  box-shadow: 0px ${px(units.quarter)} ${px(units.double)}
-    ${({ theme }) => tint(0.9, theme.eui.euiColorFullShade)};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
+  box-shadow: 0px ${({ theme }) =>
+    `${theme.eui.euiSizeXS} ${theme.eui.euiSizeXL} ${tint(
+      0.9,
+      theme.eui.euiColorFullShade
+    )}`};
   position: absolute;
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   z-index: 10;

@@ -22,7 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
-import { px, units } from '../../../../../../../style/variables';
 import { Summary } from '../../../../../../shared/Summary';
 import { TimestampTooltip } from '../../../../../../shared/TimestampTooltip';
 import { DurationSummaryItem } from '../../../../../../shared/Summary/DurationSummaryItem';
@@ -74,11 +73,11 @@ function getSpanTypes(span: Span) {
 
 const SpanBadge = euiStyled(EuiBadge)`
   display: inline-block;
-  margin-right: ${px(units.quarter)};
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 const HttpInfoContainer = euiStyled('div')`
-  margin-right: ${px(units.quarter)};
+  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
 `;
 
 interface Props {

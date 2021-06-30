@@ -21,30 +21,29 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 
 const Titles = euiStyled.div`
-  margin-bottom: ${px(units.plus)};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 const Label = euiStyled.div`
-  margin-bottom: ${px(units.quarter)};
-  font-size: ${fontSizes.small};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
 `;
 
 const Message = euiStyled.div`
-  font-family: ${fontFamilyCode};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
   font-weight: bold;
-  font-size: ${fontSizes.large};
-  margin-bottom: ${px(units.half)};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeM};
+  margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const Culprit = euiStyled.div`
-  font-family: ${fontFamilyCode};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
 
 function getShortGroupId(errorGroupId?: string) {

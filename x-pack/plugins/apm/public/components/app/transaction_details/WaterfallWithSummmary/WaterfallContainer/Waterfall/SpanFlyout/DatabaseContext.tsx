@@ -14,34 +14,30 @@ import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import {
-  borderRadius,
-  fontFamilyCode,
-  fontSize,
-  px,
-  unit,
-  units,
-} from '../../../../../../../style/variables';
 import { TruncateHeightSection } from './TruncateHeightSection';
+import { useTheme } from '../../../../../../../hooks/use_theme';
 
 SyntaxHighlighter.registerLanguage('sql', sql);
 
 const DatabaseStatement = euiStyled.div`
-  padding: ${px(units.half)} ${px(unit)};
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.s} ${theme.eui.paddingSizes.m}`};
   background: ${({ theme }) => tint(0.9, theme.eui.euiColorWarning)};
-  border-radius: ${borderRadius};
+  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSize};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
-
-const dbSyntaxLineHeight = unit * 1.5;
 
 interface Props {
   dbContext?: NonNullable<Span['span']>['db'];
 }
 
 export function DatabaseContext({ dbContext }: Props) {
+  const theme = useTheme();
+  const dbSyntaxLineHeight = theme.eui.euiSizeL;
+  const previewHeight = 240; // 10 * dbSyntaxLineHeight
+
   if (!dbContext || !dbContext.statement) {
     return null;
   }
@@ -64,7 +60,7 @@ export function DatabaseContext({ dbContext }: Props) {
       </EuiTitle>
       <EuiSpacer size="m" />
       <DatabaseStatement>
-        <TruncateHeightSection previewHeight={10 * dbSyntaxLineHeight}>
+        <TruncateHeightSection previewHeight={previewHeight}>
           <SyntaxHighlighter
             language={'sql'}
             style={xcode}
@@ -72,7 +68,7 @@ export function DatabaseContext({ dbContext }: Props) {
               color: null,
               background: null,
               padding: null,
-              lineHeight: px(dbSyntaxLineHeight),
+              lineHeight: dbSyntaxLineHeight,
               whiteSpace: 'pre-wrap',
               overflowX: 'scroll',
             }}

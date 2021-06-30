@@ -20,7 +20,7 @@ import {
   getServiceHealthStatusColor,
 } from '../../../../../common/service_health_status';
 import { useTheme } from '../../../../hooks/use_theme';
-import { fontSize, px } from '../../../../style/variables';
+import { px } from '../../../../style/variables';
 import { asInteger, asDuration } from '../../../../../common/utils/formatters';
 import { MLSingleMetricLink } from '../../../shared/Links/MachineLearningLinks/MLSingleMetricLink';
 import { popoverWidth } from '../cytoscape_options';
@@ -47,7 +47,7 @@ const SubduedText = euiStyled.span`
 const EnableText = euiStyled.section`
   color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   line-height: 1.4;
-  font-size: ${fontSize};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   width: ${px(popoverWidth)};
 `;
 

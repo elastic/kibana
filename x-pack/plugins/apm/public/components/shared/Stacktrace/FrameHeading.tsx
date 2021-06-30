@@ -8,7 +8,6 @@
 import React, { ComponentType } from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
-import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 import {
   CSharpFrameHeadingRenderer,
   DefaultFrameHeadingRenderer,
@@ -21,9 +20,9 @@ import {
 const FileDetails = euiStyled.div`
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
   line-height: 1.5; /* matches the line-hight of the accordion container button */
-  padding: ${px(units.eighth)} 0;
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSize};
+  padding: 2px 0;
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
 const LibraryFrameFileDetail = euiStyled.span`
