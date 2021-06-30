@@ -105,29 +105,37 @@ export class DynamicStyleProperty<T>
     return join ? join.getSourceMetaDataRequestId() : null;
   }
 
-  getRangeFieldMeta() {
+  _getRangeFieldMetaFromLocalFeatures() {
     const style = this._layer.getStyle() as IVectorStyle;
     const styleMeta = style.getStyleMetaFromLocal();
     const fieldName = this.getFieldName();
-    const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
+    return styleMeta.getRangeFieldMetaDescriptor(fieldName);
+  }
 
-    if (!this.isFieldMetaEnabled()) {
-      return rangeFieldMetaFromLocalFeatures;
-    }
-
-    const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
+  _getRangeFieldMetaFromStyleMetaRequest(): RangeFieldMeta | null {
+    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
     if (!dataRequestId) {
-      return rangeFieldMetaFromLocalFeatures;
+      return null;
     }
 
     const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
-      return rangeFieldMetaFromLocalFeatures;
+      return null;
     }
 
     const data = styleMetaDataRequest.getData() as StyleMetaData;
     const rangeFieldMeta = this._pluckOrdinalStyleMetaFromFieldMetaData(data);
-    return rangeFieldMeta ? rangeFieldMeta : rangeFieldMetaFromLocalFeatures;
+    return rangeFieldMeta ? rangeFieldMeta : null;
+  }
+
+  getRangeFieldMeta(): RangeFieldMeta | null {
+    const rangeFieldMetaFromLocalFeatures = this._getRangeFieldMetaFromLocalFeatures();
+    if (!this.isFieldMetaEnabled()) {
+      return rangeFieldMetaFromLocalFeatures;
+    }
+
+    const rangeFieldMetaFromServer = this._getRangeFieldMetaFromStyleMetaRequest();
+    return rangeFieldMetaFromServer ? rangeFieldMetaFromServer : rangeFieldMetaFromLocalFeatures;
   }
 
   getPercentilesFieldMeta() {
@@ -152,29 +160,39 @@ export class DynamicStyleProperty<T>
     return percentilesValuesToFieldMeta(percentiles);
   }
 
-  getCategoryFieldMeta() {
+  _getCategoryFieldMetaFromLocalFeatures() {
     const style = this._layer.getStyle() as IVectorStyle;
     const styleMeta = style.getStyleMetaFromLocal();
     const fieldName = this.getFieldName();
-    const categoryFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
+    return styleMeta.getCategoryFieldMetaDescriptor(fieldName);
+  }
+
+  _getCategoryFieldMetaFromStyleMetaRequest() {
+    const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
+    if (!dataRequestId) {
+      return null;
+    }
+
+    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
+    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
+      return null;
+    }
+
+    const data = styleMetaDataRequest.getData() as StyleMetaData;
+    return this._pluckCategoricalStyleMetaFromFieldMetaData(data);
+  }
+
+  getCategoryFieldMeta(): CategoryFieldMeta | null {
+    const categoryFieldMetaFromLocalFeatures = this._getCategoryFieldMetaFromLocalFeatures();
 
     if (!this.isFieldMetaEnabled()) {
       return categoryFieldMetaFromLocalFeatures;
     }
 
-    const dataRequestId = this._getStyleMetaDataRequestId(fieldName);
-    if (!dataRequestId) {
-      return categoryFieldMetaFromLocalFeatures;
-    }
-
-    const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
-    if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
-      return categoryFieldMetaFromLocalFeatures;
-    }
-
-    const data = styleMetaDataRequest.getData() as StyleMetaData;
-    const categoricalFieldMeta = this._pluckCategoricalStyleMetaFromFieldMetaData(data);
-    return categoricalFieldMeta ? categoricalFieldMeta : categoryFieldMetaFromLocalFeatures;
+    const categoricalFieldMetaFromServer = this._getCategoryFieldMetaFromStyleMetaRequest();
+    return categoricalFieldMetaFromServer
+      ? categoricalFieldMetaFromServer
+      : categoryFieldMetaFromLocalFeatures;
   }
 
   getField() {
