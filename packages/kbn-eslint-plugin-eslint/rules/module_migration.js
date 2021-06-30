@@ -78,6 +78,12 @@ module.exports = {
             disallowedMessage: {
               type: 'string',
             },
+            include: {
+              type: 'array',
+            },
+            exclude: {
+              type: 'array',
+            },
           },
           anyOf: [
             {
@@ -95,7 +101,32 @@ module.exports = {
     ],
   },
   create: (context) => {
-    const mappings = context.options[0];
+    const _mappings = context.options[0];
+    const filename = path.relative(KIBANA_ROOT, context.getFilename());
+
+    const mappings = _mappings.filter((mapping) => {
+      if (mapping.include || mapping.exclude) {
+        if (mapping.include) {
+          let include = false;
+          mapping.include.forEach((rgx) => {
+            if (rgx.test(filename)) {
+              include = true;
+            }
+          });
+          return include;
+        }
+        if (mapping.exclude) {
+          let include = true;
+          mapping.exclude.forEach((rgx) => {
+            if (rgx.test(filename)) {
+              include = false;
+            }
+          });
+          return include;
+        }
+      }
+      return true;
+    });
 
     return {
       ImportDeclaration(node) {

@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-const usesStyledComponents = [
-  /src[\/\\]plugins[\/\\](data|kibana_react)[\/\\]/,
-  /x-pack[\/\\]plugins[\/\\](apm|beats_management|fleet|infra|lists|observability|osquery|security_solution|uptime)[\/\\]/,
-  /x-pack[\/\\]test[\/\\]plugin_functional[\/\\]plugins[\/\\]resolver_test[\/\\]/,
-];
+const { USES_STYLED_COMPONENTS } = require.resolve('@kbn/dev-utils');
 
 module.exports = () => {
   return {
@@ -42,7 +38,7 @@ module.exports = () => {
     },
     overrides: [
       {
-        include: usesStyledComponents,
+        include: USES_STYLED_COMPONENTS,
         plugins: [
           [
             require.resolve('babel-plugin-styled-components'),
@@ -53,7 +49,7 @@ module.exports = () => {
         ],
       },
       {
-        exclude: usesStyledComponents,
+        exclude: USES_STYLED_COMPONENTS,
         presets: [
           [
             require.resolve('@emotion/babel-preset-css-prop'),
