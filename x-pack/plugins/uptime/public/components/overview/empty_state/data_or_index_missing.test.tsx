@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { screen } from '@testing-library/react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { render } from '../../../lib/helper/rtl_helpers';
 import { DataOrIndexMissing } from './data_or_index_missing';
 
 describe('DataOrIndexMissing component', () => {
@@ -19,7 +20,7 @@ describe('DataOrIndexMissing component', () => {
         values={{ indexName: <em>heartbeat-*</em> }}
       />
     );
-    const component = shallowWithIntl(<DataOrIndexMissing headingMessage={headingMessage} />);
-    expect(component).toMatchSnapshot();
+    render(<DataOrIndexMissing headingMessage={headingMessage} />);
+    expect(screen.getByText(/heartbeat-*/)).toBeInTheDocument();
   });
 });
