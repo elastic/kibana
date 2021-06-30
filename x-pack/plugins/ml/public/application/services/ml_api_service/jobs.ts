@@ -160,6 +160,15 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
+  clearJobAuditMessages(jobId: string) {
+    const body = JSON.stringify({ jobId });
+    return httpService.http<{ success: boolean; latest_cleared: number }>({
+      path: `${ML_BASE_PATH}/job_audit_messages/clear_messages`,
+      method: 'PUT',
+      body,
+    });
+  },
+
   deletingJobTasks() {
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/deleting_jobs_tasks`,
