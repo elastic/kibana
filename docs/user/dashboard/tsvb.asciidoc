@@ -127,7 +127,7 @@ IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecate
 It is the default one for new visualizations but it can also be switched for the old implementations:
 
 . Click *Panel options*, then click the gear icon to open the *Index pattern selection mode* options.
-. Switch on the *Use only Kibana index patterns* switch
+. Select *Use only Kibana index patterns*.
 . Reselect the index pattern from the dropdown and the timefield
 
 image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
