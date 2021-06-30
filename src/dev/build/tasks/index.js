@@ -25,6 +25,7 @@ export * from './create_archives_task';
 export * from './create_empty_dirs_and_files_task';
 export * from './create_package_json_task';
 export * from './create_readme_task';
+export * from './hapi_commercial_license';
 export * from './install_dependencies_task';
 export * from './license_file_task';
 export * from './nodejs';

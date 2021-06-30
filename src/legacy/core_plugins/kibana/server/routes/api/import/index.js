@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import Joi from 'joi';
 import { importDashboards } from '../../../lib/import/import_dashboards';
 

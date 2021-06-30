@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import boom from '@hapi/boom';
+import boom from '@commercial/boom';
 import { getUserFactory } from './get_user';
 import { oncePerServer } from './once_per_server';
 

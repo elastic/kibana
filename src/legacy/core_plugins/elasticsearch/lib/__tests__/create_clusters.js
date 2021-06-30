@@ -21,7 +21,7 @@ import expect from 'expect.js';
 import { createClusters } from '../create_clusters';
 import sinon from 'sinon';
 import { partial } from 'lodash';
-import Hapi from '@hapi/hapi';
+import Hapi from '@commercial/hapi';
 
 import * as ClusterNS from '../cluster';
 

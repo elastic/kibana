@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
-import { Server } from '@hapi/hapi';
+import Boom from '@commercial/boom';
+import { Server } from '@commercial/hapi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getTopTraces } from '../lib/traces/get_top_traces';

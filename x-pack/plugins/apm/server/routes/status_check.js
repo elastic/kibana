@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { getServerStatus } from '../lib/status_check/server_check';
 import { getAgentStatus } from '../lib/status_check/agent_check';
 import { setupRequest } from '../lib/helpers/setup_request';

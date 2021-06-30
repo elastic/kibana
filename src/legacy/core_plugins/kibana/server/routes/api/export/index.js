@@ -18,7 +18,7 @@
  */
 
 import { exportDashboards } from '../../../lib/export/export_dashboards';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import Joi from 'joi';
 import moment from 'moment';
 export function exportApi(server) {

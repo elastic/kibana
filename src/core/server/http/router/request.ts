@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request } from '@hapi/hapi';
+import { Request } from '@commercial/hapi';
 import { ObjectType, TypeOf } from '@kbn/config-schema';
 
 import { filterHeaders, Headers } from './headers';

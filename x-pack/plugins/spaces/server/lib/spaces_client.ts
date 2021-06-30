@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { omit } from 'lodash';
 import { isReservedSpace } from '../../common/is_reserved_space';
 import { Space } from '../../common/model/space';

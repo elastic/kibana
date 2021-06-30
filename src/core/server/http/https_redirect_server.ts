@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, ResponseToolkit, Server } from '@hapi/hapi';
+import { Request, ResponseToolkit, Server } from '@commercial/hapi';
 import { format as formatUrl } from 'url';
 
 import { Logger } from '../logging';

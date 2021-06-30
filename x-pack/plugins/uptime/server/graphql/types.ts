@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from '@hapi/hapi';
+import { Request } from '@commercial/hapi';
 import { UMServerLibs } from '../lib/lib';
 
 export interface UMContext {

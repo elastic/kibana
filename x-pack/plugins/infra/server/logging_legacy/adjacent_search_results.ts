@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Boom from '@hapi/boom';
+import * as Boom from '@commercial/boom';
 import { SearchParams } from 'elasticsearch';
 import * as Joi from 'joi';
 

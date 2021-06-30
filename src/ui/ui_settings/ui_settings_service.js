@@ -18,7 +18,7 @@
  */
 
 import { defaultsDeep } from 'lodash';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 

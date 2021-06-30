@@ -7,7 +7,7 @@
 
 
 import fs from 'fs';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { prefixDatafeedId } from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 

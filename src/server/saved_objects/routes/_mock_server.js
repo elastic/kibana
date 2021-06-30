@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Hapi from '@hapi/hapi';
+import Hapi from '@commercial/hapi';
 import { defaultValidationErrorHandler } from '../../../core/server/http/http_tools';
 
 const defaultConfig = {

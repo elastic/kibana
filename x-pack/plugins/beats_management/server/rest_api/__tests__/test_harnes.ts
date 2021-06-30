@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from '@hapi/boom';
+import { badRequest } from '@commercial/boom';
 // @ts-ignore
-import Hapi from '@hapi/hapi';
+import Hapi from '@commercial/hapi';
 import { readFile } from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';

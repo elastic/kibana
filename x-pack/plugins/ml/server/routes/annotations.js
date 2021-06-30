@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 

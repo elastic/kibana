@@ -60,7 +60,7 @@
  * given an empty migrationVersion property {} if no such property exists.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import _ from 'lodash';
 import Semver from 'semver';
 import { MigrationVersion, SavedObjectDoc } from '../../serialization';

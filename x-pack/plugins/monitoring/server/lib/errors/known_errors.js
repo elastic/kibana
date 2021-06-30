@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from '@hapi/boom';
+import { boomify } from '@commercial/boom';
 import { i18n } from '@kbn/i18n';
 /*
  * Check if the given error message is a known "safe" type of error
