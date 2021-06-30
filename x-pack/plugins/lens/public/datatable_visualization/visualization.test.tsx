@@ -38,7 +38,7 @@ const datatableVisualization = getDatatableVisualization({
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
-      expect(datatableVisualization.initialize('aaa', undefined)).toEqual({
+      expect(datatableVisualization.initialize(() => 'aaa', undefined)).toEqual({
         layerId: 'aaa',
         columns: [],
       });
@@ -49,7 +49,7 @@ describe('Datatable Visualization', () => {
         layerId: 'foo',
         columns: [{ columnId: 'saved' }],
       };
-      expect(datatableVisualization.initialize('foo', expectedState)).toEqual(expectedState);
+      expect(datatableVisualization.initialize(() => 'foo', expectedState)).toEqual(expectedState);
     });
   });
 

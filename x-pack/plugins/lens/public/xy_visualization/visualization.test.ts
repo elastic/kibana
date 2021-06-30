@@ -132,7 +132,7 @@ describe('xy_visualization', () => {
 
   describe('#initialize', () => {
     it('loads default state', () => {
-      const initialState = xyVisualization.initialize('l1');
+      const initialState = xyVisualization.initialize(() => 'l1');
 
       expect(initialState.layers).toHaveLength(1);
       expect(initialState.layers[0].xAccessor).not.toBeDefined();
@@ -161,7 +161,7 @@ describe('xy_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize('first', exampleState())).toEqual(exampleState());
+      expect(xyVisualization.initialize(() => 'first', exampleState())).toEqual(exampleState());
     });
   });
 

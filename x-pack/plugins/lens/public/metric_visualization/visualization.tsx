@@ -85,10 +85,10 @@ export const metricVisualization: Visualization<MetricState> = {
 
   getSuggestions,
 
-  initialize(layerId, state) {
+  initialize(addNewLayer, state) {
     return (
       state || {
-        layerId,
+        layerId: addNewLayer(),
         accessor: undefined,
       }
     );

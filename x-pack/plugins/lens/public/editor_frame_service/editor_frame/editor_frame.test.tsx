@@ -662,7 +662,7 @@ describe('editor_frame', () => {
       expect(mockDatasource.publicAPIMock.getTableSpec).toHaveBeenCalled();
       expect(mockVisualization2.getSuggestions).toHaveBeenCalled();
       expect(mockVisualization2.initialize).toHaveBeenCalledWith(
-        expect.any(String), // generated layerId
+        expect.any(Function), // generated layerId
         undefined,
         undefined
       );
