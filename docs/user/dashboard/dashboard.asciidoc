@@ -301,7 +301,7 @@ image:images/Dashboard_inspect.png[Inspect in dashboard]
 [[share-the-dashboard]]
 == Share dashboards
 
-To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information, refer to <<reporting-getting-started,Reporting>>.
+To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
 [float]
 [[import-dashboards]]
