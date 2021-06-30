@@ -2,7 +2,6 @@
 
 exports[`KibanaPageTemplate render basic template 1`] = `
 <EuiPageTemplate
-  paddingSize="l"
   pageHeader={
     Object {
       "description": "test",
@@ -25,7 +24,6 @@ exports[`KibanaPageTemplate render basic template 1`] = `
 
 exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
 <EuiPageTemplate
-  paddingSize="none"
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
@@ -47,7 +45,6 @@ exports[`KibanaPageTemplate render custom empty prompt only 1`] = `
 
 exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
 <EuiPageTemplate
-  paddingSize="l"
   pageHeader={
     Object {
       "description": "test",
@@ -79,7 +76,6 @@ exports[`KibanaPageTemplate render custom empty prompt with page header 1`] = `
 
 exports[`KibanaPageTemplate render default empty prompt 1`] = `
 <EuiPageTemplate
-  paddingSize="none"
   pageSideBarProps={
     Object {
       "className": "kbnPageTemplate__pageSideBar",
@@ -108,7 +104,6 @@ exports[`KibanaPageTemplate render default empty prompt 1`] = `
 
 exports[`KibanaPageTemplate render solutionNav 1`] = `
 <EuiPageTemplate
-  paddingSize="l"
   pageHeader={
     Object {
       "description": "test",
