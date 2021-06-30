@@ -58,7 +58,7 @@ export function estimateCapacity(
     recurring: percentageOfExecutionsUsedByRecurringTasks,
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
   } = capacityStats.runtime.value.execution.persistence;
-  const { overdue, capacity_requirments: capacityRequirments } = workload;
+  const { overdue, capacity_requirements: capacityRequirments } = workload;
   const {
     poll_interval: pollInterval,
     max_workers: maxWorkers,

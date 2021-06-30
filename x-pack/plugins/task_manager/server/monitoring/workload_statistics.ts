@@ -36,7 +36,7 @@ interface RawWorkloadStat extends JsonObject {
   overdue: number;
   overdue_non_recurring: number;
   estimated_schedule_density: number[];
-  capacity_requirments: CapacityRequirments;
+  capacity_requirements: CapacityRequirments;
 }
 
 export interface WorkloadStat extends RawWorkloadStat {
@@ -277,7 +277,7 @@ export function createWorkloadAggregator(
           pollInterval,
           scheduleDensity
         ),
-        capacity_requirments: {
+        capacity_requirements: {
           per_minute: cadence.perMinute,
           per_hour: cadence.perHour,
           per_day: cadence.perDay,
