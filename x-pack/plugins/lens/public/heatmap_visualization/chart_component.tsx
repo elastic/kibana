@@ -40,14 +40,15 @@ declare global {
 }
 
 function getStops(
-  { colors, stops, range, rangeMin, rangeMax }: CustomPaletteState,
+  { colors, stops, range }: CustomPaletteState,
   { min, max }: { min: number; max: number }
 ) {
   if (stops.length) {
     return stops.slice(0, stops.length - 1);
   }
-  const maxValue = range === 'percent' ? rangeMax : max;
-  const minValue = range === 'percent' ? rangeMin : min;
+  // Do not use relative values here
+  const maxValue = range === 'percent' ? 100 : max;
+  const minValue = range === 'percent' ? 0 : min;
   const step = (maxValue - minValue) / colors.length;
   return colors.slice(0, colors.length - 1).map((_, i) => minValue + (i + 1) * step);
 }
@@ -62,20 +63,20 @@ function shiftAndNormalizeStops(
   { min, max }: { min: number; max: number }
 ) {
   // data min is the fallback in case of default options
-  return [
-    params.stops.length || params.range === 'percent' ? params.rangeMin : min,
-    ...getStops(params, { min, max }),
-  ].map((value) => {
-    let result = value;
-    if (params.range === 'percent') {
-      result = min + ((max - min) * value) / 100;
+  const absMin = params.range === 'percent' ? 0 : min;
+  return [params.stops.length ? params.rangeMin : absMin, ...getStops(params, { min, max })].map(
+    (value) => {
+      let result = value;
+      if (params.range === 'percent') {
+        result = min + ((max - min) * value) / 100;
+      }
+      // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
+      if (Number.isNaN(result)) {
+        return 1;
+      }
+      return Number(result.toFixed(2));
     }
-    // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
-    if (Number.isNaN(result)) {
-      return 1;
-    }
-    return Number(result.toFixed(2));
-  });
+  );
 }
 
 function computeColorRanges(

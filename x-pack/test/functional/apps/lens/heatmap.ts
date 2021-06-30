@@ -153,5 +153,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '16948.55', name: '> 16,948.55', color: '#cc5642' },
       ]);
     });
+
+    it('should not change when passing from number to percent', async () => {
+      await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_percent');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const debugState = await PageObjects.lens.getCurrentChartDebugState();
+
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
+
+      // assert legend has changed
+      expect(debugState.legend!.items).to.eql([
+        { key: '5722.77', name: '> 5,722.77', color: '#209280' },
+        { key: '8529.22', name: '> 8,529.22', color: '#54b399' },
+        { key: '11335.66', name: '> 11,335.66', color: '#d6bf57' },
+        { key: '14142.11', name: '> 14,142.11', color: '#e7664c' },
+        { key: '16948.55', name: '> 16,948.55', color: '#cc5642' },
+      ]);
+    });
   });
 }
