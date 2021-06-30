@@ -50,6 +50,7 @@ jest.mock('../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn(),
   useDeepEqualSelector: jest.fn(),
 }));
+jest.mock('../../../common/hooks/use_invalid_filter_query.tsx');
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 const timelineId = TimelineId.active;
