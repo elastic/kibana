@@ -79,7 +79,7 @@ export const EndpointActivityLog = memo(
 
     return (
       <>
-        <EuiFlexGroup direction="column" style={{ height: '85vh' }}>
+        <EuiFlexGroup direction="column" style={{ height: '85vh' }} responsive={false}>
           {(activityLogLoaded && !activityLogSize) || activityLogError ? (
             <EuiFlexItem>
               <EuiEmptyPrompt
