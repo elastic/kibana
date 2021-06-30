@@ -41,7 +41,7 @@ export class LocatorClient implements ILocatorClient {
    * @param id ID of a URL locator.
    * @returns A public interface of a registered URL locator.
    */
-  public get<P>(id: string): undefined | LocatorPublic<P> {
+  public get<P extends SerializableState>(id: string): undefined | LocatorPublic<P> {
     return this.locators.get(id);
   }
 }
