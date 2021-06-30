@@ -9,6 +9,7 @@ import { Route, Switch } from 'react-router-dom';
 
 import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
 import { RULES_PATH, SecurityPageName } from '../../common/constants';
+import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detections/pages/detection_engine/rules';
 import { CreateRulePage } from '../detections/pages/detection_engine/rules/create';
 import { RuleDetailsPage } from '../detections/pages/detection_engine/rules/details';
@@ -18,39 +19,41 @@ const RulesSubRoutes = [
   {
     path: '/rules/id/:detailName/edit',
     main: EditRulePage,
+    exact: true,
   },
   {
     path: '/rules/id/:detailName',
     main: RuleDetailsPage,
+    exact: true,
   },
   {
     path: '/rules/create',
     main: CreateRulePage,
+    exact: true,
   },
   {
     path: '/rules',
-    exact: true,
     main: RulesPage,
+    exact: true,
   },
 ];
 
-export const RulesRoutes = () => {
-  return (
-    <TrackApplicationView viewId={SecurityPageName.rules}>
-      <Switch>
-        {RulesSubRoutes.map((route, index) => (
-          <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
-            <route.main />
-          </Route>
-        ))}
-      </Switch>
-    </TrackApplicationView>
-  );
-};
+const renderRulesRoutes = () => (
+  <TrackApplicationView viewId={SecurityPageName.rules}>
+    <Switch>
+      {RulesSubRoutes.map((route, index) => (
+        <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
+          <route.main />
+        </Route>
+      ))}
+      <Route component={NotFoundPage} />
+    </Switch>
+  </TrackApplicationView>
+);
 
 export const routes = [
   {
     path: RULES_PATH,
-    render: RulesRoutes,
+    render: renderRulesRoutes,
   },
 ];
