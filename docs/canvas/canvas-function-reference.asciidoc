@@ -411,7 +411,7 @@ This prints the `datatable` objects in the browser console before and after the 
 === `createTable`
 
 Creates a datatable with a list of columns, and 1 or more empty rows.
-To populate the rows, use <<mapColumn_Fn>> or <<mathColumnFn>>.
+To populate the rows, use <<mapColumn_fn>> or <<mathColumn_fn>>.
 
 [cols="3*^<"]
 |===
