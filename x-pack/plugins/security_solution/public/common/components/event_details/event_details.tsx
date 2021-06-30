@@ -51,7 +51,7 @@ export enum EventsViewType {
 
 interface Props {
   browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[];
+  data: TimelineEventsDetailsItem[] | null;
   id: string;
   isAlert: boolean;
   timelineTabType: TimelineTabs | 'flyout';
@@ -136,7 +136,7 @@ const EventDetailsComponent: React.FC<Props> = ({
               <>
                 <AlertSummaryView
                   {...{
-                    data,
+                    data: data ?? [],
                     eventId: id,
                     browserFields,
                     timelineId,
@@ -208,7 +208,7 @@ const EventDetailsComponent: React.FC<Props> = ({
           <EuiSpacer size="l" />
           <EventFieldsBrowser
             browserFields={browserFields}
-            data={data}
+            data={data ?? []}
             eventId={id}
             timelineId={timelineId}
             timelineTabType={timelineTabType}
