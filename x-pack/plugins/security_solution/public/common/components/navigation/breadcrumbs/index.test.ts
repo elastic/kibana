@@ -14,7 +14,6 @@ import { TabNavigationProps } from '../tab_navigation/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
-// import { AdministrationSubTab } from '../types';
 
 const setBreadcrumbsMock = jest.fn();
 const chromeMock = {
