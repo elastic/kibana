@@ -12,4 +12,4 @@ export type PrimaryNavigationItemsProps = Omit<
   'pathName' | 'pageName' | 'tabName'
 > & { selectedTabId: string };
 
-export type PrimaryNavigationProps = Omit<TabNavigationProps, 'pathName' | 'tabName'>;
+export type PrimaryNavigationProps = Omit<TabNavigationProps, 'pathName'>;

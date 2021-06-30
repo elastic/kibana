@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { EndpointDetailsActivityLogChanged, EndpointPendingActionsStateChanged } from './action';
+import {
+  EndpointDetailsActivityLogChanged,
+  EndpointPackageInfoStateChanged,
+  EndpointPendingActionsStateChanged,
+} from './action';
 import {
   isOnEndpointPage,
   hasSelectedEndpoint,
@@ -63,6 +67,16 @@ const handleEndpointPendingActionsStateChanged: CaseReducer<EndpointPendingActio
     };
   }
   return state;
+};
+
+const handleEndpointPackageInfoStateChanged: CaseReducer<EndpointPackageInfoStateChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    endpointPackageInfo: action.payload,
+  };
 };
 
 /* eslint-disable-next-line complexity */
@@ -231,11 +245,8 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...state,
       policyItemsLoading: false,
     };
-  } else if (action.type === 'serverReturnedEndpointPackageInfo') {
-    return {
-      ...state,
-      endpointPackageInfo: action.payload,
-    };
+  } else if (action.type === 'endpointPackageInfoStateChanged') {
+    return handleEndpointPackageInfoStateChanged(state, action);
   } else if (action.type === 'serverReturnedEndpointExistValue') {
     return {
       ...state,
