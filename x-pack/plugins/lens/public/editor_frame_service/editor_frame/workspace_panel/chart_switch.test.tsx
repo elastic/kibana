@@ -242,7 +242,7 @@ describe('chart_switch', () => {
     );
 
     switchTo('visB', instance);
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'a');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a'); // from preloaded state
     expect(lensStore.dispatch).toHaveBeenCalledWith({
       type: 'lens/switchVisualization',
       payload: {
@@ -498,6 +498,7 @@ describe('chart_switch', () => {
     const frame = mockFrame(['a', 'b', 'c']);
     const datasourceMap = mockDatasourceMap();
     datasourceMap.testDatasource.getLayers.mockReturnValue(['a', 'b', 'c']);
+    const datasourceStates = mockDatasourceStates();
 
     const { instance, lensStore } = await mountWithProvider(
       <ChartSwitch
@@ -507,6 +508,7 @@ describe('chart_switch', () => {
       />,
       {
         preloadedState: {
+          datasourceStates,
           visualization: {
             activeId: 'visA',
             state: {},
@@ -516,7 +518,7 @@ describe('chart_switch', () => {
     );
 
     switchTo('visB', instance);
-    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'a');
+    expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith({}, 'a');
     expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'b');
     expect(datasourceMap.testDatasource.removeLayer).toHaveBeenCalledWith(undefined, 'c');
     expect(visualizations.visB.getSuggestions).toHaveBeenCalledWith(

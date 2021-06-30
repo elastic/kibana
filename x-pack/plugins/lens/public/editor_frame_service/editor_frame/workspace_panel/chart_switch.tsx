@@ -234,19 +234,16 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
       subVisualizationId,
       dataLoss,
       getVisualizationState: topSuggestion
-        ? () => {
-            const layerId = addNewLayer();
-            return switchVisType(
+        ? () =>
+            switchVisType(
               subVisualizationId,
-              newVisualization.initialize(layerId, topSuggestion.visualizationState)
-            );
-          }
-        : () => {
-            const layerId = addNewLayer();
-            return switchVisType(
+              newVisualization.initialize(addNewLayer, topSuggestion.visualizationState)
+            )
+        : () =>
+            switchVisType(
               subVisualizationId,
               newVisualization.initialize(
-                layerId,
+                addNewLayer,
                 visualization.activeId === newVisualization.id ? visualization.state : undefined,
                 visualization.activeId &&
                   props.visualizationMap[visualization.activeId].getMainPalette
@@ -255,8 +252,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                     )
                   : undefined
               )
-            );
-          },
+            ),
       keptLayerIds: topSuggestion ? topSuggestion.keptLayerIds : [],
       datasourceState: topSuggestion ? topSuggestion.datasourceState : undefined,
       datasourceId: topSuggestion ? topSuggestion.datasourceId : undefined,
@@ -464,7 +460,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {
-            const chosenType = newOptions.find(({ checked }) => checked === 'on')!;
+            const chosenType = newOptions.find(({ checked }) => checked === 'on');
             if (!chosenType) {
               return;
             }

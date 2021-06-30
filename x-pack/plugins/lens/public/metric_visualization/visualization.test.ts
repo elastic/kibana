@@ -34,7 +34,7 @@ describe('metric_visualization', () => {
   describe('#initialize', () => {
     it('loads default state', () => {
       (generateId as jest.Mock).mockReturnValueOnce('test-id1');
-      const initialState = metricVisualization.initialize('test-id1');
+      const initialState = metricVisualization.initialize(() => 'test-id1');
 
       expect(initialState.accessor).not.toBeDefined();
       expect(initialState).toMatchInlineSnapshot(`
@@ -46,7 +46,7 @@ describe('metric_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(metricVisualization.initialize('l1', exampleState())).toEqual(exampleState());
+      expect(metricVisualization.initialize(() => 'l1', exampleState())).toEqual(exampleState());
     });
   });
 

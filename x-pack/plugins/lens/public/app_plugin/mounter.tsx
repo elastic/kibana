@@ -369,7 +369,7 @@ export function loadInitialStore(
         if (visualization.state === null && activeVisualization) {
           const newLayerId = generateId();
 
-          const initialVisualizationState = activeVisualization.initialize(newLayerId);
+          const initialVisualizationState = activeVisualization.initialize(() => newLayerId);
           lensStore.dispatch(
             updateLayer({
               datasourceId: activeDatasourceId!,

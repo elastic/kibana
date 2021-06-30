@@ -49,7 +49,7 @@ describe('heatmap', () => {
 
   describe('#intialize', () => {
     test('returns a default state', () => {
-      expect(getHeatmapVisualization({}).initialize('l1')).toEqual({
+      expect(getHeatmapVisualization({}).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
         title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
@@ -68,7 +68,7 @@ describe('heatmap', () => {
     });
 
     test('returns persisted state', () => {
-      expect(getHeatmapVisualization({}).initialize('test-layer', exampleState())).toEqual(
+      expect(getHeatmapVisualization({}).initialize(() => 'test-layer', exampleState())).toEqual(
         exampleState()
       );
     });

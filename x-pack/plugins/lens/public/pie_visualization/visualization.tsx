@@ -91,11 +91,11 @@ export const getPieVisualization = ({
     shape: visualizationTypeId as PieVisualizationState['shape'],
   }),
 
-  initialize(layerId, state, mainPalette) {
+  initialize(addNewLayer, state, mainPalette) {
     return (
       state || {
         shape: 'donut',
-        layers: [newLayerState(layerId)],
+        layers: [newLayerState(addNewLayer())],
         palette: mainPalette,
       }
     );
