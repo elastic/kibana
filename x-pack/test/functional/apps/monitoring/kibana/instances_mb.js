@@ -25,6 +25,8 @@ export default function ({ getService, getPageObjects }) {
         }
       );
 
+      await clusterOverview.closeAlertsModal();
+
       // go to kibana instances
       await clusterOverview.clickKibanaInstances();
       expect(await instances.isOnInstances()).to.be(true);

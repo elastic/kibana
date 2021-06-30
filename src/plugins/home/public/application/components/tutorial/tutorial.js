@@ -300,6 +300,7 @@ class TutorialUi extends React.Component {
           setParameter={this.setParameter}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
           key={index}
+          isCloudEnabled={this.props.isCloudEnabled}
         />
       );
     });

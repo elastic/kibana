@@ -187,7 +187,8 @@ so they can properly protect the data within their clusters.
 
 
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
-|Replaces the legacy ui/share module for registering share context menus.
+|The share plugin contains various utilities for displaying sharing context menu,
+generating deep links to other apps, and creating short URLs.
 
 
 |{kib-repo}blob/{branch}/src/plugins/spaces_oss/README.md[spacesOss]

@@ -178,8 +178,14 @@ export const getCaseIdsFromAlertId = async ({
  *
  * @param host id
  */
-export const getHostMetadata = async ({ agentId }: { agentId: string }): Promise<HostInfo> =>
+export const getHostMetadata = async ({
+  agentId,
+  signal,
+}: {
+  agentId: string;
+  signal?: AbortSignal;
+}): Promise<HostInfo> =>
   KibanaServices.get().http.fetch<HostInfo>(
     resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
-    { method: 'get' }
+    { method: 'GET', signal }
   );

@@ -52,6 +52,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showSpacer?: boolean;
   timelineId?: string;
+  toggleTopN?: () => void;
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -74,6 +75,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   showSpacer = true,
   timelineId,
   to,
+  toggleTopN,
 }) => {
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ID}-${uuid.v4()}`, []);
@@ -94,7 +96,8 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   const goToHostEvents = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
+      navigateToApp(APP_ID, {
+        deepLinkId: SecurityPageName.hosts,
         path: getTabsOnHostsUrl(HostsTableType.events, urlSearch),
       });
     },
@@ -164,6 +167,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       headerChildren={headerContent}
       id={uniqueQueryId}
       indexNames={indexNames}
+      onError={toggleTopN}
       setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}

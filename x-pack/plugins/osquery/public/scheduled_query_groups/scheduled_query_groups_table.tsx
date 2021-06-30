@@ -6,6 +6,7 @@
  */
 
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -37,6 +38,13 @@ const ScheduledQueryGroupsTableComponent = () => {
 
   const renderActive = useCallback((_, item) => <ActiveStateSwitch item={item} />, []);
 
+  const renderUpdatedAt = useCallback((updatedAt, item) => {
+    if (!updatedAt) return '-';
+
+    const updatedBy = item.updated_by !== item.created_by ? ` @ ${item.updated_by}` : '';
+    return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
+  }, []);
+
   const columns: Array<EuiBasicTableColumn<PackagePolicy>> = useMemo(
     () => [
       {
@@ -67,6 +75,21 @@ const ScheduledQueryGroupsTableComponent = () => {
         width: '150px',
       },
       {
+        field: 'created_by',
+        name: i18n.translate('xpack.osquery.scheduledQueryGroups.table.createdByColumnTitle', {
+          defaultMessage: 'Created by',
+        }),
+        sortable: true,
+        truncateText: true,
+      },
+      {
+        field: 'updated_at',
+        name: 'Last updated',
+        sortable: (item) => (item.updated_at ? Date.parse(item.updated_at) : 0),
+        truncateText: true,
+        render: renderUpdatedAt,
+      },
+      {
         field: 'enabled',
         name: i18n.translate('xpack.osquery.scheduledQueryGroups.table.activeColumnTitle', {
           defaultMessage: 'Active',
@@ -77,7 +100,7 @@ const ScheduledQueryGroupsTableComponent = () => {
         render: renderActive,
       },
     ],
-    [renderActive, renderAgentPolicy, renderQueries]
+    [renderActive, renderAgentPolicy, renderQueries, renderUpdatedAt]
   );
 
   const sorting = useMemo(

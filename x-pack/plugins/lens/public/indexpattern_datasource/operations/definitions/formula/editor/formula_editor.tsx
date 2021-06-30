@@ -24,7 +24,7 @@ import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
 import { CodeEditor } from '../../../../../../../../../src/plugins/kibana_react/public';
 import type { CodeEditorProps } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { useDebounceWithOptions } from '../../../../../shared_components';
+import { TooltipWrapper, useDebounceWithOptions } from '../../../../../shared_components';
 import { ParamEditorProps } from '../../index';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
@@ -729,11 +729,16 @@ export function FormulaEditor({
                       </EuiLink>
                     </EuiToolTip>
                   ) : (
-                    <EuiToolTip
-                      content={i18n.translate('xpack.lens.formula.editorHelpOverlayToolTip', {
-                        defaultMessage: 'Function reference',
-                      })}
+                    <TooltipWrapper
+                      tooltipContent={i18n.translate(
+                        'xpack.lens.formula.editorHelpOverlayToolTip',
+                        {
+                          defaultMessage: 'Function reference',
+                        }
+                      )}
+                      condition={!isHelpOpen}
                       position="top"
+                      delay="regular"
                     >
                       <EuiPopover
                         panelClassName="lnsFormula__docs lnsFormula__docs--overlay"
@@ -745,7 +750,12 @@ export function FormulaEditor({
                         button={
                           <EuiButtonIcon
                             className="lnsFormula__editorHelp lnsFormula__editorHelp--overlay"
-                            onClick={() => setIsHelpOpen(!isHelpOpen)}
+                            onClick={() => {
+                              if (!isHelpOpen) {
+                                trackUiEvent('open_formula_popover');
+                              }
+                              setIsHelpOpen(!isHelpOpen);
+                            }}
                             iconType="documentation"
                             color="text"
                             size="s"
@@ -764,7 +774,7 @@ export function FormulaEditor({
                           operationDefinitionMap={visibleOperationsMap}
                         />
                       </EuiPopover>
-                    </EuiToolTip>
+                    </TooltipWrapper>
                   )}
                 </EuiFlexItem>
 
