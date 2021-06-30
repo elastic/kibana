@@ -16,6 +16,7 @@ import {
   EuiListGroupItem,
   EuiShowFor,
   EuiText,
+  EuiCollapsibleNavProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
