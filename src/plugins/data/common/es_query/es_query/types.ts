@@ -14,6 +14,9 @@ export interface IFieldSubType {
 }
 export interface IndexPatternFieldBase {
   name: string;
+  /**
+   * Kibana field type
+   */
   type: string;
   subType?: IFieldSubType;
   /**
