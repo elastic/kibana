@@ -17,6 +17,7 @@ import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import {
   AlertCommentRequestRt,
+  ActionsCommentRequestRt,
   CASE_SAVED_OBJECT,
   CaseConnector,
   CaseStatuses,
@@ -35,12 +36,15 @@ import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlertOrGenAlert,
   isCommentRequestTypeUser,
+  isCommentRequestTypeActions,
   SavedObjectFindOptionsKueryNode,
 } from '../common';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
+  } else if (isCommentRequestTypeActions(comment)) {
+    pipe(excess(ActionsCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeAlertOrGenAlert(comment)) {
     pipe(excess(AlertCommentRequestRt).decode(comment), fold(throwErrors(badRequest), identity));
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
