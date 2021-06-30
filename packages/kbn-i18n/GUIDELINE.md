@@ -18,7 +18,10 @@ Ids should end with:
 - AriaLabel (if it's `aria-label` tag attribute),
 - ErrorMessage (if it's an error message),
 - LinkText (if it's `<a>` tag),
-- ToggleSwitch and etc.
+- ToggleSwitch
+- `.markdown` (if it's markdown)
+
+For markdown, do not include the actual markdown identifiers `#`, `*`, `_` etc.
 
 There is one more complex case, when we have to divide a single expression into different labels.
 
@@ -384,6 +387,12 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
   `The following dialogue box indicates progress. You can close it and the process will continue to run in the background.`
 
   If this group of sentences is separated it’s possible that the context of the `'it'` in `'close it'` will be lost.
+
+### Large paragraphs
+
+Try to avoid having to use large paragraphs of text. These are difficult to maintain and often need slight changes when the information they portray becomes out of date. 
+
+If you have absolutely no choice, we can split paragraphs into a _few_ i18n chunks whenever it makes sense to do so. Similar principles of splitting sentences apply here. Each chunk on it's own should convey the context of the information.
 
 ### Unit tests
 
