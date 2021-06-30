@@ -8,7 +8,6 @@
 import {
   ExecutionContextService,
   InternalExecutionContextSetup,
-  KibanaServerExecutionContext,
 } from './execution_context_service';
 import { mockCoreContext } from '../core_context.mock';
 
