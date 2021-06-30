@@ -17,7 +17,7 @@ import { HeaderSection } from '../header_section';
 import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
-import { useMatrixHistogram } from '../../containers/matrix_histogram';
+import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
 import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
 import { InspectButtonContainer } from '../inspect';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
@@ -40,6 +40,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     id: string;
     legendPosition?: Position;
     mapping?: MatrixHistogramMappingTypes;
+    onError?: () => void;
     showSpacer?: boolean;
     setQuery: GlobalTimeArgs['setQuery'];
     setAbsoluteRangeDatePickerTarget?: InputsModelId;
@@ -77,6 +78,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   isPtrIncluded,
   legendPosition,
   mapping,
+  onError,
   panelHeight = DEFAULT_PANEL_HEIGHT,
   setAbsoluteRangeDatePickerTarget = 'global',
   setQuery,
@@ -133,17 +135,22 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [defaultStackByOption, stackByOptions]
   );
 
-  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogram({
+  const matrixHistogramRequest = {
     endDate,
     errorMessage,
     filterQuery,
     histogramType,
     indexNames,
+    onError,
     startDate,
     stackByField: selectedStackByOption.value,
     isPtrIncluded,
     docValueFields,
-  });
+  };
+
+  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogramCombined(
+    matrixHistogramRequest
+  );
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -208,6 +215,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             title={titleWithStackByField}
             titleSize={titleSize}
             subtitle={subtitleWithCounts}
+            inspectMultiple
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
