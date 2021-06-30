@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
+import { ViewMode } from '../../../../src/plugins/embeddable/public';
 import {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -193,6 +194,7 @@ export const App = (props: {
                 </EuiFlexGroup>
                 <LensComponent
                   id=""
+                  withActions
                   style={{ height: 500 }}
                   timeRange={time}
                   attributes={getLensAttributes(props.defaultIndexPattern, color)}
@@ -211,6 +213,7 @@ export const App = (props: {
                   onTableRowClick={(_data) => {
                     // call back event for on table row click event
                   }}
+                  viewMode={ViewMode.VIEW}
                 />
                 {isSaveModalVisible && (
                   <LensSaveModalComponent

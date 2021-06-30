@@ -274,6 +274,110 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     });
   });
+
+  it('Returns the dataset for osquery_manager package', async () => {
+    getPackageInfoMock.mockResolvedValueOnce({
+      format_version: '1.0.0',
+      name: 'osquery_manager',
+      title: 'Osquery Manager',
+      version: '0.3.0',
+      license: 'basic',
+      description:
+        'Centrally manage osquery deployments, run live queries, and schedule recurring queries',
+      type: 'integration',
+      release: 'beta',
+      categories: ['security', 'os_system', 'config_management'],
+      icons: [
+        {
+          src: '/img/logo_osquery.svg',
+          title: 'logo osquery',
+          size: '32x32',
+          type: 'image/svg+xml',
+        },
+      ],
+      owner: { github: 'elastic/integrations' },
+      readme: '/package/osquery_manager/0.3.0/docs/README.md',
+      data_streams: [
+        {
+          dataset: 'osquery_manager.result',
+          package: 'osquery_manager',
+          ingest_pipeline: 'default',
+          path: 'result',
+          streams: [],
+          title: 'Osquery Manager queries',
+          type: 'logs',
+          release: 'experimental',
+        },
+      ],
+      latestVersion: '0.3.0',
+      removable: true,
+      notice: undefined,
+      status: 'not_installed',
+      assets: {
+        kibana: {
+          dashboard: [],
+          visualization: [],
+          search: [],
+          index_pattern: [],
+          map: [],
+          lens: [],
+          security_rule: [],
+          ml_module: [],
+        },
+        elasticsearch: {
+          component_template: [],
+          ingest_pipeline: [],
+          ilm_policy: [],
+          transform: [],
+          index_template: [],
+          data_stream_ilm_policy: [],
+        },
+      },
+    });
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: '12345',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'osquery_manager', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'osquery_manager',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        output_id: '',
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    expect(permissions).toMatchObject({
+      'test-policy': {
+        indices: [
+          {
+            names: ['logs-osquery_manager.result-test'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('getDataStreamPermissions()', () => {

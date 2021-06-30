@@ -38,8 +38,7 @@ export interface RoleMapping {
   };
 }
 
-const productNames = [APP_SEARCH_PLUGIN.NAME, WORKPLACE_SEARCH_PLUGIN.NAME] as const;
-export type ProductName = typeof productNames[number];
+export type ProductName = typeof APP_SEARCH_PLUGIN.NAME | typeof WORKPLACE_SEARCH_PLUGIN.NAME;
 
 export interface Invitation {
   email: string;

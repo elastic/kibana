@@ -12,6 +12,8 @@ import { shallow, mount } from 'enzyme';
 import '../../../common/mock/match_media';
 import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { TestProviders } from '../../../common/mock';
+import { SecurityPageName } from '../../../app/types';
+
 import { AlertsHistogramPanel, buildCombinedQueries, parseCombinedQueries } from './index';
 import * as helpers from './helpers';
 
@@ -83,7 +85,10 @@ describe('AlertsHistogramPanel', () => {
           preventDefault: jest.fn(),
         });
 
-      expect(mockNavigateToApp).toBeCalledWith('securitySolution:detections', { path: '' });
+      expect(mockNavigateToApp).toBeCalledWith('securitySolution', {
+        deepLinkId: SecurityPageName.alerts,
+        path: '',
+      });
     });
   });
 

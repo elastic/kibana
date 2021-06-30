@@ -9,13 +9,12 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiPageContent, EuiButton, EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
-import { extractQueryParams, SectionLoading } from '../../../../shared_imports';
+import { extractQueryParams, PageLoading, PageError } from '../../../../shared_imports';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { API_STATUS, UIM_FOLLOWER_INDEX_LIST_LOAD } from '../../../constants';
-import { SectionError, SectionUnauthorized } from '../../../components';
 import { FollowerIndicesTable, DetailPanel } from './components';
 
 const REFRESH_RATE_MS = 30000;
@@ -89,7 +88,12 @@ export class FollowerIndicesList extends PureComponent {
 
   renderEmpty() {
     return (
-      <section>
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
         <EuiEmptyPrompt
           iconType="managementApp"
           data-test-subj="emptyPrompt"
@@ -123,20 +127,18 @@ export class FollowerIndicesList extends PureComponent {
             </EuiButton>
           }
         />
-      </section>
+      </EuiPageContent>
     );
   }
 
   renderLoading() {
     return (
-      <section data-test-subj="followerIndexLoading">
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
-            defaultMessage="Loading follower indices..."
-          />
-        </SectionLoading>
-      </section>
+      <PageLoading>
+        <FormattedMessage
+          id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
+          defaultMessage="Loading follower indices..."
+        />
+      </PageLoading>
     );
   }
 
@@ -171,19 +173,22 @@ export class FollowerIndicesList extends PureComponent {
 
     if (!isAuthorized) {
       return (
-        <SectionUnauthorized
+        <PageError
           title={
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexList.permissionErrorTitle"
               defaultMessage="Permission error"
             />
           }
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexList.noPermissionText"
-            defaultMessage="You do not have permission to view or add follower indices."
-          />
-        </SectionUnauthorized>
+          error={{
+            error: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.noPermissionText"
+                defaultMessage="You do not have permission to view or add follower indices."
+              />
+            ),
+          }}
+        />
       );
     }
 
@@ -195,7 +200,7 @@ export class FollowerIndicesList extends PureComponent {
         }
       );
 
-      return <SectionError title={title} error={apiError} />;
+      return <PageError title={title} error={apiError.body} />;
     }
 
     if (isEmpty) {
