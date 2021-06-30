@@ -14,6 +14,7 @@ import {
   Append,
   Bytes,
   Circle,
+  CommunityId,
   Convert,
   CSV,
   DateProcessor,
@@ -123,6 +124,20 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values: {
           field,
         },
+      }),
+  },
+  community_id: {
+    FieldsComponent: CommunityId,
+    docLinkPath: '/community-id-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.communityId', {
+      defaultMessage: 'Community id',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.communityId', {
+      defaultMessage: 'Computes the Community ID for network flow data.',
+    }),
+    getDefaultDescription: () =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.communityId', {
+        defaultMessage: 'Computes the Community ID for network flow data.',
       }),
   },
   convert: {

@@ -1,0 +1,288 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { FieldsConfig, from } from './shared';
+import { TargetField } from './common_fields/target_field';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import {
+  FIELD_TYPES,
+  useFormData,
+  SerializerFunc,
+  UseField,
+  Field,
+  NumericField,
+  fieldFormatters,
+  fieldValidators
+} from '../../../../../../shared_imports';
+
+const seedBoundriesValidator = {
+  max: fieldValidators.numberSmallerThanField({
+    than: 65535,
+    allowEquality: true,
+    message: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError',
+      { defaultMessage: 'This number must be less or equal than 65535.' }
+    ),
+  }),
+  min: fieldValidators.numberGreaterThanField({
+    than: 0,
+    allowEquality: true,
+    message: i18n.translate(
+      'xpack.ingestPipelines.pipelineEditor.communityId.seedMinNumberError',
+      { defaultMessage: 'This number must be greater or equals than 0.' }
+    ),
+  }),
+};
+
+const fieldsConfig: FieldsConfig = {
+  source_ip: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.sourceIpLabel', {
+      defaultMessage: 'Source IP (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.sourceIpHelpText"
+        defaultMessage="Field containing the source IP address."
+      />
+    ),
+  },
+  source_port: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.sourcePortLabel', {
+      defaultMessage: 'Source port (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.sourcePortHelpText"
+        defaultMessage="Field containing the source port."
+      />
+    ),
+  },
+  destination_ip: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.destinationIpLabel', {
+      defaultMessage: 'Destination IP (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.destinationIpHelpText"
+        defaultMessage="Field containing the destination IP address."
+      />
+    ),
+  },
+  destination_port: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.destinationPortLabel', {
+      defaultMessage: 'Destination port (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.destinationPortHelpText"
+        defaultMessage="Field containing the destination port."
+      />
+    ),
+  },
+  icmp_type: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeLabel', {
+      defaultMessage: 'ICMP type (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeHelpText"
+        defaultMessage="Field containing the destination ICMP type."
+      />
+    ),
+  },
+  icmp_code: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.icmpCodeLabel', {
+      defaultMessage: 'ICMP code (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.icmpCodeHelpText"
+        defaultMessage="Field containing the ICMP code."
+      />
+    ),
+  },
+  iana_number: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.ianaLabel', {
+      defaultMessage: 'IANA number (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.ianaNumberHelpText"
+        defaultMessage="Field containing the IANA number."
+      />
+    ),
+  },
+  transport: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.transportLabel', {
+      defaultMessage: 'Transport (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.transportHelpText"
+        defaultMessage="Field containing the transport protocol."
+      />
+    ),
+  },
+  seed: {
+    type: FIELD_TYPES.NUMBER,
+    formatters: [fieldFormatters.toInt],
+    serializer: from.undefinedIfValue(0),
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedLabel', {
+      defaultMessage: 'Seed (optional)',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.communityId.seedHelpText"
+        defaultMessage="Seed for the community ID hash."
+      />
+    ),
+    validations: [{
+      validator: (field) => {
+        if (field.value) {
+          return seedBoundriesValidator.max(field) ?? seedBoundriesValidator.min(field);
+        }
+      },
+    }],
+  },
+};
+
+/*
+  iana_number defaults to network.iana_number, not required
+  if defined, also show transport => default to network.transport not required
+*/
+export const CommunityId: FunctionComponent = () => {
+  const [{ fields }] = useFormData({ watch: 'fields.iana_number' });
+
+  return (
+    <>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            config={fieldsConfig.source_ip}
+            component={Field}
+            path="fields.source_ip"
+            data-test-subj="sourceIpField"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UseField
+            config={fieldsConfig.source_port}
+            component={Field}
+            path="fields.source_port"
+            data-test-subj="sourcePortField"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            config={fieldsConfig.destination_ip}
+            component={Field}
+            path="fields.destination_ip"
+            data-test-subj="destinationIpField"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UseField
+            config={fieldsConfig.destination_port}
+            component={Field}
+            path="fields.destination_port"
+            data-test-subj="destinationPortField"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            config={fieldsConfig.icmp_type}
+            component={Field}
+            path="fields.icmp_type"
+            data-test-subj="icmpTypeField"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UseField
+            config={fieldsConfig.icmp_code}
+            component={Field}
+            path="fields.icmp_code"
+            data-test-subj="icmpCodeField"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            config={fieldsConfig.iana_number}
+            component={Field}
+            path="fields.iana_number"
+            data-test-subj="ianaField"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {fields?.iana_number &&
+            <UseField
+              config={fieldsConfig.transport}
+              component={Field}
+              path="fields.transport"
+              data-test-subj="transportField"
+            />
+          }
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <UseField
+        config={fieldsConfig.seed}
+        component={NumericField}
+        path="fields.seed"
+        data-test-subj="seedField"
+      />
+
+      <TargetField
+        helpText={
+          <FormattedMessage
+            id="xpack.ingestPipelines.pipelineEditor.communityId.targetFieldHelpText"
+            defaultMessage="Output field. Defaults to {field}."
+            values={{
+              field: <EuiCode>{'network.community_id'}</EuiCode>,
+            }}
+          />
+        }
+      />
+
+      <IgnoreMissingField
+        defaultValue={true}
+        serializer={from.undefinedIfValue(true) as SerializerFunc<boolean>}
+      />
+    </>
+  );
+};
