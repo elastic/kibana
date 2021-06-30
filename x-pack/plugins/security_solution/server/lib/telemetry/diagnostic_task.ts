@@ -12,6 +12,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
+import { getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender, TelemetryEvent } from './sender';
 
 export const TelemetryDiagTaskConstants = {
@@ -43,7 +44,7 @@ export class TelemetryDiagTask {
           return {
             run: async () => {
               const executeTo = moment().utc().toISOString();
-              const executeFrom = this.getLastExecutionTimestamp(
+              const executeFrom = getLastTaskExecutionTimestamp(
                 executeTo,
                 taskInstance.state?.lastExecutionTimestamp
               );
@@ -62,20 +63,6 @@ export class TelemetryDiagTask {
         },
       },
     });
-  }
-
-  public getLastExecutionTimestamp(executeTo: string, lastExecutionTimestamp?: string) {
-    if (lastExecutionTimestamp === undefined) {
-      this.logger.debug(`No last execution timestamp defined`);
-      return moment(executeTo).subtract(5, 'minutes').toISOString();
-    }
-
-    if (moment(executeTo).diff(lastExecutionTimestamp, 'minutes') >= 10) {
-      this.logger.debug(`last execution timestamp was greater than 10 minutes`);
-      return moment(executeTo).subtract(10, 'minutes').toISOString();
-    }
-
-    return lastExecutionTimestamp;
   }
 
   public start = async (taskManager: TaskManagerStartContract) => {
