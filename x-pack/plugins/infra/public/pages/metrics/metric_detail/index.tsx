@@ -17,7 +17,6 @@ import { InfraLoadingPanel } from '../../../components/loading';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { useLinkProps } from '../../../hooks/use_link_props';
