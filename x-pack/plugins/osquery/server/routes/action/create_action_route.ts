@@ -48,13 +48,15 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       }
 
       try {
+        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
         const action = {
           action_id: uuid.v4(),
           '@timestamp': moment().toISOString(),
-          expiration: moment().add(1, 'days').toISOString(),
+          expiration: moment().add(5, 'minutes').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
           agents: selectedAgents,
+          user_id: currentUser,
           data: {
             id: uuid.v4(),
             query: request.body.query,
@@ -75,7 +77,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         incrementCount(soClient, 'live_query', 'errors');
         return response.customError({
           statusCode: 500,
-          body: new Error(`Error occurred whlie processing ${error}`),
+          body: new Error(`Error occurred while processing ${error}`),
         });
       }
     }

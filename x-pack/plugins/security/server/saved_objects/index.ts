@@ -24,6 +24,19 @@ interface SetupSavedObjectsParams {
   getSpacesService(): SpacesService | undefined;
 }
 
+export type {
+  EnsureAuthorizedDependencies,
+  EnsureAuthorizedOptions,
+  EnsureAuthorizedResult,
+  EnsureAuthorizedActionResult,
+} from './ensure_authorized';
+
+export {
+  ensureAuthorized,
+  getEnsureAuthorizedActionResult,
+  isAuthorizedForObjectInAllSpaces,
+} from './ensure_authorized';
+
 export function setupSavedObjects({
   legacyAuditLogger,
   audit,

@@ -187,6 +187,8 @@ class InstructionSetUi extends React.Component {
           textPost={instruction.textPost}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
           customComponentName={instruction.customComponentName}
+          variantId={instructionVariant.id}
+          isCloudEnabled={this.props.isCloudEnabled}
         />
       );
       return {
@@ -320,6 +322,7 @@ InstructionSetUi.propTypes = {
   paramValues: PropTypes.object.isRequired,
   setParameter: PropTypes.func,
   replaceTemplateStrings: PropTypes.func.isRequired,
+  isCloudEnabled: PropTypes.bool.isRequired,
 };
 
 export const InstructionSet = injectI18n(InstructionSetUi);
