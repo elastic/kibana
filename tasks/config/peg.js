@@ -8,8 +8,8 @@
 
 module.exports = {
   kuery: {
-    src: 'src/plugins/data/common/es_query/kuery/ast/kuery.peg',
-    dest: 'src/plugins/data/common/es_query/kuery/ast/_generated_/kuery.js',
+    src: 'packages/kbn-es-query/src/kuery/ast/kuery.peg',
+    dest: 'packages/kbn-es-query/src/kuery/ast/_generated_/kuery.js',
     options: {
       allowedStartRules: ['start', 'Literal'],
       cache: true,
