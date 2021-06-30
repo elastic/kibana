@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './split';
-export * from './from_streaming_xhr';
-export * from './fetch_streaming';
-export { inflateResponse } from './inflate_response';
+export const DISABLE_BFETCH_COMPRESSION = 'bfetch:disableCompression';

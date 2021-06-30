@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './split';
-export * from './from_streaming_xhr';
-export * from './fetch_streaming';
-export { inflateResponse } from './inflate_response';
+import { unzlibSync, strFromU8 } from 'fflate';
+
+export function inflateResponse<Result extends object>(response: string) {
+  const buff = Buffer.from(response, 'base64');
+  const unzip = unzlibSync(buff);
+  return strFromU8(unzip);
+}
