@@ -51,9 +51,13 @@ export class DocLinksService {
           elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
           startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
           exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
+          suricataModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-suricata.html`,
+          zeekModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-zeek.html`,
         },
         auditbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}`,
+          auditdModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-auditd.html`,
+          systemModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/auditbeat/${DOC_LINK_VERSION}/auditbeat-module-system.html`,
         },
         enterpriseSearch: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}`,
@@ -69,6 +73,9 @@ export class DocLinksService {
         },
         heartbeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/heartbeat/${DOC_LINK_VERSION}`,
+        },
+        libbeat: {
+          getStarted: `${ELASTIC_WEBSITE_URL}guide/en/beats/libbeat/${DOC_LINK_VERSION}/getting-started.html`,
         },
         logstash: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
@@ -196,6 +203,10 @@ export class DocLinksService {
         siem: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
           gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
+          ml: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/machine-learning.html`,
+          ruleChangeLog: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/prebuilt-rules-changelog.html`,
+          detectionsReq: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-permissions-section.html`,
+          networkMap: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/conf-map-ui.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -453,9 +464,13 @@ export interface DocLinksStart {
       readonly elasticsearchModule: string;
       readonly startup: string;
       readonly exportedFields: string;
+      readonly suricataModule: string;
+      readonly zeekModule: string;
     };
     readonly auditbeat: {
       readonly base: string;
+      readonly auditdModule: string;
+      readonly systemModule: string;
     };
     readonly metricbeat: {
       readonly base: string;
@@ -471,6 +486,9 @@ export interface DocLinksStart {
     };
     readonly heartbeat: {
       readonly base: string;
+    };
+    readonly libbeat: {
+      readonly getStarted: string;
     };
     readonly logstash: {
       readonly base: string;
@@ -548,6 +566,10 @@ export interface DocLinksStart {
     readonly siem: {
       readonly guide: string;
       readonly gettingStarted: string;
+      readonly ml: string;
+      readonly ruleChangeLog: string;
+      readonly detectionsReq: string;
+      readonly networkMap: string;
     };
     readonly query: {
       readonly eql: string;
