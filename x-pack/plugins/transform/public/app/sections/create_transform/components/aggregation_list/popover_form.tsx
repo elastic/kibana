@@ -297,7 +297,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         <aggConfigDef.AggFormComponent
           aggConfig={aggConfigDef.aggConfig}
           selectedField={field as string}
-          onChange={(update) => {
+          onChange={(update: typeof aggConfigDef.aggConfig) => {
             setAggConfigDef({
               ...aggConfigDef,
               aggConfig: update,
