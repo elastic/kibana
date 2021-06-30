@@ -96,7 +96,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
 
   const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const [loading, { hostDetails: hostOverview, id, refetch }] = useHostDetails({
+  const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
     hostName: detailName,
@@ -166,6 +166,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     }}
                     setQuery={setQuery}
                     refetch={refetch}
+                    inspect={inspect}
                   />
                 )}
               </AnomalyTableProvider>
