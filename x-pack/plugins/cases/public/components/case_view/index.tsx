@@ -48,6 +48,7 @@ export interface CaseViewComponentProps {
   configureCasesNavigation: CasesNavigation;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   onComponentInitialized?: () => void;
+  actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   subCaseId?: string;
@@ -92,6 +93,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     getCaseDetailHrefWithCommentId,
     fetchCase,
     onComponentInitialized,
+    actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
@@ -411,6 +413,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
+                      actionsNavigation={actionsNavigation}
                       fetchUserActions={fetchCaseUserActions.bind(
                         null,
                         caseId,
@@ -498,6 +501,7 @@ export const CaseView = React.memo(
     getCaseDetailHrefWithCommentId,
     onCaseDataSuccess,
     onComponentInitialized,
+    actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
@@ -536,6 +540,7 @@ export const CaseView = React.memo(
               getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
               fetchCase={fetchCase}
               onComponentInitialized={onComponentInitialized}
+              actionsNavigation={actionsNavigation}
               ruleDetailsNavigation={ruleDetailsNavigation}
               showAlertDetails={showAlertDetails}
               subCaseId={subCaseId}

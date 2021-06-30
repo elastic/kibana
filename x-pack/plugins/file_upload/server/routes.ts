@@ -141,7 +141,6 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           accepts: ['application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
-        tags: ['access:fileUpload:import'],
       },
     },
     async (context, request, response) => {
@@ -184,9 +183,6 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       path: '/internal/file_upload/index_exists',
       validate: {
         body: schema.object({ index: schema.string() }),
-      },
-      options: {
-        tags: ['access:fileUpload:import'],
       },
     },
     async (context, request, response) => {
