@@ -59,10 +59,15 @@ describe('ClusterClient', () => {
     new ClusterClient(config, logger, 'custom-type', getAuthHeaders);
 
     expect(configureClientMock).toHaveBeenCalledTimes(2);
-    expect(configureClientMock).toHaveBeenCalledWith(config, { logger, type: 'custom-type' });
     expect(configureClientMock).toHaveBeenCalledWith(config, {
       logger,
       type: 'custom-type',
+      getExecutionContext: expect.any(Function),
+    });
+    expect(configureClientMock).toHaveBeenCalledWith(config, {
+      logger,
+      type: 'custom-type',
+      getExecutionContext: expect.any(Function),
       scoped: true,
     });
   });

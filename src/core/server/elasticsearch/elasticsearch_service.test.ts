@@ -276,12 +276,7 @@ describe('#start', () => {
       expect(clusterClient).toBe(mockClusterClientInstance);
 
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
-      expect(MockClusterClient).toHaveBeenCalledWith(
-        expect.objectContaining(customConfig),
-        expect.objectContaining({ context: ['elasticsearch'] }),
-        'custom-type',
-        expect.any(Function)
-      );
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(expect.objectContaining(customConfig));
     });
     it('creates a new client on each call', async () => {
       await elasticsearchService.setup(setupDeps);
