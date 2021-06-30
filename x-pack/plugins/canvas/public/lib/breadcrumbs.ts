@@ -7,18 +7,13 @@
 
 import { ChromeBreadcrumb } from '../../../../../src/core/public';
 
-export const getBaseBreadcrumb = () => ({
+export const getBaseBreadcrumb = (): ChromeBreadcrumb => ({
   text: 'Canvas',
   href: '#/',
 });
 
 export const getWorkpadBreadcrumb = ({
   name = 'Workpad',
-  id,
-}: { name?: string; id?: string } = {}) => {
-  const output: ChromeBreadcrumb = { text: name };
-  if (id != null) {
-    output.href = `#/workpad/${id}`;
-  }
-  return output;
-};
+}: { name?: string } = {}): ChromeBreadcrumb => ({
+  text: name,
+});
