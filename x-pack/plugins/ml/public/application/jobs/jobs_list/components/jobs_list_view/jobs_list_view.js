@@ -123,6 +123,9 @@ export class JobsListView extends Component {
       delete itemIdToExpandedRowMap[jobId];
       this.setState({ itemIdToExpandedRowMap });
     } else {
+      // Only show clear notifications button if job has warning icon due to auditMessage
+      const expandedJob = this.state.jobsSummaryList.filter((job) => job.id === jobId);
+      const showClearButton = expandedJob.length > 0 && expandedJob[0].auditMessage !== undefined;
       let itemIdToExpandedRowMap = { ...this.state.itemIdToExpandedRowMap };
 
       if (this.state.fullJobsList[jobId] !== undefined) {
@@ -134,6 +137,7 @@ export class JobsListView extends Component {
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
             refreshJobList={this.onRefreshClick}
+            showClearButton={showClearButton}
           />
         );
       } else {
@@ -144,6 +148,7 @@ export class JobsListView extends Component {
             removeYourself={this.removeUpdateFunction}
             showFullDetails={this.props.isManagementTable !== true}
             refreshJobList={this.onRefreshClick}
+            showClearButton={showClearButton}
           />
         );
       }
@@ -167,6 +172,7 @@ export class JobsListView extends Component {
                     removeYourself={this.removeUpdateFunction}
                     showFullDetails={this.props.isManagementTable !== true}
                     refreshJobList={this.onRefreshClick}
+                    showClearButton={showClearButton}
                   />
                 );
               }
