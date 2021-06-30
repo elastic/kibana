@@ -95,7 +95,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
 
   const isEndpointAlert = useMemo(() => {
-    return endpointAlertCheck({ data: detailsData });
+    return endpointAlertCheck({ data: detailsData || [] });
   }, [detailsData]);
 
   const agentId = useMemo(() => {
