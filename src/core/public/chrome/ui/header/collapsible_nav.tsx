@@ -325,16 +325,6 @@ export function CollapsibleNav({
           </EuiCollapsibleNavGroup>
         </EuiShowFor>
       </EuiFlexItem>
-      {/* Quick addition of that "ADD DATA" button everyone wants :) Feel free to remove though. */}
-      <EuiFlexItem grow={false}>
-        {/* Span fakes the nav group into not being the first item and therefore adding a top border */}
-        <span />
-        <EuiCollapsibleNavGroup>
-          <EuiButton fill fullWidth iconType="plusInCircleFilled">
-            <FormattedMessage id="core.ui.primaryNavSection.addDataBtn" defaultMessage="Add Data" />
-          </EuiButton>
-        </EuiCollapsibleNavGroup>
-      </EuiFlexItem>
     </EuiCollapsibleNav>
   );
 }
