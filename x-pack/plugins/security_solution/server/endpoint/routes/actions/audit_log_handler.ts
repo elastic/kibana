@@ -10,7 +10,7 @@ import {
   EndpointActionLogRequestParams,
   EndpointActionLogRequestQuery,
 } from '../../../../common/endpoint/schema/actions';
-import { getAuditLogResponse } from '../../services/actions';
+import { getAuditLogResponse } from '../../services';
 import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EndpointAppContext } from '../../types';
 
