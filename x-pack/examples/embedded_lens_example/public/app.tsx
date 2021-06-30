@@ -273,7 +273,6 @@ export const App = (props: {
                 iconType="alert"
               >
                 <p>This demo only works if your default index pattern is set and time based</p>
-                <p>{JSON.stringify(props.defaultIndexPattern?.toSpec(), null, 2)}</p>
               </EuiCallOut>
             )}
           </EuiPageContentBody>
