@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+// TODO - clint: convert to service abstraction
+
 import { IndexPatternAttributes } from 'src/plugins/data/public';
 
 import { API_ROUTE } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 import { ErrorStrings } from '../../i18n';
-import { notifyService } from '../services';
+import { pluginServices } from '../services';
 import { platformService } from '../services';
 
 const { esService: strings } = ErrorStrings;
@@ -36,11 +38,12 @@ export const getFields = (index = '_all') => {
         .filter((field) => !field.startsWith('_')) // filters out meta fields
         .sort()
     )
-    .catch((err: Error) =>
-      notifyService.getService().error(err, {
+    .catch((err: Error) => {
+      const notifyService = pluginServices.getServices().notify;
+      notifyService.error(err, {
         title: strings.getFieldsFetchErrorMessage(index),
-      })
-    );
+      });
+    });
 };
 
 export const getIndices = () =>
@@ -56,9 +59,10 @@ export const getIndices = () =>
         return savedObject.attributes.title;
       });
     })
-    .catch((err: Error) =>
-      notifyService.getService().error(err, { title: strings.getIndicesFetchErrorMessage() })
-    );
+    .catch((err: Error) => {
+      const notifyService = pluginServices.getServices().notify;
+      notifyService.error(err, { title: strings.getIndicesFetchErrorMessage() });
+    });
 
 export const getDefaultIndex = () => {
   const defaultIndexId = getAdvancedSettings().get('defaultIndex');
@@ -67,10 +71,9 @@ export const getDefaultIndex = () => {
     ? getSavedObjectsClient()
         .get<IndexPatternAttributes>('index-pattern', defaultIndexId)
         .then((defaultIndex) => defaultIndex.attributes.title)
-        .catch((err) =>
-          notifyService
-            .getService()
-            .error(err, { title: strings.getDefaultIndexFetchErrorMessage() })
-        )
+        .catch((err) => {
+          const notifyService = pluginServices.getServices().notify;
+          notifyService.error(err, { title: strings.getDefaultIndexFetchErrorMessage() });
+        })
     : Promise.resolve('');
 };

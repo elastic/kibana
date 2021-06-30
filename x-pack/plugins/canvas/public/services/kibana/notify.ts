@@ -6,9 +6,17 @@
  */
 
 import { get } from 'lodash';
-import { CanvasServiceFactory } from '.';
+import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+
 import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public';
 import { ToastInputFields } from '../../../../../../src/core/public';
+import { CanvasStartDeps } from '../../plugin';
+import { CanvasNotifyService } from '../notify';
+
+export type CanvasNotifyServiceFactory = KibanaPluginServiceFactory<
+  CanvasNotifyService,
+  CanvasStartDeps
+>;
 
 const getToast = (err: Error | string, opts: ToastInputFields = {}) => {
   const errData = (get(err, 'response') || err) as Error | string;
@@ -28,15 +36,8 @@ const getToast = (err: Error | string, opts: ToastInputFields = {}) => {
   };
 };
 
-export interface NotifyService {
-  error: (err: string | Error, opts?: ToastInputFields) => void;
-  warning: (err: string | Error, opts?: ToastInputFields) => void;
-  info: (err: string | Error, opts?: ToastInputFields) => void;
-  success: (err: string | Error, opts?: ToastInputFields) => void;
-}
-
-export const notifyServiceFactory: CanvasServiceFactory<NotifyService> = (setup, start) => {
-  const toasts = start.notifications.toasts;
+export const notifyServiceFactory: CanvasNotifyServiceFactory = ({ coreStart }) => {
+  const toasts = coreStart.notifications.toasts;
 
   return {
     /*
