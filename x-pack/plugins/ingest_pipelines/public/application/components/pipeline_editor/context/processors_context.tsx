@@ -150,8 +150,12 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
           });
           break;
         case 'managingProcessor':
+          const whitelistFields = ['transport', 'iana_number'];
           // These are the option names we get back from our UI
-          const knownOptionNames = Object.keys(processorTypeAndOptions.options);
+          const knownOptionNames = [
+            ...Object.keys(processorTypeAndOptions.options),
+            ...whitelistFields,
+          ];
           // The processor that we are updating may have options configured the UI does not know about
           const unknownOptions = omit(mode.arg.processor.options, knownOptionNames);
           // In order to keep the options we don't get back from our UI, we merge the known and unknown options

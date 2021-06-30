@@ -21,25 +21,23 @@ import {
   Field,
   NumericField,
   fieldFormatters,
-  fieldValidators
+  fieldValidators,
 } from '../../../../../../shared_imports';
 
-const seedBoundriesValidator = {
+const seedValidator = {
   max: fieldValidators.numberSmallerThanField({
     than: 65535,
     allowEquality: true,
-    message: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError',
-      { defaultMessage: 'This number must be less or equal than 65535.' }
-    ),
+    message: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError', {
+      defaultMessage: 'This number must be equals or less than 65535.',
+    }),
   }),
   min: fieldValidators.numberGreaterThanField({
     than: 0,
     allowEquality: true,
-    message: i18n.translate(
-      'xpack.ingestPipelines.pipelineEditor.communityId.seedMinNumberError',
-      { defaultMessage: 'This number must be greater or equals than 0.' }
-    ),
+    message: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedMinNumberError', {
+      defaultMessage: 'This number must be equals or greater than 0.',
+    }),
   }),
 };
 
@@ -151,7 +149,7 @@ const fieldsConfig: FieldsConfig = {
   seed: {
     type: FIELD_TYPES.NUMBER,
     formatters: [fieldFormatters.toInt],
-    serializer: from.undefinedIfValue(0),
+    serializer: from.undefinedIfValue(''),
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.communityId.seedLabel', {
       defaultMessage: 'Seed (optional)',
     }),
@@ -161,20 +159,18 @@ const fieldsConfig: FieldsConfig = {
         defaultMessage="Seed for the community ID hash."
       />
     ),
-    validations: [{
-      validator: (field) => {
-        if (field.value) {
-          return seedBoundriesValidator.max(field) ?? seedBoundriesValidator.min(field);
-        }
+    validations: [
+      {
+        validator: (field) => {
+          if (field.value) {
+            return seedValidator.max(field) ?? seedValidator.min(field);
+          }
+        },
       },
-    }],
+    ],
   },
 };
 
-/*
-  iana_number defaults to network.iana_number, not required
-  if defined, also show transport => default to network.transport not required
-*/
 export const CommunityId: FunctionComponent = () => {
   const [{ fields }] = useFormData({ watch: 'fields.iana_number' });
 
@@ -247,14 +243,14 @@ export const CommunityId: FunctionComponent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          {fields?.iana_number &&
+          {!fields?.iana_number && (
             <UseField
               config={fieldsConfig.transport}
               component={Field}
               path="fields.transport"
               data-test-subj="transportField"
             />
-          }
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
 
