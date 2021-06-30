@@ -43,7 +43,7 @@ export const shapeRenderer = (): ExpressionRenderDefinition<ShapeRendererConfig>
 
     render(
       <I18nProvider>
-        <ShapeComponent handlers={handlers} {...config} parentNode={domNode} />
+        <ShapeComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
       </I18nProvider>,
       domNode
     );
