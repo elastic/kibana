@@ -21,7 +21,7 @@ describe('Series Builder ReportBreakdowns', function () {
   });
 
   it('should render properly', function () {
-    render(<ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />);
+    render(<ReportBreakdowns seriesConfig={dataViewSeries} seriesId={seriesId} />);
 
     screen.getByText('Select an option: , is selected');
     screen.getAllByText('Browser family');
@@ -29,7 +29,7 @@ describe('Series Builder ReportBreakdowns', function () {
 
   it('should set new series breakdown on change', function () {
     const { setSeries } = render(
-      <ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />
+      <ReportBreakdowns seriesConfig={dataViewSeries} seriesId={seriesId} />
     );
 
     const btn = screen.getByRole('button', {
@@ -51,7 +51,7 @@ describe('Series Builder ReportBreakdowns', function () {
   });
   it('should set undefined on new series on no select breakdown', function () {
     const { setSeries } = render(
-      <ReportBreakdowns dataViewSeries={dataViewSeries} seriesId={seriesId} />
+      <ReportBreakdowns seriesConfig={dataViewSeries} seriesId={seriesId} />
     );
 
     const btn = screen.getByRole('button', {
