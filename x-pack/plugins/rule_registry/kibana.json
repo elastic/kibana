@@ -9,9 +9,9 @@
   "requiredPlugins": [
     "alerting",
     "data",
-    "security",
     "spaces",
     "triggersActionsUi"
   ],
+  "optionalPlugins": ["security"],
   "server": true
 }
