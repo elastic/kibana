@@ -12,7 +12,7 @@ import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { StreamPageContent } from './page_content';
 import { StreamPageHeader } from './page_header';
 import { LogsPageProviders } from './page_providers';
-import { streamTitle } from '../../../../public/translations';
+import { streamTitle } from '../../../translations';
 
 export const StreamPage = () => {
   useTrackPageview({ app: 'infra_logs', path: 'stream' });

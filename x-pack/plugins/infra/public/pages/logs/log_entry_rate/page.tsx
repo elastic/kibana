@@ -10,7 +10,7 @@ import React from 'react';
 import { LogEntryRatePageContent } from './page_content';
 import { LogEntryRatePageProviders } from './page_providers';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
-import { anomaliesTitle } from '../../../../public/translations';
+import { anomaliesTitle } from '../../../translations';
 
 export const LogEntryRatePage = () => {
   useLogsBreadcrumbs([

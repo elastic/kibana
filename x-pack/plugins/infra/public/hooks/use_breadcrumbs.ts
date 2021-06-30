@@ -9,7 +9,7 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import { MouseEvent, useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { observabilityTitle } from '../../public/translations';
+import { observabilityTitle } from '../translations';
 
 type AppId = 'logs' | 'metrics';
 

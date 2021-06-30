@@ -8,7 +8,7 @@
 import { ChromeBreadcrumb } from 'kibana/public';
 import { useBreadcrumbs } from './use_breadcrumbs';
 import { LOGS_APP } from '../../common/constants';
-import { logsTitle } from '../../public/translations';
+import { logsTitle } from '../translations';
 
 export const useLogsBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   useBreadcrumbs(LOGS_APP, logsTitle, extraCrumbs);

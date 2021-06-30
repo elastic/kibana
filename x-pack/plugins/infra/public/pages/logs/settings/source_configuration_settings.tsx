@@ -28,7 +28,7 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogSourceConfigurationFormErrors } from './source_configuration_form_errors';
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
 import { LogsPageTemplate } from '../page_template';
-import { settingsTitle } from '../../../../public/translations';
+import { settingsTitle } from '../../../translations';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;

@@ -26,7 +26,7 @@ import { MLConfigurationPanel } from './ml_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { settingsTitle } from '../../../../public/translations';
+import { settingsTitle } from '../../../translations';
 
 import { MetricsPageTemplate } from '../page_template';
 interface SourceConfigurationSettingsProps {
