@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-export * from '../legacy/stubs';
-
 import {
   PluginServiceProviders,
   PluginServiceProvider,
   PluginServiceRegistry,
+  KibanaPluginServiceParams,
 } from '../../../../../../src/plugins/presentation_util/public';
 
-import { CanvasPluginServices } from '..';
 import { workpadServiceFactory } from './workpad';
+import { CanvasPluginServices } from '..';
+import { CanvasStartDeps } from '../../plugin';
 
 export { workpadServiceFactory } from './workpad';
 
-export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
+export const pluginServiceProviders: PluginServiceProviders<
+  CanvasPluginServices,
+  KibanaPluginServiceParams<CanvasStartDeps>
+> = {
   workpad: new PluginServiceProvider(workpadServiceFactory),
 };
 
-export const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices>(
-  pluginServiceProviders
-);
+export const pluginServiceRegistry = new PluginServiceRegistry<
+  CanvasPluginServices,
+  KibanaPluginServiceParams<CanvasStartDeps>
+>(pluginServiceProviders);
