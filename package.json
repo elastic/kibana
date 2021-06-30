@@ -99,7 +99,7 @@
   "dependencies": {
     "@elastic/apm-rum": "^5.8.0",
     "@elastic/apm-rum-react": "^1.2.11",
-    "@elastic/charts": "30.1.0",
+    "@elastic/charts": "31.0.0",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.13",
     "@elastic/ems-client": "7.14.0",
@@ -462,7 +462,7 @@
     "@kbn/dev-utils": "link:bazel-bin/packages/kbn-dev-utils",
     "@kbn/docs-utils": "link:bazel-bin/packages/kbn-docs-utils",
     "@kbn/es": "link:bazel-bin/packages/kbn-es",
-    "@kbn/es-archiver": "link:packages/kbn-es-archiver",
+    "@kbn/es-archiver": "link:bazel-bin/packages/kbn-es-archiver",
     "@kbn/eslint-import-resolver-kibana": "link:bazel-bin/packages/kbn-eslint-import-resolver-kibana",
     "@kbn/eslint-plugin-eslint": "link:bazel-bin/packages/kbn-eslint-plugin-eslint",
     "@kbn/expect": "link:bazel-bin/packages/kbn-expect",

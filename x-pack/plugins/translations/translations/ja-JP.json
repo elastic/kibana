@@ -3320,7 +3320,6 @@
     "presentationUtil.labs.components.sessionSwitchHelp": "このタブのラボプロジェクトを有効または無効にします。ブラウザータブが閉じたときにリセットします",
     "presentationUtil.labs.components.sessionSwitchName": "セッション",
     "presentationUtil.labs.components.titleLabel": "ラボプロジェクト",
-    "presentationUtil.labs.enableUnifiedToolbarProjectDescription": "プレゼンテーションソリューションの新しい統合ツールバー設計を有効にする",
     "presentationUtil.saveModalDashboard.addToDashboardLabel": "ダッシュボードに追加",
     "presentationUtil.saveModalDashboard.dashboardInfoTooltip": "Visualizeライブラリに追加された項目はすべてのダッシュボードで使用できます。ライブラリ項目の編集は、使用されるすべての場所に表示されます。",
     "presentationUtil.saveModalDashboard.existingDashboardOptionLabel": "既存",
