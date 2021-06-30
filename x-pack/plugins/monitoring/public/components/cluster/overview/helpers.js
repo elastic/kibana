@@ -43,15 +43,14 @@ export function HealthLabel(props) {
     }
   }
 
-  if (product === 'kb' && status === 'red') {
+  // TODO: Use the actual service level statuses instead of converting them to colors
+  if (product === 'kb' && (status === 'yellow' || status === 'red')) {
     return (
       <EuiText>
         {i18n.translate('xpack.monitoring.cluster.health.pluginIssues', {
-          defaultMessage: 'Some plugins are experiencing issues. Check ',
+          defaultMessage: 'Some plugins may be experiencing issues. Please check ',
         })}
-        <EuiLink href="/status" target="_blank" external={true}>
-          status
-        </EuiLink>
+        <EuiLink href={`${Legacy.shims.getBasePath()}/status`}>the Kibana status page</EuiLink>.
       </EuiText>
     );
   }
