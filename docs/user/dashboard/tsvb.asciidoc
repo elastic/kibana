@@ -121,7 +121,9 @@ The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax 
 [float]
 [[tsvb-index-pattern-mode]]
 ==== TSVB Index pattern mode
-From 7.13.0, TSVB supports a new mode of creating a chart, the *index pattern mode*. 
+Create *TSVB* visualizations with {kib} index patterns. 
+
+IMPORTANT: Creating *TSVB* visualizations with an {es} index string is deprecated and will be removed in a future release.
 It is the default one for new visualizations but it can also be switched for the old implementations:
 
 . Click *Panel options*, then click the gear icon on the *Index pattern* setting.
