@@ -67,7 +67,7 @@ export const HelpPopover = ({
       panelClassName="lnsHelpPopover__panel"
       panelPaddingSize="none"
     >
-      {title && <EuiPopoverTitle>{title}</EuiPopoverTitle>}
+      {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
 
       <EuiText className="lnsHelpPopover__content" size="s">
         {children}

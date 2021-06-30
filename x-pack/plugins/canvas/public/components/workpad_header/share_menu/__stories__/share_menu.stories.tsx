@@ -8,8 +8,8 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { platformService } from '../../../../services/stubs/platform';
-import { reportingService } from '../../../../services/stubs/reporting';
+import { platformService } from '../../../../services/legacy/stubs/platform';
+import { reportingService } from '../../../../services/legacy/stubs/reporting';
 import { ShareMenu } from '../share_menu.component';
 
 storiesOf('components/WorkpadHeader/ShareMenu', module).add('minimal', () => (
