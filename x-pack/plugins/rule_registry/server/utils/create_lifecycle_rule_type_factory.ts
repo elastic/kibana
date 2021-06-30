@@ -262,7 +262,7 @@ export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
 
       return {
         wrapped: nextWrappedState ?? {},
-        trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : [],
+        trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : {},
       };
     },
   };
