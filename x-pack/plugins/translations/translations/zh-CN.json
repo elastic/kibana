@@ -3342,7 +3342,6 @@
     "presentationUtil.labs.components.sessionSwitchHelp": "启用或禁用此选项卡的实验室项目；在关闭浏览器选项卡时重置",
     "presentationUtil.labs.components.sessionSwitchName": "会话",
     "presentationUtil.labs.components.titleLabel": "实验室项目",
-    "presentationUtil.labs.enableUnifiedToolbarProjectDescription": "启用演示解决方案的新统一工具栏设计",
     "presentationUtil.saveModalDashboard.addToDashboardLabel": "添加到仪表板",
     "presentationUtil.saveModalDashboard.dashboardInfoTooltip": "添加到 Visualize 库的项目可用于所有仪表板。对库项目的编辑将显示在使用位置。",
     "presentationUtil.saveModalDashboard.existingDashboardOptionLabel": "现有",
