@@ -25,10 +25,10 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiPageContent,
+  EuiPageContentBody,
   EuiSelect,
   EuiSpacer,
-  EuiTitle,
+  EuiPageHeader,
 } from '@elastic/eui';
 import { ConfirmDeletePipelineModal } from './confirm_delete_pipeline_modal';
 import { FlexItemSetting } from './flex_item_setting';
@@ -269,219 +269,211 @@ class PipelineEditorUi extends React.Component {
     const { intl } = this.props;
 
     return (
-      <div data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}>
-        <EuiPageContent
-          style={{
-            width: 1100,
-          }}
-          verticalPosition="center"
-          horizontalPosition="center"
-        >
-          <EuiTitle size="m">
-            <h2>{this.getPipelineHeadingText()}</h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiForm isInvalid={this.state.showPipelineIdError} error={this.state.pipelineIdErrors}>
-            {this.props.isNewPipeline && (
-              <EuiFormRow
-                fullWidth
-                label={
-                  <FormattedMessage
-                    id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
-                    defaultMessage="Pipeline ID"
-                  />
-                }
-              >
-                <EuiFieldText
-                  fullWidth
-                  data-test-subj="inputId"
-                  isInvalid={this.state.showPipelineIdError}
-                  name="pipelineId"
-                  onBlur={this.onPipelineIdChange}
-                  onChange={this.onPipelineIdChange}
-                  value={this.state.pipeline.id || ''}
-                />
-              </EuiFormRow>
-            )}
+      <EuiPageContentBody
+        style={{ width: '100%' }}
+        restrictWidth
+        data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}
+      >
+        <EuiPageHeader pageTitle={this.getPipelineHeadingText()} bottomBorder />
+        <EuiSpacer size="l" />
+        <EuiForm isInvalid={this.state.showPipelineIdError} error={this.state.pipelineIdErrors}>
+          {this.props.isNewPipeline && (
             <EuiFormRow
               fullWidth
               label={
                 <FormattedMessage
-                  id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
-                  defaultMessage="Description"
+                  id="xpack.logstash.pipelineEditor.pipelineIdFormRowLabel"
+                  defaultMessage="Pipeline ID"
                 />
               }
             >
               <EuiFieldText
-                data-test-subj="inputDescription"
                 fullWidth
-                name="pipelineDescription"
-                onChange={this.onPipelineDescriptionChange}
-                value={this.state.pipeline.description || ''}
+                data-test-subj="inputId"
+                isInvalid={this.state.showPipelineIdError}
+                name="pipelineId"
+                onBlur={this.onPipelineIdChange}
+                onChange={this.onPipelineIdChange}
+                value={this.state.pipeline.id || ''}
               />
             </EuiFormRow>
-            <EuiFormRow
+          )}
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.logstash.pipelineEditor.descriptionFormRowLabel"
+                defaultMessage="Description"
+              />
+            }
+          >
+            <EuiFieldText
+              data-test-subj="inputDescription"
               fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
-                  defaultMessage="Pipeline"
-                />
-              }
-            >
-              <div data-test-subj="acePipeline">
-                <EuiCodeEditor
-                  mode="plain_text"
-                  onChange={this.onPipelineChange}
-                  setOptions={{
-                    minLines: 25,
-                    maxLines: Infinity,
-                    readOnly: this.props.licenseService.isReadOnly,
-                  }}
-                  theme="github"
-                  value={this.state.pipeline.pipeline}
-                  width={'1017'}
-                />
-              </div>
-            </EuiFormRow>
-            <EuiFormRow
-              label={
-                <FormLabelWithIconTip
-                  formRowLabelText={intl.formatMessage({
-                    id: 'xpack.logstash.pipelineEditor.pipelineWorkersFormRowLabel',
-                    defaultMessage: 'Pipeline workers',
-                  })}
-                  formRowTooltipText={TOOLTIPS.settings['pipeline.workers']}
-                />
-              }
+              name="pipelineDescription"
+              onChange={this.onPipelineDescriptionChange}
+              value={this.state.pipeline.description || ''}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.logstash.pipelineEditor.pipelineFormRowLabel"
+                defaultMessage="Pipeline"
+              />
+            }
+          >
+            <div data-test-subj="acePipeline">
+              <EuiCodeEditor
+                mode="plain_text"
+                onChange={this.onPipelineChange}
+                setOptions={{
+                  minLines: 25,
+                  maxLines: Infinity,
+                  readOnly: this.props.licenseService.isReadOnly,
+                }}
+                theme="github"
+                value={this.state.pipeline.pipeline}
+                width={'1017'}
+              />
+            </div>
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormLabelWithIconTip
+                formRowLabelText={intl.formatMessage({
+                  id: 'xpack.logstash.pipelineEditor.pipelineWorkersFormRowLabel',
+                  defaultMessage: 'Pipeline workers',
+                })}
+                formRowTooltipText={TOOLTIPS.settings['pipeline.workers']}
+              />
+            }
+          >
+            <EuiFieldNumber
+              data-test-subj="inputWorkers"
+              onChange={(e) => this.handleNumberChange('pipeline.workers', e.target.value)}
+              value={this.state.pipeline.settings['pipeline.workers']}
+            />
+          </EuiFormRow>
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <FlexItemSetting
+              formRowLabelText={intl.formatMessage({
+                id: 'xpack.logstash.pipelineEditor.pipelineBatchSizeFormRowLabel',
+                defaultMessage: 'Pipeline batch size',
+              })}
+              formRowTooltipText={TOOLTIPS.settings['pipeline.batch.size']}
             >
               <EuiFieldNumber
-                data-test-subj="inputWorkers"
-                onChange={(e) => this.handleNumberChange('pipeline.workers', e.target.value)}
-                value={this.state.pipeline.settings['pipeline.workers']}
+                data-test-subj="inputBatchSize"
+                onChange={(e) => this.handleNumberChange('pipeline.batch.size', e.target.value)}
+                value={this.state.pipeline.settings['pipeline.batch.size']}
               />
-            </EuiFormRow>
-            <EuiSpacer />
-            <EuiFlexGroup>
-              <FlexItemSetting
-                formRowLabelText={intl.formatMessage({
-                  id: 'xpack.logstash.pipelineEditor.pipelineBatchSizeFormRowLabel',
-                  defaultMessage: 'Pipeline batch size',
-                })}
-                formRowTooltipText={TOOLTIPS.settings['pipeline.batch.size']}
-              >
-                <EuiFieldNumber
-                  data-test-subj="inputBatchSize"
-                  onChange={(e) => this.handleNumberChange('pipeline.batch.size', e.target.value)}
-                  value={this.state.pipeline.settings['pipeline.batch.size']}
-                />
-              </FlexItemSetting>
-              <FlexItemSetting
-                formRowLabelText={intl.formatMessage({
-                  id: 'xpack.logstash.pipelineEditor.pipelineBatchDelayFormRowLabel',
-                  defaultMessage: 'Pipeline batch delay',
-                })}
-                formRowTooltipText={TOOLTIPS.settings['pipeline.batch.delay']}
-              >
-                <EuiFieldNumber
-                  data-test-subj="inputBatchDelay"
-                  onChange={(e) => this.handleNumberChange('pipeline.batch.delay', e.target.value)}
-                  value={this.state.pipeline.settings['pipeline.batch.delay']}
-                />
-              </FlexItemSetting>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <FlexItemSetting
-                formRowLabelText={intl.formatMessage({
-                  id: 'xpack.logstash.pipelineEditor.queueTypeFormRowLabel',
-                  defaultMessage: 'Queue type',
-                })}
-                formRowTooltipText={TOOLTIPS.settings['queue.type']}
-              >
-                <EuiSelect
-                  data-test-subj="selectQueueType"
-                  onChange={(e) => this.handleSettingChange('queue.type', e.target.value)}
-                  options={PIPELINE_EDITOR.QUEUE_TYPES}
-                  value={this.state.pipeline.settings['queue.type']}
-                />
-              </FlexItemSetting>
-              <FlexItemSetting
-                formRowLabelText={intl.formatMessage({
-                  id: 'xpack.logstash.pipelineEditor.queueMaxBytesFormRowLabel',
-                  defaultMessage: 'Queue max bytes',
-                })}
-                formRowTooltipText={TOOLTIPS.settings['queue.max_bytes']}
-              >
-                <EuiFieldNumber
-                  data-test-subj="inputQueueMaxBytesNumber"
-                  onChange={(e) => this.handleMaxByteNumberChange(e.target.value)}
-                  value={this.state.maxBytesNumber}
-                />
-              </FlexItemSetting>
-              <FlexItemSetting>
-                <EuiSelect
-                  data-test-subj="selectQueueMaxBytesUnits"
-                  onChange={(e) => this.handleMaxByteUnitChange(e.target.value)}
-                  options={PIPELINE_EDITOR.UNITS}
-                  value={this.state.maxBytesUnit}
-                />
-              </FlexItemSetting>
-              <FlexItemSetting
-                formRowLabelText={intl.formatMessage({
-                  id: 'xpack.logstash.pipelineEditor.queueCheckpointWritesFormRowLabel',
-                  defaultMessage: 'Queue checkpoint writes',
-                })}
-                formRowTooltipText={TOOLTIPS.settings['queue.checkpoint.writes']}
-              >
-                <EuiFieldNumber
-                  data-test-subj="inputQueueCheckpointWrites"
-                  onChange={(e) =>
-                    this.handleNumberChange('queue.checkpoint.writes', e.target.value)
-                  }
-                  value={this.state.pipeline.settings['queue.checkpoint.writes']}
-                />
-              </FlexItemSetting>
-            </EuiFlexGroup>
-          </EuiForm>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup justifyContent="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="btnSavePipeline"
-                fill
-                isDisabled={this.isSaveDisabled()}
-                onClick={this.onPipelineSave}
-              >
-                <FormattedMessage
-                  id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
-                  defaultMessage="Create and deploy"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton data-test-subj="btnCancel" onClick={this.onClose}>
-                <FormattedMessage
-                  id="xpack.logstash.pipelineEditor.cancelButtonLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            {!this.props.isNewPipeline && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="danger"
-                  data-test-subj="btnDeletePipeline"
-                  onClick={this.showConfirmDeleteModal}
-                >
-                  <FormattedMessage
-                    id="xpack.logstash.pipelineEditor.deletePipelineButtonLabel"
-                    defaultMessage="Delete pipeline"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
+            </FlexItemSetting>
+            <FlexItemSetting
+              formRowLabelText={intl.formatMessage({
+                id: 'xpack.logstash.pipelineEditor.pipelineBatchDelayFormRowLabel',
+                defaultMessage: 'Pipeline batch delay',
+              })}
+              formRowTooltipText={TOOLTIPS.settings['pipeline.batch.delay']}
+            >
+              <EuiFieldNumber
+                data-test-subj="inputBatchDelay"
+                onChange={(e) => this.handleNumberChange('pipeline.batch.delay', e.target.value)}
+                value={this.state.pipeline.settings['pipeline.batch.delay']}
+              />
+            </FlexItemSetting>
           </EuiFlexGroup>
-        </EuiPageContent>
+          <EuiFlexGroup>
+            <FlexItemSetting
+              formRowLabelText={intl.formatMessage({
+                id: 'xpack.logstash.pipelineEditor.queueTypeFormRowLabel',
+                defaultMessage: 'Queue type',
+              })}
+              formRowTooltipText={TOOLTIPS.settings['queue.type']}
+            >
+              <EuiSelect
+                data-test-subj="selectQueueType"
+                onChange={(e) => this.handleSettingChange('queue.type', e.target.value)}
+                options={PIPELINE_EDITOR.QUEUE_TYPES}
+                value={this.state.pipeline.settings['queue.type']}
+              />
+            </FlexItemSetting>
+            <FlexItemSetting
+              formRowLabelText={intl.formatMessage({
+                id: 'xpack.logstash.pipelineEditor.queueMaxBytesFormRowLabel',
+                defaultMessage: 'Queue max bytes',
+              })}
+              formRowTooltipText={TOOLTIPS.settings['queue.max_bytes']}
+            >
+              <EuiFieldNumber
+                data-test-subj="inputQueueMaxBytesNumber"
+                onChange={(e) => this.handleMaxByteNumberChange(e.target.value)}
+                value={this.state.maxBytesNumber}
+              />
+            </FlexItemSetting>
+            <FlexItemSetting>
+              <EuiSelect
+                data-test-subj="selectQueueMaxBytesUnits"
+                onChange={(e) => this.handleMaxByteUnitChange(e.target.value)}
+                options={PIPELINE_EDITOR.UNITS}
+                value={this.state.maxBytesUnit}
+              />
+            </FlexItemSetting>
+            <FlexItemSetting
+              formRowLabelText={intl.formatMessage({
+                id: 'xpack.logstash.pipelineEditor.queueCheckpointWritesFormRowLabel',
+                defaultMessage: 'Queue checkpoint writes',
+              })}
+              formRowTooltipText={TOOLTIPS.settings['queue.checkpoint.writes']}
+            >
+              <EuiFieldNumber
+                data-test-subj="inputQueueCheckpointWrites"
+                onChange={(e) => this.handleNumberChange('queue.checkpoint.writes', e.target.value)}
+                value={this.state.pipeline.settings['queue.checkpoint.writes']}
+              />
+            </FlexItemSetting>
+          </EuiFlexGroup>
+        </EuiForm>
+        <EuiSpacer size="l" />
+        <EuiFlexGroup justifyContent="flexStart">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="btnSavePipeline"
+              fill
+              isDisabled={this.isSaveDisabled()}
+              onClick={this.onPipelineSave}
+            >
+              <FormattedMessage
+                id="xpack.logstash.pipelineEditor.createAndDeployButtonLabel"
+                defaultMessage="Create and deploy"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton data-test-subj="btnCancel" onClick={this.onClose}>
+              <FormattedMessage
+                id="xpack.logstash.pipelineEditor.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          {!this.props.isNewPipeline && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="danger"
+                data-test-subj="btnDeletePipeline"
+                onClick={this.showConfirmDeleteModal}
+              >
+                <FormattedMessage
+                  id="xpack.logstash.pipelineEditor.deletePipelineButtonLabel"
+                  defaultMessage="Delete pipeline"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         {this.state.showConfirmDeleteModal && (
           <ConfirmDeletePipelineModal
             id={this.props.pipeline.id}
@@ -489,7 +481,7 @@ class PipelineEditorUi extends React.Component {
             confirmDeletePipeline={this.deletePipeline}
           />
         )}
-      </div>
+      </EuiPageContentBody>
     );
   }
 }
