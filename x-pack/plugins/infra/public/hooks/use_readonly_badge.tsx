@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
-export const useReadOnlyBadge = (readOnlyBadge = false) => {
+export const useReadOnlyBadge = (isReadOnly = false) => {
   const chrome = useKibana().services.chrome;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const badge = readOnlyBadge
-    ? {
-        text: i18n.translate('xpack.infra.header.badge.readOnly.text', {
-          defaultMessage: 'Read only',
-        }),
-        tooltip: i18n.translate('xpack.infra.header.badge.readOnly.tooltip', {
-          defaultMessage: 'Unable to change source configuration',
-        }),
-        iconType: 'glasses',
-      }
-    : undefined;
+  const badge = useMemo(() => {
+    return isReadOnly
+      ? {
+          text: i18n.translate('xpack.infra.header.badge.readOnly.text', {
+            defaultMessage: 'Read only',
+          }),
+          tooltip: i18n.translate('xpack.infra.header.badge.readOnly.tooltip', {
+            defaultMessage: 'Unable to change source configuration',
+          }),
+          iconType: 'glasses',
+        }
+      : undefined;
+  }, [isReadOnly]);
 
   const setBadge = useCallback(() => {
     return chrome?.setBadge(badge);
