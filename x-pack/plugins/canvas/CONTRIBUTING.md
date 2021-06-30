@@ -36,8 +36,8 @@ To keep the code terse, Canvas uses i18n "dictionaries": abstracted, static sing
 
 ```js
 
-// i18n/components.ts
-export const ComponentStrings = {
+// asset_manager.tsx
+const strings = {
   // ...
   AssetManager: {
     getCopyAssetMessage: (id: string) =>
@@ -51,10 +51,6 @@ export const ComponentStrings = {
   },
   // ...
 };
-
-// asset_manager.tsx
-import { ComponentStrings } from '../../../i18n';
-const { AssetManager: strings } = ComponentStrings;
 
 const text = (
   <EuiText>
