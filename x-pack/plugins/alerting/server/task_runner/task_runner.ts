@@ -51,6 +51,7 @@ import {
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
+import { retryIfNotFound } from '../lib/retry_if_not_found';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -588,11 +589,18 @@ export class TaskRunner<
     };
 
     try {
-      await partiallyUpdateAlert(client, alertId, attributes, {
-        ignore404: true,
-        namespace,
-        refresh: false,
-      });
+      await retryIfNotFound(
+        this.logger,
+        `partiallyUpdateAlert by alertId:'${alertId} with attributes:${JSON.stringify(
+          attributes
+        )}')`,
+        async () =>
+          await partiallyUpdateAlert(client, alertId, attributes, {
+            ignore404: true,
+            namespace,
+            refresh: false,
+          })
+      );
     } catch (err) {
       this.logger.error(
         `error updating alert execution status for ${this.alertType.id}:${alertId} ${err.message}`
