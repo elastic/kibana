@@ -156,7 +156,7 @@ const internalNetworkConfig: Record<
       helpText: (
         <FormattedMessage
           id="xpack.ingestPipelines.pipelineEditor.networkDirection.internalNetworksFieldHelpText"
-          defaultMessage="A field on the given document to read the {field} configuration from."
+          defaultMessage="Field stating where to read the {field} configuration from."
           values={{
             field: <EuiCode>{'internal_networks'}</EuiCode>,
           }}
@@ -167,14 +167,19 @@ const internalNetworkConfig: Record<
 };
 
 export const NetworkDirection: FunctionComponent = () => {
-  const [{ fields }] = useFormData();
+  const [{ fields }] = useFormData({ watch: 'fields.internal_networks_field' });
   const [isCustom, setIsCustom] = useState<boolean | undefined>();
 
+  // On initial render the fields variable is undefined and eventually get loaded
+  // with data as the form-lib fields get rendered. Since the state of the UI for the
+  // `NetworksFields` depends on that, we need to have an effect that runs only once
+  // when the `fields` have been loaded and when the isCustom hasnt been yet set.
+  const internalNetworksFieldValue = fields?.internal_networks_field;
   useEffect(() => {
-    if (fields && isCustom === undefined) {
-      setIsCustom(fields?.internal_networks_field?.length > 0);
+    if (internalNetworksFieldValue && isCustom === undefined) {
+      setIsCustom(internalNetworksFieldValue?.length > 0);
     }
-  }, [fields, isCustom]);
+  }, [internalNetworksFieldValue, isCustom]);
 
   return (
     <>
