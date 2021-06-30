@@ -12,7 +12,6 @@ import {
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-import { RuleDataClient } from '../../rule_registry/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -99,14 +98,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
-    const ruleDataClient = new RuleDataClient({
-      getClusterClient: async () => {
-        const coreStart = await start();
-        return coreStart.elasticsearch.client.asInternalUser;
-      },
-      ready: () => Promise.resolve(),
-      alias: plugins.ruleRegistry.ruleDataService.getFullAssetName(),
-    });
+    const ruleDataClient = plugins.ruleRegistry.ruleDataService.getRuleDataClient(
+      plugins.ruleRegistry.ruleDataService.getFullAssetName(),
+      () => Promise.resolve()
+    );
 
     registerRoutes({
       core: {
