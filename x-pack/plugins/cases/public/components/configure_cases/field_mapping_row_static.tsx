@@ -30,33 +30,28 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
   return (
     <EuiFlexGroup data-test-subj="static-mappings" alignItems="center" responsive={false}>
       <EuiFlexItem>
-        <span>
-          {' '}
-          <EuiFlexGroup component="span" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem component="span" grow={false}>
-              <EuiCode data-test-subj="field-mapping-source">{casesField}</EuiCode>
-            </EuiFlexItem>
-            <EuiFlexItem component="span" grow={false}>
-              <EuiIcon type="sortRight" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </span>
+        <EuiFlexGroup component="span" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem component="span" grow={false}>
+            <EuiCode data-test-subj="field-mapping-source">{casesField}</EuiCode>
+          </EuiFlexItem>
+          <EuiFlexItem component="span" grow={false}>
+            <EuiIcon type="sortRight" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <span>
-          <EuiFlexGroup component="span" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem component="span" grow={false}>
-              {isLoading ? (
-                <EuiLoadingSpinner size="m" />
-              ) : (
-                <EuiCode data-test-subj="field-mapping-target">{selectedThirdParty}</EuiCode>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </span>
+        <EuiFlexGroup component="span" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexItem component="span" grow={false}>
+            {isLoading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : (
+              <EuiCode data-test-subj="field-mapping-target">{selectedThirdParty}</EuiCode>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <span>{isLoading ? <EuiLoadingSpinner size="m" /> : selectedActionTypeCapitalized}</span>
+        {isLoading ? <EuiLoadingSpinner size="m" /> : selectedActionTypeCapitalized}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
