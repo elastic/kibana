@@ -11,7 +11,7 @@ import { getAggValue } from './get_agg_value';
 import { METRIC_TYPES } from '../../../../../data/common';
 import type { Metric } from '../../../../common/types';
 
-export const extractData = (metric: Metric, buckets: any[]) => {
+export const mapEmptyToZero = (metric: Metric, buckets: any[]) => {
   // Metric types where an empty set equals `zero`
   const isSettableToZero = [
     METRIC_TYPES.COUNT,

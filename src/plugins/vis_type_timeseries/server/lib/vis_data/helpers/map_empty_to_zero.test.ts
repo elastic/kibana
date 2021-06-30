@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { extractData } from './extract_data';
+import { mapEmptyToZero } from './map_empty_to_zero';
 
-describe('mapBucket(metric)', () => {
+describe('mapEmptyToZero(metric, buckets)', () => {
   test('returns bucket key and value for basic metric', () => {
     const metric = { id: 'AVG', type: 'avg' };
     const buckets = [
@@ -17,7 +17,7 @@ describe('mapBucket(metric)', () => {
         AVG: { value: 1 },
       },
     ];
-    expect(extractData(metric, buckets)).toEqual([[1234, 1]]);
+    expect(mapEmptyToZero(metric, buckets)).toEqual([[1234, 1]]);
   });
   test('returns bucket key and value for std_deviation', () => {
     const metric = { id: 'STDDEV', type: 'std_deviation' };
@@ -27,7 +27,7 @@ describe('mapBucket(metric)', () => {
         STDDEV: { std_deviation: 1 },
       },
     ];
-    expect(extractData(metric, buckets)).toEqual([[1234, 1]]);
+    expect(mapEmptyToZero(metric, buckets)).toEqual([[1234, 1]]);
   });
   test('returns bucket key and value for percentiles', () => {
     const metric = { id: 'PCT', type: 'percentile', percent: 50 };
@@ -37,7 +37,7 @@ describe('mapBucket(metric)', () => {
         PCT: { values: { '50.0': 1 } },
       },
     ];
-    expect(extractData(metric, buckets)).toEqual([[1234, 1]]);
+    expect(mapEmptyToZero(metric, buckets)).toEqual([[1234, 1]]);
   });
   test('returns bucket key and value for derivative', () => {
     const metric = { id: 'DERV', type: 'derivative', field: 'io', unit: '1s' };
@@ -47,6 +47,6 @@ describe('mapBucket(metric)', () => {
         DERV: { value: 100, normalized_value: 1 },
       },
     ];
-    expect(extractData(metric, buckets)).toEqual([[1234, 1]]);
+    expect(mapEmptyToZero(metric, buckets)).toEqual([[1234, 1]]);
   });
 });

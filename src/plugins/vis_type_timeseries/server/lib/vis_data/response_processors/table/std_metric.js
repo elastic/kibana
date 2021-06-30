@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getSplits, getLastMetric, extractData } from '../../helpers';
+import { getSplits, getLastMetric, mapEmptyToZero } from '../../helpers';
 import { METRIC_TYPES } from '../../../../../common/enums';
 
 export function stdMetric(bucket, panel, series, meta, extractFields) {
@@ -30,7 +30,7 @@ export function stdMetric(bucket, panel, series, meta, extractFields) {
     };
 
     (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
-      const data = extractData(metric, split.timeseries.buckets);
+      const data = mapEmptyToZero(metric, split.timeseries.buckets);
       results.push({
         id: split.id,
         label: split.label,

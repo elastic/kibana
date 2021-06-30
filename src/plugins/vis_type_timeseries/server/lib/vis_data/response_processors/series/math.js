@@ -10,7 +10,7 @@ import { convertIntervalToUnit } from '../../helpers/unit_to_seconds';
 
 const percentileValueMatch = /\[([0-9\.]+)\]$/;
 import { startsWith, flatten, values, first, last } from 'lodash';
-import { getDefaultDecoration, getSiblingAggValue, getSplits, extractData } from '../../helpers';
+import { getDefaultDecoration, getSiblingAggValue, getSplits, mapEmptyToZero } from '../../helpers';
 import { evaluate } from '@kbn/tinymath';
 
 export function mathAgg(resp, panel, series, meta, extractFields) {
@@ -41,7 +41,7 @@ export function mathAgg(resp, panel, series, meta, extractFields) {
           } else {
             const percentileMatch = v.field.match(percentileValueMatch);
             const m = percentileMatch ? { ...metric, percent: percentileMatch[1] } : { ...metric };
-            acc[v.name] = extractData(m, split.timeseries.buckets);
+            acc[v.name] = mapEmptyToZero(m, split.timeseries.buckets);
           }
           return acc;
         }, {});
