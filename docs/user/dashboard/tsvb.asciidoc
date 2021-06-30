@@ -128,7 +128,7 @@ It is the default one for new visualizations but it can also be switched for the
 
 . Click *Panel options*, then click the gear icon to open the *Index pattern selection mode* options.
 . Select *Use only Kibana index patterns*.
-. Reselect the index pattern from the dropdown and the timefield
+. Reselect the index pattern from the dropdown, then select the *Time field*.
 
 image::images/tsvb_index_pattern_selection_mode.png[Change index pattern selection mode action]
 
