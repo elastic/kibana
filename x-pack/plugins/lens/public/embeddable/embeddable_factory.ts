@@ -11,21 +11,18 @@ import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter/target/common';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import {
-  IndexPatternsContract,
-  TimefilterContract,
-} from '../../../../../../src/plugins/data/public';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import { IndexPatternsContract, TimefilterContract } from '../../../../../src/plugins/data/public';
+import { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
+} from '../../../../../src/plugins/embeddable/public';
 import { LensByReferenceInput, LensEmbeddableInput } from './embeddable';
-import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
-import { Document } from '../../persistence/saved_object_store';
-import { LensAttributeService } from '../../lens_attribute_service';
-import { DOC_TYPE } from '../../../common';
-import { ErrorMessage } from '../types';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { Document } from '../persistence/saved_object_store';
+import { LensAttributeService } from '../lens_attribute_service';
+import { DOC_TYPE } from '../../common';
+import { ErrorMessage } from '../editor_frame_service/types';
 
 export interface LensEmbeddableStartServices {
   timefilter: TimefilterContract;
@@ -92,7 +89,7 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       usageCollection,
     } = await this.getStartServices();
 
-    const { Embeddable } = await import('../../async_services');
+    const { Embeddable } = await import('../async_services');
 
     return new Embeddable(
       {
