@@ -6,7 +6,7 @@
  */
 
 import { SavedObject } from 'src/core/types';
-import { mergeMissingFieldsWithSource } from './source_fields_merging/strategies/merge_missing_fields_with_source';
+import { getMergeStrategy } from './source_fields_merging/strategies';
 import {
   AlertAttributes,
   SignalSourceHit,
@@ -21,6 +21,7 @@ import { additionalSignalFields, buildSignal } from './build_signal';
 import { buildEventTypeSignal } from './build_event_type_signal';
 import { EqlSequence } from '../../../../common/detection_engine/types';
 import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
+import type { ConfigType } from '../../../config';
 
 /**
  * Formats the search_after result for insertion into the signals index. We first create a
@@ -33,9 +34,10 @@ import { generateSignalId, wrapBuildingBlocks, wrapSignal } from './utils';
  */
 export const buildBulkBody = (
   ruleSO: SavedObject<AlertAttributes>,
-  doc: SignalSourceHit
+  doc: SignalSourceHit,
+  mergeStrategy: ConfigType['alertMergeStrategy']
 ): SignalHit => {
-  const mergedDoc = mergeMissingFieldsWithSource({ doc });
+  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc });
   const rule = buildRuleWithOverrides(ruleSO, mergedDoc._source ?? {});
   const signal: Signal = {
     ...buildSignal([mergedDoc], rule),
@@ -65,11 +67,12 @@ export const buildBulkBody = (
 export const buildSignalGroupFromSequence = (
   sequence: EqlSequence<SignalSource>,
   ruleSO: SavedObject<AlertAttributes>,
-  outputIndex: string
+  outputIndex: string,
+  mergeStrategy: ConfigType['alertMergeStrategy']
 ): WrappedSignalHit[] => {
   const wrappedBuildingBlocks = wrapBuildingBlocks(
     sequence.events.map((event) => {
-      const signal = buildSignalFromEvent(event, ruleSO, false);
+      const signal = buildSignalFromEvent(event, ruleSO, false, mergeStrategy);
       signal.signal.rule.building_block_type = 'default';
       return signal;
     }),
@@ -130,9 +133,10 @@ export const buildSignalFromSequence = (
 export const buildSignalFromEvent = (
   event: BaseSignalHit,
   ruleSO: SavedObject<AlertAttributes>,
-  applyOverrides: boolean
+  applyOverrides: boolean,
+  mergeStrategy: ConfigType['alertMergeStrategy']
 ): SignalHit => {
-  const mergedEvent = mergeMissingFieldsWithSource({ doc: event });
+  const mergedEvent = getMergeStrategy(mergeStrategy)({ doc: event });
   const rule = applyOverrides
     ? buildRuleWithOverrides(ruleSO, mergedEvent._source ?? {})
     : buildRuleWithoutOverrides(ruleSO);

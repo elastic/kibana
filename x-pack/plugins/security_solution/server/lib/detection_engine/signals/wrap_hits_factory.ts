@@ -9,13 +9,16 @@ import { SearchAfterAndBulkCreateParams, WrapHits, WrappedSignalHit } from './ty
 import { generateId } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { filterDuplicateSignals } from './filter_duplicate_signals';
+import type { ConfigType } from '../../../config';
 
 export const wrapHitsFactory = ({
   ruleSO,
   signalsIndex,
+  mergeStrategy,
 }: {
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   signalsIndex: string;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
 }): WrapHits => (events) => {
   const wrappedDocs: WrappedSignalHit[] = events.flatMap((doc) => [
     {
@@ -26,7 +29,7 @@ export const wrapHitsFactory = ({
         String(doc._version),
         ruleSO.attributes.params.ruleId ?? ''
       ),
-      _source: buildBulkBody(ruleSO, doc),
+      _source: buildBulkBody(ruleSO, doc, mergeStrategy),
     },
   ]);
 

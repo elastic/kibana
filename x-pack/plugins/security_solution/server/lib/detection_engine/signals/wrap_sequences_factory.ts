@@ -7,18 +7,21 @@
 
 import { SearchAfterAndBulkCreateParams, WrappedSignalHit, WrapSequences } from './types';
 import { buildSignalGroupFromSequence } from './build_bulk_body';
+import { ConfigType } from '../../../config';
 
 export const wrapSequencesFactory = ({
   ruleSO,
   signalsIndex,
+  mergeStrategy,
 }: {
   ruleSO: SearchAfterAndBulkCreateParams['ruleSO'];
   signalsIndex: string;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
 }): WrapSequences => (sequences) =>
   sequences.reduce(
     (acc: WrappedSignalHit[], sequence) => [
       ...acc,
-      ...buildSignalGroupFromSequence(sequence, ruleSO, signalsIndex),
+      ...buildSignalGroupFromSequence(sequence, ruleSO, signalsIndex, mergeStrategy),
     ],
     []
   );
