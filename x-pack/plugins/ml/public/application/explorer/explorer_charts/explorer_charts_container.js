@@ -66,7 +66,6 @@ function ExplorerChartContainer({
   tooManyBuckets,
   wrapLabel,
   mlLocator,
-  basePath,
   timeBuckets,
   timefilter,
   onSelectEntity,
@@ -159,7 +158,7 @@ function ExplorerChartContainer({
                   iconSide="right"
                   iconType="visLine"
                   size="xs"
-                  href={`${basePath}/app/ml${explorerSeriesLink}`}
+                  href={explorerSeriesLink}
                   onClick={addToRecentlyAccessed}
                 >
                   <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
@@ -241,7 +240,6 @@ export const ExplorerChartsContainerUI = ({
   const {
     services: {
       chrome: { recentlyAccessed },
-      http: { basePath },
       embeddable: embeddablePlugin,
       maps: mapsPlugin,
     },
@@ -290,7 +288,6 @@ export const ExplorerChartsContainerUI = ({
                 tooManyBuckets={tooManyBuckets}
                 wrapLabel={wrapLabel}
                 mlLocator={mlLocator}
-                basePath={basePath.get()}
                 timeBuckets={timeBuckets}
                 timefilter={timefilter}
                 onSelectEntity={onSelectEntity}

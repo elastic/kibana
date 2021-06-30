@@ -178,33 +178,35 @@ class LinksMenuUI extends Component {
       entityCondition[record.by_field_name] = record.by_field_value;
     }
 
-    const singleMetricViewerLink = await mlLocator.getUrl({
-      excludeBasePath: false,
-      page: ML_PAGES.SINGLE_METRIC_VIEWER,
-      pageState: {
-        jobIds: [record.job_id],
-        refreshInterval: {
-          display: 'Off',
-          pause: true,
-          value: 0,
-        },
-        timeRange: {
-          from: from,
-          to: to,
-          mode: 'absolute',
-        },
-        zoom: {
-          from: zoomFrom,
-          to: zoomTo,
-        },
-        detectorIndex: record.detector_index,
-        entities: entityCondition,
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
+    const singleMetricViewerLink = await mlLocator.getUrl(
+      {
+        page: ML_PAGES.SINGLE_METRIC_VIEWER,
+        pageState: {
+          jobIds: [record.job_id],
+          refreshInterval: {
+            display: 'Off',
+            pause: true,
+            value: 0,
+          },
+          timeRange: {
+            from: from,
+            to: to,
+            mode: 'absolute',
+          },
+          zoom: {
+            from: zoomFrom,
+            to: zoomTo,
+          },
+          detectorIndex: record.detector_index,
+          entities: entityCondition,
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
         },
       },
-    });
+      { absolute: true }
+    );
     window.open(singleMetricViewerLink, '_blank');
   };
 

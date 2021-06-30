@@ -18,10 +18,10 @@ import { ML_PAGES } from '../constants/locator';
 type OptionalPageState = object | undefined;
 
 export type MLPageState<PageType, PageState> = PageState extends OptionalPageState
-  ? { page: PageType; pageState?: PageState; excludeBasePath?: boolean }
+  ? { page: PageType; pageState?: PageState }
   : PageState extends object
-  ? { page: PageType; pageState: PageState; excludeBasePath?: boolean }
-  : { page: PageType; excludeBasePath?: boolean };
+  ? { page: PageType; pageState: PageState }
+  : { page: PageType };
 
 export interface MlCommonGlobalState {
   time?: TimeRange;

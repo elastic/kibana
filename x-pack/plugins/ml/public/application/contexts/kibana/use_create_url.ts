@@ -10,6 +10,7 @@ import { useMlKibana } from './kibana_context';
 import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
 import { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
+import { LocatorGetUrlParams } from '../../../../../../../src/plugins/share/common/url_service';
 
 export const useMlLocator = () => {
   const {
@@ -19,7 +20,7 @@ export const useMlLocator = () => {
   return share.url.locators.get(ML_APP_LOCATOR);
 };
 
-export const useMlLink = (params: MlLocatorParams): string => {
+export const useMlLink = (params: MlLocatorParams, getUrlParams?: LocatorGetUrlParams): string => {
   const [href, setHref] = useState<string>(params.page);
   const mlLocator = useMlLocator();
 
@@ -27,7 +28,7 @@ export const useMlLink = (params: MlLocatorParams): string => {
     let isCancelled = false;
     const generateUrl = async (_params: MlLocatorParams) => {
       if (mlLocator) {
-        const url = await mlLocator.getUrl(_params);
+        const url = await mlLocator.getUrl(_params, getUrlParams);
         if (!isCancelled) {
           setHref(url);
         }
@@ -37,7 +38,7 @@ export const useMlLink = (params: MlLocatorParams): string => {
     return () => {
       isCancelled = true;
     };
-  }, [params]);
+  }, [params, getUrlParams]);
 
   return href;
 };

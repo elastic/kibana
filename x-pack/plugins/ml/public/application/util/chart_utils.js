@@ -241,35 +241,37 @@ export async function getExploreSeriesLink(mlLocator, series, timefilter) {
     });
   }
 
-  const url = await mlLocator.getUrl({
-    page: ML_PAGES.SINGLE_METRIC_VIEWER,
-    pageState: {
-      jobIds: [series.jobId],
-      refreshInterval: {
-        display: 'Off',
-        pause: true,
-        value: 0,
-      },
-      timeRange: {
-        from: from,
-        to: to,
-        mode: 'absolute',
-      },
-      zoom: {
-        from: zoomFrom,
-        to: zoomTo,
-      },
-      detectorIndex: series.detectorIndex,
-      entities: entityCondition,
-      query: {
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
+  const url = await mlLocator.getUrl(
+    {
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
+        jobIds: [series.jobId],
+        refreshInterval: {
+          display: 'Off',
+          pause: true,
+          value: 0,
+        },
+        timeRange: {
+          from: from,
+          to: to,
+          mode: 'absolute',
+        },
+        zoom: {
+          from: zoomFrom,
+          to: zoomTo,
+        },
+        detectorIndex: series.detectorIndex,
+        entities: entityCondition,
+        query: {
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
         },
       },
     },
-    excludeBasePath: true,
-  });
+    { absolute: true }
+  );
   return url;
 }
 
