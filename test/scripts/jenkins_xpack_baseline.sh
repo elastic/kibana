@@ -5,7 +5,7 @@ source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
 echo " -> building and extracting default Kibana distributable"
 cd "$KIBANA_DIR"
-node scripts/build --debug --no-oss
+node scripts/build --debug
 
 echo " -> shipping metrics from build to ci-stats"
 node scripts/ship_ci_stats \

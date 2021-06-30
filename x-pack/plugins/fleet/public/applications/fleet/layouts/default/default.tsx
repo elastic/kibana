@@ -17,15 +17,21 @@ import { DefaultPageTitle } from './default_page_title';
 interface Props {
   section?: Section;
   children?: React.ReactNode;
+  rightColumn?: JSX.Element;
 }
 
-export const DefaultLayout: React.FunctionComponent<Props> = ({ section, children }) => {
+export const DefaultLayout: React.FunctionComponent<Props> = ({
+  section,
+  children,
+  rightColumn,
+}) => {
   const { getHref } = useLink();
   const { agents } = useConfig();
 
   return (
     <WithHeaderLayout
       leftColumn={<DefaultPageTitle />}
+      rightColumn={rightColumn}
       tabs={[
         {
           name: (
