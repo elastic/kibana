@@ -13,6 +13,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 
+import { sample, difference } from 'lodash';
 import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
@@ -181,6 +182,13 @@ export const usePivotData = (
         }),
         {}
       );
+
+    // Take a sample from docs and resolve missing mappings
+    const sampleDoc = sample(docs) ?? {};
+    const missingMappings = difference(Object.keys(sampleDoc), Object.keys(populatedProperties));
+    missingMappings.forEach((m) => {
+      populatedProperties[m] = { type: typeof sampleDoc[m] as ES_FIELD_TYPES };
+    });
 
     setTableItems(docs);
     setRowCount(docs.length);
