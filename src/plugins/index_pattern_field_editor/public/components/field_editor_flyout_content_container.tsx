@@ -119,7 +119,7 @@ export const FieldEditorFlyoutContentContainer = ({
   const saveRuntimeObject = useCallback(
     (updatedField: Field): IndexPatternField[] => {
       if (field?.type !== undefined && field?.type !== 'object') {
-        // A previous non object runtime field is now an object
+        // A previous runtime field is now a runtime object
         indexPattern.removeRuntimeField(field.name);
       } else if (field?.name && field.name !== updatedField.name) {
         // rename an existing runtime object
@@ -146,7 +146,7 @@ export const FieldEditorFlyoutContentContainer = ({
   const saveRuntimeField = useCallback(
     (updatedField: Field): [IndexPatternField] => {
       if (field?.type !== undefined && field?.type === 'object') {
-        // A previous object runtime field is now an object
+        // A previous runtime object is now a runtime field
         indexPattern.removeRuntimeObject(field.name);
       } else if (field?.name && field.name !== updatedField.name) {
         // rename an existing runtime field

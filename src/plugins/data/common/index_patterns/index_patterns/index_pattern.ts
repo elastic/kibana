@@ -410,28 +410,28 @@ export class IndexPattern implements IIndexPattern {
    * @param name Field name
    * @param runtimeField Runtime field definition
    */
-  addRuntimeField(name: string, runtimeField: EnhancedRuntimeField): IndexPatternField {
-    const { type, script, parent, customLabel, format, popularity } = runtimeField;
+  addRuntimeField(name: string, enhancedRuntimeField: EnhancedRuntimeField): IndexPatternField {
+    const { type, script, parent, customLabel, format, popularity } = enhancedRuntimeField;
 
-    const esRuntimeField = { type, script, parent };
+    const runtimeField: RuntimeField = { type, script, parent };
 
     let fieldCreated: IndexPatternField;
     const existingField = this.getFieldByName(name);
     if (existingField) {
-      existingField.runtimeField = esRuntimeField;
+      existingField.runtimeField = runtimeField;
       fieldCreated = existingField;
     } else {
       fieldCreated = this.fields.add({
         name,
-        runtimeField: esRuntimeField,
-        type: castEsToKbnFieldTypeName(runtimeField.type),
+        runtimeField,
+        type: castEsToKbnFieldTypeName(type),
         aggregatable: true,
         searchable: true,
         count: popularity ?? 0,
         readFromDocValues: false,
       });
     }
-    this.runtimeFieldMap[name] = esRuntimeField;
+    this.runtimeFieldMap[name] = runtimeField;
 
     this.setFieldCustomLabel(name, customLabel);
 
