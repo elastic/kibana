@@ -123,7 +123,7 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
 import { addsFieldsToTimeline, goBackToAllRulesTable } from '../../tasks/rule_details';
 
-import { DETECTIONS_URL, RULE_CREATION } from '../../urls/navigation';
+import { ALERTS_URL, RULE_CREATION } from '../../urls/navigation';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
@@ -407,7 +407,7 @@ describe('indicator match', () => {
     describe('Generating signals', () => {
       beforeEach(() => {
         cleanKibana();
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
       });
 
       it('Creates and activates a new Indicator Match rule', () => {
@@ -559,7 +559,7 @@ describe('indicator match', () => {
         cleanKibana();
         esArchiverLoad('threat_indicator');
         esArchiverLoad('suspicious_source_event');
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
         goToManageAlertsDetectionRules();
         createCustomIndicatorRule(newThreatIndicatorRule);
         reload();
@@ -571,7 +571,7 @@ describe('indicator match', () => {
       });
 
       beforeEach(() => {
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
         goToManageAlertsDetectionRules();
         goToRuleDetails();
       });
@@ -687,7 +687,7 @@ describe('indicator match', () => {
     describe('Duplicates the indicator rule', () => {
       beforeEach(() => {
         cleanKibana();
-        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        loginAndWaitForPageWithoutDateRange(ALERTS_URL);
         goToManageAlertsDetectionRules();
         createCustomIndicatorRule(newThreatIndicatorRule);
         reload();

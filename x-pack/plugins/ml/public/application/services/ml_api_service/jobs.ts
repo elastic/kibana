@@ -136,9 +136,23 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobAuditMessages(jobId: string, from?: number) {
+  jobAuditMessages({
+    jobId,
+    from,
+    start,
+    end,
+  }: {
+    jobId: string;
+    from?: number;
+    start?: string;
+    end?: string;
+  }) {
     const jobIdString = jobId !== undefined ? `/${jobId}` : '';
-    const query = from !== undefined ? { from } : {};
+    const query = {
+      ...(from !== undefined ? { from } : {}),
+      ...(start !== undefined && end !== undefined ? { start, end } : {}),
+    };
+
     return httpService.http<JobMessage[]>({
       path: `${ML_BASE_PATH}/job_audit_messages/messages${jobIdString}`,
       method: 'GET',

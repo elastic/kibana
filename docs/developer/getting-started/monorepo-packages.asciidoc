@@ -107,6 +107,8 @@ yarn kbn watch-bazel
 - @kbn/std
 - @kbn/storybook
 - @kbn/telemetry-utils
+- @kbn/test
+- @kbn/test-subj-selector
 - @kbn/tinymath
 - @kbn/ui-framework
 - @kbn/ui-shared-deps

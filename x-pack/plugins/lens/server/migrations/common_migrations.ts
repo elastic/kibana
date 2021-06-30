@@ -6,7 +6,13 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { LensDocShapePre712, OperationTypePre712, LensDocShapePost712 } from './types';
+import {
+  LensDocShapePre712,
+  OperationTypePre712,
+  LensDocShapePost712,
+  LensDocShape713,
+  LensDocShape714,
+} from './types';
 
 export const commonRenameOperationsForFormula = (
   attributes: LensDocShapePre712
@@ -36,6 +42,34 @@ export const commonRenameOperationsForFormula = (
                   : column.operationType,
               };
               return [columnId, copy];
+            })
+          ),
+        },
+      ];
+    })
+  );
+  return newAttributes as LensDocShapePost712;
+};
+
+export const commonRemoveTimezoneDateHistogramParam = (
+  attributes: LensDocShape713
+): LensDocShape714 => {
+  const newAttributes = cloneDeep(attributes);
+  const datasourceLayers = newAttributes.state.datasourceStates.indexpattern.layers || {};
+  (newAttributes as LensDocShapePost712).state.datasourceStates.indexpattern.layers = Object.fromEntries(
+    Object.entries(datasourceLayers).map(([layerId, layer]) => {
+      return [
+        layerId,
+        {
+          ...layer,
+          columns: Object.fromEntries(
+            Object.entries(layer.columns).map(([columnId, column]) => {
+              if (column.operationType === 'date_histogram' && 'params' in column) {
+                const copy = { ...column, params: { ...column.params } };
+                delete copy.params.timeZone;
+                return [columnId, copy];
+              }
+              return [columnId, column];
             })
           ),
         },

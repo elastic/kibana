@@ -7,14 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState, useRef, MutableRefObject } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingContent,
-  EuiLoadingSpinner,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiLoadingSpinner } from '@elastic/eui';
 
 import {
   CaseStatuses,
@@ -36,7 +29,6 @@ import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
@@ -58,6 +50,7 @@ export interface CaseViewComponentProps {
   configureCasesNavigation: CasesNavigation;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   onComponentInitialized?: () => void;
+  actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   subCaseId?: string;
@@ -91,14 +84,6 @@ const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
 
-const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
-  margin-left: 48px;
-
-  &.euiHorizontalRule--full {
-    width: calc(100% - 48px);
-  }
-`;
-
 export interface CaseComponentProps extends CaseViewComponentProps {
   fetchCase: UseGetCase['fetchCase'];
   caseData: Case;
@@ -115,6 +100,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     getCaseDetailHrefWithCommentId,
     fetchCase,
     onComponentInitialized,
+    actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
@@ -306,21 +292,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
       [caseServices, caseData.connector]
     );
 
-    const { pushButton, pushCallouts } = usePushToService({
-      configureCasesNavigation,
-      connector: {
-        ...caseData.connector,
-        name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
-      },
-      caseServices,
-      caseId: caseData.id,
-      caseStatus: caseData.status,
-      connectors,
-      updateCase: handleUpdateCase,
-      userCanCrud,
-      isValidConnector: isLoadingConnectors ? true : isValidConnector,
-    });
-
     const onSubmitConnector = useCallback(
       (connectorId, connectorFields, onError, onSuccess) => {
         const connector = getConnectorById(connectorId, connectors);
@@ -412,7 +383,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             data-test-subj="case-view-title"
             titleNode={
               <EditableTitle
-                disabled={!userCanCrud}
+                userCanCrud={userCanCrud}
                 isLoading={isLoading && updateKey === 'title'}
                 title={caseData.title}
                 onSubmit={onSubmitTitle}
@@ -434,7 +405,6 @@ export const CaseComponent = React.memo<CaseComponentProps>(
         </HeaderWrapper>
         <WhitePageWrapper>
           <MyWrapper>
-            {!initLoadingData && pushCallouts != null && pushCallouts}
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && (
@@ -450,6 +420,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
+                      actionsNavigation={actionsNavigation}
                       fetchUserActions={fetchCaseUserActions.bind(
                         null,
                         caseId,
@@ -463,34 +434,19 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       renderInvestigateInTimelineActionComponent={
                         timelineUi?.renderInvestigateInTimelineActionComponent
                       }
+                      statusActionButton={
+                        caseData.type !== CaseType.collection && userCanCrud ? (
+                          <StatusActionButton
+                            status={caseData.status}
+                            onStatusChanged={changeStatus}
+                            isLoading={isLoading && updateKey === 'status'}
+                          />
+                        ) : null
+                      }
                       updateCase={updateCase}
                       useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
                     />
-                    {(caseData.type !== CaseType.collection || hasDataToPush) && userCanCrud && (
-                      <>
-                        <MyEuiHorizontalRule
-                          margin="s"
-                          data-test-subj="case-view-bottom-actions-horizontal-rule"
-                        />
-                        <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
-                          {caseData.type !== CaseType.collection && (
-                            <EuiFlexItem grow={false}>
-                              <StatusActionButton
-                                status={caseData.status}
-                                onStatusChanged={changeStatus}
-                                isLoading={isLoading && updateKey === 'status'}
-                              />
-                            </EuiFlexItem>
-                          )}
-                          {hasDataToPush && (
-                            <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
-                              {pushButton}
-                            </EuiFlexItem>
-                          )}
-                        </EuiFlexGroup>
-                      </>
-                    )}
                   </>
                 )}
               </EuiFlexItem>
@@ -516,17 +472,22 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                   isLoading={isLoading && updateKey === 'tags'}
                 />
                 <EditConnector
-                  caseFields={caseData.connector.fields}
+                  caseData={caseData}
+                  caseServices={caseServices}
+                  configureCasesNavigation={configureCasesNavigation}
+                  connectorName={connectorName}
                   connectors={connectors}
-                  userCanCrud={userCanCrud}
+                  hasDataToPush={hasDataToPush && userCanCrud}
                   hideConnectorServiceNowSir={
                     subCaseId != null || caseData.type === CaseType.collection
                   }
                   isLoading={isLoadingConnectors || (isLoading && updateKey === 'connector')}
+                  isValidConnector={isLoadingConnectors ? true : isValidConnector}
                   onSubmit={onSubmitConnector}
-                  selectedConnector={caseData.connector.id}
-                  userActions={caseUserActions}
                   permissionsError={permissionsError}
+                  updateCase={handleUpdateCase}
+                  userActions={caseUserActions}
+                  userCanCrud={userCanCrud}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -547,6 +508,7 @@ export const CaseView = React.memo(
     getCaseDetailHrefWithCommentId,
     onCaseDataSuccess,
     onComponentInitialized,
+    actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
@@ -585,6 +547,7 @@ export const CaseView = React.memo(
               getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
               fetchCase={fetchCase}
               onComponentInitialized={onComponentInitialized}
+              actionsNavigation={actionsNavigation}
               ruleDetailsNavigation={ruleDetailsNavigation}
               showAlertDetails={showAlertDetails}
               subCaseId={subCaseId}

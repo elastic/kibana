@@ -2785,11 +2785,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-subj-selector@link:packages/kbn-test-subj-selector":
+"@kbn/test-subj-selector@link:bazel-bin/packages/kbn-test-subj-selector":
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:packages/kbn-test":
+"@kbn/test@link:bazel-bin/packages/kbn-test":
   version "0.0.0"
   uid ""
 
@@ -4306,6 +4306,11 @@
     prettier "~2.0.5"
     regenerator-runtime "^0.13.7"
     source-map "^0.7.3"
+
+"@storybook/testing-react@^0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@storybook/testing-react/-/testing-react-0.0.17.tgz#632dd22f8815743f78c182b126f444cf51d92d71"
+  integrity sha512-93nbA/JSWDEys1msd438+wzETRFDEgT2aFqJL2y46++zsyv8g2mCYKZkf9E36KQHMQbO1uJBHT8CmrLQa8VmZw==
 
 "@storybook/theming@6.1.20", "@storybook/theming@^6.1.20":
   version "6.1.20"

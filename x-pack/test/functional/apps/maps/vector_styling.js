@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.maps.setStyleByValue('fillColor', 'machine.os.raw');
         await PageObjects.maps.selectCustomColorRamp('fillColor');
         const suggestions = await PageObjects.maps.getCategorySuggestions();
-        expect(suggestions.trim().split('\n').join()).to.equal('win 8,win xp,win 7,ios,osx');
+        expect(suggestions.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
       });
     });
   });
