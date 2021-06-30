@@ -13,7 +13,10 @@ import {
 import { repeatImage } from './repeat_image';
 
 describe('repeatImage', () => {
-  const fn = functionWrapper(repeatImage);
+  let fn;
+  beforeEach(async () => {
+    fn = await functionWrapper(repeatImage);
+  });
 
   let elasticLogo;
   let elasticOutline;

@@ -16,20 +16,24 @@ const errors = getFunctionErrors().containerStyle;
 
 describe('containerStyle', () => {
   let elasticLogo;
+  let fn;
   beforeEach(async () => {
     elasticLogo = (await getElasticLogo()).elasticLogo;
+    fn = await functionWrapper(containerStyle);
   });
 
-  const fn = functionWrapper(containerStyle);
-
   describe('default output', () => {
-    const result = fn(null);
+    console.log(fn);
 
     it('returns a containerStyle', () => {
+      const result = fn(null);
+
       expect(result).toHaveProperty('type', 'containerStyle');
     });
 
     it('all style properties except `overflow` are omitted if args not provided', () => {
+      const result = fn(null);
+
       expect(Object.keys(result)).toHaveLength(2);
       expect(result).toHaveProperty('type');
       expect(result).toHaveProperty('overflow');

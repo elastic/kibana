@@ -14,7 +14,6 @@ import { Adapters } from 'src/plugins/inspector';
 const errors = getFunctionErrors().csv;
 
 describe('csv', () => {
-  // const fn = functionWrapper(csv);
   let fn: ReturnType<typeof csv>['fn'];
 
   beforeEach(async () => {
