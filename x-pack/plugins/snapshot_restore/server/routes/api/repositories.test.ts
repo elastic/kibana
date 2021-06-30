@@ -188,11 +188,10 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const mockEsResponse = {
         [name]: { type: '', settings: {} },
       };
-      const mockEsSnapshotError = jest.fn().mockRejectedValueOnce(new Error('snapshot error'));
 
       getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
       getRepoFn.mockResolvedValue({ body: mockEsResponse });
-      getSnapshotFn.mockResolvedValue({ body: mockEsSnapshotError });
+      getSnapshotFn.mockRejectedValueOnce(new Error('snapshot error'));
 
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
