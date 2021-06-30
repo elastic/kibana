@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { CasePostRequest, ConnectorTypeFields } from '../../../common';
+import { CasePostRequest, ConnectorTypeFields, MAX_TITLE_LENGTH } from '../../../common';
 import { FIELD_TYPES, fieldValidators, FormSchema } from '../../common/shared_imports';
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
 const { emptyField, maxLengthField } = fieldValidators;
-
-const MAX_TITLE_LENGTH = 64;
 
 export const schemaTags = {
   type: FIELD_TYPES.COMBO_BOX,
