@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { isEmpty } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 import {
   fetchHighLevelStats,
@@ -183,7 +183,7 @@ export function ensureTimeSpan(
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string,

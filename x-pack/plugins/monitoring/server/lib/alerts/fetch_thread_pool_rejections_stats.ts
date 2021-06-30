@@ -41,7 +41,7 @@ export async function fetchThreadPoolRejectionStats(
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
   const params = {
     index,
-    filterPath: ['aggregations'],
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
