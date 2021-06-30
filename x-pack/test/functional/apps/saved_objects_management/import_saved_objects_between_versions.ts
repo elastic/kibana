@@ -50,5 +50,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // verifying the count of saved objects after importing .ndjson
       await expect(importedSavedObjects).to.be('Export 88 objects');
     });
+
+    it('should be able to import alerts and actions saved objects from 7.14 into 8.0.0', async function () {
+      await retry.tryForTime(10000, async () => {
+        const existingSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
+        // Kibana always has 1 advanced setting as a saved object
+        await expect(existingSavedObjects).to.be('Export 88 objects');
+      });
+      await PageObjects.savedObjects.importFile(
+        path.join(__dirname, 'exports', '_7.14_import_alerts_actions.ndjson')
+      );
+      await PageObjects.savedObjects.checkImportSucceeded();
+      await PageObjects.savedObjects.clickImportDone();
+      const importedSavedObjects = await testSubjects.getVisibleText('exportAllObjects');
+      // verifying the count of saved objects after importing .ndjson
+      await expect(importedSavedObjects).to.be('Export 111 objects');
+    });
   });
 }
