@@ -6,4 +6,3 @@
  */
 
 export * from './fleet_agent_status_to_endpoint_host_status';
-export * from './search_until_empty';

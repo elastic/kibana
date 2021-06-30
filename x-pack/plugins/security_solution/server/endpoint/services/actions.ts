@@ -14,7 +14,6 @@ import {
   EndpointActionResponse,
   EndpointPendingActions,
 } from '../../../common/endpoint/types';
-import { searchUntilEmpty } from '../utils';
 
 export const getAuditLogResponse = async ({
   elasticAgentId,
@@ -147,38 +146,51 @@ export const getPendingActionCounts = async (
   agentIDs: string[]
 ): Promise<EndpointPendingActions[]> => {
   // retrieve the unexpired actions for the given hosts
-
-  const recentActions = await searchUntilEmpty<EndpointAction>(esClient, {
-    index: AGENT_ACTIONS_INDEX,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'INPUT_ACTION' } }, // actions that are directed at agent children
-            { term: { input_type: 'endpoint' } }, // filter for agent->endpoint actions
-            { range: { expiration: { gte: 'now' } } }, // that have not expired yet
-            { terms: { agents: agentIDs } }, // for the requested agent IDs
-          ],
+  const recentActions = await esClient
+    .search<EndpointAction>(
+      {
+        index: AGENT_ACTIONS_INDEX,
+        size: 10000,
+        from: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'INPUT_ACTION' } }, // actions that are directed at agent children
+                { term: { input_type: 'endpoint' } }, // filter for agent->endpoint actions
+                { range: { expiration: { gte: 'now' } } }, // that have not expired yet
+                { terms: { agents: agentIDs } }, // for the requested agent IDs
+              ],
+            },
+          },
         },
       },
-    },
-  });
+      { ignore: [404] }
+    )
+    .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || []);
 
   // retrieve any responses to those action IDs from these agents
   const actionIDs = recentActions.map((a) => a.action_id);
-  const responses = await searchUntilEmpty<EndpointActionResponse>(esClient, {
-    index: '.fleet-actions-results',
-    body: {
-      query: {
-        bool: {
-          filter: [
-            { terms: { action_id: actionIDs } }, // get results for these actions
-            { terms: { agent_id: agentIDs } }, // ignoring responses from agents we're not looking for
-          ],
+  const responses = await esClient
+    .search<EndpointActionResponse>(
+      {
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        size: 10000,
+        from: 0,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                { terms: { action_id: actionIDs } }, // get results for these actions
+                { terms: { agent_id: agentIDs } }, // ignoring responses from agents we're not looking for
+              ],
+            },
+          },
         },
       },
-    },
-  });
+      { ignore: [404] }
+    )
+    .then((result) => result.body?.hits?.hits?.map((a) => a._source!) || []);
 
   // respond with action-count per agent
   const pending: EndpointPendingActions[] = agentIDs.map((aid) => {
