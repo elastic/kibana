@@ -187,9 +187,6 @@ export class RuleDataPluginService {
     const clusterClient = await this.getClusterClient();
     const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
     const writeIndicesAndAliases: Array<{ index: string; alias: string }> = [];
-    // Sadly the get alias API returns an entry for every concrete index associated with an alias
-    // So we loop over the concrete indices, then for each concrete index add all of its aliases
-    // to the set of unique aliases
     Object.entries(aliasesResponse).forEach(([index, aliases]) => {
       Object.entries(aliases.aliases).forEach(([aliasName, aliasProperties]) => {
         if (aliasProperties.is_write_index) {
