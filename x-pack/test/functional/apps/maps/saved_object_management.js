@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }) {
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
           await inspector.close();
-          expect(hits).to.equal('2');
+          expect(hits).to.equal('1');
         });
       });
     });
