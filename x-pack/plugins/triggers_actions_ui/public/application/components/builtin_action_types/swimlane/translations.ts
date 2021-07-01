@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.selectMessageText',
-  {
-    defaultMessage: 'Create record in Swimlane',
-  }
-);
-
-export const SW_ACTION_TYPE_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.actionTypeTitle',
-  {
-    defaultMessage: 'Create Swimlane Record',
-  }
-);
-
 export const SW_REQUIRED_RULE_NAME = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredRuleName',
   {
@@ -190,11 +176,6 @@ export const SW_RETRIEVE_CONFIGURATION_LABEL = i18n.translate(
   { defaultMessage: 'Configure Fields' }
 );
 
-export const SW_CONFIGURE_API_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.configureAPILabel',
-  { defaultMessage: 'Configure API' }
-);
-
 export const SW_CONNECTOR_TYPE_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.connectorType',
   {
@@ -220,7 +201,7 @@ export const EMPTY_MAPPING_WARNING_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.emptyMappingWarningDesc',
   {
     defaultMessage:
-      'This connector cannot be selected because it is missing the required case field mappings. You can edit this connector to add required field mappings or select a connector of type Alerts.',
+      'This connector cannot be selected because it is missing the required alert field mappings. You can edit this connector to add required field mappings or select a connector of type Alerts.',
   }
 );
 
@@ -273,10 +254,24 @@ export const SW_REQUIRED_ALERT_ID = i18n.translate(
   }
 );
 
-export const SW_ALERT_SOURCE_TOOLTIP = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.alertSourceTooltip',
+export const SW_BACK = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.prevStep',
   {
-    defaultMessage: 'The index of the alert. Use {index} in Detections.',
-    values: { index: '{{context.rule.output_index}}' },
+    defaultMessage: 'Back',
+  }
+);
+
+export const SW_NEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.nextStep',
+  {
+    defaultMessage: 'Next',
+  }
+);
+
+export const SW_FIELDS_BUTTON_HELP_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.nextStepHelpText',
+  {
+    defaultMessage:
+      'If field mappings are not configured, Swimlane connector type will be set to all.',
   }
 );

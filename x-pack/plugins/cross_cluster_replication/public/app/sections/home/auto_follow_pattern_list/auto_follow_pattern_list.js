@@ -9,13 +9,12 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiPageContent, EuiButton, EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
-import { extractQueryParams, SectionLoading } from '../../../../shared_imports';
+import { extractQueryParams, PageError, PageLoading } from '../../../../shared_imports';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { API_STATUS, UIM_AUTO_FOLLOW_PATTERN_LIST_LOAD } from '../../../constants';
-import { SectionError, SectionUnauthorized } from '../../../components';
 import { AutoFollowPatternTable, DetailPanel } from './components';
 
 const REFRESH_RATE_MS = 30000;
@@ -98,7 +97,12 @@ export class AutoFollowPatternList extends PureComponent {
 
   renderEmpty() {
     return (
-      <section>
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
         <EuiEmptyPrompt
           iconType="managementApp"
           data-test-subj="emptyPrompt"
@@ -133,7 +137,7 @@ export class AutoFollowPatternList extends PureComponent {
             </EuiButton>
           }
         />
-      </section>
+      </EuiPageContent>
     );
   }
 
@@ -170,19 +174,22 @@ export class AutoFollowPatternList extends PureComponent {
 
     if (!isAuthorized) {
       return (
-        <SectionUnauthorized
+        <PageError
           title={
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternList.permissionErrorTitle"
               defaultMessage="Permission error"
             />
           }
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
-            defaultMessage="You do not have permission to view or add auto-follow patterns."
-          />
-        </SectionUnauthorized>
+          error={{
+            error: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternList.noPermissionText"
+                defaultMessage="You do not have permission to view or add auto-follow patterns."
+              />
+            ),
+          }}
+        />
       );
     }
 
@@ -194,7 +201,7 @@ export class AutoFollowPatternList extends PureComponent {
         }
       );
 
-      return <SectionError title={title} error={apiError} />;
+      return <PageError title={title} error={apiError.body} />;
     }
 
     if (isEmpty) {
@@ -203,14 +210,12 @@ export class AutoFollowPatternList extends PureComponent {
 
     if (apiStatus === API_STATUS.LOADING) {
       return (
-        <section data-test-subj="autoFollowPatternLoading">
-          <SectionLoading>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
-              defaultMessage="Loading auto-follow patterns..."
-            />
-          </SectionLoading>
-        </section>
+        <PageLoading>
+          <FormattedMessage
+            id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
+            defaultMessage="Loading auto-follow patterns..."
+          />
+        </PageLoading>
       );
     }
 

@@ -770,7 +770,7 @@ describe('loader', () => {
                 label: 'My hist',
                 operationType: 'date_histogram',
                 params: {
-                  interval: '1d',
+                  interval: 'm',
                 },
                 sourceField: 'timestamp',
               },
