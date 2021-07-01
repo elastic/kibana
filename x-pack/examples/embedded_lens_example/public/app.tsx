@@ -260,7 +260,6 @@ export const App = (props: {
                         color
                       ) as unknown) as LensEmbeddableInput
                     }
-                    isVisible={isSaveModalVisible}
                     onSave={() => {}}
                     onClose={() => setIsSaveModalVisible(false)}
                   />
