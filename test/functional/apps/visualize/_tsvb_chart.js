@@ -142,8 +142,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-
-    describe('markdown', () => {
+    // flaky https://github.com/elastic/kibana/issues/29670
+    describe.skip('markdown', () => {
 
       before(async () => {
         await PageObjects.visualBuilder.resetPage();
