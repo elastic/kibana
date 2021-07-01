@@ -20,6 +20,7 @@ const createRuleDataPluginServiceMock = (_: RuleDataPluginServiceConstructorOpti
     createOrUpdateComponentTemplate: jest.fn(),
     createOrUpdateIndexTemplate: jest.fn(),
     createOrUpdateLifecyclePolicy: jest.fn(),
+    getRuleDataClient: jest.fn(),
   };
   return mocked;
 };

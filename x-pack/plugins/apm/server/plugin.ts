@@ -18,7 +18,6 @@ import {
 import { mapValues, once } from 'lodash';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { RuleDataClient } from '../../rule_registry/server';
 import { APMConfig, APMXPackConfig, APM_SERVER_FEATURE_ID } from '.';
 import { mergeConfigs } from './index';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
@@ -189,6 +188,7 @@ export class APMPlugin
     );
 
     const ruleDataClient = ruleDataService.getRuleDataClient(
+      APM_SERVER_FEATURE_ID,
       ruleDataService.getFullAssetName('observability-apm'),
       () => initializeRuleDataTemplatesPromise
     );
@@ -207,7 +207,7 @@ export class APMPlugin
     }) as APMRouteHandlerResources['plugins'];
 
     const telemetryUsageCounter = resourcePlugins.usageCollection?.setup.createUsageCounter(
-      'apm'
+      APM_SERVER_FEATURE_ID
     );
 
     registerRoutes({
