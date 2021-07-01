@@ -10,12 +10,14 @@
 import { Query } from 'src/plugins/data/public';
 import { Feature } from 'geojson';
 import {
+  FieldMeta,
   HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
+import { VectorShapeTypeCounts } from '../get_geometry_counts';
 
 export type Attribution = {
   label: string;
@@ -27,6 +29,15 @@ export type JoinDescriptor = {
   right: TermJoinSourceDescriptor;
 };
 
+export type TileMetaFeature = Feature & {
+  properties: {
+    __kbn_metadata_feature__: true;
+    __kbn_is_tile_complete__: boolean;
+    __kbn_feature_count__: number;
+    __kbn_vector_shape_type_counts__: VectorShapeTypeCounts;
+  } & FieldMeta;
+};
+
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
@@ -34,7 +45,7 @@ export type LayerDescriptor = {
   __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
   __areTilesLoaded?: boolean;
-  __metaFromTiles?: Feature[];
+  __metaFromTiles?: TileMetaFeature[];
   alpha?: number;
   attribution?: Attribution;
   id: string;

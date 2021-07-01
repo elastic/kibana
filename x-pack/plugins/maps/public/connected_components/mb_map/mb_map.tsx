@@ -14,7 +14,6 @@ import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
-import { Feature } from 'geojson';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
@@ -26,7 +25,12 @@ import { getInitialView } from './get_initial_view';
 import { getPreserveDrawingBuffer } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import { MapSettings } from '../../reducers/map';
-import { Goto, MapCenterAndZoom, Timeslice } from '../../../common/descriptor_types';
+import {
+  Goto,
+  MapCenterAndZoom,
+  TileMetaFeature,
+  Timeslice,
+} from '../../../common/descriptor_types';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
@@ -73,7 +77,7 @@ export interface Props {
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
   timeslice?: Timeslice;
-  updateMetaFromTiles: (layerId: string, features: Feature[]) => void;
+  updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
 }
@@ -124,7 +128,7 @@ export class MbMap extends Component<Props, State> {
   // This keeps track of the latest update calls, per layerId
   _queryForMeta = (layer: ILayer) => {
     if (this.state.mbMap && layer.isVisible() && layer.getType() === LAYER_TYPE.TILED_VECTOR) {
-      const mbFeatures = (layer as TiledVectorLayer).queryForTileMeta(this.state.mbMap);
+      const mbFeatures = (layer as TiledVectorLayer).queryTileMetaFeatures(this.state.mbMap);
       if (mbFeatures !== null) {
         this.props.updateMetaFromTiles(layer.getId(), mbFeatures);
       }

@@ -8,7 +8,6 @@
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { Query } from 'src/plugins/data/public';
-import { Feature } from 'geojson';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
@@ -48,6 +47,7 @@ import {
   JoinDescriptor,
   LayerDescriptor,
   StyleDescriptor,
+  TileMetaFeature,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
@@ -593,7 +593,7 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
   };
 }
 
-export function updateMetaFromTiles(layerId: string, mbMetaFeatures: Feature[]) {
+export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFeature[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState

@@ -8,7 +8,6 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { Feature } from 'geojson';
 import { MbMap } from './mb_map';
 import {
   clearGoto,
@@ -35,6 +34,7 @@ import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
 import { DRAW_MODE } from '../../../common';
+import { TileMetaFeature } from '../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -81,7 +81,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
       dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
     },
-    updateMetaFromTiles(layerId: string, features: Feature[]) {
+    updateMetaFromTiles(layerId: string, features: TileMetaFeature[]) {
       dispatch(updateMetaFromTiles(layerId, features));
     },
   };

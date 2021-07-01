@@ -41,7 +41,7 @@ import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
 import { pluckRangeFieldMeta } from '../../common/pluck_range_field_meta';
-import { FieldMeta } from '../../common/descriptor_types';
+import { FieldMeta, TileMetaFeature } from '../../common/descriptor_types';
 import { pluckCategoryFieldMeta } from '../../common/pluck_category_field_meta';
 
 function isAbortError(error: Error) {
@@ -147,7 +147,7 @@ export async function getGridTile({
         }
       });
 
-      const metaDataFeature: Feature = {
+      const metaDataFeature: TileMetaFeature = {
         type: 'Feature',
         properties: {
           [KBN_METADATA_FEATURE]: true,
@@ -272,26 +272,25 @@ export async function getTile({
         )
         .toPromise();
 
-      features = [
-        {
-          type: 'Feature',
-          properties: {
-            [KBN_METADATA_FEATURE]: true,
-            [KBN_IS_TILE_COMPLETE]: false,
-            [KBN_FEATURE_COUNT]: 0,
-            [KBN_VECTOR_SHAPE_TYPE_COUNTS]: {
-              [VECTOR_SHAPE_TYPE.POINT]: 0,
-              [VECTOR_SHAPE_TYPE.LINE]: 0,
-              [VECTOR_SHAPE_TYPE.POLYGON]: 0,
-            },
+      const metaDataFeature: TileMetaFeature = {
+        type: 'Feature',
+        properties: {
+          [KBN_METADATA_FEATURE]: true,
+          [KBN_IS_TILE_COMPLETE]: false,
+          [KBN_FEATURE_COUNT]: 0,
+          [KBN_VECTOR_SHAPE_TYPE_COUNTS]: {
+            [VECTOR_SHAPE_TYPE.POINT]: 0,
+            [VECTOR_SHAPE_TYPE.LINE]: 0,
+            [VECTOR_SHAPE_TYPE.POLYGON]: 0,
           },
-          geometry: esBboxToGeoJsonPolygon(
-            // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
-            bboxResponse.rawResponse.aggregations.data_bounds.bounds,
-            tileToESBbox(x, y, z)
-          ),
         },
-      ];
+        geometry: esBboxToGeoJsonPolygon(
+          // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
+          bboxResponse.rawResponse.aggregations.data_bounds.bounds,
+          tileToESBbox(x, y, z)
+        ),
+      };
+      features = [metaDataFeature];
     } else {
       const documentsResponse = await context
         .search!.search(
@@ -331,7 +330,7 @@ export async function getTile({
       }
 
       const counts = countVectorShapeTypes(features);
-      const metadataFeature = {
+      const metadataFeature: TileMetaFeature = {
         type: 'Feature',
         properties: {
           [KBN_METADATA_FEATURE]: true,
@@ -342,7 +341,6 @@ export async function getTile({
         geometry: esBboxToGeoJsonPolygon(tileToESBbox(x, y, z), tileToESBbox(x, y, z)),
       };
 
-      // @ts-expect-error
       features.push(metadataFeature);
     }
 

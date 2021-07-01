@@ -36,6 +36,7 @@ import {
   StyleMetaDescriptor,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
+  TileMetaFeature,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
@@ -67,7 +68,7 @@ export class TiledVectorLayer extends VectorLayer {
     this._source = source as ITiledSingleLayerVectorSource;
   }
 
-  getMetaFromTiles(): Feature[] {
+  getMetaFromTiles(): TileMetaFeature[] {
     return this._descriptor.__metaFromTiles || [];
   }
 
@@ -264,7 +265,7 @@ export class TiledVectorLayer extends VectorLayer {
     this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
   }
 
-  queryForTileMeta(mbMap: MbMap): Feature[] | null {
+  queryTileMetaFeatures(mbMap: MbMap): TileMetaFeature[] | null {
     // @ts-ignore
     const mbSource = mbMap.getSource(this._getMbSourceId());
     if (!mbSource) {
@@ -287,7 +288,7 @@ export class TiledVectorLayer extends VectorLayer {
       filter: ['==', ['get', KBN_METADATA_FEATURE], true],
     });
 
-    const metaFeatures: Feature[] = mbFeatures.map((mbFeature: Feature) => {
+    const metaFeatures: TileMetaFeature[] = mbFeatures.map((mbFeature: Feature) => {
       const parsedProperties: Record<string, unknown> = {};
       for (const key in mbFeature.properties) {
         if (mbFeature.properties.hasOwnProperty(key)) {
@@ -299,10 +300,10 @@ export class TiledVectorLayer extends VectorLayer {
         id: mbFeature.id,
         geometry: mbFeature.geometry,
         properties: parsedProperties,
-      };
+      } as TileMetaFeature;
     });
 
-    return metaFeatures as Feature[];
+    return metaFeatures as TileMetaFeature[];
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
