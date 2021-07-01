@@ -22,7 +22,6 @@ export interface WithServicesProps {
 const defaultContextValue = {
   embeddables: {},
   expressions: {},
-  notify: {},
   platform: {},
   navLink: {},
   search: {},
@@ -34,7 +33,6 @@ export const useServices = () => useContext(context);
 export const usePlatformService = () => useServices().platform;
 export const useEmbeddablesService = () => useServices().embeddables;
 export const useExpressionsService = () => useServices().expressions;
-export const useNotifyService = () => useServices().notify;
 export const useNavLinkService = () => useServices().navLink;
 export const useLabsService = () => useServices().labs;
 
@@ -52,7 +50,6 @@ export const LegacyServicesProvider: FC<{
   const value = {
     embeddables: specifiedProviders.embeddables.getService(),
     expressions: specifiedProviders.expressions.getService(),
-    notify: specifiedProviders.notify.getService(),
     platform: specifiedProviders.platform.getService(),
     navLink: specifiedProviders.navLink.getService(),
     search: specifiedProviders.search.getService(),
