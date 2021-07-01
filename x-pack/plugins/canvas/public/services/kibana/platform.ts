@@ -5,38 +5,17 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsStart,
-  SavedObjectsClientContract,
-  IUiSettingsClient,
-  ChromeBreadcrumb,
-  IBasePath,
-  ChromeStart,
-} from '../../../../../../src/core/public';
-import { CanvasServiceFactory } from '.';
+import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
-export interface PlatformService {
-  getBasePath: () => string;
-  getBasePathInterface: () => IBasePath;
-  getDocLinkVersion: () => string;
-  getElasticWebsiteUrl: () => string;
-  getHasWriteAccess: () => boolean;
-  getUISetting: (key: string, defaultValue?: any) => any;
-  setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
-  setRecentlyAccessed: (link: string, label: string, id: string) => void;
-  setFullscreen: ChromeStart['setIsVisible'];
+import { CanvasStartDeps } from '../../plugin';
+import { CanvasPlatformService } from '../platform';
 
-  // TODO: these should go away.  We want thin accessors, not entire objects.
-  // Entire objects are hard to mock, and hide our dependency on the external service.
-  getSavedObjects: () => SavedObjectsStart;
-  getSavedObjectsClient: () => SavedObjectsClientContract;
-  getUISettings: () => IUiSettingsClient;
-}
+export type CanvaPlatformServiceFactory = KibanaPluginServiceFactory<
+  CanvasPlatformService,
+  CanvasStartDeps
+>;
 
-export const platformServiceFactory: CanvasServiceFactory<PlatformService> = (
-  _coreSetup,
-  coreStart
-) => {
+export const platformServiceFactory: CanvaPlatformServiceFactory = ({ coreStart }) => {
   return {
     getBasePath: coreStart.http.basePath.get,
     getBasePathInterface: () => coreStart.http.basePath,
