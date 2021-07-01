@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-// import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { elasticLogo } from '../../lib/elastic_logo';
-import { elasticOutline } from '../../lib/elastic_outline';
+import {
+  elasticLogo,
+  elasticOutline,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 // import { image } from './image';
 
 // TODO: the test was not running and is not up to date
 describe.skip('image', () => {
-  // const fn = functionWrapper(image);
   const fn = jest.fn();
 
   it('returns an image object using a dataUrl', () => {

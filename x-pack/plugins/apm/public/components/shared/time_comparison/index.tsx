@@ -25,7 +25,8 @@ const PrependContainer = euiStyled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${({ theme }) => theme.eui.euiGradientMiddle};
+  background-color: ${({ theme }) =>
+    theme.eui.euiFormInputGroupLabelBackground};
   padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 

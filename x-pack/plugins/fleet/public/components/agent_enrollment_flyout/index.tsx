@@ -63,6 +63,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
     }
   }, [modal, lastModal, settings]);
 
+  const isLoadingInitialRequest = settings.isLoading && settings.isInitialRequest;
+
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder aria-labelledby="FleetAgentEnrollmentFlyoutTitle">
@@ -108,7 +110,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
 
       <EuiFlyoutBody
         banner={
-          fleetServerHosts.length === 0 && mode === 'managed' ? (
+          !isLoadingInitialRequest && fleetServerHosts.length === 0 && mode === 'managed' ? (
             <MissingFleetServerHostCallout />
           ) : undefined
         }
