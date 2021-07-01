@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import semverLt from 'semver/functions/lt';
 
 export const isVersionSupported = ({
   currentVersion,
@@ -12,19 +13,14 @@ export const isVersionSupported = ({
   currentVersion: string;
   minVersionRequired: string;
 }) => {
-  const parsedCurrentVersion = currentVersion.includes('-SNAPSHOT')
+  const parsedCurrentVersion = currentVersion.includes('-')
     ? currentVersion.substring(0, currentVersion.indexOf('-'))
     : currentVersion;
-  const tokenizedCurrent = parsedCurrentVersion
-    .split('.')
-    .map((token: string) => parseInt(token, 10));
-  const tokenizedMin = minVersionRequired.split('.').map((token: string) => parseInt(token, 10));
 
-  const versionNotSupported = tokenizedCurrent.some((token: number, index: number) => {
-    return token < tokenizedMin[index];
-  });
-
-  return !versionNotSupported;
+  return (
+    parsedCurrentVersion === minVersionRequired ||
+    semverLt(minVersionRequired, parsedCurrentVersion)
+  );
 };
 
 export const isOsSupported = ({
