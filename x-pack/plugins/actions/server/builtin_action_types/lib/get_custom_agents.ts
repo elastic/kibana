@@ -11,7 +11,7 @@ import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { getNodeTLSOptions, getTLSSettingsFromConfig } from './get_node_tls_options';
+import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 
 interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;
@@ -23,14 +23,14 @@ export function getCustomAgents(
   logger: Logger,
   url: string
 ): GetCustomAgentsResponse {
-  const generalTLSSettings = configurationUtilities.getTLSSettings();
-  const agentTLSOptions = getNodeTLSOptions(logger, generalTLSSettings.verificationMode);
+  const generalSSLSettings = configurationUtilities.getSSLSettings();
+  const agentSSLOptions = getNodeSSLOptions(logger, generalSSLSettings.verificationMode);
   // the default for rejectUnauthorized is the global setting, which can
   // be overridden (below) with a custom host setting
   const defaultAgents = {
     httpAgent: undefined,
     httpsAgent: new HttpsAgent({
-      ...agentTLSOptions,
+      ...agentSSLOptions,
     }),
   };
 
@@ -43,28 +43,28 @@ export function getCustomAgents(
   }
 
   // update the defaultAgents.httpsAgent if configured
-  const tlsSettings = customHostSettings?.tls;
+  const sslSettings = customHostSettings?.ssl;
   let agentOptions: AgentOptions | undefined;
-  if (tlsSettings) {
+  if (sslSettings) {
     logger.debug(`Creating customized connection settings for: ${url}`);
     agentOptions = defaultAgents.httpsAgent.options;
 
-    if (tlsSettings.certificateAuthoritiesData) {
-      agentOptions.ca = tlsSettings.certificateAuthoritiesData;
+    if (sslSettings.certificateAuthoritiesData) {
+      agentOptions.ca = sslSettings.certificateAuthoritiesData;
     }
 
-    const tlsSettingsFromConfig = getTLSSettingsFromConfig(
-      tlsSettings.verificationMode,
-      tlsSettings.rejectUnauthorized
+    const sslSettingsFromConfig = getSSLSettingsFromConfig(
+      sslSettings.verificationMode,
+      sslSettings.rejectUnauthorized
     );
     // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
     // This is where the global rejectUnauthorized is overridden by a custom host
-    const customHostNodeTLSOptions = getNodeTLSOptions(
+    const customHostNodeSSLOptions = getNodeSSLOptions(
       logger,
-      tlsSettingsFromConfig.verificationMode
+      sslSettingsFromConfig.verificationMode
     );
-    if (customHostNodeTLSOptions.rejectUnauthorized !== undefined) {
-      agentOptions.rejectUnauthorized = customHostNodeTLSOptions.rejectUnauthorized;
+    if (customHostNodeSSLOptions.rejectUnauthorized !== undefined) {
+      agentOptions.rejectUnauthorized = customHostNodeSSLOptions.rejectUnauthorized;
     }
   }
 
@@ -107,12 +107,12 @@ export function getCustomAgents(
     return defaultAgents;
   }
 
-  const proxyNodeTLSOptions = getNodeTLSOptions(
+  const proxyNodeSSLOptions = getNodeSSLOptions(
     logger,
-    proxySettings.proxyTLSSettings.verificationMode
+    proxySettings.proxySSLSettings.verificationMode
   );
   // At this point, we are going to use a proxy, so we need new agents.
-  // We will though, copy over the calculated tls options from above, into
+  // We will though, copy over the calculated ssl options from above, into
   // the https agent.
   const httpAgent = new HttpProxyAgent(proxySettings.proxyUrl);
   const httpsAgent = (new HttpsProxyAgent({
@@ -121,7 +121,7 @@ export function getCustomAgents(
     protocol: proxyUrl.protocol,
     headers: proxySettings.proxyHeaders,
     // do not fail on invalid certs if value is false
-    ...proxyNodeTLSOptions,
+    ...proxyNodeSSLOptions,
   }) as unknown) as HttpsAgent;
   // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
 

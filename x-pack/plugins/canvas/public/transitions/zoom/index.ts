@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './zoom.scss';
-
 import { TransitionStrings } from '../../../i18n';
 
 const { zoom: strings } = TransitionStrings;

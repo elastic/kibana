@@ -75,6 +75,10 @@ export class TaskRunnerFactory {
       getUnsecuredSavedObjectsClient,
     } = this.taskRunnerContext!;
 
+    const taskInfo = {
+      scheduled: taskInstance.runAt,
+    };
+
     return {
       async run() {
         const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
@@ -122,6 +126,7 @@ export class TaskRunnerFactory {
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request: fakeRequest,
             ...getSourceFromReferences(references),
+            taskInfo,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {

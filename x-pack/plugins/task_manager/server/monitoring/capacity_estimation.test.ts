@@ -17,7 +17,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 60,
               per_hour: 0,
               per_day: 0,
@@ -79,7 +79,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 60,
               per_hour: 0,
               per_day: 0,
@@ -142,7 +142,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 60,
               per_hour: 0,
               per_day: 0,
@@ -184,7 +184,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 0,
               per_hour: 12000,
               per_day: 200,
@@ -246,7 +246,7 @@ describe('estimateCapacity', () => {
             // 0 active tasks at this moment in time, so no owners identifiable
             owner_ids: 0,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 60,
               per_hour: 0,
               per_day: 0,
@@ -308,7 +308,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 3,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 150,
               per_hour: 60,
               per_day: 0,
@@ -375,7 +375,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 150,
               per_hour: 60,
               per_day: 0,
@@ -461,7 +461,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: provisionedKibanaInstances,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: recurringTasksPerMinute,
               per_hour: 0,
               per_day: 0,
@@ -548,7 +548,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 170,
               per_hour: 0,
               per_day: 0,
@@ -618,7 +618,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 175,
               per_hour: 0,
               per_day: 0,
@@ -686,7 +686,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 210,
               per_hour: 0,
               per_day: 0,
@@ -753,7 +753,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 28,
               per_hour: 27,
               per_day: 2,
@@ -834,7 +834,7 @@ describe('estimateCapacity', () => {
           {
             owner_ids: 1,
             overdue_non_recurring: 0,
-            capacity_requirments: {
+            capacity_requirements: {
               per_minute: 210,
               per_hour: 0,
               per_day: 0,
@@ -952,7 +952,7 @@ function mockStats(
         estimated_schedule_density: [],
         non_recurring: 20,
         owner_ids: 2,
-        capacity_requirments: {
+        capacity_requirements: {
           per_minute: 150,
           per_hour: 360,
           per_day: 820,

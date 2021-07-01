@@ -147,27 +147,27 @@ exports[`Source Viewer component renders error state 1`] = `
         />
       </EuiIcon>
       <EuiSpacer
-        size="s"
+        size="m"
       >
         <div
-          className="euiSpacer euiSpacer--s"
+          className="euiSpacer euiSpacer--m"
         />
       </EuiSpacer>
+      <EuiTitle
+        size="m"
+      >
+        <h2
+          className="euiTitle euiTitle--medium"
+        >
+          An Error Occurred
+        </h2>
+      </EuiTitle>
       <EuiTextColor
         color="subdued"
       >
         <span
           className="euiTextColor euiTextColor--subdued"
         >
-          <EuiTitle
-            size="m"
-          >
-            <h2
-              className="euiTitle euiTitle--medium"
-            >
-              An Error Occurred
-            </h2>
-          </EuiTitle>
           <EuiSpacer
             size="m"
           >

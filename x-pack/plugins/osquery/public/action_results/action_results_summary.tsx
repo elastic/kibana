@@ -36,6 +36,7 @@ const StyledEuiCard = styled(EuiCard)`
 
 interface ActionResultsSummaryProps {
   actionId: string;
+  expirationDate: Date;
   agentIds?: string[];
   isLive?: boolean;
 }
@@ -48,6 +49,7 @@ const renderErrorMessage = (error: string) => (
 
 const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
+  expirationDate,
   agentIds,
   isLive,
 }) => {
@@ -56,6 +58,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const [pageIndex, setPageIndex] = useState(0);
   // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(50);
+  const expired = useMemo(() => expirationDate < new Date(), [expirationDate]);
   const {
     // @ts-expect-error update types
     data: { aggregations, edges },
@@ -66,7 +69,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     limit: pageSize,
     direction: Direction.asc,
     sortField: '@timestamp',
-    isLive,
+    isLive: !expired && isLive,
   });
 
   const { data: logsResults } = useAllResults({
@@ -79,7 +82,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         direction: Direction.asc,
       },
     ],
-    isLive,
+    isLive: !expired && isLive,
   });
 
   const notRespondedCount = useMemo(() => {
@@ -108,9 +111,13 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         description: aggregations.successful,
       },
       {
-        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.pendingLabelText', {
-          defaultMessage: 'Not yet responded',
-        }),
+        title: expired
+          ? i18n.translate('xpack.osquery.liveQueryActionResults.summary.expiredLabelText', {
+              defaultMessage: 'Expired',
+            })
+          : i18n.translate('xpack.osquery.liveQueryActionResults.summary.pendingLabelText', {
+              defaultMessage: 'Not yet responded',
+            }),
         description: notRespondedCount,
       },
       {
@@ -124,7 +131,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         ),
       },
     ],
-    [agentIds, aggregations.failed, aggregations.successful, notRespondedCount]
+    [agentIds, aggregations.failed, aggregations.successful, notRespondedCount, expired]
   );
 
   const renderAgentIdColumn = useCallback(
@@ -158,23 +165,30 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [logsResults]
   );
 
-  const renderStatusColumn = useCallback((_, item) => {
-    if (!item.fields.completed_at) {
-      return i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
-        defaultMessage: 'pending',
-      });
-    }
+  const renderStatusColumn = useCallback(
+    (_, item) => {
+      if (!item.fields.completed_at) {
+        return expired
+          ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
+              defaultMessage: 'expired',
+            })
+          : i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
+              defaultMessage: 'pending',
+            });
+      }
 
-    if (item.fields['error.keyword']) {
-      return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
-        defaultMessage: 'error',
-      });
-    }
+      if (item.fields['error.keyword']) {
+        return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
+          defaultMessage: 'error',
+        });
+      }
 
-    return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
-      defaultMessage: 'success',
-    });
-  }, []);
+      return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
+        defaultMessage: 'success',
+      });
+    },
+    [expired]
+  );
 
   const columns = useMemo(
     () => [
@@ -227,7 +241,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <StyledEuiCard title="" description="" textAlign="left">
-            {notRespondedCount ? <EuiProgress size="xs" position="absolute" /> : null}
+            {!expired && notRespondedCount ? <EuiProgress size="xs" position="absolute" /> : null}
             <EuiDescriptionList
               compressed
               textStyle="reverse"

@@ -153,7 +153,7 @@ export class AlertingPlugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.create<AlertsConfig>().pipe(first()).toPromise();
-    this.logger = initializerContext.logger.get('plugins', 'alerting');
+    this.logger = initializerContext.logger.get();
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
@@ -192,8 +192,6 @@ export class AlertingPlugin {
       event: { provider: EVENT_LOG_PROVIDER },
     });
 
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects, this.config);
-
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
@@ -220,6 +218,13 @@ export class AlertingPlugin {
         );
       });
     }
+
+    setupSavedObjects(
+      core.savedObjects,
+      plugins.encryptedSavedObjects,
+      this.alertTypeRegistry,
+      this.logger
+    );
 
     initializeApiKeyInvalidator(
       this.logger,

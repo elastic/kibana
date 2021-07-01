@@ -259,7 +259,6 @@ export function createExecutionHandler<
           license: alertType.minimumLicenseRequired,
           category: alertType.id,
           ruleset: alertType.producer,
-          ...namespace,
           name: alertName,
         },
       };

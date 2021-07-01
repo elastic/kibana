@@ -90,7 +90,7 @@ describe('SourceRouter', () => {
     expect(wrapper.find(Overview)).toHaveLength(1);
     expect(wrapper.find(SourceSettings)).toHaveLength(1);
     expect(wrapper.find(SourceContent)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(3);
+    expect(wrapper.find(Route)).toHaveLength(4);
   });
 
   it('renders source routes (custom)', () => {
@@ -100,6 +100,6 @@ describe('SourceRouter', () => {
     expect(wrapper.find(DisplaySettingsRouter)).toHaveLength(1);
     expect(wrapper.find(Schema)).toHaveLength(1);
     expect(wrapper.find(SchemaChangeErrors)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(6);
+    expect(wrapper.find(Route)).toHaveLength(7);
   });
 });

@@ -89,7 +89,7 @@ export function PageLoadDistribution() {
     {
       [`${serviceName}-page-views`]: {
         dataType: 'ux',
-        reportType: 'dist',
+        reportType: 'data-distribution',
         time: { from: rangeFrom!, to: rangeTo! },
         reportDefinitions: {
           'service.name': serviceName as string[],

@@ -244,14 +244,23 @@ export function Detail() {
         redirectToPath = [
           INTEGRATIONS_PLUGIN_ID,
           {
-            path: currentPath,
+            path: `#${
+              pagePathGetters.integration_details_policies({
+                pkgkey,
+              })[1]
+            }`,
           },
         ];
       }
 
       const redirectBackRouteState: CreatePackagePolicyRouteState = {
         onSaveNavigateTo: redirectToPath,
-        onCancelNavigateTo: redirectToPath,
+        onCancelNavigateTo: [
+          INTEGRATIONS_PLUGIN_ID,
+          {
+            path: currentPath,
+          },
+        ],
         onCancelUrl: currentPath,
       };
 

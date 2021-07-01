@@ -43,7 +43,7 @@ Literal "literal"
 // Quoted variables are interpreted as strings
 // but unquoted variables are more restrictive
 Variable
-  = _ [\'] chars:(ValidChar / Space / [\"])* [\'] _ {
+  = _ '"' chars:("\\\"" { return "\""; } / [^"])* '"' _ {
     return {
       type: 'variable',
       value: chars.join(''),
@@ -51,7 +51,7 @@ Variable
       text: text()
     };
   }
-  / _ [\"] chars:(ValidChar / Space / [\'])* [\"] _ {
+  / _ "'" chars:("\\\'" { return "\'"; } / [^'])* "'" _ {
       return {
       type: 'variable',
       value: chars.join(''),

@@ -491,6 +491,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
+    async expectSaveAndReturnButtonDisabled() {
+      const button = await testSubjects.find('lnsApp_saveAndReturnButton', 10000);
+      const disabledAttr = await button.getAttribute('disabled');
+      expect(disabledAttr).to.be('true');
+    },
+
     async editDimensionLabel(label: string) {
       await testSubjects.setValue('indexPattern-label-edit', label, { clearWithKeyboard: true });
     },
@@ -500,7 +506,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await comboBox.setElement(formatInput, format);
     },
     async editDimensionColor(color: string) {
-      const colorPickerInput = await testSubjects.find('colorPickerAnchor');
+      const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
@@ -873,7 +879,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async assertColor(color: string) {
       // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
-      await testSubjects.getAttribute('colorPickerAnchor', color);
+      await testSubjects.getAttribute('~indexPattern-dimension-colorPicker', color);
     },
 
     /**

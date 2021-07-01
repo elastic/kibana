@@ -7,11 +7,13 @@
 
 import React, { FC, useState, lazy, Suspense } from 'react';
 import { EuiButtonEmpty, EuiPortal, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ExpressionFunction } from 'src/plugins/expressions';
-import { ComponentStrings } from '../../../i18n';
+
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 
 let FunctionReferenceGenerator: null | React.LazyExoticComponent<any> = null;
+
 if (process.env.NODE_ENV === 'development') {
   FunctionReferenceGenerator = lazy(() =>
     import('../function_reference_generator').then((module) => ({
@@ -20,7 +22,12 @@ if (process.env.NODE_ENV === 'development') {
   );
 }
 
-const { HelpMenu: strings } = ComponentStrings;
+const strings = {
+  getKeyboardShortcutsLinkLabel: () =>
+    i18n.translate('xpack.canvas.helpMenu.keyboardShortcutsLinkLabel', {
+      defaultMessage: 'Keyboard shortcuts',
+    }),
+};
 
 interface Props {
   functionRegistry: Record<string, ExpressionFunction>;

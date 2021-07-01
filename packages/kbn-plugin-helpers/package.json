@@ -11,9 +11,5 @@
   "types": "target/index.d.ts",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
-  },
-  "scripts": {
-    "kbn:bootstrap": "rm -rf target && ../../node_modules/.bin/tsc",
-    "kbn:watch": "../../node_modules/.bin/tsc --watch"
   }
 }

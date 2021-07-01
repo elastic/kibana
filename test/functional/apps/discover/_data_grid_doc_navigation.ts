@@ -41,8 +41,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await rowActions[0].click();
       });
 
-      const hasDocHit = await testSubjects.exists('doc-hit');
-      expect(hasDocHit).to.be(true);
+      await retry.waitFor('hit loaded', async () => {
+        const hasDocHit = await testSubjects.exists('doc-hit');
+        return !!hasDocHit;
+      });
     });
 
     // no longer relevant as null field won't be returned in the Fields API response

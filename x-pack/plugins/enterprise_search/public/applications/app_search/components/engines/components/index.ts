@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { LaunchAppSearchButton } from './launch_as_button';
 export { EmptyState } from './empty_state';
 export { EmptyMetaEnginesState } from './empty_meta_engines_state';

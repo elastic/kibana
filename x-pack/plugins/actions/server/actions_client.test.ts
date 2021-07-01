@@ -431,7 +431,7 @@ describe('create()', () => {
         idleInterval: schema.duration().validate('1h'),
         pageSize: 100,
       },
-      tls: {
+      ssl: {
         verificationMode: 'full',
         proxyVerificationMode: 'full',
       },

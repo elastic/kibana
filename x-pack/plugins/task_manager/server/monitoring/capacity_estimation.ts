@@ -57,8 +57,8 @@ export function estimateCapacity(
   const {
     recurring: percentageOfExecutionsUsedByRecurringTasks,
     non_recurring: percentageOfExecutionsUsedByNonRecurringTasks,
-  } = capacityStats.runtime.value.polling.persistence as TaskPersistenceTypes;
-  const { overdue, capacity_requirments: capacityRequirments } = workload;
+  } = capacityStats.runtime.value.execution.persistence;
+  const { overdue, capacity_requirements: capacityRequirements } = workload;
   const {
     poll_interval: pollInterval,
     max_workers: maxWorkers,
@@ -130,9 +130,9 @@ export function estimateCapacity(
    * On average, how many tasks per minute does this cluster need to execute?
    */
   const averageRecurringRequiredPerMinute =
-    capacityRequirments.per_minute +
-    capacityRequirments.per_hour / 60 +
-    capacityRequirments.per_day / 24 / 60;
+    capacityRequirements.per_minute +
+    capacityRequirements.per_hour / 60 +
+    capacityRequirements.per_day / 24 / 60;
 
   /**
    * how many Kibana are needed solely for the recurring tasks
@@ -147,7 +147,7 @@ export function estimateCapacity(
    */
   const minRequiredKibanaInstances = Math.ceil(
     hasTooLittleCapacityToEstimateRequiredNonRecurringCapacity
-      ? /* 
+      ? /*
         if load is at 100% or there's no capacity for recurring tasks at the moment, then it's really difficult for us to assess how
         much capacity is needed for non-recurring tasks at normal times. This might be representative, but it might
         also be a spike and we have no way of knowing that. We'll recommend people scale up by 20% and go from there. */

@@ -99,6 +99,9 @@ type ResultFrequencySummary = ResultFrequency & {
 
 export interface SummarizedTaskRunStat extends JsonObject {
   drift: AveragedStat;
+  drift_by_type: {
+    [alertType: string]: AveragedStat;
+  };
   load: AveragedStat;
   execution: {
     duration: Record<string, AveragedStat>;
