@@ -7,19 +7,19 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FieldsConfig, from } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import {
-  FIELD_TYPES,
-  useFormData,
-  SerializerFunc,
-  UseField,
   Field,
+  UseField,
+  useFormData,
+  FIELD_TYPES,
   NumericField,
+  SerializerFunc,
   fieldFormatters,
   fieldValidators,
 } from '../../../../../../shared_imports';
@@ -172,7 +172,7 @@ const fieldsConfig: FieldsConfig = {
 };
 
 export const CommunityId: FunctionComponent = () => {
-  const [{ fields }] = useFormData({ watch: 'fields.iana_number' });
+  const [{ fields }] = useFormData({ watch: ['fields.iana_number', 'fields.transport'] });
 
   return (
     <>
@@ -234,24 +234,26 @@ export const CommunityId: FunctionComponent = () => {
       </EuiFlexGroup>
 
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <UseField
-            config={fieldsConfig.iana_number}
-            component={Field}
-            path="fields.iana_number"
-            data-test-subj="ianaField"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          {!fields?.iana_number && (
+        {!fields?.transport && (
+          <EuiFlexItem>
+            <UseField
+              config={fieldsConfig.iana_number}
+              component={Field}
+              path="fields.iana_number"
+              data-test-subj="ianaField"
+            />
+          </EuiFlexItem>
+        )}
+        {!fields?.iana_number && (
+          <EuiFlexItem>
             <UseField
               config={fieldsConfig.transport}
               component={Field}
               path="fields.transport"
               data-test-subj="transportField"
             />
-          )}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
