@@ -120,12 +120,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
    * needed for merging new with old field counts, high likely legacy, but kept this behavior
    * because not 100% sure in this case
    */
-  const fieldCounts = useRef<Record<string, number>>({});
+  const fieldCounts = useRef<Record<string, number>>(
+    calcFieldCounts({}, props.documents$.getValue().result, props.selectedIndexPattern)
+  );
 
-  const [documentState, setDocumentState] = useState({
-    fetchStatus: props.documents$.getValue().fetchStatus,
-    result: props.documents$.getValue().result || [],
-  });
+  const [documentState, setDocumentState] = useState(props.documents$.getValue());
   useEffect(() => {
     const subscription = props.documents$.subscribe((next) => {
       if (next.fetchStatus !== documentState.fetchStatus) {
@@ -143,6 +142,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, [props.documents$, props.selectedIndexPattern, documentState, setDocumentState]);
 
   useEffect(() => {
+    // when index pattern changes fieldCounts needs to be cleaned up to prevent displaying
+    // fields of the previous index pattern
     fieldCounts.current = {};
   }, [props.selectedIndexPattern]);
 
@@ -203,7 +204,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}
-            documents={documentState.result!}
+            documents={documentState.result ?? []}
             fieldFilter={fieldFilter}
             fieldCounts={fieldCounts.current}
             setFieldFilter={setFieldFilter}
@@ -290,7 +291,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               <div className="euiFlyoutBody">
                 <DiscoverSidebar
                   {...props}
-                  documents={documentState.result!}
+                  documents={documentState.result ?? []}
                   fieldCounts={fieldCounts.current}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
