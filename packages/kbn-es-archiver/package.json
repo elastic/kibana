@@ -7,12 +7,5 @@
   "types": "target/index.d.ts",
   "kibana": {
     "devOnly": true
-  },
-  "scripts": {
-    "kbn:bootstrap": "rm -rf target && ../../node_modules/.bin/tsc",
-    "kbn:watch": "rm -rf target && ../../node_modules/.bin/tsc --watch"
-  },
-  "dependencies": {
-    "@kbn/test": "link:../kbn-test"
   }
 }

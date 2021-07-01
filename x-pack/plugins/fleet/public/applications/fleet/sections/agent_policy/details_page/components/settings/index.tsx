@@ -8,7 +8,14 @@
 import React, { memo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import {
+  EuiBottomBar,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -145,58 +152,62 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         />
 
         {hasChanges ? (
-          <EuiBottomBar>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem>
-                <FormattedMessage
-                  id="xpack.fleet.editAgentPolicy.unsavedChangesText"
-                  defaultMessage="You have unsaved changes"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      color="ghost"
-                      onClick={() => {
-                        setAgentPolicy({ ...originalAgentPolicy });
-                        setHasChanges(false);
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.editAgentPolicy.cancelButtonText"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={onSubmit}
-                      isLoading={isLoading}
-                      isDisabled={
-                        !hasWriteCapabilites || isLoading || Object.keys(validation).length > 0
-                      }
-                      iconType="save"
-                      color="primary"
-                      fill
-                    >
-                      {isLoading ? (
+          <>
+            <EuiSpacer size="xl" />
+            <EuiSpacer size="xl" />
+            <EuiBottomBar>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.fleet.editAgentPolicy.unsavedChangesText"
+                    defaultMessage="You have unsaved changes"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        color="ghost"
+                        onClick={() => {
+                          setAgentPolicy({ ...originalAgentPolicy });
+                          setHasChanges(false);
+                        }}
+                      >
                         <FormattedMessage
-                          id="xpack.fleet.editAgentPolicy.savingButtonText"
-                          defaultMessage="Saving…"
+                          id="xpack.fleet.editAgentPolicy.cancelButtonText"
+                          defaultMessage="Cancel"
                         />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.fleet.editAgentPolicy.saveButtonText"
-                          defaultMessage="Save changes"
-                        />
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiBottomBar>
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={onSubmit}
+                        isLoading={isLoading}
+                        isDisabled={
+                          !hasWriteCapabilites || isLoading || Object.keys(validation).length > 0
+                        }
+                        iconType="save"
+                        color="primary"
+                        fill
+                      >
+                        {isLoading ? (
+                          <FormattedMessage
+                            id="xpack.fleet.editAgentPolicy.savingButtonText"
+                            defaultMessage="Saving…"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.editAgentPolicy.saveButtonText"
+                            defaultMessage="Save changes"
+                          />
+                        )}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBottomBar>
+          </>
         ) : null}
       </FormWrapper>
     );
