@@ -9,7 +9,6 @@ import { once } from 'lodash';
 import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import LRU from 'lru-cache';
-import semver from 'semver';
 
 import {
   CoreSetup,
@@ -219,6 +218,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { ruleDataService } = plugins.ruleRegistry;
       const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
+      const alertsIndexPattern = ruleDataService.getFullAssetName('security.alerts*');
+
       const ready = once(async () => {
         const componentTemplateName = ruleDataService.getFullAssetName('security.alerts-mappings');
 
@@ -227,34 +228,29 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
 
         await ruleDataService.createOrUpdateComponentTemplate({
-          template: {
-            name: componentTemplateName,
-            body: {
-              template: {
-                settings: {
-                  number_of_shards: 1,
-                },
-                mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
+          name: componentTemplateName,
+          body: {
+            template: {
+              settings: {
+                number_of_shards: 1,
               },
+              mappings: {}, // TODO: Add mappings here via `mappingFromFieldMap()`
             },
           },
-          templateVersion: new semver.SemVer('7.14.0'),
         });
 
         await ruleDataService.createOrUpdateIndexTemplate({
-          template: {
-            name: ruleDataService.getFullAssetName('security.alerts-index-template'),
-            body: {
-              index_patterns: [ruleDataService.getFullAssetName('security.alerts*')],
-              composed_of: [
-                ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-                ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
-                componentTemplateName,
-              ],
-            },
+          name: ruleDataService.getFullAssetName('security.alerts-index-template'),
+          body: {
+            index_patterns: [alertsIndexPattern],
+            composed_of: [
+              ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+              ruleDataService.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
+              componentTemplateName,
+            ],
           },
-          templateVersion: new semver.SemVer('7.14.0'),
         });
+        await ruleDataService.updateIndexMappingsMatchingPattern(alertsIndexPattern);
       });
 
       ready().catch((err) => {
@@ -269,6 +265,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         ready,
       });
+
+      const initTest = async () => {
+        if (ruleDataClient == null) {
+          return;
+        }
+        ruleDataClient
+          .getWriter({ namespace: 'marshall' })
+          .bulk({ body: [{ index: {} }, { '@timestamp': 1624259271000 }] });
+        ruleDataClient
+          .getWriter({ namespace: 'otherspace' })
+          .bulk({ body: [{ index: {} }, { '@timestamp': 1624259271000 }] });
+      };
+      initTest();
 
       // sec
 

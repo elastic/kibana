@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import semver from 'semver';
-import { IndicesRolloverResponse } from '@elastic/elasticsearch/api/types';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { get } from 'lodash';
 import { IndexPatternsFetcher } from '../../../../../src/plugins/data/server';
 import {
   IRuleDataClient,
@@ -71,10 +68,9 @@ export class RuleDataClient implements IRuleDataClient {
     };
   }
 
-  async getWriter(options: { namespace?: string } = {}): Promise<RuleDataWriter> {
+  getWriter(options: { namespace?: string } = {}): RuleDataWriter {
     const { namespace } = options;
     const alias = getNamespacedAlias({ alias: this.options.alias, namespace });
-    await this.rolloverAliasIfNeeded(alias);
     return {
       bulk: async (request) => {
         const clusterClient = await this.getClusterClient();
@@ -102,92 +98,6 @@ export class RuleDataClient implements IRuleDataClient {
         });
       },
     };
-  }
-
-  async rolloverAliasIfNeeded(alias: string) {
-    const clusterClient = await this.getClusterClient();
-    let simulatedRollover: IndicesRolloverResponse;
-    try {
-      // By simulating the rollover here first, we can easily retrieve the current write index name
-      // and the prospective new write index name. These index names will be used to check if the new
-      // write index would have any mapping differences from the current write index, and if so, we
-      // trigger an actual rollover.
-      ({ body: simulatedRollover } = await clusterClient.indices.rollover({
-        alias,
-        dry_run: true,
-      }));
-    } catch (err) {
-      if (err?.meta?.body?.error?.type !== 'index_not_found_exception') {
-        throw err;
-      }
-      return;
-    }
-
-    const [writeIndexMapping, simulatedIndexMapping] = await Promise.all([
-      clusterClient.indices.get({
-        index: simulatedRollover.old_index,
-      }),
-      clusterClient.indices.simulateIndexTemplate({
-        name: simulatedRollover.new_index,
-      }),
-    ]);
-    const currentVersions =
-      writeIndexMapping.body[simulatedRollover.old_index]?.mappings?._meta?.versions;
-    const targetVersions = get(simulatedIndexMapping, [
-      'body',
-      'template',
-      'mappings',
-      '_meta',
-      'versions',
-    ]);
-    const needRollover = this.indexNeedsRollover(currentVersions, targetVersions);
-    if (needRollover) {
-      try {
-        // We specify the new_index name explicitly here to avoid races that would cause us to roll
-        // the index multiple times. If another function rolls the index in between the simulated rollover
-        // above and this rollover, then this rollover will fail with a resource_already_exists_exception - so
-        // we catch and suppress that exception. Any other exceptions are rethrown.
-        await clusterClient.indices.rollover({
-          alias,
-          new_index: simulatedRollover.new_index,
-        });
-      } catch (err) {
-        if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
-          throw err;
-        }
-      }
-    }
-  }
-
-  indexNeedsRollover(
-    currentVersions: object | undefined,
-    targetVersions: object | undefined
-  ): boolean {
-    // If any of the target versions can't be parsed by semver, something is wrong so don't rollover
-    if (
-      targetVersions == null ||
-      Object.entries(targetVersions).some(
-        ([_, targetVersion]) => semver.valid(targetVersion) == null
-      )
-    ) {
-      return false;
-    }
-    // At this point we know we have a valid set of target versions so if we can't find currentVersions
-    // then we rollover. We also roll over if there are less keys in targetVersions, as this means
-    // a template has been removed.
-    if (
-      currentVersions == null ||
-      Object.keys(currentVersions).length > Object.keys(targetVersions).length
-    ) {
-      return true;
-    }
-    // Finally, we compare the target versions to the current versions. Current versions that can't be parsed are treated
-    // as though they are always less than a target version if the target version is valid.
-    return Object.entries(targetVersions).some(([templateName, targetVersion]) => {
-      const currentTemplateVersion = get(currentVersions, templateName);
-      const parsedCurrentVersion = semver.valid(currentTemplateVersion);
-      return parsedCurrentVersion == null || semver.lt(parsedCurrentVersion, targetVersion);
-    });
   }
 
   async createWriteTargetIfNeeded({ namespace }: { namespace?: string }) {

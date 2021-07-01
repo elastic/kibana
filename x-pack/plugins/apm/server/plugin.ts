@@ -16,7 +16,6 @@ import {
   PluginInitializerContext,
 } from 'src/core/server';
 import { mapValues, once } from 'lodash';
-import semver from 'semver';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { RuleDataClient } from '../../rule_registry/server';
@@ -127,6 +126,10 @@ export class APMPlugin
     const getCoreStart = () =>
       core.getStartServices().then(([coreStart]) => coreStart);
 
+    const alertsIndexPattern = ruleDataService.getFullAssetName(
+      'observability-apm*'
+    );
+
     const ready = once(async () => {
       const componentTemplateName = ruleDataService.getFullAssetName(
         'apm-mappings'
@@ -137,50 +140,43 @@ export class APMPlugin
       }
 
       await ruleDataService.createOrUpdateComponentTemplate({
-        template: {
-          name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: mappingFromFieldMap({
-                [SERVICE_NAME]: {
-                  type: 'keyword',
-                },
-                [SERVICE_ENVIRONMENT]: {
-                  type: 'keyword',
-                },
-                [TRANSACTION_TYPE]: {
-                  type: 'keyword',
-                },
-                [PROCESSOR_EVENT]: {
-                  type: 'keyword',
-                },
-              }),
+        name: componentTemplateName,
+        body: {
+          template: {
+            settings: {
+              number_of_shards: 1,
             },
+            mappings: mappingFromFieldMap({
+              [SERVICE_NAME]: {
+                type: 'keyword',
+              },
+              [SERVICE_ENVIRONMENT]: {
+                type: 'keyword',
+              },
+              [TRANSACTION_TYPE]: {
+                type: 'keyword',
+              },
+              [PROCESSOR_EVENT]: {
+                type: 'keyword',
+              },
+            }),
           },
         },
-        templateVersion: new semver.SemVer('7.14.0'),
       });
 
       await ruleDataService.createOrUpdateIndexTemplate({
-        template: {
-          name: ruleDataService.getFullAssetName('apm-index-template'),
-          body: {
-            index_patterns: [
-              ruleDataService.getFullAssetName('observability-apm*'),
-            ],
-            composed_of: [
-              ruleDataService.getFullAssetName(
-                TECHNICAL_COMPONENT_TEMPLATE_NAME
-              ),
-              componentTemplateName,
-            ],
-          },
+        name: ruleDataService.getFullAssetName('apm-index-template'),
+        body: {
+          index_patterns: [alertsIndexPattern],
+          composed_of: [
+            ruleDataService.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+            componentTemplateName,
+          ],
         },
-        templateVersion: new semver.SemVer('7.14.0'),
       });
+      await ruleDataService.updateIndexMappingsMatchingPattern(
+        alertsIndexPattern
+      );
     });
 
     ready().catch((err) => {

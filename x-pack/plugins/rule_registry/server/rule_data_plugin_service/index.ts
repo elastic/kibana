@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import semver from 'semver';
 import { ClusterPutComponentTemplate } from '@elastic/elasticsearch/api/requestParams';
+import { IndicesRolloverResponse } from '@elastic/elasticsearch/api/types';
 import { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient, Logger } from 'kibana/server';
-import { isEmpty, merge } from 'lodash';
+import { get, isEmpty } from 'lodash';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import {
   DEFAULT_ILM_POLICY_ID,
@@ -80,19 +80,13 @@ export class RuleDataPluginService {
     });
 
     await this._createOrUpdateComponentTemplate({
-      template: {
-        name: this.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-        body: technicalComponentTemplate,
-      },
-      templateVersion: new semver.SemVer('7.14.0'),
+      name: this.getFullAssetName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+      body: technicalComponentTemplate,
     });
 
     await this._createOrUpdateComponentTemplate({
-      template: {
-        name: this.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
-        body: ecsComponentTemplate,
-      },
-      templateVersion: new semver.SemVer('7.14.0'),
+      name: this.getFullAssetName(ECS_COMPONENT_TEMPLATE_NAME),
+      body: ecsComponentTemplate,
     });
 
     this.options.logger.info(`Installed all assets`);
@@ -100,37 +94,17 @@ export class RuleDataPluginService {
     this.signal.complete();
   }
 
-  private async _createOrUpdateComponentTemplate({
-    template,
-    templateVersion,
-  }: {
-    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>;
-    templateVersion: semver.SemVer;
-  }) {
+  private async _createOrUpdateComponentTemplate(
+    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>
+  ) {
     this.assertWriteEnabled();
 
     const clusterClient = await this.getClusterClient();
     this.options.logger.debug(`Installing component template ${template.name}`);
-    const mergedTemplate = merge(
-      {
-        body: {
-          template: {
-            mappings: { _meta: { versions: { [template.name]: templateVersion.version } } },
-          },
-        },
-      },
-      template
-    );
-    return clusterClient.cluster.putComponentTemplate(mergedTemplate);
+    return clusterClient.cluster.putComponentTemplate(template);
   }
 
-  private async _createOrUpdateIndexTemplate({
-    template,
-    templateVersion,
-  }: {
-    template: PutIndexTemplateRequest;
-    templateVersion: semver.SemVer;
-  }) {
+  private async _createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
     this.assertWriteEnabled();
 
     const clusterClient = await this.getClusterClient();
@@ -143,17 +117,7 @@ export class RuleDataPluginService {
         'No mappings would be generated for this index, possibly due to failed/misconfigured bootstrapping'
       );
     }
-    const mergedTemplate = merge(
-      {
-        body: {
-          template: {
-            mappings: { _meta: { versions: { [template.name]: templateVersion.version } } },
-          },
-        },
-      },
-      template
-    );
-    return clusterClient.indices.putIndexTemplate(mergedTemplate);
+    return clusterClient.indices.putIndexTemplate(template);
   }
 
   private async _createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
@@ -164,31 +128,83 @@ export class RuleDataPluginService {
     return clusterClient.ilm.putLifecycle(policy);
   }
 
-  async createOrUpdateComponentTemplate({
-    template,
-    templateVersion,
-  }: {
-    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>;
-    templateVersion: semver.SemVer;
-  }) {
-    await this.wait();
-    return this._createOrUpdateComponentTemplate({ template, templateVersion });
+  private async updateAliasWriteIndexMapping(alias: string) {
+    const clusterClient = await this.getClusterClient();
+    let simulatedRollover: IndicesRolloverResponse;
+    try {
+      // Simulating the rollover here acts like the start of a transaction. If we determine that a rollover
+      // is necessary because the putMapping call below fails, then we know that this simulated rollover *would*
+      // have been the correct thing to do. When we do the real rollover, we provide the new_index from the simulation
+      // as the target index so that if another Kibana instance has rolled over in the meantime then the rollover returns
+      // an error that we suppress. This prevents multiple rollovers from happening accidentally.
+      // The simulated rollover doubles as a convenient way to get the current write index for an alias.
+      ({ body: simulatedRollover } = await clusterClient.indices.rollover({
+        alias,
+        dry_run: true,
+      }));
+    } catch (err) {
+      if (err?.meta?.body?.error?.type !== 'index_not_found_exception') {
+        throw err;
+      }
+      return;
+    }
+
+    const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
+      name: simulatedRollover.new_index,
+    });
+    const simulatedMapping = get(simulatedIndexMapping, ['body', 'template', 'mappings']);
+    try {
+      await clusterClient.indices.putMapping({
+        index: simulatedRollover.old_index,
+        body: simulatedMapping,
+      });
+      return;
+    } catch (err) {
+      if (err.meta?.body?.error?.type !== 'illegal_argument_exception') {
+        throw err;
+      }
+      try {
+        await clusterClient.indices.rollover({
+          alias,
+          new_index: simulatedRollover.new_index,
+        });
+      } catch (e) {
+        if (e?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
+          throw e;
+        }
+      }
+    }
   }
 
-  async createOrUpdateIndexTemplate({
-    template,
-    templateVersion,
-  }: {
-    template: PutIndexTemplateRequest;
-    templateVersion: semver.SemVer;
-  }) {
+  async createOrUpdateComponentTemplate(
+    template: ClusterPutComponentTemplate<ClusterPutComponentTemplateBody>
+  ) {
     await this.wait();
-    return this._createOrUpdateIndexTemplate({ template, templateVersion });
+    return this._createOrUpdateComponentTemplate(template);
+  }
+
+  async createOrUpdateIndexTemplate(template: PutIndexTemplateRequest) {
+    await this.wait();
+    return this._createOrUpdateIndexTemplate(template);
   }
 
   async createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
     await this.wait();
     return this._createOrUpdateLifecyclePolicy(policy);
+  }
+
+  async updateIndexMappingsMatchingPattern(pattern: string) {
+    await this.wait();
+    const clusterClient = await this.getClusterClient();
+    const { body: aliasesResponse } = await clusterClient.indices.getAlias({ index: pattern });
+    const uniqueAliases = new Set<string>();
+    // Sadly the get alias API returns an entry for every concrete index associated with an alias
+    // So we loop over the concrete indices, then for each concrete index add all of its aliases
+    // to the set of unique aliases
+    Object.entries(aliasesResponse).forEach(([_, aliases]) => {
+      Object.keys(aliases.aliases).forEach((alias) => uniqueAliases.add(alias));
+    });
+    await Promise.all([...uniqueAliases].map((alias) => this.updateAliasWriteIndexMapping(alias)));
   }
 
   isReady() {
