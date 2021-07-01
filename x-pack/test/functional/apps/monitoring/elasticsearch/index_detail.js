@@ -32,6 +32,8 @@ export default function ({ getService, getPageObjects }) {
           }
         );
 
+        await overview.closeAlertsModal();
+
         // go to indices listing
         await overview.clickEsIndices();
         expect(await indicesList.isOnListing()).to.be(true);
@@ -77,39 +79,6 @@ export default function ({ getService, getPageObjects }) {
           totalShards: 'Total shards\n10',
           unassignedShards: 'Unassigned shards\n1',
           health: 'Health: yellow',
-        });
-      });
-    });
-
-    describe('Deleted Index', () => {
-      const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
-
-      before(async () => {
-        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_red_platinum', {
-          from: 'Oct 6, 2017 @ 19:53:06.748',
-          to: 'Oct 6, 2017 @ 20:15:30.212',
-        });
-
-        // go to indices listing
-        await overview.clickEsIndices();
-        expect(await indicesList.isOnListing()).to.be(true);
-      });
-
-      after(async () => {
-        await tearDown();
-      });
-
-      it.skip('should have an index summary with NA for deleted index', async () => {
-        await indicesList.setFilter('deleted');
-        await indicesList.clickRowByName('many-0001_clruksahirti');
-
-        expect(await indexDetail.getSummary()).to.eql({
-          dataSize: 'Total:\n3.6 KB',
-          dataSizePrimaries: 'Primaries:\n3.6 KB',
-          documentCount: 'Documents:\n1',
-          totalShards: 'Total Shards:\nN/A',
-          unassignedShards: 'Unassigned Shards:\nN/A',
-          health: 'Health: Not Available',
         });
       });
     });

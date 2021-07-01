@@ -41,12 +41,14 @@ export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
   height?: number;
   id?: string;
+  isInspectDisabled?: boolean;
   split?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
   growLeftSplit?: boolean;
+  inspectMultiple?: boolean;
 }
 
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
@@ -54,12 +56,14 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   children,
   height,
   id,
+  isInspectDisabled,
   split,
   subtitle,
   title,
   titleSize = 'm',
   tooltip,
   growLeftSplit = true,
+  inspectMultiple = false,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
     <EuiFlexGroup alignItems="center">
@@ -83,7 +87,12 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
 
           {id && (
             <EuiFlexItem grow={false}>
-              <InspectButton queryId={id} inspectIndex={0} title={title} />
+              <InspectButton
+                isDisabled={isInspectDisabled}
+                queryId={id}
+                multiple={inspectMultiple}
+                title={title}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
