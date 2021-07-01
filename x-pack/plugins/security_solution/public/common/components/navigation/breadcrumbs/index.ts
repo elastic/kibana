@@ -186,18 +186,7 @@ export const getBreadcrumbsForRoute = (
     if (spyState.tabName != null) {
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
     }
-
-    return [
-      siemRootBreadcrumb,
-      ...getAdminBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
+    return [siemRootBreadcrumb, ...getAdminBreadcrumbs(spyState)];
   }
 
   if (

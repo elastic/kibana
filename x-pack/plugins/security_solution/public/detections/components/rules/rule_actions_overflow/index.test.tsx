@@ -36,11 +36,16 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('../../../pages/detection_engine/rules/all/actions', () => ({
-  deleteRulesAction: jest.fn(),
-  duplicateRulesAction: jest.fn(),
-  editRuleAction: jest.fn(),
-}));
+jest.mock('../../../pages/detection_engine/rules/all/actions', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...actual,
+    exportRulesAction: jest.fn(),
+    deleteRulesAction: jest.fn(),
+    duplicateRulesAction: jest.fn(),
+    editRuleAction: jest.fn(),
+  };
+});
 
 const duplicateRulesActionMock = duplicateRulesAction as jest.Mock;
 const flushPromises = () => new Promise(setImmediate);

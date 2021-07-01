@@ -18,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
-import { Header } from '../components/header';
 import { ColumnarPage, PageContent } from '../components/page';
 
 const DetailPageContent = euiStyled(PageContent)`
@@ -33,7 +32,6 @@ interface Props {
 export const Error: React.FC<Props> = ({ message }) => {
   return (
     <ColumnarPage>
-      <Header />
       <DetailPageContent>
         <ErrorPageBody message={message} />
       </DetailPageContent>
