@@ -902,7 +902,6 @@ invalid: "
             indexPattern,
             operationDefinitionMap
           )
-          // TODO: use regex here
         ).toEqual(
           expect.arrayContaining([
             expect.stringMatching(
