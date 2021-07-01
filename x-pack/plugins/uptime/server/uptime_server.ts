@@ -6,26 +6,15 @@
  */
 
 import { Logger } from 'kibana/server';
-import { createUptimeESClient, UMServerLibs } from './lib/lib';
+import { createLifecycleRuleTypeFactory, RuleDataClient } from '../../rule_registry/server';
+import { UMServerLibs } from './lib/lib';
 import { createRouteWithAuth, restApiRoutes, uptimeRouteWrapper } from './rest_api';
 import { UptimeCoreSetup, UptimeCorePlugins } from './lib/adapters';
-import { uptimeAlertTypeFactories } from './lib/alerts';
-import { createLifecycleRuleTypeFactory, RuleDataClient } from '../../rule_registry/server';
-import { savedObjectsAdapter } from './lib/saved_objects';
 
-import {
-  statusCheckAlertFactory,
-  ActionGroupIds as statusCheckActionGroup,
-} from './lib/alerts/status_check';
-import { tlsAlertFactory, ActionGroupIds as tlsActionGroup } from './lib/alerts/tls';
-import {
-  tlsLegacyAlertFactory,
-  ActionGroupIds as tlsLegacyActionGroup,
-} from './lib/alerts/tls_legacy';
-import {
-  durationAnomalyAlertFactory,
-  ActionGroupIds as durationAnomalyActionGroup,
-} from './lib/alerts/duration_anomaly';
+import { statusCheckAlertFactory } from './lib/alerts/status_check';
+import { tlsAlertFactory } from './lib/alerts/tls';
+import { tlsLegacyAlertFactory } from './lib/alerts/tls_legacy';
+import { durationAnomalyAlertFactory } from './lib/alerts/duration_anomaly';
 
 export const initUptimeServer = (
   server: UptimeCoreSetup,

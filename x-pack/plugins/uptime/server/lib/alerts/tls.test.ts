@@ -81,7 +81,7 @@ const mockCertResult: CertResult = {
 describe('tls alert', () => {
   let toISOStringSpy: jest.SpyInstance<string, []>;
   let savedObjectsAdapterSpy: jest.SpyInstance<
-    ReturnType<typeof UMSavedObjectsAdapter['getUptimeDynamicSettings']>
+    ReturnType<UMSavedObjectsAdapter['getUptimeDynamicSettings']>
   >;
   const mockDate = 'date';
   beforeAll(() => {
@@ -152,6 +152,8 @@ describe('tls alert', () => {
       const certSettings = {
         certAgeThreshold: 10,
         certExpirationThreshold: 5,
+        heartbeatIndices: 'heartbeat-*',
+        defaultConnectors: [],
       };
       savedObjectsAdapterSpy.mockImplementation(() => certSettings);
       const mockGetter: jest.Mock<CertResult> = jest.fn();

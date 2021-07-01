@@ -5,11 +5,9 @@
  * 2.0.
  */
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
-import { UMServerLibs, UptimeESClient } from '../lib';
-import { DynamicSettings } from '../../../common/runtime_types';
+import { UMServerLibs } from '../lib';
 import { AlertTypeWithExecutor, LifecycleAlertService } from '../../../../rule_registry/server';
 import { AlertInstanceContext } from '../../../../alerting/common';
-import { AlertServices, AlertTypeParams } from '../../../../alerting/server';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,
