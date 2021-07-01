@@ -12,7 +12,7 @@ import {
   EuiPageHeaderSection,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { LinkIcon, LinkIconProps } from '../link_icon';
@@ -63,10 +63,10 @@ const HeaderSection = styled(EuiPageHeaderSection)`
 HeaderSection.displayName = 'HeaderSection';
 
 interface BackOptions {
+  pageId: SecurityPageName;
   text: LinkIconProps['children'];
   path?: string;
   dataTestSubj?: string;
-  pageId: SecurityPageName;
 }
 
 export interface HeaderPageProps extends HeaderProps {
@@ -83,6 +83,29 @@ export interface HeaderPageProps extends HeaderProps {
   titleNode?: React.ReactElement;
 }
 
+const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo(({ backOptions }) => {
+  const { navigateToUrl } = useKibana().services.application;
+  const { formatUrl } = useFormatUrl(backOptions.pageId);
+
+  const backUrl = formatUrl(backOptions.path ?? '');
+  return (
+    <LinkBack>
+      <LinkIcon
+        dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
+        onClick={(ev: Event) => {
+          ev.preventDefault();
+          navigateToUrl(backUrl);
+        }}
+        href={backUrl}
+        iconType="arrowLeft"
+      >
+        {backOptions.text}
+      </LinkIcon>
+    </LinkBack>
+  );
+});
+HeaderLinkBack.displayName = 'HeaderLinkBack';
+
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   backOptions,
   backComponent,
@@ -97,63 +120,36 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   title,
   titleNode,
   ...rest
-}) => {
-  const { navigateToUrl } = useKibana().services.application;
+}) => (
+  <>
+    <EuiPageHeader alignItems="center" bottomBorder={border}>
+      <HeaderSection>
+        {backOptions && <HeaderLinkBack backOptions={backOptions} />}
+        {!backOptions && backComponent && <>{backComponent}</>}
 
-  const { formatUrl } = useFormatUrl(backOptions?.pageId ?? SecurityPageName.overview);
-
-  const linkBack = useMemo(() => {
-    if (!backOptions) {
-      return null;
-    }
-    const backUrl = formatUrl(backOptions.path ?? '');
-    return (
-      <LinkBack>
-        <LinkIcon
-          dataTestSubj={backOptions.dataTestSubj ?? 'link-back'}
-          onClick={(ev: Event) => {
-            ev.preventDefault();
-            navigateToUrl(backUrl);
-          }}
-          href={backUrl}
-          iconType="arrowLeft"
-        >
-          {backOptions.text}
-        </LinkIcon>
-      </LinkBack>
-    );
-  }, [backOptions, navigateToUrl, formatUrl]);
-
-  return (
-    <>
-      <EuiPageHeader alignItems="center" bottomBorder={border}>
-        <HeaderSection>
-          {linkBack}
-          {!backOptions && backComponent && <>{backComponent}</>}
-          {titleNode || (
-            <Title
-              draggableArguments={draggableArguments}
-              title={title}
-              badgeOptions={badgeOptions}
-            />
-          )}
-
-          {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
-          {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
-          {border && isLoading && <EuiProgress size="xs" color="accent" />}
-        </HeaderSection>
-
-        {children && (
-          <EuiPageHeaderSection data-test-subj="header-page-supplements">
-            {children}
-          </EuiPageHeaderSection>
+        {titleNode || (
+          <Title
+            draggableArguments={draggableArguments}
+            title={title}
+            badgeOptions={badgeOptions}
+          />
         )}
-        {!hideSourcerer && <Sourcerer scope={SourcererScopeName.default} />}
-      </EuiPageHeader>
-      {/* Manually add a 'padding-bottom' to header */}
-      <EuiSpacer size="l" />
-    </>
-  );
-};
+
+        {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
+        {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
+        {border && isLoading && <EuiProgress size="xs" color="accent" />}
+      </HeaderSection>
+
+      {children && (
+        <EuiPageHeaderSection data-test-subj="header-page-supplements">
+          {children}
+        </EuiPageHeaderSection>
+      )}
+      {!hideSourcerer && <Sourcerer scope={SourcererScopeName.default} />}
+    </EuiPageHeader>
+    {/* Manually add a 'padding-bottom' to header */}
+    <EuiSpacer size="l" />
+  </>
+);
 
 export const HeaderPage = React.memo(HeaderPageComponent);
