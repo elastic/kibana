@@ -1467,7 +1467,7 @@ describe('IndexPattern Data Source', () => {
       ).toBeUndefined();
     });
 
-    it('should clear the incomplete column', () => {
+    it('should clear all incomplete columns', () => {
       const state = {
         indexPatternRefs: [],
         existingFields: {},
@@ -1499,7 +1499,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
-            incompleteColumns: { col2: { operationType: 'sum' } },
+            incompleteColumns: undefined,
           },
         },
       });

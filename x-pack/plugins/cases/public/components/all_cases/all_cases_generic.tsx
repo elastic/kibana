@@ -199,6 +199,7 @@ export const AllCasesGeneric = React.memo<AllCasesGenericProps>(
       isLoadingCases: loading,
       refreshCases,
       showActions,
+      userCanCrud,
     });
 
     const itemIdToExpandedRowMap = useMemo(
