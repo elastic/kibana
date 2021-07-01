@@ -34,7 +34,6 @@ import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
 import { pluginServices } from './services';
 import { pluginServiceRegistry } from './services/kibana';
 
-
 export { CoreStart, CoreSetup };
 
 /**
