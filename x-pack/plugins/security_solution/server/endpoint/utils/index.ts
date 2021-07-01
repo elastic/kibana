@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './artifacts';
-export { getMetadataForEndpoints } from './metadata';
-export * from './actions';
+export * from './fleet_agent_status_to_endpoint_host_status';
