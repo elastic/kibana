@@ -17,10 +17,11 @@ import {
 
 import { ApmConfiguration } from './config';
 
-const initialEnv = { ...process.env };
-
 describe('ApmConfiguration', () => {
   beforeEach(() => {
+    // start with an empty env to avoid CI from spoiling snapshots, env is unique for each jest file
+    process.env = {};
+
     packageMock.raw = {
       version: '8.0.0',
       build: {
@@ -30,7 +31,6 @@ describe('ApmConfiguration', () => {
   });
 
   afterEach(() => {
-    process.env = { ...initialEnv };
     resetAllMocks();
   });
 
@@ -86,7 +86,7 @@ describe('ApmConfiguration', () => {
         "breakdownMetrics": true,
         "captureSpanStackTraces": false,
         "centralConfig": false,
-        "environment": "test",
+        "environment": "development",
         "globalLabels": Object {},
         "logUncaughtExceptions": true,
         "metricsInterval": "30s",
@@ -107,7 +107,7 @@ describe('ApmConfiguration', () => {
         "captureHeaders": false,
         "captureSpanStackTraces": false,
         "centralConfig": false,
-        "environment": "test",
+        "environment": "development",
         "globalLabels": Object {
           "git_rev": "sha",
         },
