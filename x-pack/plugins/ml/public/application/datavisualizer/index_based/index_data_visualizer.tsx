@@ -93,7 +93,9 @@ export const IndexDataVisualizerPage: FC = () => {
           });
         },
         canDisplay: async () => {
-          return isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
+          return (
+            isFullLicense() && checkPermission('canCreateDataFrameAnalytics') && mlNodesAvailable()
+          );
         },
       },
     ],
