@@ -6,6 +6,7 @@
  */
 
 import {
+  isIosAgentName,
   isRumAgentName,
   isJavaAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
@@ -68,6 +69,10 @@ export function getAgentIconKey(agentName: string) {
   // Java  agent names
   if (isJavaAgentName(lowercasedAgentName)) {
     return 'java';
+  }
+
+  if (isIosAgentName(lowercasedAgentName)) {
+    return 'ios';
   }
 
   // Remove "opentelemetry/" prefix

@@ -8,7 +8,7 @@
 
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
-import { IndexPatternBase, KueryNode, IFieldType, LatLon } from '../../..';
+import { IndexPatternBase, KueryNode, LatLon } from '../../..';
 import { LiteralTypeBuildNode } from '../node_types/types';
 
 export function buildNodeParams(fieldName: string, points: LatLon[]) {
@@ -35,8 +35,8 @@ export function toElasticsearchQuery(
     value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
   const fieldName = nodeTypes.literal.toElasticsearchQuery(fullFieldNameArg) as string;
-  const fieldList: IFieldType[] = indexPattern?.fields ?? [];
-  const field = fieldList.find((fld: IFieldType) => fld.name === fieldName);
+  const fieldList = indexPattern?.fields ?? [];
+  const field = fieldList.find((fld) => fld.name === fieldName);
   const queryParams = {
     points: points.map((point: LiteralTypeBuildNode) => {
       return ast.toElasticsearchQuery(point, indexPattern, config, context);
