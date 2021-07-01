@@ -13,7 +13,7 @@ import {
 } from '../../../../../../observability/public';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 
 export function CustomLinkList({
   customLinks,

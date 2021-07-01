@@ -19,7 +19,7 @@ import React from 'react';
 import { useChartTheme } from '../../../../../../observability/public';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
-import { unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
 
 export type Color =

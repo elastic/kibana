@@ -29,7 +29,7 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { truncate, unit } from '../../../../style/variables';
+import { truncate, unit } from '../../../../utils/style';
 import { AgentIcon } from '../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
 import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';

@@ -15,7 +15,7 @@ import {
   asMillisecondDuration,
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
-import { truncate } from '../../../../style/variables';
+import { truncate } from '../../../../utils/style';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';

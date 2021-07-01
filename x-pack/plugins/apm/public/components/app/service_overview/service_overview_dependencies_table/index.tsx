@@ -27,7 +27,7 @@ import { ServiceDependencyItem } from '../../../../../server/lib/services/get_se
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 import { AgentIcon } from '../../../shared/agent_icon';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';

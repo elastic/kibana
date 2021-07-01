@@ -19,7 +19,7 @@ import {
 } from '../../../../../context/apm_plugin/apm_plugin_context';
 
 storiesOf(
-  'app/settings/agent_configurations/AgentConfigurationCreateEdit',
+  'app/Settings/AgentConfigurations/AgentConfigurationCreateEdit',
   module
 )
   .addDecorator((storyFn) => {

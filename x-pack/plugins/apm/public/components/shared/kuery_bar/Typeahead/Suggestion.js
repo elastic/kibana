@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { EuiIcon } from '@elastic/eui';
-import { unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 import { tint } from 'polished';
 
 function getIconColor(type, theme) {

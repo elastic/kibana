@@ -19,7 +19,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { truncate, unit } from '../../../style/variables';
+import { truncate, unit } from '../../../utils/style';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 

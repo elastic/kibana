@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { truncate } from '../../../style/variables';
+import { truncate } from '../../../utils/style';
 
 export interface IStickyProperty {
   val: JSX.Element | string | Date;

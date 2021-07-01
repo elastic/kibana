@@ -44,7 +44,7 @@ import {
 } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { unit } from '../../../style/variables';
+import { unit } from '../../../utils/style';
 
 const colors = euiPaletteForTemperature(100).slice(50, 85);
 

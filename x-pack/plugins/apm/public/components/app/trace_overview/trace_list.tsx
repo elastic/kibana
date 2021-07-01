@@ -14,7 +14,7 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { truncate } from '../../../style/variables';
+import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';

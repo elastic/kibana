@@ -25,7 +25,7 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { unit } from '../../../../style/variables';
+import { unit } from '../../../../utils/style';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';

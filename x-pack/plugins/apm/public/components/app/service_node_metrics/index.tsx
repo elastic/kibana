@@ -25,7 +25,7 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useServiceMetricChartsFetcher } from '../../../hooks/use_service_metric_charts_fetcher';
-import { truncate, unit } from '../../../style/variables';
+import { truncate, unit } from '../../../utils/style';
 import { MetricsChart } from '../../shared/charts/metrics_chart';
 import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
