@@ -27,7 +27,6 @@ interface Props {
   additionalLinks: ResultLink[];
 }
 
-// @todo: Add back create job card in a follow up PR
 export const ActionsPanel: FC<Props> = ({
   indexPattern,
   searchString,
@@ -130,7 +129,7 @@ export const ActionsPanel: FC<Props> = ({
               icon={link.icon}
               description={link.description}
               title={link.title}
-              // data-test-subj="dataVisualizerViewInDiscoverCard"
+              data-test-subj={link.dataTestSubj}
             />
             <EuiSpacer size="m" />
           </>

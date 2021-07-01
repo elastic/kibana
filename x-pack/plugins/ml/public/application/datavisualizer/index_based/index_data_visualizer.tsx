@@ -69,6 +69,7 @@ export const IndexDataVisualizerPage: FC = () => {
         canDisplay: async () => {
           return isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
         },
+        dataTestSubj: 'dataVisualizerCreateAdvancedJobCard',
       },
       {
         id: 'create_ml_dfa_job',
@@ -97,6 +98,7 @@ export const IndexDataVisualizerPage: FC = () => {
             isFullLicense() && checkPermission('canCreateDataFrameAnalytics') && mlNodesAvailable()
           );
         },
+        dataTestSubj: 'dataVisualizerCreateDataFrameAnalyticsCard',
       },
     ],
     []

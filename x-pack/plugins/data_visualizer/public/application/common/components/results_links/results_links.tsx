@@ -28,6 +28,7 @@ export interface ResultLink {
   description: string;
   getUrl(params?: any): Promise<string>;
   canDisplay(params?: any): Promise<boolean>;
+  dataTestSubj?: string;
 }
 
 interface Props {
