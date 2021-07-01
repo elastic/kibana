@@ -18,7 +18,7 @@
  */
 
 
-import { Server } from '@hapi/hapi';
+import { Server } from '@commercial/hapi';
 import { registerHapiPlugins } from '../../server/http/register_hapi_plugins';
 
 export default class WatchServer {

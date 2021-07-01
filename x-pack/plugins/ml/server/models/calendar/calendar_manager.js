@@ -7,7 +7,7 @@
 
 
 import _ from 'lodash';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import { EventManager } from './event_manager';
 
 export class CalendarManager {

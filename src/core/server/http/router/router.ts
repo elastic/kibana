@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
+import { Request, ResponseObject, ResponseToolkit } from '@commercial/hapi';
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 
 import { KibanaRequest } from './request';

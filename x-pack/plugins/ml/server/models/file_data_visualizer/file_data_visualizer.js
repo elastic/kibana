@@ -5,7 +5,7 @@
  */
 
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import fs from 'fs';
 import os from 'os';
 const util = require('util');

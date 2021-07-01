@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 
-import { Server } from '@hapi/hapi';
+import { Server } from '@commercial/hapi';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
 import {

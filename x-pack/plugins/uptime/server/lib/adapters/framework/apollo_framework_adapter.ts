@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, Request, ResponseToolkit, Server } from '@hapi/hapi';
+import { Plugin, Request, ResponseToolkit, Server } from '@commercial/hapi';
 import { runHttpQuery } from 'apollo-server-core';
 import { DEFAULT_GRAPHQL_PATH } from '../../../graphql';
 import { UMHapiGraphQLPluginOptions } from './adapter_types';

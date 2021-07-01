@@ -331,10 +331,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "backgroundColor": "#baeeba",
                       },
                       "hljs-attr": Object {
-                        "color": "#5c2699",
+                        "color": "#836C28",
                       },
                       "hljs-attribute": Object {
-                        "color": "#000",
+                        "color": "#aa0d91",
                       },
                       "hljs-built_in": Object {
                         "color": "#5c2699",
@@ -348,8 +348,11 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                       "hljs-class .hljs-title": Object {
                         "color": "#5c2699",
                       },
+                      "hljs-code": Object {
+                        "color": "#c41a16",
+                      },
                       "hljs-comment": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-deletion": Object {
                         "backgroundColor": "#ffc8bd",
@@ -368,16 +371,19 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#aa0d91",
                       },
                       "hljs-link": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-literal": Object {
                         "color": "#aa0d91",
                       },
                       "hljs-meta": Object {
-                        "color": "#1c00cf",
+                        "color": "#643820",
+                      },
+                      "hljs-meta-string": Object {
+                        "color": "#c41a16",
                       },
                       "hljs-name": Object {
-                        "color": "#008",
+                        "color": "#aa0d91",
                       },
                       "hljs-number": Object {
                         "color": "#1c00cf",
@@ -386,13 +392,13 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-quote": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-regexp": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-section": Object {
-                        "color": "#5c2699",
+                        "color": "#643820",
                       },
                       "hljs-selector-class": Object {
                         "color": "#9b703f",
@@ -416,10 +422,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#1c00cf",
                       },
                       "hljs-tag": Object {
-                        "color": "#1c00cf",
+                        "color": "#aa0d91",
                       },
                       "hljs-template-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
                       },
                       "hljs-title": Object {
                         "color": "#1c00cf",
@@ -428,7 +434,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
+                      },
+                      "xml .hljs-meta": Object {
+                        "color": "#c0c0c0",
                       },
                     }
                   }
@@ -456,11 +465,18 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         }
                       }
                     >
-                      <styled.code>
+                      <styled.code
+                        className="language-javascript"
+                      >
                         <code
-                          className="c11"
+                          className="language-javascript c11"
                         >
-                              })
+                          <span
+                            key="code-segement0"
+                            style={Object {}}
+                          >
+                                })
+                          </span>
                         </code>
                       </styled.code>
                     </pre>
@@ -490,10 +506,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "backgroundColor": "#baeeba",
                       },
                       "hljs-attr": Object {
-                        "color": "#5c2699",
+                        "color": "#836C28",
                       },
                       "hljs-attribute": Object {
-                        "color": "#000",
+                        "color": "#aa0d91",
                       },
                       "hljs-built_in": Object {
                         "color": "#5c2699",
@@ -507,8 +523,11 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                       "hljs-class .hljs-title": Object {
                         "color": "#5c2699",
                       },
+                      "hljs-code": Object {
+                        "color": "#c41a16",
+                      },
                       "hljs-comment": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-deletion": Object {
                         "backgroundColor": "#ffc8bd",
@@ -527,16 +546,19 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#aa0d91",
                       },
                       "hljs-link": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-literal": Object {
                         "color": "#aa0d91",
                       },
                       "hljs-meta": Object {
-                        "color": "#1c00cf",
+                        "color": "#643820",
+                      },
+                      "hljs-meta-string": Object {
+                        "color": "#c41a16",
                       },
                       "hljs-name": Object {
-                        "color": "#008",
+                        "color": "#aa0d91",
                       },
                       "hljs-number": Object {
                         "color": "#1c00cf",
@@ -545,13 +567,13 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-quote": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-regexp": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-section": Object {
-                        "color": "#5c2699",
+                        "color": "#643820",
                       },
                       "hljs-selector-class": Object {
                         "color": "#9b703f",
@@ -575,10 +597,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#1c00cf",
                       },
                       "hljs-tag": Object {
-                        "color": "#1c00cf",
+                        "color": "#aa0d91",
                       },
                       "hljs-template-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
                       },
                       "hljs-title": Object {
                         "color": "#1c00cf",
@@ -587,7 +609,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
+                      },
+                      "xml .hljs-meta": Object {
+                        "color": "#c0c0c0",
                       },
                     }
                   }
@@ -615,10 +640,19 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         }
                       }
                     >
-                      <styled.code>
+                      <styled.code
+                        className="language-javascript"
+                      >
                         <code
-                          className="c11"
+                          className="language-javascript c11"
                         >
+                          <span
+                            key="code-segement0"
+                            style={Object {}}
+                          >
+                            
+
+                          </span>
                           
 
                         </code>
@@ -650,10 +684,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "backgroundColor": "#baeeba",
                       },
                       "hljs-attr": Object {
-                        "color": "#5c2699",
+                        "color": "#836C28",
                       },
                       "hljs-attribute": Object {
-                        "color": "#000",
+                        "color": "#aa0d91",
                       },
                       "hljs-built_in": Object {
                         "color": "#5c2699",
@@ -667,8 +701,11 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                       "hljs-class .hljs-title": Object {
                         "color": "#5c2699",
                       },
+                      "hljs-code": Object {
+                        "color": "#c41a16",
+                      },
                       "hljs-comment": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-deletion": Object {
                         "backgroundColor": "#ffc8bd",
@@ -687,16 +724,19 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#aa0d91",
                       },
                       "hljs-link": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-literal": Object {
                         "color": "#aa0d91",
                       },
                       "hljs-meta": Object {
-                        "color": "#1c00cf",
+                        "color": "#643820",
+                      },
+                      "hljs-meta-string": Object {
+                        "color": "#c41a16",
                       },
                       "hljs-name": Object {
-                        "color": "#008",
+                        "color": "#aa0d91",
                       },
                       "hljs-number": Object {
                         "color": "#1c00cf",
@@ -705,13 +745,13 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-quote": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-regexp": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-section": Object {
-                        "color": "#5c2699",
+                        "color": "#643820",
                       },
                       "hljs-selector-class": Object {
                         "color": "#9b703f",
@@ -735,10 +775,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#1c00cf",
                       },
                       "hljs-tag": Object {
-                        "color": "#1c00cf",
+                        "color": "#aa0d91",
                       },
                       "hljs-template-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
                       },
                       "hljs-title": Object {
                         "color": "#1c00cf",
@@ -747,7 +787,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
+                      },
+                      "xml .hljs-meta": Object {
+                        "color": "#c0c0c0",
                       },
                     }
                   }
@@ -775,11 +818,18 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         }
                       }
                     >
-                      <styled.code>
+                      <styled.code
+                        className="language-javascript"
+                      >
                         <code
-                          className="c11"
+                          className="language-javascript c11"
                         >
-                              client.query(
+                          <span
+                            key="code-segement0"
+                            style={Object {}}
+                          >
+                                client.query(
+                          </span>
                           <span
                             key="code-segement1"
                             style={
@@ -790,7 +840,12 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                           >
                             'SELECT id FROM customers WHERE id=$1'
                           </span>
-                          , [req.body.customer_id], next())
+                          <span
+                            key="code-segement2"
+                            style={Object {}}
+                          >
+                            , [req.body.customer_id], next())
+                          </span>
                         </code>
                       </styled.code>
                     </pre>
@@ -820,10 +875,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "backgroundColor": "#baeeba",
                       },
                       "hljs-attr": Object {
-                        "color": "#5c2699",
+                        "color": "#836C28",
                       },
                       "hljs-attribute": Object {
-                        "color": "#000",
+                        "color": "#aa0d91",
                       },
                       "hljs-built_in": Object {
                         "color": "#5c2699",
@@ -837,8 +892,11 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                       "hljs-class .hljs-title": Object {
                         "color": "#5c2699",
                       },
+                      "hljs-code": Object {
+                        "color": "#c41a16",
+                      },
                       "hljs-comment": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-deletion": Object {
                         "backgroundColor": "#ffc8bd",
@@ -857,16 +915,19 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#aa0d91",
                       },
                       "hljs-link": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-literal": Object {
                         "color": "#aa0d91",
                       },
                       "hljs-meta": Object {
-                        "color": "#1c00cf",
+                        "color": "#643820",
+                      },
+                      "hljs-meta-string": Object {
+                        "color": "#c41a16",
                       },
                       "hljs-name": Object {
-                        "color": "#008",
+                        "color": "#aa0d91",
                       },
                       "hljs-number": Object {
                         "color": "#1c00cf",
@@ -875,13 +936,13 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-quote": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-regexp": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-section": Object {
-                        "color": "#5c2699",
+                        "color": "#643820",
                       },
                       "hljs-selector-class": Object {
                         "color": "#9b703f",
@@ -905,10 +966,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#1c00cf",
                       },
                       "hljs-tag": Object {
-                        "color": "#1c00cf",
+                        "color": "#aa0d91",
                       },
                       "hljs-template-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
                       },
                       "hljs-title": Object {
                         "color": "#1c00cf",
@@ -917,7 +978,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
+                      },
+                      "xml .hljs-meta": Object {
+                        "color": "#c0c0c0",
                       },
                     }
                   }
@@ -945,39 +1009,60 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         }
                       }
                     >
-                      <styled.code>
+                      <styled.code
+                        className="language-javascript"
+                      >
                         <code
-                          className="c11"
+                          className="language-javascript c11"
                         >
-                              req.body.lines.forEach(
                           <span
-                            key="code-segement1"
+                            key="code-segement0"
                             style={Object {}}
                           >
-                            <span
-                              key="code-segment-1-0"
-                              style={
-                                Object {
-                                  "color": "#aa0d91",
-                                }
+                                req.body.lines.forEach(
+                          </span>
+                          <span
+                            className="hljs-function"
+                            key="code-segement1"
+                            style={
+                              Object {
+                                "color": "#aa0d91",
                               }
-                            >
-                              function
-                            </span>
+                            }
+                          >
+                            function
+                          </span>
+                          <span
+                            className="hljs-function"
+                            key="code-segement2"
+                            style={Object {}}
+                          >
                              (
-                            <span
-                              key="code-segment-1-2"
-                              style={
-                                Object {
-                                  "color": "#5c2699",
-                                }
+                          </span>
+                          <span
+                            className="hljs-function"
+                            key="code-segement3"
+                            style={
+                              Object {
+                                "color": "#5c2699",
                               }
-                            >
-                              line
-                            </span>
+                            }
+                          >
+                            line
+                          </span>
+                          <span
+                            className="hljs-function"
+                            key="code-segement4"
+                            style={Object {}}
+                          >
                             ) 
                           </span>
-                          {
+                          <span
+                            key="code-segement5"
+                            style={Object {}}
+                          >
+                            {
+                          </span>
                         </code>
                       </styled.code>
                     </pre>
@@ -1007,10 +1092,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "backgroundColor": "#baeeba",
                       },
                       "hljs-attr": Object {
-                        "color": "#5c2699",
+                        "color": "#836C28",
                       },
                       "hljs-attribute": Object {
-                        "color": "#000",
+                        "color": "#aa0d91",
                       },
                       "hljs-built_in": Object {
                         "color": "#5c2699",
@@ -1024,8 +1109,11 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                       "hljs-class .hljs-title": Object {
                         "color": "#5c2699",
                       },
+                      "hljs-code": Object {
+                        "color": "#c41a16",
+                      },
                       "hljs-comment": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-deletion": Object {
                         "backgroundColor": "#ffc8bd",
@@ -1044,16 +1132,19 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#aa0d91",
                       },
                       "hljs-link": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-literal": Object {
                         "color": "#aa0d91",
                       },
                       "hljs-meta": Object {
-                        "color": "#1c00cf",
+                        "color": "#643820",
+                      },
+                      "hljs-meta-string": Object {
+                        "color": "#c41a16",
                       },
                       "hljs-name": Object {
-                        "color": "#008",
+                        "color": "#aa0d91",
                       },
                       "hljs-number": Object {
                         "color": "#1c00cf",
@@ -1062,13 +1153,13 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-quote": Object {
-                        "color": "#006a00",
+                        "color": "#007400",
                       },
                       "hljs-regexp": Object {
-                        "color": "#080",
+                        "color": "#0E0EFF",
                       },
                       "hljs-section": Object {
-                        "color": "#5c2699",
+                        "color": "#643820",
                       },
                       "hljs-selector-class": Object {
                         "color": "#9b703f",
@@ -1092,10 +1183,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#1c00cf",
                       },
                       "hljs-tag": Object {
-                        "color": "#1c00cf",
+                        "color": "#aa0d91",
                       },
                       "hljs-template-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
                       },
                       "hljs-title": Object {
                         "color": "#1c00cf",
@@ -1104,7 +1195,10 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         "color": "#5c2699",
                       },
                       "hljs-variable": Object {
-                        "color": "#660",
+                        "color": "#3F6E74",
+                      },
+                      "xml .hljs-meta": Object {
+                        "color": "#c0c0c0",
                       },
                     }
                   }
@@ -1132,11 +1226,18 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         }
                       }
                     >
-                      <styled.code>
+                      <styled.code
+                        className="language-javascript"
+                      >
                         <code
-                          className="c11"
+                          className="language-javascript c11"
                         >
-                                client.query(
+                          <span
+                            key="code-segement0"
+                            style={Object {}}
+                          >
+                                  client.query(
+                          </span>
                           <span
                             key="code-segement1"
                             style={
@@ -1147,7 +1248,12 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                           >
                             'SELECT id FROM products WHERE id=$1'
                           </span>
-                          , [line.id], next())
+                          <span
+                            key="code-segement2"
+                            style={Object {}}
+                          >
+                            , [line.id], next())
+                          </span>
                         </code>
                       </styled.code>
                     </pre>

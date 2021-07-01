@@ -7,7 +7,7 @@ jest.mock('../../../../server/lib/get_client_shield', () => ({
   getClient: jest.fn(),
 }));
 
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 // @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';

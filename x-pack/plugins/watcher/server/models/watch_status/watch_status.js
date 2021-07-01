@@ -5,7 +5,7 @@
  */
 
 import { get, map, forEach, max } from 'lodash';
-import { badRequest } from '@hapi/boom';
+import { badRequest } from '@commercial/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ActionStatus } from '../action_status';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';

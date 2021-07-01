@@ -18,7 +18,7 @@
  */
 
 import Joi from 'joi';
-import Boom from '@hapi/boom';
+import Boom from '@commercial/boom';
 import Wreck from '@hapi/wreck';
 import { trimLeft, trimRight } from 'lodash';
 

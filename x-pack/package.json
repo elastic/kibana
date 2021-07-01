@@ -26,7 +26,7 @@
     "@types/react": "16.3.14"
   },
   "devDependencies": {
-    "@hapi/hapi": "^17.9.0",
+    "@commercial/hapi": "^17.9.4",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/plugin-helpers": "7.1.5",
@@ -53,6 +53,7 @@
     "@types/react-dom": "^16.0.5",
     "@types/react-redux": "^6.0.6",
     "@types/react-router-dom": "^4.3.1",
+    "@types/react-syntax-highlighter": "^13.5.0",
     "@types/reduce-reducers": "^0.1.3",
     "@types/sinon": "^5.0.1",
     "@types/supertest": "^2.0.5",
@@ -113,14 +114,14 @@
     "yargs": "4.8.1"
   },
   "dependencies": {
+    "@commercial/boom": "^7.4.12",
+    "@commercial/statehood": "^6.1.2",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "6.10.9",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
-    "@hapi/boom": "^7.4.11",
     "@hapi/oppsy": "^2.1.2",
-    "@hapi/statehood": "^6.1.2",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/es-query": "1.0.0",
     "@kbn/i18n": "1.0.0",
@@ -236,7 +237,7 @@
     "react-select": "^1.2.1",
     "react-shortcuts": "^2.0.0",
     "react-sticky": "^6.0.3",
-    "react-syntax-highlighter": "^5.7.0",
+    "react-syntax-highlighter": "^13.5.3",
     "react-vis": "^1.8.1",
     "recompose": "^0.26.0",
     "reduce-reducers": "^0.4.3",
