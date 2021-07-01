@@ -99,7 +99,7 @@ pageLoadAssetSize:
   watcher: 43742
   runtimeFields: 41752
   stackAlerts: 29684
-  presentationUtil: 49767
+  presentationUtil: 94301
   spacesOss: 18817
   indexPatternFieldEditor: 90489
   osquery: 107090
@@ -110,4 +110,5 @@ pageLoadAssetSize:
   timelines: 230410
   screenshotMode: 17856
   visTypePie: 35583
+  expressionRevealImage: 25675
   cases: 144442
