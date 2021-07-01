@@ -9,10 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
 import { estypes } from '@elastic/elasticsearch';
 import {
-  AlertExecutorOptions,
   AlertServices,
   AlertInstance,
-  AlertTypeParams,
   AlertTypeState,
   AlertInstanceContext,
   AlertInstanceState,
@@ -45,19 +43,17 @@ import { decodeOrThrow } from '../../../../common/runtime_types';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 
-type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
-type LogThresholdAlertServices = AlertServices<
-  AlertInstanceState,
-  AlertInstanceContext,
+export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
+export type LogThresholdAlertTypeParams = AlertParams;
+export type LogThresholdAlertTypeState = AlertTypeState; // no specific state used
+export type LogThresholdAlertInstanceState = AlertInstanceState; // no specific state used
+export type LogThresholdAlertInstanceContext = AlertInstanceContext; // no specific instance context used
+
+type LogThresholdAlertInstanceFactory = AlertServices<
+  LogThresholdAlertInstanceState,
+  LogThresholdAlertInstanceContext,
   LogThresholdActionGroups
->;
-type LogThresholdAlertExecutorOptions = AlertExecutorOptions<
-  AlertTypeParams,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  LogThresholdActionGroups
->;
+>['alertInstanceFactory'];
 
 const COMPOSITE_GROUP_SIZE = 2000;
 
@@ -75,9 +71,20 @@ const checkValueAgainstComparatorMap: {
 // With forks for group_by vs ungrouped, and ratio vs non-ratio.
 
 export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
-  async function ({ services, params }: LogThresholdAlertExecutorOptions) {
-    const { alertInstanceFactory, savedObjectsClient, scopedClusterClient } = services;
+  libs.logsRules.createLifecycleRuleExecutor<
+    LogThresholdAlertTypeParams,
+    LogThresholdAlertTypeState,
+    LogThresholdAlertInstanceState,
+    LogThresholdAlertInstanceContext,
+    LogThresholdActionGroups
+  >(async ({ services, params }) => {
+    const { alertWithLifecycle, savedObjectsClient, scopedClusterClient } = services;
     const { sources } = libs;
+    const alertInstanceFactory = (id: string) =>
+      alertWithLifecycle({
+        id,
+        fields: {},
+      });
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const { indices, timestampField, runtimeMappings } = await resolveLogSourceConfiguration(
@@ -113,7 +120,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     } catch (e) {
       throw new Error(e);
     }
-  };
+  });
 
 async function executeAlert(
   alertParams: CountAlertParams,
@@ -121,7 +128,7 @@ async function executeAlert(
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
-  alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
+  alertInstanceFactory: LogThresholdAlertInstanceFactory
 ) {
   const query = getESQuery(alertParams, timestampField, indexPattern, runtimeMappings);
 
@@ -152,7 +159,7 @@ async function executeRatioAlert(
   indexPattern: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   esClient: ElasticsearchClient,
-  alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
+  alertInstanceFactory: LogThresholdAlertInstanceFactory
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
   const numeratorParams: AlertParams = {
@@ -214,7 +221,7 @@ const getESQuery = (
 export const processUngroupedResults = (
   results: UngroupedSearchQueryResponse,
   params: CountAlertParams,
-  alertInstanceFactory: LogThresholdAlertExecutorOptions['services']['alertInstanceFactory'],
+  alertInstanceFactory: LogThresholdAlertInstanceFactory,
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;
@@ -240,7 +247,7 @@ export const processUngroupedRatioResults = (
   numeratorResults: UngroupedSearchQueryResponse,
   denominatorResults: UngroupedSearchQueryResponse,
   params: RatioAlertParams,
-  alertInstanceFactory: LogThresholdAlertExecutorOptions['services']['alertInstanceFactory'],
+  alertInstanceFactory: LogThresholdAlertInstanceFactory,
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;
@@ -308,7 +315,7 @@ const getReducedGroupByResults = (
 export const processGroupByResults = (
   results: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: CountAlertParams,
-  alertInstanceFactory: LogThresholdAlertExecutorOptions['services']['alertInstanceFactory'],
+  alertInstanceFactory: LogThresholdAlertInstanceFactory,
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;
@@ -339,7 +346,7 @@ export const processGroupByRatioResults = (
   numeratorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   denominatorResults: GroupedSearchQueryResponse['aggregations']['groups']['buckets'],
   params: RatioAlertParams,
-  alertInstanceFactory: LogThresholdAlertExecutorOptions['services']['alertInstanceFactory'],
+  alertInstanceFactory: LogThresholdAlertInstanceFactory,
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;

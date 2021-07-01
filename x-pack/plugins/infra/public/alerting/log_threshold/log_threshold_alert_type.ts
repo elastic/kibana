@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { ObservabilityRuleTypeModel } from '../../../../observability/public';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
   PartialAlertParams,
 } from '../../../common/alerting/logs/log_threshold/types';
 import { validateExpression } from './validation';
 
-export function getAlertType(): AlertTypeModel<PartialAlertParams> {
+export function getLogThresholdAlertType(): ObservabilityRuleTypeModel<PartialAlertParams> {
   return {
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.logs.alertFlyout.alertDescription', {
@@ -33,5 +33,10 @@ export function getAlertType(): AlertTypeModel<PartialAlertParams> {
       }
     ),
     requiresAppContext: false,
+    format: ({ fields }) => ({
+      reason: 'x',
+      link: '/',
+      // TODO: pass through params of alert and generate reason
+    }),
   };
 }

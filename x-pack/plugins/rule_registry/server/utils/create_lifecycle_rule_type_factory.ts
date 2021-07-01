@@ -15,6 +15,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeParams,
+  AlertTypeState,
 } from '../../../alerting/common';
 import {
   ALERT_DURATION,
@@ -28,8 +29,9 @@ import {
   RULE_UUID,
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
-import { AlertTypeWithExecutor } from '../types';
+import { AlertTypeExecutor, AlertTypeWithExecutor } from '../types';
 import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
+import { createLifecycleExecutor, LifecycleRuleExecutor } from './create_lifecycle_executor';
 import { getRuleExecutorData } from './get_rule_executor_data';
 
 export type LifecycleAlertService<TAlertInstanceContext extends Record<string, unknown>> = (alert: {
@@ -59,211 +61,29 @@ type CreateLifecycleRuleTypeFactory = (options: {
   type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
 ) => AlertTypeWithExecutor<TParams, TAlertInstanceContext, any>;
 
-export const createLifecycleRuleTypeFactory: CreateLifecycleRuleTypeFactory = ({
+export const createLifecycleRuleTypeFactory = ({
   logger,
   ruleDataClient,
-}) => (type) => {
+}: {
+  ruleDataClient: RuleDataClient;
+  logger: Logger;
+}) => <
+  TParams extends AlertTypeParams,
+  TAlertInstanceContext extends AlertInstanceContext,
+  TServices extends { alertWithLifecycle: LifecycleAlertService<TAlertInstanceContext> }
+>(
+  type: AlertTypeWithExecutor<TParams, TAlertInstanceContext, TServices>
+): AlertTypeWithExecutor<TParams, TAlertInstanceContext, any> => {
+  const createBoundLifecycleExecutor = createLifecycleExecutor(logger, ruleDataClient);
+  const executor = createBoundLifecycleExecutor<
+    TParams,
+    AlertTypeState,
+    AlertInstanceState,
+    TAlertInstanceContext,
+    string
+  >(type.executor as any);
   return {
     ...type,
-    executor: async (options) => {
-      const {
-        services: { alertInstanceFactory },
-        state: previousState,
-      } = options;
-
-      const ruleExecutorData = getRuleExecutorData(type, options);
-
-      const decodedState = wrappedStateRt.decode(previousState);
-
-      const state = isLeft(decodedState)
-        ? {
-            wrapped: previousState,
-            trackedAlerts: {},
-          }
-        : decodedState.right;
-
-      const currentAlerts: Record<string, { [ALERT_ID]: string }> = {};
-
-      const timestamp = options.startedAt.toISOString();
-
-      const nextWrappedState = await type.executor({
-        ...options,
-        state: state.wrapped,
-        services: {
-          ...options.services,
-          alertWithLifecycle: ({ id, fields }) => {
-            currentAlerts[id] = {
-              ...fields,
-              [ALERT_ID]: id,
-            };
-            return alertInstanceFactory(id);
-          },
-        },
-      });
-
-      const currentAlertIds = Object.keys(currentAlerts);
-      const trackedAlertIds = Object.keys(state.trackedAlerts);
-      const newAlertIds = currentAlertIds.filter((alertId) => !trackedAlertIds.includes(alertId));
-
-      const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
-
-      const trackedAlertStatesOfRecovered = Object.values(state.trackedAlerts).filter(
-        (trackedAlertState) => !currentAlerts[trackedAlertState.alertId]
-      );
-
-      logger.debug(
-        `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
-      );
-
-      const alertsDataMap: Record<
-        string,
-        {
-          [ALERT_ID]: string;
-        }
-      > = {
-        ...currentAlerts,
-      };
-
-      if (trackedAlertStatesOfRecovered.length) {
-        const { hits } = await ruleDataClient.getReader().search({
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      [RULE_UUID]: ruleExecutorData[RULE_UUID],
-                    },
-                  },
-                  {
-                    terms: {
-                      [ALERT_UUID]: trackedAlertStatesOfRecovered.map(
-                        (trackedAlertState) => trackedAlertState.alertUuid
-                      ),
-                    },
-                  },
-                ],
-              },
-            },
-            size: trackedAlertStatesOfRecovered.length,
-            collapse: {
-              field: ALERT_UUID,
-            },
-            _source: false,
-            fields: [{ field: '*', include_unmapped: true }],
-            sort: {
-              [TIMESTAMP]: 'desc' as const,
-            },
-          },
-          allow_no_indices: true,
-        });
-
-        hits.hits.forEach((hit) => {
-          const fields = parseTechnicalFields(hit.fields);
-          const alertId = fields[ALERT_ID]!;
-          alertsDataMap[alertId] = {
-            ...fields,
-            [ALERT_ID]: alertId,
-          };
-        });
-      }
-
-      const eventsToIndex = allAlertIds.map((alertId) => {
-        const alertData = alertsDataMap[alertId];
-
-        if (!alertData) {
-          logger.warn(`Could not find alert data for ${alertId}`);
-        }
-
-        const event: Mutable<ParsedTechnicalFields> = {
-          ...alertData,
-          ...ruleExecutorData,
-          [TIMESTAMP]: timestamp,
-          [EVENT_KIND]: 'event',
-          [ALERT_ID]: alertId,
-        };
-
-        const isNew = !state.trackedAlerts[alertId];
-        const isRecovered = !currentAlerts[alertId];
-        const isActiveButNotNew = !isNew && !isRecovered;
-        const isActive = !isRecovered;
-
-        const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
-          alertUuid: v4(),
-          started: timestamp,
-        };
-
-        event[ALERT_START] = started;
-        event[ALERT_UUID] = alertUuid;
-
-        if (isNew) {
-          event[EVENT_ACTION] = 'open';
-        }
-
-        if (isRecovered) {
-          event[ALERT_END] = timestamp;
-          event[EVENT_ACTION] = 'close';
-          event[ALERT_STATUS] = 'closed';
-        }
-
-        if (isActiveButNotNew) {
-          event[EVENT_ACTION] = 'active';
-        }
-
-        if (isActive) {
-          event[ALERT_STATUS] = 'open';
-        }
-
-        event[ALERT_DURATION] =
-          (options.startedAt.getTime() - new Date(event[ALERT_START]!).getTime()) * 1000;
-
-        return event;
-      });
-
-      if (eventsToIndex.length) {
-        const alertEvents: Map<string, ParsedTechnicalFields> = new Map();
-
-        for (const event of eventsToIndex) {
-          const uuid = event[ALERT_UUID]!;
-          let storedEvent = alertEvents.get(uuid);
-          if (!storedEvent) {
-            storedEvent = event;
-          }
-          alertEvents.set(uuid, {
-            ...storedEvent,
-            [EVENT_KIND]: 'signal',
-          });
-        }
-
-        if (ruleDataClient.isWriteEnabled()) {
-          await ruleDataClient.getWriter().bulk({
-            body: eventsToIndex
-              .flatMap((event) => [{ index: {} }, event])
-              .concat(
-                Array.from(alertEvents.values()).flatMap((event) => [
-                  { index: { _id: event[ALERT_UUID]! } },
-                  event,
-                ])
-              ),
-          });
-        }
-      }
-
-      const nextTrackedAlerts = Object.fromEntries(
-        eventsToIndex
-          .filter((event) => event[ALERT_STATUS] !== 'closed')
-          .map((event) => {
-            const alertId = event[ALERT_ID]!;
-            const alertUuid = event[ALERT_UUID]!;
-            const started = new Date(event[ALERT_START]!).toISOString();
-            return [alertId, { alertId, alertUuid, started }];
-          })
-      );
-
-      return {
-        wrapped: nextWrappedState ?? {},
-        trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : {},
-      };
-    },
+    executor: executor as any,
   };
 };

@@ -8,6 +8,7 @@
 import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import { Logger } from '@kbn/logging';
 import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
 import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
@@ -32,6 +33,7 @@ import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 import { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+import { RulesService } from './services/rules';
 
 export const config = {
   schema: schema.object({
@@ -82,9 +84,17 @@ export interface InfraPluginSetup {
 export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
   public config: InfraConfig;
   public libs: InfraBackendLibs | undefined;
+  public logger: Logger;
+
+  private logsRules: RulesService;
+  private metricsRules: RulesService;
 
   constructor(context: PluginInitializerContext) {
     this.config = context.config.get<InfraConfig>();
+    this.logger = context.logger.get();
+
+    this.logsRules = new RulesService('observability.logs', this.logger.get('logsRules'));
+    this.metricsRules = new RulesService('observability.metrics', this.logger.get('metricsRules'));
   }
 
   setup(core: CoreSetup<InfraServerPluginStartDeps>, plugins: InfraServerPluginSetupDeps) {
@@ -126,6 +136,8 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       ...domainLibs,
       getLogQueryFields: createGetLogQueryFields(sources, framework),
       handleEsError,
+      logsRules: this.logsRules.setup(core, plugins),
+      metricsRules: this.metricsRules.setup(core, plugins),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
