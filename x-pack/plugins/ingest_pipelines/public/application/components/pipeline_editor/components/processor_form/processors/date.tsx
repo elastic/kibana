@@ -32,10 +32,20 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldLabel', {
       defaultMessage: 'Formats',
     }),
-    helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText', {
-      defaultMessage:
-        'Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern, ISO8601, UNIX, UNIX_MS, or TAI64N formats.',
-    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText"
+        defaultMessage="Expected date formats. Provided formats are applied sequentially. Accepts a Java time pattern or one of the following formats: {allowedFormats}."
+        values={{
+          allowedFormats: (
+            <>
+              <EuiCode>{'ISO8601'}</EuiCode>,<EuiCode>{'UNIX'}</EuiCode>,
+              <EuiCode>{'UNIX_MS'}</EuiCode>,<EuiCode>{'TAI64N'}</EuiCode>
+            </>
+          ),
+        }}
+      />
+    ),
     validations: [
       {
         validator: minLengthField({
