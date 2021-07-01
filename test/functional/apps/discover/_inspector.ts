@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(getHitCount(requestStats)).to.be('0');
     });
 
-    it.only('should display request stats with results', async () => {
+    it('should display request stats with results', async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await inspector.open();
