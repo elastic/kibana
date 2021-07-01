@@ -675,7 +675,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.shellcode',
       {
-        defaultMessage: "A value of 'false' disables Shellcode Injection Protection, a feature of Memory Protection. Default: true.",
+        defaultMessage:
+          "A value of 'false' disables Shellcode Injection Protection, a feature of Memory Protection. Default: true.",
       }
     ),
   },
@@ -685,7 +686,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.signature',
       {
-        defaultMessage: "A value of 'false' disables Memory Signature Scanning, a feature of Memory Protection. Default: true.",
+        defaultMessage:
+          "A value of 'false' disables Memory Signature Scanning, a feature of Memory Protection. Default: true.",
       }
     ),
   },
