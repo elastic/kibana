@@ -72,6 +72,25 @@ function sortColumnsForLatest(sortField: string) {
   };
 }
 
+/**
+ * Extracts missing mappings from docs.
+ */
+export function getCombinedProperties(
+  populatedProperties: PreviewMappingsProperties,
+  docs: Array<Record<string, unknown>>
+): PreviewMappingsProperties {
+  // Take a sample from docs and resolve missing mappings
+  const sampleDoc = sample(docs) ?? {};
+  const missingMappings = difference(Object.keys(sampleDoc), Object.keys(populatedProperties));
+  return {
+    ...populatedProperties,
+    ...missingMappings.reduce((acc, curr) => {
+      acc[curr] = { type: typeof sampleDoc[curr] as ES_FIELD_TYPES };
+      return acc;
+    }, {} as PreviewMappingsProperties),
+  };
+}
+
 export const usePivotData = (
   indexPatternTitle: SearchItems['indexPattern']['title'],
   query: PivotQuery,
@@ -171,7 +190,7 @@ export const usePivotData = (
     const populatedFields = [...new Set(docs.map(Object.keys).flat(1))];
 
     // 3. Filter mapping properties by populated fields
-    const populatedProperties: PreviewMappingsProperties = Object.entries(
+    let populatedProperties: PreviewMappingsProperties = Object.entries(
       resp.generated_dest_index.mappings.properties
     )
       .filter(([key]) => populatedFields.includes(key))
@@ -183,12 +202,7 @@ export const usePivotData = (
         {}
       );
 
-    // Take a sample from docs and resolve missing mappings
-    const sampleDoc = sample(docs) ?? {};
-    const missingMappings = difference(Object.keys(sampleDoc), Object.keys(populatedProperties));
-    missingMappings.forEach((m) => {
-      populatedProperties[m] = { type: typeof sampleDoc[m] as ES_FIELD_TYPES };
-    });
+    populatedProperties = getCombinedProperties(populatedProperties, docs);
 
     setTableItems(docs);
     setRowCount(docs.length);
