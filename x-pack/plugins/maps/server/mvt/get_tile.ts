@@ -41,7 +41,8 @@ import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
 import { pluckRangeFieldMeta } from '../../common/pluck_range_field_meta';
-import { RangeFieldMeta } from '../../common/descriptor_types';
+import { FieldMeta } from '../../common/descriptor_types';
+import { pluckCategoryFieldMeta } from '../../common/pluck_category_field_meta';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
@@ -117,9 +118,9 @@ export async function getGridTile({
         }
       });
 
-      const rangeMeta: { [key: string]: RangeFieldMeta } = {};
+      const fieldMeta: FieldMeta = {};
       fieldNames.forEach((fieldName: string) => {
-        const metaForField = pluckRangeFieldMeta(features, fieldName, (rawValue: unknown) => {
+        const rangeMeta = pluckRangeFieldMeta(features, fieldName, (rawValue: unknown) => {
           if (fieldName === COUNT_PROP_NAME) {
             return parseFloat(rawValue as string);
           } else if (typeof rawValue === 'number') {
@@ -130,8 +131,19 @@ export async function getGridTile({
             return NaN;
           }
         });
-        if (metaForField) {
-          rangeMeta[fieldName] = metaForField;
+
+        const categoryMeta = pluckCategoryFieldMeta(features, fieldName, 20);
+
+        if (!fieldMeta[fieldName]) {
+          fieldMeta[fieldName] = {};
+        }
+
+        if (rangeMeta) {
+          fieldMeta[fieldName].range = rangeMeta;
+        }
+
+        if (categoryMeta) {
+          fieldMeta[fieldName].categories = categoryMeta;
         }
       });
 
@@ -153,7 +165,7 @@ export async function getGridTile({
                   [VECTOR_SHAPE_TYPE.LINE]: 0,
                   [VECTOR_SHAPE_TYPE.POLYGON]: 0,
                 },
-          ...rangeMeta,
+          ...fieldMeta,
         },
         geometry: bounds,
       };

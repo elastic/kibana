@@ -515,10 +515,10 @@ export class VectorStyle implements IVectorStyle {
       let max = -Infinity;
       for (let i = 0; i < metaFeatures.length; i++) {
         const properties = metaFeatures[i].properties;
-        if (properties && properties[name]) {
-          const metaFromTiles = properties[name];
-          min = Math.min(metaFromTiles.min, min);
-          max = Math.max(metaFromTiles.max, max);
+        if (properties && properties[name] && properties[name].range) {
+          const metaFromTile = properties[name];
+          min = Math.min(metaFromTile.range.min, min);
+          max = Math.max(metaFromTile.range.max, max);
         }
       }
 
