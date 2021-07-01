@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { reindexOperationSavedObjectType } from './reindex_operation_saved_object_type';
-export { telemetrySavedObjectType } from './telemetry_saved_object_type';
-export { mlSavedObjectType } from './ml_upgrade_operation_saved_object_type';
+export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
