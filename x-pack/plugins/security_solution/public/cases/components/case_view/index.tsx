@@ -35,6 +35,7 @@ import { useInsertTimeline } from '../use_insert_timeline';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import * as timelineMarkdownPlugin from '../../../common/components/markdown_editor/plugins/timeline';
 import { CaseDetailsRefreshContext } from '../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { getEndpointDetailsPath } from '../../../management/common/routing';
 
 interface Props {
   caseId: string;
@@ -162,6 +163,14 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
     [dispatch]
   );
 
+  const endpointDetailsHref = (endpointId: string) =>
+    formatUrl(
+      getEndpointDetailsPath({
+        name: 'endpointActivityLog',
+        selected_endpoint: endpointId,
+      })
+    );
+
   const onComponentInitialized = useCallback(() => {
     dispatch(
       timelineActions.createTimeline({
@@ -220,6 +229,20 @@ export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) =
         getCaseDetailHrefWithCommentId,
         onCaseDataSuccess,
         onComponentInitialized,
+        actionsNavigation: {
+          href: endpointDetailsHref,
+          onClick: (endpointId: string, e) => {
+            if (e) {
+              e.preventDefault();
+            }
+            return navigateToApp(APP_ID, {
+              path: getEndpointDetailsPath({
+                name: 'endpointActivityLog',
+                selected_endpoint: endpointId,
+              }),
+            });
+          },
+        },
         ruleDetailsNavigation: {
           href: getDetectionsRuleDetailsHref,
           onClick: async (ruleId: string | null | undefined, e) => {

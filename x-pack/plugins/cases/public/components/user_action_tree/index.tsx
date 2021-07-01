@@ -26,6 +26,7 @@ import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import {
   ActionConnector,
+  ActionsCommentRequestRt,
   AlertCommentRequestRt,
   Case,
   CaseUserActions,
@@ -45,6 +46,8 @@ import {
   getAlertAttachment,
   getGeneratedAlertsAttachment,
   RuleDetailsNavigation,
+  ActionsNavigation,
+  getActionAttachment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -61,6 +64,7 @@ export interface UserActionTreeProps {
   fetchUserActions: () => void;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
+  actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
@@ -125,6 +129,7 @@ export const UserActionTree = React.memo(
     fetchUserActions,
     getCaseDetailHrefWithCommentId,
     getRuleDetailsHref,
+    actionsNavigation,
     isLoadingDescription,
     isLoadingUserActions,
     onRuleDetailsClick,
@@ -447,6 +452,30 @@ export const UserActionTree = React.memo(
                       ]
                     : []),
                 ];
+              } else if (
+                comment != null &&
+                isRight(ActionsCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.actions
+              ) {
+                return [
+                  ...comments,
+                  ...(comment.actions !== null
+                    ? [
+                        getActionAttachment({
+                          comment,
+                          userCanCrud,
+                          isLoadingIds,
+                          getCaseDetailHrefWithCommentId,
+                          actionsNavigation,
+                          manageMarkdownEditIds,
+                          handleManageMarkdownEditId,
+                          handleManageQuote,
+                          handleSaveComment,
+                          action,
+                        }),
+                      ]
+                    : []),
+                ];
               }
             }
 
@@ -559,6 +588,7 @@ export const UserActionTree = React.memo(
         handleManageMarkdownEditId,
         handleSaveComment,
         getCaseDetailHrefWithCommentId,
+        actionsNavigation,
         userCanCrud,
         isLoadingIds,
         handleManageQuote,
