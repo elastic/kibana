@@ -185,4 +185,27 @@
       }
     }
   }
+  &.activeThumb {
+    #results {
+      .outerBox {
+        fill: $euiColorEmptyShade;
+        stroke: $euiColorPrimary;
+        stroke-width: 1px;
+      }
+      .url {
+        fill: $euiColorPrimary;
+        opacity: .1;
+      }
+      .titleBox {
+        fill: $euiColorEmptyShade;
+      }
+      .titleCopy {
+        fill: $euiColorPrimary;
+        opacity: .1;
+      }
+      .shoe {
+        fill: $euiColorPrimary;
+      }
+    }
+  }
 }
