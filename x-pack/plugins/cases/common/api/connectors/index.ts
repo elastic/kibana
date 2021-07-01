@@ -115,3 +115,10 @@ export interface ESCaseConnector {
   type: ESCaseConnectorTypes;
   fields: ESConnectorFields | null;
 }
+
+// TODO: clean up
+export interface ESCaseConnectorNoID {
+  name: string;
+  type: ESCaseConnectorTypes;
+  fields: ESConnectorFields | null;
+}

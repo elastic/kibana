@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsUtils } from '../../../../../../src/core/server';
+import { SavedObjectsFindResponse, SavedObjectsUtils } from '../../../../../../src/core/server';
 
 import {
   throwErrors,
@@ -22,9 +22,10 @@ import {
   CaseType,
   OWNER_FIELD,
   ENABLE_CASE_CONNECTOR,
+  CasesConfigureAttributes,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
-import { getConnectorFromConfiguration } from '../utils';
+import { getNoneCaseConnector } from '../utils';
 
 import { Operations } from '../../authorization';
 import {
@@ -34,6 +35,15 @@ import {
   transformNewCase,
 } from '../../common';
 import { CasesClientArgs } from '..';
+
+function getConnectorFromFindConfiguration(
+  myCaseConfigure: SavedObjectsFindResponse<CasesConfigureAttributes>
+) {
+  return myCaseConfigure.saved_objects.length > 0 &&
+    myCaseConfigure.saved_objects[0].attributes?.connector
+    ? myCaseConfigure.saved_objects[0].attributes?.connector
+    : getNoneCaseConnector();
+}
 
 /**
  * Creates a new case.
@@ -86,7 +96,10 @@ export const create = async (
     const myCaseConfigure = await caseConfigureService.find({
       unsecuredSavedObjectsClient,
     });
-    const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
+
+    // TODO: why does this set fields to null?
+    // const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
+    const caseConfigureConnector = getConnectorFromFindConfiguration(myCaseConfigure);
 
     const newCase = await caseService.postNewCase({
       unsecuredSavedObjectsClient,
@@ -96,6 +109,7 @@ export const create = async (
         username,
         full_name,
         email,
+        // TODO: refactor this so it doesn't need to convert
         connector: transformCaseConnectorToEsConnector(query.connector ?? caseConfigureConnector),
       }),
       id: savedObjectID,

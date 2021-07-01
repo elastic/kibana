@@ -17,6 +17,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
+import { configurationConnectorReferenceName } from '../services';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -168,6 +169,19 @@ export const configureMigrations = {
     // removing the id field since it will be stored in the references instead
     const { id: connectorId, ...restConnector } = doc.attributes.connector;
     const { references = [] } = doc;
+    // ignore the connector ID if it is none
+    const connectorReference =
+      connectorId !== 'none'
+        ? [
+            {
+              id: connectorId,
+              type: ACTION_SAVED_OBJECT_TYPE,
+
+              // TODO: can we remove 'associated'?
+              name: configurationConnectorReferenceName,
+            },
+          ]
+        : [];
 
     return {
       ...doc,
@@ -177,16 +191,7 @@ export const configureMigrations = {
           ...restConnector,
         },
       },
-      references: [
-        ...references,
-        {
-          id: connectorId,
-          type: ACTION_SAVED_OBJECT_TYPE,
-
-          // TODO: can we remove 'associated'?
-          name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
-        },
-      ],
+      references: [...references, ...connectorReference],
     };
   },
 };

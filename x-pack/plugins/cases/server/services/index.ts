@@ -17,3 +17,5 @@ export { AttachmentService } from './attachments';
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
 }
+
+export const configurationConnectorReferenceName = 'connectorID';

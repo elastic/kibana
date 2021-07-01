@@ -15,9 +15,9 @@ import {
   CaseStatuses,
   ExternalServiceResponse,
   ESCaseAttributes,
-  ESCasesConfigureAttributes,
   CaseType,
   ENABLE_CASE_CONNECTOR,
+  CasesConfigureAttributes,
 } from '../../../common';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
@@ -33,7 +33,7 @@ import { casesConnectors } from '../../connectors';
  * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
  */
 function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<ESCasesConfigureAttributes>,
+  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
   caseInfo: SavedObject<ESCaseAttributes>
 ): boolean {
   return (

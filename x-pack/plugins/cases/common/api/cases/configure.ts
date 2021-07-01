@@ -8,7 +8,12 @@
 import * as rt from 'io-ts';
 
 import { UserRT } from '../user';
-import { CaseConnectorRt, ConnectorMappingsRt, ESCaseConnector } from '../connectors';
+import {
+  CaseConnectorRt,
+  ConnectorMappingsRt,
+  ESCaseConnector,
+  ESCaseConnectorNoID,
+} from '../connectors';
 
 // TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
@@ -85,6 +90,14 @@ export type CasesConfigurationsResponse = rt.TypeOf<typeof CaseConfigurationsRes
 
 export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
   connector: ESCaseConnector;
+};
+
+// TODO: rename
+export type ESCasesConfigureAttributesNoConnectorID = Omit<
+  CasesConfigureAttributes,
+  'connector'
+> & {
+  connector: ESCaseConnectorNoID;
 };
 
 export type GetConfigureFindRequest = rt.TypeOf<typeof GetConfigureFindRequestRt>;
