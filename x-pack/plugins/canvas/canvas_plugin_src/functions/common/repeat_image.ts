@@ -6,8 +6,10 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
-import { elasticOutline } from '../../lib/elastic_outline';
+import {
+  elasticOutline,
+  resolveWithMissingImage,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { Render } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 

@@ -7,3 +7,4 @@
 
 export * from './artifacts';
 export { getMetadataForEndpoints } from './metadata';
+export * from './actions';
