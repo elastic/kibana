@@ -74,7 +74,6 @@ describe('url state', () => {
     waitForIpsTableToBeLoaded();
     setEndDate(ABSOLUTE_DATE.newEndTimeTyped);
     updateDates();
-    cy.wait(300);
 
     let startDate: string;
     let endDate: string;
@@ -214,7 +213,7 @@ describe('url state', () => {
     cy.get(ANOMALIES_TAB).should(
       'have.attr',
       'href',
-      "/app/security/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&sourcerer=(default:!('auditbeat-*'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))"
+      "/app/security/hosts/siem-kibana/anomalies?sourcerer=(default:!('auditbeat-*'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')"
     );
     cy.get(BREADCRUMBS)
       .eq(1)

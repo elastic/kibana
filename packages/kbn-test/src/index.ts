@@ -18,7 +18,7 @@ import {
 // @internal
 export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
-// @ts-expect-error not typed yet
+// @ts-ignore not typed yet
 // @internal
 export { runTests, startServers } from './functional_tests/tasks';
 

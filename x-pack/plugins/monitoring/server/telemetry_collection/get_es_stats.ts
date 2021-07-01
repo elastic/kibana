@@ -6,7 +6,8 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { estypes } from '@elastic/elasticsearch';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
@@ -17,7 +18,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  */
 export async function getElasticsearchStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   maxBucketSize: number
 ) {
@@ -34,16 +35,16 @@ export async function getElasticsearchStats(
  *
  * Returns the response for the aggregations to fetch details for the product.
  */
-export function fetchElasticsearchStats(
-  callCluster: LegacyAPICaller,
+export async function fetchElasticsearchStats(
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   maxBucketSize: number
 ) {
-  const params = {
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: maxBucketSize,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.timestamp',
       'hits.hits._source.cluster_name',
@@ -69,7 +70,8 @@ export function fetchElasticsearchStats(
     },
   };
 
-  return callCluster('search', params);
+  const { body: response } = await callCluster.search(params);
+  return response as SearchResponse<ESClusterStats>;
 }
 
 export interface ESClusterStats {

@@ -31,6 +31,9 @@ import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
+import { pluginServices } from './services';
+import { pluginServiceRegistry } from './services/kibana';
+
 
 export { CoreStart, CoreSetup };
 
@@ -76,14 +79,14 @@ export class CanvasPlugin
   // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
   private srcPlugin = new CanvasSrcPlugin();
 
-  public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
-    const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
+  public setup(coreSetup: CoreSetup<CanvasStartDeps>, setupPlugins: CanvasSetupDeps) {
+    const { api: canvasApi, registries } = getPluginApi(setupPlugins.expressions);
 
-    this.srcPlugin.setup(core, { canvas: canvasApi });
+    this.srcPlugin.setup(coreSetup, { canvas: canvasApi });
 
     // Set the nav link to the last saved url if we have one in storage
     const lastPath = getSessionStorage().get(
-      `${SESSIONSTORAGE_LASTPATH}:${core.http.basePath.get()}`
+      `${SESSIONSTORAGE_LASTPATH}:${coreSetup.http.basePath.get()}`
     );
     if (lastPath) {
       this.appUpdater.next(() => ({
@@ -91,7 +94,7 @@ export class CanvasPlugin
       }));
     }
 
-    core.application.register({
+    coreSetup.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: 'canvas',
       title: 'Canvas',
@@ -103,28 +106,28 @@ export class CanvasPlugin
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
         // Get start services
-        const [coreStart, depsStart] = await core.getStartServices();
+        const [coreStart, startPlugins] = await coreSetup.getStartServices();
 
         const canvasStore = await initializeCanvas(
-          core,
+          coreSetup,
           coreStart,
-          plugins,
-          depsStart,
+          setupPlugins,
+          startPlugins,
           registries,
           this.appUpdater
         );
 
-        const unmount = renderApp(coreStart, depsStart, params, canvasStore);
+        const unmount = renderApp({ coreStart, startPlugins, params, canvasStore, pluginServices });
 
         return () => {
           unmount();
-          teardownCanvas(coreStart, depsStart);
+          teardownCanvas(coreStart);
         };
       },
     });
 
-    if (plugins.home) {
-      plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    if (setupPlugins.home) {
+      setupPlugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
     canvasApi.addArgumentUIs(async () => {
@@ -142,8 +145,9 @@ export class CanvasPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: CanvasStartDeps) {
-    this.srcPlugin.start(core, plugins);
-    initLoadingIndicator(core.http.addLoadingCountSource);
+  public start(coreStart: CoreStart, startPlugins: CanvasStartDeps) {
+    this.srcPlugin.start(coreStart, startPlugins);
+    pluginServices.setRegistry(pluginServiceRegistry.start({ coreStart, startPlugins }));
+    initLoadingIndicator(coreStart.http.addLoadingCountSource);
   }
 }
