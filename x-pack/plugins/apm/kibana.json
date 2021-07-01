@@ -29,7 +29,6 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "apm"],
-  "extraPublicDirs": ["public/style/variables"],
   "requiredBundles": [
     "fleet",
     "home",
