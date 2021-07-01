@@ -193,7 +193,7 @@ export class DashboardPanelActionsService extends FtrService {
     const libraryNotification = parent
       ? await this.testSubjects.findDescendant(LIBRARY_NOTIFICATION_TEST_SUBJ, parent)
       : await this.testSubjects.find(LIBRARY_NOTIFICATION_TEST_SUBJ);
-    await libraryNotification.click();
+    await libraryNotification.click(); // how does this click the wrong button sometimes?
     await this.testSubjects.click('libraryNotificationUnlinkButton');
   }
 
