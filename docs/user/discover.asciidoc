@@ -272,6 +272,12 @@ your data appears in a map.
 [role="screenshot"]
 image:images/discover-maps.png[Map containing documents]
 
+[float]
+[[share-your-findings]]
+=== Share your findings
+
+To share your findings with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+
 
 [float]
 === What’s next?

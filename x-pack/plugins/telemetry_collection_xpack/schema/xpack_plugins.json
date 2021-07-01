@@ -319,6 +319,9 @@
             "dotnet": {
               "type": "long"
             },
+            "iOS/swift": {
+              "type": "long"
+            },
             "go": {
               "type": "long"
             },
@@ -373,6 +376,9 @@
             "opentelemetry/ruby": {
               "type": "long"
             },
+            "opentelemetry/swift": {
+              "type": "long"
+            },
             "opentelemetry/webjs": {
               "type": "long"
             }
@@ -381,6 +387,90 @@
         "agents": {
           "properties": {
             "dotnet": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "iOS/swift": {
               "properties": {
                 "agent": {
                   "properties": {
@@ -2192,7 +2282,9 @@
             },
             "open_formula_popover": {
               "type": "long",
-              "_meta": { "description": "Number of times the user opened the in-product formula help popover." }
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
             },
             "toggle_fullscreen_formula": {
               "type": "long",
@@ -2431,7 +2523,9 @@
             },
             "open_formula_popover": {
               "type": "long",
-              "_meta": { "description": "Number of times the user opened the in-product formula help popover." }
+              "_meta": {
+                "description": "Number of times the user opened the in-product formula help popover."
+              }
             },
             "toggle_fullscreen_formula": {
               "type": "long",
@@ -5422,79 +5516,6 @@
                             }
                           }
                         }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "endpoints": {
-          "properties": {
-            "total_installed": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of installed endpoints"
-              }
-            },
-            "active_within_last_24_hours": {
-              "type": "long",
-              "_meta": {
-                "description": "The number of active endpoints"
-              }
-            },
-            "os": {
-              "type": "array",
-              "items": {
-                "properties": {
-                  "full_name": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "Full name of the operating system"
-                    }
-                  },
-                  "platform": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "OS Platform. eg Centos, Ubuntu"
-                    }
-                  },
-                  "version": {
-                    "type": "keyword",
-                    "_meta": {
-                      "description": "The version of the operating system, eg 16.04.7 LTS (Xenial Xerus), 8 (Core)"
-                    }
-                  },
-                  "count": {
-                    "type": "long",
-                    "_meta": {
-                      "description": "The total number of endpoints from that platform"
-                    }
-                  }
-                }
-              }
-            },
-            "policies": {
-              "properties": {
-                "malware": {
-                  "properties": {
-                    "active": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of active malware policies"
-                      }
-                    },
-                    "inactive": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of inactive malware policies"
-                      }
-                    },
-                    "failure": {
-                      "type": "long",
-                      "_meta": {
-                        "description": "The total number of failing malware policies"
                       }
                     }
                   }
