@@ -10,9 +10,10 @@ import { of, Observable } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { Datatable } from '../../../expression_types';
 import { mapColumn, MapColumnArguments } from '../map_column';
-import { emptyTable, functionWrapper, testTable } from './utils';
+import { emptyTable, functionWrapper, testTable, tableWithNulls } from './utils';
 
-const pricePlusTwo = (datatable: Datatable) => of(datatable.rows[0].price + 2);
+const pricePlusTwo = (datatable: Datatable) =>
+  of(typeof datatable.rows[0].price === 'number' ? datatable.rows[0].price + 2 : null);
 
 describe('mapColumn', () => {
   const fn = functionWrapper(mapColumn);
@@ -219,17 +220,42 @@ describe('mapColumn', () => {
     });
   });
 
-  it('should correctly infer the type fromt he first row if the references column for meta information does not exists', () => {
+  it('should correctly infer the type from the first row if the references column for meta information does not exists', () => {
     testScheduler.run(({ expectObservable }) => {
       expectObservable(
         runFn(
-          { ...emptyTable, rows: [...emptyTable.rows, { value: 5 }] },
+          { ...emptyTable, rows: [...emptyTable.rows, { price: 5 }] },
           { name: 'value', copyMetaFrom: 'time', expression: pricePlusTwo }
         )
       ).toBe('(0|)', [
         expect.objectContaining({
           type: 'datatable',
           columns: [
+            expect.objectContaining({
+              id: 'value',
+              name: 'value',
+              meta: expect.objectContaining({ type: 'number' }),
+            }),
+          ],
+          rows: [{ price: 5, value: 7 }],
+        }),
+      ]);
+    });
+  });
+
+  it('should correctly infer the type from the first non-null row', () => {
+    testScheduler.run(({ expectObservable }) => {
+      expectObservable(
+        runFn(tableWithNulls, {
+          id: 'value',
+          name: 'value',
+          expression: pricePlusTwo,
+        })
+      ).toBe('(0|)', [
+        expect.objectContaining({
+          type: 'datatable',
+          columns: [
+            ...tableWithNulls.columns,
             expect.objectContaining({
               id: 'value',
               name: 'value',

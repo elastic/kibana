@@ -30,7 +30,7 @@ interface MonitoringStats {
         non_recurring: number;
         owner_ids: number;
         estimated_schedule_density: number[];
-        capacity_requirments: {
+        capacity_requirements: {
           per_minute: number;
           per_hour: number;
           per_day: number;
@@ -218,9 +218,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof workload.non_recurring).to.eql('number');
       expect(typeof workload.owner_ids).to.eql('number');
 
-      expect(typeof workload.capacity_requirments.per_minute).to.eql('number');
-      expect(typeof workload.capacity_requirments.per_hour).to.eql('number');
-      expect(typeof workload.capacity_requirments.per_day).to.eql('number');
+      expect(typeof workload.capacity_requirements.per_minute).to.eql('number');
+      expect(typeof workload.capacity_requirements.per_hour).to.eql('number');
+      expect(typeof workload.capacity_requirements.per_day).to.eql('number');
 
       expect(Array.isArray(workload.estimated_schedule_density)).to.eql(true);
 

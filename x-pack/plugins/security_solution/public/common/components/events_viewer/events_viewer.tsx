@@ -49,9 +49,9 @@ import {
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
-import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { defaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -243,7 +243,7 @@ const EventsViewerComponent: React.FC<Props> = ({
     sort: sortField,
     startDate: start,
     endDate: end,
-    skip: !canQueryTimeline,
+    skip: !canQueryTimeline || combinedQueries?.filterQuery === undefined, // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
   });
 
   const totalCountMinusDeleted = useMemo(
@@ -296,6 +296,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
               title={globalFullScreen ? titleWithExitFullScreen : justTitle}
+              isInspectDisabled={combinedQueries!.filterQuery === undefined}
             >
               {HeaderSectionContent}
             </HeaderSection>

@@ -11,14 +11,15 @@ import { RouteComponentProps } from 'react-router-dom';
 import { getServiceNodeName } from '../../../common/service_nodes';
 import { APMRouteDefinition } from '../../application/routes';
 import { toQuery } from '../shared/Links/url_helpers';
-import { ErrorGroupDetails } from '../app/ErrorGroupDetails';
+import { ErrorGroupDetails } from '../app/error_group_details';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceNodeMetrics } from '../app/service_node_metrics';
 import { SettingsTemplate } from './templates/settings_template';
-import { AgentConfigurations } from '../app/Settings/AgentConfigurations';
+import { AgentConfigurations } from '../app/Settings/agent_configurations';
 import { AnomalyDetection } from '../app/Settings/anomaly_detection';
 import { ApmIndices } from '../app/Settings/ApmIndices';
-import { CustomizeUI } from '../app/Settings/CustomizeUI';
+import { CustomizeUI } from '../app/Settings/customize_ui';
+import { Schema } from '../app/Settings/schema';
 import { TraceLink } from '../app/TraceLink';
 import { TransactionLink } from '../app/transaction_link';
 import { TransactionDetails } from '../app/transaction_details';
@@ -36,7 +37,7 @@ import { TransactionOverview } from '../app/transaction_overview';
 import { ServiceInventory } from '../app/service_inventory';
 import { TraceOverview } from '../app/trace_overview';
 import { useFetcher } from '../../hooks/use_fetcher';
-import { AgentConfigurationCreateEdit } from '../app/Settings/AgentConfigurations/AgentConfigurationCreateEdit';
+import { AgentConfigurationCreateEdit } from '../app/Settings/agent_configurations/AgentConfigurationCreateEdit';
 
 // These component function definitions are used below with the `component`
 // property of the route definitions.
@@ -250,6 +251,14 @@ function SettingsCustomizeUI() {
   );
 }
 
+function SettingsSchema() {
+  return (
+    <SettingsTemplate selectedTab="schema">
+      <Schema />
+    </SettingsTemplate>
+  );
+}
+
 export function EditAgentConfigurationRouteView(props: RouteComponentProps) {
   const { search } = props.history.location;
 
@@ -314,6 +323,10 @@ const EditAgentConfigurationTitle = i18n.translate(
 const SettingsCustomizeUITitle = i18n.translate(
   'xpack.apm.views.settings.customizeUI.title',
   { defaultMessage: 'Customize app' }
+);
+const SettingsSchemaTitle = i18n.translate(
+  'xpack.apm.views.settings.schema.title',
+  { defaultMessage: 'Schema' }
 );
 const SettingsAnomalyDetectionTitle = i18n.translate(
   'xpack.apm.views.settings.anomalyDetection.title',
@@ -394,6 +407,12 @@ export const apmRouteConfig: APMRouteDefinition[] = [
     path: '/settings/customize-ui',
     component: SettingsCustomizeUI,
     breadcrumb: SettingsCustomizeUITitle,
+  },
+  {
+    exact: true,
+    path: '/settings/schema',
+    component: SettingsSchema,
+    breadcrumb: SettingsSchemaTitle,
   },
   {
     exact: true,

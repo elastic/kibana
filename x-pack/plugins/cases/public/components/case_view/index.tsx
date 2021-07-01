@@ -26,7 +26,7 @@ import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
-import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
+import { ContentWrapper, WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { EditConnector } from '../edit_connector';
@@ -41,8 +41,6 @@ import { OwnerProvider } from '../owner_context';
 import { getConnectorById } from '../utils';
 import { DoesNotExist } from './does_not_exist';
 
-const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
-
 export interface CaseViewComponentProps {
   allCasesNavigation: CasesNavigation;
   caseDetailsNavigation: CasesNavigation;
@@ -50,6 +48,7 @@ export interface CaseViewComponentProps {
   configureCasesNavigation: CasesNavigation;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   onComponentInitialized?: () => void;
+  actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   subCaseId?: string;
@@ -74,11 +73,6 @@ export interface OnUpdateFields {
   onError?: () => void;
 }
 
-const MyWrapper = styled.div`
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}`};
-`;
-
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
@@ -99,6 +93,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
     getCaseDetailHrefWithCommentId,
     fetchCase,
     onComponentInitialized,
+    actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
@@ -381,7 +376,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
             data-test-subj="case-view-title"
             titleNode={
               <EditableTitle
-                disabled={!userCanCrud}
+                userCanCrud={userCanCrud}
                 isLoading={isLoading && updateKey === 'title'}
                 title={caseData.title}
                 onSubmit={onSubmitTitle}
@@ -402,7 +397,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
           </HeaderPage>
         </HeaderWrapper>
         <WhitePageWrapper>
-          <MyWrapper>
+          <ContentWrapper>
             <EuiFlexGroup>
               <EuiFlexItem grow={6}>
                 {initLoadingData && (
@@ -418,6 +413,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                       caseUserActions={caseUserActions}
                       connectors={connectors}
                       data={caseData}
+                      actionsNavigation={actionsNavigation}
                       fetchUserActions={fetchCaseUserActions.bind(
                         null,
                         caseId,
@@ -488,7 +484,7 @@ export const CaseComponent = React.memo<CaseComponentProps>(
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </MyWrapper>
+          </ContentWrapper>
         </WhitePageWrapper>
         {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
@@ -505,6 +501,7 @@ export const CaseView = React.memo(
     getCaseDetailHrefWithCommentId,
     onCaseDataSuccess,
     onComponentInitialized,
+    actionsNavigation,
     ruleDetailsNavigation,
     showAlertDetails,
     subCaseId,
@@ -543,6 +540,7 @@ export const CaseView = React.memo(
               getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
               fetchCase={fetchCase}
               onComponentInitialized={onComponentInitialized}
+              actionsNavigation={actionsNavigation}
               ruleDetailsNavigation={ruleDetailsNavigation}
               showAlertDetails={showAlertDetails}
               subCaseId={subCaseId}

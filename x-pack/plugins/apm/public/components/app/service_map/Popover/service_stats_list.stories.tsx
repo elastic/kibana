@@ -10,7 +10,7 @@ import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/k
 import { ServiceStatsList } from './ServiceStatsList';
 
 export default {
-  title: 'app/service_map/Popover/ServiceStatsList',
+  title: 'app/ServiceMap/Popover/ServiceStatsList',
   component: ServiceStatsList,
   decorators: [EuiThemeProviderDecorator],
 };

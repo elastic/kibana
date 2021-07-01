@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import '../../common/mock/match_media';
-import { CaseComponent, CaseComponentProps, CaseView } from '.';
+import { CaseComponent, CaseComponentProps, CaseView, CaseViewProps } from '.';
 import {
   basicCase,
   basicCaseClosed,
@@ -90,6 +90,10 @@ export const caseProps: CaseComponentProps = {
   },
   getCaseDetailHrefWithCommentId: jest.fn(),
   onComponentInitialized: jest.fn(),
+  actionsNavigation: {
+    href: jest.fn(),
+    onClick: jest.fn(),
+  },
   ruleDetailsNavigation: {
     href: jest.fn(),
     onClick: jest.fn(),
@@ -408,6 +412,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -448,6 +456,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -485,6 +497,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -522,6 +538,10 @@ describe('CaseView ', () => {
             },
             getCaseDetailHrefWithCommentId: jest.fn(),
             onComponentInitialized: jest.fn(),
+            actionsNavigation: {
+              href: jest.fn(),
+              onClick: jest.fn(),
+            },
             ruleDetailsNavigation: {
               href: jest.fn(),
               onClick: jest.fn(),
@@ -766,6 +786,69 @@ describe('CaseView ', () => {
           .text()
           .includes('My Connector 2')
       ).toBe(true);
+    });
+  });
+
+  describe('when a `refreshRef` prop is provided', () => {
+    let refreshRef: CaseViewProps['refreshRef'];
+
+    beforeEach(() => {
+      (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
+      refreshRef = React.createRef();
+
+      mount(
+        <TestProviders>
+          <CaseView
+            {...{
+              refreshRef,
+              allCasesNavigation: {
+                href: 'all-cases-href',
+                onClick: jest.fn(),
+              },
+              caseDetailsNavigation: {
+                href: 'case-details-href',
+                onClick: jest.fn(),
+              },
+              caseId: '1234',
+              configureCasesNavigation: {
+                href: 'configure-cases-href',
+                onClick: jest.fn(),
+              },
+              getCaseDetailHrefWithCommentId: jest.fn(),
+              onComponentInitialized: jest.fn(),
+              ruleDetailsNavigation: {
+                href: jest.fn(),
+                onClick: jest.fn(),
+              },
+              showAlertDetails: jest.fn(),
+              useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+              userCanCrud: true,
+            }}
+          />
+        </TestProviders>
+      );
+    });
+
+    it('should set it with expected refresh interface', async () => {
+      expect(refreshRef!.current).toEqual({
+        refreshUserActionsAndComments: expect.any(Function),
+        refreshCase: expect.any(Function),
+      });
+    });
+
+    it('should refresh actions and comments', async () => {
+      await waitFor(() => {
+        refreshRef!.current!.refreshUserActionsAndComments();
+        expect(fetchCaseUserActions).toBeCalledWith('1234', 'resilient-2', undefined);
+        expect(fetchCase).toBeCalledWith(true);
+      });
+    });
+
+    it('should refresh case', async () => {
+      await waitFor(() => {
+        refreshRef!.current!.refreshCase();
+        expect(fetchCase).toBeCalledWith(); // No args given to `fetchCase()`
+      });
     });
   });
 
