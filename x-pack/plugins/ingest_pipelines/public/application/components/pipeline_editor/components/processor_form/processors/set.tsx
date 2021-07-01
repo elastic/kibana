@@ -8,7 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
@@ -40,6 +40,19 @@ const fieldsConfig: FieldsConfig = {
         values={{
           emptyString: <EuiCode>{'""'}</EuiCode>,
         }}
+      />
+    ),
+  },
+  copy_from: {
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldLabel', {
+      defaultMessage: 'Copy from',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldHelpText"
+        defaultMessage="The origin field which will be copied to field"
       />
     ),
   },
@@ -105,26 +118,38 @@ const fieldsConfig: FieldsConfig = {
  * Disambiguate name from the Set data structure
  */
 export const SetProcessor: FunctionComponent = () => {
-  const [{ fields }] = useFormData({ watch: 'fields.value' });
+  const [{ fields }] = useFormData({ watch: ['fields.value', 'fields.copy_from'] });
 
   return (
     <>
-      <FieldNameField
-        helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.fieldNameField', {
-          defaultMessage: 'Field to insert or update.',
-        })}
-      />
+      <EuiFlexGroup>
+        {!fields?.copy_from &&
+          <EuiFlexItem>
+            <UseField
+              config={fieldsConfig.value}
+              component={Field}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'valueFieldInput',
+                },
+              }}
+              path="fields.value"
+            />
+          </EuiFlexItem>
+        }
+        {!fields?.value &&
+          <EuiFlexItem>
+            <UseField
+              config={fieldsConfig.copy_from}
+              component={Field}
+              path="fields.copy_from"
+              data-test-subj="copyFromField"
+            />
+          </EuiFlexItem>
+        }
+      </EuiFlexGroup>
 
-      <UseField
-        config={fieldsConfig.value}
-        component={Field}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'valueFieldInput',
-          },
-        }}
-        path="fields.value"
-      />
+      <EuiSpacer size="m" />
 
       {hasTemplateSnippet(fields?.value) && (
         <UseField
@@ -152,6 +177,12 @@ export const SetProcessor: FunctionComponent = () => {
           path="fields.media_type"
         />
       )}
+
+      <FieldNameField
+        helpText={i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.fieldNameField', {
+          defaultMessage: 'Field to insert or update.',
+        })}
+      />
 
       <UseField
         config={fieldsConfig.override}
