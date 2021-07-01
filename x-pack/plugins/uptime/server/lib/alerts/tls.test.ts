@@ -13,6 +13,8 @@ import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
+import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects';
+
 /**
  * This function aims to provide an easy way to give mock props that will
  * reduce boilerplate for tests.
@@ -78,6 +80,9 @@ const mockCertResult: CertResult = {
 
 describe('tls alert', () => {
   let toISOStringSpy: jest.SpyInstance<string, []>;
+  let savedObjectsAdapterSpy: jest.SpyInstance<
+    ReturnType<typeof UMSavedObjectsAdapter['getUptimeDynamicSettings']>
+  >;
   const mockDate = 'date';
   beforeAll(() => {
     Date.now = jest.fn().mockReturnValue(new Date('2021-05-13T12:33:37.000Z'));
@@ -86,6 +91,7 @@ describe('tls alert', () => {
   describe('alert executor', () => {
     beforeEach(() => {
       toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
+      savedObjectsAdapterSpy = jest.spyOn(savedObjectsAdapter, 'getUptimeDynamicSettings');
     });
 
     it('triggers when aging or expiring alerts are found', async () => {
@@ -143,13 +149,17 @@ describe('tls alert', () => {
 
     it('handles dynamic settings for aging or expiration threshold', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
+      const certSettings = {
+        certAgeThreshold: 10,
+        certExpirationThreshold: 5,
+      };
+      savedObjectsAdapterSpy.mockImplementation(() => certSettings);
       const mockGetter: jest.Mock<CertResult> = jest.fn();
 
       mockGetter.mockReturnValue(mockCertResult);
       const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
       const alert = tlsAlertFactory(server, libs, plugins);
-      const certSettings = { certAgeThreshold: 10, certExpirationThreshold: 5 };
-      const options = mockOptions(certSettings);
+      const options = mockOptions();
       await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
       expect(mockGetter).toBeCalledWith(

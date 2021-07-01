@@ -27,6 +27,8 @@ import { getMLJobId } from '../../../common/lib';
 
 import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../common/translations';
 
+import { createUptimeESClient } from '../lib';
+
 export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
 export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
@@ -75,6 +77,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   plugins
 ) => ({
   id: 'xpack.uptime.alerts.durationAnomaly',
+  producer: 'uptime',
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
     params: schema.object({
@@ -97,9 +100,13 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   minimumLicenseRequired: 'platinum',
   async executor({
     params,
-    services: { alertWithLifecycle, savedObjectsClient, uptimeEsClient },
+    services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient },
     state,
   }) {
+    const uptimeEsClient = createUptimeESClient({
+      esClient: scopedClusterClient.asCurrentUser,
+      savedObjectsClient,
+    });
     const { anomalies } =
       (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt as string)) ??
       {};

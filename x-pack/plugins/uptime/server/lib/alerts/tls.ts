@@ -18,6 +18,9 @@ import { TlsTranslations } from '../../../common/translations';
 
 import { ActionGroupIdsOf } from '../../../../alerting/common';
 
+import { savedObjectsAdapter } from '../saved_objects';
+import { createUptimeESClient } from '../lib';
+
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS>;
 
 export const DEFAULT_SIZE = 20;
@@ -96,6 +99,7 @@ export const getCertSummary = (
 
 export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
   id: 'xpack.uptime.alerts.tlsCertificate',
+  producer: 'uptime',
   name: tlsTranslations.alertFactoryName,
   validate: {
     params: schema.object({}),
@@ -113,7 +117,17 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
-  async executor({ services: { alertWithLifecycle, uptimeEsClient, dynamicSettings }, state }) {
+  async executor({
+    services: { alertWithLifecycle, savedObjectsClient, scopedClusterClient },
+    state,
+  }) {
+    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+
+    const uptimeEsClient = createUptimeESClient({
+      esClient: scopedClusterClient.asCurrentUser,
+      savedObjectsClient,
+    });
+
     const { certs, total }: CertResult = await libs.requests.getCerts({
       uptimeEsClient,
       from: DEFAULT_FROM,
