@@ -12119,7 +12119,6 @@
     "xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel": "配置 JSON 编辑器",
     "xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldLabel": "配置",
     "xpack.ingestPipelines.pipelineEditor.dateForm.fieldNameHelpText": "要转换的字段。",
-    "xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText": "预期的日期格式。提供的格式按顺序应用。接受 Java 时间模式、ISO8601、UNIX、UNIX_MS 或 TAI64N 格式。",
     "xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldLabel": "格式",
     "xpack.ingestPipelines.pipelineEditor.dateForm.formatsRequiredError": "需要格式的值。",
     "xpack.ingestPipelines.pipelineEditor.dateForm.localeFieldLabel": "区域设置 (可选) ",
