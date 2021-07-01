@@ -46,7 +46,7 @@ export function getViewBox(
   return { minX, minY, width, height };
 }
 
-export function viewBoxToString(viewBox?: ViewBoxParams): void | string {
+export function viewBoxToString(viewBox?: ViewBoxParams): undefined | string {
   if (!viewBox) return;
   return `${viewBox?.minX} ${viewBox?.minY} ${viewBox?.width} ${viewBox?.height}`;
 }

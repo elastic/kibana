@@ -17,11 +17,11 @@ export interface ShapeHocProps {
 }
 
 export interface ShapeProps {
-  shapeAttributes: ShapeAttributes & {
-    viewBox: string;
+  shapeAttributes: Omit<ShapeAttributes, 'viewBox'> & {
+    viewBox?: string;
   };
   shapeContentAttributes: ShapeContentAttributes & SpecificShapeContentAttributes;
-  shapeType: SvgElementTypes;
+  shapeType?: SvgElementTypes;
 }
 
 export enum SvgElementTypes {

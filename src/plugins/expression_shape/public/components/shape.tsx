@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { JSXElementConstructor, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { viewBoxToString } from '../../common/lib';
 import { ShapeHocProps, ShapeProps, SvgConfig, SvgElementTypes } from './types';
 
-export const ShapeHOC = (ShapeComponent: JSXElementConstructor<any>, svgParams: SvgConfig) =>
+export const ShapeHOC = (ShapeComponent: typeof Shape, svgParams: SvgConfig) =>
   function ShapeWrapper({
     shapeAttributes,
     shapeContentAttributes,
