@@ -115,8 +115,8 @@ Select **Save**. The alert has been created and is now active!
 [[apm-alert-manage]]
 === Manage alerts and actions
 
-From the APM app, select **Alerts** > **View active alerts** to be taken to the Kibana alerts and actions management page.
-From this page, you can create, edit, disable, mute, and delete alerts, and create, edit, and disable connectors.
+From the APM app, select **Alerts** > **View active alerts** to be taken to the Kibana **Rules and Connectors** page.
+From this page, you can disable, mute, and delete APM alerts.
 
 [float]
 [[apm-alert-more-info]]
