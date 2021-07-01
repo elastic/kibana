@@ -11955,7 +11955,6 @@
     "xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldAriaLabel": "構成JSONエディター",
     "xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldLabel": "構成",
     "xpack.ingestPipelines.pipelineEditor.dateForm.fieldNameHelpText": "変換するフィールド。",
-    "xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText": "想定されるデータ形式。指定された形式は連続で適用されます。Java時刻パターン、ISO8601、UNIX、UNIX_MS、TAI64Nを使用できます。",
     "xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldLabel": "形式",
     "xpack.ingestPipelines.pipelineEditor.dateForm.formatsRequiredError": "形式の値は必須です。",
     "xpack.ingestPipelines.pipelineEditor.dateForm.localeFieldLabel": "ロケール (任意) ",
