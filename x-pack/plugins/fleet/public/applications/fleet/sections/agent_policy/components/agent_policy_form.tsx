@@ -63,6 +63,15 @@ export const agentPolicyFormValidation = (
     errors.namespace = [namespaceValidation.error];
   }
 
+  if (agentPolicy.unenroll_timeout && agentPolicy.unenroll_timeout < 0) {
+    errors.unenroll_timeout = [
+      <FormattedMessage
+        id="xpack.fleet.agentPolicyForm.unenrollTimeoutMinValueErrorMessage"
+        defaultMessage="Timeout must be greater than zero."
+      />,
+    ];
+  }
+
   return errors;
 };
 
@@ -314,11 +323,20 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           />
         }
       >
-        <EuiFormRow fullWidth>
+        <EuiFormRow
+          fullWidth
+          error={
+            touchedFields.unenroll_timeout && validation.unenroll_timeout
+              ? validation.unenroll_timeout
+              : null
+          }
+          isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
+        >
           <EuiFieldNumber
             fullWidth
             disabled={agentPolicy.is_managed === true}
             value={agentPolicy.unenroll_timeout || ''}
+            min={0}
             onChange={(e) => {
               updateAgentPolicy({
                 unenroll_timeout: e.target.value ? Number(e.target.value) : 0,
