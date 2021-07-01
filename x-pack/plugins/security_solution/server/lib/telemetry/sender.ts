@@ -200,7 +200,7 @@ export class TelemetryEventsSender {
     return this.agentPolicyService?.getFullAgentPolicy(this.savedObjectClient, id);
   }
 
-  public async fetchFailedEndpointPolicyResponses() {
+  public async fetchEndpointPolicyResponses() {
     if (this.esClient === undefined) {
       throw Error('could not fetch policy responses. es client is not available');
     }
@@ -211,11 +211,6 @@ export class TelemetryEventsSender {
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
       body: {
-        query: {
-          match: {
-            'Endpoint.policy.applied.status': 'failure',
-          },
-        },
         aggs: {
           policy_responses: {
             terms: {

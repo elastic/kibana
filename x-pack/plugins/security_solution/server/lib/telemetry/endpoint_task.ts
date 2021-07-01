@@ -25,10 +25,16 @@ import {
 export const TelemetryEndpointTaskConstants = {
   TIMEOUT: '5m',
   TYPE: 'security:endpoint-meta-telemetry',
-  INTERVAL: '24m',
+  INTERVAL: '1m', // TODO:@pjhampton - reset to 24h before merge
   VERSION: '1.0.0',
 };
 
+/** Telemetry Endpoint Task
+ *
+ * The Endpoint Telemetry task is a daily batch job that collects and transmits non-sensitive
+ * endpoint performance and policy logs to Elastic Security Data Engineering. It is used to
+ * identify bugs or common UX issues with the Elastic Security Endpoint agent.
+ */
 export class TelemetryEndpointTask {
   private readonly logger: Logger;
   private readonly sender: TelemetryEventsSender;
@@ -98,7 +104,7 @@ export class TelemetryEndpointTask {
     const [epMetricsResponse, fleetAgentsResponse, policyResponse] = await Promise.allSettled([
       this.sender.fetchEndpointMetrics(),
       this.sender.fetchFleetAgents(),
-      this.sender.fetchFailedEndpointPolicyResponses(),
+      this.sender.fetchEndpointPolicyResponses(),
     ]);
 
     return {
@@ -124,6 +130,13 @@ export class TelemetryEndpointTask {
 
     const endpointData = await this.fetchEndpointData();
 
+    /** STAGE 1 - Fetch Endpoint Agent Metrics
+     *
+     * Reads Endpoint Agent metrics out of the `.ds-metrics-endpoint.metrics` data stream
+     * and buckets them by Endpoint Agent id and sorts by the top hit. The EP agent will
+     * report its metrics once per day OR every time a policy change has occured. If
+     * a metric document(s) exists for an EP agent we map to fleet agent and policy
+     */
     const { body: endpointMetricsResponse } = (endpointData.endpointMetrics as unknown) as {
       body: EndpointMetricsAggregation;
     };
@@ -141,11 +154,16 @@ export class TelemetryEndpointTask {
       }
     );
 
-    if (endpointMetrics.length === 0) {
-      this.logger.debug('no reported endpoint metrics');
-      return 0;
-    }
-
+    /** STAGE 2 - Fetch Fleet Agent Config
+     *
+     * As the policy id + policy version does not exist on the Endpoint Metrics document
+     * we need to fetch information about the Fleet Agent and sync the metrics document
+     * with the Fleet agent's policy data.
+     *
+     * 7.14 ~ An issue was created with the Endpoint agent team to add the policy id +
+     * policy version to the metrics document to circumvent and refactor away from
+     * this expensive join operation.
+     */
     const agentsResponse = endpointData.fleetAgentsResponse;
     if (agentsResponse === undefined) {
       this.logger.debug('no agents to report');
@@ -173,18 +191,35 @@ export class TelemetryEndpointTask {
       }
     }
 
+    /** STAGE 3 - Fetch Endpoint Policy Responses
+     *
+     * Reads Endpoint Agent policy responses out of the `.ds-metrics-endpoint.policy*` data
+     * stream and creates a local K/V structure that stores the policy response (V) with
+     * the Endpoint Agent Id (K). A value will only exist if there has been a endpoint
+     * enrolled in the last 24 hours OR a policy change has occurred. We only send
+     * non-successful responses. If the field is null, we assume no responses in
+     * the last 24h or no failures/warnings in the policy applied.
+     *
+     */
     const { body: failedPolicyResponses } = (endpointData.epPolicyResponse as unknown) as {
       body: EndpointPolicyResponseAggregation;
     };
     const policyResponses = failedPolicyResponses.aggregations.policy_responses.buckets.reduce(
-      (cache, bucket) => {
-        const doc = bucket.latest_response.hits.hits[0];
-        cache.set(bucket.key, doc);
+      (cache, endpointAgentId) => {
+        const doc = endpointAgentId.latest_response.hits.hits[0];
+        cache.set(endpointAgentId.key, doc);
         return cache;
       },
       new Map<string, EndpointPolicyResponseDocument>()
     );
 
+    /** STAGE 4 - Create the telemetry log records
+     *
+     * Iterates through the endpoint metrics documents at STAGE 1 and joins them together
+     * to form the telemetry log that is sent back to Elastic Security developers to
+     * make improvements to the product.
+     *
+     */
     const telemetryPayloads = endpointMetrics.map((endpoint) => {
       let policyConfig = null;
       let failedPolicy = null;
@@ -214,6 +249,11 @@ export class TelemetryEndpointTask {
       };
     });
 
+    /**
+     * STAGE 5 - Send the documents
+     *
+     * Send the documents in a batches of 1000
+     */
     this.sender.sendOnDemand('endpoint-metadata', telemetryPayloads);
     return telemetryPayloads.length;
   };
