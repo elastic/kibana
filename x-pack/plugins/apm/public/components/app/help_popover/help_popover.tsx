@@ -14,7 +14,12 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import './help_popover.scss';
+import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+
+const PopoverContent = euiStyled(EuiText)`
+  max-width: 480px;
+  max-height: 40vh;
+`;
 
 export function HelpPopoverButton({
   onClick,
@@ -51,18 +56,14 @@ export function HelpPopover({
     <EuiPopover
       anchorPosition={anchorPosition}
       button={button}
-      className="apmHelpPopover"
       closePopover={closePopover}
       isOpen={isOpen}
+      panelPaddingSize="s"
       ownFocus
-      panelClassName="apmHelpPopover__panel"
-      panelPaddingSize="none"
     >
       {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
 
-      <EuiText className="apmHelpPopover__content" size="s">
-        {children}
-      </EuiText>
+      <PopoverContent size="s">{children}</PopoverContent>
     </EuiPopover>
   );
 }
