@@ -164,35 +164,17 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         },
       },
     };
-  } else if (action.type === 'appRequestedEndpointActivityLog') {
-    const paging = {
-      disabled: state.endpointDetails.activityLog.paging.disabled,
-      page: action.payload.page,
-      pageSize: action.payload.pageSize,
-      startDate: action.payload.startDate,
-      endDate: action.payload.endDate,
-    };
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails!,
-        activityLog: {
-          ...state.endpointDetails.activityLog,
-          paging,
-        },
-      },
-    };
   } else if (action.type === 'endpointDetailsActivityLogUpdatePaging') {
-    const paging = {
-      ...action.payload,
-    };
     return {
       ...state,
       endpointDetails: {
         ...state.endpointDetails!,
         activityLog: {
           ...state.endpointDetails.activityLog,
-          paging,
+          paging: {
+            ...state.endpointDetails.activityLog.paging,
+            ...action.payload,
+          },
         },
       },
     };

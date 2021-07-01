@@ -83,7 +83,7 @@ export const EndpointActivityLog = memo(
         const isTargetIntersecting = entries.some((entry) => entry.isIntersecting);
         if (isTargetIntersecting && activityLogLoaded && !isPagingDisabled) {
           dispatch({
-            type: 'appRequestedEndpointActivityLog',
+            type: 'endpointDetailsActivityLogUpdatePaging',
             payload: {
               page: page + 1,
               pageSize,
@@ -102,18 +102,9 @@ export const EndpointActivityLog = memo(
         dispatch({
           type: 'endpointDetailsActivityLogUpdatePaging',
           payload: {
-            disabled: false,
             page,
             pageSize,
             startDate: date ? date?.toISOString() : undefined,
-          },
-        });
-        dispatch({
-          type: 'appRequestedEndpointActivityLog',
-          payload: {
-            page,
-            pageSize,
-            startDate: date ? date.toISOString() : undefined,
             endDate: endDate ? endDate.toISOString() : undefined,
           },
         });
@@ -126,15 +117,6 @@ export const EndpointActivityLog = memo(
         setEndDate(date);
         dispatch({
           type: 'endpointDetailsActivityLogUpdatePaging',
-          payload: {
-            disabled: false,
-            page,
-            pageSize,
-            endDate: date ? date.toISOString() : undefined,
-          },
-        });
-        dispatch({
-          type: 'appRequestedEndpointActivityLog',
           payload: {
             page,
             pageSize,

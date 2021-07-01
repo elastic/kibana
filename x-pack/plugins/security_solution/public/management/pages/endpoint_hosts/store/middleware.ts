@@ -400,7 +400,10 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     }
 
     // page activity log API
-    if (action.type === 'appRequestedEndpointActivityLog' && hasSelectedEndpoint(getState())) {
+    if (
+      action.type === 'endpointDetailsActivityLogUpdatePaging' &&
+      hasSelectedEndpoint(getState())
+    ) {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
         // ts error to be fixed when AsyncResourceState is refactored (#830)
