@@ -15,15 +15,15 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   environmentQuery,
-  rangeQuery,
   kqlQuery,
+  rangeQuery,
 } from '../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
 } from '../../../lib/helpers/aggregated_transactions';
-import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../../../lib/helpers/setup_request';
+import { getBucketSizeForAggregatedTransactions } from '../../helpers/get_bucket_size_for_aggregated_transactions';
 import { getThroughputBuckets } from './transform';
 
 export type ThroughputChartsResponse = PromiseReturnType<
@@ -115,7 +115,12 @@ export async function getThroughputCharts({
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
 }) {
-  const { bucketSize, intervalString } = getBucketSize(setup);
+  const { bucketSize, intervalString } = getBucketSizeForAggregatedTransactions(
+    {
+      ...setup,
+      searchAggregatedTransactions,
+    }
+  );
 
   const response = await searchThroughput({
     environment,
