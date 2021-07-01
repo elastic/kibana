@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nested');
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nested']);
-      await PageObjects.common.navigateToUrl('discover', '#/?_a=(index:date_nested)');
+      await PageObjects.common.navigateToUrl('discover', '#/?_a=(index:date-nested)');
     });
 
     after(async function unloadMakelogs() {
