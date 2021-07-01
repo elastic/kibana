@@ -40,6 +40,7 @@ import {
   MAX_CONCURRENT_SEARCHES,
   SUB_CASE_SAVED_OBJECT,
   throwErrors,
+  MAX_TITLE_LENGTH,
 } from '../../../common';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
@@ -175,6 +176,24 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
     const ids = typeUpdateWithAlerts.map((req) => req.id);
     throw Boom.badRequest(
       `Converting a case to a collection is not allowed when it has alert comments, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+/**
+ * Throws an error if any of the requests updates a title and the length is over MAX_TITLE_LENGTH.
+ */
+function throwIfTitleIsInvalid(requests: ESCasePatchRequest[]) {
+  const requestsInvalidTitle = requests.filter(
+    (req) => req.title !== undefined && req.title.length > MAX_TITLE_LENGTH
+  );
+
+  if (requestsInvalidTitle.length > 0) {
+    const ids = requestsInvalidTitle.map((req) => req.id);
+    throw Boom.badRequest(
+      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}, ids: [${ids.join(
         ', '
       )}]`
     );
@@ -477,6 +496,7 @@ export const update = async (
     }
 
     throwIfUpdateOwner(updateFilterCases);
+    throwIfTitleIsInvalid(updateFilterCases);
     throwIfUpdateStatusOfCollection(updateFilterCases, casesMap);
     throwIfUpdateTypeCollectionToIndividual(updateFilterCases, casesMap);
     await throwIfInvalidUpdateOfTypeWithAlerts({

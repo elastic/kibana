@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+// TODO - clint: convert to service abstraction
+
 import { API_ROUTE_TEMPLATES } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
-import { platformService } from '../services';
+import { pluginServices } from '../services';
 import { CanvasTemplate } from '../../types';
 
 const getApiPath = function () {
-  const basePath = platformService.getService().getBasePath();
+  const platformService = pluginServices.getServices().platform;
+  const basePath = platformService.getBasePath();
   return `${basePath}${API_ROUTE_TEMPLATES}`;
 };
 
@@ -21,6 +24,5 @@ interface ListResponse {
 
 export async function list() {
   const templateResponse = await fetch.get<ListResponse>(`${getApiPath()}`);
-
   return templateResponse.data.templates;
 }
