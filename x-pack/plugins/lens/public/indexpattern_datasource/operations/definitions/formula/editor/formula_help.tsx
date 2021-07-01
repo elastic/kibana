@@ -74,7 +74,7 @@ function FormulaHelp({
 
     items: [
       {
-        label: i18n.translate('xpack.lens.formulaDocumentation.filterRatio', {
+        label: i18n.translate('xpack.lens.formulaDocumentation.filterRatio.markdown', {
           defaultMessage: 'Filter ratio',
         }),
         description: (
@@ -97,7 +97,7 @@ count(kql='response.status_code > 400') / count()
         ),
       },
       {
-        label: i18n.translate('xpack.lens.formulaDocumentation.weekOverWeek', {
+        label: i18n.translate('xpack.lens.formulaDocumentation.weekOverWeek.markdown', {
           defaultMessage: 'Week over week',
         }),
         description: (
@@ -121,7 +121,7 @@ percentile(system.network.in.bytes, percentile=99, shift='1w')
         ),
       },
       {
-        label: i18n.translate('xpack.lens.formulaDocumentation.percentOfTotal', {
+        label: i18n.translate('xpack.lens.formulaDocumentation.percentOfTotal.markdown', {
           defaultMessage: 'Percent of total',
         }),
         description: (
@@ -372,7 +372,7 @@ sum(products.base_price) / overall_sum(sum(products.base_price))
               }}
             >
               <Markdown
-                markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+                markdown={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
                   defaultMessage: `
 ## How it works
 
