@@ -29,13 +29,13 @@ export default function ({ getPageObjects, getService }) {
     it('should request documents when zoomed to smaller regions showing less data', async () => {
       const { rawResponse: response } = await PageObjects.maps.getResponse();
       // Allow a range of hits to account for variances in browser window size.
-      expect(response.hits.hits.length).to.be.within(35, 45);
+      expect(response.hits.hits.length).to.be.within(5, 12);
     });
 
     it('should request clusters when zoomed to larger regions showing lots of data', async () => {
       await PageObjects.maps.setView(20, -90, 2);
       const { rawResponse: response } = await PageObjects.maps.getResponse();
-      expect(response.aggregations.gridSplit.buckets.length).to.equal(17);
+      expect(response.aggregations.gridSplit.buckets.length).to.equal(15);
     });
 
     it('should request documents when query narrows data', async () => {
