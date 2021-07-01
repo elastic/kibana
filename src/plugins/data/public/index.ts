@@ -102,6 +102,9 @@ export const esFilters = {
   extractTimeRange,
 };
 
+/**
+ * @deprecated Import from `@kbn/es-query` directly.
+ */
 export type {
   RangeFilter,
   RangeFilterMeta,

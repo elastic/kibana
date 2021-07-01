@@ -8,6 +8,5 @@
 
 export { KQLSyntaxError } from './kuery_syntax_error';
 export { nodeTypes, nodeBuilder } from './node_types';
-export * from './ast';
-
-export * from './types';
+export { fromKueryExpression, toElasticsearchQuery } from './ast';
+export { KueryNode } from './types';
