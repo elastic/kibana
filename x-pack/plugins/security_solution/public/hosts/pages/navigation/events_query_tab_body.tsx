@@ -103,6 +103,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
         start={startDate}
+        showTotalCount={false}
         pageFilters={pageFilters}
       />
     </>

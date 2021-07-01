@@ -40,6 +40,7 @@ export interface OwnProps {
   id: TimelineId;
   scopeId: SourcererScopeName;
   start: string;
+  showTotalCount?: boolean;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
   onRuleChange?: () => void;
@@ -79,6 +80,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   scopeId,
   showCheckboxes,
   sort,
+  showTotalCount = true,
   utilityBar,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
@@ -176,6 +178,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               rowRenderers={rowRenderers}
               start={start}
               sort={sort}
+              showTotalCount={showTotalCount}
               utilityBar={utilityBar}
               graphEventId={graphEventId}
             />
