@@ -10,7 +10,7 @@
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Query } from 'src/plugins/data/public';
 import _ from 'lodash';
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
@@ -109,7 +109,7 @@ export interface ILayer {
 }
 
 export type CustomIconAndTooltipContent = {
-  icon: ReactNode;
+  icon: ReactElement;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
