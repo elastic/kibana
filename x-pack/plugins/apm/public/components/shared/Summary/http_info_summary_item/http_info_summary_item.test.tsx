@@ -9,6 +9,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { HttpInfoSummaryItem } from '.';
 import * as exampleTransactions from '../__fixtures__/transactions';
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 
 describe('HttpInfoSummaryItem', () => {
   describe('render', () => {
@@ -19,18 +20,24 @@ describe('HttpInfoSummaryItem', () => {
 
     it('renders', () => {
       expect(() =>
-        shallow(<HttpInfoSummaryItem {...props} />)
+        shallow(<HttpInfoSummaryItem {...props} />, {
+          wrappingComponent: EuiThemeProvider,
+        })
       ).not.toThrowError();
     });
 
     it('renders empty component if no url is provided', () => {
-      const component = shallow(<HttpInfoSummaryItem url="" />);
+      const component = shallow(<HttpInfoSummaryItem url="" />, {
+        wrappingComponent: EuiThemeProvider,
+      });
       expect(component.isEmptyRender()).toBeTruthy();
     });
 
     describe('with status code 100', () => {
       it('shows a success color', () => {
-        const wrapper = mount(<HttpInfoSummaryItem {...props} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...props} />, {
+          wrappingComponent: EuiThemeProvider,
+        });
 
         expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(100);
       });
@@ -39,7 +46,9 @@ describe('HttpInfoSummaryItem', () => {
     describe('with status code 200', () => {
       it('shows a success color', () => {
         const p = { ...props, status: 200 };
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
+          wrappingComponent: EuiThemeProvider,
+        });
 
         expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(200);
       });
@@ -49,7 +58,9 @@ describe('HttpInfoSummaryItem', () => {
       it('shows a warning color', () => {
         const p = { ...props, status: 301 };
 
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
+          wrappingComponent: EuiThemeProvider,
+        });
 
         expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(301);
       });
@@ -59,7 +70,9 @@ describe('HttpInfoSummaryItem', () => {
       it('shows a error color', () => {
         const p = { ...props, status: 404 };
 
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
+          wrappingComponent: EuiThemeProvider,
+        });
 
         expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(404);
       });
@@ -69,7 +82,9 @@ describe('HttpInfoSummaryItem', () => {
       it('shows a error color', () => {
         const p = { ...props, status: 502 };
 
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
+          wrappingComponent: EuiThemeProvider,
+        });
 
         expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(502);
       });
@@ -79,7 +94,9 @@ describe('HttpInfoSummaryItem', () => {
       it('shows the default color', () => {
         const p = { ...props, status: 700 };
 
-        const wrapper = mount(<HttpInfoSummaryItem {...p} />);
+        const wrapper = mount(<HttpInfoSummaryItem {...p} />, {
+          wrappingComponent: EuiThemeProvider,
+        });
 
         expect(wrapper.find('HttpStatusBadge').prop('status')).toEqual(700);
       });
