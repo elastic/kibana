@@ -4,10 +4,10 @@
 
 :keywords: administrator, analyst, concept, task, analyze, dashboard, controls, drilldowns
 :description: Add interactive capabilities to your dashboard, such as controls that allow \
-you to apply dashboard-level filtes, and drilldowns that allow you to navigate to other \
+you to apply dashboard-level filters, and drilldowns that allow you to navigate to other \
 dashboards and external websites.
 
-Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filtes, and drilldowns that allow you to navigate to other dashboards and external websites. 
+Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filters, and drilldowns that allow you to navigate to other dashboards and external websites. 
 
 *Controls* panels allow you to apply dashboard-level filters based on values from a list, or a range of values. 
 
@@ -22,9 +22,9 @@ min and max aggregation. For example, use the range slider when you want to filt
 [role="screenshot"]
 image::images/dashboard-controls.png[]
 
-Panels have built-in interactive capabilties that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Each dashboard panel can support multiple drilldowns. The drilldowns you create apply only to the panel that you created the drilldown on, and are not shared across panels.
+Panels have built-in interactive capabilities that apply filters to the dashboard data. For example, when you drag a time range or click a pie slice, a filter for the time range or pie slice is applied. Drilldowns let you customize the interactive behavior while keeping the context of the interaction. 
 
-Drilldowns let you customize the interactive behavior while keeping the context of the interaction. {kib} supports two types of drilldowns:
+{kib} supports two types of drilldowns:
 
 * *Dashboard* &mdash; Navigates you from one dashboard to another dashboard. For example, when can create a drilldown for a *Lens* panel that navigates you from a summary dashboard to a dashboard with a filter for a specific host name.
 
