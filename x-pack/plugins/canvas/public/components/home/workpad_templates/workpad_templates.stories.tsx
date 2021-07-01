@@ -6,57 +6,27 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { action } from '@storybook/addon-actions';
 import React from 'react';
 
-import {
-  reduxDecorator,
-  getAddonPanelParameters,
-  servicesContextDecorator,
-  getDisableStoryshotsParameter,
-} from '../../../../storybook';
-import { getSomeTemplates } from '../../../services/stubs/workpad';
+import { reduxDecorator } from '../../../../storybook';
+import { argTypes } from '../../../services/storybook';
 
-import { WorkpadTemplates } from './workpad_templates';
-import { WorkpadTemplates as WorkpadTemplatesComponent } from './workpad_templates.component';
+import { WorkpadTemplates as Component } from './workpad_templates';
+
+const { hasTemplates } = argTypes;
 
 export default {
-  title: 'Home/Workpad Templates',
-  argTypes: {},
+  title: 'Home/Tabs/Workpad Templates',
+  component: Component,
+  argTypes: {
+    hasTemplates,
+  },
   decorators: [reduxDecorator()],
-  parameters: { ...getAddonPanelParameters(), ...getDisableStoryshotsParameter() },
+  parameters: {},
 };
 
-export const NoTemplates = () => {
-  return (
-    <EuiPanel>
-      <WorkpadTemplates />
-    </EuiPanel>
-  );
-};
-
-export const HasTemplates = () => {
-  return (
-    <EuiPanel>
-      <WorkpadTemplates />
-    </EuiPanel>
-  );
-};
-
-NoTemplates.decorators = [servicesContextDecorator()];
-HasTemplates.decorators = [servicesContextDecorator({ findTemplates: true })];
-
-export const Component = ({ hasTemplates }: { hasTemplates: boolean }) => {
-  return (
-    <EuiPanel>
-      <WorkpadTemplatesComponent
-        onCreateWorkpad={action('onCreateWorkpad')}
-        templates={hasTemplates ? getSomeTemplates().templates : []}
-      />
-    </EuiPanel>
-  );
-};
-
-Component.args = {
-  hasTemplates: true,
-};
+export const WorkpadTemplates = () => (
+  <EuiPanel>
+    <Component />
+  </EuiPanel>
+);

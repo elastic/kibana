@@ -7,7 +7,6 @@
  */
 
 import { buildRequestBody } from './build_request_body';
-import { getIntervalAndTimefield } from '../get_interval_and_timefield';
 
 import type { FetchedIndexPattern, Panel, Series } from '../../../../common/types';
 import type {
@@ -27,6 +26,7 @@ export async function getSeriesRequestParams(
     esShardTimeout,
     uiSettings,
     cachedIndexPatternFetcher,
+    buildSeriesMetaParams,
   }: VisTypeTimeseriesRequestServices
 ) {
   let seriesIndex = panelIndex;
@@ -34,18 +34,6 @@ export async function getSeriesRequestParams(
   if (series.override_index_pattern) {
     seriesIndex = await cachedIndexPatternFetcher(series.series_index_pattern ?? '');
   }
-
-  const buildSeriesMetaParams = async () => {
-    let index = seriesIndex;
-
-    /** This part of code is required to try to get the default timefield for string indices.
-     *  The rest of the functionality available for Kibana indexes should not be active **/
-    if (!panel.use_kibana_indexes && index.indexPatternString) {
-      index = await cachedIndexPatternFetcher(index.indexPatternString, true);
-    }
-
-    return getIntervalAndTimefield(panel, index, series);
-  };
 
   const request = await buildRequestBody(
     req,
@@ -55,7 +43,7 @@ export async function getSeriesRequestParams(
     seriesIndex,
     capabilities,
     uiSettings,
-    buildSeriesMetaParams
+    () => buildSeriesMetaParams(seriesIndex, Boolean(panel.use_kibana_indexes), series)
   );
 
   return {
