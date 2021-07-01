@@ -18,7 +18,7 @@ describe('containerStyle', () => {
   let elasticLogo;
   let fn;
   beforeEach(async () => {
-    elasticLogo = (await getElasticLogo()).elasticLogo;
+    elasticLogo = await (await getElasticLogo()).elasticLogo;
     fn = await functionWrapper(containerStyle);
   });
 
