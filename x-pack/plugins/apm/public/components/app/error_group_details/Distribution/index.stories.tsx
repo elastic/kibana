@@ -11,14 +11,12 @@ import {
   ApmPluginContext,
   ApmPluginContextValue,
 } from '../../../../context/apm_plugin/apm_plugin_context';
-import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ErrorDistribution } from './';
 
 export default {
   title: 'app/ErrorGroupDetails/Distribution',
   component: ErrorDistribution,
   decorators: [
-    EuiThemeProviderDecorator,
     (Story: ComponentType) => {
       const apmPluginContextMock = ({
         observabilityRuleTypeRegistry: { getFormatter: () => undefined },

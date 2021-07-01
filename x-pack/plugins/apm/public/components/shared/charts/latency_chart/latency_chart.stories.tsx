@@ -8,7 +8,6 @@
 import { StoryContext } from '@storybook/react';
 import React, { ComponentType } from 'react';
 import { MemoryRouter, Route } from 'react-router-dom';
-import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/kibana_react/common';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
@@ -40,7 +39,6 @@ export default {
     },
   },
   decorators: [
-    EuiThemeProviderDecorator,
     (Story: ComponentType, { args }: StoryContext) => {
       const { alertsResponse, latencyChartResponse } = args as Args;
 

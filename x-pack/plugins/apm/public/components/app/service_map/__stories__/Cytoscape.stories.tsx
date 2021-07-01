@@ -7,14 +7,12 @@
 
 import cytoscape from 'cytoscape';
 import React from 'react';
-import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Cytoscape } from '../Cytoscape';
 import { Centerer } from './centerer';
 
 export default {
   title: 'app/ServiceMap/Cytoscape',
   component: Cytoscape,
-  decorators: [EuiThemeProviderDecorator],
 };
 
 export function Example() {

@@ -8,7 +8,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ErrorCountAlertTrigger } from '.';
-import { EuiThemeProviderDecorator } from '../../../../../../../src/plugins/kibana_react/common';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
@@ -19,7 +18,6 @@ export default {
   title: 'app/ErrorCountAlertTrigger',
   component: ErrorCountAlertTrigger,
   decorators: [
-    EuiThemeProviderDecorator,
     (Story: React.ComponentClass) => (
       <MockApmPluginContextWrapper
         value={(mockApmPluginContextValue as unknown) as ApmPluginContextValue}

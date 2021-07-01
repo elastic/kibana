@@ -15,7 +15,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
-import { EuiThemeProviderDecorator } from '../../../../../../../src/plugins/kibana_react/common';
 import { getSpanIcon, spanTypeIcons } from './get_span_icon';
 import { SpanIcon } from './index';
 
@@ -24,7 +23,6 @@ const spanTypes = Object.keys(spanTypeIcons);
 export default {
   title: 'shared/icons',
   component: SpanIcon,
-  decorators: [EuiThemeProviderDecorator],
 };
 
 export function SpanIcons() {

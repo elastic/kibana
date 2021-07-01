@@ -8,7 +8,6 @@
 import cytoscape from 'cytoscape';
 import { CoreStart } from 'kibana/public';
 import React, { ComponentType } from 'react';
-import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { MockUrlParamsContextProvider } from '../../../../context/url_params_context/mock_url_params_context_provider';
 import { createCallApmApi } from '../../../../services/rest/createCallApmApi';
@@ -20,7 +19,6 @@ export default {
   title: 'app/ServiceMap/Popover',
   component: Popover,
   decorators: [
-    EuiThemeProviderDecorator,
     (Story: ComponentType) => {
       const coreMock = ({
         http: {

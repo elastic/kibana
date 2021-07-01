@@ -6,13 +6,11 @@
  */
 
 import React from 'react';
-import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ServiceStatsList } from './ServiceStatsList';
 
 export default {
   title: 'app/ServiceMap/Popover/ServiceStatsList',
   component: ServiceStatsList,
-  decorators: [EuiThemeProviderDecorator],
 };
 
 export function Example() {

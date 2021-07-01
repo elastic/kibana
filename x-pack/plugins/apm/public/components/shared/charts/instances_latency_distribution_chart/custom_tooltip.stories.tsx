@@ -7,7 +7,6 @@
 
 import { TooltipInfo } from '@elastic/charts';
 import React from 'react';
-import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/kibana_react/common';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { MainStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
 import { CustomTooltip } from './custom_tooltip';
@@ -25,7 +24,6 @@ function getLatencyFormatter(props: TooltipInfo) {
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart/CustomTooltip',
   component: CustomTooltip,
-  decorators: [EuiThemeProviderDecorator],
 };
 
 export function Example(props: TooltipInfo) {

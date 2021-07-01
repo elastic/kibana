@@ -17,7 +17,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { EuiThemeProviderDecorator } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Cytoscape } from '../Cytoscape';
 import { Centerer } from './centerer';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
@@ -42,7 +41,6 @@ function getHeight() {
 export default {
   title: 'app/ServiceMap/Example data',
   component: Cytoscape,
-  decorators: [EuiThemeProviderDecorator],
 };
 
 export function GenerateMap() {
