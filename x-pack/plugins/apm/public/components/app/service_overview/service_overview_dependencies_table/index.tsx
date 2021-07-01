@@ -156,7 +156,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Latency (avg.)',
         }
       ),
-      width: px(unit * 10),
+      width: unit * 10,
       render: (_, { latency }) => {
         return (
           <SparkPlot
@@ -177,7 +177,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         'xpack.apm.serviceOverview.dependenciesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: px(unit * 10),
+      width: unit * 10,
       render: (_, { throughput }) => {
         return (
           <SparkPlot
@@ -203,7 +203,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Error rate',
         }
       ),
-      width: px(unit * 10),
+      width: unit * 10,
       render: (_, { errorRate }) => {
         return (
           <SparkPlot
@@ -227,7 +227,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
           defaultMessage: 'Impact',
         }
       ),
-      width: px(unit * 5),
+      width: unit * 5,
       render: (_, { impact, previousPeriodImpact }) => {
         return (
           <EuiFlexGroup gutterSize="xs" direction="column">

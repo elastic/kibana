@@ -8,7 +8,6 @@
 import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useTheme } from '../../../../hooks/use_theme';
-import { fontSizes, px, units } from '../../../../style/variables';
 
 export enum Shape {
   circle = 'circle',
@@ -17,7 +16,6 @@ export enum Shape {
 
 interface ContainerProps {
   onClick: (e: Event) => void;
-  fontSize?: string;
   clickable: boolean;
   disabled: boolean;
 }
@@ -25,7 +23,7 @@ interface ContainerProps {
 const Container = euiStyled.div<ContainerProps>`
   display: flex;
   align-items: center;
-  font-size: ${(props) => props.fontSize};
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
   cursor: ${(props) => (props.clickable ? 'pointer' : 'initial')};
   opacity: ${(props) => (props.disabled ? 0.4 : 1)};
@@ -33,16 +31,17 @@ const Container = euiStyled.div<ContainerProps>`
 `;
 
 interface IndicatorProps {
-  radius: number;
   color: string;
   shape: Shape;
   withMargin: boolean;
 }
 
+const radius = 11;
+
 export const Indicator = euiStyled.span<IndicatorProps>`
-  width: ${(props) => px(props.radius)};
-  height: ${(props) => px(props.radius)};
-  margin-right: ${(props) => (props.withMargin ? px(props.radius / 2) : 0)};
+  width: ${radius}px;
+  height: ${radius}px;
+  margin-right: ${(props) => (props.withMargin ? `${radius / 2}px` : 0)};
   background: ${(props) => props.color};
   border-radius: ${(props) => {
     return props.shape === Shape.circle ? '100%' : '0';
@@ -53,8 +52,6 @@ interface Props {
   onClick?: any;
   text?: string;
   color?: string;
-  fontSize?: string;
-  radius?: number;
   disabled?: boolean;
   clickable?: boolean;
   shape?: Shape;
@@ -65,8 +62,6 @@ export function Legend({
   onClick,
   text,
   color,
-  fontSize = fontSizes.small,
-  radius = units.minus - 1,
   disabled = false,
   clickable = false,
   shape = Shape.circle,
@@ -81,18 +76,12 @@ export function Legend({
       onClick={onClick}
       disabled={disabled}
       clickable={clickable || Boolean(onClick)}
-      fontSize={fontSize}
       {...rest}
     >
       {indicator ? (
         indicator()
       ) : (
-        <Indicator
-          color={indicatorColor}
-          radius={radius}
-          shape={shape}
-          withMargin={!!text}
-        />
+        <Indicator color={indicatorColor} shape={shape} withMargin={!!text} />
       )}
       {text}
     </Container>

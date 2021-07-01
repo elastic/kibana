@@ -15,7 +15,7 @@ import {
 import { Context } from './Context';
 import { FrameHeading } from './FrameHeading';
 import { Variables } from './Variables';
-import { px, units } from '../../../style/variables';
+import { px } from '../../../style/variables';
 
 const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
   position: relative;
@@ -31,7 +31,7 @@ const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
 
 // Indent the non-context frames the same amount as the accordion control
 const NoContextFrameHeadingWrapper = euiStyled.div`
-  margin-left: ${px(28)};
+  margin-left: 28px;
 `;
 
 interface Props {

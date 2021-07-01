@@ -59,7 +59,7 @@ export function TimelineAxis({
         position: 'sticky',
         top: 0,
         borderBottom: `1px solid ${theme.eui.euiColorMediumShade}`,
-        height: px(margins.top),
+        height: margins.top,
         zIndex: 2,
         width: '100%',
       }}

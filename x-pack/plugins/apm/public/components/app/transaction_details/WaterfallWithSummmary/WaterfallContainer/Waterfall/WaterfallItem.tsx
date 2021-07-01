@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { ReactNode } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
-import { asDuration } from '../../../../../../../common/utils/formatters';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
-import { px } from '../../../../../../style/variables';
-import { ErrorCount } from '../../ErrorCount';
-import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
-import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
-import { SyncBadge } from './SyncBadge';
+import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/Timeline';
+import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
+import { ErrorCount } from '../../ErrorCount';
+import { SyncBadge } from './SyncBadge';
+import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -39,8 +37,8 @@ const Container = euiStyled.div<IContainerStyleProps>`
   user-select: none;
   padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
   padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
-  margin-right: ${(props) => px(props.timelineMargins.right)};
-  margin-left: ${(props) => px(props.timelineMargins.left)};
+  margin-right: ${(props) => props.timelineMargins.right}px;
+  margin-left: ${(props) => props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;

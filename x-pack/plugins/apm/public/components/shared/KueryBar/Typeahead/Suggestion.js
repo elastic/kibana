@@ -73,7 +73,7 @@ const Icon = euiStyled.div`
 `;
 
 const TextValue = euiStyled.div`
-  flex: 0 0 ${px(unit * 16)};
+  flex: 0 0 ${unit * 16}px;
   color: ${({ theme }) => theme.eui.euiColorDarkestShade};
   padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
 `;

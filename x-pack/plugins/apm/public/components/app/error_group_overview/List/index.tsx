@@ -13,7 +13,7 @@ import { EuiIconTip } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { px, truncate, unit } from '../../../../style/variables';
+import { truncate, unit } from '../../../../style/variables';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { ManagedTable } from '../../../shared/ManagedTable';
 import { ErrorDetailLink } from '../../../shared/Links/apm/ErrorDetailLink';
@@ -80,7 +80,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
         ),
         field: 'groupId',
         sortable: false,
-        width: px(unit * 6),
+        width: unit * 6,
         render: (groupId: string) => {
           return (
             <GroupIdLink serviceName={serviceName} errorGroupId={groupId}>

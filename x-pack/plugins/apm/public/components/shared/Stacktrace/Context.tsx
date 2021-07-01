@@ -30,8 +30,8 @@ const LINE_HEIGHT = 18;
 const LineHighlight = euiStyled.div<{ lineNumber: number }>`
   position: absolute;
   width: 100%;
-  height: ${px(LINE_HEIGHT)};
-  top: ${(props) => px(props.lineNumber * LINE_HEIGHT)};
+  height: ${LINE_HEIGHT}px;
+  top: ${(props) => props.lineNumber * LINE_HEIGHT}px;
   pointer-events: none;
   background-color: ${({ theme }) => tint(0.9, theme.eui.euiColorWarning)};
 `;
@@ -49,11 +49,11 @@ const LineNumberContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
 
 const LineNumber = euiStyled.div<{ highlight: boolean }>`
   position: relative;
-  min-width: ${px(42)};
+  min-width: 42px;
   padding-left: ${({ theme }) => theme.eui.paddingSizes.s};
   padding-right: ${({ theme }) => theme.eui.paddingSizes.xs};
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
-  line-height: ${px(LINE_HEIGHT)};
+  line-height: ${LINE_HEIGHT}px;
   text-align: right;
   border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   background-color: ${({ highlight, theme }) =>
@@ -66,7 +66,7 @@ const LineNumber = euiStyled.div<{ highlight: boolean }>`
 
 const LineContainer = euiStyled.div`
   overflow: auto;
-  margin: 0 0 0 ${px(42)};
+  margin: 0 0 0 42px;
   padding: 0;
   background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
 
@@ -83,8 +83,8 @@ const Line = euiStyled.pre`
   border: 0;
   border-radius: 0;
   overflow: initial;
-  padding: 0 ${px(LINE_HEIGHT)};
-  line-height: ${px(LINE_HEIGHT)};
+  padding: 0 ${LINE_HEIGHT}px;
+  line-height: ${LINE_HEIGHT}px;
 `;
 
 const Code = euiStyled.code`

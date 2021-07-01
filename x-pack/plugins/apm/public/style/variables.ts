@@ -5,24 +5,11 @@
  * 2.0.
  */
 
-// Units
 export const unit = 16;
 
-export const units = {
-  minus: unit * 0.75,
-};
-
-export function px(value: number): string {
-  return `${value}px`;
-}
-
-export function pct(value: number): string {
-  return `${value}%`;
-}
-
-export function truncate(width: string) {
+export function truncate(width: string | number) {
   return `
-      max-width: ${width};
+      max-width: ${typeof width === 'string' ? width : `${width}px`};
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;

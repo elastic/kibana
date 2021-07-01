@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiIconTip,
   EuiHealth,
+  EuiIconTip,
+  EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import {
-  getServiceHealthStatus,
-  getServiceHealthStatusColor,
-} from '../../../../../common/service_health_status';
-import { useTheme } from '../../../../hooks/use_theme';
-import { px } from '../../../../style/variables';
-import { asInteger, asDuration } from '../../../../../common/utils/formatters';
-import { MLSingleMetricLink } from '../../../shared/Links/MachineLearningLinks/MLSingleMetricLink';
-import { popoverWidth } from '../cytoscape_options';
-import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import {
   getSeverity,
   ServiceAnomalyStats,
 } from '../../../../../common/anomaly_detection';
+import {
+  getServiceHealthStatus,
+  getServiceHealthStatusColor,
+} from '../../../../../common/service_health_status';
+import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
+import { asDuration, asInteger } from '../../../../../common/utils/formatters';
+import { useTheme } from '../../../../hooks/use_theme';
+import { MLSingleMetricLink } from '../../../shared/Links/MachineLearningLinks/MLSingleMetricLink';
+import { popoverWidth } from '../cytoscape_options';
 
 const HealthStatusTitle = euiStyled(EuiTitle)`
   display: inline;
@@ -48,7 +47,7 @@ const EnableText = euiStyled.section`
   color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   line-height: 1.4;
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-  width: ${px(popoverWidth)};
+  width: ${popoverWidth}px;
 `;
 
 export const ContentLine = euiStyled.section`

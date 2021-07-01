@@ -41,7 +41,7 @@ export function TruncateHeightSection({ children, previewHeight }: Props) {
         ref={contentContainerEl}
         style={{
           overflow: 'hidden',
-          maxHeight: isOpen ? 'initial' : px(previewHeight),
+          maxHeight: isOpen ? 'initial' : previewHeight,
         }}
       >
         {children}

@@ -36,7 +36,7 @@ const INITIAL_DATA = {
 
 const Truncate = euiStyled.span`
   display: block;
-  ${truncate(px(unit * 12))}
+  ${truncate(unit * 12)}
 `;
 
 interface ServiceNodeMetricsProps {

@@ -25,7 +25,7 @@ interface Props {
 }
 
 const Popover = euiStyled.div`
-  max-width: ${px(280)};
+  max-width: 280px;
 `;
 
 const TimeLegend = euiStyled(Legend)`
@@ -101,7 +101,9 @@ export function ErrorMarker({ mark }: Props) {
       <Popover>
         <TimeLegend
           text={asDuration(mark.offset)}
-          indicator={<div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>}
+          indicator={() => (
+            <div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>
+          )}
         />
         <Legend
           key={mark.serviceColor}

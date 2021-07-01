@@ -165,7 +165,7 @@ function BottomSection({
     return (
       <EuiFlexGroup responsive={false} direction="column" gutterSize="none">
         <EuiFlexItem>
-          <EuiText size="xs" grow={false} style={{ width: px(300) }}>
+          <EuiText size="xs" grow={false} style={{ width: 300 }}>
             {i18n.translate('xpack.apm.customLink.empty', {
               defaultMessage:
                 'No custom links found. Set up your own custom links, e.g., a link to a specific Dashboard or external link.',

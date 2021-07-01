@@ -50,7 +50,7 @@ export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
       truncateText: true,
     },
     {
-      width: px(160),
+      width: 160,
       align: 'right',
       field: '@timestamp',
       name: i18n.translate(

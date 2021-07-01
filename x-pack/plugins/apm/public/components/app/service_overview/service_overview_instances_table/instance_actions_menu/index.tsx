@@ -33,7 +33,7 @@ interface Props {
   onClose: () => void;
 }
 
-const POPOVER_WIDTH = px(305);
+const POPOVER_WIDTH = '305px';
 
 export function InstanceActionsMenu({
   serviceName,

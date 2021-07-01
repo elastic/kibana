@@ -28,7 +28,7 @@ const INITIAL_SORT_FIELD = 'cpu';
 const INITIAL_SORT_DIRECTION = 'desc';
 
 const ServiceNodeName = euiStyled.div`
-  ${truncate(px(8 * unit))}
+  ${truncate(8 * unit)}
 `;
 
 interface ServiceNodeOverviewProps {

@@ -26,7 +26,7 @@ const MarkerContainer = euiStyled.div`
 export function Marker({ mark, x }: Props) {
   const legendWidth = 11;
   return (
-    <MarkerContainer style={{ left: px(x - legendWidth / 2) }}>
+    <MarkerContainer style={{ left: x - legendWidth / 2 }}>
       {mark.type === 'errorMark' ? (
         <ErrorMarker mark={mark} />
       ) : (

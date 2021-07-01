@@ -26,7 +26,7 @@ const List = euiStyled.ul`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   z-index: 10;
   left: 0;
-  max-height: ${px(unit * 20)};
+  max-height: ${unit * 20}px;
   overflow: scroll;
 `;
 

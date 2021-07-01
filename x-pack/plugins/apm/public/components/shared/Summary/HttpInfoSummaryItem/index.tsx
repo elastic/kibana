@@ -19,7 +19,7 @@ const HttpInfoBadge = euiStyled(EuiBadge)`
 const Url = euiStyled('span')`
   display: inline-block;
   vertical-align: bottom;
-  ${truncate(px(unit * 24))};
+  ${truncate(unit * 24)};
 `;
 interface HttpInfoProps {
   method?: string;

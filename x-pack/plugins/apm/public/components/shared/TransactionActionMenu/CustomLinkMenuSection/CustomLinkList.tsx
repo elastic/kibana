@@ -23,7 +23,7 @@ export function CustomLinkList({
   transaction: Transaction;
 }) {
   return (
-    <SectionLinks style={{ maxHeight: px(unit * 10), overflowY: 'auto' }}>
+    <SectionLinks style={{ maxHeight: unit * 10, overflowY: 'auto' }}>
       {customLinks.map((link) => {
         const href = getHref(link, transaction);
         return (

@@ -80,7 +80,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
         defaultMessage: 'Health',
       }),
-      width: px(unit * 6),
+      width: unit * 6,
       sortable: true,
       render: (_, { healthStatus }) => {
         return (
@@ -130,7 +130,7 @@ export function getServiceColumns({
       name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
         defaultMessage: 'Environment',
       }),
-      width: px(unit * 10),
+      width: unit * 10,
       sortable: true,
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
@@ -144,7 +144,7 @@ export function getServiceColumns({
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
             ),
-            width: px(unit * 10),
+            width: unit * 10,
             sortable: true,
           },
         ]
@@ -164,7 +164,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: px(unit * 10),
+      width: unit * 10,
     },
     {
       field: 'transactionsPerMinute',
@@ -181,7 +181,7 @@ export function getServiceColumns({
         />
       ),
       align: 'left',
-      width: px(unit * 10),
+      width: unit * 10,
     },
     {
       field: 'transactionErrorRate',
@@ -204,7 +204,7 @@ export function getServiceColumns({
         );
       },
       align: 'left',
-      width: px(unit * 10),
+      width: unit * 10,
     },
   ];
 }

@@ -335,7 +335,7 @@ export function ServiceProfilingFlamegraph({
           />
         </Chart>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ width: px(unit * 24) }}>
+      <EuiFlexItem grow={false} style={{ width: unit * 24 }}>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiCheckbox
@@ -405,7 +405,7 @@ export function ServiceProfilingFlamegraph({
                     defaultMessage: 'Self',
                   }),
                   render: (_, item) => formatValue(item.value, valueUnit),
-                  width: px(unit * 6),
+                  width: unit * 6,
                 },
               ]}
             />

@@ -125,7 +125,7 @@ export function SearchBar({
             responsive={false}
           >
             {showTimeComparison && (
-              <EuiFlexItem grow={isXXL} style={{ minWidth: px(300) }}>
+              <EuiFlexItem grow={isXXL} style={{ minWidth: 300 }}>
                 <TimeComparison />
               </EuiFlexItem>
             )}
