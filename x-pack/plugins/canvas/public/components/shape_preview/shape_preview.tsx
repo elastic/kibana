@@ -5,45 +5,47 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, JSXElementConstructor, useState } from 'react';
 import PropTypes from 'prop-types';
+import { ViewBoxParams } from '../../../../../../src/plugins/expression_shape/common';
 
 interface Props {
-  shape?: string;
+  shape?: JSXElementConstructor<any>;
 }
 
-export const ShapePreview: FC<Props> = ({ shape }) => {
-  if (!shape) {
+export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
+  const [shapeViewBox, setShapeViewBox] = useState<ViewBoxParams>({
+    minX: 0,
+    minY: 0,
+    width: 0,
+    height: 0,
+  });
+
+  if (!Shape) {
     return <div className="canvasShapePreview" />;
   }
 
   const weight = 5;
-  const parser = new DOMParser();
-  const shapeSvg = parser
-    .parseFromString(shape, 'image/svg+xml')
-    .getElementsByTagName('svg')
-    .item(0);
-
-  if (!shapeSvg) {
-    throw new Error('An unexpected error occurred: the SVG was not parseable');
-  }
-
-  shapeSvg.setAttribute('fill', 'none');
-  shapeSvg.setAttribute('stroke', 'black');
-
-  const viewBox = shapeSvg.getAttribute('viewBox') || '0 0 0 0';
-  const initialViewBox = viewBox.split(' ').map((v: string) => parseInt(v, 10));
-
-  let [minX, minY, width, height] = initialViewBox;
+  let { minX, minY, width, height } = shapeViewBox;
   minX -= weight / 2;
   minY -= weight / 2;
   width += weight;
   height += weight;
-  shapeSvg.setAttribute('viewBox', [minX, minY, width, height].join(' '));
 
+  const shapeAttributes = {
+    fill: 'none',
+    stroke: 'black',
+    viewBox: {
+      minX,
+      minY,
+      width,
+      height,
+    },
+  };
   return (
-    // eslint-disable-next-line react/no-danger
-    <div className="canvasShapePreview" dangerouslySetInnerHTML={{ __html: shapeSvg.outerHTML }} />
+    <div className="canvasShapePreview">
+      <Shape shapeAttributes={shapeAttributes} setViewBoxParams={setShapeViewBox} />
+    </div>
   );
 };
 

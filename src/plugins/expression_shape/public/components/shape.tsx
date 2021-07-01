@@ -21,14 +21,14 @@ export const ShapeHOC = (ShapeComponent: JSXElementConstructor<any>, svgParams: 
       setViewBoxParams(svgParams.viewBox);
     }, [setViewBoxParams]);
 
-    const viewBox = shapeAttributes.viewBox
-      ? viewBoxToString(shapeAttributes.viewBox)
+    const viewBox = shapeAttributes?.viewBox
+      ? viewBoxToString(shapeAttributes?.viewBox)
       : viewBoxToString(initialViewBox);
 
     return (
       <ShapeComponent
-        shapeAttributes={{ ...shapeAttributes, viewBox }}
-        shapeContentAttributes={{ ...shapeContentAttributes, ...shapeProps }}
+        shapeAttributes={{ ...(shapeAttributes || {}), viewBox }}
+        shapeContentAttributes={{ ...(shapeContentAttributes || {}), ...shapeProps }}
         shapeType={shapeType}
       />
     );

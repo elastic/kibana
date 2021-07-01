@@ -15,7 +15,6 @@ import { ArgumentStrings } from '../../../i18n';
 const { Shape: strings } = ArgumentStrings;
 
 const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => {
-  console.log(typeInstance);
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>

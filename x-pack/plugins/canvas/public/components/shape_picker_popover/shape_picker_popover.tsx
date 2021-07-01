@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, JSXElementConstructor } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 import {
@@ -19,7 +19,7 @@ const Popover = withSuspense(LazyPopoverComponent);
 
 interface Props {
   shapes: {
-    [key: string]: string;
+    [key: string]: JSXElementConstructor<any>;
   };
   onChange?: (key: string) => void;
   value?: string;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shapes } from '../../renderers/shape/shapes';
+import { shapes } from '../../../../../../src/plugins/expression_shape/public';
 import { ViewStrings } from '../../../i18n';
 
 const { Shape: strings } = ViewStrings;

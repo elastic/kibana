@@ -6,28 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { SVGProps } from 'react';
 import { IInterpreterRenderHandlers } from '../../../../../src/plugins/expressions';
 import { ShapeRendererConfig, ViewBoxParams } from '../../common/types';
 
-export interface ShapeAttributes {
-  width?: number;
-  height?: number;
-  viewBox?: ViewBoxParams;
-  overflow?: string;
-  preserveAspectRatio?: string;
-}
-
-export interface ShapeContentAttributes {
-  strokeWidth?: string;
-  stroke?: string;
-  fill?: string;
-  vectorEffect?: string;
-  strokeMiterlimit?: string;
-}
-
 export interface ShapeHocProps {
-  shapeAttributes: ShapeAttributes;
-  shapeContentAttributes: ShapeContentAttributes;
+  shapeAttributes?: ShapeAttributes;
+  shapeContentAttributes?: ShapeContentAttributes;
   setViewBoxParams: (viewBoxParams?: ViewBoxParams) => void;
 }
 
@@ -35,9 +20,7 @@ export interface ShapeProps {
   shapeAttributes: ShapeAttributes & {
     viewBox: string;
   };
-  shapeContentAttributes: ShapeContentAttributes & {
-    points: string;
-  };
+  shapeContentAttributes: ShapeContentAttributes & SpecificShapeContentAttributes;
   shapeType: SvgElementTypes;
 }
 
@@ -49,19 +32,19 @@ export enum SvgElementTypes {
 }
 
 export interface ShapeAttributes {
-  width?: number;
-  height?: number;
+  width?: SVGProps<SVGElement>['width'];
+  height?: SVGProps<SVGElement>['height'];
   viewBox?: ViewBoxParams;
-  overflow?: string;
-  preserveAspectRatio?: string;
+  overflow?: SVGProps<SVGElement>['overflow'];
+  preserveAspectRatio?: SVGProps<SVGElement>['preserveAspectRatio'];
 }
 
 export interface ShapeContentAttributes {
-  strokeWidth?: string;
-  stroke?: string;
-  fill?: string;
-  vectorEffect?: string;
-  strokeMiterlimit?: string;
+  strokeWidth?: SVGProps<SVGElement>['strokeWidth'];
+  stroke?: SVGProps<SVGElement>['stroke'];
+  fill?: SVGProps<SVGElement>['fill'];
+  vectorEffect?: SVGProps<SVGElement>['vectorEffect'];
+  strokeMiterlimit?: SVGProps<SVGElement>['strokeMiterlimit'];
 }
 
 export interface ShapeComponentProps extends ShapeRendererConfig {
@@ -74,29 +57,31 @@ export interface Dimensions {
   height: number;
 }
 interface CircleParams {
-  r: string;
-  cx: string;
-  cy: string;
+  r: SVGProps<SVGCircleElement>['r'];
+  cx: SVGProps<SVGCircleElement>['cx'];
+  cy: SVGProps<SVGCircleElement>['cy'];
 }
 
 interface RectParams {
-  x: string;
-  y: string;
-  width: string;
-  height: string;
+  x: SVGProps<SVGRectElement>['x'];
+  y: SVGProps<SVGRectElement>['y'];
+  width: SVGProps<SVGRectElement>['width'];
+  height: SVGProps<SVGRectElement>['height'];
 }
 
 interface PathParams {
-  d: string;
+  d: SVGProps<SVGPathElement>['d'];
 }
 
 interface PolygonParams {
-  points: string;
-  strokeLinejoin?: string;
+  points: SVGProps<SVGPolygonElement>['points'];
+  strokeLinejoin?: SVGProps<SVGPolygonElement>['strokeLinejoin'];
 }
+
+type SpecificShapeContentAttributes = CircleParams | RectParams | PathParams | PolygonParams;
 
 export interface SvgConfig {
   shapeType?: SvgElementTypes;
   viewBox: ViewBoxParams;
-  shapeProps: CircleParams | RectParams | PathParams | PolygonParams;
+  shapeProps: SpecificShapeContentAttributes;
 }
