@@ -121,7 +121,6 @@ describe('Cluster tab', () => {
         const upgradeRequest = server.requests[server.requests.length - 2];
         expect(upgradeRequest.method).toBe('POST');
         expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
-        expect(upgradeRequest.status).toEqual(200);
 
         // Next, we expect a GET request to check the status of the upgrade
         const statusRequest = server.requests[server.requests.length - 1];
@@ -129,7 +128,6 @@ describe('Cluster tab', () => {
         expect(statusRequest.url).toBe(
           `/api/upgrade_assistant/ml_snapshots/${jobId}/${snapshotId}`
         );
-        expect(statusRequest.status).toEqual(200);
       });
 
       test('handles upgrade failure', async () => {
@@ -156,7 +154,6 @@ describe('Cluster tab', () => {
         const upgradeRequest = server.requests[server.requests.length - 1];
         expect(upgradeRequest.method).toBe('POST');
         expect(upgradeRequest.url).toBe('/api/upgrade_assistant/ml_snapshots');
-        expect(upgradeRequest.status).toEqual(500);
 
         const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
           .split(' ')
@@ -191,7 +188,6 @@ describe('Cluster tab', () => {
             (mlDeprecation.correctiveAction! as MlAction).jobId
           }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
         );
-        expect(request.status).toEqual(200);
       });
 
       test('handles delete failure', async () => {
@@ -224,7 +220,6 @@ describe('Cluster tab', () => {
             (mlDeprecation.correctiveAction! as MlAction).jobId
           }/${(mlDeprecation.correctiveAction! as MlAction).snapshotId}`
         );
-        expect(request.status).toEqual(500);
 
         const accordionTestSubj = `depgroup_${upgradeStatusMockResponse.cluster[0].message
           .split(' ')
@@ -285,12 +280,14 @@ describe('Cluster tab', () => {
       );
     });
 
-    test('handles upgrade error', async () => {
+    test('shows upgraded message when all nodes have been upgraded', async () => {
       const error = {
         statusCode: 426,
         error: 'Upgrade required',
         message: 'There are some nodes running a different version of Elasticsearch',
         attributes: {
+          // This is marked true in the scenario where none of the nodes have the same major version of Kibana,
+          // and therefore we assume all have been upgraded
           allNodesUpgraded: true,
         },
       };
@@ -311,7 +308,7 @@ describe('Cluster tab', () => {
       );
     });
 
-    test('handles partially upgrade error', async () => {
+    test('shows partially upgrade error when nodes are running different versions', async () => {
       const error = {
         statusCode: 426,
         error: 'Upgrade required',

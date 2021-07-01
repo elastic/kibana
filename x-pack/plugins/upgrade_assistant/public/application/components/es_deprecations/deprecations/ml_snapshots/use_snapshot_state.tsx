@@ -9,7 +9,7 @@ import { useRef, useCallback, useState, useEffect } from 'react';
 
 import { ApiService, ResponseError } from '../../../../lib/api';
 
-const POLL_INTERVAL = 1000;
+const POLL_INTERVAL_MS = 1000;
 
 export interface SnapshotStatus {
   snapshotId: string;
@@ -18,7 +18,7 @@ export interface SnapshotStatus {
   action?: 'upgrade' | 'delete';
 }
 
-export const useSnapshotStatus = ({
+export const useSnapshotState = ({
   jobId,
   snapshotId,
   api,
@@ -67,7 +67,7 @@ export const useSnapshotStatus = ({
 
     // Only keep polling if it exists and is in progress.
     if (data?.status === 'in_progress') {
-      pollIntervalIdRef.current = setTimeout(updateSnapshotStatus, POLL_INTERVAL);
+      pollIntervalIdRef.current = setTimeout(updateSnapshotStatus, POLL_INTERVAL_MS);
     }
   }, [api, clearPollInterval, jobId, snapshotId]);
 

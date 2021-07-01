@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FixSnapshotsFlyout } from './fix_snapshots_flyout';
 import { useAppContext } from '../../../../app_context';
-import { useSnapshotStatus } from './use_snapshot_state';
+import { useSnapshotState } from './use_snapshot_state';
 
 const i18nTexts = {
   fixButtonLabel: i18n.translate(
@@ -59,16 +59,13 @@ export const FixMlSnapshotsButton: React.FunctionComponent<Props> = ({
   description,
 }) => {
   const { api } = useAppContext();
-  const {
-    snapshotState,
-    upgradeSnapshot,
-    deleteSnapshot,
-    updateSnapshotStatus,
-  } = useSnapshotStatus({
-    jobId,
-    snapshotId,
-    api,
-  });
+  const { snapshotState, upgradeSnapshot, deleteSnapshot, updateSnapshotStatus } = useSnapshotState(
+    {
+      jobId,
+      snapshotId,
+      api,
+    }
+  );
 
   const [showFlyout, setShowFlyout] = useState(false);
 
