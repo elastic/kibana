@@ -26,17 +26,12 @@ storiesOf('components/WorkpadHeader/ShareMenu/ShareWebsiteFlyout', module)
     },
   })
   .add('default', () => (
-    <ShareWebsiteFlyout
-      onCopy={action('onCopy')}
-      onDownload={action('onDownload')}
-      onClose={action('onClose')}
-    />
+    <ShareWebsiteFlyout onClose={action('onClose')} renderedWorkpad={{} as any} />
   ))
   .add('unsupported renderers', () => (
     <ShareWebsiteFlyout
-      onCopy={action('onCopy')}
-      onDownload={action('onDownload')}
       onClose={action('onClose')}
       unsupportedRenderers={['rendererOne', 'rendererTwo']}
+      renderedWorkpad={{} as any}
     />
   ));
