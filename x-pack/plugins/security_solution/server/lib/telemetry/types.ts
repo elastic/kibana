@@ -74,6 +74,7 @@ interface EndpointMetricDocument {
     '@timestamp': string;
     agent: {
       id: string;
+      version: string;
     };
     Endpoint: {
       metrics: EndpointMetrics;

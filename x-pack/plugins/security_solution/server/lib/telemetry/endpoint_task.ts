@@ -56,13 +56,13 @@ export class TelemetryEndpointTask {
 
           return {
             run: async () => {
-              const executeTo = moment().utc().toISOString();
+              const taskExecutionTime = moment().utc().toISOString();
               const lastExecutionTimestamp = getLastTaskExecutionTimestamp(
-                executeTo,
+                taskExecutionTime,
                 taskInstance.state?.lastExecutionTimestamp
               );
 
-              const hits = await this.runTask(taskInstance.id);
+              const hits = await this.runTask(taskInstance.id, taskExecutionTime);
 
               return {
                 state: {
@@ -116,7 +116,7 @@ export class TelemetryEndpointTask {
     };
   }
 
-  public runTask = async (taskId: string) => {
+  public runTask = async (taskId: string, taskExecutionTime: string) => {
     if (taskId !== this.getTaskId()) {
       this.logger.debug(`Outdated task running: ${taskId}`);
       return 0;
@@ -149,6 +149,7 @@ export class TelemetryEndpointTask {
       (epMetrics) => {
         return {
           endpoint_agent: epMetrics.latest_metrics.hits.hits[0]._source.agent.id,
+          endpoint_version: epMetrics.latest_metrics.hits.hits[0]._source.agent.version,
           endpoint_metrics: epMetrics.latest_metrics.hits.hits[0]._source,
         };
       }
@@ -230,18 +231,31 @@ export class TelemetryEndpointTask {
       const policyInformation = fleetAgents.get(fleetAgentId);
       if (policyInformation?.policy_id) {
         policyConfig = endpointPolicyCache.get(policyInformation?.policy_id);
+
         if (policyConfig) {
           failedPolicy = policyResponses.get(policyConfig?.id);
         }
       }
 
       return {
+        '@timestamp': taskExecutionTime,
         agent_id: fleetAgentId,
         endpoint_id: endpointAgentId,
+        endpoint_version: endpoint.endpoint_version,
         endpoint_metrics: {
-          cpu: endpoint.endpoint_metrics.Endpoint.metrics.cpu,
-          memory: endpoint.endpoint_metrics.Endpoint.metrics.memory,
-          uptime: endpoint.endpoint_metrics.Endpoint.metrics.uptime,
+          cpu: {
+            histogram: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.histogram,
+            latest: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.latest,
+            mean: endpoint.endpoint_metrics.Endpoint.metrics.cpu.endpoint.mean,
+          },
+          memory: {
+            latest: endpoint.endpoint_metrics.Endpoint.metrics.memory.endpoint.private.latest,
+            mean: endpoint.endpoint_metrics.Endpoint.metrics.memory.endpoint.private.mean,
+          },
+          uptime: {
+            endpoint: endpoint.endpoint_metrics.Endpoint.metrics.uptime.endpoint,
+            system: endpoint.endpoint_metrics.Endpoint.metrics.uptime.system,
+          },
         },
         endpoint_meta: {
           os: endpoint.endpoint_metrics.host.os,
