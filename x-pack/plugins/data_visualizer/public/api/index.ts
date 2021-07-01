@@ -12,7 +12,8 @@ export async function getFileDataVisualizerComponent(): Promise<() => FileDataVi
   const modules = await lazyLoadModules();
   return () => modules.FileDataVisualizer;
 }
-export async function getIndexDataVisualizerComponent(): Promise<IndexDataVisualizerSpec> {
+
+export async function getIndexDataVisualizerComponent(): Promise<() => IndexDataVisualizerSpec> {
   const modules = await lazyLoadModules();
-  return modules.IndexDataVisualizer;
+  return () => modules.IndexDataVisualizer;
 }

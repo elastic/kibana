@@ -5,20 +5,34 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
-import { useMlKibana, useTimefilter } from '../../contexts/kibana';
+import React, { FC, Fragment, useEffect, useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useMlKibana, useTimefilter, useMlUrlGenerator } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
-import type { IndexDataVisualizerViewProps } from '../../../../../data_visualizer/public';
+import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { isFullLicense } from '../../license';
+import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
+import { checkPermission } from '../../capabilities/check_capabilities';
+
+import type { ResultLink, IndexDataVisualizerSpec } from '../../../../../data_visualizer/public';
+
+interface GetUrlParams {
+  indexPatternId: string;
+  globalState: any;
+}
+
 export const IndexDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
     services: { docLinks, dataVisualizer },
   } = useMlKibana();
-  const [
-    IndexDataVisualizer,
-    setIndexDataVisualizer,
-  ] = useState<FC<IndexDataVisualizerViewProps> | null>(null);
+  const mlUrlGenerator = useMlUrlGenerator();
+  getMlNodeCount();
+
+  const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
+    null
+  );
 
   useEffect(() => {
     if (dataVisualizer !== undefined) {
@@ -26,10 +40,70 @@ export const IndexDataVisualizerPage: FC = () => {
       getIndexDataVisualizerComponent().then(setIndexDataVisualizer);
     }
   }, []);
+
+  const links: ResultLink[] = useMemo(
+    () => [
+      {
+        id: 'create_ml_ad_job',
+        title: i18n.translate('xpack.ml.indexDatavisualizer.actionsPanel.anomalyDetectionTitle', {
+          defaultMessage: 'Advanced anomaly detection',
+        }),
+        description: i18n.translate(
+          'xpack.ml.indexDatavisualizer.actionsPanel.anomalyDetectionDescription',
+          {
+            defaultMessage:
+              'Create a job with the full range of options for more advanced use cases.',
+          }
+        ),
+        icon: 'createAdvancedJob',
+        type: 'file',
+        getUrl: async ({ indexPatternId, globalState }: GetUrlParams) => {
+          return await mlUrlGenerator.createUrl({
+            page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED,
+            pageState: {
+              index: indexPatternId,
+              globalState,
+            },
+          });
+        },
+        canDisplay: async () => {
+          return isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
+        },
+      },
+      {
+        id: 'create_ml_dfa_job',
+        title: i18n.translate('xpack.ml.indexDatavisualizer.actionsPanel.dataframeTitle', {
+          defaultMessage: 'Data frame analytics',
+        }),
+        description: i18n.translate(
+          'xpack.ml.indexDatavisualizer.actionsPanel.dataframeDescription',
+          {
+            defaultMessage: 'Create outlier detection, regression, or classification analytics.',
+          }
+        ),
+        icon: 'classificationJob',
+        type: 'file',
+        getUrl: async ({ indexPatternId, globalState }: GetUrlParams) => {
+          return await mlUrlGenerator.createUrl({
+            page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
+            pageState: {
+              index: indexPatternId,
+              globalState,
+            },
+          });
+        },
+        canDisplay: async () => {
+          return isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
+        },
+      },
+    ],
+    []
+  );
+
   return IndexDataVisualizer ? (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      {IndexDataVisualizer}
+      {IndexDataVisualizer !== null && <IndexDataVisualizer additionalLinks={links} />}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>
   ) : (

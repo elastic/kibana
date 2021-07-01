@@ -6,7 +6,7 @@
  */
 
 import React, { FC, Fragment, useState, useEffect, useMemo } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
@@ -16,6 +16,7 @@ import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
+import type { ResultLink, FileDataVisualizerSpec } from '../../../../../data_visualizer/public';
 
 interface GetUrlParams {
   indexPatternId: string;
@@ -29,13 +30,16 @@ export const FileDataVisualizerPage: FC = () => {
   } = useMlKibana();
   const mlUrlGenerator = useMlUrlGenerator();
   getMlNodeCount();
-  const [FileDataVisualizer, setFileDataVisualizer] = useState<any | null>(null);
 
-  const links = useMemo(
+  const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
+
+  const links: ResultLink[] = useMemo(
     () => [
       {
         id: 'create_ml_job',
-        title: 'Create new ML job',
+        title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.anomalyDetectionTitle', {
+          defaultMessage: 'Create new ML job',
+        }),
         description: '',
         icon: 'machineLearningApp',
         type: 'file',
@@ -48,13 +52,15 @@ export const FileDataVisualizerPage: FC = () => {
             },
           });
         },
-        canDisplay: () => {
+        canDisplay: async () => {
           return isFullLicense() && checkPermission('canCreateJob') && mlNodesAvailable();
         },
       },
       {
         id: 'open_in_data_viz',
-        title: 'Open in Data Visualizer',
+        title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.dataframeTitle', {
+          defaultMessage: 'Open in Data Visualizer',
+        }),
         description: '',
         icon: 'dataVisualizer',
         type: 'file',
@@ -67,7 +73,7 @@ export const FileDataVisualizerPage: FC = () => {
             },
           });
         },
-        canDisplay: () => true,
+        canDisplay: async () => true,
       },
     ],
     []

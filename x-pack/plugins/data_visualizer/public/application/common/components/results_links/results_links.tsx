@@ -27,7 +27,7 @@ export interface ResultLink {
   icon: string;
   description: string;
   getUrl(params?: any): Promise<string>;
-  canDisplay(params?: any): boolean;
+  canDisplay(params?: any): Promise<boolean>;
 }
 
 interface Props {
@@ -115,15 +115,22 @@ export const ResultsLinks: FC<Props> = ({
 
     getDiscoverUrl();
 
-    Promise.all(additionalLinks.map(({ getUrl }) => getUrl({ globalState, indexPatternId }))).then(
-      (urls) => {
-        const linksById = urls.reduce((acc, url, i) => {
+    Promise.all(
+      additionalLinks.map(async ({ canDisplay, getUrl }) => {
+        if ((await canDisplay()) === false) {
+          return null;
+        }
+        return getUrl({ globalState, indexPatternId });
+      })
+    ).then((urls) => {
+      const linksById = urls.reduce((acc, url, i) => {
+        if (url !== null) {
           acc[additionalLinks[i].id] = url;
-          return acc;
-        }, {} as Record<string, string>);
-        setGeneratedLinks(linksById);
-      }
-    );
+        }
+        return acc;
+      }, {} as Record<string, string>);
+      setGeneratedLinks(linksById);
+    });
 
     if (!unmounted) {
       setIndexManagementLink(
@@ -257,7 +264,7 @@ export const ResultsLinks: FC<Props> = ({
         />
       </EuiFlexItem>
       {additionalLinks
-        .filter(({ canDisplay }) => canDisplay())
+        .filter(({ id }) => generatedLinks[id] !== undefined)
         .map((link) => (
           <EuiFlexItem>
             <EuiCard
