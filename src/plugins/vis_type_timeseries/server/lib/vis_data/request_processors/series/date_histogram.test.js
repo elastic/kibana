@@ -47,7 +47,16 @@ describe('dateHistogram(req, panel, series)', () => {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
     buildSeriesMetaParams = jest.fn(async () => {
-      return getIntervalAndTimefield(panel, indexPattern, series);
+      return getIntervalAndTimefield(
+        panel,
+        indexPattern,
+        {
+          min: '2017-01-01T00:00:00Z',
+          max: '2017-01-01T01:00:00Z',
+          maxBuckets: 1000,
+        },
+        series
+      );
     });
   });
 

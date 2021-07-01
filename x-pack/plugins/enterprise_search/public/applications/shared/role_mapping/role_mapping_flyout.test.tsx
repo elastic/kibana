@@ -26,6 +26,7 @@ describe('RoleMappingFlyout', () => {
   const props = {
     isNew: true,
     disabled: false,
+    formLoading: false,
     closeUsersAndRolesFlyout,
     handleSaveMapping,
   };

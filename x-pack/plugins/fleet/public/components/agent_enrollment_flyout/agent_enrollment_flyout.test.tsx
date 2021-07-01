@@ -19,7 +19,7 @@ import type { AgentPolicy } from '../../../common';
 import { useGetSettings, sendGetFleetStatus } from '../../hooks/use_request';
 import { FleetStatusProvider, ConfigContext } from '../../hooks';
 
-import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page';
+import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 
 import { AgentEnrollmentKeySelectionStep, AgentPolicySelectionStep, ViewDataStep } from './steps';
 

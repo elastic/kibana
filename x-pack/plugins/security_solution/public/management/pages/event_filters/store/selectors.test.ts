@@ -250,11 +250,6 @@ describe('event filters selectors', () => {
       initialState.location.page_index = 10;
       expect(listDataNeedsRefresh(initialState)).toBe(true);
     });
-
-    it('should should return true if filter param differ from last api call', () => {
-      initialState.location.filter = 'query';
-      expect(listDataNeedsRefresh(initialState)).toBe(true);
-    });
   });
 
   describe('getFormEntry()', () => {

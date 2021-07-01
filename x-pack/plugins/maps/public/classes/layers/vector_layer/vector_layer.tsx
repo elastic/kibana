@@ -99,6 +99,7 @@ export interface IVectorLayer extends ILayer {
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
   addFeature(geometry: Geometry | Position[]): Promise<void>;
+  deleteFeature(featureId: string): Promise<void>;
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
@@ -235,11 +236,17 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    const { tooltipContent, areResultsTrimmed } = this.getSource().getSourceTooltipContent(
-      sourceDataRequest
-    );
+    const {
+      tooltipContent,
+      areResultsTrimmed,
+      isDeprecated,
+    } = this.getSource().getSourceTooltipContent(sourceDataRequest);
     return {
-      icon: this.getCurrentStyle().getIcon(),
+      icon: isDeprecated ? (
+        <EuiIcon type="alert" color="danger" />
+      ) : (
+        this.getCurrentStyle().getIcon()
+      ),
       tooltipContent,
       areResultsTrimmed,
     };
@@ -1155,5 +1162,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   async addFeature(geometry: Geometry | Position[]) {
     const layerSource = this.getSource();
     await layerSource.addFeature(geometry);
+  }
+
+  async deleteFeature(featureId: string) {
+    const layerSource = this.getSource();
+    await layerSource.deleteFeature(featureId);
   }
 }

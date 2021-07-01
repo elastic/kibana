@@ -17,6 +17,7 @@ import {
   UserSelector,
   UserAddedInfo,
   UserInvitationCallout,
+  DeactivatedUserCallout,
 } from '../../../shared/role_mapping';
 import { Role } from '../../types';
 
@@ -46,12 +47,19 @@ export const User: React.FC = () => {
     roleMappingErrors,
     userCreated,
     userFormIsNewUser,
+    smtpSettingsPresent,
+    formLoading,
   } = useValues(RoleMappingsLogic);
 
   const showGroupAssignmentSelector = availableGroups.length > 0;
   const hasAvailableUsers = elasticsearchUsers.length > 0;
   const flyoutDisabled =
     (!userFormUserIsExisting || !hasAvailableUsers) && !elasticsearchUser.username;
+  const userIsDeactivated = !!(
+    singleUserRoleMapping &&
+    !singleUserRoleMapping.invitation &&
+    !singleUserRoleMapping.elasticsearchUser.enabled
+  );
 
   const userAddedInfo = singleUserRoleMapping && (
     <UserAddedInfo
@@ -73,6 +81,7 @@ export const User: React.FC = () => {
     <EuiForm isInvalid={roleMappingErrors.length > 0} error={roleMappingErrors}>
       <UserSelector
         isNewUser={userFormIsNewUser}
+        smtpSettingsPresent={smtpSettingsPresent}
         elasticsearchUsers={elasticsearchUsers}
         handleRoleChange={handleRoleChange}
         elasticsearchUser={elasticsearchUser}
@@ -91,6 +100,7 @@ export const User: React.FC = () => {
   return (
     <UserFlyout
       disabled={flyoutDisabled}
+      formLoading={formLoading}
       isComplete={userCreated}
       isNew={userFormIsNewUser}
       closeUserFlyout={closeUsersAndRolesFlyout}
@@ -98,6 +108,7 @@ export const User: React.FC = () => {
     >
       {userCreated ? userAddedInfo : createUserForm}
       {userInvitationCallout}
+      {userIsDeactivated && <DeactivatedUserCallout isNew={userFormIsNewUser} />}
     </UserFlyout>
   );
 };

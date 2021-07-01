@@ -97,11 +97,9 @@ export interface AlertMemoryUsageState extends AlertNodeState {
   memoryUsage: number;
 }
 
-export interface AlertThreadPoolRejectionsState extends AlertState {
+export interface AlertThreadPoolRejectionsState extends AlertNodeState {
   rejectionCount: number;
   type: string;
-  nodeId: string;
-  nodeName?: string;
 }
 
 export interface AlertLicenseState extends AlertState {
@@ -172,6 +170,7 @@ export interface AlertThreadPoolRejectionsStats {
   nodeId: string;
   nodeName: string;
   rejectionCount: number;
+  type: string;
   ccs?: string;
 }
 

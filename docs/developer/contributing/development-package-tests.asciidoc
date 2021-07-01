@@ -36,7 +36,7 @@ pip3 install --user ansible
 
 ```
 # Build distributions
-node scripts/build --all-platforms --debug --no-oss
+node scripts/build --all-platforms --debug
 
 cd test/package
 

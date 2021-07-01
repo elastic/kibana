@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo, useState, useEffect, useRef } from 'react';
-import { ApplicationStart, CoreStart } from 'kibana/public';
 import { EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,27 +13,25 @@ import {
   PackageCustomExtensionComponentProps,
   pagePathGetters,
 } from '../../../../../../../../../fleet/public';
-import { useKibana } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { getTrustedAppsListPath } from '../../../../../../common/routing';
 import {
   ListPageRouteState,
   GetExceptionSummaryResponse,
 } from '../../../../../../../../common/endpoint/types';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../../fleet/common';
-import { MANAGEMENT_APP_ID } from '../../../../../../common/constants';
-import { useToasts } from '../../../../../../../common/lib/kibana';
+
+import { useAppUrl } from '../../../../../../../common/lib/kibana/hooks';
+import { useKibana, useToasts } from '../../../../../../../common/lib/kibana';
 import { LinkWithIcon } from './link_with_icon';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import { TrustedAppsHttpService } from '../../../../../trusted_apps/service';
 import { StyledEuiFlexGridGroup, StyledEuiFlexGridItem } from './styled_components';
 
 export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>(({ pkgkey }) => {
+  const { getAppUrl } = useAppUrl();
   const {
-    services: {
-      application: { getUrlForApp },
-      http,
-    },
-  } = useKibana<CoreStart & { application: ApplicationStart }>();
+    services: { http },
+  } = useKibana();
   const toasts = useToasts();
   const [stats, setStats] = useState<GetExceptionSummaryResponse | undefined>();
   const trustedAppsApi = useMemo(() => new TrustedAppsHttpService(http), [http]);
@@ -83,11 +80,9 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
           path: fleetPackageCustomUrlPath,
         },
       ],
-      backButtonUrl: getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
-        path: fleetPackageCustomUrlPath,
-      }),
+      backButtonUrl: getAppUrl({ appId: INTEGRATIONS_PLUGIN_ID, path: fleetPackageCustomUrlPath }),
     };
-  }, [getUrlForApp, pkgkey]);
+  }, [getAppUrl, pkgkey]);
   return (
     <EuiPanel paddingSize="l">
       <StyledEuiFlexGridGroup alignItems="baseline" justifyContent="center">
@@ -107,8 +102,9 @@ export const FleetTrustedAppsCard = memo<PackageCustomExtensionComponentProps>((
         <StyledEuiFlexGridItem gridarea="link" alignitems="flex-end">
           <>
             <LinkWithIcon
-              appId={MANAGEMENT_APP_ID}
-              href={getUrlForApp(MANAGEMENT_APP_ID, { path: trustedAppsListUrlPath })}
+              href={getAppUrl({
+                path: trustedAppsListUrlPath,
+              })}
               appPath={trustedAppsListUrlPath}
               appState={trustedAppRouteState}
               data-test-subj="linkToTrustedApps"
