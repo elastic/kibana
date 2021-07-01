@@ -8,10 +8,9 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
-import { DataPublicPluginStart, IndexPattern, search } from '../../../../../../../data/public';
+import { IndexPattern, search } from '../../../../../../../data/public';
 import { TimechartHeader } from '../timechart_header';
 import { SavedSearch } from '../../../../../saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
@@ -19,24 +18,22 @@ import { TimechartBucketInterval } from '../timechart_header/timechart_header';
 import { Chart as IChart } from './point_series';
 import { DiscoverHistogram } from './histogram';
 import { SavedSearchDataSubject } from '../../services/use_saved_search';
+import { DiscoverServices } from '../../../../../build_services';
 
 const TimechartHeaderMemoized = React.memo(TimechartHeader);
 const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
 export function DiscoverChart({
-  config,
-  data,
   bucketInterval,
   isLegacy,
   resetQuery,
   savedSearch,
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
+  services,
   state,
   stateContainer,
   timefield,
 }: {
-  config: IUiSettingsClient;
-  data: DataPublicPluginStart;
   bucketInterval?: TimechartBucketInterval;
   chartData?: IChart;
   indexPattern: IndexPattern;
@@ -45,10 +42,12 @@ export function DiscoverChart({
   savedSearch: SavedSearch;
   savedSearchDataChart$: SavedSearchDataSubject;
   savedSearchDataTotalHits$: SavedSearchDataSubject;
+  services: DiscoverServices;
   state: AppState;
   stateContainer: GetStateReturn;
   timefield?: string;
 }) {
+  const { data, uiSettings: config } = services;
   const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
     element: null,
     moveFocus: false,
@@ -150,6 +149,7 @@ export function DiscoverChart({
               <DiscoverHistogramMemoized
                 savedSearchData$={savedSearchDataChart$}
                 timefilterUpdateHandler={timefilterUpdateHandler}
+                services={services}
               />
             </div>
           </section>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -160,17 +160,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     };
   }, []);
 
+  const setFieldEditorRef = useCallback((ref: () => void | undefined) => {
+    closeFieldEditor.current = ref;
+  }, []);
+
+  const closeFlyout = useCallback(() => {
+    setIsFlyoutVisible(false);
+  }, []);
+
   if (!props.selectedIndexPattern) {
     return null;
   }
-
-  const setFieldEditorRef = (ref: () => void | undefined) => {
-    closeFieldEditor.current = ref;
-  };
-
-  const closeFlyout = () => {
-    setIsFlyoutVisible(false);
-  };
 
   const { indexPatternFieldEditor } = props.services;
   const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();

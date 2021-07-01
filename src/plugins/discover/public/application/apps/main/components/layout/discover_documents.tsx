@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import React, { useState, useRef, useMemo, useCallback, useEffect, memo } from 'react';
+import { EuiFlexItem, EuiSpacer, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocTableLegacy } from '../../../../angular/doc_table/create_doc_table_react';
 import { SortPairArr } from '../../../../angular/doc_table/lib/get_sort';
@@ -32,13 +32,7 @@ import { AppState, GetStateReturn } from '../../services/discover_state';
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const DataGridMemoized = React.memo(DiscoverGrid);
 
-interface DiscoverLayoutDocumentState extends SavedSearchDataDocumentsMessage {
-  fetchStatus: FetchStatus;
-  result: ElasticSearchHit[];
-  error?: Error;
-}
-
-export function DiscoverDocuments({
+function DiscoverDocumentsComponent({
   documents$,
   expandedDoc,
   indexPattern,
@@ -68,9 +62,9 @@ export function DiscoverDocuments({
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
-  const [documentState, setDocumentState] = useState<DiscoverLayoutDocumentState>({
+  const [documentState, setDocumentState] = useState<SavedSearchDataDocumentsMessage>({
     fetchStatus: documents$.getValue().fetchStatus,
-    result: documents$.getValue().result || [],
+    result: documents$.getValue().result,
   });
   useEffect(() => {
     const subscription = documents$.subscribe((next) => {
@@ -100,7 +94,7 @@ export function DiscoverDocuments({
       scrollableDesktop.current.focus();
     }
     // Only the desktop one needs to target a specific container
-    if (!isMobile && scrollableDesktop.current) {
+    if (!isMobile() && scrollableDesktop.current) {
       scrollableDesktop.current.scrollTo(0, 0);
     } else if (window) {
       window.scrollTo(0, 0);
@@ -131,6 +125,21 @@ export function DiscoverDocuments({
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
     [uiSettings, indexPattern.timeFieldName]
   );
+
+  if (
+    (!documentState.result || documentState.result.length === 0) &&
+    documentState.fetchStatus === FetchStatus.LOADING
+  ) {
+    return (
+      <div className="dscDocuments__loading">
+        <EuiText size="xs" color="subdued">
+          <EuiLoadingSpinner />
+          <EuiSpacer size="s" />
+          <FormattedMessage id="discover.loadingDocuments" defaultMessage="Loading documents" />
+        </EuiText>
+      </div>
+    );
+  }
 
   return (
     <EuiFlexItem className="eui-yScroll">
@@ -192,3 +201,5 @@ export function DiscoverDocuments({
     </EuiFlexItem>
   );
 }
+
+export const DiscoverDocuments = memo(DiscoverDocumentsComponent);

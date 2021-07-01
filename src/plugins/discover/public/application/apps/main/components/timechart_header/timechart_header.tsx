@@ -35,10 +35,7 @@ export interface TimechartHeaderProps {
    * Format of date to be displayed
    */
   dateFormat?: string;
-  /**
-   * Interval for the buckets of the recent request
-   */
-  bucketInterval?: TimechartBucketInterval;
+
   data: DataPublicPluginStart;
   /**
    * Interval Options

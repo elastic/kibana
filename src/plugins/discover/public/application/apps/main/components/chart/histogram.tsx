@@ -28,7 +28,6 @@ import {
 import { IUiSettingsClient } from 'kibana/public';
 import { EuiChartThemeType } from '@elastic/eui/dist/eui_charts_theme';
 import { combineLatest } from 'rxjs';
-import { getServices } from '../../../../../kibana_services';
 import { Chart as IChart } from './point_series';
 import {
   CurrentTime,
@@ -39,10 +38,12 @@ import {
 import { SavedSearchChartsSubject } from '../../services/use_saved_search';
 import { FetchStatus } from '../../../../types';
 import { TimechartBucketInterval } from '../timechart_header/timechart_header';
+import { DiscoverServices } from '../../../../../build_services';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: SavedSearchChartsSubject;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
+  services: DiscoverServices;
 }
 
 interface DiscoverHistogramState {
@@ -67,22 +68,23 @@ function getTimezone(uiSettings: IUiSettingsClient) {
 export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
+  services,
 }: DiscoverHistogramProps) {
   const [theme, setTheme] = useState({
-    chartsTheme: getServices().theme.chartsDefaultTheme,
-    chartsBaseTheme: getServices().theme.chartsDefaultBaseTheme,
+    chartsTheme: services.theme.chartsDefaultTheme,
+    chartsBaseTheme: services.theme.chartsDefaultBaseTheme,
   });
   const [state, setState] = useState<DiscoverHistogramState>({
-    chartsTheme: getServices().theme.chartsDefaultTheme,
-    chartsBaseTheme: getServices().theme.chartsDefaultBaseTheme,
+    chartsTheme: services.theme.chartsDefaultTheme,
+    chartsBaseTheme: services.theme.chartsDefaultBaseTheme,
     chartData: undefined,
     fetchStatus: FetchStatus.LOADING,
   });
 
   useEffect(() => {
     const themeSubscription = combineLatest([
-      getServices().theme.chartsTheme$,
-      getServices().theme.chartsBaseTheme$,
+      services.theme.chartsTheme$,
+      services.theme.chartsBaseTheme$,
     ]).subscribe(([chartsTheme, chartsBaseTheme]) => {
       if (chartsTheme !== theme.chartsTheme || chartsBaseTheme !== theme.chartsBaseTheme)
         setTheme({ chartsTheme, chartsBaseTheme });
@@ -90,7 +92,12 @@ export function DiscoverHistogram({
     return () => {
       return themeSubscription.unsubscribe();
     };
-  }, [theme.chartsBaseTheme, theme.chartsTheme]);
+  }, [
+    services.theme.chartsBaseTheme$,
+    services.theme.chartsTheme$,
+    theme.chartsBaseTheme,
+    theme.chartsTheme,
+  ]);
 
   useEffect(() => {
     const dataSubscription = savedSearchData$.subscribe((res) => {
@@ -105,7 +112,7 @@ export function DiscoverHistogram({
     };
   }, [savedSearchData$, state]);
 
-  const uiSettings = getServices().uiSettings;
+  const uiSettings = services.uiSettings;
   const timeZone = getTimezone(uiSettings);
   const { chartData, fetchStatus } = state;
 
@@ -191,7 +198,7 @@ export function DiscoverHistogram({
     type: TooltipType.VerticalCursor,
   };
 
-  const xAxisFormatter = getServices().data.fieldFormats.deserialize(chartData!.yAxisFormat);
+  const xAxisFormatter = services.data.fieldFormats.deserialize(chartData!.yAxisFormat);
 
   return (
     <Chart size="100%">

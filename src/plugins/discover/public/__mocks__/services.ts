@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import { Observable } from 'rxjs';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { chromeServiceMock, coreMock, docLinksServiceMock } from '../../../../core/public/mocks';
@@ -46,6 +48,9 @@ export const discoverServiceMock = ({
         return [];
       }
     },
+    isDefault: (key: string) => {
+      return true;
+    },
   },
   indexPatternFieldEditor: {
     openEditor: jest.fn(),
@@ -59,5 +64,11 @@ export const discoverServiceMock = ({
   },
   metadata: {
     branch: 'test',
+  },
+  theme: {
+    chartsDefaultTheme: EUI_CHARTS_THEME_LIGHT.theme,
+    chartsDefaultBaseTheme: EUI_CHARTS_THEME_LIGHT.theme,
+    chartsTheme$: new Observable(),
+    chartsBaseTheme$: new Observable(),
   },
 } as unknown) as DiscoverServices;

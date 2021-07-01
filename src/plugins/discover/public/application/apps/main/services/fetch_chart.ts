@@ -88,6 +88,7 @@ export function fetchChart(
         return undefined;
       })
     );
+
   fetch$.subscribe(
     (res) => {
       if (res) {

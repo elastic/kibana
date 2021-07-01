@@ -40,19 +40,12 @@ import { getResultState } from '../../utils/get_result_state';
 import { InspectorSession } from '../../../../../../../inspector/public';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { SavedSearchDataMessage } from '../../services/use_saved_search';
-import { FetchStatus } from '../../../../types';
 import { useDataGridColumns } from '../../../../helpers/use_data_grid_columns';
 import { DiscoverDocuments } from './discover_documents';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 const DiscoverChartMemoized = React.memo(DiscoverChart);
-
-export interface DiscoverLayoutFetchState extends SavedSearchDataMessage {
-  fetchStatus: FetchStatus;
-  fetchCounter: number;
-  error?: Error;
-}
 
 export function DiscoverLayout({
   indexPattern,
@@ -77,12 +70,7 @@ export function DiscoverLayout({
   const collapseIcon = useRef<HTMLButtonElement>(null);
   const { main$, charts$, totalHits$ } = savedSearchData$;
 
-  const [fetchState, setFetchState] = useState<DiscoverLayoutFetchState>({
-    fetchStatus: main$.getValue().fetchStatus,
-    fetchCounter:
-      main$.getValue().fetchCounter ||
-      (main$.getValue().fetchStatus === FetchStatus.LOADING ? 1 : 0),
-  });
+  const [fetchState, setFetchState] = useState<SavedSearchDataMessage>(main$.getValue());
 
   const { fetchCounter } = fetchState;
 
@@ -96,7 +84,7 @@ export function DiscoverLayout({
   }, [main$, fetchState, setFetchState]);
 
   // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
-  const isMobile = () => collapseIcon && !collapseIcon.current;
+  const isMobile = useCallback(() => collapseIcon && !collapseIcon.current, []);
   const timeField = useMemo(() => {
     return indexPatternsUtils.isDefault(indexPattern) ? indexPattern.timeFieldName : undefined;
   }, [indexPattern]);
@@ -165,7 +153,7 @@ export function DiscoverLayout({
 
   return (
     <I18nProvider>
-      <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
+      <EuiPage className="dscPage" data-fetch-counter={fetchCounter ?? 0}>
         <TopNavMemoized
           indexPattern={indexPattern}
           onOpenInspector={onOpenInspector}
@@ -253,8 +241,6 @@ export function DiscoverLayout({
                   >
                     <EuiFlexItem grow={false}>
                       <DiscoverChartMemoized
-                        config={uiSettings}
-                        data={data}
                         indexPattern={indexPattern}
                         isLegacy={isLegacy}
                         state={state}
@@ -262,6 +248,7 @@ export function DiscoverLayout({
                         savedSearch={savedSearch}
                         savedSearchDataChart$={charts$}
                         savedSearchDataTotalHits$={totalHits$}
+                        services={services}
                         stateContainer={stateContainer}
                         timefield={timeField}
                       />
