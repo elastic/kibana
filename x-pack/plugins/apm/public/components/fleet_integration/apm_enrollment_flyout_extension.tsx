@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { AgentEnrollmentFlyoutFinalStepExtension } from '../../../../fleet/public';
@@ -22,20 +21,22 @@ function StepComponent() {
     <>
       <EuiText>
         <p>
-          <FormattedMessage
-            id="xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentInstructions"
-            defaultMessage="
-          After the agent starts, you can install APM agents on your hosts to collect data from your applications and services."
-          />
+          {i18n.translate(
+            'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentDescription',
+            {
+              defaultMessage:
+                'After the agent starts, you can install APM agents on your hosts to collect data from your applications and services.',
+            }
+          )}
         </p>
       </EuiText>
       <EuiSpacer size="m" />
 
       <EuiButton fill href={installApmAgentLink}>
-        <FormattedMessage
-          id="xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText"
-          defaultMessage="Install APM Agent"
-        />
+        {i18n.translate(
+          'xpack.apm.fleetIntegration.enrollmentFlyout.installApmAgentButtonText',
+          { defaultMessage: 'Install APM Agent' }
+        )}
       </EuiButton>
     </>
   );

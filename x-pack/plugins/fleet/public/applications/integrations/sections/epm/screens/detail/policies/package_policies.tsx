@@ -7,7 +7,11 @@
 import { stringify, parse } from 'query-string';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Redirect, useLocation, useHistory } from 'react-router-dom';
-import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  EuiStepProps,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiBasicTable,
@@ -22,8 +26,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
-
-import type { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
 
 import { InstallStatus } from '../../../../../types';
 import {
@@ -103,7 +105,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     [setPagination]
   );
 
-  const viewDataStep = useMemo<EuiStepInterface>(() => {
+  const viewDataStep = useMemo<EuiStepProps>(() => {
     if (agentEnrollmentFlyoutExtension) {
       return {
         title: agentEnrollmentFlyoutExtension.title,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiStepInterface } from '@elastic/eui/src/components/steps/step';
+import type { EuiStepProps } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../types';
 
@@ -26,5 +26,5 @@ export interface BaseProps {
    * There is a step in the agent enrollment process that allows users to see the data from an integration represented in the UI
    * in some way. This is an area for consumers to render a button and text explaining how data can be viewed.
    */
-  viewDataStep?: EuiStepInterface;
+  viewDataStep?: EuiStepProps;
 }

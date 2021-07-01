@@ -310,18 +310,18 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     return {};
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { registerExtension } = plugins.fleet;
+    const { fleet } = plugins;
 
     const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
 
-    registerExtension({
+    fleet.registerExtension({
       package: 'apm',
       view: 'agent-enrollment-flyout',
       title: agentEnrollmentExtensionData.title,
       Component: agentEnrollmentExtensionData.Component,
     });
 
-    registerExtension({
+    fleet.registerExtension({
       package: 'apm',
       view: 'package-detail-assets',
       Component: LazyApmCustomAssetsExtension,
