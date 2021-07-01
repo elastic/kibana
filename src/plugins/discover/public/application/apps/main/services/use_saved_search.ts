@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCallback, useEffect, useRef, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, forkJoin, merge, of, Subject } from 'rxjs';
 import { debounceTime, filter, tap } from 'rxjs/operators';
 import { DiscoverServices } from '../../../../build_services';
@@ -108,6 +108,7 @@ export const useSavedSearch = ({
     () =>
       new BehaviorSubject<SavedSearchDataMessage>({
         fetchStatus: initialFetchStatus,
+        fetchCounter: initialFetchStatus === FetchStatus.LOADING ? 1 : 0,
       })
   );
 
