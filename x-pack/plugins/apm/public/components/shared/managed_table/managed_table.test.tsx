@@ -7,39 +7,41 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { UnoptimizedManagedTable } from '.';
+import { ITableColumn, UnoptimizedManagedTable } from '.';
 
-describe('ManagedTable component', () => {
-  let people;
-  let columns;
+interface Person {
+  name: string;
+  age: number;
+}
 
-  beforeEach(() => {
-    people = [
-      { name: 'Jess', age: 29 },
-      { name: 'Becky', age: 43 },
-      { name: 'Thomas', age: 31 },
-    ];
-    columns = [
-      {
-        field: 'name',
-        name: 'Name',
-        sortable: true,
-        render: (name) => `Name: ${name}`,
-      },
-      { field: 'age', name: 'Age', render: (age) => `Age: ${age}` },
-    ];
-  });
+describe('ManagedTable', () => {
+  const people: Person[] = [
+    { name: 'Jess', age: 29 },
+    { name: 'Becky', age: 43 },
+    { name: 'Thomas', age: 31 },
+  ];
+  const columns: Array<ITableColumn<Person>> = [
+    {
+      field: 'name',
+      name: 'Name',
+      sortable: true,
+      render: (name) => `Name: ${name}`,
+    },
+    { field: 'age', name: 'Age', render: (age) => `Age: ${age}` },
+  ];
 
   it('should render a page-full of items, with defaults', () => {
     expect(
-      shallow(<UnoptimizedManagedTable columns={columns} items={people} />)
+      shallow(
+        <UnoptimizedManagedTable<Person> columns={columns} items={people} />
+      )
     ).toMatchSnapshot();
   });
 
   it('should render when specifying initial values', () => {
     expect(
       shallow(
-        <UnoptimizedManagedTable
+        <UnoptimizedManagedTable<Person>
           columns={columns}
           items={people}
           initialSortField="age"

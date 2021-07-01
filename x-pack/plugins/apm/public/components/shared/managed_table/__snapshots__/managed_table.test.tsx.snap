@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ManagedTable component should render a page-full of items, with defaults 1`] = `
+exports[`ManagedTable should render a page-full of items, with defaults 1`] = `
 <EuiBasicTable
   columns={
     Array [
@@ -56,7 +56,7 @@ exports[`ManagedTable component should render a page-full of items, with default
 />
 `;
 
-exports[`ManagedTable component should render when specifying initial values 1`] = `
+exports[`ManagedTable should render when specifying initial values 1`] = `
 <EuiBasicTable
   columns={
     Array [
