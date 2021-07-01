@@ -16,6 +16,7 @@ import {
   ESConnectorFields,
   SECURITY_SOLUTION_OWNER,
 } from '../../common';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../actions/server';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -160,6 +161,33 @@ export const configureMigrations = {
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
     return addOwnerToSO(doc);
+  },
+  '7.15.0': (
+    doc: SavedObjectUnsanitizedDoc<{ connector: { id: string } }>
+  ): SavedObjectSanitizedDoc<unknown> => {
+    // removing the id field since it will be stored in the references instead
+    const { id: connectorId, ...restConnector } = doc.attributes.connector;
+    const { references = [] } = doc;
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        connector: {
+          ...restConnector,
+        },
+      },
+      references: [
+        ...references,
+        {
+          id: connectorId,
+          type: ACTION_SAVED_OBJECT_TYPE,
+
+          // TODO: can we remove 'associated'?
+          name: `associated-${ACTION_SAVED_OBJECT_TYPE}`,
+        },
+      ],
+    };
   },
 };
 
