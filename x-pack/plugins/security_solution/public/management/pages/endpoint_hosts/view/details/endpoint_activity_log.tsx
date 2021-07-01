@@ -69,13 +69,13 @@ export const EndpointActivityLog = memo(
       disabled: isPagingDisabled,
     } = useEndpointSelector(getActivityLogDataPaging);
 
-    const [startDate, setStartDate] = useState<Moment | null>(
-      initialStartDate ? moment(initialStartDate) : null
+    const [startDate, setStartDate] = useState<Moment | undefined>(
+      initialStartDate ? moment(initialStartDate) : undefined
     );
-    const [endDate, setEndDate] = useState<Moment | null>(
-      initialEndDate ? moment(initialEndDate) : null
+    const [endDate, setEndDate] = useState<Moment | undefined>(
+      initialEndDate ? moment(initialEndDate) : undefined
     );
-    const isInvalidDateRange = startDate !== null && endDate !== null ? startDate > endDate : false;
+    const isInvalidDateRange = startDate && endDate ? startDate > endDate : false;
 
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
     const getActivityLog = useCallback(
@@ -165,7 +165,7 @@ export const EndpointActivityLog = memo(
                             endDate={endDate}
                             isInvalid={isInvalidDateRange}
                             onChange={onChangeStartDate}
-                            onClear={() => onChangeStartDate(null)}
+                            onClear={() => onChangeStartDate(undefined)}
                             placeholderText={i18.ACTIVITY_LOG.datePicker.startDate}
                             selected={startDate}
                             showTimeSelect
@@ -178,7 +178,7 @@ export const EndpointActivityLog = memo(
                             endDate={endDate}
                             isInvalid={isInvalidDateRange}
                             onChange={onChangeEndDate}
-                            onClear={() => onChangeEndDate(null)}
+                            onClear={() => onChangeEndDate(undefined)}
                             placeholderText={i18.ACTIVITY_LOG.datePicker.endDate}
                             selected={endDate}
                             showTimeSelect
