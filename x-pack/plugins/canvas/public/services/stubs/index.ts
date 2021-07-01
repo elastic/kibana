@@ -15,11 +15,14 @@ import {
 
 import { CanvasPluginServices } from '..';
 import { workpadServiceFactory } from './workpad';
+import { notifyServiceFactory } from './notify';
 
 export { workpadServiceFactory } from './workpad';
+export { notifyServiceFactory } from './notify';
 
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
   workpad: new PluginServiceProvider(workpadServiceFactory),
+  notify: new PluginServiceProvider(notifyServiceFactory),
 };
 
 export const pluginServiceRegistry = new PluginServiceRegistry<CanvasPluginServices>(

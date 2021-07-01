@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ExperimentalBadge } from './experimental_badge';
+export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';

@@ -9,11 +9,14 @@ export * from './legacy';
 
 import { PluginServices } from '../../../../../src/plugins/presentation_util/public';
 import { CanvasWorkpadService } from './workpad';
+import { CanvasNotifyService } from './notify';
 
 export interface CanvasPluginServices {
   workpad: CanvasWorkpadService;
+  notify: CanvasNotifyService;
 }
 
 export const pluginServices = new PluginServices<CanvasPluginServices>();
 
 export const useWorkpadService = () => (() => pluginServices.getHooks().workpad.useService())();
+export const useNotifyService = () => (() => pluginServices.getHooks().notify.useService())();

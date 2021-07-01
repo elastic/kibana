@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -104,7 +104,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
           : [],
       }}
     >
-      <EuiPanel>
+      <>
         {(!journey || journey.loading) && (
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
@@ -124,7 +124,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
         {journey && activeStep && !journey.loading && (
           <WaterfallChartContainer checkGroup={checkGroup} stepIndex={stepIndex} />
         )}
-      </EuiPanel>
+      </>
     </PageTemplateComponent>
   );
 };
