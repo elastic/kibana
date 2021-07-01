@@ -79,27 +79,30 @@ async function fetchIndicesCall(
   // System indices may show up in _cat APIs, as these APIs are primarily used for troubleshooting
   // For now, we filter them out and only return index information for the indices we have
   // In the future, we should migrate away from using cat APIs (https://github.com/elastic/kibana/issues/57286)
-  const filteredCatHits = catHits.filter((hit) => typeof indices[hit.index] !== 'undefined');
-
-  return filteredCatHits.map((hit) => {
+  return catHits.reduce((decoratedIndices, hit) => {
     const index = indices[hit.index];
-    const aliases = Object.keys(index.aliases);
 
-    return {
-      health: hit.health,
-      status: hit.status,
-      name: hit.index,
-      uuid: hit.uuid,
-      primary: hit.pri,
-      replica: hit.rep,
-      documents: hit['docs.count'],
-      size: hit['store.size'],
-      isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
-      aliases: aliases.length ? aliases : 'none',
-      hidden: index.settings.index.hidden === 'true',
-      data_stream: index.data_stream,
-    };
-  });
+    if (typeof index !== 'undefined') {
+      const aliases = Object.keys(index.aliases);
+
+      decoratedIndices.push({
+        health: hit.health,
+        status: hit.status,
+        name: hit.index,
+        uuid: hit.uuid,
+        primary: hit.pri,
+        replica: hit.rep,
+        documents: hit['docs.count'],
+        size: hit['store.size'],
+        isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
+        aliases: aliases.length ? aliases : 'none',
+        hidden: index.settings.index.hidden === 'true',
+        data_stream: index.data_stream,
+      });
+    }
+
+    return decoratedIndices;
+  }, [] as Index[]);
 }
 
 export const fetchIndices = async (
