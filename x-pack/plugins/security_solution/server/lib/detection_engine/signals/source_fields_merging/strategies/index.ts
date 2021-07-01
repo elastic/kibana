@@ -6,3 +6,4 @@
  */
 export * from './merge_all_fields_with_source';
 export * from './merge_missing_fields_with_source';
+export * from './get_strategy';
