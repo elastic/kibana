@@ -24,6 +24,7 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
+import { retryIfNotFound } from './retry_if_not_found';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -116,12 +117,19 @@ export class ActionExecutor {
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        const { actionTypeId, name, config, secrets } = await getActionInfo(
-          await getActionsClientWithRequest(request, source),
-          encryptedSavedObjectsClient,
-          preconfiguredActions,
-          actionId,
-          namespace.namespace
+        const { actionTypeId, name, config, secrets } = await retryIfNotFound(
+          logger,
+          `getDecryptedAsInternalUser by actionId:'${actionId} with attributes:${JSON.stringify(
+            params
+          )}')`,
+          async () =>
+            await getActionInfo(
+              await getActionsClientWithRequest(request, source),
+              encryptedSavedObjectsClient,
+              preconfiguredActions,
+              actionId,
+              namespace.namespace
+            )
         );
 
         if (span) {

@@ -493,6 +493,8 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    // console.log('start');
+    await new Promise((resolve) => setTimeout(resolve, 8000));
     const runDate = new Date();
     const runDateString = runDate.toISOString();
     this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
@@ -607,6 +609,7 @@ export class TaskRunner<
       );
     }
 
+    // console.log('end');
     return {
       state: map<AlertTaskState, ElasticsearchError, AlertTaskState>(
         state,

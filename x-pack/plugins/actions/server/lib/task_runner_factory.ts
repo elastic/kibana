@@ -16,6 +16,7 @@ import {
   KibanaRequest,
   SavedObjectReference,
   IBasePath,
+  SavedObject,
 } from '../../../../../src/core/server';
 import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
@@ -31,6 +32,7 @@ import {
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import { asSavedObjectExecutionSource } from './action_execution_source';
 import { validatedRelatedSavedObjects } from './related_saved_objects';
+import { retryIfNotFound } from './retry_if_not_found';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -84,10 +86,17 @@ export class TaskRunnerFactory {
         const {
           attributes: { actionId, params, apiKey, relatedSavedObjects },
           references,
-        } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-          actionTaskParamsId,
-          { namespace }
+        } = await retryIfNotFound<SavedObject<ActionTaskParams>>(
+          logger,
+          `getDecryptedAsInternalUser by actionId:'${actionTaskParamsId} with attributes:${JSON.stringify(
+            ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE
+          )}')`,
+          async () =>
+            await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+              ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+              actionTaskParamsId,
+              { namespace }
+            )
         );
 
         const requestHeaders: Record<string, string> = {};
