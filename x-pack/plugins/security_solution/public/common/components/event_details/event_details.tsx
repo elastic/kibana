@@ -134,7 +134,6 @@ const EventDetailsComponent: React.FC<Props> = ({
                     eventId: id,
                     browserFields,
                     timelineId,
-                    title: i18n.ALERT_SUMMARY,
                   }}
                 />
                 {enrichmentsLoading && (
