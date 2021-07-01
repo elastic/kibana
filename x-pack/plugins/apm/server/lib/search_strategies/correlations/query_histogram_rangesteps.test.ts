@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import { getHistogramIntervalRequest } from './query_histogram_rangesteps';
+import type { estypes } from '@elastic/elasticsearch';
+
+import type { ElasticsearchClient } from 'src/core/server';
+
+import {
+  fetchTransactionDurationHistogramRangesteps,
+  getHistogramIntervalRequest,
+} from './query_histogram_rangesteps';
+
+const params = { index: 'apm-*' };
 
 describe('query_histogram_rangesteps', () => {
   describe('getHistogramIntervalRequest()', () => {
     it('returns the request body for the histogram interval request', () => {
-      const req = getHistogramIntervalRequest({ index: 'apm-*' });
+      const req = getHistogramIntervalRequest(params);
 
       expect(req).toEqual({
         body: {
@@ -39,8 +48,43 @@ describe('query_histogram_rangesteps', () => {
           },
           size: 0,
         },
-        index: 'apm-*',
+        index: params.index,
       });
+    });
+  });
+
+  describe('fetchTransactionDurationHistogramRangesteps()', () => {
+    it('fetches the range steps for the log histogram', async () => {
+      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
+        body: estypes.SearchResponse;
+      } => {
+        return {
+          body: ({
+            aggregations: {
+              transaction_duration_max: {
+                value: 10000,
+              },
+              transaction_duration_min: {
+                value: 10,
+              },
+            },
+          } as unknown) as estypes.SearchResponse,
+        };
+      });
+
+      const esClientMock = ({
+        search: esClientSearchMock,
+      } as unknown) as ElasticsearchClient;
+
+      const resp = await fetchTransactionDurationHistogramRangesteps(
+        esClientMock,
+        params
+      );
+
+      expect(resp.length).toEqual(100);
+      expect(resp[0]).toEqual(9.260965422132594);
+      expect(resp[99]).toEqual(18521.930844265193);
+      expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+
+import type { ElasticsearchClient } from 'src/core/server';
+
 import {
+  fetchTransactionDurationFieldCandidates,
   getRandomDocsRequest,
   hasPrefixToInclude,
   shouldBeExcluded,
 } from './query_field_candidates';
+
+const params = { index: 'apm-*' };
 
 describe('query_field_candidates', () => {
   describe('shouldBeExcluded()', () => {
@@ -38,7 +45,7 @@ describe('query_field_candidates', () => {
 
   describe('getRandomDocsRequest()', () => {
     it('returns the most basic request body for a sample of random documents', () => {
-      const req = getRandomDocsRequest({ index: 'apm-*' });
+      const req = getRandomDocsRequest(params);
 
       expect(req).toEqual({
         body: {
@@ -63,8 +70,81 @@ describe('query_field_candidates', () => {
           size: 1000,
           track_total_hits: true,
         },
-        index: 'apm-*',
+        index: params.index,
       });
+    });
+  });
+
+  describe('fetchTransactionDurationFieldCandidates()', () => {
+    it('returns field candidates and total hits', async () => {
+      const totalHits = 1234;
+
+      const esClientFieldCapsMock = jest.fn(() => ({
+        body: {
+          fields: {
+            myIpFieldName: { ip: {} },
+            myKeywordFieldName: { keyword: {} },
+            myUnpopulatedKeywordFieldName: { keyword: {} },
+            myNumericFieldName: { number: {} },
+          },
+        },
+      }));
+      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
+        body: estypes.SearchResponse;
+      } => {
+        return {
+          body: ({
+            hits: {
+              hits: [
+                {
+                  fields: {
+                    myIpFieldName: '1.1.1.1',
+                    myKeywordFieldName: 'myKeywordFieldValue',
+                    myNumericFieldName: 1234,
+                  },
+                },
+              ],
+              total: { value: totalHits },
+            },
+          } as unknown) as estypes.SearchResponse,
+        };
+      });
+
+      const esClientMock = ({
+        fieldCaps: esClientFieldCapsMock,
+        search: esClientSearchMock,
+      } as unknown) as ElasticsearchClient;
+
+      const resp = await fetchTransactionDurationFieldCandidates(
+        esClientMock,
+        params
+      );
+
+      expect(resp).toEqual({
+        fieldCandidates: [
+          // default field candidates
+          'service.version',
+          'service.node.name',
+          'service.framework.version',
+          'service.language.version',
+          'service.runtime.version',
+          'kubernetes.pod.name',
+          'kubernetes.pod.uid',
+          'container.id',
+          'source.ip',
+          'client.ip',
+          'host.ip',
+          'service.environment',
+          'process.args',
+          'http.response.status_code',
+          // field candidates identified by sample documents
+          'myIpFieldName',
+          'myKeywordFieldName',
+        ],
+        totalHits,
+      });
+      expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
+      expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });
 });

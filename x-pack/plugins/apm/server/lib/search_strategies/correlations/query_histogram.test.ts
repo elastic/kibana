@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { getTransactionDurationHistogramRequest } from './query_histogram';
+import type { estypes } from '@elastic/elasticsearch';
+
+import type { ElasticsearchClient } from 'src/core/server';
+
+import {
+  fetchTransactionDurationHistogram,
+  getTransactionDurationHistogramRequest,
+} from './query_histogram';
+
+const params = { index: 'apm-*' };
+const interval = 100;
 
 describe('query_histogram', () => {
-  describe('getHistogramIntervalRequest()', () => {
+  describe('getTransactionDurationHistogramRequest()', () => {
     it('returns the request body for the histogram request', () => {
-      const req = getTransactionDurationHistogramRequest(
-        { index: 'apm-*' },
-        100
-      );
+      const req = getTransactionDurationHistogramRequest(params, interval);
 
       expect(req).toEqual({
         body: {
@@ -21,7 +28,7 @@ describe('query_histogram', () => {
             transaction_duration_histogram: {
               histogram: {
                 field: 'transaction.duration.us',
-                interval: 100,
+                interval,
               },
             },
           },
@@ -40,6 +47,44 @@ describe('query_histogram', () => {
         },
         index: 'apm-*',
       });
+    });
+  });
+
+  describe('fetchTransactionDurationHistogram()', () => {
+    it('returns the buckets from the histogram aggregation', async () => {
+      const histogramBucket = [
+        {
+          key: 0.0,
+          doc_count: 1,
+        },
+      ];
+
+      const esClientSearchMock = jest.fn((req: estypes.SearchRequest): {
+        body: estypes.SearchResponse;
+      } => {
+        return {
+          body: ({
+            aggregations: {
+              transaction_duration_histogram: {
+                buckets: histogramBucket,
+              },
+            },
+          } as unknown) as estypes.SearchResponse,
+        };
+      });
+
+      const esClientMock = ({
+        search: esClientSearchMock,
+      } as unknown) as ElasticsearchClient;
+
+      const resp = await fetchTransactionDurationHistogram(
+        esClientMock,
+        params,
+        interval
+      );
+
+      expect(resp).toEqual(histogramBucket);
+      expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
   });
 });
