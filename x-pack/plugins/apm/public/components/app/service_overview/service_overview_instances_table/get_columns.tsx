@@ -98,7 +98,7 @@ export function getColumns({
     {
       field: 'latency',
       name: getLatencyColumnLabel(latencyAggregationType),
-      width: unit * 10,
+      width: `${unit * 10}px`,
       render: (_, { serviceNodeName, latency }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.latency;
@@ -123,7 +123,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
         { defaultMessage: 'Throughput' }
       ),
-      width: unit * 10,
+      width: `${unit * 10}px`,
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.throughput;
@@ -149,7 +149,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
         { defaultMessage: 'Error rate' }
       ),
-      width: unit * 8,
+      width: `${unit * 8}px`,
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.errorRate;
@@ -175,7 +175,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
         { defaultMessage: 'CPU usage (avg.)' }
       ),
-      width: unit * 8,
+      width: `${unit * 8}px`,
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
@@ -201,7 +201,7 @@ export function getColumns({
         'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
         { defaultMessage: 'Memory usage (avg.)' }
       ),
-      width: unit * 9,
+      width: `${unit * 9}px`,
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;

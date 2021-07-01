@@ -405,7 +405,7 @@ export function ServiceProfilingFlamegraph({
                     defaultMessage: 'Self',
                   }),
                   render: (_, item) => formatValue(item.value, valueUnit),
-                  width: unit * 6,
+                  width: `${unit * 6}px`,
                 },
               ]}
             />

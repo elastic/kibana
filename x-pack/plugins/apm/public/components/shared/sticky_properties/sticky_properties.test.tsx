@@ -35,7 +35,7 @@ describe('StickyProperties', () => {
       {
         label: 'User ID',
         fieldName: USER_ID,
-        val: 1337,
+        val: '1337',
       },
     ];
 
@@ -52,7 +52,7 @@ describe('StickyProperties', () => {
         {
           label: 'My Number',
           fieldName: 'myNumber',
-          val: 1337,
+          val: '1337',
         },
       ];
 
@@ -64,25 +64,6 @@ describe('StickyProperties', () => {
         .text();
 
       expect(wrapper).toEqual('1337');
-    });
-
-    it('should not stringify booleans', () => {
-      const stickyProperties = [
-        {
-          label: 'My boolean',
-          fieldName: 'myBoolean',
-          val: true,
-        },
-      ];
-
-      const wrapper = shallow(
-        <StickyProperties stickyProperties={stickyProperties} />
-      )
-        .find('PropertyValue')
-        .dive()
-        .text();
-
-      expect(wrapper).toEqual('');
     });
 
     it('should render nested components', () => {

@@ -61,7 +61,7 @@ export function getColumns({
       render: (_, { last_seen: lastSeen }) => {
         return <TimestampTooltip time={lastSeen} timeUnit="minutes" />;
       },
-      width: unit * 9,
+      width: `${unit * 9}px`,
     },
     {
       field: 'occurrences',
@@ -71,7 +71,7 @@ export function getColumns({
           defaultMessage: 'Occurrences',
         }
       ),
-      width: unit * 12,
+      width: `${unit * 12}px`,
       render: (_, { occurrences, group_id: errorGroupId }) => {
         const currentPeriodTimeseries =
           errorGroupDetailedStatistics?.currentPeriod?.[errorGroupId]
