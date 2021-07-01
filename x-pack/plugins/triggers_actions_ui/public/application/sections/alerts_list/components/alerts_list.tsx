@@ -8,6 +8,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { i18n } from '@kbn/i18n';
+import { asyncScheduler } from 'rxjs';
 import { capitalize, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
@@ -28,6 +29,8 @@ import {
   EuiText,
   EuiToolTip,
   EuiTableSortingType,
+  EuiSwitch,
+  EuiIcon,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -44,6 +47,8 @@ import {
   loadAlerts,
   loadAlertAggregations,
   loadAlertTypes,
+  disableAlert,
+  enableAlert,
   deleteAlerts,
 } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
@@ -308,7 +313,44 @@ export const AlertsList: React.FunctionComponent = () => {
     );
   };
 
+  const disabledLabel = i18n.translate(
+    'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.disabledLabel',
+    { defaultMessage: 'Disabled' }
+  );
+  const enabledLabel = i18n.translate(
+    'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.enabledLabel',
+    { defaultMessage: 'Active' }
+  );
+
   const alertsTableColumns = [
+    {
+      name: '',
+      width: '100px',
+      render(item: AlertTableItem) {
+        return (
+          <EuiSwitch
+            name="disable"
+            disabled={!item.isEditable || !item.enabledInLicense}
+            compressed
+            checked={item.enabled}
+            data-test-subj="disableSwitch"
+            onChange={async () => {
+              const enabled = !item.enabled;
+              asyncScheduler.schedule(async () => {
+                if (enabled) {
+                  await disableAlert({ http, id: item.id });
+                } else {
+                  await enableAlert({ http, id: item.id });
+                }
+                loadAlertsData();
+              }, 10);
+              // setIsDisabled(!item.enabled);
+            }}
+            label={!item.enabled ? disabledLabel : enabledLabel}
+          />
+        );
+      },
+    },
     {
       field: 'name',
       name: i18n.translate(
@@ -364,6 +406,16 @@ export const AlertsList: React.FunctionComponent = () => {
       },
     },
     {
+      field: 'alertType',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle',
+        { defaultMessage: 'Type' }
+      ),
+      sortable: false,
+      truncateText: true,
+      'data-test-subj': 'alertsTableCell-alertType',
+    },
+    {
       field: 'tagsText',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.tagsText',
@@ -371,6 +423,26 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       'data-test-subj': 'alertsTableCell-tagsText',
+    },
+    {
+      field: 'schedule',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.scheduleTitle',
+        { defaultMessage: 'Schedule' }
+      ),
+      render: (count: number, item: AlertTableItem) => {
+        return (
+          <>
+            <EuiIcon type="clock" />
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.alertsList.fixLicenseLink"
+              defaultMessage="10m"
+            />
+          </>
+        );
+      },
+      sortable: false,
+      'data-test-subj': 'alertsTableCell-actionsCount',
     },
     {
       field: 'actionsCount',
@@ -387,16 +459,6 @@ export const AlertsList: React.FunctionComponent = () => {
       },
       sortable: false,
       'data-test-subj': 'alertsTableCell-actionsCount',
-    },
-    {
-      field: 'alertType',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle',
-        { defaultMessage: 'Type' }
-      ),
-      sortable: false,
-      truncateText: true,
-      'data-test-subj': 'alertsTableCell-alertType',
     },
     {
       field: 'schedule.interval',
