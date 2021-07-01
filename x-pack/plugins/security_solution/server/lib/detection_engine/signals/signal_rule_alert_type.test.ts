@@ -193,6 +193,7 @@ describe('signal_rule_alert_type', () => {
       version,
       ml: mlMock,
       lists: listMock.createSetup(),
+      mergeStrategy: 'missingFields',
     });
   });
 

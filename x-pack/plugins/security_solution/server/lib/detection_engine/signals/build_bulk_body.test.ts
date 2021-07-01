@@ -38,7 +38,11 @@ describe('buildBulkBody', () => {
     const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     delete doc._source.source;
-    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
@@ -102,7 +106,11 @@ describe('buildBulkBody', () => {
       },
     };
     delete doc._source.source;
-    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
@@ -180,7 +188,11 @@ describe('buildBulkBody', () => {
       dataset: 'socket',
       kind: 'event',
     };
-    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
@@ -244,7 +256,11 @@ describe('buildBulkBody', () => {
       module: 'system',
       dataset: 'socket',
     };
-    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
@@ -305,7 +321,11 @@ describe('buildBulkBody', () => {
     doc._source.event = {
       kind: 'event',
     };
-    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(ruleSO, doc);
+    const fakeSignalSourceHit: SignalHitOptionalTimestamp = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields'
+    );
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: 'someValue' } = {
@@ -365,7 +385,11 @@ describe('buildBulkBody', () => {
         signal: 123,
       },
     } as unknown) as SignalSourceHit;
-    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(ruleSO, doc);
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields'
+    );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
       event: {
@@ -421,7 +445,11 @@ describe('buildBulkBody', () => {
         signal: { child_1: { child_2: 'nested data' } },
       },
     } as unknown) as SignalSourceHit;
-    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(ruleSO, doc);
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(
+      ruleSO,
+      doc,
+      'missingFields'
+    );
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
       event: {
@@ -645,7 +673,12 @@ describe('buildSignalFromEvent', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
     delete ancestor._source.source;
     const ruleSO = sampleRuleSO(getQueryRuleParams());
-    const signal: SignalHitOptionalTimestamp = buildSignalFromEvent(ancestor, ruleSO, true);
+    const signal: SignalHitOptionalTimestamp = buildSignalFromEvent(
+      ancestor,
+      ruleSO,
+      true,
+      'missingFields'
+    );
 
     // Timestamp will potentially always be different so remove it for the test
     delete signal['@timestamp'];
