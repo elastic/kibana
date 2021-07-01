@@ -83,7 +83,7 @@ Platform::
 Reporting::
 * Fixes too_long_frame_exception by passing scroll_id in the request body {kibana-pull}102972[#102972]
 Uptime::
-* Update to make sure env filter is being used {kibana-pull}102063[#102063]
+* Fixes environment filter in the User Experience app {kibana-pull}102063[#102063]
 
 [[release-notes-7.13.2]]
 == {kib} 7.13.2
