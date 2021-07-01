@@ -123,7 +123,7 @@ export const SetProcessor: FunctionComponent = () => {
   return (
     <>
       <EuiFlexGroup>
-        {!fields?.copy_from &&
+        {!fields?.copy_from && (
           <EuiFlexItem>
             <UseField
               config={fieldsConfig.value}
@@ -136,8 +136,8 @@ export const SetProcessor: FunctionComponent = () => {
               path="fields.value"
             />
           </EuiFlexItem>
-        }
-        {!fields?.value &&
+        )}
+        {!fields?.value && (
           <EuiFlexItem>
             <UseField
               config={fieldsConfig.copy_from}
@@ -146,7 +146,7 @@ export const SetProcessor: FunctionComponent = () => {
               data-test-subj="copyFromField"
             />
           </EuiFlexItem>
-        }
+        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />

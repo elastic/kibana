@@ -189,4 +189,6 @@ type TestSubject =
   | 'ianaField.input'
   | 'transportField.input'
   | 'seedField.input'
+  | 'copyFromField'
+  | 'copyFromField.input'
   | 'trimSwitch.input';

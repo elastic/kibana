@@ -87,6 +87,19 @@ describe('Processor: Set', () => {
     });
   });
 
+  test('allows to set either value or copy_From', async () => {
+    const { find, form } = testBed;
+
+    expect(find('valueFieldInput').exists()).toBe(true);
+    expect(find('copyFromField.input').exists()).toBe(true);
+
+    form.setInputValue('valueFieldInput', 'value');
+    expect(find('copyFromField').exists()).toBe(false);
+
+    form.setInputValue('valueFieldInput', '');
+    form.setInputValue('copyFromField.input', 'copy_from');
+    expect(find('valueFieldInput').exists()).toBe(false);
+  });
   test('should allow to set mediaType when value is a template snippet', async () => {
     const {
       actions: { saveNewProcessor },
