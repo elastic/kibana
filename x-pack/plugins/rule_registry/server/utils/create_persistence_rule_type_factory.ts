@@ -101,8 +101,7 @@ export const createPersistenceRuleTypeFactory: CreatePersistenceRuleTypeFactory 
       logger.debug(`Found ${numAlerts} alerts.`);
 
       if (ruleDataClient && numAlerts) {
-        const ruleDataClientWriter = await ruleDataClient.getWriter();
-        await ruleDataClientWriter.bulk({
+        await ruleDataClient.getWriter().bulk({
           body: currentAlerts.flatMap((event) => [{ index: {} }, event]),
         });
       }
