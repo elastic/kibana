@@ -24,4 +24,7 @@ export interface CanvasWorkpadService {
   find: (term: string) => Promise<WorkpadFindResponse>;
   remove: (id: string) => Promise<void>;
   findTemplates: () => Promise<TemplateFindResponse>;
+  update: (id: string, workpad: CanvasWorkpad) => Promise<void>;
+  updateWorkpad: (id: string, workpad: CanvasWorkpad) => Promise<void>;
+  updateAssets: (id: string, assets: CanvasWorkpad['assets']) => Promise<void>;
 }

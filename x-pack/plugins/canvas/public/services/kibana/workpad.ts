@@ -14,6 +14,8 @@ import {
   API_ROUTE_WORKPAD,
   DEFAULT_WORKPAD_CSS,
   API_ROUTE_TEMPLATES,
+  API_ROUTE_WORKPAD_ASSETS,
+  API_ROUTE_WORKPAD_STRUCTURES,
 } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
 
@@ -92,6 +94,21 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
     },
     remove: (id: string) => {
       return coreStart.http.delete(`${getApiPath()}/${id}`);
+    },
+    update: (id, workpad) => {
+      return coreStart.http.put(`${getApiPath()}/${id}`, {
+        body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
+      });
+    },
+    updateWorkpad: (id, workpad) => {
+      return coreStart.http.put(`${API_ROUTE_WORKPAD_STRUCTURES}/${id}`, {
+        body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
+      });
+    },
+    updateAssets: (id, assets) => {
+      return coreStart.http.put(`${API_ROUTE_WORKPAD_ASSETS}/${id}`, {
+        body: JSON.stringify(assets),
+      });
     },
   };
 };

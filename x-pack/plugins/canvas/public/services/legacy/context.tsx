@@ -27,14 +27,15 @@ const defaultContextValue = {
   search: {},
 };
 
-const context = createContext<CanvasServices>(defaultContextValue as CanvasServices);
+export const ServicesContext = createContext<CanvasServices>(defaultContextValue as CanvasServices);
 
-export const useServices = () => useContext(context);
+export const useServices = () => useContext(ServicesContext);
 export const usePlatformService = () => useServices().platform;
 export const useEmbeddablesService = () => useServices().embeddables;
 export const useExpressionsService = () => useServices().expressions;
 export const useNavLinkService = () => useServices().navLink;
 export const useLabsService = () => useServices().labs;
+export const useReportingService = () => useServices().reporting;
 
 export const withServices = <Props extends WithServicesProps>(type: ComponentType<Props>) => {
   const EnhancedType: FC<Props> = (props) =>
@@ -56,5 +57,5 @@ export const LegacyServicesProvider: FC<{
     reporting: specifiedProviders.reporting.getService(),
     labs: specifiedProviders.labs.getService(),
   };
-  return <context.Provider value={value}>{children}</context.Provider>;
+  return <ServicesContext.Provider value={value}>{children}</ServicesContext.Provider>;
 };

@@ -8,7 +8,13 @@
 import { RefObject } from 'react';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
 
-import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
+import {
+  ElementPosition,
+  CanvasPage,
+  CanvasWorkpad,
+  RendererSpec,
+  ExpressionRenderable,
+} from '../types';
 
 /**
  * Represents a Canvas Element whose expression has been evaluated and now
@@ -17,7 +23,7 @@ import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../typ
 export interface CanvasRenderedElement {
   id: string;
   position: ElementPosition;
-  expressionRenderable: CanvasRenderable;
+  expressionRenderable: ExpressionRenderable | undefined;
 }
 
 /**
@@ -32,7 +38,7 @@ export interface CanvasRenderedPage extends Omit<Omit<CanvasPage, 'elements'>, '
 /**
  * A Canvas Workpad made up of ready-to-render Elements.
  */
-export interface CanvasRenderedWorkpad extends Omit<CanvasWorkpad, 'pages'> {
+export interface CanvasRenderedWorkpad extends Omit<CanvasWorkpad, 'pages' | 'variables'> {
   pages: CanvasRenderedPage[];
 }
 
