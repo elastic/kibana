@@ -12,7 +12,7 @@ import { LinkPreview } from './link_preview';
 
 export default {
   title:
-    'app/settings/customize_ui/custom_link/create_edit_custom_link_flyout/LinkPreview',
+    'app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/LinkPreview',
   component: LinkPreview,
 };
 
