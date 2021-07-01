@@ -5,7 +5,14 @@
  * 2.0.
  */
 
+import { SignalSourceHit } from '../types';
+
 /**
  * A bit stricter typing since the default fields type is an "any"
  */
 export type FieldsType = string[] | number[] | boolean[] | object[];
+
+/**
+ * The type of the merge strategy functions which must implement to be part of the strategy group
+ */
+export type MergeStrategyFunction = ({ doc }: { doc: SignalSourceHit }) => SignalSourceHit;
