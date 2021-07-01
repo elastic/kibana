@@ -17,7 +17,7 @@ import { maxAgeUnits } from '../constants';
 
 export const MaxAgeField: FunctionComponent = () => {
   return (
-    <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+    <EuiFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <UseField
           path={ROLLOVER_FORM_PATHS.maxAge}

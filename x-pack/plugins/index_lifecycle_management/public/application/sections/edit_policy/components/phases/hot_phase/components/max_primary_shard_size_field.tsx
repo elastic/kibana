@@ -17,7 +17,7 @@ import { maxSizeStoredUnits } from '../constants';
 
 export const MaxPrimaryShardSizeField: FunctionComponent = () => {
   return (
-    <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+    <EuiFlexGroup alignItems="flexStart" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <UseField
           path={ROLLOVER_FORM_PATHS.maxPrimaryShardSize}
