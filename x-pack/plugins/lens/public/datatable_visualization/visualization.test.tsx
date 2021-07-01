@@ -7,7 +7,7 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
@@ -21,8 +21,6 @@ import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 function mockFrame(): FramePublicAPI {
   return {
     ...createMockFramePublicAPI(),
-    addNewLayer: () => 'aaa',
-    removeLayers: () => {},
     datasourceLayers: {},
     query: { query: '', language: 'lucene' },
     dateRange: {
@@ -40,7 +38,7 @@ const datatableVisualization = getDatatableVisualization({
 describe('Datatable Visualization', () => {
   describe('#initialize', () => {
     it('should initialize from the empty state', () => {
-      expect(datatableVisualization.initialize(mockFrame(), undefined)).toEqual({
+      expect(datatableVisualization.initialize(() => 'aaa', undefined)).toEqual({
         layerId: 'aaa',
         columns: [],
       });
@@ -51,7 +49,7 @@ describe('Datatable Visualization', () => {
         layerId: 'foo',
         columns: [{ columnId: 'saved' }],
       };
-      expect(datatableVisualization.initialize(mockFrame(), expectedState)).toEqual(expectedState);
+      expect(datatableVisualization.initialize(() => 'foo', expectedState)).toEqual(expectedState);
     });
   });
 
