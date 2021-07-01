@@ -8,10 +8,10 @@
 
 import type { CoreSetup } from 'src/core/public';
 import type { History } from 'history';
-import type { SerializableState } from 'src/plugins/kibana_utils/common';
-import { migrateToLatest } from 'src/plugins/kibana_utils/common';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { migrateToLatest } from '../../../../kibana_utils/common';
+import type { SerializableState } from '../../../../kibana_utils/common';
 import type { UrlService } from '../../../common/url_service';
 import { render } from './render';
 import { parseSearchParams } from './util/parse_search_params';
