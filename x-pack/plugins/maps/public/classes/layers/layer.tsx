@@ -36,6 +36,7 @@ import {
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  Timeslice,
 } from '../../../common/descriptor_types';
 import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
@@ -78,7 +79,7 @@ export interface ILayer {
   getMbLayerIds(): string[];
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
-  syncLayerWithMB(mbMap: MbMap): void;
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];

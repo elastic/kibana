@@ -43,7 +43,7 @@ export function SeriesDatePicker({ seriesId }: Props) {
     if (!series || !series.time) {
       setSeries(seriesId, { ...series, time: DEFAULT_TIME });
     }
-  }, [seriesId, series, setSeries]);
+  }, [series, seriesId, setSeries]);
 
   return (
     <EuiSuperDatePicker

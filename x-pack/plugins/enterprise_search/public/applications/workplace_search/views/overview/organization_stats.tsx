@@ -13,16 +13,13 @@ import { EuiFlexGrid, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AppLogic } from '../../app_logic';
 import { ContentSection } from '../../components/shared/content_section';
-import { SOURCES_PATH, USERS_PATH } from '../../routes';
+import { SOURCES_PATH, USERS_AND_ROLES_PATH } from '../../routes';
 
 import { OverviewLogic } from './overview_logic';
 import { StatisticCard } from './statistic_card';
 
 export const OrganizationStats: React.FC = () => {
-  const { isFederatedAuth } = useValues(AppLogic);
-
   const { sourcesCount, pendingInvitationsCount, accountsCount, personalSourcesCount } = useValues(
     OverviewLogic
   );
@@ -37,7 +34,7 @@ export const OrganizationStats: React.FC = () => {
       }
     >
       <EuiPanel color="subdued" hasShadow={false}>
-        <EuiFlexGrid columns={isFederatedAuth ? 2 : 4}>
+        <EuiFlexGrid columns={4}>
           <StatisticCard
             title={i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.organizationStats.sharedSources',
@@ -46,26 +43,22 @@ export const OrganizationStats: React.FC = () => {
             count={sourcesCount}
             actionPath={SOURCES_PATH}
           />
-          {!isFederatedAuth && (
-            <>
-              <StatisticCard
-                title={i18n.translate(
-                  'xpack.enterpriseSearch.workplaceSearch.organizationStats.invitations',
-                  { defaultMessage: 'Invitations' }
-                )}
-                count={pendingInvitationsCount}
-                actionPath={USERS_PATH}
-              />
-              <StatisticCard
-                title={i18n.translate(
-                  'xpack.enterpriseSearch.workplaceSearch.organizationStats.activeUsers',
-                  { defaultMessage: 'Active users' }
-                )}
-                count={accountsCount}
-                actionPath={USERS_PATH}
-              />
-            </>
-          )}
+          <StatisticCard
+            title={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.organizationStats.invitations',
+              { defaultMessage: 'Invitations' }
+            )}
+            count={pendingInvitationsCount}
+            actionPath={USERS_AND_ROLES_PATH}
+          />
+          <StatisticCard
+            title={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.organizationStats.activeUsers',
+              { defaultMessage: 'Active users' }
+            )}
+            count={accountsCount}
+            actionPath={USERS_AND_ROLES_PATH}
+          />
           <StatisticCard
             title={i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.organizationStats.privateSources',

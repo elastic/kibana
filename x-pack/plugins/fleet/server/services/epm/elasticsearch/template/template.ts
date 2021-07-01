@@ -16,7 +16,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
-import { FINAL_PIPELINE_ID } from '../ingest_pipeline/final_pipeline';
+import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
 
 interface Properties {
   [key: string]: any;
@@ -90,7 +90,11 @@ export function getTemplate({
   if (template.template.settings.index.final_pipeline) {
     throw new Error(`Error template for ${templateIndexPattern} contains a final_pipeline`);
   }
-  template.template.settings.index.final_pipeline = FINAL_PIPELINE_ID;
+
+  if (appContextService.getConfig()?.agentIdVerificationEnabled) {
+    // Add fleet global assets
+    template.composed_of = [...(template.composed_of || []), FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME];
+  }
 
   return template;
 }
@@ -144,6 +148,12 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
           fieldProps = { ...fieldProps, ...keywordMapping, type: 'keyword' };
           if (field.multi_fields) {
             fieldProps.fields = generateMultiFields(field.multi_fields);
+          }
+          break;
+        case 'constant_keyword':
+          fieldProps.type = field.type;
+          if (field.value) {
+            fieldProps.value = field.value;
           }
           break;
         case 'object':

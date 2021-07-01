@@ -8,10 +8,10 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../../public/application/sections/edit_policy/i18n_texts';
 import { setupEnvironment } from '../../helpers';
-import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> cold phase validation', () => {
-  let testBed: EditPolicyTestBed;
+  let testBed: ValidationTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
@@ -35,7 +35,7 @@ describe('<EditPolicy /> cold phase validation', () => {
     ]);
 
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupValidationTestBed();
     });
 
     const { component, actions } = testBed;

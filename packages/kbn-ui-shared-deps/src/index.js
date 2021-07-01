@@ -85,6 +85,8 @@ exports.externals = {
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
   '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.Theme.euiLightVars',
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
+  // transient dep of eui
+  'react-beautiful-dnd': '__kbnSharedDeps__.ReactBeautifulDnD',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
   fflate: '__kbnSharedDeps__.Fflate',

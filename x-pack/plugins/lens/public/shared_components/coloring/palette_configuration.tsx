@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import {
   EuiFormRow,
@@ -38,6 +38,17 @@ import {
   roundStopValues,
 } from './utils';
 const idPrefix = htmlIdGenerator()();
+
+const ContinuityOption: FC<{ iconType: string }> = ({ children, iconType }) => {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={iconType} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 /**
  * Some name conventions here:
@@ -141,41 +152,45 @@ export function CustomizablePalette({
             options={[
               {
                 value: 'above',
-                inputDisplay: i18n.translate(
-                  'xpack.lens.table.dynamicColoring.continuity.aboveLabel',
-                  {
-                    defaultMessage: 'Above range',
-                  }
+                inputDisplay: (
+                  <ContinuityOption iconType="continuityAbove">
+                    {i18n.translate('xpack.lens.table.dynamicColoring.continuity.aboveLabel', {
+                      defaultMessage: 'Above range',
+                    })}
+                  </ContinuityOption>
                 ),
                 'data-test-subj': 'continuity-above',
               },
               {
                 value: 'below',
-                inputDisplay: i18n.translate(
-                  'xpack.lens.table.dynamicColoring.continuity.belowLabel',
-                  {
-                    defaultMessage: 'Below range',
-                  }
+                inputDisplay: (
+                  <ContinuityOption iconType="continuityBelow">
+                    {i18n.translate('xpack.lens.table.dynamicColoring.continuity.belowLabel', {
+                      defaultMessage: 'Below range',
+                    })}
+                  </ContinuityOption>
                 ),
                 'data-test-subj': 'continuity-below',
               },
               {
                 value: 'all',
-                inputDisplay: i18n.translate(
-                  'xpack.lens.table.dynamicColoring.continuity.allLabel',
-                  {
-                    defaultMessage: 'Above and below range',
-                  }
+                inputDisplay: (
+                  <ContinuityOption iconType="continuityAboveBelow">
+                    {i18n.translate('xpack.lens.table.dynamicColoring.continuity.allLabel', {
+                      defaultMessage: 'Above and below range',
+                    })}
+                  </ContinuityOption>
                 ),
                 'data-test-subj': 'continuity-all',
               },
               {
                 value: 'none',
-                inputDisplay: i18n.translate(
-                  'xpack.lens.table.dynamicColoring.continuity.noneLabel',
-                  {
-                    defaultMessage: 'Within range',
-                  }
+                inputDisplay: (
+                  <ContinuityOption iconType="continuityWithin">
+                    {i18n.translate('xpack.lens.table.dynamicColoring.continuity.noneLabel', {
+                      defaultMessage: 'Within range',
+                    })}
+                  </ContinuityOption>
                 ),
                 'data-test-subj': 'continuity-none',
               },

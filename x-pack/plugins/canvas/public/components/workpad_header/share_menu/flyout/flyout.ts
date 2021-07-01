@@ -7,6 +7,8 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
+import { i18n } from '@kbn/i18n';
+
 import {
   getWorkpad,
   getRenderedWorkpad,
@@ -24,14 +26,35 @@ import { arrayBufferFetch } from '../../../../../common/lib/fetch';
 import { API_ROUTE_SHAREABLE_ZIP } from '../../../../../common/lib/constants';
 import { renderFunctionNames } from '../../../../../shareable_runtime/supported_renderers';
 
-import { ComponentStrings } from '../../../../../i18n/components';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public/';
 import { OnCloseFn } from '../share_menu.component';
+import { ZIP } from '../../../../../i18n/constants';
 import { WithKibanaProps } from '../../../../index';
 
 export { OnDownloadFn, OnCopyFn } from './flyout.component';
 
-const { WorkpadHeaderShareMenu: strings } = ComponentStrings;
+const strings = {
+  getCopyShareConfigMessage: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.copyShareConfigMessage', {
+      defaultMessage: 'Copied share markup to clipboard',
+    }),
+  getShareableZipErrorTitle: (workpadName: string) =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteErrorTitle', {
+      defaultMessage:
+        "Failed to create {ZIP} file for '{workpadName}'. The workpad may be too large. You'll need to download the files separately.",
+      values: {
+        ZIP,
+        workpadName,
+      },
+    }),
+  getUnknownExportErrorMessage: (type: string) =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.unknownExportErrorMessage', {
+      defaultMessage: 'Unknown export type: {type}',
+      values: {
+        type,
+      },
+    }),
+};
 
 const getUnsupportedRenderers = (state: State) => {
   const renderers: string[] = [];
