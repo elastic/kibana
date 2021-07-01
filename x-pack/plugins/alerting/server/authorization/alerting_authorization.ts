@@ -143,7 +143,7 @@ export class AlertingAuthorization {
    * used by the RAC/Alerts client
    */
   public async getAugmentRuleTypesWithAuthorization(
-    featureIds: string[],
+    featureIds: readonly string[],
     operations: Array<ReadOperations | WriteOperations>,
     authorizationEntity: AlertingAuthorizationEntity
   ): Promise<{

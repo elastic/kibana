@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
+import { validFeatureIds } from '../utils/rbac';
 
 export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
@@ -22,14 +23,9 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
       },
     },
     async (context, request, response) => {
-      const APM_SERVER_FEATURE_ID = 'apm';
-      const SERVER_APP_ID = 'siem';
       try {
         const alertsClient = await context.rac.getAlertsClient();
-        const indexName = await alertsClient.getAuthorizedAlertsIndices([
-          APM_SERVER_FEATURE_ID,
-          SERVER_APP_ID,
-        ]);
+        const indexName = await alertsClient.getAuthorizedAlertsIndices(validFeatureIds);
         return response.ok({
           body: { index_name: indexName },
         });
@@ -52,7 +48,6 @@ export const getAlertsIndexRoute = (router: IRouter<RacRequestHandlerContext>) =
             })
           ),
         });
-        // return response.custom;
       }
     }
   );

@@ -10,7 +10,6 @@
 - [authorization](constructoroptions.md#authorization)
 - [esClient](constructoroptions.md#esclient)
 - [logger](constructoroptions.md#logger)
-- [ruleDataService](constructoroptions.md#ruledataservice)
 
 ## Properties
 
@@ -20,7 +19,7 @@
 
 #### Defined in
 
-[alerts_client.ts:26](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L26)
+[rule_registry/server/alert_data_client/alerts_client.ts:34](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L34)
 
 ___
 
@@ -30,7 +29,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:25](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L25)
+[rule_registry/server/alert_data_client/alerts_client.ts:33](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L33)
 
 ___
 
@@ -40,7 +39,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:27](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L27)
+[rule_registry/server/alert_data_client/alerts_client.ts:35](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L35)
 
 ___
 
@@ -50,14 +49,4 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:24](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L24)
-
-___
-
-### ruleDataService
-
-• **ruleDataService**: `PublicMethodsOf`<RuleDataPluginService\>
-
-#### Defined in
-
-[alerts_client.ts:28](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L28)
+[rule_registry/server/alert_data_client/alerts_client.ts:32](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L32)

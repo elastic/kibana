@@ -12,25 +12,20 @@
 
 ### Properties
 
-- [data](updateoptions.md#data)
+- [\_version](updateoptions.md#_version)
 - [id](updateoptions.md#id)
-- [indexName](updateoptions.md#indexname)
+- [index](updateoptions.md#index)
+- [status](updateoptions.md#status)
 
 ## Properties
 
-### data
+### \_version
 
-• **data**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `status` | `string` |
+• **\_version**: `undefined` \| `string`
 
 #### Defined in
 
-[alerts_client.ts:33](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L33)
+[rule_registry/server/alert_data_client/alerts_client.ts:41](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L41)
 
 ___
 
@@ -40,14 +35,24 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:32](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L32)
+[rule_registry/server/alert_data_client/alerts_client.ts:39](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L39)
 
 ___
 
-### indexName
+### index
 
-• **indexName**: `string`
+• **index**: `string`
 
 #### Defined in
 
-[alerts_client.ts:37](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L37)
+[rule_registry/server/alert_data_client/alerts_client.ts:42](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L42)
+
+___
+
+### status
+
+• **status**: `string`
+
+#### Defined in
+
+[rule_registry/server/alert_data_client/alerts_client.ts:40](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L40)

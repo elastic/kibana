@@ -18,14 +18,13 @@ on alerts as data.
 - [authorization](alertsclient.md#authorization)
 - [esClient](alertsclient.md#esclient)
 - [logger](alertsclient.md#logger)
-- [ruleDataService](alertsclient.md#ruledataservice)
 
 ### Methods
 
 - [fetchAlert](alertsclient.md#fetchalert)
 - [get](alertsclient.md#get)
 - [getAlertsIndex](alertsclient.md#getalertsindex)
-- [getFullAssetName](alertsclient.md#getfullassetname)
+- [getAuthorizedAlertsIndices](alertsclient.md#getauthorizedalertsindices)
 - [update](alertsclient.md#update)
 
 ## Constructors
@@ -42,7 +41,7 @@ on alerts as data.
 
 #### Defined in
 
-[alerts_client.ts:56](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L56)
+[rule_registry/server/alert_data_client/alerts_client.ts:59](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L59)
 
 ## Properties
 
@@ -52,7 +51,7 @@ on alerts as data.
 
 #### Defined in
 
-[alerts_client.ts:53](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L53)
+[rule_registry/server/alert_data_client/alerts_client.ts:57](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L57)
 
 ___
 
@@ -62,7 +61,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:54](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L54)
+[rule_registry/server/alert_data_client/alerts_client.ts:58](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L58)
 
 ___
 
@@ -72,7 +71,7 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:55](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L55)
+[rule_registry/server/alert_data_client/alerts_client.ts:59](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L59)
 
 ___
 
@@ -82,23 +81,13 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:52](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L52)
-
-___
-
-### ruleDataService
-
-• `Private` `Readonly` **ruleDataService**: `PublicMethodsOf`<RuleDataPluginService\>
-
-#### Defined in
-
-[alerts_client.ts:56](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L56)
+[rule_registry/server/alert_data_client/alerts_client.ts:56](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L56)
 
 ## Methods
 
 ### fetchAlert
 
-▸ `Private` **fetchAlert**(`__namedParameters`): `Promise`<OutputOf<SetOptional<`Object`\>\>\>
+▸ `Private` **fetchAlert**(`__namedParameters`): `Promise`<AlertType\>
 
 #### Parameters
 
@@ -108,11 +97,11 @@ ___
 
 #### Returns
 
-`Promise`<OutputOf<SetOptional<`Object`\>\>\>
+`Promise`<AlertType\>
 
 #### Defined in
 
-[alerts_client.ts:83](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L83)
+[rule_registry/server/alert_data_client/alerts_client.ts:79](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L79)
 
 ___
 
@@ -132,13 +121,34 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:108](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L108)
+[rule_registry/server/alert_data_client/alerts_client.ts:108](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L108)
 
 ___
 
 ### getAlertsIndex
 
-▸ **getAlertsIndex**(`featureIds`): `Promise`<undefined \| string[]\>
+▸ **getAlertsIndex**(`featureIds`, `operations`): `Promise`<`Object`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `featureIds` | `string`[] |
+| `operations` | (`ReadOperations` \| `WriteOperations`)[] |
+
+#### Returns
+
+`Promise`<`Object`\>
+
+#### Defined in
+
+[rule_registry/server/alert_data_client/alerts_client.ts:68](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L68)
+
+___
+
+### getAuthorizedAlertsIndices
+
+▸ **getAuthorizedAlertsIndices**(`featureIds`): `Promise`<undefined \| string[]\>
 
 #### Parameters
 
@@ -152,27 +162,13 @@ ___
 
 #### Defined in
 
-[alerts_client.ts:76](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L76)
-
-___
-
-### getFullAssetName
-
-▸ **getFullAssetName**(): `string`
-
-#### Returns
-
-`string`
-
-#### Defined in
-
-[alerts_client.ts:72](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L72)
+[rule_registry/server/alert_data_client/alerts_client.ts:200](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L200)
 
 ___
 
 ### update
 
-▸ **update**<Params\>(`__namedParameters`): `Promise`<undefined \| ``null`` \| OutputOf<SetOptional<`Object`\>\>\>
+▸ **update**<Params\>(`__namedParameters`): `Promise`<`Object`\>
 
 #### Type parameters
 
@@ -188,8 +184,8 @@ ___
 
 #### Returns
 
-`Promise`<undefined \| ``null`` \| OutputOf<SetOptional<`Object`\>\>\>
+`Promise`<`Object`\>
 
 #### Defined in
 
-[alerts_client.ts:146](https://github.com/dhurley14/kibana/blob/25bf227f8c6/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L146)
+[rule_registry/server/alert_data_client/alerts_client.ts:146](https://github.com/dhurley14/kibana/blob/d2173f5090e/x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts#L146)
