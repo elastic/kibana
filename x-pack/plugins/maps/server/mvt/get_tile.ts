@@ -307,7 +307,6 @@ export async function getTile({
         )
         .toPromise();
 
-      // Todo: pass in epochMillies-fields
       const featureCollection = hitsToGeoJson(
         // @ts-expect-error hitsToGeoJson should be refactored to accept estypes.SearchHit
         documentsResponse.rawResponse.hits.hits,
@@ -330,6 +329,36 @@ export async function getTile({
       }
 
       const counts = countVectorShapeTypes(features);
+
+      const fieldNames = new Set<string>();
+      features.forEach((feature) => {
+        for (const key in feature.properties) {
+          if (feature.properties.hasOwnProperty(key) && key !== 'key' && key !== 'gridCentroid') {
+            fieldNames.add(key);
+          }
+        }
+      });
+
+      const fieldMeta: FieldMeta = {};
+      fieldNames.forEach((fieldName: string) => {
+        const rangeMeta = pluckRangeFieldMeta(features, fieldName, (rawValue: unknown) => {
+          return typeof rawValue === 'number' ? rawValue : NaN;
+        });
+        const categoryMeta = pluckCategoryFieldMeta(features, fieldName, 20);
+
+        if (!fieldMeta[fieldName]) {
+          fieldMeta[fieldName] = {};
+        }
+
+        if (rangeMeta) {
+          fieldMeta[fieldName].range = rangeMeta;
+        }
+
+        if (categoryMeta) {
+          fieldMeta[fieldName].categories = categoryMeta;
+        }
+      });
+
       const metadataFeature: TileMetaFeature = {
         type: 'Feature',
         properties: {
@@ -337,6 +366,7 @@ export async function getTile({
           [KBN_IS_TILE_COMPLETE]: true,
           [KBN_VECTOR_SHAPE_TYPE_COUNTS]: counts,
           [KBN_FEATURE_COUNT]: features.length,
+          fieldMeta,
         },
         geometry: esBboxToGeoJsonPolygon(tileToESBbox(x, y, z), tileToESBbox(x, y, z)),
       };
