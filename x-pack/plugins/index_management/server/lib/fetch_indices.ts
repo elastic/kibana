@@ -76,8 +76,13 @@ async function fetchIndicesCall(
     query: catQuery,
   });
 
+  // System indices may show up in _cat APIs, as these APIs are primarily used for troubleshooting
+  // For now, we filter them out and only return index information for the indices we have
+  // In the future, we should migrate away from using cat APIs (https://github.com/elastic/kibana/issues/57286)
+  const filteredCatHits = catHits.filter((hit) => typeof indices[hit.index] !== 'undefined');
+
   // The two responses should be equal in the number of indices returned
-  return catHits.map((hit) => {
+  return filteredCatHits.map((hit) => {
     const index = indices[hit.index];
     const aliases = Object.keys(index.aliases);
 
