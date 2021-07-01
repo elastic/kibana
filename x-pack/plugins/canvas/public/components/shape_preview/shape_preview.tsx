@@ -26,16 +26,12 @@ export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
   }
 
   function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
-    let { minX, minY, width, height } = defaultViewBox;
-    minX -= defaultWidth / 2;
-    minY -= defaultWidth / 2;
-    width += defaultWidth;
-    height += defaultWidth;
+    const { minX, minY, width, height } = defaultViewBox;
     return {
-      minX,
-      minY,
-      width,
-      height,
+      minX: minX - defaultWidth / 2,
+      minY: minY - defaultWidth / 2,
+      width: width + defaultWidth,
+      height: height + defaultWidth,
     };
   }
 
