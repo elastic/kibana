@@ -35,7 +35,8 @@ export type TileMetaFeature = Feature & {
     __kbn_is_tile_complete__: boolean;
     __kbn_feature_count__: number;
     __kbn_vector_shape_type_counts__: VectorShapeTypeCounts;
-  } & FieldMeta;
+    fieldMeta?: FieldMeta;
+  };
 };
 
 export type LayerDescriptor = {

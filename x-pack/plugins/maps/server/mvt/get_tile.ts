@@ -165,7 +165,7 @@ export async function getGridTile({
                   [VECTOR_SHAPE_TYPE.LINE]: 0,
                   [VECTOR_SHAPE_TYPE.POLYGON]: 0,
                 },
-          ...fieldMeta,
+          fieldMeta,
         },
         geometry: bounds,
       };

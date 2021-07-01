@@ -9,7 +9,6 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
-import { Feature } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
 import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
 import {
@@ -64,6 +63,7 @@ import {
   StyleMetaDescriptor,
   StylePropertyField,
   StylePropertyOptions,
+  TileMetaFeature,
   VectorStyleDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../common/descriptor_types';
@@ -489,7 +489,7 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  async pluckStyleMetaFromTileMeta(metaFeatures: Feature[]): Promise<StyleMetaDescriptor> {
+  async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
     const styleMeta = {
       geometryTypes: {
         isPointsOnly: false,
@@ -514,11 +514,10 @@ export class VectorStyle implements IVectorStyle {
       let min = Infinity;
       let max = -Infinity;
       for (let i = 0; i < metaFeatures.length; i++) {
-        const properties = metaFeatures[i].properties;
-        if (properties && properties[name] && properties[name].range) {
-          const metaFromTile = properties[name];
-          min = Math.min(metaFromTile.range.min, min);
-          max = Math.max(metaFromTile.range.max, max);
+        const fieldMeta = metaFeatures[i].properties.fieldMeta;
+        if (fieldMeta && fieldMeta[name] && fieldMeta[name].range) {
+          min = Math.min(fieldMeta[name].range?.min as number, min);
+          max = Math.max(fieldMeta[name].range?.max as number, max);
         }
       }
 
