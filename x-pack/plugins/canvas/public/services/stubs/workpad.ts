@@ -96,4 +96,7 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
   createFromTemplate: (_templateId: string) => Promise.resolve(getDefaultWorkpad()),
   find: findNoWorkpads(),
   remove: (_id: string) => Promise.resolve(),
+  update: (id, workpad) => Promise.resolve(),
+  updateWorkpad: (id, workpad) => Promise.resolve(),
+  updateAssets: (id, assets) => Promise.resolve(),
 });
