@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderWithTheme } from '../../../utils/testHelpers';
-import { LibraryStacktrace } from './LibraryStacktrace';
+import { LibraryStacktrace } from './library_stacktrace';
 
 describe('LibraryStacktrace', () => {
   describe('render', () => {

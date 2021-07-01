@@ -29,7 +29,7 @@ import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import { Summary } from '../../../shared/Summary';
-import { HttpInfoSummaryItem } from '../../../shared/Summary/HttpInfoSummaryItem';
+import { HttpInfoSummaryItem } from '../../../shared/Summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/Summary/UserAgentSummaryItem';
 import { TimestampTooltip } from '../../../shared/TimestampTooltip';
 import {

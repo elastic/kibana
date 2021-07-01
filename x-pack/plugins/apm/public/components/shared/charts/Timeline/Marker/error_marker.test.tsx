@@ -15,7 +15,7 @@ import {
   renderWithTheme,
 } from '../../../../../utils/testHelpers';
 import { ErrorMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
-import { ErrorMarker } from './ErrorMarker';
+import { ErrorMarker } from './error_marker';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

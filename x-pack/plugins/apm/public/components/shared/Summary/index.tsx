@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { Maybe } from '../../../../typings/common';
 

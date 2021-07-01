@@ -10,9 +10,9 @@ import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from './';
 import { TimestampTooltip } from '../TimestampTooltip';
 import { DurationSummaryItem } from './DurationSummaryItem';
-import { ErrorCountSummaryItemBadge } from './ErrorCountSummaryItemBadge';
+import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
 import { isRumAgentName } from '../../../../common/agent_name';
-import { HttpInfoSummaryItem } from './HttpInfoSummaryItem';
+import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './TransactionResultSummaryItem';
 import { UserAgentSummaryItem } from './UserAgentSummaryItem';
 

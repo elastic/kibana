@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
+import React, { useState } from 'react';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { asDuration } from '../../../../../../common/utils/formatters';
-import { useTheme } from '../../../../../hooks/use_theme';
 import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../../../common/elasticsearch_fieldnames';
+import { asDuration } from '../../../../../../common/utils/formatters';
 import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { px } from '../../../../../style/variables';
+import { useTheme } from '../../../../../hooks/use_theme';
 import { ErrorMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
-import { Legend, Shape } from '../../Legend';
+import { Legend, Shape } from '../legend';
 
 interface Props {
   mark: ErrorMark;

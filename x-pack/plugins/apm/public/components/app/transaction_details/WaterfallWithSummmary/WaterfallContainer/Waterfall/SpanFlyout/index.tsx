@@ -32,7 +32,7 @@ import { Stacktrace } from '../../../../../../shared/Stacktrace';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
 import { StickySpanProperties } from './StickySpanProperties';
-import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/HttpInfoSummaryItem';
+import { HttpInfoSummaryItem } from '../../../../../../shared/Summary/http_info_summary_item';
 import { SpanMetadata } from '../../../../../../shared/MetadataTable/SpanMetadata';
 import { SyncBadge } from '../SyncBadge';
 

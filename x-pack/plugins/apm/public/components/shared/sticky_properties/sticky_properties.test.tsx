@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { StickyProperties } from './index';
+import { StickyProperties } from '.';
 import { shallow } from 'enzyme';
 import { USER_ID, URL_FULL } from '../../../../common/elasticsearch_fieldnames';
 import { mockMoment } from '../../../utils/testHelpers';

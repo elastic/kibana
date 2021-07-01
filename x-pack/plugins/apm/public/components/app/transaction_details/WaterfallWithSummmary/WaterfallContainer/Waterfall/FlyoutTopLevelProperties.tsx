@@ -16,7 +16,7 @@ import {
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview_link';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
-import { StickyProperties } from '../../../../../shared/StickyProperties';
+import { StickyProperties } from '../../../../../shared/sticky_properties';
 
 interface Props {
   transaction?: Transaction;

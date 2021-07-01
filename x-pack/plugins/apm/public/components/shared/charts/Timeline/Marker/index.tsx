@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { px } from '../../../../../style/variables';
-import { AgentMarker } from './AgentMarker';
-import { ErrorMarker } from './ErrorMarker';
 import { AgentMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 import { ErrorMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
+import { AgentMarker } from './agent_marker';
+import { ErrorMarker } from './error_marker';
 
 interface Props {
   mark: ErrorMark | AgentMark;

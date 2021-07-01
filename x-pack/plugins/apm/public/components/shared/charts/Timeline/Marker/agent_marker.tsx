@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
+import React from 'react';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/use_theme';
-import { Legend } from '../../Legend';
 import { AgentMark } from '../../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
+import { Legend } from '../legend';
 
 const NameContainer = euiStyled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};

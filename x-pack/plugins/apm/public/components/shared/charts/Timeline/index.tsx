@@ -8,11 +8,11 @@
 import PropTypes from 'prop-types';
 import React, { PureComponent, ReactNode } from 'react';
 import { makeWidthFlexible } from 'react-vis';
-import { getPlotValues } from './plotUtils';
-import { TimelineAxis } from './TimelineAxis';
-import { VerticalLines } from './VerticalLines';
-import { ErrorMark } from '../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
 import { AgentMark } from '../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
+import { ErrorMark } from '../../../app/transaction_details/WaterfallWithSummmary/WaterfallContainer/Marks/get_error_marks';
+import { getPlotValues } from './plotUtils';
+import { TimelineAxis } from './timeline_axis';
+import { VerticalLines } from './VerticalLines';
 
 export type Mark = AgentMark | ErrorMark;
 

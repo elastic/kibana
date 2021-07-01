@@ -13,9 +13,8 @@ import {
   StackframeWithLineContext,
 } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { Context } from './Context';
-import { FrameHeading } from './FrameHeading';
+import { FrameHeading } from './frame_heading';
 import { Variables } from './Variables';
-import { px } from '../../../style/variables';
 
 const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
   position: relative;

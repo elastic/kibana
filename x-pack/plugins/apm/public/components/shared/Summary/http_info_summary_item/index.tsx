@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiToolTip, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { px, truncate, unit } from '../../../../style/variables';
+import { truncate, unit } from '../../../../style/variables';
 import { HttpStatusBadge } from '../HttpStatusBadge';
 
 const HttpInfoBadge = euiStyled(EuiBadge)`

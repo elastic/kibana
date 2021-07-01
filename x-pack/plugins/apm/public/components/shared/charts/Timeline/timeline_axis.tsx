@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
 import { inRange } from 'lodash';
+import React, { ReactNode } from 'react';
 import { XAxis, XYPlot } from 'react-vis';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { px } from '../../../../style/variables';
 import { Mark } from './';
 import { LastTickValue } from './LastTickValue';
 import { Marker } from './Marker';

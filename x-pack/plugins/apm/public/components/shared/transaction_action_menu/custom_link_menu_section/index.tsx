@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
 import {
-  EuiText,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiButtonEmpty,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { EuiToolTip } from '@elastic/eui';
-import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import React, { useMemo, useState } from 'react';
 import {
   ActionMenuDivider,
   Section,
   SectionSubtitle,
   SectionTitle,
 } from '../../../../../../observability/public';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { CustomLinkList } from './CustomLinkList';
-import { CustomLinkToolbar } from './CustomLinkToolbar';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { LoadingStatePrompt } from '../../LoadingStatePrompt';
-import { px } from '../../../../style/variables';
-import { CreateEditCustomLinkFlyout } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout';
-import { convertFiltersToQuery } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/helper';
+import { NO_PERMISSION_LABEL } from '../../../../../common/custom_link';
 import {
   CustomLink,
   Filter,
 } from '../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { CreateEditCustomLinkFlyout } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout';
+import { convertFiltersToQuery } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/helper';
+import { LoadingStatePrompt } from '../../LoadingStatePrompt';
+import { CustomLinkToolbar } from './CustomLinkToolbar';
+import { CustomLinkList } from './custom_link_list';
 
 const DEFAULT_LINKS_TO_SHOW = 3;
 

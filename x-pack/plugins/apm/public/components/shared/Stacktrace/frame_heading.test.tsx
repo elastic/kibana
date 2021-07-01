@@ -8,7 +8,7 @@
 import React from 'react';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import { renderWithTheme } from '../../../utils/testHelpers';
-import { FrameHeading } from './FrameHeading';
+import { FrameHeading } from './frame_heading';
 
 function getRenderedStackframeText(
   stackframe: Stackframe,

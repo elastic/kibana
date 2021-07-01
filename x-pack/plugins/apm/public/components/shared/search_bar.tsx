@@ -19,7 +19,6 @@ import { enableInspectEsQueries } from '../../../../observability/public';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { useKibanaUrl } from '../../hooks/useKibanaUrl';
 import { useBreakPoints } from '../../hooks/use_break_points';
-import { px } from '../../style/variables';
 import { DatePicker } from './DatePicker';
 import { KueryBar } from './KueryBar';
 import { TimeComparison } from './time_comparison';

@@ -22,7 +22,7 @@ import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
-import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
+import { TransactionActionMenu } from '../../../shared/transaction_action_menu/TransactionActionMenu';
 import { MaybeViewTraceLink } from './MaybeViewTraceLink';
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';

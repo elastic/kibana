@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiTracker } from '../../../../../observability/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { useUiTracker } from '../../../../../observability/public';
 import { getDateDifference } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import * as urlHelpers from '../../shared/Links/url_helpers';
 import { useBreakPoints } from '../../../hooks/use_break_points';
+import * as urlHelpers from '../../shared/Links/url_helpers';
 import {
   getTimeRangeComparison,
   TimeRangeComparisonType,

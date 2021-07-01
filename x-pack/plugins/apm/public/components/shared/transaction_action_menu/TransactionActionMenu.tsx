@@ -22,7 +22,7 @@ import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { CustomLinkMenuSection } from './CustomLinkMenuSection';
+import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 
 interface Props {

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render } from '@testing-library/react';
-import { CustomLinkList } from './CustomLinkList';
+import React from 'react';
+import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/testHelpers';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
+import { CustomLinkList } from './custom_link_list';
 
 describe('CustomLinkList', () => {
   const customLinks = [

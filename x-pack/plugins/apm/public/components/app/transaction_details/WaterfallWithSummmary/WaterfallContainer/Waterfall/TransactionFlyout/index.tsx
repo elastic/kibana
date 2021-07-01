@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { TransactionActionMenu } from '../../../../../../shared/TransactionActionMenu/TransactionActionMenu';
+import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/TransactionActionMenu';
 import { TransactionSummary } from '../../../../../../shared/Summary/TransactionSummary';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
