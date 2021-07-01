@@ -20,8 +20,6 @@ import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
 import { IlmPolicyManager } from './ilm_policy_manager';
 
-import { reportingIlmPolicy } from './report_ilm_policy';
-
 /*
  * When an instance of Kibana claims a report job, this information tells us about that instance
  */
@@ -140,11 +138,7 @@ export class ReportingStore {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
             lifecycle: {
-<<<<<<< HEAD
               name: ILM_POLICY_NAME,
-=======
-              name: this.ilmPolicyName,
->>>>>>> 398d3fdd5caa955e6229304c29fb52b9e733c56b
             },
           },
           mappings: {
@@ -200,30 +194,11 @@ export class ReportingStore {
     return client.indices.refresh({ index });
   }
 
-<<<<<<< HEAD
-=======
-  private readonly ilmPolicyName = 'kibana-reporting';
-
-  private async doesIlmPolicyExist(): Promise<boolean> {
-    const client = await this.getClient();
-    try {
-      await client.ilm.getLifecycle({ policy: this.ilmPolicyName });
-      return true;
-    } catch (e) {
-      if (e.statusCode === 404) {
-        return false;
-      }
-      throw e;
-    }
-  }
-
->>>>>>> 398d3fdd5caa955e6229304c29fb52b9e733c56b
   /**
    * Function to be called during plugin start phase. This ensures the environment is correctly
    * configured for storage of reports.
    */
   public async start() {
-<<<<<<< HEAD
     const ilmPolicyManager = await this.getIlmPolicyManager();
     try {
       if (await ilmPolicyManager.doesIlmPolicyExist()) {
@@ -232,19 +207,6 @@ export class ReportingStore {
       }
       this.logger.info(`Creating ILM policy for managing reporting indices: ${ILM_POLICY_NAME}`);
       await ilmPolicyManager.createIlmPolicy();
-=======
-    const client = await this.getClient();
-    try {
-      if (await this.doesIlmPolicyExist()) {
-        this.logger.debug(`Found ILM policy ${this.ilmPolicyName}; skipping creation.`);
-        return;
-      }
-      this.logger.info(`Creating ILM policy for managing reporting indices: ${this.ilmPolicyName}`);
-      await client.ilm.putLifecycle({
-        policy: this.ilmPolicyName,
-        body: reportingIlmPolicy,
-      });
->>>>>>> 398d3fdd5caa955e6229304c29fb52b9e733c56b
     } catch (e) {
       this.logger.error('Error in start phase');
       this.logger.error(e.body.error);
