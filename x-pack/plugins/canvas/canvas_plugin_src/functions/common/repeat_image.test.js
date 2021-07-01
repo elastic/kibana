@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
-import { elasticOutline } from '../../lib/elastic_outline';
-import { elasticLogo } from '../../lib/elastic_logo';
+import {
+  elasticLogo,
+  elasticOutline,
+  functionWrapper,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 import { repeatImage } from './repeat_image';
 
 describe('repeatImage', () => {
