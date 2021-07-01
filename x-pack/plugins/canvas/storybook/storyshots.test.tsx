@@ -118,7 +118,7 @@ addSerializer(styleSheetSerializer);
 initStoryshots({
   configPath: path.resolve(__dirname),
   framework: 'react',
-  test: multiSnapshotWithOptions({}),
+  test: multiSnapshotWithOptions(),
   // Don't snapshot tests that start with 'redux'
   storyNameRegex: /^((?!.*?redux).)*$/,
 });
