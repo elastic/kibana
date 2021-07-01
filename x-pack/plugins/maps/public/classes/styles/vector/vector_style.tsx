@@ -16,13 +16,14 @@ import {
   FIELD_ORIGIN,
   GEO_JSON_TYPE,
   KBN_IS_CENTROID_FEATURE,
+  KBN_VECTOR_SHAPE_TYPE_COUNTS,
   LAYER_STYLE_TYPE,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { StyleMetaFromLocal } from './style_meta';
+import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { isOnlySingleFeatureType } from './style_util';
@@ -75,6 +76,7 @@ import { IVectorLayer } from '../../layers/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
 import { createStyleFieldsHelper, StyleFieldsHelper } from './style_fields_helper';
 import { IESAggField } from '../../fields/agg';
+import { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -84,7 +86,7 @@ export interface IVectorStyle extends IStyle {
   getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>>;
   getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
   getSourceFieldNames(): string[];
-  getStyleMetaFromLocal(): StyleMetaFromLocal;
+  getStyleMeta(): StyleMeta;
   getDescriptorWithUpdatedStyleProps(
     nextFields: IField[],
     previousFields: IField[],
@@ -146,7 +148,7 @@ export class VectorStyle implements IVectorStyle {
   private readonly _descriptor: VectorStyleDescriptor;
   private readonly _layer: IVectorLayer;
   private readonly _source: IVectorSource;
-  private readonly _styleMeta: StyleMetaFromLocal;
+  private readonly _styleMeta: StyleMeta;
 
   private readonly _symbolizeAsStyleProperty: SymbolizeAsProperty;
   private readonly _lineColorStyleProperty: StaticColorProperty | DynamicColorProperty;
@@ -191,7 +193,7 @@ export class VectorStyle implements IVectorStyle {
         }
       : VectorStyle.createDescriptor();
 
-    this._styleMeta = new StyleMetaFromLocal(this._descriptor.__styleMeta);
+    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
 
     this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
       this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
@@ -490,14 +492,53 @@ export class VectorStyle implements IVectorStyle {
   }
 
   async pluckStyleMetaFromTileMeta(metaFeatures: TileMetaFeature[]): Promise<StyleMetaDescriptor> {
-    const styleMeta = {
+    const shapeTypeCountMeta: VectorShapeTypeCounts = metaFeatures.reduce(
+      (accumulator: VectorShapeTypeCounts, tileMeta: TileMetaFeature) => {
+        if (
+          !tileMeta ||
+          !tileMeta.properties ||
+          !tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]
+        ) {
+          return accumulator;
+        }
+
+        accumulator[VECTOR_SHAPE_TYPE.POINT] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POINT];
+        accumulator[VECTOR_SHAPE_TYPE.LINE] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.LINE];
+        accumulator[VECTOR_SHAPE_TYPE.POLYGON] +=
+          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POLYGON];
+
+        return accumulator;
+      },
+      {
+        [VECTOR_SHAPE_TYPE.POLYGON]: 0,
+        [VECTOR_SHAPE_TYPE.LINE]: 0,
+        [VECTOR_SHAPE_TYPE.POINT]: 0,
+      }
+    );
+
+    const isLinesOnly =
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] > 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
+    const isPointsOnly =
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
+    const isPolygonsOnly =
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
+      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] > 0;
+
+    const styleMeta: StyleMetaDescriptor = {
       geometryTypes: {
-        isPointsOnly: false,
-        isLinesOnly: false,
-        isPolygonsOnly: false,
+        isPointsOnly,
+        isLinesOnly,
+        isPolygonsOnly,
       },
       fieldMeta: {},
-    } as StyleMetaDescriptor;
+    };
 
     const dynamicProperties = this.getDynamicPropertiesArray();
     if (dynamicProperties.length === 0 || !metaFeatures) {
@@ -657,7 +698,7 @@ export class VectorStyle implements IVectorStyle {
     });
   }
 
-  getStyleMetaFromLocal() {
+  getStyleMeta() {
     return this._styleMeta;
   }
 

@@ -19,10 +19,8 @@ import {
   KBN_FEATURE_COUNT,
   KBN_IS_TILE_COMPLETE,
   KBN_METADATA_FEATURE,
-  KBN_VECTOR_SHAPE_TYPE_COUNTS,
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
-  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import {
   VectorLayer,
@@ -40,8 +38,8 @@ import {
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
-import { VectorShapeTypeCounts } from '../../../../common/get_geometry_counts';
 import { isRefreshOnlyQuery } from '../../util/is_refresh_only_query';
+import { CustomIconAndTooltipContent } from '../layer';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -72,7 +70,7 @@ export class TiledVectorLayer extends VectorLayer {
     return this._descriptor.__metaFromTiles || [];
   }
 
-  getCustomIconAndTooltipContent() {
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
     const tileMetas = this.getMetaFromTiles();
     if (!tileMetas.length) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
@@ -91,43 +89,8 @@ export class TiledVectorLayer extends VectorLayer {
       return !tileMeta?.properties?.[KBN_IS_TILE_COMPLETE];
     });
 
-    const shapeTypeCountMeta: VectorShapeTypeCounts = tileMetas.reduce(
-      (accumulator: VectorShapeTypeCounts, tileMeta: Feature) => {
-        if (
-          !tileMeta ||
-          !tileMeta.properties ||
-          !tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS]
-        ) {
-          return accumulator;
-        }
-
-        accumulator[VECTOR_SHAPE_TYPE.POINT] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POINT];
-        accumulator[VECTOR_SHAPE_TYPE.LINE] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.LINE];
-        accumulator[VECTOR_SHAPE_TYPE.POLYGON] +=
-          tileMeta.properties[KBN_VECTOR_SHAPE_TYPE_COUNTS][VECTOR_SHAPE_TYPE.POLYGON];
-
-        return accumulator;
-      },
-      {
-        [VECTOR_SHAPE_TYPE.POLYGON]: 0,
-        [VECTOR_SHAPE_TYPE.LINE]: 0,
-        [VECTOR_SHAPE_TYPE.POINT]: 0,
-      }
-    );
-
-    const isLinesOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] > 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
-    const isPointsOnly =
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.LINE] === 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POINT] > 0 &&
-      shapeTypeCountMeta[VECTOR_SHAPE_TYPE.POLYGON] === 0;
-
     return {
-      icon: this.getCurrentStyle().getIconFromGeometryTypes(isLinesOnly, isPointsOnly),
+      icon: this.getCurrentStyle().getIcon(),
       tooltipContent: isIncomplete
         ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
             defaultMessage: `Layer shows incomplete results`,
@@ -371,7 +334,7 @@ export class TiledVectorLayer extends VectorLayer {
     return null;
   }
 
-  async getStyleMetaDescriptorFromLocal(): Promise<StyleMetaDescriptor | null> {
+  async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
     const style = this.getCurrentStyle();
     if (!style) {
       return null;

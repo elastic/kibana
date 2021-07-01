@@ -1174,7 +1174,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     await layerSource.deleteFeature(featureId);
   }
 
-  async getStyleMetaDescriptorFromLocal(): Promise<StyleMetaDescriptor | null> {
+  async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
     const sourceDataRequest = this.getSourceDataRequest();
     const style = this.getCurrentStyle();
     if (!style || !sourceDataRequest) {

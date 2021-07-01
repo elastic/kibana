@@ -94,7 +94,7 @@ export function updateStyleMeta(layerId: string | null) {
       return;
     }
 
-    const styleMeta = await layer.getStyleMetaDescriptorFromLocal();
+    const styleMeta = await layer.getStyleMetaDescriptorFromLocalFeatures();
     if (!styleMeta) {
       return;
     }
