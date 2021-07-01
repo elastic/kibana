@@ -7,7 +7,7 @@
 
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { ExpressionValue, ExpressionAstExpression } from 'src/plugins/expressions/public';
-import { notifyService, expressionsService } from '../services';
+import { pluginServices, expressionsService } from '../services';
 
 interface Options {
   castToRender?: boolean;
@@ -57,7 +57,8 @@ export async function runInterpreter(
 
     throw new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
   } catch (err) {
-    notifyService.getService().error(err);
+    const { error: displayError } = pluginServices.getServices().notify;
+    displayError(err);
     throw err;
   }
 }
