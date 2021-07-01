@@ -11,8 +11,9 @@ import { useResizeObserver } from '@elastic/eui';
 import { Dimensions, ShapeComponentProps } from './types';
 import { shapes } from './shapes';
 import './shape.scss';
-import { ShapeAttributes, ShapeContentAttributes, ViewBoxParams } from './types';
+import { ShapeAttributes, ShapeContentAttributes } from './types';
 import { getViewBox } from '../../common/lib';
+import { ViewBoxParams } from '../../common/types';
 
 function ShapeComponent({
   onLoaded,

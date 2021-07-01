@@ -10,8 +10,8 @@ import React, { JSXElementConstructor, useEffect } from 'react';
 import { viewBoxToString } from '../../common/lib';
 import { ShapeHocProps, ShapeProps, SvgConfig, SvgElementTypes } from './types';
 
-export const ShapeHOC = (Component: JSXElementConstructor<any>, svgParams: SvgConfig) =>
-  function HocComponent({
+export const ShapeHOC = (ShapeComponent: JSXElementConstructor<any>, svgParams: SvgConfig) =>
+  function ShapeWrapper({
     shapeAttributes,
     shapeContentAttributes,
     setViewBoxParams,
@@ -26,7 +26,7 @@ export const ShapeHOC = (Component: JSXElementConstructor<any>, svgParams: SvgCo
       : viewBoxToString(initialViewBox);
 
     return (
-      <Component
+      <ShapeComponent
         shapeAttributes={{ ...shapeAttributes, viewBox }}
         shapeContentAttributes={{ ...shapeContentAttributes, ...shapeProps }}
         shapeType={shapeType}

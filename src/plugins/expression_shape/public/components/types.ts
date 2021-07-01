@@ -7,7 +7,7 @@
  */
 
 import { IInterpreterRenderHandlers } from '../../../../../src/plugins/expressions';
-import { ShapeRendererConfig } from '../../common/types';
+import { ShapeRendererConfig, ViewBoxParams } from '../../common/types';
 
 export interface ShapeAttributes {
   width?: number;
@@ -25,13 +25,6 @@ export interface ShapeContentAttributes {
   strokeMiterlimit?: string;
 }
 
-export interface ViewBoxParams {
-  minX: number;
-  minY: number;
-  width: number;
-  height: number;
-}
-
 export interface ShapeHocProps {
   shapeAttributes: ShapeAttributes;
   shapeContentAttributes: ShapeContentAttributes;
@@ -46,12 +39,6 @@ export interface ShapeProps {
     points: string;
   };
   shapeType: SvgElementTypes;
-}
-
-export interface ParentNodeParams {
-  borderOffset: number;
-  width: number;
-  height: number;
 }
 
 export enum SvgElementTypes {
@@ -75,13 +62,6 @@ export interface ShapeContentAttributes {
   fill?: string;
   vectorEffect?: string;
   strokeMiterlimit?: string;
-}
-
-export interface ViewBoxParams {
-  minX: number;
-  minY: number;
-  width: number;
-  height: number;
 }
 
 export interface ShapeComponentProps extends ShapeRendererConfig {

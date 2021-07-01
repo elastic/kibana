@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionFunctionDefinition, ExpressionValueRender } from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
 
 export enum Shape {
   ARROW = 'arrow',

@@ -5,6 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from './expression_functions';
-export * from './expression_renderers';
-export * from './components';
+
+export interface ViewBoxParams {
+  minX: number;
+  minY: number;
+  width: number;
+  height: number;
+}
+
+export interface ParentNodeParams {
+  borderOffset: number;
+  width: number;
+  height: number;
+}
