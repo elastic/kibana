@@ -12,6 +12,7 @@ import {
   processLogstashStateResults,
 } from './get_logstash_stats';
 import sinon from 'sinon';
+import { ElasticsearchClient } from 'kibana/server';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const logstashStatsResultSet = require('./__mocks__/fixtures/logstash_stats_results');
@@ -33,10 +34,15 @@ const getBaseOptions = () => ({
 
 describe('Get Logstash Stats', () => {
   const clusterUuids = ['aCluster', 'bCluster', 'cCluster'];
-  let callCluster = sinon.stub();
+  const searchMock = sinon.stub();
+  const callCluster = ({ search: searchMock } as unknown) as ElasticsearchClient;
 
   beforeEach(() => {
-    callCluster = sinon.stub();
+    searchMock.returns(Promise.resolve({ body: {} }));
+  });
+
+  afterEach(() => {
+    searchMock.reset();
   });
 
   describe('fetchLogstashState', () => {
@@ -63,17 +69,15 @@ describe('Get Logstash Stats', () => {
       };
 
       await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, {} as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
-      expect(api).toEqual('search');
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
       expect(body.query).toEqual(expected);
     });
 
     it('should set `from: 0, to: 10000` in the query', async () => {
       await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, {} as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
-      expect(api).toEqual('search');
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
       expect(body.from).toEqual(0);
       expect(body.size).toEqual(10000);
     });
@@ -82,10 +86,9 @@ describe('Get Logstash Stats', () => {
       await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, {
         page: 1,
       } as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
 
-      expect(api).toEqual('search');
       expect(body.from).toEqual(10000);
       expect(body.size).toEqual(10000);
     });
@@ -94,10 +97,9 @@ describe('Get Logstash Stats', () => {
       await fetchLogstashState(callCluster, clusterUuid, ephemeralIds, {
         page: 2,
       } as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
 
-      expect(api).toEqual('search');
       expect(body.from).toEqual(20000);
       expect(body.size).toEqual(10000);
     });
@@ -106,30 +108,27 @@ describe('Get Logstash Stats', () => {
   describe('fetchLogstashStats', () => {
     it('should set `from: 0, to: 10000` in the query', async () => {
       await fetchLogstashStats(callCluster, clusterUuids, {} as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
 
-      expect(api).toEqual('search');
       expect(body.from).toEqual(0);
       expect(body.size).toEqual(10000);
     });
 
     it('should set `from: 10000, to: 10000` in the query', async () => {
       await fetchLogstashStats(callCluster, clusterUuids, { page: 1 } as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
 
-      expect(api).toEqual('search');
       expect(body.from).toEqual(10000);
       expect(body.size).toEqual(10000);
     });
 
     it('should set `from: 20000, to: 10000` in the query', async () => {
       await fetchLogstashStats(callCluster, clusterUuids, { page: 2 } as any);
-      const { args } = callCluster.firstCall;
-      const [api, { body }] = args;
+      const { args } = searchMock.firstCall;
+      const [{ body }] = args;
 
-      expect(api).toEqual('search');
       expect(body.from).toEqual(20000);
       expect(body.size).toEqual(10000);
     });

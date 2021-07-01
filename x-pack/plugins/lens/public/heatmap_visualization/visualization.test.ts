@@ -10,7 +10,7 @@ import {
   getHeatmapVisualization,
   isCellValueSupported,
 } from './visualization';
-import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
+import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import {
   CHART_SHAPES,
   FUNCTION_NAME,
@@ -52,12 +52,8 @@ describe('heatmap', () => {
 
   describe('#intialize', () => {
     test('returns a default state', () => {
-      expect(
-        getHeatmapVisualization({
-          paletteService,
-        }).initialize(frame)
-      ).toEqual({
-        layerId: '',
+      expect(getHeatmapVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
+        layerId: 'l1',
         title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
         legend: {
@@ -76,9 +72,7 @@ describe('heatmap', () => {
 
     test('returns persisted state', () => {
       expect(
-        getHeatmapVisualization({
-          paletteService,
-        }).initialize(frame, exampleState())
+        getHeatmapVisualization({ paletteService }).initialize(() => 'test-layer', exampleState())
       ).toEqual(exampleState());
     });
   });

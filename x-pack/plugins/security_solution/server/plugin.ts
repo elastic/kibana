@@ -171,7 +171,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     initUsageCollectors({
       core,
-      endpointAppContext: endpointContext,
       kibanaIndex: globalConfig.kibana.index,
       signalsIndex: config.signalsIndex,
       ml: plugins.ml,
@@ -197,9 +196,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     let ruleDataClient: RuleDataClient | null = null;
     if (isRuleRegistryEnabled) {
       const { ruleDataService } = plugins.ruleRegistry;
-      const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
-      const ready = once(async () => {
+      const initializeRuleDataTemplates = once(async () => {
         const componentTemplateName = ruleDataService.getFullAssetName(
           'security-solution-mappings'
         );
@@ -233,18 +231,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         });
       });
 
-      ready().catch((err) => {
+      // initialize eagerly
+      const initializeRuleDataTemplatesPromise = initializeRuleDataTemplates().catch((err) => {
         this.logger!.error(err);
       });
 
-      ruleDataClient = new RuleDataClient({
-        alias: plugins.ruleRegistry.ruleDataService.getFullAssetName('security-solution'),
-        getClusterClient: async () => {
-          const coreStart = await start();
-          return coreStart.elasticsearch.client.asInternalUser;
-        },
-        ready,
-      });
+      ruleDataClient = ruleDataService.getRuleDataClient(
+        ruleDataService.getFullAssetName('security-solution'),
+        () => initializeRuleDataTemplatesPromise
+      );
 
       // sec
 
@@ -392,6 +387,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
         lists: plugins.lists,
+        mergeStrategy: this.config.alertMergeStrategy,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
@@ -507,7 +503,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       exceptionListsClient: this.lists!.getExceptionListClient(savedObjectsClient, 'kibana'),
     });
 
-    this.telemetryEventsSender.start(core, plugins.telemetry, plugins.taskManager);
+    this.telemetryEventsSender.start(
+      core,
+      plugins.telemetry,
+      plugins.taskManager,
+      this.endpointAppContextService
+    );
     return {};
   }
 
