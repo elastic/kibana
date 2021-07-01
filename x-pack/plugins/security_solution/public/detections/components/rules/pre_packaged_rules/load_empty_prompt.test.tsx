@@ -27,6 +27,7 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../containers/detection_engine/rules/api', () => ({
   getPrePackagedRulesStatus: jest.fn().mockResolvedValue({
@@ -52,9 +53,12 @@ describe('PrePackagedRulesPrompt', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('renders correctly', () => {
