@@ -242,19 +242,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         () => initializeRuleDataTemplatesPromise
       );
 
-      const initTest = async () => {
-        if (ruleDataClient == null) {
-          return;
-        }
-        ruleDataClient
-          .getWriter({ namespace: 'marshall' })
-          .bulk({ body: [{ index: {} }, { '@timestamp': 1624259271000 }] });
-        ruleDataClient
-          .getWriter({ namespace: 'otherspace' })
-          .bulk({ body: [{ index: {} }, { '@timestamp': 1624259271000 }] });
-      };
-      initTest();
-
       // sec
 
       // Register reference rule types via rule-registry
