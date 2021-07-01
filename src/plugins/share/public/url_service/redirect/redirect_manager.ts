@@ -7,7 +7,6 @@
  */
 
 import type { CoreSetup } from 'src/core/public';
-import type { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { migrateToLatest } from '../../../../kibana_utils/common';
@@ -43,7 +42,7 @@ export class RedirectManager {
       chromeless: true,
       mount: (params) => {
         const unmount = render(params.element, { manager: this });
-        this.onMount(params.history);
+        this.onMount(params.history.location.search);
         return () => {
           unmount();
         };
@@ -51,8 +50,8 @@ export class RedirectManager {
     });
   }
 
-  protected onMount(history: History) {
-    const options = this.parseSearchParams(history);
+  public onMount(urlLocationSearch: string) {
+    const options = this.parseSearchParams(urlLocationSearch);
     const locator = this.deps.url.locators.get(options.id);
 
     if (!locator) {
@@ -85,9 +84,9 @@ export class RedirectManager {
       });
   }
 
-  protected parseSearchParams(history: History): RedirectOptions {
+  protected parseSearchParams(urlLocationSearch: string): RedirectOptions {
     try {
-      return parseSearchParams(history.location.search);
+      return parseSearchParams(urlLocationSearch);
     } catch (error) {
       this.error$.next(error);
       throw error;
