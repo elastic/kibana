@@ -7,7 +7,7 @@
 you to apply dashboard-level filters, and drilldowns that allow you to navigate to other \
 dashboards and external websites.
 
-Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filtes, and drilldowns that allow you to navigate to other dashboards and external websites. 
+Add interactive capabilities to your dashboard, such as controls that allow you to apply dashboard-level filters, and drilldowns that allow you to navigate to other dashboards and external websites. 
 
 *Controls* panels allow you to apply dashboard-level filters based on values from a list, or a range of values. 
 
