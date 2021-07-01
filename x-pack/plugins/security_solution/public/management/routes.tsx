@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { TrackApplicationView } from '../../../../../src/plugins/usage_collection/public';
-import { MANAGEMENT_PATH, SecurityPageName } from '../../common/constants';
+import { MANAGEMENT_PATH } from '../../common/constants';
 import { ManagementContainer } from './pages';
 import { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
@@ -16,11 +15,9 @@ import { CurrentLicense } from '../common/components/current_license';
  * Returns the React Router Routes for the management area
  */
 const ManagementRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.administration}>
-    <CurrentLicense>
-      <ManagementContainer />
-    </CurrentLicense>
-  </TrackApplicationView>
+  <CurrentLicense>
+    <ManagementContainer />
+  </CurrentLicense>
 );
 
 export const routes: SecuritySubPluginRoutes = [

@@ -101,9 +101,7 @@ describe('DocumentDetailLogic', () => {
 
         expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
         await nextTick();
-        expect(flashSuccessToast).toHaveBeenCalledWith('Your document was marked for deletion', {
-          text: 'It will be deleted momentarily.',
-        });
+        expect(flashSuccessToast).toHaveBeenCalledWith('Your document was deleted');
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/engine1/documents');
       });
 

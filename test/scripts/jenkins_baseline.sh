@@ -4,7 +4,7 @@ source src/dev/ci_setup/setup_env.sh
 source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
 echo " -> building and extracting OSS Kibana distributable for use in functional tests"
-node scripts/build --debug --oss
+node scripts/build --debug
 
 echo " -> shipping metrics from build to ci-stats"
 node scripts/ship_ci_stats \
