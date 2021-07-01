@@ -30,12 +30,10 @@ export const ShareMenu: FC = () => {
     pageCount: getPages(state).length,
   }));
 
-  const platformService = usePlatformService();
   const reportingService = useReportingService();
   const downloadWorkpad = useDownloadWorkpad();
 
   const sharingServices = {
-    basePath: platformService.getBasePathInterface(),
     reporting: reportingService.start,
   };
 
