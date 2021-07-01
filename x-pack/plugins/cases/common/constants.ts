@@ -94,3 +94,9 @@ if (ENABLE_CASE_CONNECTOR) {
 
 export const MAX_DOCS_PER_PAGE = 10000;
 export const MAX_CONCURRENT_SEARCHES = 10;
+
+/**
+ * Validation
+ */
+
+export const MAX_TITLE_LENGTH = 64;
