@@ -39,6 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).not.to.be.empty();
       await queryBar.clickQuerySubmitButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       const searchSessionId2 = await getSearchSessionId();
       expect(searchSessionId2).not.to.be(searchSessionId1);
     });
