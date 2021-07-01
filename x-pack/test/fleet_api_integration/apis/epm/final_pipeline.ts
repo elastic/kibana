@@ -91,6 +91,26 @@ export default function (providerContext: FtrProviderContext) {
       );
     });
 
+    it('all docs should contain event.ingested without sub-seconds', async () => {
+      const res = await es.index({
+        index: 'logs-log.log-test',
+        body: {
+          '@timestamp': '2020-01-01T09:09:00',
+          message: 'hello',
+        },
+      });
+
+      const { body: doc } = await es.get({
+        id: res.body._id,
+        index: res.body._index,
+      });
+      // @ts-expect-error
+      const ingestTimestamp = doc._source.event.ingested;
+
+      // 2021-06-30T12:06:28Z
+      expect(ingestTimestamp).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
+    });
+
     it('For a doc written without api key should write the correct api key status', async () => {
       const res = await es.index({
         index: 'logs-log.log-test',
