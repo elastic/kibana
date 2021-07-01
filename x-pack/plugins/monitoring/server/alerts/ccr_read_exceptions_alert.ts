@@ -49,7 +49,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
         {
           name: 'remoteCluster',
           description: i18n.translate(
-            'xpack.monitoring.alerts.ccrReadExceptions.actionVariables.remoteClusters',
+            'xpack.monitoring.alerts.ccrReadExceptions.actionVariables.remoteCluster',
             {
               defaultMessage: 'The remote cluster experiencing CCR read exceptions.',
             }
@@ -58,7 +58,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
         {
           name: 'followerIndex',
           description: i18n.translate(
-            'xpack.monitoring.alerts.ccrReadExceptions.actionVariables.followerIndices',
+            'xpack.monitoring.alerts.ccrReadExceptions.actionVariables.followerIndex',
             {
               defaultMessage: 'The follower index reporting CCR read exceptions.',
             }
