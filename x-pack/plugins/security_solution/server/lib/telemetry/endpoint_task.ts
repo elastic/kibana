@@ -12,9 +12,10 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import { getLastTaskExecutionTimestamp } from './helpers';
+import { batchTelemetryRecords, getLastTaskExecutionTimestamp } from './helpers';
 import { TelemetryEventsSender } from './sender';
 import { FullAgentPolicyInput } from '../../../../fleet/common/types/models/agent_policy';
+// import { PolicyData } from '../../../common/endpoint/types';
 import {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
@@ -28,6 +29,8 @@ export const TelemetryEndpointTaskConstants = {
   INTERVAL: '1m', // TODO:@pjhampton - reset to 24h before merge
   VERSION: '1.0.0',
 };
+
+const DEFAULT_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
 /** Telemetry Endpoint Task
  *
@@ -262,15 +265,20 @@ export class TelemetryEndpointTask {
         },
         policy_config: policyConfig,
         policy_failure: failedPolicy,
+        telemetry_meta: {
+          metrics_timestamp: endpoint.endpoint_metrics['@timestamp'],
+        },
       };
     });
 
     /**
      * STAGE 5 - Send the documents
      *
-     * Send the documents in a batches of 1000
+     * Send the documents in a batches of 100
      */
-    this.sender.sendOnDemand('endpoint-metadata', telemetryPayloads);
+    batchTelemetryRecords(telemetryPayloads, 100).forEach((telemetryBatch) =>
+      this.sender.sendOnDemand('endpoint-metadata', telemetryBatch)
+    );
     return telemetryPayloads.length;
   };
 }

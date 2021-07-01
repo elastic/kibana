@@ -21,3 +21,19 @@ export const getLastTaskExecutionTimestamp = (
 
   return lastExecutionTimestamp;
 };
+
+/**
+ * Chunks an Array<T> into an Array<Array<T>>
+ * This is to prevent overloading the telemetry channel + user resources
+ *
+ * @param telemetryRecords
+ * @param batchSize
+ * @returns
+ */
+export const batchTelemetryRecords = (
+  telemetryRecords: unknown[],
+  batchSize: number
+): unknown[][] =>
+  [...Array(Math.ceil(telemetryRecords.length / batchSize))].map((_) =>
+    telemetryRecords.splice(0, batchSize)
+  );
