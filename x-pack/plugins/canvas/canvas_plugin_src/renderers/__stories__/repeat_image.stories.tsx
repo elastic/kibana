@@ -9,8 +9,10 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { repeatImage } from '../repeat_image';
 import { Render } from './render';
-import { elasticLogo } from '../../lib/elastic_logo';
-import { elasticOutline } from '../../lib/elastic_outline';
+import {
+  elasticLogo,
+  elasticOutline,
+} from '../../../../../../src/plugins/presentation_util/common/lib';
 
 storiesOf('renderers/repeatImage', module).add('default', () => {
   const config = {

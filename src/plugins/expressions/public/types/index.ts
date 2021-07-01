@@ -48,6 +48,7 @@ export interface IExpressionLoaderParams {
   renderMode?: RenderMode;
   syncColors?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+  partial?: boolean;
 }
 
 export interface ExpressionRenderError extends Error {

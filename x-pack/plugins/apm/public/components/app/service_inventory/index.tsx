@@ -18,8 +18,8 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useUpgradeAssistantHref } from '../../shared/Links/kibana';
 import { SearchBar } from '../../shared/search_bar';
 import { NoServicesMessage } from './no_services_message';
-import { ServiceList } from './ServiceList';
-import { MLCallout } from './ServiceList/MLCallout';
+import { ServiceList } from './service_list';
+import { MLCallout } from './service_list/MLCallout';
 
 const initialData = {
   items: [],
