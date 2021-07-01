@@ -46,6 +46,7 @@ describe('Row renderers', () => {
     loginAndWaitForPage(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
+    cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).should('exist');
     cy.get(TIMELINE_SHOW_ROW_RENDERERS_GEAR).first().click({ force: true });
   });
 
@@ -59,6 +60,7 @@ describe('Row renderers', () => {
   });
 
   it('Selected renderer can be disabled and enabled', () => {
+    cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).should('exist');
     cy.get(TIMELINE_ROW_RENDERERS_SEARCHBOX).type('flow');
 
     cy.get(TIMELINE_ROW_RENDERERS_MODAL_ITEMS_CHECKBOX).first().uncheck();
@@ -75,8 +77,11 @@ describe('Row renderers', () => {
     });
   });
 
-  it.skip('Selected renderer can be disabled with one click', () => {
-    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).click({ force: true });
+  it('Selected renderer can be disabled with one click', () => {
+    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN).should('exist');
+    cy.get(TIMELINE_ROW_RENDERERS_DISABLE_ALL_BTN)
+      .pipe(($el) => $el.trigger('click'))
+      .should('not.be.visible');
 
     cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
     cy.wait('@updateTimeline').its('response.statusCode').should('eq', 200);

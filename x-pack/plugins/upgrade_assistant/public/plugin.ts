@@ -9,19 +9,17 @@ import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
 
-import { CloudSetup } from '../../cloud/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 import { Config } from '../common/config';
 
 interface Dependencies {
-  cloud: CloudSetup;
   management: ManagementSetup;
 }
 
 export class UpgradeAssistantUIPlugin implements Plugin {
   constructor(private ctx: PluginInitializerContext) {}
-  setup(coreSetup: CoreSetup, { cloud, management }: Dependencies) {
+  setup(coreSetup: CoreSetup, { management }: Dependencies) {
     const { enabled, readonly } = this.ctx.config.get<Config>();
 
     if (!enabled) {
@@ -29,7 +27,6 @@ export class UpgradeAssistantUIPlugin implements Plugin {
     }
 
     const appRegistrar = management.sections.section.stack;
-    const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
     const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
 
     const kibanaVersionInfo = {
@@ -59,7 +56,6 @@ export class UpgradeAssistantUIPlugin implements Plugin {
         const { mountManagementSection } = await import('./application/mount_management_section');
         const unmountAppCallback = await mountManagementSection(
           coreSetup,
-          isCloudEnabled,
           params,
           kibanaVersionInfo,
           readonly
