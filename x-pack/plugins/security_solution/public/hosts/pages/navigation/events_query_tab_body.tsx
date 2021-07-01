@@ -65,6 +65,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
+
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
@@ -103,7 +104,6 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         rowRenderers={defaultRowRenderers}
         scopeId={SourcererScopeName.default}
         start={startDate}
-        showTotalCount={false}
         pageFilters={pageFilters}
       />
     </>

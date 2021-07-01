@@ -10,6 +10,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
+import { isEmpty } from 'lodash/fp';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -80,7 +81,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   scopeId,
   showCheckboxes,
   sort,
-  showTotalCount = true,
   utilityBar,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
@@ -178,7 +178,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
               rowRenderers={rowRenderers}
               start={start}
               sort={sort}
-              showTotalCount={showTotalCount}
+              showTotalCount={isEmpty(graphEventId) ? true : false}
               utilityBar={utilityBar}
               graphEventId={graphEventId}
             />
