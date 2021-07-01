@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { FC, JSXElementConstructor } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { ShapePreview } from '../shape_preview';
+import { ShapeType } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
   shapes: {
-    [key: string]: JSXElementConstructor<any>;
+    [key: string]: ShapeType;
   };
   onChange?: (key: string) => void;
 }

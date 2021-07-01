@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, JSXElementConstructor, useState } from 'react';
+import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
-import { ViewBoxParams } from '../../../../../../src/plugins/expression_shape/common';
+import { ViewBoxParams, ShapeType } from '../../../../../../src/plugins/presentation_util/public';
 
 interface Props {
-  shape?: JSXElementConstructor<any>;
+  shape?: ShapeType;
 }
 
 export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
@@ -25,26 +25,32 @@ export const ShapePreview: FC<Props> = ({ shape: Shape }) => {
     return <div className="canvasShapePreview" />;
   }
 
-  const weight = 5;
-  let { minX, minY, width, height } = shapeViewBox;
-  minX -= weight / 2;
-  minY -= weight / 2;
-  width += weight;
-  height += weight;
-
-  const shapeAttributes = {
-    fill: 'none',
-    stroke: 'black',
-    viewBox: {
+  function getViewBox(defaultWidth: number, defaultViewBox: ViewBoxParams): ViewBoxParams {
+    let { minX, minY, width, height } = defaultViewBox;
+    minX -= defaultWidth / 2;
+    minY -= defaultWidth / 2;
+    width += defaultWidth;
+    height += defaultWidth;
+    return {
       minX,
       minY,
       width,
       height,
-    },
-  };
+    };
+  }
+
   return (
     <div className="canvasShapePreview">
-      <Shape shapeAttributes={shapeAttributes} setViewBoxParams={setShapeViewBox} />
+      <Shape
+        shapeAttributes={{
+          fill: 'none',
+          stroke: 'black',
+          viewBox: getViewBox(5, shapeViewBox),
+        }}
+        setViewBoxParams={(viewBox?: ViewBoxParams | void) => {
+          if (viewBox) setShapeViewBox(viewBox);
+        }}
+      />
     </div>
   );
 };

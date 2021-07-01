@@ -13,3 +13,4 @@ export * from './httpurl';
 export * from './missing_asset';
 export * from './resolve_dataurl';
 export * from './url';
+export * from './view_box';

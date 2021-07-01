@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ParentNodeParams, ViewBoxParams } from '../types';
+import { ParentNodeParams, ViewBoxParams } from '../../types';
 
 function getMinxAndWidth(viewBoxParams: ViewBoxParams, { borderOffset, width }: ParentNodeParams) {
   let { minX, width: shapeWidth } = viewBoxParams;

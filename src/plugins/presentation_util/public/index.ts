@@ -29,6 +29,7 @@ export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './type
 export { SaveModalDashboardProps } from './components/types';
 export { projectIDs, ProjectID, Project } from '../common/labs';
 export * from '../common/lib';
+export * from '../common/types';
 
 export {
   LazyLabsBeakerButton,
@@ -40,7 +41,11 @@ export {
   LazyPopoverComponent,
   ClosePopoverFn,
   withSuspense,
+  getShapeComponent,
+  ShapeType,
 } from './components';
+
+export * from './components/types';
 
 export {
   AddFromLibraryButton,

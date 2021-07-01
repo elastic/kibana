@@ -22,8 +22,9 @@ import { Star as star } from './star';
 import { Tag as tag } from './tag';
 import { Triangle as triangle } from './triangle';
 import { TriangleRight as triangleRight } from './triangle_right';
+import { ShapeType } from '../../../../../../src/plugins/presentation_util/public';
 
-export const shapes = {
+export const shapes: { [key: string]: ShapeType } = {
   arrow,
   arrowMulti,
   bookmark,
