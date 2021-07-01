@@ -445,6 +445,7 @@ module.exports = {
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
+                  '!(src|x-pack)/plugins/**/__stories__/index.{js,mjs,ts,tsx}',
                 ],
                 allowSameFolder: true,
                 errorMessage: 'Plugins may only import from top-level public and server modules.',
@@ -855,6 +856,18 @@ module.exports = {
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
+      },
+    },
+    {
+      files: ['x-pack/plugins/apm/**/*.stories.*', 'x-pack/plugins/observability/**/*.stories.*'],
+      rules: {
+        'react/function-component-definition': [
+          'off',
+          {
+            namedComponents: 'function-declaration',
+            unnamedComponents: 'arrow-function',
+          },
+        ],
       },
     },
 

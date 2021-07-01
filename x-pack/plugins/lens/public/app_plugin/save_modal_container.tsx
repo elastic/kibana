@@ -8,21 +8,16 @@
 import React, { useEffect, useState } from 'react';
 import { ChromeStart, NotificationsStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { partition, uniq } from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { partition } from 'lodash';
 import { SaveModal } from './save_modal';
 import { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';
 import { Document, injectFilterReferences } from '../persistence';
-import { LensByReferenceInput, LensEmbeddableInput } from '../editor_frame_service/embeddable';
+import { LensByReferenceInput, LensEmbeddableInput } from '../embeddable';
 import { LensAttributeService } from '../lens_attribute_service';
-import {
-  DataPublicPluginStart,
-  esFilters,
-  IndexPattern,
-} from '../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, esFilters } from '../../../../../src/plugins/data/public';
 import { APP_ID, getFullPath, LENS_EMBEDDABLE_TYPE } from '../../common';
-import { getAllIndexPatterns } from '../utils';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { checkForDuplicateTitle } from '../../../../../src/plugins/saved_objects/public';
 import { LensAppState } from '../state_management';
@@ -31,7 +26,6 @@ type ExtraProps = Pick<LensAppProps, 'initialInput'> &
   Partial<Pick<LensAppProps, 'redirectToOrigin' | 'redirectTo' | 'onAppLeave'>>;
 
 export type SaveModalContainerProps = {
-  isVisible: boolean;
   originatingApp?: string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
@@ -49,7 +43,6 @@ export function SaveModalContainer({
   onClose,
   onSave,
   runSave,
-  isVisible,
   persistedDoc,
   originatingApp,
   initialInput,
@@ -61,6 +54,14 @@ export function SaveModalContainer({
   lensServices,
 }: SaveModalContainerProps) {
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(initLastKnowDoc);
+  let title = '';
+  let description;
+  let savedObjectId;
+  if (lastKnownDoc) {
+    title = lastKnownDoc.title;
+    description = lastKnownDoc.description;
+    savedObjectId = lastKnownDoc.savedObjectId;
+  }
 
   const {
     attributeService,
@@ -77,22 +78,26 @@ export function SaveModalContainer({
   }, [initLastKnowDoc]);
 
   useEffect(() => {
-    async function loadLastKnownDoc() {
-      if (initialInput && isVisible) {
-        getLastKnownDoc({
+    let isMounted = true;
+    async function loadPersistedDoc() {
+      if (initialInput) {
+        getPersistedDoc({
           data,
           initialInput,
           chrome,
           notifications,
           attributeService,
-        }).then((result) => {
-          if (result) setLastKnownDoc(result.doc);
+        }).then((doc) => {
+          if (doc && isMounted) setLastKnownDoc(doc);
         });
       }
     }
 
-    loadLastKnownDoc();
-  }, [chrome, data, initialInput, notifications, attributeService, isVisible]);
+    loadPersistedDoc();
+    return () => {
+      isMounted = false;
+    };
+  }, [chrome, data, initialInput, notifications, attributeService]);
 
   const tagsIds =
     persistedDoc && savedObjectsTagging
@@ -131,7 +136,6 @@ export function SaveModalContainer({
 
   return (
     <SaveModal
-      isVisible={isVisible}
       originatingApp={originatingApp}
       savingToLibraryPermitted={savingToLibraryPermitted}
       allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
@@ -142,7 +146,9 @@ export function SaveModalContainer({
       }}
       onClose={onClose}
       getAppNameFromId={getAppNameFromId}
-      lastKnownDoc={lastKnownDoc}
+      title={title}
+      description={description}
+      savedObjectId={savedObjectId}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
     />
   );
@@ -330,7 +336,10 @@ export const runSaveLensVisualization = async (
       ...newInput,
     };
 
-    return { persistedDoc: newDoc, lastKnownDoc: newDoc, isLinkedToOriginatingApp: false };
+    return {
+      persistedDoc: newDoc,
+      isLinkedToOriginatingApp: false,
+    };
   } catch (e) {
     // eslint-disable-next-line no-console
     console.dir(e);
@@ -356,7 +365,7 @@ export function getLastKnownDocWithoutPinnedFilters(doc?: Document) {
     : doc;
 }
 
-export const getLastKnownDoc = async ({
+export const getPersistedDoc = async ({
   initialInput,
   attributeService,
   data,
@@ -368,7 +377,7 @@ export const getLastKnownDoc = async ({
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
   chrome: ChromeStart;
-}): Promise<{ doc: Document; indexPatterns: IndexPattern[] } | undefined> => {
+}): Promise<Document | undefined> => {
   let doc: Document;
 
   try {
@@ -387,19 +396,12 @@ export const getLastKnownDoc = async ({
         initialInput.savedObjectId
       );
     }
-    const indexPatternIds = uniq(
-      doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-    );
-    const { indexPatterns } = await getAllIndexPatterns(indexPatternIds, data.indexPatterns);
 
     // Don't overwrite any pinned filters
     data.query.filterManager.setAppFilters(
       injectFilterReferences(doc.state.filters, doc.references)
     );
-    return {
-      doc,
-      indexPatterns,
-    };
+    return doc;
   } catch (e) {
     notifications.toasts.addDanger(
       i18n.translate('xpack.lens.app.docLoadingError', {

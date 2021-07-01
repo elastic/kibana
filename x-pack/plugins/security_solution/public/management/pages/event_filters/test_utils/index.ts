@@ -50,6 +50,7 @@ export const ecsEventMock = (): Ecs => ({
     name: ['Host-tvs68wo3qc'],
     os: {
       family: ['windows'],
+      name: ['Windows'],
     },
     id: ['a563b365-2bee-40df-adcd-ae84d889f523'],
     ip: ['10.242.233.187'],

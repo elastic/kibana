@@ -26,6 +26,7 @@ import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import {
   ActionConnector,
+  ActionsCommentRequestRt,
   AlertCommentRequestRt,
   Case,
   CaseUserActions,
@@ -45,6 +46,8 @@ import {
   getAlertAttachment,
   getGeneratedAlertsAttachment,
   RuleDetailsNavigation,
+  ActionsNavigation,
+  getActionAttachment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -61,12 +64,14 @@ export interface UserActionTreeProps {
   fetchUserActions: () => void;
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
+  actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
+  statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
   useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
@@ -124,12 +129,14 @@ export const UserActionTree = React.memo(
     fetchUserActions,
     getCaseDetailHrefWithCommentId,
     getRuleDetailsHref,
+    actionsNavigation,
     isLoadingDescription,
     isLoadingUserActions,
     onRuleDetailsClick,
     onShowAlertDetails,
     onUpdateField,
     renderInvestigateInTimelineActionComponent,
+    statusActionButton,
     updateCase,
     useFetchAlertData,
     userCanCrud,
@@ -246,10 +253,11 @@ export const UserActionTree = React.memo(
           onCommentPosted={handleUpdate}
           onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
           showLoading={false}
+          statusActionButton={statusActionButton}
           subCaseId={subCaseId}
         />
       ),
-      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, subCaseId]
+      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, statusActionButton, subCaseId]
     );
 
     useEffect(() => {
@@ -444,6 +452,30 @@ export const UserActionTree = React.memo(
                       ]
                     : []),
                 ];
+              } else if (
+                comment != null &&
+                isRight(ActionsCommentRequestRt.decode(comment)) &&
+                comment.type === CommentType.actions
+              ) {
+                return [
+                  ...comments,
+                  ...(comment.actions !== null
+                    ? [
+                        getActionAttachment({
+                          comment,
+                          userCanCrud,
+                          isLoadingIds,
+                          getCaseDetailHrefWithCommentId,
+                          actionsNavigation,
+                          manageMarkdownEditIds,
+                          handleManageMarkdownEditId,
+                          handleManageQuote,
+                          handleSaveComment,
+                          action,
+                        }),
+                      ]
+                    : []),
+                ];
               }
             }
 
@@ -556,6 +588,7 @@ export const UserActionTree = React.memo(
         handleManageMarkdownEditId,
         handleSaveComment,
         getCaseDetailHrefWithCommentId,
+        actionsNavigation,
         userCanCrud,
         isLoadingIds,
         handleManageQuote,
