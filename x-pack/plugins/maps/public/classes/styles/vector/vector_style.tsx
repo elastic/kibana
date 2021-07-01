@@ -506,14 +506,19 @@ export class VectorStyle implements IVectorStyle {
     }
 
     dynamicProperties.forEach((dynamicProperty) => {
-      const name = dynamicProperty.getFieldName();
-
       const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(
         metaFeatures
       );
+      const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(
+        metaFeatures
+      );
 
+      const name = dynamicProperty.getFieldName();
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = {};
+      }
+      if (categoricalStyleMeta) {
+        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
       }
 
       if (ordinalStyleMeta) {

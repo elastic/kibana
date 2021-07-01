@@ -9,7 +9,6 @@ import _ from 'lodash';
 import React from 'react';
 import { Feature, FeatureCollection } from 'geojson';
 import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
-import { Map } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
 import {
@@ -341,7 +340,7 @@ export class DynamicStyleProperty<T>
 
     const name = this.getFieldName();
 
-    const counts = new Map();
+    const counts = new Map<string, number>();
     for (let i = 0; i < metaFeatures.length; i++) {
       const fieldMeta = metaFeatures[i].properties.fieldMeta;
       if (fieldMeta && fieldMeta[name] && fieldMeta[name].categories) {
@@ -352,7 +351,7 @@ export class DynamicStyleProperty<T>
           // properties object may be sparse, so need to check if the field is effectively present
           if (typeof category.key !== undefined) {
             if (counts.has(category.key)) {
-              counts.set(category.key, counts.get(category.key) + category.count);
+              counts.set(category.key, (counts.get(category.key) as number) + category.count);
             } else {
               counts.set(category.key, category.count);
             }
