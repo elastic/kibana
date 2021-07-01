@@ -402,54 +402,54 @@ There is some support for using markdown and you can use any of the following sy
 
 #### Headers
 
-  ```md
-    # This is an <h1> tag
-    ## This is an <h2> tag
-    ###### This is an <h6> tag
-  ```
+```md
+# This is an <h1> tag
+## This is an <h2> tag
+###### This is an <h6> tag
+```
 
 #### Emphasis
 
 ```md
-  *This text will be italic*
-  _This will also be italic_
+*This text will be italic*
+_This will also be italic_
 
-  **This text will be bold**
-  __This will also be bold__
+**This text will be bold**
+__This will also be bold__
 
-  _You **can** combine them_
+_You **can** combine them_
 ```
 
 #### Lists
   ##### Unordered
 
 ```md
-  * Item 1
-  * Item 2
-    * Item 2a
-    * Item 2b
+* Item 1
+* Item 2
+  * Item 2a
+  * Item 2b
 ```
   ##### Ordered
 
 ```md
-  1. Item 1
-  1. Item 2
-  1. Item 3
-    1. Item 3a
-    1. Item 3b
+1. Item 1
+1. Item 2
+1. Item 3
+  1. Item 3a
+  1. Item 3b
 ```
 #### Images
 
 ```md
-  ![Github Logo](/images/logo.png)
-  Format: ![Alt Text](url)
+![Github Logo](/images/logo.png)
+Format: ![Alt Text](url)
 ```
   
 #### Links
 
 ```md
-  http://github.com - automatic!
-  [GitHub](http://github.com)
+http://github.com - automatic!
+[GitHub](http://github.com)
 ```
   
 #### Blockquotes
@@ -469,8 +469,8 @@ var a = 13;
 #### Inline code
 
 ```md
-  I think you should use an
-  `<addr>` element here instead
+I think you should use an
+`<addr>` element here instead
 ```
 ### Splitting
 
